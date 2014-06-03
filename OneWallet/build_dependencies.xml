@@ -17,21 +17,26 @@
 	<import file="save_ziftr_changes.xml" />
 	
     <target name="build_libraries">
-        
+
+    	<antcall target="build_bitcoinj_eclipse"/>
     	
-    	<!-- not doing this until we save properly
-    	<antcall target="save_changes" />
-    	<antcall target="delete_bitcoinj" />
+    	<antcall target="download_ziftr_dependencies" />
+    	
+    	<!--
+			<antcall target="setup_ziftr_classpath" />
+			<eclipse.refreshLocal resource="MegaWallet" depth="infinite" />
     	-->
-    	
-    	<antcall target="download_bitcoinj"/>
-    	<antcall target="build_bitcoinj"/>
-    	<antcall target="setup_ziftr_classpath" />
-    	
-    	<eclipse.refreshLocal resource="MegaWallet" depth="infinite" />
 
     </target>
+
 	
+	<target name="download_ziftr_dependencies">
+	
+		<artifact:mvn pom="pom.xml" mavenHome="${maven.home}">
+			<arg value="dependency:resolve"/>
+		</artifact:mvn>
+		
+	</target>
     
     <target name="setup_ziftr_classpath">
     	<!--  this will mess up the ziftr eclipse project becuase maven, eclipse, and android
@@ -60,67 +65,13 @@
     	<delete file="project.properties" />
     	<move file="backup.properties" tofile="project.properties" />
     </target>
+
 	
-	<target name="delete_bitcoinj">
-		<echo message="Deleting existing bitcoinj library..." />
-		<delete dir="../bitcoinj" />
-	</target>
-	
-	<target name="check_bitcoinj">
-		<available file="../bitcoinj/pom.xml" property="bitcoinj.exists"/>
-	</target>
-	
-	
-	<target name="download_bitcoinj" depends="check_bitcoinj" unless="bitcoinj.exists">
-		<echo message="No bitcoinj library found." />
-		
-    	<exec executable="git">
-    		<arg value="--version"/>
-    	</exec>
-		
-		<git command="clone" dir="../">
-			<args>
-				<arg value="https://github.com/bitcoinj/bitcoinj.git" />
-			</args>
-		</git>
-		
-		<git command="fetch" dir="../bitcoinj">
-			<args>
-				<arg value="--all" />
-			</args>
-		</git>
-			
-		<git command="checkout" dir="../bitcoinj">
-			<args>
-				<arg value="2733004e71cca805c0615e516d9f358b9f44e502" />
-			</args>
-		</git>
-	
-	</target>
-	
-	
-	<target name="check_bitcoinj_build">
-		<!-- for now hardcode the specific bitcoin version build made the maven
-			TODO use: http://maven.apache.org/ant-tasks/installation.html
-			to read info from pom file and figure out name/location of target build
-		-->
-		<uptodate property="bitcoinj.buildNotRequired" targetfile="../bitcoinj/core/target/bitcoinj-0.11.2.jar" >
-		    <srcfiles dir= "../bitcoinj" includes="**/*.dtd"/>
-		  </uptodate>
-	</target>
-		
-	<target name="build_bitcoinj" depends="check_bitcoinj_build" unless="bitcoinj.buildNotRequired">
-		<echo message="bitcoinj jar file is not up to date. Rebuilding..." />
-		
-		<artifact:mvn pom="../bitcoinj/pom.xml">
+	<target name="build_bitcoinj_eclipse">
+	    <artifact:mvn pom="../bitcoinj/pom.xml">
 			<arg value="eclipse:eclipse"/>
-			<!-- now we just create an eclipse project for it
-			<arg value="package"/>
-			<arg value="-DskipTests=true" />
-			-->
 		</artifact:mvn>
 	</target>
-	
 	
 	
 	

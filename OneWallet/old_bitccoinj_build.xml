@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MegaWallet_old_bitcoinj_build" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+	
+	<!-- Maven Ant Tasks
+			This build file uses the maven ant tasks library. The library should be included
+			with this build file and is expected to be located in the same directory (per the path declared below).
+			Library is also available for download here: http://maven.apache.org/ant-tasks/installation.html
+		-->
+		<path id="maven-ant-tasks.classpath" path="maven-ant-tasks-2.1.3.jar" />
+		<typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+			uri="antlib:org.apache.maven.artifact.ant"
+			classpathref="maven-ant-tasks.classpath" />
+	
+	
+	<target name="check_bitcoinj">
+		<available file="../bitcoinj/pom.xml" property="bitcoinj.exists"/>
+	</target>
+	
+	
+	
+	<target name="delete_bitcoinj">
+		<echo message="Deleting existing bitcoinj library..." />
+		<delete dir="../bitcoinj" />
+	</target>
+		
+	
+	<target name="download_bitcoinj" depends="check_bitcoinj" unless="bitcoinj.exists">
+		<echo message="No bitcoinj library found." />
+		
+		<git command="clone" dir="../">
+			<args>
+				<arg value="https://github.com/bitcoinj/bitcoinj.git" />
+			</args>
+		</git>
+		
+		<git command="fetch" dir="../bitcoinj">
+			<args>
+				<arg value="--all" />
+			</args>
+		</git>
+			
+		<git command="checkout" dir="../bitcoinj">
+			<args>
+				<arg value="2733004e71cca805c0615e516d9f358b9f44e502" />
+			</args>
+		</git>
+	
+	</target>
+	
+	
+	<target name="check_bitcoinj_build">
+		<!-- for now hardcode the specific bitcoin version build made the maven
+			TODO use: http://maven.apache.org/ant-tasks/installation.html
+			to read info from pom file and figure out name/location of target build
+		-->
+		<uptodate property="bitcoinj.buildNotRequired" targetfile="../bitcoinj/core/target/bitcoinj-0.11.2.jar" >
+		    <srcfiles dir= "../bitcoinj" includes="**/*.dtd"/>
+		  </uptodate>
+	</target>
+		
+	<target name="build_bitcoinj" depends="check_bitcoinj_build" unless="bitcoinj.buildNotRequired">
+		<echo message="bitcoinj jar file is not up to date. Rebuilding..." />
+		
+		<artifact:mvn pom="../bitcoinj/pom.xml">
+			<arg value="eclipse:eclipse"/>
+			<!-- now we just create an eclipse project for it
+			<arg value="package"/>
+			<arg value="-DskipTests=true" />
+			-->
+		</artifact:mvn>
+	</target>
+    
+</project>
