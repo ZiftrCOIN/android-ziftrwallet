@@ -1,4 +1,4 @@
 [submodule "bitcoinj"]
 	path = bitcoinj
 	url = git@github.com:Ziftr/bitcoinj.git
-	branch = release-0.11
+	branch = ziftr
