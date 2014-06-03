@@ -3,5 +3,6 @@
 
 * Clone this repo
 * `cd OneWallet`
-* `git submodule init`
-* `git submodule update`
+* `git submodule update --init`
+* `cd bitcoinj`
+* `git checkout ziftr`
