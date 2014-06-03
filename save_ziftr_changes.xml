@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MegaWallet_saveChanges" default="save_changes" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+	
+	
+	
+	<target name="save_changes">
+		<echo message="Saving bitcoinj changes..." />
+		
+		<exec executable="git" dir="../bitcoinj" outputproperty="status">
+			<arg value="status"/>
+		</exec>
+		
+		<echo message="${status}" />
+	</target>
+	
+	
+	
+	
+	<macrodef name="git">
+		<attribute name="command" />
+		<attribute name="dir" default="" />
+		<element name="args" optional="true" />
+		<sequential>
+			<echo message="git @{command}" />
+			<exec executable="git" dir="@{dir}">
+				<arg value="@{command}" />
+					<args/>
+			</exec>
+		</sequential>
+	</macrodef>
+    
+</project>

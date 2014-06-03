@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MegaWallet_custom_rules">
+
+    
+	<import file="build_dependencies.xml" />
+    
+    <target name="-pre-build">
+    	<!-- don't call these as part of the build process now, they can seriously screw up the eclipse setup
+    	<echo message="Calling build libraries target..."/>
+        <antcall target="build_libraries"/>
+        -->
+    </target>
+    
+</project>
