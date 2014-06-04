@@ -8,7 +8,7 @@
 
     <artifactId>ziftr_test</artifactId>
 
-    <name>ziftr_test</name>
+    <name>OneWallet</name>
     <description>A Ziftr Test POM for filling in classpath info</description>
     
     <repositories>
@@ -53,24 +53,39 @@
     </build>
 
     <dependencies>
+    
+    	<!-- note on dependencies for android
+    		one, or more, of these dependencies has their own dependencies on libraries 
+    		that will stop android app from compiling, due to having core java.* or javax.*
+    		classes, these problem libraries were removed from the eclipse project setup,
+    		but may still causes maven issues -->
+    
     	<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
 			<version>4.1.1.4</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- this library messes up android build (due to license.txt file in root of .jar
+			it's only used for unit testing the library, which the android project won't use
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
+         -->
+         
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
             <version>3.0</version>
             <scope>test</scope>
         </dependency>
+        
+        
+        <!-- this might be causing issues on android, as it's not the right version -->
         <!-- bitcoinj consumers are expected to provide their own SLF4J adapters
              such as logback, slf4j-log4j12, slf4j-jcl and so on
              see http://www.slf4j.org/faq.html -->
@@ -79,6 +94,8 @@
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.7.5</version>
             <scope>test</scope>
+        
+        
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -111,11 +128,17 @@
             <artifactId>jcip-annotations</artifactId>
             <version>1.0</version>
         </dependency>
+        
+        <!-- simply going to manually add this library to the libs folder
+        	android requires that the library have no native code files
+        	(android native code must also be stored in a different folder) 
+        	so this jar in the maven repo will not even work in an android project
         <dependency>
             <groupId>com.lambdaworks</groupId>
             <artifactId>scrypt</artifactId>
             <version>1.3.3</version>
         </dependency>
+         -->
     <dependency>
       <groupId>net.sf.jopt-simple</groupId>
       <artifactId>jopt-simple</artifactId>
