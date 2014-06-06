@@ -85,14 +85,15 @@
         </dependency>
         
         
-        <!-- this might be causing issues on android, as it's not the right version -->
         <!-- bitcoinj consumers are expected to provide their own SLF4J adapters
              such as logback, slf4j-log4j12, slf4j-jcl and so on
              see http://www.slf4j.org/faq.html -->
+        <!-- note that version 1.7.7 of slf4j android exists in maven repo, 
+        	it's 1/3rd the size of this one and it doesn't work -->
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.5</version>
+            <artifactId>slf4j-android</artifactId>
+            <version>1.6.1-RC1</version>
             <scope>test</scope>
         
         
