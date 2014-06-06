@@ -43,10 +43,22 @@ At this point, the 3 bitcoinj projects shouldn't have any errors.
 -------- To get OneWallet projects in eclipse --------
 
 Do the above first, as the OneWallet Project references the bitcoinj project.
+
+In Eclipse, do File->Import...
+	Choose 'Existing project into workspace'
+	Import the HOME/android-sdks/extras
+	Make sure only the appcompat project is imported, you don't need all three
+	This project shouldn't have any errors
 	
 In Eclipse, do File->Import...
 	Choose 'Existing android project into workspace' (notice the android)
 	Select the OneWallet folder which was cloned from Github and click finish
 	Right click on the build_dependencies.xml file and do Run As -> Ant Build
 	When it is finished it will print a stack trace error, but ignore it.
+
+For the OneWallet App:
+	Go into project properties-> Android
+	Remove the Appcompat library (bottom right)
+	Click add and select the appcompat Project previously imported
+	
 	
