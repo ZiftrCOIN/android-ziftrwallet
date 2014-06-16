@@ -38,4 +38,21 @@
         android:layout_height="wrap_content"
         android:text="$0.00" />
 
+    <Button
+        android:id="@+id/buttonSendCoins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="Send BTC" />
+
+    <EditText
+        android:id="@+id/editSendAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:text="mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db" >
+
+        <requestFocus />
+    </EditText>
+
 </LinearLayout>

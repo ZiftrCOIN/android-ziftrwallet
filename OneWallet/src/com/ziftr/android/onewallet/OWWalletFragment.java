@@ -1,15 +1,30 @@
 package com.ziftr.android.onewallet;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
 import com.google.bitcoin.core.AbstractWalletEventListener;
+import com.google.bitcoin.core.Address;
+import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.BlockChain;
+import com.google.bitcoin.core.CheckpointManager;
 import com.google.bitcoin.core.ECKey;
+import com.google.bitcoin.core.InsufficientMoneyException;
 import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.core.PeerAddress;
 import com.google.bitcoin.core.PeerGroup;
+import com.google.bitcoin.core.Sha256Hash;
 import com.google.bitcoin.core.Transaction;
+import com.google.bitcoin.core.TransactionConfidence;
+import com.google.bitcoin.core.TransactionConfidence.Source;
+import com.google.bitcoin.core.TransactionInput;
 import com.google.bitcoin.core.Utils;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.net.discovery.DnsDiscovery;
@@ -18,15 +33,19 @@ import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.BriefLogFormatter;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
-public abstract class OWWalletFragment extends Fragment {
+public abstract class OWWalletFragment extends Fragment implements OnClickListener {
 
 	
 	//abstract methods
@@ -47,6 +66,22 @@ public abstract class OWWalletFragment extends Fragment {
 	PeerGroup peerGroup;
 	
 	
+	
+	
+	
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+	
+		setupWallet();
+		
+		refreshWallet();
+		
+	}
+	
+	
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		
@@ -54,33 +89,76 @@ public abstract class OWWalletFragment extends Fragment {
 		
 		rootView = inflater.inflate(R.layout.fragment_wallet, container, false);
 		
+		View sendButton = rootView.findViewById(R.id.buttonSendCoins);
+		sendButton.setOnClickListener(this);
+		
 		publicAddressText = (TextView) rootView.findViewById(R.id.textWalletMainAddress);
 		walletBalanceText = (TextView) rootView.findViewById(R.id.textWalletMainBalance);
 		
-		walletFile = null;
-		File externalDirectory = getActivity().getExternalFilesDir(null);
-		if(externalDirectory != null) {
-			walletFile = new File(externalDirectory, getCoinPrefix() + "_wallet.dat");
-			blockStoreFile = new File(externalDirectory, getCoinPrefix() + "_blockchain.store");
-		}
 		
-		setupWallet();
-		
-		if(wallet != null) {
-			
+		if(wallet != null) {	
 			ECKey key = wallet.getKeys().get(0);
 			publicAddressText.setText(key.toAddress(networkParams).toString());
-			walletBalanceText.setText(Utils.bitcoinValueToFriendlyString(wallet.getBalance(Wallet.BalanceType.ESTIMATED)));
+			walletBalanceText.setText(Utils.bitcoinValueToFriendlyString(wallet.getBalance(Wallet.BalanceType.AVAILABLE)));
 		}
-			
 		
-		
-		refreshWallet();
 		
 		return rootView;
 	}
 	
 	
+	
+
+	@Override
+	public void onClick(View v) {
+		
+		if(v.getId() == R.id.buttonSendCoins) {
+			
+			//for testing purposes at the moment, let's just always send 0.001 btc
+			EditText receivingAddressEdit = (EditText) rootView.findViewById(R.id.editSendAddress);
+			String address = receivingAddressEdit.getText().toString();
+			
+			try {
+				sendCoins(address, Utils.toNanoCoins("0.0001"));
+			} 
+			catch (AddressFormatException e) {
+				ZLog.log("Exception trying send coins: ", e);
+			} 
+			catch (InsufficientMoneyException e) {
+				ZLog.log("Exception trying send coins: ", e);
+			}
+		}
+	}
+	
+	
+	private void sendCoins(String address, BigInteger value) throws AddressFormatException, InsufficientMoneyException {
+		
+		//create an address object based on network parameters in use and the entered address
+		Address sendAddress = new Address(networkParams, address);
+		
+		//use the address and the value to create a new send request object
+		Wallet.SendRequest sendRequest = Wallet.SendRequest.to(sendAddress, value);
+		
+		//use the wallet to setup the send request's transaction, giving it proper outputs and a signed input
+		
+		//wallet.completeTx(sendRequest); //calling sendCoins internally calls this, so calling it here causes exceptions to be thrown
+		
+		sendRequest.fee = new BigInteger("0");
+		
+		//Transaction tx = sendRequest.tx;
+		
+		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
+		
+		
+		sendResult.broadcastComplete.addListener(new Runnable() {
+			
+			@Override
+			public void run() {
+				ZLog.log("Successfully sent coins to address!");
+			}
+		}, MoreExecutors.sameThreadExecutor());
+		
+	}
 	
 	
 	/*
@@ -89,6 +167,14 @@ public abstract class OWWalletFragment extends Fragment {
 	 * this shouldn't be called from a UI thread due to the blocking nature of creating files.
 	 */
 	private void setupWallet() {
+		
+
+		walletFile = null;
+		File externalDirectory = getActivity().getExternalFilesDir(null);
+		if(externalDirectory != null) {
+			walletFile = new File(externalDirectory, getCoinPrefix() + "_wallet.dat");
+			blockStoreFile = new File(externalDirectory, getCoinPrefix() + "_blockchain.store");
+		}
 
 		wallet = null;
 
@@ -117,6 +203,7 @@ public abstract class OWWalletFragment extends Fragment {
 		
 		ZLog.log("Test Wallet: ", wallet.toString());
 		ZLog.log("Earliest wallet creation time: ", String.valueOf(wallet.getEarliestKeyCreationTime()));
+		ZLog.log("Wallet keys: ", wallet.getKeys().toString());
 		
 	}
 	
@@ -131,16 +218,36 @@ public abstract class OWWalletFragment extends Fragment {
 			
 				try {
 					
-		        	blockStore = new SPVBlockStore(networkParams, blockStoreFile); 
+					boolean blockStoreExists = blockStoreFile.exists();
+		        	blockStore = new SPVBlockStore(networkParams, blockStoreFile); //this creates the file if it doesn't exist, so check first
+		        	
+		        	if(!blockStoreExists) {
+		        		//we're creating a new block store file here, so use checkpoints to speed up network syncing
+		        		Activity act = getActivity();
+		        		if(act == null) {
+		        			return; //if this happens app is dying, so wait and do this on the next run
+		        		}
+		        		
+		        		InputStream inputSteam = act.getResources().openRawResource(R.raw.btc_checkpoints);
+		        		try {
+							CheckpointManager.checkpoint(networkParams, inputSteam, blockStore, wallet.getEarliestKeyCreationTime());
+						} 
+		        		catch (IOException e) {
+		        			//we failed to read the checkpoints file for some reason, still let the user attempt sync the chain the slow way
+		        			ZLog.log("Failed to load chain checkpoint: ", e);
+						}
+		        	}
 		        	
 		        	BlockChain chain = new BlockChain(networkParams, wallet, blockStore);
-					
+		        	
 					peerGroup = new PeerGroup(networkParams, chain);
 					
 
 			        //TODO -what does doing this actually do?
 					peerGroup.addWallet(wallet);
-			        chain.addWallet(wallet);
+			        
+					
+					//chain.addWallet(wallet); //note: i think this is not needed as it's done in the constructor which takes a wallet
 			        
 
 					peerGroup.addPeerDiscovery(new DnsDiscovery(networkParams));
@@ -187,6 +294,101 @@ public abstract class OWWalletFragment extends Fragment {
 					
 					// Now download and process the block chain.
 			        peerGroup.downloadBlockChain();
+			        
+			        
+
+					
+					//TODO these are not safe as other threads can modify the transaction collections while we iterate through them
+			        		//however this is just for testing right now
+			        
+			        //also upload any pending transactions
+			        Collection<Transaction> pendingTransactions = wallet.getPendingTransactions();
+			        
+			        for(Transaction tx : pendingTransactions) {
+			      
+			        	//ZLog.log("There is a pending transaction in the wallet: ", tx.toString(chain));
+			        	//wallet.commitTx(tx);
+			        	
+			        	try {
+			        		//wallet.commitTx(tx);
+			        		//wallet.cleanup();
+			        		
+			        		if(!wallet.isConsistent()) {
+			        			ZLog.log("Wallet is inconsistent!!");
+			        		}
+			        		if(wallet.isTransactionRisky(tx, null)) {
+			        			ZLog.log("Transaction is risky...");
+			        		}
+			        		
+			        		String logMsg = "Pending Transaction Details: \n";
+			        		logMsg += "isPending: " + String.valueOf(tx.isPending()) +"\n";
+			        		logMsg += "isMature: " + String.valueOf(tx.isMature()) + "\n";
+			        		logMsg += "isAnyOutputSpent: " + String.valueOf(tx.isAnyOutputSpent()) + "\n";
+			        		logMsg += "sigOpCount: " + String.valueOf(tx.getSigOpCount()) +"\n";
+			        		
+			        		TransactionConfidence confidence = tx.getConfidence();
+			        		
+			        		logMsg += "Confidence: \n" + confidence.toString() + "\n";
+			        		
+			        		logMsg += "Confidence Type: " + String.valueOf(confidence.getConfidenceType().getValue()) + "\n";
+			        		logMsg += "Confidence Block Depth: " + String.valueOf(confidence.getDepthInBlocks()) + "\n";
+			        		logMsg += "Number Broadcast Peers: " + String.valueOf(confidence.numBroadcastPeers()) +"\n";
+			        		
+			        		String broadcastByString = "none";
+			        		ListIterator<PeerAddress> broadcastBy = confidence.getBroadcastBy();
+			        		if(broadcastBy != null) {
+			        			broadcastByString = "";
+			        			while(broadcastBy.hasNext()) {
+			        				broadcastByString += broadcastBy.next().toString() + "\n";
+			        			}
+			        		}
+			        		logMsg += "Broadcast by Peers: \n" + broadcastByString + "\n";
+			        		
+			        		logMsg += "Confidence Source: " + confidence.getSource().name() +"\n";
+			        		
+			        		
+			        		
+			        		logMsg += "version: " + String.valueOf(tx.getVersion()) +"\n";
+			        		
+			        		String hashes = "null";
+			        		Map<Sha256Hash, Integer> hashesTransactionAppearsIn = tx.getAppearsInHashes();
+			        		if(hashesTransactionAppearsIn != null) {
+			        			hashes = hashesTransactionAppearsIn.toString();
+			        		}
+			        		
+			        		logMsg += "Transaction Appears in Hashes: \n" + hashes +"\n";
+			        		
+			        		logMsg += "Transaction Hash: " + tx.getHashAsString() + "\n";
+
+			        		logMsg += "Transaction Update Time: " + tx.getUpdateTime().toString() +"\n";
+			        		
+			        		logMsg += "Transaction Value: " + String.valueOf(tx.getValue(wallet)) + "\n";
+			        		
+			        		ZLog.log(logMsg);
+			        		
+			        		//wallet.clearTransactions(0); //for testing... drop a bomb on our wallet
+			        		
+			        	}
+			        	catch(Exception e) {
+			        		ZLog.log("Caught Excpetion: ", e);
+			        	}
+			        	
+			        	try {
+			        		//peerGroup.broadcastTransaction(tx);
+			        	}
+			        	catch(Exception e) {
+			        		ZLog.log("Caught Excpetion: ", e);
+			        	}
+			        	
+			        }
+			        
+			        /**
+			        List<Transaction> recentTransactions = wallet.getRecentTransactions(20, true);
+			        for(Transaction tx : recentTransactions) {
+			        	ZLog.log("Recent transaction: ", tx);
+			        }
+			        ***/
+			        
 				} 
 		        catch (BlockStoreException e) {
 		        	ZLog.log("Exeption creating block store: ", e);
@@ -199,7 +401,9 @@ public abstract class OWWalletFragment extends Fragment {
 	
 	
 	private void updateWalletBalance(String newBalance) {
-		walletBalanceText.setText(newBalance);
+		if(walletBalanceText != null) {
+			walletBalanceText.setText(newBalance);
+		}
 	}
 	
 	
