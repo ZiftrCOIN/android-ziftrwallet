@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.spongycastle.crypto.params.KeyParameter;
+
 import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.AddressFormatException;
@@ -56,6 +58,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	
 	TextView publicAddressText;
 	TextView walletBalanceText;
+	TextView outsideBalanceText;
 	
 	File walletFile;
 	File blockStoreFile;
@@ -94,12 +97,14 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		
 		publicAddressText = (TextView) rootView.findViewById(R.id.textWalletMainAddress);
 		walletBalanceText = (TextView) rootView.findViewById(R.id.textWalletMainBalance);
+		outsideBalanceText = (TextView) rootView.findViewById(R.id.textWalletOutsideBalance);
 		
 		
 		if(wallet != null) {	
 			ECKey key = wallet.getKeys().get(0);
 			publicAddressText.setText(key.toAddress(networkParams).toString());
-			walletBalanceText.setText(Utils.bitcoinValueToFriendlyString(wallet.getBalance(Wallet.BalanceType.AVAILABLE)));
+			
+			updateWalletBalance(wallet.getBalance(Wallet.BalanceType.AVAILABLE));
 		}
 		
 		
@@ -119,7 +124,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 			String address = receivingAddressEdit.getText().toString();
 			
 			try {
-				sendCoins(address, Utils.toNanoCoins("0.0001"));
+				sendCoins(address, Utils.toNanoCoins("0.00378"));
 			} 
 			catch (AddressFormatException e) {
 				ZLog.log("Exception trying send coins: ", e);
@@ -143,10 +148,12 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		
 		//wallet.completeTx(sendRequest); //calling sendCoins internally calls this, so calling it here causes exceptions to be thrown
 		
-		sendRequest.fee = new BigInteger("0");
+		//sendRequest.fee = new BigInteger("0"); //don't ever really want a 0 fee, just experimenting with setting fees
 		
 		//Transaction tx = sendRequest.tx;
 		
+		
+		wallet.decrypt(null);
 		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
 		
 		
@@ -200,6 +207,24 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 				//super.onBackPressed(); //just kill the activity for testing purposes
 			}
 		}
+		
+		Address watchedAddress;
+		try {
+			watchedAddress = new Address(networkParams, "mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db");
+			wallet.addWatchedAddress(watchedAddress, 1402200000);
+		} 
+		catch (AddressFormatException e) {
+			ZLog.log("Exception trying to add a watched address: ", e);
+		}
+		
+		
+		//KeyParameter keyParam = wallet.encrypt("password");
+		// ZLog.log("Wallet locked with key parameter: ", keyParam);
+		
+		//wallet.decrypt(new KeyParameter("password".getBytes()));
+		
+		
+		//ECKey key = new ECKey(null, null);
 		
 		ZLog.log("Test Wallet: ", wallet.toString());
 		ZLog.log("Earliest wallet creation time: ", String.valueOf(wallet.getEarliestKeyCreationTime()));
@@ -284,7 +309,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 			            	if(activity != null) {
 				                activity.runOnUiThread(new Runnable() {
 									public void run() {
-										updateWalletBalance(Utils.bitcoinValueToFriendlyString(newBalance));
+										updateWalletBalance(newBalance);
 									}
 								});
 			            	}
@@ -400,9 +425,12 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	}
 	
 	
-	private void updateWalletBalance(String newBalance) {
+	private void updateWalletBalance(BigInteger newBalance) {
 		if(walletBalanceText != null) {
-			walletBalanceText.setText(newBalance);
+			String balanceString = Utils.bitcoinValueToFriendlyString(newBalance);
+			walletBalanceText.setText(balanceString);
+			
+			outsideBalanceText.setText(Utils.bitcoinValueToFriendlyString(wallet.getWatchedBalance()));
 		}
 	}
 	
