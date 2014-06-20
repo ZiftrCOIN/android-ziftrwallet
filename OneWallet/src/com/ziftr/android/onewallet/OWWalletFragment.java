@@ -29,6 +29,9 @@ import com.google.bitcoin.core.TransactionConfidence.Source;
 import com.google.bitcoin.core.TransactionInput;
 import com.google.bitcoin.core.Utils;
 import com.google.bitcoin.core.Wallet;
+import com.google.bitcoin.crypto.KeyCrypter;
+import com.google.bitcoin.crypto.KeyCrypterException;
+import com.google.bitcoin.crypto.KeyCrypterScrypt;
 import com.google.bitcoin.net.discovery.DnsDiscovery;
 import com.google.bitcoin.store.BlockStore;
 import com.google.bitcoin.store.BlockStoreException;
@@ -152,8 +155,6 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		
 		//Transaction tx = sendRequest.tx;
 		
-		
-		wallet.decrypt(null);
 		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
 		
 		
@@ -208,6 +209,8 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 			}
 		}
 		
+		
+		//how to watch an outside address, note: we probably won't do this client side in the actual app
 		Address watchedAddress;
 		try {
 			watchedAddress = new Address(networkParams, "mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db");
@@ -218,13 +221,15 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		}
 		
 		
+		//how to encrypt a wallet for safety
 		//KeyParameter keyParam = wallet.encrypt("password");
-		// ZLog.log("Wallet locked with key parameter: ", keyParam);
+	
+		//how to decrypt the wallet
+		//wallet.decrypt(wallet.getKeyCrypter().deriveKey("password"));
 		
-		//wallet.decrypt(new KeyParameter("password".getBytes()));
+		//note: wallets should only be encrypted once using the password, decryption is specifically for removing encryption completely
+		//instead any spending transactions should set SendRequest.aesKey and it will be used to decrypt keys as it signs.
 		
-		
-		//ECKey key = new ECKey(null, null);
 		
 		ZLog.log("Test Wallet: ", wallet.toString());
 		ZLog.log("Earliest wallet creation time: ", String.valueOf(wallet.getEarliestKeyCreationTime()));
