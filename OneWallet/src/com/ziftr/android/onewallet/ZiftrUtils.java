@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -32,9 +31,6 @@ public class ZiftrUtils {
 	private static final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US); //formatting for date written like "2013-08-26T13:59:30-04:00"
 	private static final DateFormat formatterExpanded = new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss Z", Locale.US); //formatting for date written like "Tue, 19 Nov 2013 10:28:31 -0500"
 	private static final DateFormat formatterNoTimeZone = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); //formatting for date written like "2013-12-11 10:59:48"
-
-	
-	
 	
 	/**
 	 * Converts a date string in a format such as "2013-08-26T13:59:30-04:00" into milliseconds

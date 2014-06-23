@@ -1,34 +1,38 @@
 package com.ziftr.android.onewallet;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.google.bitcoin.core.NetworkParameters;
-import com.google.bitcoin.params.TestNet3Params;
 
 public class OWMainActivity extends ActionBarActivity {
 
+	/**
+	 * Loads up the views and starts the OWHomeFragment 
+	 * if necessary. 
+	 * 
+	 * @param savedInstanceState - If one exists, it stores
+	 * the 
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		FragmentManager fragmentManager = getSupportFragmentManager();
-
+		// If the app has just been launched (so the fragment
+		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
+			FragmentManager fragmentManager = getSupportFragmentManager();
 			OWHomeFragment homeFragment = new OWHomeFragment();
-			fragmentManager.beginTransaction().add(R.id.mainActivityContainer, homeFragment).commit();
-		}
+			fragmentManager.beginTransaction().add(
+					R.id.mainActivityContainer, homeFragment).commit();
+		} 
 	}
 
-	
+	/**
+	 * 
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -39,20 +43,19 @@ public class OWMainActivity extends ActionBarActivity {
 		return false;
 	}
 
-	
+	/** 
+	 * We handle action bar item clicks here. The action bar will
+	 * automatically handle clicks on the Home/Up button, so long
+	 * as you specify a parent activity in AndroidManifest.xml.
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	
 
 }
 

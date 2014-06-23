@@ -117,7 +117,6 @@ public abstract class ZLog {
 		
 	}
 	
-	@SuppressWarnings("unused")
 	private static class NoOpLogger extends ZLog {
 
 		@Override

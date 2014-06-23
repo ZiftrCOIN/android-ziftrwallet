@@ -42,34 +42,60 @@ import com.google.bitcoin.utils.BriefLogFormatter;
 import com.google.common.util.concurrent.MoreExecutors;
 
 /**
- * 
+ * This is the abstract superclass for all of the individual Wallet type
+ * Fragments. It provides some generic methods that will be useful
+ * to all Fragments of the OneWallet. 
  */
 public abstract class OWWalletFragment extends Fragment implements OnClickListener {
 
-	//abstract methods
 	/**
 	 * Get the market exchange prefix for the 
-	 * actual subclassing coin fragment type.
+	 * actual sub-classing coin fragment type.
 	 * 
 	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
 	 */
 	public abstract String getCoinPrefix();
+	
+	/**
+	 * Get the specific coin's network parameters. This 
+	 * is an instance which selects the network (production 
+	 * or test) you are on.
+	 * 
+	 * @return A network parameters object. 
+	 * For example, to get the TestNetwork, use 
+	 * <pre>'return TestNet3Params.get();'.</pre>
+	 */
 	public abstract NetworkParameters getCoinNetworkParameters();
 
-	View rootView;
+	/** The root view for this application. */
+	protected View rootView;
+	/** The TextView to hold the Wallet's public address. */ 
+	protected TextView publicAddressText;
+	/** The TextView to hold the Wallet's current balance. */
+	protected TextView walletBalanceText;
+	/** The TextView to hold a different address' balance. */
+	protected TextView outsideBalanceText;
 
-	TextView publicAddressText;
-	TextView walletBalanceText;
-	TextView outsideBalanceText;
+	/** The file where the wallet for this coin will be stored. */
+	protected File walletFile;
+	/** The file where the BlockStore for this coin will be stored. */
+	protected File blockStoreFile;
 
-	File walletFile;
-	File blockStoreFile;
+	/** The wallet for this coin. */
+	protected Wallet wallet;
+	/** The Network parameters for this coin. */
+	protected NetworkParameters networkParams = this.getCoinNetworkParameters();
+	/** A map of hashes to StoredBlocks to save StoredBlock objects to disk. */
+	protected BlockStore blockStore;
+	/** The PeerGroup that this SPV node is connected to. */
+	protected PeerGroup peerGroup;
 
-	Wallet wallet;
-	NetworkParameters networkParams = this.getCoinNetworkParameters();
-	BlockStore blockStore;
-	PeerGroup peerGroup;
-
+	/**
+	 * When this fragment is created, this method is called
+	 * unless it is overridden. 
+	 * 
+	 * @param savedInstanceState - The last state of this fragment.
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,6 +103,9 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		refreshWallet();
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
