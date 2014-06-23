@@ -1,6 +1,5 @@
 package com.ziftr.android.onewallet;
 
-import android.content.pm.ApplicationInfo;
 import android.util.Log;
 
 public abstract class ZLog {
