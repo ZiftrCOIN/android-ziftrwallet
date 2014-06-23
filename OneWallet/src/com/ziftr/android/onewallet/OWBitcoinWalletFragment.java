@@ -17,5 +17,4 @@ public class OWBitcoinWalletFragment extends OWWalletFragment {
 		return TestNet3Params.get();
 	}
 
-
 }

@@ -18,13 +18,13 @@
         android:text="Bitcoin Wallets" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/buttonLitecoinWallet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Litecoin Wallets" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/buttonNewWallet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Create New Wallet" />

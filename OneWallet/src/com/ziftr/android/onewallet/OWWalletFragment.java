@@ -40,6 +40,8 @@ import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.BriefLogFormatter;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -47,25 +49,6 @@ import com.google.common.util.concurrent.MoreExecutors;
  * to all Fragments of the OneWallet. 
  */
 public abstract class OWWalletFragment extends Fragment implements OnClickListener {
-
-	/**
-	 * Get the market exchange prefix for the 
-	 * actual sub-classing coin fragment type.
-	 * 
-	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
-	 */
-	public abstract String getCoinPrefix();
-	
-	/**
-	 * Get the specific coin's network parameters. This 
-	 * is an instance which selects the network (production 
-	 * or test) you are on.
-	 * 
-	 * @return A network parameters object. 
-	 * For example, to get the TestNetwork, use 
-	 * <pre>'return TestNet3Params.get();'.</pre>
-	 */
-	public abstract NetworkParameters getCoinNetworkParameters();
 
 	/** The root view for this application. */
 	protected View rootView;
@@ -91,6 +74,25 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	protected PeerGroup peerGroup;
 
 	/**
+	 * Get the market exchange prefix for the 
+	 * actual sub-classing coin fragment type.
+	 * 
+	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
+	 */
+	public abstract String getCoinPrefix();
+
+	/**
+	 * Get the specific coin's network parameters. This 
+	 * is an instance which selects the network (production 
+	 * or test) you are on.
+	 * 
+	 * @return A network parameters object. 
+	 * For example, to get the TestNetwork, use 
+	 * <pre>'return TestNet3Params.get();'.</pre>
+	 */
+	public abstract NetworkParameters getCoinNetworkParameters();
+
+	/**
 	 * When this fragment is created, this method is called
 	 * unless it is overridden. 
 	 * 
@@ -107,7 +109,8 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	 * 
 	 */
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, 
+			ViewGroup container, Bundle savedInstanceState) {
 
 		BriefLogFormatter.initVerbose();
 
@@ -116,16 +119,19 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		View sendButton = rootView.findViewById(R.id.buttonSendCoins);
 		sendButton.setOnClickListener(this);
 
-		publicAddressText = (TextView) rootView.findViewById(R.id.textWalletMainAddress);
-		walletBalanceText = (TextView) rootView.findViewById(R.id.textWalletMainBalance);
-		outsideBalanceText = (TextView) rootView.findViewById(R.id.textWalletOutsideBalance);
+		publicAddressText = (
+				TextView) rootView.findViewById(R.id.textWalletMainAddress);
+		walletBalanceText = (
+				TextView) rootView.findViewById(R.id.textWalletMainBalance);
+		outsideBalanceText = (
+				TextView) rootView.findViewById(R.id.textWalletOutsideBalance);
 
 
-		if(wallet != null) {	
+		if (wallet != null) {	
 			ECKey key = wallet.getKeys().get(0);
 			publicAddressText.setText(key.toAddress(networkParams).toString());
-
-			updateWalletBalance(wallet.getBalance(Wallet.BalanceType.AVAILABLE));
+			updateWalletBalance(
+					wallet.getBalance(Wallet.BalanceType.AVAILABLE));
 		}
 
 
@@ -153,21 +159,50 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	}
 
 	@Override
+	public void onDestroy() {
+
+		if (peerGroup != null) {
+			peerGroup.stop();
+		}
+
+		if (blockStore != null) {
+			try {
+				blockStore.close();
+			} 
+			catch (BlockStoreException e) {
+				ZLog.log("Exception closing block store: ", e);
+			}
+		}
+
+		if (wallet != null) {
+			try {
+				wallet.saveToFile(walletFile);
+			}
+			catch (IOException e) {
+				ZLog.log("Exception saving wallet file on shutdown: ", e);
+			}
+		}
+
+		super.onDestroy();
+
+	}
+
+	@Override
 	public void onClick(View v) {
 
-		if(v.getId() == R.id.buttonSendCoins) {
+		if (v.getId() == R.id.buttonSendCoins) {
 
-			//for testing purposes at the moment, let's just always send 0.001 btc
-			EditText receivingAddressEdit = (EditText) rootView.findViewById(R.id.editSendAddress);
+			// For testing purposes at the moment, let's 
+			// just always send 0.001 btc
+			EditText receivingAddressEdit = (
+					EditText) rootView.findViewById(R.id.editSendAddress);
 			String address = receivingAddressEdit.getText().toString();
 
 			try {
 				sendCoins(address, Utils.toNanoCoins("0.00378"));
-			} 
-			catch (AddressFormatException e) {
+			} catch (AddressFormatException e) {
 				ZLog.log("Exception trying send coins: ", e);
-			} 
-			catch (InsufficientMoneyException e) {
+			} catch (InsufficientMoneyException e) {
 				ZLog.log("Exception trying send coins: ", e);
 			}
 		}
@@ -185,17 +220,23 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	private void sendCoins(String address, BigInteger value) 
 			throws AddressFormatException, InsufficientMoneyException {
 
-		//create an address object based on network parameters in use and the entered address
+		// Create an address object based on network parameters 
+		// in use and the entered address
 		Address sendAddress = new Address(networkParams, address);
 
 		//use the address and the value to create a new send request object
-		Wallet.SendRequest sendRequest = Wallet.SendRequest.to(sendAddress, value);
+		Wallet.SendRequest sendRequest = 
+				Wallet.SendRequest.to(sendAddress, value);
+		sendRequest.aesKey = wallet.getKeyCrypter().deriveKey("password");
 
 		// Use the wallet to setup the send request's transaction, 
 		// giving it proper outputs and a signed input
-		//wallet.completeTx(sendRequest); //calling sendCoins internally calls this, so calling it here causes exceptions to be thrown
+		// Calling sendCoins internally calls this, so calling 
+		// it here causes exceptions to be thrown
+		//wallet.completeTx(sendRequest); 
 
-		//sendRequest.fee = new BigInteger("0"); //don't ever really want a 0 fee, just experimenting with setting fees
+		// Don't ever really want a 0 fee, just experimenting with setting fees
+		//sendRequest.fee = new BigInteger("0"); 
 
 		//Transaction tx = sendRequest.tx;
 
@@ -223,9 +264,11 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 		walletFile = null;
 		File externalDirectory = getActivity().getExternalFilesDir(null);
-		if(externalDirectory != null) {
-			walletFile = new File(externalDirectory, getCoinPrefix() + "_wallet.dat");
-			blockStoreFile = new File(externalDirectory, getCoinPrefix() + "_blockchain.store");
+		if (externalDirectory != null) {
+			walletFile = new File(
+					externalDirectory, getCoinPrefix() + "_wallet.dat");
+			blockStoreFile = new File(
+					externalDirectory, getCoinPrefix() + "_blockchain.store");
 		}
 
 		wallet = null;
@@ -245,43 +288,47 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 			} catch (IOException e) {
 				ZLog.log("Exception trying to save new wallet file: ", e);
 				return;
-				//TODO -this is just test code of course but this is probably "fatal" as if we can't save our wallet, that's a problem
-				//super.onBackPressed(); //just kill the activity for testing purposes
+				//TODO -this is just test code of course but this is probably 
+				// "fatal" as if we can't save our wallet, that's a problem
+				//just kill the activity for testing purposes
+				//super.onBackPressed(); 
 			}
 		}
 
-		//how to watch an outside address, note: we probably won't do this client side in the actual app
-		Address watchedAddress;
-		try {
-			watchedAddress = new Address(networkParams, 
-					"mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db");
-			wallet.addWatchedAddress(watchedAddress, 1402200000);
-		} catch (AddressFormatException e) {
-			ZLog.log("Exception trying to add a watched address: ", e);
-		}
+		// How to watch an outside address, note: we probably 
+		// won't do this client side in the actual app
+		//		Address watchedAddress;
+		//		try {
+		//			watchedAddress = new Address(networkParams, 
+		//					"mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db");
+		//			wallet.addWatchedAddress(watchedAddress, 1402200000);
+		//		} catch (AddressFormatException e) {
+		//			ZLog.log("Exception trying to add a watched address: ", e);
+		//		}
 
-		//KeyParameter keyParam = wallet.encrypt("password");
-		//ZLog.log("Wallet locked with key parameter: ", keyParam);
-
-		//wallet.decrypt(new KeyParameter("password".getBytes()));
-
-		//ECKey key = new ECKey(null, null);
-
-
-
-		//how to encrypt a wallet for safety
-		//KeyParameter keyParam = wallet.encrypt("password");
+		// how to encrypt a wallet for safety
+		// Actually effect wallet file itself
+		// If it is encrypted, bitcoinj just works with it encrypted as long
+		// as all sendRequests etc have the 
+		// KeyParameter keyParam = wallet.encrypt("password");
 
 		//how to decrypt the wallet
 		//wallet.decrypt(wallet.getKeyCrypter().deriveKey("password"));
 
-		//note: wallets should only be encrypted once using the password, decryption is specifically for removing encryption completely
-		//instead any spending transactions should set SendRequest.aesKey and it will be used to decrypt keys as it signs.
+		// Note: wallets should only be encrypted once using the 
+		// password, decryption is specifically for removing encryption 
+		// completely instead any spending transactions should set 
+		// SendRequest.aesKey and it will be used to decrypt keys as it signs.
+		// TODO Explain???
 
-		ZLog.log("Test Wallet: ", wallet.toString());
-		ZLog.log("Earliest wallet creation time: ", String.valueOf(
-				wallet.getEarliestKeyCreationTime()));
-		ZLog.log("Wallet keys: ", wallet.getKeys().toString());
+		// if (!wallet.isEncrypted()) {
+		//     get a password from the user and encrypt
+		// }
+
+		//		ZLog.log("Test Wallet: ", wallet.toString());
+		//		ZLog.log("Earliest wallet creation time: ", String.valueOf(
+		//				wallet.getEarliestKeyCreationTime()));
+		//		ZLog.log("Wallet keys: ", wallet.getKeys().toString());
 
 	}
 
@@ -291,18 +338,16 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	private void refreshWallet() {
 
 		ZiftrUtils.runOnNewThread(new Runnable() {
-
 			@Override
 			public void run() {
 
 				try {
-
 					boolean blockStoreExists = blockStoreFile.exists();
 					// This creates the file if it doesn't exist, so check first
 					blockStore = new SPVBlockStore(
 							networkParams, blockStoreFile); 
 
-					if(!blockStoreExists) {
+					if (!blockStoreExists) {
 						// We're creating a new block store file here, so 
 						// use checkpoints to speed up network syncing
 						Activity act = getActivity();
@@ -371,7 +416,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 							// Now update the UI with the new balance
 							Activity activity = getActivity();
-							if(activity != null) {
+							if (activity != null) {
 								activity.runOnUiThread(new Runnable() {
 									public void run() {
 										updateWalletBalance(newBalance);
@@ -402,10 +447,11 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 							//wallet.commitTx(tx);
 							//wallet.cleanup();
 
-							if(!wallet.isConsistent()) {
+							if (!wallet.isConsistent()) {
 								ZLog.log("Wallet is inconsistent!!");
 							}
-							if(wallet.isTransactionRisky(tx, null)) {
+
+							if (wallet.isTransactionRisky(tx, null)) {
 								ZLog.log("Transaction is risky...");
 							}
 
@@ -438,7 +484,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 							String broadcastByString = "none";
 							ListIterator<PeerAddress> broadcastBy = 
 									confidence.getBroadcastBy();
-							if(broadcastBy != null) {
+							if (broadcastBy != null) {
 								broadcastByString = "";
 								while(broadcastBy.hasNext()) {
 									broadcastByString += broadcastBy.next().toString() + "\n";
@@ -454,7 +500,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 							String hashes = "null";
 							Map<Sha256Hash, Integer> hashesTransactionAppearsIn = tx.getAppearsInHashes();
-							if(hashesTransactionAppearsIn != null) {
+							if (hashesTransactionAppearsIn != null) {
 								hashes = hashesTransactionAppearsIn.toString();
 							}
 
@@ -470,15 +516,13 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 							//wallet.clearTransactions(0); //for testing... drop a bomb on our wallet
 
-						}
-						catch(Exception e) {
+						} catch(Exception e) {
 							ZLog.log("Caught Excpetion: ", e);
 						}
 
 						try {
 							//peerGroup.broadcastTransaction(tx);
-						}
-						catch(Exception e) {
+						} catch(Exception e) {
 							ZLog.log("Caught Excpetion: ", e);
 						}
 
@@ -501,7 +545,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	}
 
 	private void updateWalletBalance(BigInteger newBalance) {
-		if(walletBalanceText != null) {
+		if (walletBalanceText != null) {
 			String balanceString = 
 					Utils.bitcoinValueToFriendlyString(newBalance);
 			walletBalanceText.setText(balanceString);
@@ -510,36 +554,6 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 					Utils.bitcoinValueToFriendlyString(wallet.getWatchedBalance());
 			outsideBalanceText.setText(watchedBalance);
 		}
-	}
-
-
-	@Override
-	public void onDestroy() {
-
-		if(peerGroup != null) {
-			peerGroup.stop();
-		}
-
-		if(blockStore != null) {
-			try {
-				blockStore.close();
-			} 
-			catch (BlockStoreException e) {
-				ZLog.log("Exception closing block store: ", e);
-			}
-		}
-
-		if(wallet != null) {
-			try {
-				wallet.saveToFile(walletFile);
-			}
-			catch (IOException e) {
-				ZLog.log("Exception saving wallet file on shutdown: ", e);
-			}
-		}
-
-		super.onDestroy();
-
 	}
 
 }

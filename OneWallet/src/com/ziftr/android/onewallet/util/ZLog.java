@@ -1,4 +1,6 @@
-package com.ziftr.android.onewallet;
+package com.ziftr.android.onewallet.util;
+
+import com.ziftr.android.onewallet.OWApplication;
 
 import android.util.Log;
 
