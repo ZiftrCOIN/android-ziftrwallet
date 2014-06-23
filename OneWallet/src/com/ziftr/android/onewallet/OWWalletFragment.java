@@ -101,8 +101,8 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 
 		return rootView;
-		
-		
+
+
 		// TODO
 		// 1. Ability to generate new address upon user request
 		// and be able to turn that into a QR code
@@ -120,7 +120,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		// ex. ZLog.log("aa", "b"); (get's exception message, as well)
 		// also autotags comments with class name and shuts itself off at
 		// launch time for release build.
-		
+
 	}
 
 	@Override
@@ -171,8 +171,8 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		//Transaction tx = sendRequest.tx;
 
 		wallet.decrypt(null);
-		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
 
+		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
 		sendResult.broadcastComplete.addListener(new Runnable() {
 
 			@Override
@@ -221,6 +221,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 			}
 		}
 
+		//how to watch an outside address, note: we probably won't do this client side in the actual app
 		Address watchedAddress;
 		try {
 			watchedAddress = new Address(networkParams, 
@@ -230,13 +231,23 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 			ZLog.log("Exception trying to add a watched address: ", e);
 		}
 
-
 		//KeyParameter keyParam = wallet.encrypt("password");
 		//ZLog.log("Wallet locked with key parameter: ", keyParam);
 
 		//wallet.decrypt(new KeyParameter("password".getBytes()));
 
 		//ECKey key = new ECKey(null, null);
+
+
+
+		//how to encrypt a wallet for safety
+		//KeyParameter keyParam = wallet.encrypt("password");
+
+		//how to decrypt the wallet
+		//wallet.decrypt(wallet.getKeyCrypter().deriveKey("password"));
+
+		//note: wallets should only be encrypted once using the password, decryption is specifically for removing encryption completely
+		//instead any spending transactions should set SendRequest.aesKey and it will be used to decrypt keys as it signs.
 
 		ZLog.log("Test Wallet: ", wallet.toString());
 		ZLog.log("Earliest wallet creation time: ", String.valueOf(
