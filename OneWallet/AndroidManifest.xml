@@ -45,6 +45,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity
+			android:name="com.google.zxing.client.android.CaptureActivity"
+			android:screenOrientation="landscape" >
+		</activity>
+        
     </application>
 
 </manifest>

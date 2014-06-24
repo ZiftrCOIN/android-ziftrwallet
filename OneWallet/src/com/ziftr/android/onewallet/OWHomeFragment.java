@@ -5,6 +5,7 @@ import java.util.Arrays;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
@@ -97,6 +99,31 @@ public class OWHomeFragment extends Fragment implements OWPassphraseConsumer {
 			}
 		});
 
+
+
+
+
+		// For the getQRCodeButton
+		View getQRCodeButton = rootView.findViewById(R.id.getQRCodeButton);
+		// Set the listener for the clicks
+		getQRCodeButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(
+						OWHomeFragment.this.getActivity(), CaptureActivity.class);
+				intent.setAction("com.google.zxing.client.android.SCAN");
+				// for Qr code, its ÒQR_CODE_MODEÓ instead of ÒPRODUCT_MODEÓ
+				intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+				
+				intent.putExtra("SAVE_HISTORY", false);
+				startActivityForResult(intent, 0);
+			}
+		});
+
+
+
+
+
 		// Return the view which was inflated
 		return rootView;
 	}
@@ -147,7 +174,7 @@ public class OWHomeFragment extends Fragment implements OWPassphraseConsumer {
 	private byte[] getStoredPassphraseHash(SharedPreferences prefs) {
 		String storedPassphrase = prefs.getString(
 				this.PASSPHRASE_KEY, null);
-	
+
 		byte[] storedHash = (storedPassphrase == null) ?
 				null : ZiftrUtils.hexStringToBinary(storedPassphrase);
 		return storedHash;

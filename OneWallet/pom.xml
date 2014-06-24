@@ -59,7 +59,7 @@
     		that will stop android app from compiling, due to having core java.* or javax.*
     		classes, these problem libraries were removed from the eclipse project setup,
     		but may still causes maven issues -->
-    
+    	
     	<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
