@@ -54,7 +54,6 @@ In Eclipse, do File->Import...
 	Choose 'Existing android project into workspace' (notice the android)
 	Select the OneWallet folder which was cloned from Github and click finish
 	Right click on the build_dependencies.xml file and do Run As -> Ant Build
-	When it is finished it will print a stack trace error, but ignore it.
 
 For the OneWallet App:
 	Go into project properties-> Android
