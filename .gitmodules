@@ -2,3 +2,6 @@
 	path = bitcoinj
 	url = git@github.com:Ziftr/bitcoinj.git
 	branch = ziftr
+[submodule "zxing"]
+	path = zxing
+	url = git@github.com:Ziftr/zxing.git
