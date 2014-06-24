@@ -95,8 +95,6 @@
             <artifactId>slf4j-android</artifactId>
             <version>1.6.1-RC1</version>
             <scope>test</scope>
-        
-        
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -129,6 +127,19 @@
             <artifactId>jcip-annotations</artifactId>
             <version>1.0</version>
         </dependency>
+        
+        
+        <!-- ZXing dependencies -->
+        <dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.1.0</version>
+		</dependency>
         
         <!-- simply going to manually add this library to the libs folder
         	android requires that the library have no native code files

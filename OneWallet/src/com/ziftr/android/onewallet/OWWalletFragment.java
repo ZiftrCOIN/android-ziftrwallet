@@ -155,6 +155,15 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		// ex. ZLog.log("aa", "b"); (get's exception message, as well)
 		// also autotags comments with class name and shuts itself off at
 		// launch time for release build.
+		// 
+		// 7. Move all dialog stuff into dialog package and make dialogs
+		// persistent.
+		//
+		// 8. Get QR code example working
+		// 
+		// 9. Get a list interface on top lefthand corner.
+		//
+		// 10. Get a reset working for the passphrase.
 
 	}
 
@@ -168,8 +177,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		if (blockStore != null) {
 			try {
 				blockStore.close();
-			} 
-			catch (BlockStoreException e) {
+			} catch (BlockStoreException e) {
 				ZLog.log("Exception closing block store: ", e);
 			}
 		}
@@ -177,8 +185,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		if (wallet != null) {
 			try {
 				wallet.saveToFile(walletFile);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				ZLog.log("Exception saving wallet file on shutdown: ", e);
 			}
 		}
@@ -206,6 +213,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 				ZLog.log("Exception trying send coins: ", e);
 			}
 		}
+		
 	}
 
 	/**

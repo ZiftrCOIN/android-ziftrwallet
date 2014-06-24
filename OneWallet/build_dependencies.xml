@@ -32,7 +32,7 @@
 	
 	<target name="download_ziftr_dependencies">
 	
-		<artifact:mvn pom="pom.xml" mavenHome="${maven.home}">
+		<artifact:mvn pom="pom.xml" mavenHome="${maven.home}" fork="true">
 			<arg value="dependency:resolve"/>
 		</artifact:mvn>
 		

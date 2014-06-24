@@ -189,8 +189,7 @@ public class OWHomeFragment extends Fragment implements OWPassphraseConsumer {
 		alert.show();
 	}
 
-	public static void alertUser(
-			Context context, String message) {
+	public static void alertUser(Context context, String message) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
 		alert.setTitle("OneWallet");
