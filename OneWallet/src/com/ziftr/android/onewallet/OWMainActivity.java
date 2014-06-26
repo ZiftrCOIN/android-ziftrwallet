@@ -1,6 +1,5 @@
 package com.ziftr.android.onewallet;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
@@ -13,14 +12,13 @@ public class OWMainActivity extends ActionBarActivity {
 	 * Loads up the views and starts the OWHomeFragment 
 	 * if necessary. 
 	 * 
-	 * @param savedInstanceState - If one exists, it stores
-	 * the 
+	 * @param savedInstanceState - The stored bundle
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
@@ -36,7 +34,6 @@ public class OWMainActivity extends ActionBarActivity {
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
@@ -55,21 +52,5 @@ public class OWMainActivity extends ActionBarActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// 
-		// TODO this also has some QR useful code
-		//
-		super.onActivityResult(requestCode, resultCode, data);
-		
-		if (data != null && data.hasExtra("SCAN_RESULT")) {
-			String result = data.getStringExtra("SCAN_RESULT");
-			OWHomeFragment.alertUser(this, result);
-		}
-	}
 
 }
-
-
-
