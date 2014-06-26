@@ -129,7 +129,7 @@
         </dependency>
         
         
-        <!-- ZXing dependencies -->
+        <!-- ZXing dependencies 
         <dependency>
 			<groupId>com.google.zxing</groupId>
 			<artifactId>core</artifactId>
@@ -139,7 +139,7 @@
 			<groupId>com.google.zxing</groupId>
 			<artifactId>javase</artifactId>
 			<version>3.1.0</version>
-		</dependency>
+		</dependency> -->
         
         <!-- simply going to manually add this library to the libs folder
         	android requires that the library have no native code files

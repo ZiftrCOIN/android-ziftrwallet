@@ -18,7 +18,7 @@ import android.widget.EditText;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.util.ZLog;
-import com.ziftr.android.onewallet.util.ZiftrUtils;
+import com.ziftr.android.onewallet.util.OWUtils;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 
@@ -35,7 +35,7 @@ public class OWHomeFragment extends Fragment implements OWPassphraseConsumer {
 
 	/** The key for getting the hash from the preferences. */
 	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
-
+	
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
 	 * what parent method does right now.
@@ -80,7 +80,7 @@ public class OWHomeFragment extends Fragment implements OWPassphraseConsumer {
 							Editor editor = prefs.edit();
 							editor.putString(
 									OWHomeFragment.this.PASSPHRASE_KEY, 
-									ZiftrUtils.binaryToHexString(inputHash));
+									OWUtils.binaryToHexString(inputHash));
 							editor.commit();
 							OWHomeFragment.this.startFragmentFromButtonTag();
 						}
@@ -176,7 +176,7 @@ public class OWHomeFragment extends Fragment implements OWPassphraseConsumer {
 				this.PASSPHRASE_KEY, null);
 
 		byte[] storedHash = (storedPassphrase == null) ?
-				null : ZiftrUtils.hexStringToBinary(storedPassphrase);
+				null : OWUtils.hexStringToBinary(storedPassphrase);
 		return storedHash;
 	}
 
@@ -200,7 +200,7 @@ public class OWHomeFragment extends Fragment implements OWPassphraseConsumer {
 					byte[] passphraseBytes = 
 							input.getText().toString().getBytes();
 					onConfirm.consumePassphraseHash(
-							ZiftrUtils.Sha256Hash(passphraseBytes));
+							OWUtils.Sha256Hash(passphraseBytes));
 				}
 			}
 		});
