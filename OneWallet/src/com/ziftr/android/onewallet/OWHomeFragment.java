@@ -15,9 +15,11 @@ import android.view.ViewGroup;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.dialog.OWPassphraseDialog;
+import com.ziftr.android.onewallet.dialog.OWResetPassphraseDialog;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWPassphraseDialogHandler;
+import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.RequestCodes;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -27,8 +29,8 @@ import com.ziftr.android.onewallet.util.ZLog;
  * associated with a few buttons where the user can choose what
  * kind of wallet they want to open.
  */
-public class OWHomeFragment extends Fragment 
-implements OWPassphraseDialogHandler, OWNeutralDialogHandler {
+public class OWHomeFragment extends Fragment implements OWPassphraseDialogHandler, 
+OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 
 	/** The view container for this fragment. */
 	protected View rootView;
@@ -74,9 +76,12 @@ implements OWPassphraseDialogHandler, OWNeutralDialogHandler {
 				passphraseDialog.setTargetFragment(OWHomeFragment.this, 
 						RequestCodes.GET_PASSPHRASE_DIALOG);
 				
-				String message = "Please input your passphrase. ";
+				String message = null;
 				if (OWHomeFragment.this.userHasPassphrase()) {
-					message += "This will be used for securing all your wallets.";
+					message = "Please input your passphrase. ";
+				} else {
+					message = "Please input a passphrase. This will be used "
+							+ "for securing all your wallets.";
 				}
 				passphraseDialog.setupDialog("OneWallet", message, 
 						"Continue", null, "Cancel");
@@ -85,6 +90,24 @@ implements OWPassphraseDialogHandler, OWNeutralDialogHandler {
 			}
 		});
 
+		// For the getQRCodeButton
+		View resetPassphraseButton = rootView.findViewById(R.id.resetPassphraseButton);
+		// Set the listener for the clicks
+		resetPassphraseButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				OWResetPassphraseDialog passphraseDialog = new OWResetPassphraseDialog();
+
+				// Set the target fragment
+				passphraseDialog.setTargetFragment(OWHomeFragment.this, 
+						RequestCodes.RESET_PASSPHRASE_DIALOG);
+				passphraseDialog.setupDialog("OneWallet", null, 
+						"Continue", null, "Cancel");
+				passphraseDialog.show(OWHomeFragment.this.getFragmentManager(), 
+						"scan_qr");
+			}
+		});
+		
 		// For the getQRCodeButton
 		View getQRCodeButton = rootView.findViewById(R.id.getQRCodeButton);
 		// Set the listener for the clicks
@@ -97,7 +120,7 @@ implements OWPassphraseDialogHandler, OWNeutralDialogHandler {
 				// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
 				intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
 				intent.putExtra("SAVE_HISTORY", false);
-				startActivityForResult(intent, 0);
+				startActivityForResult(intent, RequestCodes.SCAN_QR_CODE);
 			}
 		});
 
@@ -109,7 +132,8 @@ implements OWPassphraseDialogHandler, OWNeutralDialogHandler {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
-		if (data != null && data.hasExtra("SCAN_RESULT")) {
+		if (data != null && data.hasExtra("SCAN_RESULT") && 
+				requestCode == RequestCodes.SCAN_QR_CODE) {
 			// Get the result of the QR scan
 			String result = data.getStringExtra("SCAN_RESULT");
 
@@ -122,6 +146,8 @@ implements OWPassphraseDialogHandler, OWNeutralDialogHandler {
 					"The scanned data is:\n" + result, null, "OK", null);
 			// Pop up the dialog
 			alertUserDialog.show(this.getFragmentManager(), "show_qr_result");
+		} else {
+			ZLog.log("Error: not everything was set correctly to scan QR codes. ");
 		}
 	}
 
@@ -176,43 +202,85 @@ implements OWPassphraseDialogHandler, OWNeutralDialogHandler {
 	private boolean userHasPassphrase() {
 		return this.getStoredPassphraseHash() != null;
 	}
+	
+	private boolean inputHashMatchesStoredHash(byte[] inputHash) {
+		byte[] storedHash = this.getStoredPassphraseHash();
+		if (storedHash != null && inputHash != null) {
+			return Arrays.equals(storedHash, inputHash); 
+		} else {
+			ZLog.log("Error, something was null that shouldn't have been.");
+			return false;
+		}
+	}
+
+	/**
+	 * @param inputHash
+	 */
+	private void setPassphraseHash(byte[] inputHash) {
+		SharedPreferences prefs = getActivity().getSharedPreferences(
+				PASSPHRASE_KEY, Context.MODE_PRIVATE);
+		Editor editor = prefs.edit();
+		editor.putString(
+				OWHomeFragment.this.PASSPHRASE_KEY, 
+				OWUtils.binaryToHexString(inputHash));
+		editor.commit();
+	}
+	
+	/**
+	 * Pops up a dialog to give the user some information. 
+	 * 
+	 * @param message
+	 * @param tag
+	 */
+	private void alertUser(String message, String tag) {
+		OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
+		alertUserDialog.setTargetFragment(this, 
+				RequestCodes.ALERT_USER_DIALOG);
+		// Set negative text to null to not have negative button
+		alertUserDialog.setupDialog("OneWallet", message, null, "OK", null);
+		alertUserDialog.show(
+				this.getFragmentManager(), tag);
+	}
 
 	/**
 	 * Take appropriate action when the user enters their passphrase.
 	 * If it is the first time, we store the new passphrase hash.
 	 */
 	@Override
-	public void handlePassphraseEnter(int requestCode, byte[] inputPassphrase) {
+	public void handlePassphrasePositive(int requestCode, byte[] inputPassphrase) {
 		byte[] inputHash = OWUtils.Sha256Hash(inputPassphrase);
 		if (this.userHasPassphrase()) {
-			byte[] storedHash = this.getStoredPassphraseHash();
-			if (storedHash != null && inputHash != null) {
-				if (Arrays.equals(storedHash, inputHash)) {
-					this.startFragmentFromButtonTag();
-				} else {
-					OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
-					alertUserDialog.setTargetFragment(this, 
-							RequestCodes.ALERT_USER_DIALOG);
-					// Set negative text to null to not have negative button
-					alertUserDialog.setupDialog("OneWallet", 
-							"Passphrases don't match\n" + 
-									Arrays.toString(inputHash) + "\n" + 
-									Arrays.toString(storedHash), null, "OK", null);
-					alertUserDialog.show(
-							this.getChildFragmentManager(), "wrong_passphrase");
-				}
+			if (this.inputHashMatchesStoredHash(inputHash)) {
+				this.startFragmentFromButtonTag();
 			} else {
-				ZLog.log("Error, something was null that shouldn't have been.");
+				this.alertUser("Error: Passphrases don't match. ", "wrong_passphrase");
 			}
 		} else {
-			SharedPreferences prefs = getActivity().getSharedPreferences(
-					PASSPHRASE_KEY, Context.MODE_PRIVATE);
-			Editor editor = prefs.edit();
-			editor.putString(
-					OWHomeFragment.this.PASSPHRASE_KEY, 
-					OWUtils.binaryToHexString(inputHash));
-			editor.commit();
+			this.setPassphraseHash(inputHash);
 			this.startFragmentFromButtonTag();
+		}
+	}
+
+	@Override
+	public void handleResetPassphrasePositive(int requestCode,
+			byte[] oldPassphrase, byte[] newPassphrase, byte[] confirmPassphrase) {
+		// Can assume that there was a previously entered passphrase because 
+		// of the way the dialog was set up. 
+
+		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
+			byte[] inputHash = OWUtils.Sha256Hash(oldPassphrase);
+			if (this.inputHashMatchesStoredHash(inputHash)) {
+				// If the old matches, set the new passphrase hash
+				this.setPassphraseHash(OWUtils.Sha256Hash(newPassphrase));
+			} else {
+				// If don't match, tell user. 
+				this.alertUser("The passphrase you entered doesn't match your "
+						+ "previous passphrase. Your previous passphrase is "
+						+ "still in place.", "passphrases_dont_match");
+			}
+		} else {
+			this.alertUser("The passphrases you entered don't match. Your previous "
+					+ "passphrase is still in place.", "wrong_re-enter_passphrase");
 		}
 	}
 

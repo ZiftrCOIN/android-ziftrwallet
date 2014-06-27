@@ -30,6 +30,12 @@
         android:text="Create New Wallet" />
     
     <Button
+        android:id="@+id/resetPassphraseButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reset your passphrase" />
+    
+    <Button
         android:id="@+id/getQRCodeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -2,9 +2,11 @@ package com.ziftr.android.onewallet.dialog.handlers;
 
 /**
  *  A simple handler for handling a dialog where the
- *  user enters their passphrase.
+ *  user enters their passphrase, a new passphrase
+ *  and a confirmation of that passphrase to reset 
+ *  the passphrase for their wallet.
  */
-public interface OWPassphraseDialogHandler {
+public interface OWResetPassphraseDialogHandler {
 	
 	/**
 	 * Implement this to determine what the app does when
@@ -13,15 +15,17 @@ public interface OWPassphraseDialogHandler {
 	 * @param requestCode - A bit of extra information so that if a fragment
 	 * or activity uses multiple dialogs, we have a way of determining which 
 	 * dialog is returning.
-	 * @param passPhrase - The passphrase is given to the activity/fragment
-	 * so that they can use the result appropriately.
+	 * @param oldPassphrase - The previously set passphrase
+	 * @param newPassphrase - The new passphrase to set
+	 * @param confirmPassphrase - The (should be) matching new passphrase
 	 */
-	public void handlePassphrasePositive(int requestCode, byte[] passphrase);
+	public void handleResetPassphrasePositive(int requestCode, 
+			byte[] oldPassphrase, byte[] newPassphrase, byte[] confirmPassphrase);
 	
 	/**
 	 * Implement this method to determine what the app does when
 	 * the cancel button is clicked instead of going forward with
-	 * entering the passphrase.
+	 * entering the new passphrase.
 	 * 
 	 * @param requestCode - A bit of extra information so that if a fragment
 	 * or activity uses multiple dialogs, we have a way of determining which 

@@ -25,11 +25,11 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	/** The key to save the Dialog's message text in the bundle. */
 	private static final String MESSAGE_KEY = "message";
 	/** The key to save the positive button text in the bundle. */
-	private static final String POSITIVE_BUTTON_TEXT_KEY = "yes";
+	private static final String POSITIVE_BUTTON_TEXT_KEY = "positive";
 	/** The key to save the neutral button text in the bundle. */
-	private static final String NEUTRAL_BUTTON_TEXT_KEY = "yes";
+	private static final String NEUTRAL_BUTTON_TEXT_KEY = "neutral";
 	/** The key to save the negative button text in the bundle. */
-	private static final String NEGATIVE_BUTTON_TEXT_KEY = "no";
+	private static final String NEGATIVE_BUTTON_TEXT_KEY = "negative";
 
 	/**
 	 * Set's up a basic dialog with all of its content.

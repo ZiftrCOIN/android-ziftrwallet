@@ -4,6 +4,10 @@
     <string name="app_name">OneWallet</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    
     <string name="passphrase_hint">Enter your passphrase</string>
+    <string name="old_passphrase_hint">Enter your old passphrase</string>
+    <string name="new_passphrase_hint">Enter your new passphrase</string>
+    <string name="confirm_passphrase_hint">Re-enter your passphrase</string>
 
 </resources>

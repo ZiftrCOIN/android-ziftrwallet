@@ -50,6 +50,8 @@ public class OWSimpleAlertDialog extends OWDialogFragment {
 
 		if (which == DialogInterface.BUTTON_NEUTRAL) {
 			handler.handleNeutral(this.getTargetRequestCode());
+		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
+			handler.handleNegative(this.getTargetRequestCode());
 		} else if (which == DialogInterface.BUTTON_POSITIVE) {
 			ZLog.log("These dialogs are not supposed to have positive buttons.");
 		}

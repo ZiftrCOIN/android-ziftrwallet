@@ -16,9 +16,13 @@ import com.ziftr.android.onewallet.R;
  * from the user.
  */
 public class OWPassphraseDialog extends OWDialogFragment {
-
+	
+	/** The textbox where the user enters their passphrase. */
 	private EditText passphraseTextBox;
 
+	/** The key to save the text in the box. */
+	private static final String CURRENT_ENTERED_TEXT_KEY = "entered_text";
+	
 	/**
 	 * Whenever this is fragment is attached to an activity 
 	 * we must make sure that it is able to handle accepting 
@@ -51,9 +55,14 @@ public class OWPassphraseDialog extends OWDialogFragment {
 	 */
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		AlertDialog.Builder builder = createBuilder(savedInstanceState);
+		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 		
 		this.passphraseTextBox = new EditText(this.getActivity());
+		if (savedInstanceState != null && 
+				savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
+			this.passphraseTextBox.setText(
+					savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY));
+		}
 		passphraseTextBox.setHint(R.string.passphrase_hint);
 		builder.setView(this.passphraseTextBox);
 
@@ -69,13 +78,27 @@ public class OWPassphraseDialog extends OWDialogFragment {
 				((OWPassphraseDialogHandler) this.getActivity()) : 
 					((OWPassphraseDialogHandler) this.getTargetFragment());
 		if (which == DialogInterface.BUTTON_POSITIVE) {
-			handler.handlePassphraseEnter(this.getTargetRequestCode(),
+			handler.handlePassphrasePositive(this.getTargetRequestCode(),
 					this.passphraseTextBox.getText().toString().getBytes());
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
 			handler.handleNegative(this.getTargetRequestCode());
 		} else {
 			ZLog.log("These dialogs shouldn't have neutral buttons.");
 		}
+	}
+	
+	/**
+	 * When we save the instance, in addition to doing everything that
+	 * all dialogs must do, we also have to store the current entered 
+	 * text in the 
+	 */
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		// Save all of the important strings in the dialog
+		outState.putString(CURRENT_ENTERED_TEXT_KEY, 
+				this.passphraseTextBox.getText().toString());
+		
+		super.onSaveInstanceState(outState);
 	}
 
 }

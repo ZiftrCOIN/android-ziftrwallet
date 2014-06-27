@@ -30,7 +30,7 @@ public class OWMainActivity extends ActionBarActivity {
 	}
 
 	/**
-	 * 
+	 * Create the options menu. May want to get rid of this later.
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
