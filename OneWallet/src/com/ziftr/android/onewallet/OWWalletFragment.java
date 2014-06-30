@@ -136,35 +136,6 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 
 		return rootView;
-
-
-		// TODO
-		// o 1. Ability to generate new address upon user request
-		// and be able to turn that into a QR code
-		// 
-		// o 2. Get transaction history for all addresses in wallet and
-		// be able to display them.
-		// 
-		// o 3. Start making layouts.
-		// 
-		// o 4. Organizing tasks that need to be done and appr. difficulty
-		// 
-		// o 5. OW to start all of our classes.
-		// 
-		// o 6. ZiftrUtils and Zlog for static useful methods.
-		// ex. ZLog.log("aa", "b"); (get's exception message, as well)
-		// also autotags comments with class name and shuts itself off at
-		// launch time for release build.
-		// 
-		// o 7. Move all dialog stuff into dialog package and make dialogs
-		// persistent.
-		//
-		// X 8. Get QR code example working
-		// 
-		// o 9. Get a list interface on top lefthand corner.
-		//
-		// o 10. Get a reset working for the passphrase.
-
 	}
 
 	@Override

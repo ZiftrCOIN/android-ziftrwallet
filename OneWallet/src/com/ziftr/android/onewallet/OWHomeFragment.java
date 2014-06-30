@@ -214,7 +214,10 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 	}
 
 	/**
-	 * @param inputHash
+	 * Sets the stored passphrase hash to be the specified
+	 * hash.
+	 * 
+	 * @param inputHash - The new passphrase's Sha256 hash
 	 */
 	private void setPassphraseHash(byte[] inputHash) {
 		SharedPreferences prefs = getActivity().getSharedPreferences(
@@ -290,9 +293,6 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 		case RequestCodes.ALERT_USER_DIALOG:
 			// Things for alert dialogs go here.
 			break;
-		case RequestCodes.GET_PASSPHRASE_DIALOG:
-			// Things for get passphrase dialogs go here.
-			break;
 		default:
 			break;
 		}
@@ -306,6 +306,9 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 			break;
 		case RequestCodes.GET_PASSPHRASE_DIALOG:
 			// Things for get passphrase dialogs go here.
+			break;
+		case RequestCodes.RESET_PASSPHRASE_DIALOG:
+			// Things for reset passphrase dialogs go here
 			break;
 		default:
 			break;

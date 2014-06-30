@@ -7,9 +7,9 @@ import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageView;
 
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -18,12 +18,44 @@ import com.ziftr.android.onewallet.util.ZLog;
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainActivity extends ActionBarActivity implements DrawerListener {
+public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener {
+
+	// TODO
+	// o 1. Ability to generate new address upon user request
+	// and be able to turn that into a QR code
+	// 
+	// o 2. Get transaction history for all addresses in wallet and
+	// be able to display them.
+	// 
+	// o 3. Start making layouts.
+	// 
+	// o 4. Organizing tasks that need to be done and appr. difficulty
+	// 
+	// o 5. OW to start all of our classes.
+	// 
+	// o 6. ZiftrUtils and Zlog for static useful methods.
+	// ex. ZLog.log("aa", "b"); (get's exception message, as well)
+	// also autotags comments with class name and shuts itself off at
+	// launch time for release build.
+	// 
+	// X 7. Move all dialog stuff into dialog package and make dialogs
+	// persistent.
+	//
+	// X 8. Get QR code example working
+	// 
+	// o 9. Get a list interface on top lefthand corner. Move over to ActionBar
+	// instead of 
+	//
+	// X 10. Get a reset working for the passphrase.
+	// 
+	// TODO turn header bar into an actionbar
+	// Get Fragment switching working with selection in the drawer layout 
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
-	/** The drawer layout menu button. */
-	private ImageView menuButton;
+	
+	/** The menu for our app. */
+	private Menu drawerMenuIcon;
 
 	/**
 	 * Loads up the views and starts the OWHomeFragment 
@@ -34,7 +66,7 @@ public class OWMainActivity extends ActionBarActivity implements DrawerListener 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		// Everything is held within this main activity layout
 		setContentView(R.layout.activity_main);
 
@@ -57,9 +89,9 @@ public class OWMainActivity extends ActionBarActivity implements DrawerListener 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		//		getMenuInflater().inflate(R.menu.main, menu);
-		//		return true;
-		return false;
+		this.getMenuInflater().inflate(R.menu.ow_action_bar_menu, menu);
+		this.drawerMenuIcon = menu;
+		return true;
 	}
 
 	/**
@@ -87,7 +119,7 @@ public class OWMainActivity extends ActionBarActivity implements DrawerListener 
 			OnClickListener menuItemListener = new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
-					OWMainActivity.this.closeDrawerIfOpen();
+					OWMainFragmentActivity.this.closeDrawerIfOpen();
 					ZLog.log("Menu item clicked. Drawer should close.");
 					// TODO start the opening of the the correct fragment here
 				}
@@ -116,31 +148,7 @@ public class OWMainActivity extends ActionBarActivity implements DrawerListener 
 		} else {
 			ZLog.log("drawerMenu was null. ?");
 		}
-
-
-		this.menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
-		this.menuButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				if (OWMainActivity.this.menuDrawer != null) {
-					if (OWMainActivity.this.drawerMenuIsOpen()) {
-						// If drawer menu is open, close it
-						OWMainActivity.this.menuDrawer.closeDrawer(Gravity.LEFT);
-						// Set the icon here to avoid extra swapping while 
-						// drawer menu is closing
-						OWMainActivity.this.menuButton.setImageResource(
-								R.drawable.icon_menu);
-					} else {
-						// If drawer menu is closed, open it
-						OWMainActivity.this.menuDrawer.openDrawer(Gravity.LEFT);
-						// Set the icon here to avoid extra swapping while 
-						// drawer menu is opening
-						OWMainActivity.this.menuButton.setImageResource(
-								R.drawable.icon_menu_pressed);
-					}
-				}
-			}
-		});
+		
 	}
 
 	/**
@@ -151,17 +159,53 @@ public class OWMainActivity extends ActionBarActivity implements DrawerListener 
 	 * currenly open
 	 */
 	private boolean drawerMenuIsOpen() {
-		return OWMainActivity.this.menuDrawer.isDrawerOpen(Gravity.LEFT);
+		return OWMainFragmentActivity.this.menuDrawer.isDrawerOpen(Gravity.LEFT);
+	}
+
+	/**
+	 * Called when the drawer menu item is clicked.
+	 */
+	public void onDrawerMenuItemClicked() {
+		MenuItem drawerMenuItem = this.drawerMenuIcon.findItem(R.id.switchTaskMenuButton);
+		if (this.menuDrawer != null) {
+			if (this.drawerMenuIsOpen()) {
+				// If drawer menu is open, close it
+				this.menuDrawer.closeDrawer(Gravity.LEFT);
+				// Set the icon here to avoid extra swapping while 
+				// drawer menu is closing
+				drawerMenuItem.setIcon(R.drawable.icon_menu);
+			} else {
+				// If drawer menu is closed, open it
+				this.menuDrawer.openDrawer(Gravity.LEFT);
+				// Set the icon here to avoid extra swapping while 
+				// drawer menu is opening
+				drawerMenuItem.setIcon(R.drawable.icon_menu_pressed);
+			}
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle presses on the aciton bar items
+		switch(item.getItemId()) {
+		case R.id.switchTaskMenuButton:
+			this.onDrawerMenuItemClicked();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	@Override
 	public void onDrawerClosed(View arg0) {
-		this.menuButton.setImageResource(R.drawable.icon_menu_statelist);
+		this.drawerMenuIcon.findItem(R.id.switchTaskMenuButton
+				).setIcon(R.drawable.icon_menu_statelist);
 	}
 
 	@Override
 	public void onDrawerOpened(View arg0) {
-		this.menuButton.setImageResource(R.drawable.icon_menu_statelist_reverse);
+		this.drawerMenuIcon.findItem(R.id.switchTaskMenuButton
+				).setIcon(R.drawable.icon_menu_statelist_reverse);
 	}
 
 	@Override

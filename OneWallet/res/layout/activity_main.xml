@@ -4,14 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.ziftr.android.onewallet.OWMainActivity" >
+    tools:context="com.ziftr.android.onewallet.OWMainFragmentActivity" >
 
     <!-- The header bar at the top of the activity. -->
 
+	<!-- 
     <include
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/_app_header_bar" />
+         -->
 
     <!-- A small divider to make the bar look nicer. -->
 
