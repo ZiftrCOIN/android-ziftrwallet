@@ -58,7 +58,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		rootView = inflater.inflate(R.layout.fragment_home, container, false);
+		this.rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
 		// For the bitcoinWalletButton
 		View bitcoinWalletButton = rootView.findViewById(R.id.buttonBitcoinWallet);
@@ -86,7 +86,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 				passphraseDialog.setupDialog("OneWallet", message, 
 						"Continue", null, "Cancel");
 				passphraseDialog.show(OWHomeFragment.this.getFragmentManager(), 
-						"wrong_passphrase");
+						"open_bitcoin_wallet");
 			}
 		});
 
@@ -165,7 +165,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 			String tagString = newFragmentClass.getSimpleName();
 
 			getFragmentManager().beginTransaction().replace(
-					R.id.mainActivityContainer, fragment, tagString
+					R.id.oneWalletBaseFragmentHolder, fragment, tagString
 					).addToBackStack(null).commit();
 		} catch(Exception e) {
 			ZLog.log("Exceptiong trying to load wallet fragment. Was a "

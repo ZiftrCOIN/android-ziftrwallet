@@ -1,7 +1,45 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainActivityContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ziftr.android.onewallet.OWMainActivity"
-    tools:ignore="MergeRootFrame" />
+    android:orientation="vertical"
+    tools:context="com.ziftr.android.onewallet.OWMainActivity" >
+
+    <!-- The header bar at the top of the activity. -->
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/_app_header_bar" />
+
+    <!-- A small divider to make the bar look nicer. -->
+
+    <View
+        android:id="@+id/headerBarDivider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/LimeGreen" />
+
+    <!-- The drawer layout that contains the main fragment frame. -->
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/oneWalletBaseDrawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animateFirstView="false" >
+
+        <FrameLayout
+            android:id="@+id/oneWalletBaseFragmentHolder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+        </FrameLayout>
+
+        <include
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            layout="@layout/_drawer_menu_list" />
+    </android.support.v4.widget.DrawerLayout>
+
+</LinearLayout>

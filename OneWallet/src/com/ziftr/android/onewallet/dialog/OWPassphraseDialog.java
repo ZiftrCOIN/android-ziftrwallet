@@ -78,6 +78,7 @@ public class OWPassphraseDialog extends OWDialogFragment {
 				((OWPassphraseDialogHandler) this.getActivity()) : 
 					((OWPassphraseDialogHandler) this.getTargetFragment());
 		if (which == DialogInterface.BUTTON_POSITIVE) {
+			ZLog.log("positive button was hit, calling handler.");
 			handler.handlePassphrasePositive(this.getTargetRequestCode(),
 					this.passphraseTextBox.getText().toString().getBytes());
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {

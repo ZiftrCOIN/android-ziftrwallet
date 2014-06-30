@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/menuDrawerScrollView"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@color/LightGrey" >
+
+    <!-- use this: android:choiceMode="singleChoice" ??? -->
+    <TableLayout
+        android:id="@+id/menuDrawerBaseLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/LightGrey"
+        android:clickable="true"
+        android:orientation="vertical"
+        android:shrinkColumns="*" >
+
+        <!-- The Accounts Section -->
+
+        <TableRow
+            android:id="@+id/menuDrawerAccountsRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:id="@+id/menuDrawerAccountsLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:minWidth="220dp"
+                android:orientation="horizontal"
+                android:paddingRight="26dp" >
+
+                <View
+                    android:id="@+id/DrawerSelectionView1"
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/clickable_menu_color"
+                    android:duplicateParentState="true" />
+
+                <ImageView
+                    android:id="@+id/menuDrawerAccountsIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="60dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/icon_menu_about" />
+
+                <TextView
+                    android:id="@+id/menuDrawerAccountsText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="12dp"
+                    android:text="@string/menu_text_accounts"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/Black" />
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowDivider1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/ow_menu_divider" />
+        </TableRow>
+
+        <!-- The Exchange Section -->
+
+        <TableRow
+            android:id="@+id/menuDrawerExchangeRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:id="@+id/menuDrawerExchangeLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:minWidth="220dp"
+                android:orientation="horizontal"
+                android:paddingRight="26dp" >
+
+                <View
+                    android:id="@+id/DrawerSelectionView2"
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/clickable_menu_color"
+                    android:duplicateParentState="true" />
+
+                <ImageView
+                    android:id="@+id/menuDrawerExchangeIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="60dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/icon_menu_about" />
+
+                <TextView
+                    android:id="@+id/menuDrawerExchangeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="12dp"
+                    android:text="@string/menu_text_exchange"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/Black" />
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowDivider2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/ow_menu_divider" />
+        </TableRow>
+
+        <!-- The Settings Section -->
+
+        <TableRow
+            android:id="@+id/menuDrawerSettingsRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:id="@+id/menuDrawerSettingsLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:minWidth="220dp"
+                android:orientation="horizontal"
+                android:paddingRight="26dp" >
+
+                <View
+                    android:id="@+id/DrawerSelectionView3"
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/clickable_menu_color"
+                    android:duplicateParentState="true" />
+
+                <ImageView
+                    android:id="@+id/menuDrawerSettingsIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="60dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/icon_menu_settings" />
+
+                <TextView
+                    android:id="@+id/menuDrawerSettingsText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="12dp"
+                    android:text="@string/menu_text_settings"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/Black" />
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowDivider3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <View
+                android:id="@+id/divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/ow_menu_divider" />
+        </TableRow>
+
+        <!-- The About Section -->
+
+        <TableRow
+            android:id="@+id/menuDrawerAboutRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:id="@+id/menuDrawerAboutLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:minWidth="220dp"
+                android:orientation="horizontal"
+                android:paddingRight="26dp" >
+
+                <View
+                    android:id="@+id/DrawerSelectionView4"
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/clickable_menu_color"
+                    android:duplicateParentState="true" />
+
+                <ImageView
+                    android:id="@+id/menuDrawerAboutIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="60dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/icon_menu_about" />
+
+                <TextView
+                    android:id="@+id/menuDrawerAboutText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="12dp"
+                    android:text="@string/menu_text_about"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/Black" />
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowDivider4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/ow_menu_divider" />
+        </TableRow>
+
+        <!-- The Contact Section -->
+
+        <TableRow
+            android:id="@+id/menuDrawerContactRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:id="@+id/menuDrawerContactLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:minWidth="220dp"
+                android:orientation="horizontal"
+                android:paddingRight="26dp" >
+
+                <View
+                    android:id="@+id/DrawerSelectionView5"
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/clickable_menu_color"
+                    android:duplicateParentState="true" />
+
+                <ImageView
+                    android:id="@+id/menuDrawerContactIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="60dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/icon_menu_about" />
+
+                <TextView
+                    android:id="@+id/menuDrawerContactText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="12dp"
+                    android:text="@string/menu_text_contact"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/Black" />
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRowDivider5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <View
+                android:id="@+id/divider5"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/ow_menu_divider" />
+        </TableRow>
+    </TableLayout>
+
+</ScrollView>

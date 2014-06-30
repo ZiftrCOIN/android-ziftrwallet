@@ -9,5 +9,11 @@
     <string name="old_passphrase_hint">Enter your old passphrase</string>
     <string name="new_passphrase_hint">Enter your new passphrase</string>
     <string name="confirm_passphrase_hint">Re-enter your passphrase</string>
+    
+    <string name="menu_text_accounts">ACCOUNTS</string>
+    <string name="menu_text_exchange">EXCHANGE</string>
+    <string name="menu_text_settings">SETTINGS</string>
+    <string name="menu_text_about">ABOUT</string>
+    <string name="menu_text_contact">CONTACT</string>
 
 </resources>
