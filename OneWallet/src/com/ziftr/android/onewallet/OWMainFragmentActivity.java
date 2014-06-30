@@ -49,7 +49,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	// X 10. Get a reset working for the passphrase.
 	// 
 	// TODO turn header bar into an actionbar
-	// Get Fragment switching working with selection in the drawer layout 
+	// Get Fragment switching working with selection in the drawer layout  
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;

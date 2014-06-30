@@ -27,7 +27,7 @@ import com.ziftr.android.onewallet.util.ZLog;
 /**
  * The OWMainActivity starts this fragment. This fragment is 
  * associated with a few buttons where the user can choose what
- * kind of wallet they want to open.
+ * kind of wallet they want to open. 
  */
 public class OWHomeFragment extends Fragment implements OWPassphraseDialogHandler, 
 OWNeutralDialogHandler, OWResetPassphraseDialogHandler {

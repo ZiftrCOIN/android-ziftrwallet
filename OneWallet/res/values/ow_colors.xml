@@ -13,4 +13,5 @@
     
     <color name="ow_menu_divider">#5a5a5a</color>
 
+    <color name="ow_action_bar_color">#D3D3D3</color>
 </resources>
