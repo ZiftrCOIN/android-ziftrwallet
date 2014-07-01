@@ -1,6 +1,10 @@
 package com.ziftr.android.onewallet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -11,52 +15,68 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.ziftr.android.onewallet.fragment.OWAccountsFragment;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * This is the main activity of the OneWallet application. It handles
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
+ *                                                                                           
  */
 public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener {
 
-	// TODO
-	// o 1. Ability to generate new address upon user request
-	// and be able to turn that into a QR code
-	// 
-	// o 2. Get transaction history for all addresses in wallet and
-	// be able to display them.
-	// 
-	// o 3. Start making layouts.
-	// 
-	// o 4. Organizing tasks that need to be done and appr. difficulty
-	// 
-	// o 5. OW to start all of our classes.
-	// 
-	// o 6. ZiftrUtils and Zlog for static useful methods.
-	// ex. ZLog.log("aa", "b"); (get's exception message, as well)
-	// also autotags comments with class name and shuts itself off at
-	// launch time for release build.
-	// 
-	// X 7. Move all dialog stuff into dialog package and make dialogs
-	// persistent.
-	//
-	// X 8. Get QR code example working
-	// 
-	// o 9. Get a list interface on top lefthand corner. Move over to ActionBar
-	// instead of 
-	//
-	// X 10. Get a reset working for the passphrase.
-	// 
-	// TODO turn header bar into an actionbar
-	// Get Fragment switching working with selection in the drawer layout  
+	/*
+	--- TODO list for the OneWallet project ---
+	
+	o 1. Ability to generate new address upon user request
+	and be able to turn that into a QR code
+	
+	o 2. Get transaction history for all addresses in wallet and
+	be able to display them.
 
+	o 3. Making layouts necessary for the wireframe models.
+	
+	o 4. Organizing tasks that need to be done and appr. difficulty
+	
+	o 5. OW to start all of our classes.
+	
+	o 6. ZiftrUtils and Zlog for static useful methods.
+	ex. ZLog.log("aa", "b"); (get's exception message, as well)
+	also autotags comments with class name and shuts itself off at
+	launch time for release build.
+	
+	X 7. Move all dialog stuff into dialog package and make dialogs
+	persistent.
+	
+	X 8. Get QR code example working
+	
+	X 9. Get a list interface on top right corner. Move over to ActionBar
+	instead of 
+	
+	X 10. Get a reset working for the passphrase.
+	
+	o 11. Get Fragment switching working with selection in the drawer layout
+	
+	*/
+	
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
-	
-	/** The menu for our app. */
-	private Menu drawerMenuIcon;
 
+	/** The menu for our app. */
+	private Menu actionBarMenu;
+	
+	/** The fragment in the accounts section, selected from drawer menu. */
+	private Fragment accountsFragment;
+	/** The fragment in the exchange section, selected from drawer menu. */
+	private Fragment exchangeFragment;
+	/** The fragment in the settings section, selected from drawer menu. */
+	private Fragment settingsFragment;
+	/** The fragment in the about section, selected from drawer menu. */
+	private Fragment aboutFragment;
+	/** The fragment in the contact section, selected from drawer menu. */
+	private Fragment contactFragment;
+	
 	/**
 	 * Loads up the views and starts the OWHomeFragment 
 	 * if necessary. 
@@ -77,9 +97,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
 			FragmentManager fragmentManager = getSupportFragmentManager();
-			OWHomeFragment homeFragment = new OWHomeFragment();
+			this.accountsFragment = new OWAccountsFragment();
 			fragmentManager.beginTransaction().add(
-					R.id.oneWalletBaseFragmentHolder, homeFragment).commit();
+					R.id.oneWalletBaseFragmentHolder, this.accountsFragment).commit();
 		} 
 	}
 
@@ -90,7 +110,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		this.getMenuInflater().inflate(R.menu.ow_action_bar_menu, menu);
-		this.drawerMenuIcon = menu;
+		this.actionBarMenu = menu;
 		return true;
 	}
 
@@ -98,10 +118,50 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * A convenience method to close the drawer layout
 	 * if it is open. Does nothing if it is not open. 
 	 */
-	private void closeDrawerIfOpen() {
-		if (this.menuDrawer.isDrawerOpen(Gravity.LEFT)) {
-			this.menuDrawer.closeDrawer(Gravity.LEFT);
+	private void toggleDrawerPosition() {
+//		if (this.menuDrawer.isDrawerOpen(Gravity.LEFT)) {
+//			this.menuDrawer.closeDrawer(Gravity.LEFT);
+//		}
+		
+		MenuItem drawerMenuItem = this.actionBarMenu.findItem(R.id.switchTaskMenuButton);
+		
+		if (this.menuDrawer != null) {
+			if (this.drawerMenuIsOpen()) {
+				// Set the icon here to avoid extra swapping while 
+				// drawer menu is closing
+				drawerMenuItem.setIcon(R.drawable.icon_menu);
+				// If drawer menu is open, close it
+				this.menuDrawer.closeDrawer(Gravity.LEFT);
+			} else {
+				// Set the icon here to avoid extra swapping while 
+				// drawer menu is opening
+				drawerMenuItem.setIcon(R.drawable.icon_menu_pressed);
+				// If drawer menu is closed, open it
+				this.menuDrawer.openDrawer(Gravity.LEFT);
+			}
 		}
+		
+	}
+	
+	/**
+	 * Should be called after the view is initialized only.
+	 * Returns a list of the views that are in the drawer menu.
+	 * 
+	 * @return a list of the views that are in the drawer menu.
+	 */
+	private List<View> getDrawerMenuItems() {
+		// Make a new list
+		List<View> selectionItems = new ArrayList<View>();
+		
+		// Add all the selection views to it
+		selectionItems.add(this.findViewById(R.id.menuDrawerAccountsLayout));
+		selectionItems.add(this.findViewById(R.id.menuDrawerExchangeLayout));
+		selectionItems.add(this.findViewById(R.id.menuDrawerSettingsLayout));
+		selectionItems.add(this.findViewById(R.id.menuDrawerAboutLayout));
+		selectionItems.add(this.findViewById(R.id.menuDrawerContactLayout));
+		
+		// return the result
+		return selectionItems;
 	}
 
 	/**
@@ -116,38 +176,79 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		if (this.menuDrawer != null) {
 			this.menuDrawer.setDrawerListener(this);
 
-			OnClickListener menuItemListener = new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					OWMainFragmentActivity.this.closeDrawerIfOpen();
-					ZLog.log("Menu item clicked. Drawer should close.");
-					// TODO start the opening of the the correct fragment here
-				}
-			};
-
 			// Setup the menu choices
 			View accountsMenuButton = 
 					this.findViewById(R.id.menuDrawerAccountsLayout);
-			accountsMenuButton.setOnClickListener(menuItemListener);
+			accountsMenuButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View clickedView) {
+					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
+				}
+			});
 
 			View exchangeMenuButton = 
 					this.findViewById(R.id.menuDrawerExchangeLayout);
-			exchangeMenuButton.setOnClickListener(menuItemListener);
+			exchangeMenuButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View clickedView) {
+					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
+				}
+			});
 
 			View settingsMenuButton = 
 					this.findViewById(R.id.menuDrawerSettingsLayout);
-			settingsMenuButton.setOnClickListener(menuItemListener);
+			settingsMenuButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View clickedView) {
+					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
+				}
+			});
 
 			View aboutMenuButton = 
 					this.findViewById(R.id.menuDrawerAboutLayout);
-			aboutMenuButton.setOnClickListener(menuItemListener);
+			aboutMenuButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View clickedView) {
+					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
+				}
+			});
 
 			View contactMenuButton = 
 					this.findViewById(R.id.menuDrawerContactLayout);
-			contactMenuButton.setOnClickListener(menuItemListener);
+			contactMenuButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View clickedView) {
+					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
+				}
+			});
 		} else {
 			ZLog.log("drawerMenu was null. ?");
 		}
+
+	}
+	
+	/**
+	 * Should be called whenever any of the menu items in the
+	 * drawer menu are selected. Basically just contains code 
+	 * common to all of the tasks so that we can avoid code
+	 * duplication. 
+	 * 
+	 * @param selectedView The view selected.
+	 */
+	private void onAnyDrawerMenuItemClicked(View selectedView) {
+		
+		// Deselect all the other views
+		for (View selectionView : this.getDrawerMenuItems()) {
+			selectionView.setSelected(false);
+		}
+		
+		// Mark this one as selected to have green selector view
+		// next to it in the drawer layout
+		selectedView.setSelected(true);
+		
+		// Menu must have been open, so calling this will just 
+		// result in a close of the menu.
+		this.toggleDrawerPosition();;
 		
 	}
 
@@ -159,29 +260,18 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * currenly open
 	 */
 	private boolean drawerMenuIsOpen() {
-		return OWMainFragmentActivity.this.menuDrawer.isDrawerOpen(Gravity.LEFT);
+		return this.menuDrawer.isDrawerOpen(Gravity.LEFT);
 	}
-
+	
 	/**
-	 * Called when the drawer menu item is clicked.
+	 * Called when the drawer menu item in the action bar is clicked.
+	 * 
+	 * This name is confusing because there is a drawer menu and then 
+	 * there is the menu in the action bar that has a menu in it, of 
+	 * which one of the items is a clickable that opens the drawer menu.
 	 */
-	public void onDrawerMenuItemClicked() {
-		MenuItem drawerMenuItem = this.drawerMenuIcon.findItem(R.id.switchTaskMenuButton);
-		if (this.menuDrawer != null) {
-			if (this.drawerMenuIsOpen()) {
-				// If drawer menu is open, close it
-				this.menuDrawer.closeDrawer(Gravity.LEFT);
-				// Set the icon here to avoid extra swapping while 
-				// drawer menu is closing
-				drawerMenuItem.setIcon(R.drawable.icon_menu);
-			} else {
-				// If drawer menu is closed, open it
-				this.menuDrawer.openDrawer(Gravity.LEFT);
-				// Set the icon here to avoid extra swapping while 
-				// drawer menu is opening
-				drawerMenuItem.setIcon(R.drawable.icon_menu_pressed);
-			}
-		}
+	private void onDrawerMenuActionBarItemClicked() {
+		this.toggleDrawerPosition();
 	}
 
 	@Override
@@ -189,7 +279,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Handle presses on the aciton bar items
 		switch(item.getItemId()) {
 		case R.id.switchTaskMenuButton:
-			this.onDrawerMenuItemClicked();
+			this.onDrawerMenuActionBarItemClicked();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -198,13 +288,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	@Override
 	public void onDrawerClosed(View arg0) {
-		this.drawerMenuIcon.findItem(R.id.switchTaskMenuButton
+		this.actionBarMenu.findItem(R.id.switchTaskMenuButton
 				).setIcon(R.drawable.icon_menu_statelist);
 	}
 
 	@Override
 	public void onDrawerOpened(View arg0) {
-		this.drawerMenuIcon.findItem(R.id.switchTaskMenuButton
+		this.actionBarMenu.findItem(R.id.switchTaskMenuButton
 				).setIcon(R.drawable.icon_menu_statelist_reverse);
 	}
 

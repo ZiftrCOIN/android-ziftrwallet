@@ -1,4 +1,4 @@
-package com.ziftr.android.onewallet;
+package com.ziftr.android.onewallet.fragment;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,8 +40,9 @@ import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.BriefLogFormatter;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type

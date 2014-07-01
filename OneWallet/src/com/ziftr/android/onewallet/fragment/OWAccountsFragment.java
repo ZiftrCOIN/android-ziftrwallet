@@ -1,4 +1,4 @@
-package com.ziftr.android.onewallet;
+package com.ziftr.android.onewallet.fragment;
 
 import java.util.Arrays;
 
@@ -14,6 +14,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import com.google.zxing.client.android.CaptureActivity;
+import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.OWPassphraseDialog;
 import com.ziftr.android.onewallet.dialog.OWResetPassphraseDialog;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
@@ -29,7 +30,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * associated with a few buttons where the user can choose what
  * kind of wallet they want to open. 
  */
-public class OWHomeFragment extends Fragment implements OWPassphraseDialogHandler, 
+public class OWAccountsFragment extends Fragment implements OWPassphraseDialogHandler, 
 OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 
 	/** The view container for this fragment. */
@@ -38,7 +39,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 	/** The most recently clicked button. */
 	private View clickedButton;
 
-	/** The key for getting the hash from the preferences. */
+	/** The key for getting the passphrase hash from the preferences. */
 	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
 	
 	/** 
@@ -68,16 +69,16 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 		bitcoinWalletButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				OWHomeFragment.this.clickedButton = v;
+				OWAccountsFragment.this.clickedButton = v;
 				
 				OWPassphraseDialog passphraseDialog = new OWPassphraseDialog();
 				
 				// Set the target fragment
-				passphraseDialog.setTargetFragment(OWHomeFragment.this, 
+				passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
 						RequestCodes.GET_PASSPHRASE_DIALOG);
 				
 				String message = null;
-				if (OWHomeFragment.this.userHasPassphrase()) {
+				if (OWAccountsFragment.this.userHasPassphrase()) {
 					message = "Please input your passphrase. ";
 				} else {
 					message = "Please input a passphrase. This will be used "
@@ -85,7 +86,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 				}
 				passphraseDialog.setupDialog("OneWallet", message, 
 						"Continue", null, "Cancel");
-				passphraseDialog.show(OWHomeFragment.this.getFragmentManager(), 
+				passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
 						"open_bitcoin_wallet");
 			}
 		});
@@ -96,15 +97,29 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 		resetPassphraseButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				OWResetPassphraseDialog passphraseDialog = new OWResetPassphraseDialog();
+				if (OWAccountsFragment.this.userHasPassphrase()) {
+					OWResetPassphraseDialog passphraseDialog = new OWResetPassphraseDialog();
 
-				// Set the target fragment
-				passphraseDialog.setTargetFragment(OWHomeFragment.this, 
-						RequestCodes.RESET_PASSPHRASE_DIALOG);
-				passphraseDialog.setupDialog("OneWallet", null, 
-						"Continue", null, "Cancel");
-				passphraseDialog.show(OWHomeFragment.this.getFragmentManager(), 
-						"scan_qr");
+					// Set the target fragment
+					passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
+							RequestCodes.RESET_PASSPHRASE_DIALOG);
+					passphraseDialog.setupDialog("OneWallet", null, 
+							"Continue", null, "Cancel");
+					passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
+							"scan_qr");
+				} else {
+					// Make a new alert dialog
+					OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
+					alertUserDialog.setTargetFragment(OWAccountsFragment.this, 
+							RequestCodes.ALERT_USER_DIALOG);
+					// Set up the dialog with message and other info
+					alertUserDialog.setupDialog("OneWallet", 
+							"You must set a passphrase before you can "
+							+ "reset your passphrase.", null, "OK", null);
+					// Pop up the dialog
+					alertUserDialog.show(OWAccountsFragment.this.getFragmentManager(), 
+							"no_passphrase_currently_set_alert_dialog");
+				}
 			}
 		});
 		
@@ -115,7 +130,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 			@Override
 			public void onClick(View arg0) {
 				Intent intent = new Intent(
-						OWHomeFragment.this.getActivity(), CaptureActivity.class);
+						OWAccountsFragment.this.getActivity(), CaptureActivity.class);
 				intent.setAction("com.google.zxing.client.android.SCAN");
 				// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
 				intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
@@ -224,7 +239,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 				PASSPHRASE_KEY, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
 		editor.putString(
-				OWHomeFragment.this.PASSPHRASE_KEY, 
+				OWAccountsFragment.this.PASSPHRASE_KEY, 
 				OWUtils.binaryToHexString(inputHash));
 		editor.commit();
 	}
