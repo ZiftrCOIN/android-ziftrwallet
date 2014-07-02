@@ -2,12 +2,14 @@ package com.ziftr.android.onewallet.fragment;
 
 import java.util.Arrays;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -41,7 +43,10 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 
 	/** The key for getting the passphrase hash from the preferences. */
 	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
-	
+
+	/** The context for this fragment. */
+	private FragmentActivity myContext;
+
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
 	 * what parent method does right now.
@@ -70,13 +75,13 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 			@Override
 			public void onClick(View v) {
 				OWAccountsFragment.this.clickedButton = v;
-				
+
 				OWPassphraseDialog passphraseDialog = new OWPassphraseDialog();
-				
+
 				// Set the target fragment
 				passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
 						RequestCodes.GET_PASSPHRASE_DIALOG);
-				
+
 				String message = null;
 				if (OWAccountsFragment.this.userHasPassphrase()) {
 					message = "Please input your passphrase. ";
@@ -115,14 +120,14 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 					// Set up the dialog with message and other info
 					alertUserDialog.setupDialog("OneWallet", 
 							"You must set a passphrase before you can "
-							+ "reset your passphrase.", null, "OK", null);
+									+ "reset your passphrase.", null, "OK", null);
 					// Pop up the dialog
 					alertUserDialog.show(OWAccountsFragment.this.getFragmentManager(), 
 							"no_passphrase_currently_set_alert_dialog");
 				}
 			}
 		});
-		
+
 		// For the getQRCodeButton
 		View getQRCodeButton = rootView.findViewById(R.id.getQRCodeButton);
 		// Set the listener for the clicks
@@ -142,7 +147,17 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 		// Return the view which was inflated
 		return rootView;
 	}
-	
+
+	/**
+	 * Whenever this is fragment is attached to an activity 
+	 * we 
+	 */
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		this.myContext = (FragmentActivity) activity;
+	}
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -179,15 +194,15 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 			Fragment fragment = newFragmentClass.newInstance();
 			String tagString = newFragmentClass.getSimpleName();
 
-			getFragmentManager().beginTransaction().replace(
-					R.id.oneWalletBaseFragmentHolder, fragment, tagString
+			this.myContext.getSupportFragmentManager().beginTransaction(
+					).replace(R.id.oneWalletBaseFragmentHolder, fragment, tagString
 					).addToBackStack(null).commit();
 		} catch(Exception e) {
 			ZLog.log("Exceptiong trying to load wallet fragment. Was a "
 					+ "button not properly setup? ", e);
 		}
 	}
-	
+
 	/**
 	 * Gets the stored hash of the users passphrase, if there is one.
 	 * 
@@ -217,7 +232,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 	private boolean userHasPassphrase() {
 		return this.getStoredPassphraseHash() != null;
 	}
-	
+
 	private boolean inputHashMatchesStoredHash(byte[] inputHash) {
 		byte[] storedHash = this.getStoredPassphraseHash();
 		if (storedHash != null && inputHash != null) {
@@ -243,7 +258,7 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 				OWUtils.binaryToHexString(inputHash));
 		editor.commit();
 	}
-	
+
 	/**
 	 * Pops up a dialog to give the user some information. 
 	 * 

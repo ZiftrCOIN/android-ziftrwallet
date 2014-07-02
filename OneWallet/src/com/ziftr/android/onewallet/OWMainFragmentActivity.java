@@ -70,68 +70,58 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** The menu for our app. */
 	private Menu actionBarMenu;
 
+	/** Use this key to save which section of the drawer menu is open. */
+	private final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
+
+	/**
+	 * This is an enum to differentiate between the different
+	 * sections of the app. Each enum also holds specific information related
+	 * to each of fragment types.
+	 */
 	private enum FragmentDetails {
 		/** The enum to identify the accounts fragment of the app. */
-	    ACCOUNT_FRAGMENT_DETAILS {
+		ACCOUNT_FRAGMENT_DETAILS {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWAccountsFragment();
 			}
 		}, 
-	    /** The enum to identify the exchange fragment of the app. */
-	    EXCHANGE_FRAGMENT_DETAILS {
+		/** The enum to identify the exchange fragment of the app. */
+		EXCHANGE_FRAGMENT_DETAILS {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWExchangeFragment();
 			}
 		}, 
-	    /** The enum to identify the settings fragment of the app. */
-	    SETTINGS_FRAGMENT_DETAILS {
+		/** The enum to identify the settings fragment of the app. */
+		SETTINGS_FRAGMENT_DETAILS {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWSettingsFragment();
 			}
 		}, 
-	    /** The enum to identify the about fragment of the app. */
-	    ABOUT_FRAGMENT_DETAILS {
+		/** The enum to identify the about fragment of the app. */
+		ABOUT_FRAGMENT_DETAILS {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWAboutFragment();
 			}
 		},
-	    /** The enum to identify the contact fragment of the app. */
-	    CONTACT_FRAGMENT_DETAILS {
+		/** The enum to identify the contact fragment of the app. */
+		CONTACT_FRAGMENT_DETAILS {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWContactFragment();
 			}
 		};
-	    
-	    /** The fragment associated with this section of the app. */
-	    private Fragment fragment;
-	    /** The drawe menu view associated with this section of the app. */
-	    private View drawerMenuView;
-	    
-	    /**
-	     * Makes a new fragment of the type specified.
-	     * 
-	     * @return
-	     */
-	    public abstract Fragment getNewFragment();
-	    
-	    /**
-	     * @return the fragment
-	     */
-	    public Fragment getFragment() {
-	    	return fragment;
-	    }
-	    
-	    /**
-	     * @param fragment the fragment to set
-	     */
-	    public void setFragment(Fragment fragment) {
-	    	this.fragment = fragment;
-	    }
+
+		/** The drawe menu view associated with this section of the app. */
+		private View drawerMenuView;
+
+		/**
+		 * @return a new fragment of the type specified.
+		 */
+		public abstract Fragment getNewFragment();
 
 		/**
 		 * @return the drawerMenuView
@@ -147,9 +137,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			this.drawerMenuView = drawerMenuView;
 		}
 	};
-	
-	//	/** */
-	//	private final String SELECTED_
 
 	/**
 	 * Loads up the views and starts the OWHomeFragment 
@@ -158,11 +145,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param savedInstanceState - The stored bundle
 	 */
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		// Everything is held within this main activity layout
-		setContentView(R.layout.activity_main);
+		this.setContentView(R.layout.activity_main);
 
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
@@ -170,18 +157,27 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
-			// TODO
 			this.showFragment(FragmentDetails.ACCOUNT_FRAGMENT_DETAILS);
-//			Fragment accountsFragment = 
-//					FragmentDetails.ACCOUNT_FRAGMENT_DETAILS.getNewFragment();
-//			FragmentDetails.ACCOUNT_FRAGMENT_DETAILS.setFragment(accountsFragment);
-//			fragmentManager.beginTransaction().add(
-//					R.id.oneWalletBaseFragmentHolder, accountsFragment).commit();
+		} else {
+			String prevSelectedSectionString = 
+					savedInstanceState.getString(this.SELECTED_SECTION_KEY);
+			if (prevSelectedSectionString != null) {
+				FragmentDetails fragmentDetails = 
+						FragmentDetails.valueOf(prevSelectedSectionString);
+				if (fragmentDetails.getDrawerMenuView() != null) {
+					this.selectSingleDrawerMenuOption(
+							fragmentDetails.getDrawerMenuView());
+				} else {
+					ZLog.log("The drawer menu was null, "
+							+ "can't select... shouldn't happen1");
+				}
+			}
 		}
 	}
 
 	/**
 	 * Create the options menu.
+	 * Updates the icon appropriately.
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -195,61 +191,76 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	/**
+	 * Here we save save which part of the app is currently open in
+	 * the drawer.
+	 */
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		// Save which part of the app is currently open.
+		outState.putString(this.SELECTED_SECTION_KEY, 
+				this.getCurrentlySelectedDrawerMenuOption());
+	}
+
+	/**
+	 * When the back button is pressed from this activity we
+	 * go to the accounts fragment if we are somewhere else, and from
+	 * the accounts fragment we exit the app. 
+	 */
+	@Override
+	public void onBackPressed() {
+		String curSelected = getCurrentlySelectedDrawerMenuOption();
+		if (curSelected == null) {
+			ZLog.log("No selected section... Why did this happen?");
+		} else if (FragmentDetails.ACCOUNT_FRAGMENT_DETAILS.toString(
+				).equals(curSelected)) {
+			super.onBackPressed();
+		} else {
+			OWMainFragmentActivity.this.showFragment(
+					FragmentDetails.ACCOUNT_FRAGMENT_DETAILS);
+		}
+	}
+
+	/**
 	 * Starts a new fragment in the main layout space depending
-	 * on which fragment id is passed in. 
+	 * on which fragment FragmentDetails is passed in. 
 	 * 
-	 * @param fragmentId - The string identifier for which fragment to start.
+	 * @param fragmentDetails - The identifier for which fragment to start.
 	 */
 	private void showFragment(FragmentDetails fragmentDetails) {
-
-		// Initialize if the fragment doesn't exist yet
-		if (fragmentDetails.getFragment() == null) {
-			fragmentDetails.setFragment(fragmentDetails.getNewFragment());
-		}
-		
-		Fragment fragToShow = fragmentDetails.getFragment();
-		
-		// There is nothing to do if it is already showing.
-		if (fragToShow.isVisible()) {
-			return;
-		}
-
-		
 		// Go through menu options and select the right one, note  
 		// that not all menu options can be selected
 		if (fragmentDetails.getDrawerMenuView() != null) {
 			this.selectSingleDrawerMenuOption(fragmentDetails.getDrawerMenuView());
 		} else {
-			ZLog.log("The drawer menu was null, can't select... shouldn't happen");
+			ZLog.log("The drawer menu was null, can't select... shouldn't happen2");
 		}
 
+		// The tag for fragment of this fragmentDetails type
+		String tag = fragmentDetails.toString();
+		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = 
 				this.getSupportFragmentManager().beginTransaction();
 
 		// TODO add animation to transaciton here
 
-		// Hide any other visible fragments
-		for(FragmentDetails fragDets : FragmentDetails.values()) {
-			Fragment storedFragment = fragDets.getFragment();
-			if (storedFragment != null && !storedFragment.isHidden()) {
-				transaction.hide(storedFragment);
-			}
-		}
-		
-		// If the fragment hasn't been added to the manager yet
-		if (this.getSupportFragmentManager().findFragmentByTag(
-				fragmentDetails.toString()) == null) {
-			// Then we add it now
-			transaction.add(R.id.oneWalletBaseFragmentHolder, 
-					fragToShow, fragmentDetails.toString());
+		// Make the new fragment of the correct type
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+		if (fragToShow == null) {
+			// If the fragment doesn't exist yet, make a new one
+			fragToShow = fragmentDetails.getNewFragment(); 
+		} else if (fragToShow.isVisible()) {
+			// If the fragment is already visible, no need to do anything
+			return;
 		}
 
-		// Show the correct fragment
-		transaction.show(fragToShow);
-
+		transaction.replace(R.id.oneWalletBaseFragmentHolder, fragToShow, tag);
+		//		transaction.addToBackStack(null);
 		transaction.commit();
+
 	}
-	
+
 	/**
 	 * A convenience method to close the drawer layout
 	 * if it is open. Does nothing if it is not open. 
@@ -323,7 +334,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 							FragmentDetails.ACCOUNT_FRAGMENT_DETAILS);
 				}
 			});
-			
+
 			// Set up for exchange section
 			View exchangeMenuButton = 
 					this.findViewById(R.id.menuDrawerExchangeLayout);
@@ -337,7 +348,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 							FragmentDetails.EXCHANGE_FRAGMENT_DETAILS);
 				}
 			});
-			
+
 			// Set up for settings section
 			View settingsMenuButton = 
 					this.findViewById(R.id.menuDrawerSettingsLayout);
@@ -351,7 +362,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 							FragmentDetails.SETTINGS_FRAGMENT_DETAILS);
 				}
 			});
-			
+
 			// Set up for about section
 			View aboutMenuButton = 
 					this.findViewById(R.id.menuDrawerAboutLayout);
@@ -380,8 +391,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				}
 			});
 
-			// TODO make sure that correcty option is selected
-			// even after rotate
 		} else {
 			ZLog.log("drawerMenu was null. ?");
 		}
@@ -407,7 +416,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	/**
-	 * Selects the drawer menu option given, deselcts all
+	 * Selects the drawer menu option given, deselects all
 	 * the other drawer menu options.
 	 * 
 	 * @param selectedView - The view to select.
@@ -422,18 +431,19 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// next to it in the drawer layout
 		selectedView.setSelected(true);
 	}
-	
+
 	/**
-	 * Selects the drawer menu option given, deselcts all
-	 * the other drawer menu options.
-	 * 
-	 * @param selectedView - The view to select.
+	 * Gets the string identifier of the currently selected
+	 * drawer menu option.
+	 * For example, if we are in the accounts section, this
+	 * method will return "ACCOUNT_FRAGMENT_DETAILS".
 	 */
-	private View getCurrentlySelectedDrawerMenuOption() {
+	private String getCurrentlySelectedDrawerMenuOption() {
 		// Deselect all the other views
-		for (View selectionView : this.getDrawerMenuItems()) {
-			if (selectionView.isSelected()) {
-				return selectionView;
+		for (FragmentDetails fragDets : FragmentDetails.values()) {
+			if (fragDets.getDrawerMenuView() != null && 
+					fragDets.getDrawerMenuView().isSelected()) {
+				return fragDets.toString();
 			}
 		}
 		return null;
@@ -476,7 +486,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			this.actionBarMenu.findItem(R.id.switchTaskMenuButton
 					).setIcon(R.drawable.icon_menu_statelist);
 		}
-
 	}
 
 	@Override
