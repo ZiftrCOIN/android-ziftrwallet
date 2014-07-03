@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:resauto="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navBarLayout"
     android:layout_width="match_parent"
     android:layout_height="10dp"
@@ -7,6 +8,16 @@
     android:gravity="left"
     android:orientation="horizontal" >
 
+    <menu>
+
+        <item
+            android:id="@+id/switchTaskMenuButton"
+            android:icon="@drawable/icon_menu_statelist"
+            resauto:showAsAction="always"/>
+        
+    </menu>
+
+    <!--
     <ImageView
         android:id="@+id/switchTaskMenuButton"
         android:layout_width="wrap_content"
@@ -15,7 +26,7 @@
         android:scaleType="fitCenter"
         android:src="@drawable/icon_menu_statelist" />
 
-    <!-- 
+    
     <TextView 
         android:id="@+id/oneWalletLogo"
         android:layout_width="0dp"
@@ -29,6 +40,6 @@
         
         android:adjustViewBounds="true"
         />
-         -->
+    -->
 
 </LinearLayout>

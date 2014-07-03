@@ -27,31 +27,19 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	
 	/** The view for this dialog. */
 	private View dialogView;
-
+	
 	/**
 	 * Whenever this is fragment is attached to an activity 
 	 * we must make sure that it is able to handle accepting 
-	 * and cancelling from passphrase dialogs.
+	 * and cancelling from reset passphrase dialogs.
 	 * 
-	 * This method throws an exception if the newly attached activity
-	 * is not an instance of OWResetPassphraseDialogHandler. 
+	 * This method throws an exception if neither the newly attached activity
+	 * nor the target fragment are instances of {@link OWResetPassphraseDialogHandler}.
 	 */
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-
-		if (this.getTargetFragment() != null) {
-			if (!(this.getTargetFragment() instanceof OWResetPassphraseDialogHandler)) {
-				throw new ClassCastException(this.getTargetFragment().toString() + 
-						" must implement " + 
-						OWResetPassphraseDialogHandler.class.toString() + 
-						" to be able to use this kind of dialog.");
-			}
-		} else if (!(activity instanceof OWResetPassphraseDialogHandler)) {
-			throw new ClassCastException(activity.toString() + " must implement " + 
-					OWResetPassphraseDialogHandler.class.toString() + 
-					" to be able to use this kind of dialog.");
-		}
+		this.validateHandler(activity, OWResetPassphraseDialogHandler.class);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package com.ziftr.android.onewallet;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -60,7 +61,16 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	X 10. Get a reset working for the passphrase.
 
-	o 11. Get Fragment switching working with selection in the drawer layout
+	X 11. Get Fragment switching working with selection in the drawer layout
+
+	o 12. Put menu icon on the top left part of action bar rather than the right.
+	To do this we need to make a custom action bar. Maybe just keep it on the right?
+
+	o 13. make it so that the content is moved over whenever we click the menu 
+	button.
+
+	o 14. Turn the EditText field in the passphrase dialog into an xml just like
+	the reset passphrase dialog.
 
 	 */
 
@@ -73,49 +83,55 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** Use this key to save which section of the drawer menu is open. */
 	private final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
 
+	/** The main view that all of the fragments will be stored in. */
+	private View baseFragmentContainer;
+
+	/** A float used in making the container move over when the drawer is moved. */
+	private float lastTranslate = 0.0f;
+
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
 	 * to each of fragment types.
 	 */
-	private enum FragmentDetails {
+	private enum FragmentType {
 		/** The enum to identify the accounts fragment of the app. */
-		ACCOUNT_FRAGMENT_DETAILS {
+		ACCOUNT_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWAccountsFragment();
 			}
 		}, 
 		/** The enum to identify the exchange fragment of the app. */
-		EXCHANGE_FRAGMENT_DETAILS {
+		EXCHANGE_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWExchangeFragment();
 			}
 		}, 
 		/** The enum to identify the settings fragment of the app. */
-		SETTINGS_FRAGMENT_DETAILS {
+		SETTINGS_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWSettingsFragment();
 			}
 		}, 
 		/** The enum to identify the about fragment of the app. */
-		ABOUT_FRAGMENT_DETAILS {
+		ABOUT_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWAboutFragment();
 			}
 		},
 		/** The enum to identify the contact fragment of the app. */
-		CONTACT_FRAGMENT_DETAILS {
+		CONTACT_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWContactFragment();
 			}
 		};
 
-		/** The drawe menu view associated with this section of the app. */
+		/** The drawer menu view associated with this section of the app. */
 		private View drawerMenuView;
 
 		/**
@@ -154,19 +170,60 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
 
+		// Make sure the base fragment view is initialized
+		this.initizalizeBaseFragmentView(savedInstanceState);
+	}
+
+	//	/**
+	//	 * Loads up the views and starts the OWHomeFragment 
+	//	 * if necessary. 
+	//	 * 
+	//	 * @param savedInstanceState - The stored bundle
+	//	 */
+	//	@Override
+	//	public View onCreateView(View parent, String name, 
+	//			Context context, AttributeSet attrs) {
+	//		// Make sure the base fragment view is offset the correct amount
+	//		// so that the drawer doesn't extend over it.
+	//		float offset;
+	//		ZLog.log("width: ", "" + this.menuDrawer.findViewById(R.id.menuDrawerBaseLayout).getWidth());
+	//		if (!this.drawerMenuIsOpen()) {
+	//			ZLog.log("drawer is open!");
+	//			offset = this.menuDrawer.findViewById(R.id.menuDrawerScrollView).getWidth();
+	//		} else {
+	//			ZLog.log("drawer is closed");
+	//			offset = 0;
+	//		}
+	//		ZLog.log("offset: ", offset);
+	//		this.baseFragmentContainer.setTranslationX(offset);
+	//		
+	//		return super.onCreateView(parent, name, context, attrs);
+	//	}
+
+	/**
+	 * Initializes the drawer layout. Sets up some view fields
+	 * and opens the right fragment if the bundle has extra information
+	 * in it.
+	 */
+	private void initizalizeBaseFragmentView(Bundle savedInstanceState) {
+		// Set the base fragment container
+		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseFragmentHolder);
+
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
-			this.showFragment(FragmentDetails.ACCOUNT_FRAGMENT_DETAILS);
+			this.showFragment(FragmentType.ACCOUNT_FRAGMENT_TYPE);
 		} else {
+			// Here we must make sure that the drawer menu is still
+			// showing which section of the app is currently open.
 			String prevSelectedSectionString = 
 					savedInstanceState.getString(this.SELECTED_SECTION_KEY);
 			if (prevSelectedSectionString != null) {
-				FragmentDetails fragmentDetails = 
-						FragmentDetails.valueOf(prevSelectedSectionString);
-				if (fragmentDetails.getDrawerMenuView() != null) {
+				FragmentType fragmentType = 
+						FragmentType.valueOf(prevSelectedSectionString);
+				if (fragmentType.getDrawerMenuView() != null) {
 					this.selectSingleDrawerMenuOption(
-							fragmentDetails.getDrawerMenuView());
+							fragmentType.getDrawerMenuView());
 				} else {
 					ZLog.log("The drawer menu was null, "
 							+ "can't select... shouldn't happen1");
@@ -187,7 +244,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Make sure the icon matches the current open/close state
 		this.setActionBarMenuIcon(this.drawerMenuIsOpen());
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	/**
@@ -213,32 +270,33 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		String curSelected = getCurrentlySelectedDrawerMenuOption();
 		if (curSelected == null) {
 			ZLog.log("No selected section... Why did this happen?");
-		} else if (FragmentDetails.ACCOUNT_FRAGMENT_DETAILS.toString(
+			super.onBackPressed();
+		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString(
 				).equals(curSelected)) {
 			super.onBackPressed();
 		} else {
 			OWMainFragmentActivity.this.showFragment(
-					FragmentDetails.ACCOUNT_FRAGMENT_DETAILS);
+					FragmentType.ACCOUNT_FRAGMENT_TYPE);
 		}
 	}
 
 	/**
 	 * Starts a new fragment in the main layout space depending
-	 * on which fragment FragmentDetails is passed in. 
+	 * on which fragment FragmentType is passed in. 
 	 * 
-	 * @param fragmentDetails - The identifier for which fragment to start.
+	 * @param fragmentType - The identifier for which type of fragment to start.
 	 */
-	private void showFragment(FragmentDetails fragmentDetails) {
+	private void showFragment(FragmentType fragmentType) {
 		// Go through menu options and select the right one, note  
 		// that not all menu options can be selected
-		if (fragmentDetails.getDrawerMenuView() != null) {
-			this.selectSingleDrawerMenuOption(fragmentDetails.getDrawerMenuView());
+		if (fragmentType.getDrawerMenuView() != null) {
+			this.selectSingleDrawerMenuOption(fragmentType.getDrawerMenuView());
 		} else {
 			ZLog.log("The drawer menu was null, can't select... shouldn't happen2");
 		}
 
-		// The tag for fragment of this fragmentDetails type
-		String tag = fragmentDetails.toString();
+		// The tag for fragments of this fragmentType
+		String tag = fragmentType.toString();
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = 
 				this.getSupportFragmentManager().beginTransaction();
@@ -249,21 +307,21 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
 			// If the fragment doesn't exist yet, make a new one
-			fragToShow = fragmentDetails.getNewFragment(); 
+			fragToShow = fragmentType.getNewFragment(); 
 		} else if (fragToShow.isVisible()) {
 			// If the fragment is already visible, no need to do anything
 			return;
 		}
 
 		transaction.replace(R.id.oneWalletBaseFragmentHolder, fragToShow, tag);
-		//		transaction.addToBackStack(null);
 		transaction.commit();
 
 	}
 
 	/**
-	 * A convenience method to close the drawer layout
-	 * if it is open. Does nothing if it is not open. 
+	 * A convenience method to toggle the drawer menu position.
+	 * Also sets the icons to a static resource while opening/closing
+	 * to avoid extra swapping.
 	 */
 	private void toggleDrawerPosition() {
 		MenuItem drawerMenuItem = this.actionBarMenu.findItem(R.id.switchTaskMenuButton);
@@ -324,70 +382,70 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			// Set up for accounts section
 			View accountsMenuButton = 
 					this.findViewById(R.id.menuDrawerAccountsLayout);
-			FragmentDetails.ACCOUNT_FRAGMENT_DETAILS.setDrawerMenuView(
+			FragmentType.ACCOUNT_FRAGMENT_TYPE.setDrawerMenuView(
 					accountsMenuButton);
 			accountsMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 					OWMainFragmentActivity.this.showFragment(
-							FragmentDetails.ACCOUNT_FRAGMENT_DETAILS);
+							FragmentType.ACCOUNT_FRAGMENT_TYPE);
 				}
 			});
 
 			// Set up for exchange section
 			View exchangeMenuButton = 
 					this.findViewById(R.id.menuDrawerExchangeLayout);
-			FragmentDetails.EXCHANGE_FRAGMENT_DETAILS.setDrawerMenuView(
+			FragmentType.EXCHANGE_FRAGMENT_TYPE.setDrawerMenuView(
 					exchangeMenuButton);
 			exchangeMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 					OWMainFragmentActivity.this.showFragment(
-							FragmentDetails.EXCHANGE_FRAGMENT_DETAILS);
+							FragmentType.EXCHANGE_FRAGMENT_TYPE);
 				}
 			});
 
 			// Set up for settings section
 			View settingsMenuButton = 
 					this.findViewById(R.id.menuDrawerSettingsLayout);
-			FragmentDetails.SETTINGS_FRAGMENT_DETAILS.setDrawerMenuView(
+			FragmentType.SETTINGS_FRAGMENT_TYPE.setDrawerMenuView(
 					settingsMenuButton);
 			settingsMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 					OWMainFragmentActivity.this.showFragment(
-							FragmentDetails.SETTINGS_FRAGMENT_DETAILS);
+							FragmentType.SETTINGS_FRAGMENT_TYPE);
 				}
 			});
 
 			// Set up for about section
 			View aboutMenuButton = 
 					this.findViewById(R.id.menuDrawerAboutLayout);
-			FragmentDetails.ABOUT_FRAGMENT_DETAILS.setDrawerMenuView(
+			FragmentType.ABOUT_FRAGMENT_TYPE.setDrawerMenuView(
 					aboutMenuButton);
 			aboutMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 					OWMainFragmentActivity.this.showFragment(
-							FragmentDetails.ABOUT_FRAGMENT_DETAILS);
+							FragmentType.ABOUT_FRAGMENT_TYPE);
 				}
 			});
 
 			// Set up for contact section
 			View contactMenuButton = 
 					this.findViewById(R.id.menuDrawerContactLayout);
-			FragmentDetails.CONTACT_FRAGMENT_DETAILS.setDrawerMenuView(
+			FragmentType.CONTACT_FRAGMENT_TYPE.setDrawerMenuView(
 					contactMenuButton);
 			contactMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 					OWMainFragmentActivity.this.showFragment(
-							FragmentDetails.CONTACT_FRAGMENT_DETAILS);
+							FragmentType.CONTACT_FRAGMENT_TYPE);
 				}
 			});
 
@@ -436,14 +494,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * Gets the string identifier of the currently selected
 	 * drawer menu option.
 	 * For example, if we are in the accounts section, this
-	 * method will return "ACCOUNT_FRAGMENT_DETAILS".
+	 * method will return "ACCOUNT_FRAGMENT_TYPE".
 	 */
 	private String getCurrentlySelectedDrawerMenuOption() {
 		// Deselect all the other views
-		for (FragmentDetails fragDets : FragmentDetails.values()) {
-			if (fragDets.getDrawerMenuView() != null && 
-					fragDets.getDrawerMenuView().isSelected()) {
-				return fragDets.toString();
+		for (FragmentType fragType : FragmentType.values()) {
+			if (fragType.getDrawerMenuView() != null && 
+					fragType.getDrawerMenuView().isSelected()) {
+				return fragType.toString();
 			}
 		}
 		return null;
@@ -464,8 +522,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * Called when the drawer menu item in the action bar is clicked.
 	 * 
 	 * This name is confusing because there is a drawer menu and then 
-	 * there is the menu in the action bar that has a menu in it, of 
-	 * which one of the items is a clickable that opens the drawer menu.
+	 * there is the menu in the action bar that has a menu icon in it, 
+	 * which is a clickable that opens the drawer menu.
 	 */
 	private void onActionBarMenuIconClicked() {
 		this.toggleDrawerPosition();
@@ -502,22 +560,34 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	@Override
 	public void onDrawerClosed(View arg0) {
+		ZLog.log("A");
 		this.setActionBarMenuIcon(false);
 	}
 
 	@Override
 	public void onDrawerOpened(View arg0) {
+		ZLog.log("B");
 		this.setActionBarMenuIcon(true);
 	}
 
 	@Override
-	public void onDrawerSlide(View arg0, float arg1) {
-		// Nothing to do
+	public void onDrawerSlide(View drawerView, float slideOffset) {
+		ZLog.log("C");
+		// Here we need to 
+		float moveFactor = (drawerView.getWidth() * (slideOffset - this.lastTranslate));
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			this.baseFragmentContainer.setTranslationX(moveFactor);
+		} else {
+			ZLog.log("Older than honeycomb, which we don't support");
+		}
 	}
 
 	@Override
 	public void onDrawerStateChanged(int newState) {
 		// Nothing to do
+		ZLog.log("D");
+
 	}
 
 }

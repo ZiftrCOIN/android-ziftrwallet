@@ -1,6 +1,7 @@
 package com.ziftr.android.onewallet.dialog;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface.OnClickListener;
@@ -121,6 +122,29 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 		outState.putString(NEGATIVE_BUTTON_TEXT_KEY, this.negativeButtonText);
 		
 		super.onSaveInstanceState(outState);
+	}
+	
+	/**
+	 * OWDialogs must have their own respective handlers. When
+	 * the activity is attached, this method should be called in
+	 * order to verify that either the target fragment or the 
+	 * activity is a handler of the type specified (by the c param).
+	 * 
+	 * @param activity - The activity being attached
+	 * @param c - The handler class for this type of dialog.
+	 */
+	protected void validateHandler(Activity activity, Class<?> c) {
+		if (this.getTargetFragment() != null) {
+			if (!(c.isAssignableFrom(this.getTargetFragment().getClass()))) {
+				throw new ClassCastException(this.getTargetFragment().toString() + 
+						" must implement " + c.toString() + 
+						" to be able to use this kind of dialog.");
+			}
+		} else if (!(c.isAssignableFrom(activity.getClass()))) {
+			throw new ClassCastException(activity.getClass().toString() + 
+					" must implement " + c.toString() + 
+					" to be able to use this kind of dialog.");
+		}
 	}
 
 }

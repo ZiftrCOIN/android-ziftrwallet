@@ -28,24 +28,13 @@ public class OWPassphraseDialog extends OWDialogFragment {
 	 * we must make sure that it is able to handle accepting 
 	 * and cancelling from passphrase dialogs.
 	 * 
-	 * This method throws an exception if the newly attached activity
-	 * is not an instance of OWPassphraseDialogHandler. 
+	 * This method throws an exception if neither the newly attached activity
+	 * nor the target fragment are instances of {@link OWPassphraseDialogHandler}.
 	 */
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-
-		if (this.getTargetFragment() != null) {
-			if (!(this.getTargetFragment() instanceof OWPassphraseDialogHandler)) {
-				throw new ClassCastException(this.getTargetFragment().toString() + 
-						" must implement " + OWPassphraseDialogHandler.class.toString() + 
-						" to be able to use this kind of dialog.");
-			}
-		} else if (!(activity instanceof OWPassphraseDialogHandler)) {
-			throw new ClassCastException(activity.toString() + " must implement " + 
-					OWPassphraseDialogHandler.class.toString() + 
-					" to be able to use this kind of dialog.");
-		}
+		this.validateHandler(activity, OWPassphraseDialogHandler.class);
 	}
 
 	/**
@@ -95,11 +84,11 @@ public class OWPassphraseDialog extends OWDialogFragment {
 	 */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		
 		// Save all of the important strings in the dialog
 		outState.putString(CURRENT_ENTERED_TEXT_KEY, 
 				this.passphraseTextBox.getText().toString());
-		
-		super.onSaveInstanceState(outState);
 	}
 
 }

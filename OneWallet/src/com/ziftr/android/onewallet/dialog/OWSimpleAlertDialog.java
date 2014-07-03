@@ -14,27 +14,18 @@ public class OWSimpleAlertDialog extends OWDialogFragment {
 
 	/**
 	 * Whenever this is fragment is attached to an activity 
-	 * we must make sure that it is able to handle confirmations.
+	 * we must make sure that it is able to handle accepting 
+	 * and cancelling from simple alert dialogs.
 	 * 
-	 * This method throws an exception if the newly attached activity
-	 * is not an instance of OWOkayDialogHandler. 
+	 * This method throws an exception if neither the newly attached activity
+	 * nor the target fragment are instances of {@link OWNeutralDialogHandler}.
 	 */
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		if (this.getTargetFragment() != null) {
-			if (!(this.getTargetFragment() instanceof OWNeutralDialogHandler)) {
-				throw new ClassCastException(this.getTargetFragment().toString() + 
-						" must implement " + OWNeutralDialogHandler.class.toString() + 
-						" to be able to use this kind of dialog.");
-			}
-		} else if (!(activity instanceof OWNeutralDialogHandler)) {
-			throw new ClassCastException(activity.toString() + " must implement " + 
-					OWNeutralDialogHandler.class.toString() + 
-					" to be able to use this kind of dialog.");
-		}
+		this.validateHandler(activity, OWNeutralDialogHandler.class);
 	}
-
+	
 	/**
 	 * Whenever the dialog is clicked we get the activity
 	 * and have it handle the confirmation of the dialog.
