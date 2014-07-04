@@ -66,7 +66,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	o 12. Put menu icon on the top left part of action bar rather than the right.
 	To do this we need to make a custom action bar. Maybe just keep it on the right?
 
-	o 13. make it so that the content is moved over whenever we click the menu 
+	X 13. make it so that the content is moved over whenever we click the menu 
 	button.
 
 	o 14. Turn the EditText field in the passphrase dialog into an xml just like
@@ -174,64 +174,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		this.initizalizeBaseFragmentView(savedInstanceState);
 	}
 
-	//	/**
-	//	 * Loads up the views and starts the OWHomeFragment 
-	//	 * if necessary. 
-	//	 * 
-	//	 * @param savedInstanceState - The stored bundle
-	//	 */
-	//	@Override
-	//	public View onCreateView(View parent, String name, 
-	//			Context context, AttributeSet attrs) {
-	//		// Make sure the base fragment view is offset the correct amount
-	//		// so that the drawer doesn't extend over it.
-	//		float offset;
-	//		ZLog.log("width: ", "" + this.menuDrawer.findViewById(R.id.menuDrawerBaseLayout).getWidth());
-	//		if (!this.drawerMenuIsOpen()) {
-	//			ZLog.log("drawer is open!");
-	//			offset = this.menuDrawer.findViewById(R.id.menuDrawerScrollView).getWidth();
-	//		} else {
-	//			ZLog.log("drawer is closed");
-	//			offset = 0;
-	//		}
-	//		ZLog.log("offset: ", offset);
-	//		this.baseFragmentContainer.setTranslationX(offset);
-	//		
-	//		return super.onCreateView(parent, name, context, attrs);
-	//	}
-
-	/**
-	 * Initializes the drawer layout. Sets up some view fields
-	 * and opens the right fragment if the bundle has extra information
-	 * in it.
-	 */
-	private void initizalizeBaseFragmentView(Bundle savedInstanceState) {
-		// Set the base fragment container
-		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseFragmentHolder);
-
-		// If the app has just been launched (so the fragment
-		// doesn't exist yet), we create the main fragment.
-		if (savedInstanceState == null) {
-			this.showFragment(FragmentType.ACCOUNT_FRAGMENT_TYPE);
-		} else {
-			// Here we must make sure that the drawer menu is still
-			// showing which section of the app is currently open.
-			String prevSelectedSectionString = 
-					savedInstanceState.getString(this.SELECTED_SECTION_KEY);
-			if (prevSelectedSectionString != null) {
-				FragmentType fragmentType = 
-						FragmentType.valueOf(prevSelectedSectionString);
-				if (fragmentType.getDrawerMenuView() != null) {
-					this.selectSingleDrawerMenuOption(
-							fragmentType.getDrawerMenuView());
-				} else {
-					ZLog.log("The drawer menu was null, "
-							+ "can't select... shouldn't happen1");
-				}
-			}
-		}
-	}
-
 	/**
 	 * Create the options menu.
 	 * Updates the icon appropriately.
@@ -241,6 +183,17 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Inflate the menu; this adds items to the action bar if it is present.
 		this.getMenuInflater().inflate(R.menu.ow_action_bar_menu, menu);
 		this.actionBarMenu = menu;
+
+		// TODO not sure if there is a better place to make sure the content 
+		// doesn't go behind the drawer menu, but it seems to be working here.
+		
+		float offset;
+		if (this.drawerMenuIsOpen()) {
+			offset = this.menuDrawer.findViewById(R.id.menuDrawerScrollView).getWidth();
+		} else {
+			offset = 0;
+		}
+		this.baseFragmentContainer.setTranslationX(offset);
 
 		// Make sure the icon matches the current open/close state
 		this.setActionBarMenuIcon(this.drawerMenuIsOpen());
@@ -456,6 +409,38 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	/**
+	 * Initializes the drawer layout. Sets up some view fields
+	 * and opens the right fragment if the bundle has extra information
+	 * in it.
+	 */
+	private void initizalizeBaseFragmentView(Bundle savedInstanceState) {
+		// Set the base fragment container
+		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseFragmentHolder);
+
+		// If the app has just been launched (so the fragment
+		// doesn't exist yet), we create the main fragment.
+		if (savedInstanceState == null) {
+			this.showFragment(FragmentType.ACCOUNT_FRAGMENT_TYPE);
+		} else {
+			// Here we must make sure that the drawer menu is still
+			// showing which section of the app is currently open.
+			String prevSelectedSectionString = 
+					savedInstanceState.getString(this.SELECTED_SECTION_KEY);
+			if (prevSelectedSectionString != null) {
+				FragmentType fragmentType = 
+						FragmentType.valueOf(prevSelectedSectionString);
+				if (fragmentType.getDrawerMenuView() != null) {
+					this.selectSingleDrawerMenuOption(
+							fragmentType.getDrawerMenuView());
+				} else {
+					ZLog.log("The drawer menu was null, "
+							+ "can't select... shouldn't happen1");
+				}
+			}
+		}
+	}
+
+	/**
 	 * Should be called whenever any of the menu items in the
 	 * drawer menu are selected. Basically just contains code 
 	 * common to all of the tasks so that we can avoid code
@@ -560,19 +545,16 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	@Override
 	public void onDrawerClosed(View arg0) {
-		ZLog.log("A");
 		this.setActionBarMenuIcon(false);
 	}
 
 	@Override
 	public void onDrawerOpened(View arg0) {
-		ZLog.log("B");
 		this.setActionBarMenuIcon(true);
 	}
 
 	@Override
 	public void onDrawerSlide(View drawerView, float slideOffset) {
-		ZLog.log("C");
 		// Here we need to 
 		float moveFactor = (drawerView.getWidth() * (slideOffset - this.lastTranslate));
 
@@ -586,8 +568,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	public void onDrawerStateChanged(int newState) {
 		// Nothing to do
-		ZLog.log("D");
-
 	}
 
 }
