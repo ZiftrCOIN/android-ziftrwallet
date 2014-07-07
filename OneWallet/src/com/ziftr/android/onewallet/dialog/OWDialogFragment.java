@@ -7,6 +7,8 @@ import android.app.Dialog;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.view.View;
+import android.widget.EditText;
 
 public abstract class OWDialogFragment extends DialogFragment implements OnClickListener {
 
@@ -31,6 +33,9 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	private static final String NEUTRAL_BUTTON_TEXT_KEY = "neutral";
 	/** The key to save the negative button text in the bundle. */
 	private static final String NEGATIVE_BUTTON_TEXT_KEY = "negative";
+	
+	/** The view for this dialog. */
+	private View dialogView;
 
 	/**
 	 * Set's up a basic dialog with all of its content.
@@ -125,6 +130,20 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	}
 	
 	/**
+	 * @return the dialogView
+	 */
+	public View getDialogView() {
+		return dialogView;
+	}
+
+	/**
+	 * @param dialogView the dialogView to set for this dialog
+	 */
+	public void setDialogView(View dialogView) {
+		this.dialogView = dialogView;
+	}
+	
+	/**
 	 * OWDialogs must have their own respective handlers. When
 	 * the activity is attached, this method should be called in
 	 * order to verify that either the target fragment or the 
@@ -145,6 +164,50 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 					" must implement " + c.toString() + 
 					" to be able to use this kind of dialog.");
 		}
+	}
+	
+	/**
+	 * Sets a specified EditText to have the string setVal in it's 
+	 * writable field. 
+	 * Will throw a null pointer if no such view with id.
+	 * Will thow a class cast if view is not an EditText.
+	 * 
+	 * @param id - The id of the EditText to set the value in.
+	 * @param setVal - The value to set it to.
+	 * @return as above.
+	 */
+	protected void setStringInEditText(int id, String setVal) {
+		EditText textBox = (EditText) this.getDialogView().findViewById(id);
+		textBox.setText(setVal);
+	}
+	
+	/**
+	 * Given a resource id, this method finds the correpsonding
+	 * view and then gets the text from from that view, returning 
+	 * the value in a string.
+	 * Will throw a null pointer if no such view with id.
+	 * Will thow a class cast if view is not an EditText.
+	 * 
+	 * @param id - The id of the view to find.
+	 * @return as above
+	 */
+	protected String getStringFromEditText(int id) {
+		EditText textBox = (EditText) this.getDialogView().findViewById(id);
+		return textBox.getText().toString();
+	}
+	
+	/**
+	 * Given a resource id, this method finds the correpsonding
+	 * view and then gets the text from from that view, returning 
+	 * the value in bytes.
+	 * Will throw a null pointer if no such view with id.
+	 * Will thow a class cast if view is not an EditText.
+	 * 
+	 * @param id - The id of the view to find.
+	 * @return as above
+	 */
+	protected byte[] getBytesFromEditText(int id) {
+		return this.getStringFromEditText(id).getBytes();
 	}
 
 }

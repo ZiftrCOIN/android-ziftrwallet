@@ -5,8 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
@@ -24,9 +22,6 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	private static final String NEW_PASSPHRASE_KEY = "NEW_PASSPHRASE_KEY";
 	/** The key to save the text in the confirm passphrase box. */
 	private static final String CONFIRM_PASSPHRASE_KEY = "CONFIRM_PASSPHRASE_KEY";
-	
-	/** The view for this dialog. */
-	private View dialogView;
 	
 	/**
 	 * Whenever this is fragment is attached to an activity 
@@ -51,9 +46,9 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 
-		this.dialogView = this.getActivity().getLayoutInflater().inflate(
-				R.layout.reset_passphrase_dialog, null);
-		builder.setView(this.dialogView);
+		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
+				R.layout.dialog_reset_passphrase, null));
+		builder.setView(this.getDialogView());
 		
 		// Do this after the view has been inflated so views with ids exist
 		if (savedInstanceState != null) {
@@ -113,54 +108,7 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 		outState.putString(CONFIRM_PASSPHRASE_KEY, 
 				this.getStringFromEditText(R.id.textbox_confirm_passphrase));
 		
-		// Prevent memory leak?
-		this.dialogView = null;
-
 		super.onSaveInstanceState(outState);
 	}
 	
-	/**
-	 * Given a resource id, this method finds the correpsonding
-	 * view and then gets the text from from that view, returning 
-	 * the value in bytes.
-	 * Will throw a null pointer if no such view with id.
-	 * Will thow a class cast if view is not an EditText.
-	 * 
-	 * @param id - The id of the view to find.
-	 * @return as above
-	 */
-	private byte[] getBytesFromEditText(int id) {
-		return this.getStringFromEditText(id).getBytes();
-	}
-	
-	/**
-	 * Given a resource id, this method finds the correpsonding
-	 * view and then gets the text from from that view, returning 
-	 * the value in a string.
-	 * Will throw a null pointer if no such view with id.
-	 * Will thow a class cast if view is not an EditText.
-	 * 
-	 * @param id - The id of the view to find.
-	 * @return as above
-	 */
-	private String getStringFromEditText(int id) {
-		EditText textBox = (EditText) this.dialogView.findViewById(id);
-		return textBox.getText().toString();
-	}
-	
-	/**
-	 * Sets a specified EditText to have the string setVal in it's 
-	 * writable field. 
-	 * Will throw a null pointer if no such view with id.
-	 * Will thow a class cast if view is not an EditText.
-	 * 
-	 * @param id - The id of the EditText to set the value in.
-	 * @param setVal - The value to set it to.
-	 * @return as above.
-	 */
-	private void setStringInEditText(int id, String setVal) {
-		EditText textBox = (EditText) this.dialogView.findViewById(id);
-		textBox.setText(setVal);
-	}
-
 }

@@ -55,10 +55,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	X 7. Move all dialog stuff into dialog package and make dialogs
 	persistent.
 
-	X 8. Get QR code example working
+	X 8. Get QR code scanning example working
 
 	X 9. Get a list interface on top right corner. Move over to ActionBar
-	instead of 
+	instead of custom header layout.
 
 	X 10. Get a reset working for the passphrase.
 

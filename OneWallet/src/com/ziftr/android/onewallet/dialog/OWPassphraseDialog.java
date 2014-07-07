@@ -5,11 +5,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.widget.EditText;
 
+import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.handlers.OWPassphraseDialogHandler;
 import com.ziftr.android.onewallet.util.ZLog;
-import com.ziftr.android.onewallet.R;
 
 /**
  * Dialogs where the app requests to get the passphrase
@@ -17,9 +16,6 @@ import com.ziftr.android.onewallet.R;
  */
 public class OWPassphraseDialog extends OWDialogFragment {
 	
-	/** The textbox where the user enters their passphrase. */
-	private EditText passphraseTextBox;
-
 	/** The key to save the text in the box. */
 	private static final String CURRENT_ENTERED_TEXT_KEY = "entered_text";
 	
@@ -46,15 +42,17 @@ public class OWPassphraseDialog extends OWDialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 		
-		this.passphraseTextBox = new EditText(this.getActivity());
-		if (savedInstanceState != null && 
-				savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
-			this.passphraseTextBox.setText(
-					savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY));
+		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
+				R.layout.dialog_new_passphrase, null));
+		builder.setView(this.getDialogView());
+		
+		if (savedInstanceState != null) {
+			if (savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
+				this.setStringInEditText(R.id.textbox_set_new_passphrase, 
+						savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY));
+			}
 		}
-		passphraseTextBox.setHint(R.string.passphrase_hint);
-		builder.setView(this.passphraseTextBox);
-
+		
 		return builder.create();
 	}
 
@@ -67,9 +65,8 @@ public class OWPassphraseDialog extends OWDialogFragment {
 				((OWPassphraseDialogHandler) this.getActivity()) : 
 					((OWPassphraseDialogHandler) this.getTargetFragment());
 		if (which == DialogInterface.BUTTON_POSITIVE) {
-			ZLog.log("positive button was hit, calling handler.");
-			handler.handlePassphrasePositive(this.getTargetRequestCode(),
-					this.passphraseTextBox.getText().toString().getBytes());
+			handler.handlePassphrasePositive(this.getTargetRequestCode(), 
+					this.getBytesFromEditText(R.id.textbox_set_new_passphrase));
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
 			handler.handleNegative(this.getTargetRequestCode());
 		} else {
@@ -88,7 +85,7 @@ public class OWPassphraseDialog extends OWDialogFragment {
 		
 		// Save all of the important strings in the dialog
 		outState.putString(CURRENT_ENTERED_TEXT_KEY, 
-				this.passphraseTextBox.getText().toString());
+				this.getStringFromEditText(R.id.textbox_set_new_passphrase));
 	}
 
 }
