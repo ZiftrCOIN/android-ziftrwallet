@@ -32,8 +32,8 @@ import com.ziftr.android.onewallet.util.ZLog;
  * associated with a few buttons where the user can choose what
  * kind of wallet they want to open. 
  */
-public class OWAccountsFragment extends OWSectionFragment implements OWPassphraseDialogHandler, 
-OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
+public class OWAccountsFragment extends OWSectionFragment implements 
+OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 
 	/** The view container for this fragment. */
 	protected View rootView;
@@ -64,7 +64,8 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.rootView = inflater.inflate(R.layout.section_accounts_layout, container, false);
+		this.rootView = inflater.inflate(
+				R.layout.section_accounts_layout, container, false);
 
 		// For the bitcoinWalletButton
 		View bitcoinWalletButton = rootView.findViewById(R.id.buttonBitcoinWallet);
@@ -103,7 +104,8 @@ OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 			@Override
 			public void onClick(View arg0) {
 				if (OWAccountsFragment.this.userHasPassphrase()) {
-					OWResetPassphraseDialog passphraseDialog = new OWResetPassphraseDialog();
+					OWResetPassphraseDialog passphraseDialog = 
+							new OWResetPassphraseDialog();
 
 					// Set the target fragment
 					passphraseDialog.setTargetFragment(OWAccountsFragment.this, 

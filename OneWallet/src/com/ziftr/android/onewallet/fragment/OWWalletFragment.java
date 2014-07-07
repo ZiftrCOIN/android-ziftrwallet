@@ -39,7 +39,7 @@ import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.BriefLogFormatter;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.bitcoin.utils.Threading;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -85,11 +85,12 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	/**
 	 * Get the specific coin's network parameters. This 
 	 * is an instance which selects the network (production 
-	 * or test) you are on.
+	 * or test) you are on. <br/>
 	 * 
-	 * @return A network parameters object. 
 	 * For example, to get the TestNetwork, use 
 	 * <pre>'return TestNet3Params.get();'.</pre>
+	 * 
+	 * @return A network parameters object. 
 	 */
 	public abstract NetworkParameters getCoinNetworkParameters();
 
@@ -102,8 +103,8 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setupWallet();
-		refreshWallet();
+		this.setupWallet();
+		this.refreshWallet();
 	}
 
 	/**
@@ -127,14 +128,11 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		outsideBalanceText = (
 				TextView) rootView.findViewById(R.id.textWalletOutsideBalance);
 
-
 		if (wallet != null) {	
 			ECKey key = wallet.getKeys().get(0);
 			publicAddressText.setText(key.toAddress(networkParams).toString());
-			updateWalletBalance(
-					wallet.getBalance(Wallet.BalanceType.AVAILABLE));
+			updateWalletBalance(wallet.getBalance(Wallet.BalanceType.AVAILABLE));
 		}
-
 
 		return rootView;
 	}
@@ -204,32 +202,23 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		// in use and the entered address
 		Address sendAddress = new Address(networkParams, address);
 
-		//use the address and the value to create a new send request object
+		// Use the address and the value to create a new send request object
 		Wallet.SendRequest sendRequest = 
 				Wallet.SendRequest.to(sendAddress, value);
 		sendRequest.aesKey = wallet.getKeyCrypter().deriveKey("password");
-
-		// Use the wallet to setup the send request's transaction, 
-		// giving it proper outputs and a signed input
-		// Calling sendCoins internally calls this, so calling 
-		// it here causes exceptions to be thrown
-		//wallet.completeTx(sendRequest); 
-
-		// Don't ever really want a 0 fee, just experimenting with setting fees
-		//sendRequest.fee = new BigInteger("0"); 
-
-		//Transaction tx = sendRequest.tx;
+				
+		// Set a fee for the transaction
+		sendRequest.fee = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
 
 		wallet.decrypt(null);
 
 		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
 		sendResult.broadcastComplete.addListener(new Runnable() {
-
 			@Override
 			public void run() {
 				ZLog.log("Successfully sent coins to address!");
 			}
-		}, MoreExecutors.sameThreadExecutor());
+		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
 
 	}
 
