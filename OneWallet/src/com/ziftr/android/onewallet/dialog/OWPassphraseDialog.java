@@ -48,7 +48,7 @@ public class OWPassphraseDialog extends OWDialogFragment {
 		
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
-				this.setStringInEditText(R.id.textbox_set_new_passphrase, 
+				this.setStringInEditText(R.id.textbox_passphrase, 
 						savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY));
 			}
 		}
@@ -66,7 +66,7 @@ public class OWPassphraseDialog extends OWDialogFragment {
 					((OWPassphraseDialogHandler) this.getTargetFragment());
 		if (which == DialogInterface.BUTTON_POSITIVE) {
 			handler.handlePassphrasePositive(this.getTargetRequestCode(), 
-					this.getBytesFromEditText(R.id.textbox_set_new_passphrase));
+					this.getBytesFromEditText(R.id.textbox_passphrase));
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
 			handler.handleNegative(this.getTargetRequestCode());
 		} else {
@@ -85,7 +85,7 @@ public class OWPassphraseDialog extends OWDialogFragment {
 		
 		// Save all of the important strings in the dialog
 		outState.putString(CURRENT_ENTERED_TEXT_KEY, 
-				this.getStringFromEditText(R.id.textbox_set_new_passphrase));
+				this.getStringFromEditText(R.id.textbox_passphrase));
 	}
 
 }

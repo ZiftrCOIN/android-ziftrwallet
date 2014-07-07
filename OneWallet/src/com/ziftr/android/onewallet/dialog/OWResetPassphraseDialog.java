@@ -96,10 +96,12 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	/**
 	 * When we save the instance, in addition to doing everything that
 	 * all dialogs must do, we also have to store the current entered 
-	 * text in the 
+	 * text in the three text boxes.
 	 */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		
 		// Save all of the important strings in the dialog
 		outState.putString(OLD_PASSPHRASE_KEY, 
 				this.getStringFromEditText(R.id.textbox_old_passphrase));
@@ -107,8 +109,6 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 				this.getStringFromEditText(R.id.textbox_new_passphrase));
 		outState.putString(CONFIRM_PASSPHRASE_KEY, 
 				this.getStringFromEditText(R.id.textbox_confirm_passphrase));
-		
-		super.onSaveInstanceState(outState);
 	}
 	
 }
