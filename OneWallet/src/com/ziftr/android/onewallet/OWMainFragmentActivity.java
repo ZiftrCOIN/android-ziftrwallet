@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewTreeObserver;
 
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
 import com.ziftr.android.onewallet.fragment.OWAccountsFragment;
@@ -183,17 +184,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Inflate the menu; this adds items to the action bar if it is present.
 		this.getMenuInflater().inflate(R.menu.ow_action_bar_menu, menu);
 		this.actionBarMenu = menu;
-
-		// TODO not sure if there is a better place to make sure the content 
-		// doesn't go behind the drawer menu, but it seems to be working here.
-		
-		float offset;
-		if (this.drawerMenuIsOpen()) {
-			offset = this.menuDrawer.findViewById(R.id.menuDrawerScrollView).getWidth();
-		} else {
-			offset = 0;
-		}
-		this.baseFragmentContainer.setTranslationX(offset);
 
 		// Make sure the icon matches the current open/close state
 		this.setActionBarMenuIcon(this.drawerMenuIsOpen());
@@ -416,6 +406,24 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	private void initizalizeBaseFragmentView(Bundle savedInstanceState) {
 		// Set the base fragment container
 		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseFragmentHolder);
+
+		// To make sure the content doesn't go behind the drawer menu
+		this.baseFragmentContainer.getViewTreeObserver().addOnGlobalLayoutListener(
+				new ViewTreeObserver.OnGlobalLayoutListener() {
+					@Override
+					public void onGlobalLayout() {
+						// At this point the layout is complete and the 
+						// dimensions of the view and any child views are known.
+						float offset;
+						if (drawerMenuIsOpen()) {
+							offset = menuDrawer.findViewById(
+									R.id.menuDrawerScrollView).getWidth();
+						} else {
+							offset = 0;
+						}
+						baseFragmentContainer.setTranslationX(offset);
+					}
+				});
 
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
