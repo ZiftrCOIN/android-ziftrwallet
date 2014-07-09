@@ -15,5 +15,15 @@
     <string name="menu_text_settings">SETTINGS</string>
     <string name="menu_text_about">ABOUT</string>
     <string name="menu_text_contact">CONTACT</string>
+    
+    <string name="cancel_button_text">CANCEL</string>
+    <string name="send_button_text">SEND</string>
+    
+    <string name="send_to_address">SEND TO: </string>
+    <string name="send_to_address_name">NAME: </string>
+    <string name="send_amount">AMOUNT: </string>
+    <string name="send_amount_equivalent">USD</string>
+    <string name="send_transaction_fee">TRANSACTION FEE: </string>
+    <string name="send_total">TOTAL: </string>
 
 </resources>

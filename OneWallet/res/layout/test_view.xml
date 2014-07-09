@@ -1,0 +1,30 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TextView android:text="welcome" 
+        android:id="@+id/TextView" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content">
+    </TextView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button android:text="submit" 
+            android:id="@+id/Button" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true">
+        </Button>
+        <EditText android:id="@+id/EditText" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/Button"
+            android:layout_alignParentBottom="true">
+        </EditText>
+    </RelativeLayout>
+</LinearLayout>

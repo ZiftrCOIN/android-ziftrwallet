@@ -11,11 +11,11 @@ import java.util.Map;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.bitcoin.core.AbstractWalletEventListener;
@@ -108,7 +108,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	}
 
 	/**
-	 * 
+	 * When the view is created, we fill in all of the correct
 	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
@@ -137,13 +137,22 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		return rootView;
 	}
 
+	/**
+	 * When this fragment is being destroyed we need to shut
+	 * down all of the wallet stuff and make sure the wallet is
+	 * saved to a file.
+	 */
 	@Override
 	public void onDestroy() {
 
+		// If the thread that is connecting with peers is still working,
+		// then we stop it here
 		if (peerGroup != null) {
 			peerGroup.stop();
 		}
 
+		// Close the blockstore because we are no longer going to be receiving
+		// and storing blocks
 		if (blockStore != null) {
 			try {
 				blockStore.close();
@@ -152,6 +161,9 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 			}
 		}
 
+		// Save the wallet to the file. Not that this will save the wallet as either
+		// encrypted or decrypted, depending on which was set last using the encrypt
+		// or decrypt methods. 
 		if (wallet != null) {
 			try {
 				wallet.saveToFile(walletFile);
@@ -166,24 +178,43 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 	@Override
 	public void onClick(View v) {
-
 		if (v.getId() == R.id.buttonSendCoins) {
+			// The transaction that will take place to show the new fragment
+			FragmentTransaction transaction = 
+					this.getActivity().getSupportFragmentManager().beginTransaction();
+
+			// TODO add animation to transaciton here
+
+			// Make the new fragment of the correct type
+			Fragment fragToShow = this.getActivity().getSupportFragmentManager().findFragmentByTag("send_coins_fragment");
+			if (fragToShow == null) {
+				// If the fragment doesn't exist yet, make a new one
+				fragToShow = new OWSendBitcoinsFragment();
+			} else if (fragToShow.isVisible()) {
+				// If the fragment is already visible, no need to do anything
+				return;
+			}
+
+			transaction.replace(R.id.oneWalletBaseFragmentHolder, fragToShow, "send_coins_fragment");
+			transaction.addToBackStack(null);
+			transaction.commit();
 
 			// For testing purposes at the moment, let's 
 			// just always send 0.001 btc
+			/*
 			EditText receivingAddressEdit = (
 					EditText) rootView.findViewById(R.id.editSendAddress);
 			String address = receivingAddressEdit.getText().toString();
 
 			try {
-				sendCoins(address, Utils.toNanoCoins("0.00378"));
+				this.sendCoins(address, Utils.toNanoCoins("0.00378"));
 			} catch (AddressFormatException e) {
 				ZLog.log("Exception trying send coins: ", e);
 			} catch (InsufficientMoneyException e) {
 				ZLog.log("Exception trying send coins: ", e);
 			}
+			*/
 		}
-		
 	}
 
 	/**
@@ -198,24 +229,33 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	private void sendCoins(String address, BigInteger value) 
 			throws AddressFormatException, InsufficientMoneyException {
 
-		// Create an address object based on network parameters 
-		// in use and the entered address
+		// Create an address object based on network parameters in use 
+		// and the entered address. This is the address we will send coins to.
 		Address sendAddress = new Address(networkParams, address);
 
 		// Use the address and the value to create a new send request object
-		Wallet.SendRequest sendRequest = 
-				Wallet.SendRequest.to(sendAddress, value);
-		sendRequest.aesKey = wallet.getKeyCrypter().deriveKey("password");
-				
-		// Set a fee for the transaction
+		Wallet.SendRequest sendRequest = Wallet.SendRequest.to(sendAddress, value);
+		
+		// If the wallet is encrypted then we have to load the AES key so that the
+		// wallet can get at the private keys and sign the data.
+		if (this.wallet.isEncrypted()) {
+			sendRequest.aesKey = wallet.getKeyCrypter().deriveKey("password");
+		}
+
+		// Set a fee for the transaction, always the minimum for now.
 		sendRequest.fee = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
 
-		wallet.decrypt(null);
+		// I don't think we want to do this. 
+		//wallet.decrypt(null);
 
 		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
 		sendResult.broadcastComplete.addListener(new Runnable() {
 			@Override
 			public void run() {
+				// 1. TODO if we want something to be done here that relates
+				// to the gui thread, how do we do that?
+				// 
+				// The warning in the xml about layout_width won't go away
 				ZLog.log("Successfully sent coins to address!");
 			}
 		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
@@ -224,42 +264,49 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 	/**
 	 * Setup a wallet object for this fragment by either loading it 
-	 * from an existing store file or by creating a new one from 
+	 * from an existing stored file or by creating a new one from 
 	 * network parameters. Note, though Android won't crash out because 
 	 * of it, this shouldn't be called from a UI thread due to the 
 	 * blocking nature of creating files.
 	 */
 	private void setupWallet() {
 
-		walletFile = null;
+		// Here we recreate the files or create them if this is the first
+		// time the user opens the app.
+		this.walletFile = null;
+		// This is application specific storage, will be deleted when app is uninstalled.
 		File externalDirectory = getActivity().getExternalFilesDir(null);
 		if (externalDirectory != null) {
-			walletFile = new File(
+			this.walletFile = new File(
 					externalDirectory, getCoinPrefix() + "_wallet.dat");
-			blockStoreFile = new File(
-					externalDirectory, getCoinPrefix() + "_blockchain.store");
+			this.blockStoreFile = new File(
+					externalDirectory, this.getCoinPrefix() + "_blockchain.store");
 		}
 
-		wallet = null;
+		this.wallet = null;
 
+		// Try to load the wallet from a file
 		try {
-			wallet = Wallet.loadFromFile(walletFile);
+			this.wallet = Wallet.loadFromFile(walletFile);
 		} catch (UnreadableWalletException e) {
 			ZLog.log("Exception trying to load wallet file: ", e);
 		}
 
-		// If this is the first time this type of wallet was set up
-		if (wallet == null) {
-			wallet = new Wallet(networkParams);
+		// If the load was unsucecssful (presumably only if this is the first 
+		// time this type of wallet was set up) then we make a new wallet and add
+		// a new key to the wallet.
+		if (this.wallet == null) {
+			this.wallet = new Wallet(networkParams);
 			try {
-				wallet.addKey(new ECKey());
-				wallet.saveToFile(walletFile);
+				this.wallet.addKey(new ECKey());
+				this.wallet.saveToFile(this.walletFile);
 			} catch (IOException e) {
 				ZLog.log("Exception trying to save new wallet file: ", e);
 				return;
-				//TODO -this is just test code of course but this is probably 
+				// TODO this is just test code of course but this is probably 
 				// "fatal" as if we can't save our wallet, that's a problem
-				//just kill the activity for testing purposes
+				//
+				// Just kill the activity for testing purposes
 				//super.onBackPressed(); 
 			}
 		}
@@ -275,13 +322,15 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		//			ZLog.log("Exception trying to add a watched address: ", e);
 		//		}
 
-		// how to encrypt a wallet for safety
-		// Actually effect wallet file itself
 		// If it is encrypted, bitcoinj just works with it encrypted as long
 		// as all sendRequests etc have the 
-		// KeyParameter keyParam = wallet.encrypt("password");
+		//KeyParameter keyParam = wallet.encrypt("password");
+		
+		// TODO autosave using 
+		// this.wallet.autosaveToFile(f, delayTime, timeUnit, eventListener);
 
-		//how to decrypt the wallet
+		// To decrypt the wallet. Note that this should only be done if 
+		// the user specifically requests that their wallet be unencrypted. 
 		//wallet.decrypt(wallet.getKeyCrypter().deriveKey("password"));
 
 		// Note: wallets should only be encrypted once using the 
@@ -345,21 +394,22 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 					peerGroup = new PeerGroup(networkParams, chain);
 
+					peerGroup.setUserAgent("OneWallet", "1.0");
+					
 
 					// So the wallet receives broadcast transactions.
 					peerGroup.addWallet(wallet);
 
 					peerGroup.addPeerDiscovery(new DnsDiscovery(networkParams));
+					
+					
 					//peerGroup.setMaxConnections(25);
 
 					// This is for running local version of bitcoin 
 					// network for testing
 					//peerGroup.addAddress(InetAddress.getLocalHost()); 
 
-
-					//peerGroup.downloadBlockChain();
-					//peerGroup.awaitRunning();
-
+					// This starts the connecting with peers on a new thread
 					peerGroup.start();
 
 					ZLog.log("Connected peers: ", 
@@ -372,15 +422,17 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 					wallet.addEventListener(new AbstractWalletEventListener() {
 						@Override
 						public synchronized void onCoinsReceived(
-								Wallet w, Transaction tx, 
+								Wallet w, 
+								Transaction tx, 
 								BigInteger prevBalance, 
 								final BigInteger newBalance) {
 
 							try {
+								// Every time the wallet changes, we save it to the file
 								wallet.saveToFile(walletFile);
 							} catch (IOException e) {
-								ZLog.log("Failed to save "
-										+ "updated wallet balance: ", e);
+								// TODO what to do if this fails? 
+								ZLog.log("Failed to save updated wallet balance: ", e);
 							}
 
 							// Now update the UI with the new balance
@@ -406,7 +458,11 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 					//also upload any pending transactions
 					Collection<Transaction> pendingTransactions = 
 							wallet.getPendingTransactions();
+					wallet.getKeyCrypter();
 
+					synchronized (pendingTransactions) {
+						
+					}
 					for(Transaction tx : pendingTransactions) {
 						//ZLog.log("There is a pending transaction "
 						//		+ "in the wallet: ", tx.toString(chain));
