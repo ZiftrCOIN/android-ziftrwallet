@@ -3,14 +3,15 @@
     android:id="@+id/menuDrawerScrollView"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="@color/LightGrey" >
+    android:background="@color/ow_menu_default" >
 
     <!-- use this: android:choiceMode="singleChoice" ??? -->
+
     <TableLayout
         android:id="@+id/menuDrawerBaseLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/LightGrey"
+        android:background="@color/ow_menu_default"
         android:clickable="true"
         android:orientation="vertical"
         android:shrinkColumns="*" >

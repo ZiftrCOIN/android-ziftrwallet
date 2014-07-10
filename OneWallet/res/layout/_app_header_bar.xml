@@ -4,7 +4,7 @@
     android:id="@+id/navBarLayout"
     android:layout_width="match_parent"
     android:layout_height="10dp"
-    android:background="@color/LightGrey"
+    android:background="@color/ow_action_bar_color"
     android:gravity="left"
     android:orientation="horizontal" >
 
@@ -14,7 +14,6 @@
             android:id="@+id/switchTaskMenuButton"
             android:icon="@drawable/icon_menu_statelist"
             resauto:showAsAction="always"/>
-        
     </menu>
 
     <!--

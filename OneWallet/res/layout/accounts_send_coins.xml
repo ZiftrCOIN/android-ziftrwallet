@@ -19,16 +19,17 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@color/LightGrey"
+                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
+                android:background="@color/ow_send_list_background"
                 android:orientation="horizontal" >
 
                 <ImageView
-                    android:id="@+id/imageView1"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:id="@+id/send_copy_icon"
+                    android:layout_width="@dimen/ow_send_icon_size"
+                    android:layout_height="@dimen/ow_send_icon_size"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_margin="@dimen/ow_send_icon_margin"
+                    android:background="@android:color/transparent"
                     android:contentDescription="@string/old_passphrase_hint"
                     android:src="@drawable/copy_icon" />
 
@@ -41,7 +42,6 @@
                     android:orientation="vertical" >
 
                     <TextView
-                        android:id="@+id/textView1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -51,20 +51,20 @@
                     </TextView>
 
                     <EditText
-                        android:id="@+id/editText1"
+                        android:id="@+id/send_edit_text_receiver_address"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="1"
-                        android:inputType="numberDecimal" >
+                        android:inputType="text" >
                     </EditText>
                 </LinearLayout>
 
                 <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:id="@+id/send_qr_icon"
+                    android:layout_width="@dimen/ow_send_icon_size"
+                    android:layout_height="@dimen/ow_send_icon_size"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_margin="@dimen/ow_send_icon_margin"
                     android:contentDescription="@string/old_passphrase_hint"
                     android:src="@drawable/qr_icon" />
             </LinearLayout>
@@ -72,16 +72,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@color/LightGrey"
+                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
+                android:background="@color/ow_send_list_background"
                 android:orientation="vertical"
                 android:paddingBottom="5dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
+                android:paddingLeft="@dimen/ow_send_empty_space_padding"
+                android:paddingRight="@dimen/ow_send_empty_space_padding"
                 android:paddingTop="5dp" >
 
                 <TextView
-                    android:id="@+id/textView11"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -91,35 +90,34 @@
                 </TextView>
 
                 <EditText
-                    android:id="@+id/editText11"
+                    android:id="@+id/send_edit_text_reciever_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="1"
-                    android:inputType="textCapWords" >
+                    android:inputType="text" >
                 </EditText>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@color/LightGrey"
+                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
+                android:background="@color/ow_send_list_background"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:paddingBottom="5dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
+                android:paddingLeft="@dimen/ow_send_empty_space_padding"
+                android:paddingRight="@dimen/ow_send_empty_space_padding"
                 android:paddingTop="5dp" >
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@color/LightGrey"
+                    android:background="@color/ow_send_list_background"
                     android:orientation="vertical" >
 
                     <TextView
-                        android:id="@+id/textView111"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -129,11 +127,11 @@
                     </TextView>
 
                     <EditText
-                        android:id="@+id/editText111"
+                        android:id="@+id/send_edit_text_amount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="1"
-                        android:inputType="textCapWords" >
+                        android:inputType="text" >
                     </EditText>
                 </LinearLayout>
 
@@ -141,11 +139,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@color/LightGrey"
+                    android:background="@color/ow_send_list_background"
                     android:orientation="vertical" >
 
                     <TextView
-                        android:id="@+id/textView112"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -155,11 +152,11 @@
                     </TextView>
 
                     <EditText
-                        android:id="@+id/editText112"
+                        android:id="@+id/send_edit_text_amount_fiat_equiv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="1"
-                        android:inputType="textCapWords" >
+                        android:inputType="text" >
                     </EditText>
                 </LinearLayout>
             </LinearLayout>
@@ -167,39 +164,40 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@color/LightGrey"
+                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
+                android:background="@color/ow_send_list_background"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:paddingBottom="5dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
+                android:paddingLeft="@dimen/ow_send_empty_space_padding"
+                android:paddingRight="@dimen/ow_send_empty_space_padding"
                 android:paddingTop="5dp" >
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@color/LightGrey"
                     android:orientation="vertical" >
 
                     <TextView
-                        android:id="@+id/textView4"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
                         android:gravity="left"
-                        android:text="@string/send_transaction_fee"
-                        android:textSize="12sp" >
+                        android:text="@string/send_transaction_fee" >
                     </TextView>
 
                     <EditText
-                        android:id="@+id/editText4"
+                        android:id="@+id/send_edit_text_transaction_fee"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:cursorVisible="false"
                         android:ems="1"
-                        android:inputType="textCapWords" >
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:inputType="text" >
                     </EditText>
                 </LinearLayout>
 
@@ -207,11 +205,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@color/LightGrey"
                     android:orientation="vertical" >
 
                     <TextView
-                        android:id="@+id/textView44"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -220,33 +216,34 @@
                         android:gravity="left"
                         android:text="@string/send_amount_equivalent" >
                     </TextView>
-
-                    <TextView
-                        android:id="@+id/textView45"
+                    
+                    <EditText
+                        android:id="@+id/send_edit_text_transaction_fee_fiat_equiv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_margin="5dp"
+                        android:clickable="false"
+                        android:cursorVisible="false"
                         android:ems="1"
-                        android:gravity="bottom"
-                        android:text="(0.06)" >
-                    </TextView>
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:inputType="text" >
+                    </EditText>
+
                 </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:background="@color/LightGrey"
+                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
+                android:background="@color/ow_send_list_background"
                 android:orientation="vertical"
                 android:paddingBottom="5dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
+                android:paddingLeft="@dimen/ow_send_empty_space_padding"
+                android:paddingRight="@dimen/ow_send_empty_space_padding"
                 android:paddingTop="5dp" >
 
                 <TextView
-                    android:id="@+id/textView31"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -258,30 +255,30 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
+                    android:layout_gravity="bottom"
                     android:layout_margin="0dp"
                     android:orientation="horizontal"
                     android:padding="0dp" >
 
                     <TextView
-                        android:id="@+id/textView32"
-                        android:layout_width="0dp"
+                        android:id="@+id/send_total"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_weight="1"
                         android:gravity="left"
-                        android:text="35.00" >
+                        android:text="@string/send_default_total"
+                        android:textSize="24sp" >
                     </TextView>
 
                     <TextView
-                        android:id="@+id/textView33"
-                        android:layout_width="0dp"
+                        android:id="@+id/send_total_fiat_equiv"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_weight="1"
                         android:gravity="left"
-                        android:text="(35.00)" >
+                        android:text="@string/send_default_total" >
                     </TextView>
                 </LinearLayout>
             </LinearLayout>
@@ -302,7 +299,7 @@
             android:layout_height="match_parent"
             android:layout_margin="0dp"
             android:layout_weight="1"
-            android:background="@color/DarkGray"
+            android:background="@color/ow_unpressed_button"
             android:gravity="center"
             android:text="@string/cancel_button_text" />
 
@@ -319,7 +316,7 @@
             android:layout_height="match_parent"
             android:layout_margin="0dp"
             android:layout_weight="1"
-            android:background="@color/DarkGray"
+            android:background="@color/ow_unpressed_button"
             android:gravity="center"
             android:text="@string/send_button_text" />
     </LinearLayout>

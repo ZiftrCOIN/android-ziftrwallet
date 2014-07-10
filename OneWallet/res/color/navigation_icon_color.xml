@@ -20,7 +20,7 @@
         android:state_selected="true"
         android:state_enabled="true"
         />
-    <item android:color="@color/LightGrey"
+    <item android:color="@color/LightGray"
         android:state_enabled="false"
         />
 </selector>

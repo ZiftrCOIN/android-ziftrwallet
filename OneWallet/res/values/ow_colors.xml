@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="ow_menu_default">#D3D3D3</color>
-    <color name="ow_menu_clicked">#A9A9A9</color>
-    <color name="ow_menu_button_clicked">#32CD32</color>
-    <color name="ow_forest_green">#228B22</color>
+    <color name="ow_menu_default">@color/MediumGray</color>
+    <color name="ow_menu_clicked">@color/MediumGray</color>
+    <color name="ow_menu_button_clicked">@color/LimeGreen</color>
     
-    <color name="ow_unpressed_button">#D3D3D3</color>
-    <color name="ow_pressed_button">#32CD32</color>
-    <color name="ow_selected_button">#32CD32</color>
-    <color name="ow_disabled_button">#5a5a5a</color>
+    <color name="ow_unpressed_button">@color/MediumGray</color>
+    <color name="ow_pressed_button">@color/LimeGreen</color>
+    <color name="ow_selected_button">@color/LimeGreen</color>
+    <color name="ow_disabled_button">@color/DarkGray</color>
     
-    <color name="ow_menu_divider">#5a5a5a</color>
+    <color name="ow_menu_divider">@color/DarkGray</color>
+    <color name="ow_action_bar_color">@color/MediumGray</color>
+    
+    <color name="ow_send_list_background">@color/LightGray</color>
 
-    <color name="ow_action_bar_color">#D3D3D3</color>
 </resources>
