@@ -6,9 +6,14 @@
     <color name="ow_menu_button_clicked">@color/LimeGreen</color>
     
     <color name="ow_unpressed_button">@color/MediumGray</color>
-    <color name="ow_pressed_button">@color/LimeGreen</color>
-    <color name="ow_selected_button">@color/LimeGreen</color>
-    <color name="ow_disabled_button">@color/DarkGray</color>
+    <color name="ow_pressed_button">@color/DarkGray</color>
+    <color name="ow_selected_button">@color/DarkGray</color>
+    <color name="ow_disabled_button">@color/LightGray</color>
+    
+    <color name="ow_unpressed_menu_icon">@color/MediumGray</color>
+    <color name="ow_pressed_menu_icon">@color/LimeGreen</color>
+    <color name="ow_selected_menu_icon">@color/LimeGreen</color>
+    <color name="ow_disabled_menu_icon">@color/DarkGray</color>
     
     <color name="ow_menu_divider">@color/DarkGray</color>
     <color name="ow_action_bar_color">@color/MediumGray</color>

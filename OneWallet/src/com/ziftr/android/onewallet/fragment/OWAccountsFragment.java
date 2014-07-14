@@ -24,7 +24,7 @@ import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWPassphraseDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.onewallet.util.OWUtils;
-import com.ziftr.android.onewallet.util.RequestCodes;
+import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -81,7 +81,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 
 				// Set the target fragment
 				passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
-						RequestCodes.GET_PASSPHRASE_DIALOG);
+						OWRequestCodes.GET_PASSPHRASE_DIALOG);
 
 				String message = null;
 				if (OWAccountsFragment.this.userHasPassphrase()) {
@@ -109,7 +109,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 
 					// Set the target fragment
 					passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
-							RequestCodes.RESET_PASSPHRASE_DIALOG);
+							OWRequestCodes.RESET_PASSPHRASE_DIALOG);
 					passphraseDialog.setupDialog("OneWallet", null, 
 							"Continue", null, "Cancel");
 					passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
@@ -118,7 +118,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 					// Make a new alert dialog
 					OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 					alertUserDialog.setTargetFragment(OWAccountsFragment.this, 
-							RequestCodes.ALERT_USER_DIALOG);
+							OWRequestCodes.ALERT_USER_DIALOG);
 					// Set up the dialog with message and other info
 					alertUserDialog.setupDialog("OneWallet", 
 							"You must set a passphrase before you can "
@@ -142,7 +142,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 				// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
 				intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
 				intent.putExtra("SAVE_HISTORY", false);
-				startActivityForResult(intent, RequestCodes.SCAN_QR_CODE);
+				startActivityForResult(intent, OWRequestCodes.SCAN_QR_CODE);
 			}
 		});
 
@@ -162,16 +162,18 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		ZLog.log("A");
 		super.onActivityResult(requestCode, resultCode, data);
+		ZLog.log("B");
 
 		if (data != null && data.hasExtra("SCAN_RESULT") && 
-				requestCode == RequestCodes.SCAN_QR_CODE) {
+				requestCode == OWRequestCodes.SCAN_QR_CODE) {
 			// Get the result of the QR scan
 			String result = data.getStringExtra("SCAN_RESULT");
 
 			OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 			alertUserDialog.setTargetFragment(this, 
-					RequestCodes.ALERT_USER_DIALOG);
+					OWRequestCodes.ALERT_USER_DIALOG);
 			// Set up the dialog, displaying the resulting scanned data.
 			// Set negative text to null to not have negative button
 			alertUserDialog.setupDialog("OneWallet", 
@@ -270,7 +272,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 	private void alertUser(String message, String tag) {
 		OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 		alertUserDialog.setTargetFragment(this, 
-				RequestCodes.ALERT_USER_DIALOG);
+				OWRequestCodes.ALERT_USER_DIALOG);
 		// Set negative text to null to not have negative button
 		alertUserDialog.setupDialog("OneWallet", message, null, "OK", null);
 		alertUserDialog.show(
@@ -322,7 +324,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 	@Override
 	public void handleNeutral(int requestCode) {
 		switch(requestCode) {
-		case RequestCodes.ALERT_USER_DIALOG:
+		case OWRequestCodes.ALERT_USER_DIALOG:
 			// Things for alert dialogs go here.
 			break;
 		default:
@@ -333,13 +335,13 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 	@Override
 	public void handleNegative(int requestCode) {
 		switch(requestCode) {
-		case RequestCodes.ALERT_USER_DIALOG:
+		case OWRequestCodes.ALERT_USER_DIALOG:
 			// Things for alert dialogs go here.
 			break;
-		case RequestCodes.GET_PASSPHRASE_DIALOG:
+		case OWRequestCodes.GET_PASSPHRASE_DIALOG:
 			// Things for get passphrase dialogs go here.
 			break;
-		case RequestCodes.RESET_PASSPHRASE_DIALOG:
+		case OWRequestCodes.RESET_PASSPHRASE_DIALOG:
 			// Things for reset passphrase dialogs go here
 			break;
 		default:

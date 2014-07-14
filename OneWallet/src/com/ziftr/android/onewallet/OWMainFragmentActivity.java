@@ -3,6 +3,7 @@ package com.ziftr.android.onewallet;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -537,6 +538,16 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			this.actionBarMenu.findItem(R.id.switchTaskMenuButton
 					).setIcon(R.drawable.icon_menu_statelist);
 		}
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// Goes here first
+		
+		// Placeholder for anything we might need to do with the results
+		
+		// Then this calls the current fragment's on activity result
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 	@Override

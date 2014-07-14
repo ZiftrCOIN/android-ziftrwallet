@@ -4,10 +4,16 @@
     android:orientation="vertical"
     android:padding="0dp" >
 
-    <ScrollView
+    <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:minHeight="@dimen/ow_send_list_spacing_top_margin" >
+    </View>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="0dp" >
 
@@ -19,12 +25,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
                 android:background="@color/ow_send_list_background"
                 android:orientation="horizontal" >
 
                 <ImageView
-                    android:id="@+id/send_copy_icon"
+                    android:id="@+id/send_paste_icon"
                     android:layout_width="@dimen/ow_send_icon_size"
                     android:layout_height="@dimen/ow_send_icon_size"
                     android:layout_gravity="center"
@@ -131,7 +136,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="1"
-                        android:inputType="text" >
+                        android:inputType="numberDecimal" >
                     </EditText>
                 </LinearLayout>
 
@@ -156,7 +161,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="1"
-                        android:inputType="text" >
+                        android:inputType="numberDecimal" >
                     </EditText>
                 </LinearLayout>
             </LinearLayout>
@@ -216,7 +221,7 @@
                         android:gravity="left"
                         android:text="@string/send_amount_equivalent" >
                     </TextView>
-                    
+
                     <EditText
                         android:id="@+id/send_edit_text_transaction_fee_fiat_equiv"
                         android:layout_width="match_parent"
@@ -228,7 +233,6 @@
                         android:focusableInTouchMode="false"
                         android:inputType="text" >
                     </EditText>
-
                 </LinearLayout>
             </LinearLayout>
 
@@ -257,6 +261,7 @@
                     android:layout_height="60dp"
                     android:layout_gravity="bottom"
                     android:layout_margin="0dp"
+                    android:gravity="bottom"
                     android:orientation="horizontal"
                     android:padding="0dp" >
 
@@ -264,9 +269,9 @@
                         android:id="@+id/send_total"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_gravity="bottom"
                         android:layout_margin="5dp"
-                        android:gravity="left"
+                        android:gravity="bottom"
                         android:text="@string/send_default_total"
                         android:textSize="24sp" >
                     </TextView>
@@ -275,15 +280,22 @@
                         android:id="@+id/send_total_fiat_equiv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_gravity="bottom"
                         android:layout_margin="5dp"
-                        android:gravity="left"
-                        android:text="@string/send_default_total" >
+                        android:gravity="bottom"
+                        android:text="@string/send_default_total_fiat_equiv" >
                     </TextView>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:minHeight="@dimen/ow_send_list_spacing_top_margin" >
+    </View>
 
     <LinearLayout
         android:id="@+id/sendCoinsButtonHolder"
@@ -299,7 +311,7 @@
             android:layout_height="match_parent"
             android:layout_margin="0dp"
             android:layout_weight="1"
-            android:background="@color/ow_unpressed_button"
+            android:background="@drawable/clickable_button_color"
             android:gravity="center"
             android:text="@string/cancel_button_text" />
 
@@ -316,7 +328,7 @@
             android:layout_height="match_parent"
             android:layout_margin="0dp"
             android:layout_weight="1"
-            android:background="@color/ow_unpressed_button"
+            android:background="@drawable/clickable_button_color"
             android:gravity="center"
             android:text="@string/send_button_text" />
     </LinearLayout>

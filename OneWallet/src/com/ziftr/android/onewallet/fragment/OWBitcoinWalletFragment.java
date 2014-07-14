@@ -5,6 +5,12 @@ import com.google.bitcoin.params.TestNet3Params;
 
 public class OWBitcoinWalletFragment extends OWWalletFragment {
 
+	/**
+	 * Get the market exchange prefix for the 
+	 * actual sub-classing coin fragment type.
+	 * 
+	 * @return "BTC" for Bitcoin
+	 */
 	@Override
 	public String getCoinPrefix() {
 		return "BTC";

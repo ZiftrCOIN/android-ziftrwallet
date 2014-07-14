@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -267,6 +269,126 @@ public class OWUtils {
 			bArray[i] = (byte) finalByte;
 		}
 		return bArray;
+	}
+
+	/**
+	 * Given a double, this method gives the number of 'satoshis' in the double.
+	 * For example, 1.5001 BTC (where "BTC" is the coinType) will return 150010000. 
+	 * 
+	 * @param coinType - The type of coin, "BTC" for bitcoin, etc. 
+	 * @param d - the amount to convert.
+	 */
+	public static int doubleToAtomicUnits(String coinType, double d) {
+		if ("BTC".equals(coinType)) {
+			d *= Math.pow(10, 8);
+			return (int) d;
+		}
+		return 0;
+	}
+
+	/**
+	 * Given a double as a string, this method gives the number of 'satoshis' 
+	 * in the double.
+	 * For example, "1.5001" BTC (where "BTC" is the coinType) will return 150010000. 
+	 * 
+	 * @param coinType - The type of coin, "BTC" for bitcoin, etc. 
+	 * @param d - the amount to convert.
+	 */
+	public static int stringToAtomicUnits(String coinType, String d) {
+		double val = 0.0;
+		if ("BTC".equals(coinType)) {
+			try {
+				val = Double.parseDouble(d);
+			} catch(NumberFormatException nfe) {
+				return 0;
+			}
+		}
+		return doubleToAtomicUnits(coinType, val);
+	}
+
+	/**
+	 * Based on the coin type, this method converts back the number of atomic
+	 * units to a double.
+	 * 
+	 * @param coinType - "BTC" for bitcoin, etc.
+	 * @param numAtomicUnits - The number of atomic units to convert. 
+	 * @return The integer converted back to a double.
+	 */
+	public static double atomicUnitsToDouble(String coinType, int numAtomicUnits) {
+		if ("BTC".equals(coinType)) {
+			double d = (double) numAtomicUnits;
+			d /= Math.pow(10, 8);
+			return d;
+		}
+		return 0;
+	}
+
+	/**
+	 * Based on the coin type, this method converts back the number of atomic
+	 * units to a double and gives back a string containing that double.
+	 * 
+	 * @param coinType - "BTC" for bitcoin, etc.
+	 * @param numAtomicUnits - The number of atomic units to convert. 
+	 * @return The integer converted back to a double, represented as a string.
+	 */
+	public static String atomicUnitsToString(String coinType, int numAtomicUnits) {
+		BigDecimal basic = 
+				(new BigDecimal(atomicUnitsToDouble(coinType, numAtomicUnits)));
+		return trimZeroes(formatTo8DecimalPlaces(basic));
+	}
+	
+	/**
+	 * This makes it so that the BigDecimal returned has a string value with
+	 * exactly 8 decimal places. If it is desirable to have the zeroes trimmed,
+	 * call trimZeroes on the result.
+	 * 
+	 * @param toFormat - The big decimal to format
+	 * @return a new big decimal formatted correctly as above.
+	 */
+	public static BigDecimal formatTo8DecimalPlaces(BigDecimal toFormat) {
+		return formatToNDecimalPlaces(8, toFormat);
+	}
+	
+	/**
+	 * This makes it so that the BigDecimal returned has a string value with
+	 * exactly numDecimalPlaces decimal places. If it is desirable to have 
+	 * the zeroes trimmed, call trimZeroes on the result.
+	 * 
+	 * @param toFormat - The big decimal to format
+	 * @return a new big decimal formatted correctly as above.
+	 */
+	public static BigDecimal formatToNDecimalPlaces(int numDecimalPlaces, 
+			BigDecimal toFormat) {
+		return toFormat.setScale(numDecimalPlaces, RoundingMode.HALF_UP);
+	}
+
+	/**
+	 * Trims the zeroes 
+	 * @param decToFormat
+	 * @return
+	 */
+	public static String trimZeroes(BigDecimal decToFormat) {
+		return String.format("%s", decToFormat.doubleValue());
+//		// Check that not null
+//		if (decToFormat == null) {
+//			return null;
+//		}
+//		
+//		// Trim white space
+//		decToFormat = decToFormat.trim();
+//		
+//		// Get rid of leading zeroes
+//		while (decToFormat.startsWith("0")) {
+//			decToFormat = decToFormat.substring(1);
+//		}
+//		
+//		// Get rid of trailing zeroes
+//		while (decToFormat.endsWith("0")) {
+//			decToFormat = decToFormat.substring(0, decToFormat.length()-1);
+//		}
+//		
+//		// Return the result
+//		return decToFormat;
 	}
 
 }

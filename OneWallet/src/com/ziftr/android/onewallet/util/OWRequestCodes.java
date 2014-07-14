@@ -1,6 +1,6 @@
 package com.ziftr.android.onewallet.util;
 
-public class RequestCodes {
+public class OWRequestCodes {
 	
 	public static final int GET_PASSPHRASE_DIALOG = 1;
 	
