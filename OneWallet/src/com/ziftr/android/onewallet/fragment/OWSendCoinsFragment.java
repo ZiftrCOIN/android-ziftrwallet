@@ -1,6 +1,7 @@
 package com.ziftr.android.onewallet.fragment;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 
 import android.app.Activity;
@@ -21,6 +22,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.bitcoin.core.Address;
+import com.google.bitcoin.core.AddressFormatException;
+import com.google.bitcoin.core.InsufficientMoneyException;
+import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.core.Wallet;
+import com.google.bitcoin.utils.Threading;
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.Fiat;
@@ -72,6 +79,26 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	public abstract int getNumberOfDigitsOfPrecision(); 
 
 	/**
+	 * This is a placeholder for a spot to determine if a given address
+	 * is valid.
+	 * 
+	 * @param address - The address to verify the validity of.
+	 * @return as above
+	 */
+	public abstract boolean addressIsValid(String address);
+
+	private Wallet wallet;
+	private NetworkParameters networkParams; 
+	
+	public void setWallet(Wallet w) {
+		this.wallet = w;
+	}
+	
+	public void setNetworkParams(NetworkParameters nps) {
+		this.networkParams = nps;
+	}
+
+	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
 	@Override
@@ -79,6 +106,14 @@ public abstract class OWSendCoinsFragment extends Fragment {
 			ViewGroup container, Bundle savedInstanceState) {
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
+
+		if (this.wallet == null) {
+			throw new IllegalArgumentException(
+					"The wallet must be set to send coins.");
+		} else if (this.networkParams == null) {
+			throw new IllegalArgumentException(
+					"The network params must be set to send coins.");
+		}
 
 		// Sets the onclicks for qr code icon, copy/paste icon, any help icons.
 		this.initializeIcons();
@@ -106,77 +141,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 					data.getExtras().getCharSequence("SCAN_RESULT"));
 		}
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	/**
-	 * Sets up the cancel and the send buttons with their appropriate actions.
-	 * The cancel buttons quits the send coins fragment and goes back to wherever
-	 * the user was before. The send button validates the values in the form and
-	 * initizializes the sending of the coins if everything is correct.
-	 */
-	private void initializeButtons() {
-		Button cancelButton = (Button) 
-				this.rootView.findViewById(R.id.cancelSendCoinsButton);
-		cancelButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Activity a = getActivity();
-				if (a != null) {
-					a.onBackPressed();
-				}
-			}
-		});
-	}
-
-	/**
-	 * The form needs to add the totals and update the total text view and
-	 * ensure that the coin and fiat equivalents are always in sync. This method
-	 * sets up all the text views to do that. 
-	 */
-	private void initializeTextViewDependencies() {
-		// Bind the amount values so that when one changes the other changes
-		// according to the current exchange rate.
-		EditText amountTextView = this.getCoinAmountEditText();
-		this.bindEditTextValues(amountTextView, this.getFiatAmountEditText());
-
-		// Bind the fee values so that when one changes the other changes
-		// according to the current exchange rate.
-		EditText feeTextView = this.getCoinFeeEditText();
-		this.bindEditTextValues(feeTextView, this.getFiatFeeEditText());
-
-		TextWatcher refreshTotalTextWatcher = new TextWatcher() {
-			@Override
-			public void onTextChanged(CharSequence text, int start, 
-					int before, int count) {
-				refreshTotal();
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence text, int start, 
-					int count, int after) {
-				// Nothing to do 
-			}
-
-			@Override
-			public void afterTextChanged(Editable text) {
-				// Nothing to do 
-			}
-		};
-
-		// Add the listener to the amount text view
-		amountTextView.addTextChangedListener(refreshTotalTextWatcher);
-
-		// Add the listener to the fee text view
-		feeTextView.addTextChangedListener(refreshTotalTextWatcher);
-
-		// Set the fee to the default and set send amount to 0 initially 
-		changeFiatStartedFromProgram = true;
-		feeTextView.setText(this.getDefaultFee());
-		changeFiatStartedFromProgram = false;
-
-		changeCoinStartedFromProgram = true;
-		amountTextView.setText("0");
-		changeCoinStartedFromProgram = false;
 	}
 
 	/**
@@ -237,6 +201,164 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	}
 
 	/**
+	 * The form needs to add the totals and update the total text view and
+	 * ensure that the coin and fiat equivalents are always in sync. This method
+	 * sets up all the text views to do that. 
+	 */
+	private void initializeTextViewDependencies() {
+		// Bind the amount values so that when one changes the other changes
+		// according to the current exchange rate.
+		EditText amountTextView = this.getCoinAmountEditText();
+		this.bindEditTextValues(amountTextView, this.getFiatAmountEditText());
+
+		// Bind the fee values so that when one changes the other changes
+		// according to the current exchange rate.
+		EditText feeTextView = this.getCoinFeeEditText();
+		this.bindEditTextValues(feeTextView, this.getFiatFeeEditText());
+
+		TextWatcher refreshTotalTextWatcher = new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence text, int start, 
+					int before, int count) {
+				refreshTotal();
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence text, int start, 
+					int count, int after) {
+				// Nothing to do 
+			}
+
+			@Override
+			public void afterTextChanged(Editable text) {
+				// Nothing to do 
+			}
+		};
+
+		// Add the listener to the amount text view
+		amountTextView.addTextChangedListener(refreshTotalTextWatcher);
+
+		// Add the listener to the fee text view
+		feeTextView.addTextChangedListener(refreshTotalTextWatcher);
+
+		// Set the fee to the default and set send amount to 0 initially 
+		changeFiatStartedFromProgram = true;
+		feeTextView.setText(this.getDefaultFee());
+		changeFiatStartedFromProgram = false;
+
+		changeCoinStartedFromProgram = true;
+		amountTextView.setText("0");
+		changeCoinStartedFromProgram = false;
+	}
+
+	/**
+	 * Sets up the cancel and the send buttons with their appropriate actions.
+	 * The cancel buttons quits the send coins fragment and goes back to wherever
+	 * the user was before. The send button validates the values in the form and
+	 * initizializes the sending of the coins if everything is correct.
+	 */
+	private void initializeButtons() {
+		Button cancelButton = (Button) 
+				this.rootView.findViewById(R.id.cancelSendCoinsButton);
+		cancelButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Activity a = getActivity();
+				if (a != null) {
+					a.onBackPressed();
+				}
+			}
+		});
+
+		Button sendButton = (Button) 
+				this.rootView.findViewById(R.id.sendCoinsButton);
+		sendButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (addressIsValid(getSendToAddressEditText().getText().toString())) {
+					// Need to make sure amount to send is less than balance
+					BigInteger amountSending = getAmountToSendFromEditText().multiply(
+							(new BigDecimal("10").pow(getNumberOfDigitsOfPrecision()))
+							).toBigInteger();
+					BigInteger feeSending = getFeeFromEditText().multiply(
+							(new BigDecimal("10").pow(getNumberOfDigitsOfPrecision()))
+							).toBigInteger();
+					
+					ZLog.log("Sending: ", amountSending.toString());
+					
+					try {
+						// TODO The fee is 0 for now, we will have to change this to be
+						// this.getFeeFromEditText() eventually. 
+						sendCoins(getSendToAddressEditText().getText().toString(), 
+								amountSending, feeSending); // new BigInteger("0")
+						
+						// To exit out of the send coins fragment
+						getActivity().onBackPressed();
+					} catch(AddressFormatException afe) {
+						// TODO alert user if address has errors
+						ZLog.log("There was a problem with the address.");
+					} catch(InsufficientMoneyException ime) {
+						// TODO alert user if not enough money in wallet.
+						ZLog.log("There was not enough money in the wallet.");
+					} 
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Sends the type of coin that this thread actually represents to 
+	 * the specified address. 
+	 * 
+	 * @param address - The address to send coins to.
+	 * @param value - The number of atomic units (satoshis for BTC) to send
+	 * @throws AddressFormatException
+	 * @throws InsufficientMoneyException
+	 */
+	private void sendCoins(String address, BigInteger value, BigInteger fee) 
+			throws AddressFormatException, InsufficientMoneyException {
+
+		// Create an address object based on network parameters in use 
+		// and the entered address. This is the address we will send coins to.
+		Address sendAddress = new Address(networkParams, address);
+
+		// Use the address and the value to create a new send request object
+		Wallet.SendRequest sendRequest = Wallet.SendRequest.to(sendAddress, value);
+		
+		
+		// If the wallet is encrypted then we have to load the AES key so that the
+		// wallet can get at the private keys and sign the data.
+		if (this.wallet.isEncrypted()) {
+			sendRequest.aesKey = wallet.getKeyCrypter().deriveKey("password");
+		}
+		
+		// Make sure we aren't adding any additional fees
+		sendRequest.ensureMinRequiredFee = false;
+
+		// Set a fee for the transaction, always the minimum for now.
+		// sendRequest.fee = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
+		sendRequest.fee = fee;
+		
+		// TODO tell Eric B. that we need to change fee to fee/kb to be accurate
+		// and change the layout to match
+		sendRequest.feePerKb = BigInteger.ZERO;
+
+		// I don't think we want to do this. 
+		//wallet.decrypt(null);
+
+		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
+		sendResult.broadcastComplete.addListener(new Runnable() {
+			@Override
+			public void run() {
+				// TODO if we want something to be done here that relates
+				// to the gui thread, how do we do that?
+				ZLog.log("Successfully sent coins to address!");
+			}
+		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
+
+	}
+
+	/**
 	 * This is a useful method that binds two textviews together with
 	 * TextWatchers in such a way that when one changes the other also 
 	 * changes. One EditText contains coin values and the other should 
@@ -254,12 +376,9 @@ public abstract class OWSendCoinsFragment extends Fragment {
 				if (!changeCoinStartedFromProgram) {
 					String newVal = text.toString();
 					BigDecimal newCoinVal = null;
-					//					BigDecimal oldFiatVal = null;
 					BigDecimal newFiatVal = null;
 					try {
 						newCoinVal = new BigDecimal(newVal);
-						//						oldFiatVal = new BigDecimal(
-						//								"0" + fiatValEditText.getText().toString());
 						newFiatVal = convertCoinToFiat(newCoinVal);
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
@@ -271,12 +390,9 @@ public abstract class OWSendCoinsFragment extends Fragment {
 						return;
 					}
 
-					//					if (!newFiatVal.equals(oldFiatVal) || 
-					//							newFiatVal.doubleValue() == 0.0) {
 					changeFiatStartedFromProgram = true;
 					fiatValEditText.setText(formatFiatAmount(newFiatVal).toPlainString());
 					changeFiatStartedFromProgram = false;
-					//					}
 				}
 			}
 
@@ -300,12 +416,9 @@ public abstract class OWSendCoinsFragment extends Fragment {
 				if (!changeFiatStartedFromProgram) {
 					String newVal = text.toString();
 					BigDecimal newFiatVal = null;
-					//					BigDecimal oldCoinVal = null;
 					BigDecimal newCoinVal = null;
 					try {
 						newFiatVal = new BigDecimal(newVal);
-						//						oldCoinVal = new BigDecimal(
-						//								"0" + coinValEditText.getText().toString());
 						newCoinVal = newFiatVal.divide(
 								getExchangeRateToFiat(Fiat.Type.USD), 
 								MathContext.DECIMAL64);
@@ -319,12 +432,9 @@ public abstract class OWSendCoinsFragment extends Fragment {
 						return;
 					}
 
-					//					if (!newCoinVal.equals(oldCoinVal) || 
-					//							newCoinVal.doubleValue() == 0.0) {
 					changeCoinStartedFromProgram = true;
 					coinValEditText.setText(formatCoinAmount(newCoinVal).toPlainString());
 					changeCoinStartedFromProgram = false;
-					//					}
 				}
 			}
 
@@ -371,20 +481,49 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	 * @return as above
 	 */
 	private BigDecimal getTotalAmountToSend() {
+		return this.getAmountToSendFromEditText().add(this.getFeeFromEditText());
+	}
+	
+	/**
+	 * Gets the amount that is in the amount text box. The user can change 
+	 * this either through changing the fiat equivalent textbox or by changing
+	 * the 
+	 * 
+	 * @return A {@link BigDecimal} with the amount the user would like to send.
+	 */
+	private BigDecimal getAmountToSendFromEditText() {
 		EditText basicAmountTextBox = getCoinAmountEditText();
-		EditText feeTextBox = getCoinFeeEditText();
 
 		BigDecimal basicAmount = null;
-		BigDecimal fee = null;
 		try {
 			basicAmount = new BigDecimal(basicAmountTextBox.getText().toString());
+		} catch (NumberFormatException nfe) {
+			// If any of the textboxes contain values that can't be parsed
+			// then just return 0
+			return new BigDecimal(0);
+		}
+		return basicAmount;
+	}
+	
+	/**
+	 * Gets the amount that is in the fee text box. This will be set in the 
+	 * text box to the default of this coin type if the user has not 
+	 * purposefully changed it.
+	 * 
+	 * @return A {@link BigDecimal} with the fee the user would like to send.
+	 */
+	private BigDecimal getFeeFromEditText() {
+		EditText feeTextBox = getCoinFeeEditText();
+
+		BigDecimal fee = null;
+		try {
 			fee = new BigDecimal(feeTextBox.getText().toString());
 		} catch (NumberFormatException nfe) {
 			// If any of the textboxes contain values that can't be parsed
 			// then just return 0
 			return new BigDecimal(0);
 		}
-		return basicAmount.add(fee);
+		return fee;
 	}
 
 	/**

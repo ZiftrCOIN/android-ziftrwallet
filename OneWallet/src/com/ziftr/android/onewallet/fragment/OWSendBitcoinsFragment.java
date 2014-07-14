@@ -33,4 +33,9 @@ public class OWSendBitcoinsFragment extends OWSendCoinsFragment {
 		return 8;
 	}
 
+	@Override
+	public boolean addressIsValid(String address) {
+		return address != null && 27 <= address.length() && address.length() <= 34; 
+	}
+
 }
