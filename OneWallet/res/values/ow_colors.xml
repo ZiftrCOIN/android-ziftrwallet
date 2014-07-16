@@ -19,5 +19,7 @@
     <color name="ow_action_bar_color">@color/MediumGray</color>
     
     <color name="ow_send_list_background">@color/LightGray</color>
+    
+    <color name="ow_add_currency_background">@color/MediumGray</color>
 
 </resources>

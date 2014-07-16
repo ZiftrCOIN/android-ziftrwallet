@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="5dp"
+        android:contentDescription="@string/old_passphrase_hint"
+        android:src="@drawable/icon_bitcoin_logo" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="5dp"
+        android:gravity="center_horizontal"
+        android:text="@string/bitcoin_caps" />
+
+</LinearLayout>

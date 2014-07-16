@@ -6,9 +6,9 @@
     
     <dimen name="ow_send_list_spacing_top_margin">6dp</dimen>
     
+    <dimen name="ow_icon_size">40dp</dimen>
+    <dimen name="ow_icon_margin">5dp</dimen>
     <!-- 2*margin + size == empty_space_padding -->
-    <dimen name="ow_send_icon_size">40dp</dimen>
-    <dimen name="ow_send_icon_margin">5dp</dimen>
-    <dimen name="ow_send_empty_space_padding">50dp</dimen>
-
+    <dimen name="ow_total_icon_side_length">50dp</dimen>
+    
 </resources>

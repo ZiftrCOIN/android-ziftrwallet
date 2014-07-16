@@ -30,10 +30,10 @@
 
                 <ImageView
                     android:id="@+id/send_paste_icon"
-                    android:layout_width="@dimen/ow_send_icon_size"
-                    android:layout_height="@dimen/ow_send_icon_size"
+                    android:layout_width="@dimen/ow_icon_size"
+                    android:layout_height="@dimen/ow_icon_size"
                     android:layout_gravity="center"
-                    android:layout_margin="@dimen/ow_send_icon_margin"
+                    android:layout_margin="@dimen/ow_icon_margin"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/old_passphrase_hint"
                     android:src="@drawable/copy_icon" />
@@ -66,10 +66,10 @@
 
                 <ImageView
                     android:id="@+id/send_qr_icon"
-                    android:layout_width="@dimen/ow_send_icon_size"
-                    android:layout_height="@dimen/ow_send_icon_size"
+                    android:layout_width="@dimen/ow_icon_size"
+                    android:layout_height="@dimen/ow_icon_size"
                     android:layout_gravity="center"
-                    android:layout_margin="@dimen/ow_send_icon_margin"
+                    android:layout_margin="@dimen/ow_icon_margin"
                     android:contentDescription="@string/old_passphrase_hint"
                     android:src="@drawable/qr_icon" />
             </LinearLayout>
@@ -81,8 +81,8 @@
                 android:background="@color/ow_send_list_background"
                 android:orientation="vertical"
                 android:paddingBottom="5dp"
-                android:paddingLeft="@dimen/ow_send_empty_space_padding"
-                android:paddingRight="@dimen/ow_send_empty_space_padding"
+                android:paddingLeft="@dimen/ow_total_icon_side_length"
+                android:paddingRight="@dimen/ow_total_icon_side_length"
                 android:paddingTop="5dp" >
 
                 <TextView
@@ -111,8 +111,8 @@
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:paddingBottom="5dp"
-                android:paddingLeft="@dimen/ow_send_empty_space_padding"
-                android:paddingRight="@dimen/ow_send_empty_space_padding"
+                android:paddingLeft="@dimen/ow_total_icon_side_length"
+                android:paddingRight="@dimen/ow_total_icon_side_length"
                 android:paddingTop="5dp" >
 
                 <LinearLayout
@@ -174,8 +174,8 @@
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:paddingBottom="5dp"
-                android:paddingLeft="@dimen/ow_send_empty_space_padding"
-                android:paddingRight="@dimen/ow_send_empty_space_padding"
+                android:paddingLeft="@dimen/ow_total_icon_side_length"
+                android:paddingRight="@dimen/ow_total_icon_side_length"
                 android:paddingTop="5dp" >
 
                 <LinearLayout
@@ -245,8 +245,8 @@
                 android:background="@color/ow_send_list_background"
                 android:orientation="vertical"
                 android:paddingBottom="5dp"
-                android:paddingLeft="@dimen/ow_send_empty_space_padding"
-                android:paddingRight="@dimen/ow_send_empty_space_padding"
+                android:paddingLeft="@dimen/ow_total_icon_side_length"
+                android:paddingRight="@dimen/ow_total_icon_side_length"
                 android:paddingTop="5dp" >
 
                 <TextView

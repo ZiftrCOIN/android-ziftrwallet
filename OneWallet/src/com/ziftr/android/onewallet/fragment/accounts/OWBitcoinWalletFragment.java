@@ -1,4 +1,4 @@
-package com.ziftr.android.onewallet.fragment;
+package com.ziftr.android.onewallet.fragment.accounts;
 
 import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.params.TestNet3Params;

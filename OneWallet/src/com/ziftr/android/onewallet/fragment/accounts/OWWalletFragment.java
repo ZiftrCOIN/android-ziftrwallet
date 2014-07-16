@@ -1,4 +1,4 @@
-package com.ziftr.android.onewallet.fragment;
+package com.ziftr.android.onewallet.fragment.accounts;
 
 import java.io.File;
 import java.io.IOException;

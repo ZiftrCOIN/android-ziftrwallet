@@ -1,6 +1,8 @@
-package com.ziftr.android.onewallet.fragment;
+package com.ziftr.android.onewallet.fragment.accounts;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,19 +14,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 
-import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.OWPassphraseDialog;
-import com.ziftr.android.onewallet.dialog.OWResetPassphraseDialog;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWPassphraseDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.fragment.OWSectionFragment;
+import com.ziftr.android.onewallet.util.Fiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -39,13 +43,16 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 	protected View rootView;
 
 	/** The most recently clicked button. */
-	private View clickedButton;
+	private Class<? extends Fragment> classToOpenFragmentFor;
 
 	/** The key for getting the passphrase hash from the preferences. */
 	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
 
 	/** The context for this fragment. */
 	private FragmentActivity myContext;
+
+	/** The list view which shows a link to open each of the wallets/currency types. */
+	ListView listViewOfUserWallets;
 
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
@@ -67,6 +74,36 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 		this.rootView = inflater.inflate(
 				R.layout.section_accounts_layout, container, false);
 
+		// Add a few wallets for testing, will need to get these
+		// values somewhere eventually
+		List<OWCurrencyListItem> userWallets = new ArrayList<OWCurrencyListItem>();
+		userWallets.add(new OWCurrencyListItem(R.drawable.icon_bitcoin_logo,
+				"Bitcoin", Fiat.Type.USD, "620.00", "0.00000000", "0.00"));
+		userWallets.add(new OWCurrencyListItem(R.drawable.icon_bitcoin_logo, 
+				"Bitcoin Testnet", Fiat.Type.USD, "0.00", "0.00000000", "0.00"));
+
+		this.listViewOfUserWallets = (ListView) 
+				this.rootView.findViewById(R.id.listOfUserWallets);
+		this.listViewOfUserWallets.setAdapter(new OWCurrencyListAdapter(
+				this.myContext, R.layout.accounts_single_currency, userWallets));
+
+		this.listViewOfUserWallets.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, 
+					int position, long id) {
+				OWCurrencyListItem item = (OWCurrencyListItem) 
+						parent.getItemAtPosition(position);
+				if ("Bitcoin Testnet".equals(item.getCurrencyTitle())) {
+					// If we are using the test net network then we make sure the
+					// user has a passphrase and 
+					startBitcoinTestnetWallet();
+				}
+				ZLog.log("View: ", view, "\n", "at position: " + position, 
+						"\n", "id: "  +id);
+			}
+		});
+
+		/*
 		// For the bitcoinWalletButton
 		View bitcoinWalletButton = rootView.findViewById(R.id.buttonBitcoinWallet);
 		// Add what kind of fragment this button should create as tag
@@ -75,25 +112,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 		bitcoinWalletButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				OWAccountsFragment.this.clickedButton = v;
-
-				OWPassphraseDialog passphraseDialog = new OWPassphraseDialog();
-
-				// Set the target fragment
-				passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
-						OWRequestCodes.GET_PASSPHRASE_DIALOG);
-
-				String message = null;
-				if (OWAccountsFragment.this.userHasPassphrase()) {
-					message = "Please input your passphrase. ";
-				} else {
-					message = "Please input a passphrase. This will be used "
-							+ "for securing all your wallets.";
-				}
-				passphraseDialog.setupDialog("OneWallet", message, 
-						"Continue", null, "Cancel");
-				passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
-						"open_bitcoin_wallet");
+				startBitcoinTestnetWallet();
 			}
 		});
 
@@ -145,9 +164,31 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 				startActivityForResult(intent, OWRequestCodes.SCAN_QR_CODE);
 			}
 		});
-
+		 */
 		// Return the view which was inflated
 		return rootView;
+	}
+
+	private void startBitcoinTestnetWallet() {
+		// TODO is there a better way to do this? 
+		this.classToOpenFragmentFor = OWBitcoinWalletFragment.class;
+		
+		OWPassphraseDialog passphraseDialog = new OWPassphraseDialog();
+
+		// Set the target fragment
+		passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
+				OWRequestCodes.GET_PASSPHRASE_DIALOG);
+
+		// TODO separate this into two dailos, enter passphrase dialog
+		// and a create new passphrase dialog.
+		String message = "Please input your passphrase. ";
+		if (!OWAccountsFragment.this.userHasPassphrase()) {
+			message += "This will be used for securing all your wallets.";
+		}
+		passphraseDialog.setupDialog("OneWallet", message, 
+				"Continue", null, "Cancel");
+		passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
+				"open_bitcoin_wallet");
 	}
 
 	/**
@@ -162,9 +203,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		ZLog.log("A");
 		super.onActivityResult(requestCode, resultCode, data);
-		ZLog.log("B");
 
 		if (data != null && data.hasExtra("SCAN_RESULT") && 
 				requestCode == OWRequestCodes.SCAN_QR_CODE) {
@@ -191,16 +230,12 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 	 */
 	private void startFragmentFromButtonTag() {
 		try {
-			@SuppressWarnings("unchecked") 
-			Class<? extends Fragment> newFragmentClass = (
-					Class<? extends Fragment>) this.clickedButton.getTag();
-
-			Fragment fragment = newFragmentClass.newInstance();
-			String tagString = newFragmentClass.getSimpleName();
+			Fragment fragment = this.classToOpenFragmentFor.newInstance();
+			String tagString = this.classToOpenFragmentFor.getSimpleName();
 
 			this.myContext.getSupportFragmentManager().beginTransaction(
 					).replace(R.id.oneWalletBaseFragmentHolder, fragment, tagString
-					).addToBackStack(null).commit();
+							).addToBackStack(null).commit();
 		} catch(Exception e) {
 			ZLog.log("Exceptiong trying to load wallet fragment. Was a "
 					+ "button not properly setup? ", e);

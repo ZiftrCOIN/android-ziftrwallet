@@ -19,10 +19,10 @@ import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
-import com.ziftr.android.onewallet.fragment.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**

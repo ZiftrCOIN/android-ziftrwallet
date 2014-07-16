@@ -257,6 +257,7 @@ public class OWUtils {
 	 * @return The result of the conversion.
 	 */
 	public static byte[] hexStringToBinary(String hexStr) {
+		// TODO is this the same: Hex.decode(hexStr); ???
 		byte bArray[] = new byte[hexStr.length()/2];  
 		for (int i=0; i<(hexStr.length()/2); i++) {
 			// [x,y) 
