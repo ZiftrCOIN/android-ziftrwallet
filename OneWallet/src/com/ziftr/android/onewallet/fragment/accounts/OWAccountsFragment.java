@@ -14,9 +14,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ListView;
 
 import com.ziftr.android.onewallet.R;
@@ -26,7 +29,8 @@ import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWPassphraseDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.onewallet.fragment.OWSectionFragment;
-import com.ziftr.android.onewallet.util.Fiat;
+import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -52,7 +56,16 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 	private FragmentActivity myContext;
 
 	/** The list view which shows a link to open each of the wallets/currency types. */
-	ListView listViewOfUserWallets;
+	private ListView currencyListView;
+	private List<OWCurrencyListItem> userWallets;
+
+	/** The grid view which lets users add new wallet types.*/
+	private GridView newCurrencyGridView;
+	/** The string to save the visibility of the grid on rotation changes. */
+	private static final String NEW_CURRENCY_GRID_VISIBILITY = 
+			"NEW_CURRENCY_GRID_VISIBILITY";
+
+
 
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
@@ -74,34 +87,10 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 		this.rootView = inflater.inflate(
 				R.layout.section_accounts_layout, container, false);
 
-		// Add a few wallets for testing, will need to get these
-		// values somewhere eventually
-		List<OWCurrencyListItem> userWallets = new ArrayList<OWCurrencyListItem>();
-		userWallets.add(new OWCurrencyListItem(R.drawable.icon_bitcoin_logo,
-				"Bitcoin", Fiat.Type.USD, "620.00", "0.00000000", "0.00"));
-		userWallets.add(new OWCurrencyListItem(R.drawable.icon_bitcoin_logo, 
-				"Bitcoin Testnet", Fiat.Type.USD, "0.00", "0.00000000", "0.00"));
+		// Initialize the list of user wallets that they can open
+		this.initializeCurrencyListView();
 
-		this.listViewOfUserWallets = (ListView) 
-				this.rootView.findViewById(R.id.listOfUserWallets);
-		this.listViewOfUserWallets.setAdapter(new OWCurrencyListAdapter(
-				this.myContext, R.layout.accounts_single_currency, userWallets));
-
-		this.listViewOfUserWallets.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, 
-					int position, long id) {
-				OWCurrencyListItem item = (OWCurrencyListItem) 
-						parent.getItemAtPosition(position);
-				if ("Bitcoin Testnet".equals(item.getCurrencyTitle())) {
-					// If we are using the test net network then we make sure the
-					// user has a passphrase and 
-					startBitcoinTestnetWallet();
-				}
-				ZLog.log("View: ", view, "\n", "at position: " + position, 
-						"\n", "id: "  +id);
-			}
-		});
+		this.initializeNewCurrencyGridView(savedInstanceState);
 
 		/*
 		// For the bitcoinWalletButton
@@ -169,31 +158,9 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 		return rootView;
 	}
 
-	private void startBitcoinTestnetWallet() {
-		// TODO is there a better way to do this? 
-		this.classToOpenFragmentFor = OWBitcoinWalletFragment.class;
-		
-		OWPassphraseDialog passphraseDialog = new OWPassphraseDialog();
-
-		// Set the target fragment
-		passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
-				OWRequestCodes.GET_PASSPHRASE_DIALOG);
-
-		// TODO separate this into two dailos, enter passphrase dialog
-		// and a create new passphrase dialog.
-		String message = "Please input your passphrase. ";
-		if (!OWAccountsFragment.this.userHasPassphrase()) {
-			message += "This will be used for securing all your wallets.";
-		}
-		passphraseDialog.setupDialog("OneWallet", message, 
-				"Continue", null, "Cancel");
-		passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
-				"open_bitcoin_wallet");
-	}
-
 	/**
 	 * Whenever this is fragment is attached to an activity 
-	 * we 
+	 * we save a reference to the activity.
 	 */
 	@Override
 	public void onAttach(Activity activity) {
@@ -222,6 +189,171 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandle
 		} else {
 			ZLog.log("Error: not everything was set correctly to scan QR codes. ");
 		}
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle b) {
+		if (this.newCurrencyGridView != null) {
+			b.putString(NEW_CURRENCY_GRID_VISIBILITY, 
+					String.valueOf(this.newCurrencyGridView.getVisibility()));
+		}
+	}
+
+	/**
+	 * @param savedInstanceState 
+	 */
+	private void initializeNewCurrencyGridView(Bundle savedInstanceState) {
+		this.newCurrencyGridView = (GridView)
+				this.rootView.findViewById(R.id.addNewCurrencyGridView);
+		this.newCurrencyGridView.setAdapter(
+				new OWNewCurrencyListAdapter(this.myContext, R.layout._coin_with_title));
+
+		if (savedInstanceState != null && 
+				savedInstanceState.getString(NEW_CURRENCY_GRID_VISIBILITY) != null) {
+			try {
+				// If the visibility was saved we bring it back here.
+				// Note that I used a string to save the int because I needed to know
+				// if it had been set or not. Default for getInt from a bundle is 
+				// zero which is the same as View.Visible, so we wouldn't be able 
+				// to tell if it had been set or not. 
+				int visibility = Integer.parseInt(
+						savedInstanceState.getString(NEW_CURRENCY_GRID_VISIBILITY));
+				ZLog.log("Visibility: " + (visibility));
+				ZLog.log("Visibility == Gone: " + (visibility == View.GONE));
+				ZLog.log("Visibility == Visible: " + (visibility == View.VISIBLE));
+				this.newCurrencyGridView.setVisibility(visibility);
+			} catch (NumberFormatException nfe) {
+				// Default, if no visibility was saved, is to be gone. Then the user
+				// can click the new currency bar and open it up. 
+				this.newCurrencyGridView.setVisibility(View.GONE);
+			}
+		} else {
+			this.newCurrencyGridView.setVisibility(View.GONE);
+		}
+
+		this.newCurrencyGridView.setOnItemClickListener(new OnItemClickListener() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, 
+					int position, long id) {
+				OWNewCurrencyListItem newItem = (OWNewCurrencyListItem) 
+						parent.getItemAtPosition(position);
+
+				for (OWCurrencyListItem itemInList : userWallets) {
+					if (itemInList.getCoinId() == newItem.getCoinId()) {
+						// Already in list
+						return;
+					}
+				}
+				
+				int indexToAddAt = 0;
+				if (!userWallets.isEmpty()) {
+					// We order these alphabetically
+					boolean notOutOfBounds = indexToAddAt < userWallets.size();
+					while (notOutOfBounds && 
+							userWallets.get(indexToAddAt).getCoinId().getTitle(
+									).compareTo(newItem.getCoinId().getTitle()) > 0) {
+						indexToAddAt++;
+						notOutOfBounds = indexToAddAt < userWallets.size();
+					}
+				}
+				
+				// TODO export all of this to a method and see if we can 
+				// get the constructor of OWCurrencyListItem to take very few things
+				// i.e. put a lot of the info into the OWCoin.Types and then it
+				// will be easy to store what types of wallets the user has in 
+				// preferences. After getting value from preferences, can use the 
+				// enum.valueOf to get back the correct enum and re-add to the list
+				// when view is first initialzed in this method. 
+				if (newItem.getCoinId() == OWCoin.Type.BTC) {
+					userWallets.add(indexToAddAt, 
+							new OWCurrencyListItem(R.drawable.logo_bitcoin,
+									OWCoin.Type.BTC, OWFiat.Type.USD, 
+									"620.00", "0.00000000", "0.00"));
+				} else if (newItem.getCoinId() == OWCoin.Type.BTC_TEST) {
+					userWallets.add(indexToAddAt, 
+							new OWCurrencyListItem(R.drawable.logo_bitcoin, 
+									OWCoin.Type.BTC_TEST, OWFiat.Type.USD, 
+									"0.00", "0.00000000", "0.00"));
+				} else if (newItem.getCoinId() == OWCoin.Type.DOGE) {
+					userWallets.add(indexToAddAt, 
+							new OWCurrencyListItem(R.drawable.logo_dogecoin,
+									OWCoin.Type.DOGE, OWFiat.Type.USD, 
+									"0.0023", "0.00000000", "0.00"));
+				} else if (newItem.getCoinId() == OWCoin.Type.DOGE_TEST) {
+					userWallets.add(indexToAddAt, 
+							new OWCurrencyListItem(R.drawable.logo_dogecoin,
+									OWCoin.Type.DOGE_TEST, OWFiat.Type.USD, 
+									"0.00", "0.00000000", "0.00"));
+				}
+				
+				((ArrayAdapter<OWCurrencyListItem>) 
+						currencyListView.getAdapter()).notifyDataSetChanged();
+			}
+		});
+
+		View newCurrencyBar = this.rootView.findViewById(R.id.addNewWalletBar);
+		newCurrencyBar.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (newCurrencyGridView.getVisibility() == View.GONE) {
+					newCurrencyGridView.setVisibility(View.VISIBLE);
+				} else if (newCurrencyGridView.getVisibility() == View.VISIBLE) {
+					newCurrencyGridView.setVisibility(View.GONE);
+				}
+			}
+		});
+	}
+
+	/**
+	 * 
+	 */
+	private void initializeCurrencyListView() {
+		// Add a few wallets for testing, will need to get these
+		// values somewhere eventually
+		this.userWallets = new ArrayList<OWCurrencyListItem>();
+
+		this.currencyListView = (ListView) 
+				this.rootView.findViewById(R.id.listOfUserWallets);
+		this.currencyListView.setAdapter(new OWCurrencyListAdapter(
+				this.myContext, R.layout.accounts_single_currency, userWallets));
+
+		this.currencyListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, 
+					int position, long id) {
+				OWCurrencyListItem item = (OWCurrencyListItem) 
+						parent.getItemAtPosition(position);
+				if (OWCoin.Type.BTC_TEST == item.getCoinId()) {
+					// If we are using the test net network then we make sure the
+					// user has a passphrase and 
+					startBitcoinTestnetWallet();
+				} 
+				// TODO add other cases
+			}
+		});
+	}
+
+	private void startBitcoinTestnetWallet() {
+		// TODO is there a better way to do this? 
+		this.classToOpenFragmentFor = OWBitcoinTestnetWalletFragment.class;
+
+		OWPassphraseDialog passphraseDialog = new OWPassphraseDialog();
+
+		// Set the target fragment
+		passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
+				OWRequestCodes.GET_PASSPHRASE_DIALOG);
+
+		// TODO separate this into two dailos, enter passphrase dialog
+		// and a create new passphrase dialog.
+		String message = "Please input your passphrase. ";
+		if (!OWAccountsFragment.this.userHasPassphrase()) {
+			message += "This will be used for securing all your wallets.";
+		}
+		passphraseDialog.setupDialog("OneWallet", message, 
+				"Continue", null, "Cancel");
+		passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
+				"open_bitcoin_wallet");
 	}
 
 	/**

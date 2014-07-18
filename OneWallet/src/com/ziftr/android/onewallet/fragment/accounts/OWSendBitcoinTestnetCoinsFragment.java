@@ -7,19 +7,20 @@ import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWFiat.Type;
 
 
-public class OWSendBitcoinsFragment extends OWSendCoinsFragment {
+public class OWSendBitcoinTestnetCoinsFragment extends OWSendCoinsFragment {
 
 	@Override
 	public OWCoin.Type getCoinId() {
-		return OWCoin.Type.BTC;
+		return OWCoin.Type.BTC_TEST;
 	}
 
 	@Override
 	public BigDecimal getExchangeRateToFiat(Type fiatType) {
+		// Not actually 1, just doing this to avoid errors for testing
 		if (fiatType == OWFiat.Type.USD) {
-			return new BigDecimal(618.34);
+			return new BigDecimal("1");
 		} else if (fiatType == OWFiat.Type.EUR) {
-			return new BigDecimal(453.84);
+			return new BigDecimal("1");
 		}
 		return null;
 	}

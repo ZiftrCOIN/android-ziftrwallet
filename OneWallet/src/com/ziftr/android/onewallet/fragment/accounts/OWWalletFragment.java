@@ -37,7 +37,10 @@ import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.BriefLogFormatter;
+import com.ziftr.android.onewallet.OWMainFragmentActivity;
+import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -49,27 +52,27 @@ import com.ziftr.android.onewallet.util.ZLog;
 public abstract class OWWalletFragment extends Fragment implements OnClickListener {
 
 	/** The root view for this application. */
-	protected View rootView;
+	private View rootView;
 	/** The TextView to hold the Wallet's public address. */ 
-	protected TextView publicAddressText;
+	private TextView publicAddressText;
 	/** The TextView to hold the Wallet's current balance. */
-	protected TextView walletBalanceText;
+	private TextView walletBalanceText;
 	/** The TextView to hold a different address' balance. */
-	protected TextView outsideBalanceText;
+	private TextView outsideBalanceText;
 
 	/** The file where the wallet for this coin will be stored. */
-	protected File walletFile;
+	private File walletFile;
 	/** The file where the BlockStore for this coin will be stored. */
-	protected File blockStoreFile;
+	private File blockStoreFile;
 
 	/** The wallet for this coin. */
-	protected Wallet wallet;
+	private Wallet wallet;
 	/** The Network parameters for this coin. */
-	protected NetworkParameters networkParams = this.getCoinNetworkParameters();
+	private NetworkParameters networkParams = this.getCoinNetworkParameters();
 	/** A map of hashes to StoredBlocks to save StoredBlock objects to disk. */
-	protected BlockStore blockStore;
+	private BlockStore blockStore;
 	/** The PeerGroup that this SPV node is connected to. */
-	protected PeerGroup peerGroup;
+	private PeerGroup peerGroup;
 
 	/**
 	 * Get the market exchange prefix for the 
@@ -77,7 +80,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	 * 
 	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
 	 */
-	public abstract String getCoinPrefix();
+	public abstract OWCoin.Type getCoinId();
 
 	/**
 	 * Get the specific coin's network parameters. This 
@@ -100,8 +103,6 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		this.setupWallet();
-		this.refreshWallet();
 	}
 
 	/**
@@ -110,6 +111,12 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
+		
+		// Need to give android system time to create activity and such before
+		// we can call these. That's why we do them here instead of onCreate.
+		this.setupWallet();
+		this.refreshWallet();
+		
 		BriefLogFormatter.initVerbose();
 
 		rootView = inflater.inflate(R.layout.fragment_wallet, container, false);
@@ -117,12 +124,12 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		View sendButton = rootView.findViewById(R.id.buttonSendCoins);
 		sendButton.setOnClickListener(this);
 
-		publicAddressText = (
-				TextView) rootView.findViewById(R.id.textWalletMainAddress);
-		walletBalanceText = (
-				TextView) rootView.findViewById(R.id.textWalletMainBalance);
-		outsideBalanceText = (
-				TextView) rootView.findViewById(R.id.textWalletOutsideBalance);
+		this.publicAddressText = (TextView) 
+				rootView.findViewById(R.id.textWalletMainAddress);
+		this.walletBalanceText = (TextView) 
+				rootView.findViewById(R.id.textWalletMainBalance);
+		this.outsideBalanceText = (TextView) 
+				rootView.findViewById(R.id.textWalletOutsideBalance);
 
 		if (wallet != null) {	
 			ECKey key = wallet.getKeys().get(0);
@@ -186,15 +193,11 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 					).findFragmentByTag("send_coins_fragment");
 			if (fragToShow == null) {
 				// If the fragment doesn't exist yet, make a new one
-				fragToShow = new OWSendBitcoinsFragment();
+				fragToShow = new OWSendBitcoinTestnetCoinsFragment();
 			} else if (fragToShow.isVisible()) {
 				// If the fragment is already visible, no need to do anything
 				return;
 			}
-
-			// Set the wallet for the new fragment
-			((OWSendCoinsFragment) fragToShow).setWallet(this.wallet);
-			((OWSendCoinsFragment) fragToShow).setNetworkParams(networkParams);
 
 			transaction.replace(R.id.oneWalletBaseFragmentHolder, 
 					fragToShow, "send_coins_fragment");
@@ -235,9 +238,9 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		File externalDirectory = getActivity().getExternalFilesDir(null);
 		if (externalDirectory != null) {
 			this.walletFile = new File(
-					externalDirectory, getCoinPrefix() + "_wallet.dat");
+					externalDirectory, getCoinId().toString() + "_wallet.dat");
 			this.blockStoreFile = new File(
-					externalDirectory, this.getCoinPrefix() + "_blockchain.store");
+					externalDirectory, this.getCoinId().toString() + "_blockchain.store");
 		}
 
 		this.wallet = null;
@@ -266,6 +269,15 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 				// Just kill the activity for testing purposes
 				//super.onBackPressed(); 
 			}
+		}
+		
+		// Get wallet manager and add the wallet 
+		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
+				).getWalletManager();
+		if (m != null) {
+			m.addWallet(this.getCoinId(), this.wallet);
+		} else {
+			ZLog.log("manager is null... this shouldn't happen.");
 		}
 
 		// How to watch an outside address, note: we probably 
@@ -525,7 +537,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		});
 
 	}
-
+	
 	private void updateWalletBalance(BigInteger newBalance) {
 		if (walletBalanceText != null) {
 //			String balanceString = 

@@ -1,13 +1,14 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
 
-import com.ziftr.android.onewallet.util.Fiat;
-import com.ziftr.android.onewallet.util.Fiat.Type;
+import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWFiat;
+import com.ziftr.android.onewallet.util.OWFiat.Type;
 
 public class OWCurrencyListItem {
 
 	/** The currency's title. e.g. "Bitcoin". */
-	private String currencyTitle;
+	private OWCoin.Type coinId;
 
 	/** They type of fiat. e.g. Fiat.Type.USD. */
 	private Type fiatType;
@@ -33,14 +34,14 @@ public class OWCurrencyListItem {
 	 * @param walletTotal
 	 * @param walletTotalFiatEquiv
 	 */
-	public OWCurrencyListItem(int coinLogoId, String currencyTitle, 
-			Fiat.Type fiatType, String unitFiatMarketValue, 
+	public OWCurrencyListItem(int coinLogoId, OWCoin.Type coinId, 
+			OWFiat.Type fiatType, String unitFiatMarketValue, 
 			String walletTotal, String walletTotalFiatEquiv) {
 		this.setCoinLogoId(coinLogoId);
-		this.setCurrencyTitle(currencyTitle);
+		this.setCoinId(coinId);
 		this.setFiatType(fiatType);
 		this.setUnitFiatMarketValue(unitFiatMarketValue);
-		this.setWalletTotal(walletTotalFiatEquiv);
+		this.setWalletTotal(walletTotal);
 		this.setWalletTotalFiatEquiv(walletTotalFiatEquiv);
 	}
 
@@ -62,18 +63,18 @@ public class OWCurrencyListItem {
 
 
 	/**
-	 * @return the currencyTitle
+	 * @return the coinId
 	 */
-	public String getCurrencyTitle() {
-		return currencyTitle;
+	public OWCoin.Type getCoinId() {
+		return coinId;
 	}
 
 
 	/**
-	 * @param currencyTitle the currencyTitle to set
+	 * @param currencyId the coinId to set
 	 */
-	public void setCurrencyTitle(String currencyTitle) {
-		this.currencyTitle = currencyTitle;
+	public void setCoinId(OWCoin.Type coinId) {
+		this.coinId = coinId;
 	}
 
 
@@ -88,7 +89,7 @@ public class OWCurrencyListItem {
 	/**
 	 * @param fiatType the fiatType to set
 	 */
-	public void setFiatType(Fiat.Type fiatType) {
+	public void setFiatType(OWFiat.Type fiatType) {
 		this.fiatType = fiatType;
 	}
 

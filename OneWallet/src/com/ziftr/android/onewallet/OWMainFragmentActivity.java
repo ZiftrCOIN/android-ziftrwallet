@@ -18,11 +18,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
+import com.google.bitcoin.core.Wallet;
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
 import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
+import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -90,6 +92,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	/** A float used in making the container move over when the drawer is moved. */
 	private float lastTranslate = 0.0f;
+	
+	/** This object is responsible for all the wallets. */
+	private OWWalletManager walletManager;
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -165,6 +170,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		if (this.getLastCustomNonConfigurationInstance() == null) {
+			ZLog.log("recreate manager from scratch");
+			this.walletManager = new OWWalletManager();
+		} else {
+			ZLog.log("get manager from last configuration instance");
+			this.walletManager = (OWWalletManager) 
+					this.getLastCustomNonConfigurationInstance();
+		}
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
@@ -223,7 +237,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 					FragmentType.ACCOUNT_FRAGMENT_TYPE);
 		}
 	}
-
+	
+	@Override
+	public Object onRetainCustomNonConfigurationInstance() {
+		ZLog.log("saving manager");
+		return this.walletManager;
+	}
+	
 	/**
 	 * Starts a new fragment in the main layout space depending
 	 * on which fragment FragmentType is passed in. 
@@ -259,7 +279,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		transaction.replace(R.id.oneWalletBaseFragmentHolder, fragToShow, tag);
 		transaction.commit();
-
 	}
 
 	/**
@@ -540,13 +559,32 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 	}
 	
+	/**
+	 * @return the walletManager
+	 */
+	public OWWalletManager getWalletManager() {
+		return walletManager;
+	}
+
+	/**
+	 * @param walletManager the walletManager to set
+	 */
+	public void setWalletManager(OWWalletManager walletManager) {
+		this.walletManager = walletManager;
+	}
+	
+	/**
+	 * @return the walletManager
+	 */
+	public void addToWalletManager(OWCoin.Type id, Wallet w) {
+		this.walletManager.addWallet(id, w);
+	}
+	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// Goes here first
-		
 		// Placeholder for anything we might need to do with the results
 		
-		// Then this calls the current fragment's on activity result
+		// Goes here first, then this calls the current fragment's on activity result
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 

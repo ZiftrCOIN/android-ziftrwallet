@@ -1,6 +1,6 @@
 package com.ziftr.android.onewallet.util;
 
-public class Fiat {
+public class OWFiat {
 	public enum Type {
 		USD("$"),
 		EUR(String.valueOf((char) 0x80));

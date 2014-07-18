@@ -20,6 +20,7 @@
     
     <color name="ow_send_list_background">@color/LightGray</color>
     
-    <color name="ow_add_currency_background">@color/MediumGray</color>
+    <color name="ow_add_currency_list_item_background">@color/MediumGray</color>
+    <color name="ow_add_currency_logo_with_text_background">@color/Ivory</color>
 
 </resources>

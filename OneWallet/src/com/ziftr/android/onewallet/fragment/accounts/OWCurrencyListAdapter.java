@@ -42,28 +42,32 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
         	convertView = (RelativeLayout) this.inflater.inflate(this.resourceId, null);
         }
 		
+		String fiatSymbol = currencyListItem.getFiatType().getSymbol();
+		
 		// Whether or not we just created one, we reset all the resources
 		// to match the currencyListItem.
 		TextView coinName = (TextView) 
 				convertView.findViewById(R.id.coinName);
-		coinName.setText(currencyListItem.getCurrencyTitle());
+		coinName.setText(currencyListItem.getCoinId().getTitle());
 
 		TextView coinValue = (TextView) 
 				convertView.findViewById(R.id.coinUnitValue);
-		coinValue.setText(currencyListItem.getUnitFiatMarketValue());
+		coinValue.setText(fiatSymbol + currencyListItem.getUnitFiatMarketValue());
 		
 		TextView walletTotal = (TextView) 
 				convertView.findViewById(R.id.coinWalletTotal);
 		walletTotal.setText(currencyListItem.getWalletTotal());
+		
 		TextView walletTotalFiatEquiv = (TextView) 
 				convertView.findViewById(R.id.coinWalletTotalFiatEquiv);
-		walletTotalFiatEquiv.setText(currencyListItem.getWalletTotalFiatEquiv());
+		walletTotalFiatEquiv.setText(
+				fiatSymbol + currencyListItem.getWalletTotalFiatEquiv());
 
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.coinLogo);
 		Drawable image = context.getResources().getDrawable(
 				currencyListItem.getCoinLogoId());
 		coinLogo.setImageDrawable(image);
-
+		
 		return convertView;
 	}
 }

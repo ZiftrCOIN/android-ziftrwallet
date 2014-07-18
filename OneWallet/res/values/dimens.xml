@@ -8,7 +8,13 @@
     
     <dimen name="ow_icon_size">40dp</dimen>
     <dimen name="ow_icon_margin">5dp</dimen>
+    
     <!-- 2*margin + size == empty_space_padding -->
     <dimen name="ow_total_icon_side_length">50dp</dimen>
+    
+    <!-- Half of the icon size -->
+    <dimen name="ow_half_icon_size">20dp</dimen>
+    <!-- Quarter of the icon size -->
+    <dimen name="ow_quarter_icon_size">10dp</dimen>
     
 </resources>

@@ -1,27 +1,27 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
 import com.google.bitcoin.core.NetworkParameters;
-import com.google.bitcoin.params.MainNetParams;
+import com.google.bitcoin.params.TestNet3Params;
 import com.ziftr.android.onewallet.util.OWCoin;
 
-public class OWBitcoinWalletFragment extends OWWalletFragment {
+public class OWBitcoinTestnetWalletFragment extends OWWalletFragment {
 
 	/**
 	 * Get the market exchange prefix for the 
 	 * actual sub-classing coin fragment type.
 	 * 
-	 * @return OWCoin.Type.BTC for Bitcoin
+	 * @return "BTC" for Bitcoin
 	 */
 	@Override
 	public OWCoin.Type getCoinId() {
-		return OWCoin.Type.BTC;
+		return OWCoin.Type.BTC_TEST;
 	}
 
 	@Override
 	public NetworkParameters getCoinNetworkParameters() {
 		// TODO for now return the test network, obviously this 
 		// needs to be changed to use the real network at some point
-		return MainNetParams.get();
+		return TestNet3Params.get();
 	}
 
 }

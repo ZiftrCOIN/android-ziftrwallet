@@ -23,7 +23,7 @@
     <string name="send_to_address_name">NAME: </string>
     <string name="send_amount">AMOUNT: </string>
     <string name="send_amount_equivalent">USD</string>
-    <string name="send_transaction_fee">TRANSACTION FEE: </string>
+    <string name="send_transaction_fee">FEE/KB: </string>
     <string name="send_total">TOTAL: </string>
     
     <string name="send_default_total">0.00</string>
