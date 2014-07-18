@@ -18,13 +18,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
-import com.google.bitcoin.core.Wallet;
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
 import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
-import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -171,14 +169,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		if (this.getLastCustomNonConfigurationInstance() == null) {
-			ZLog.log("recreate manager from scratch");
-			this.walletManager = new OWWalletManager();
-		} else {
-			ZLog.log("get manager from last configuration instance");
-			this.walletManager = (OWWalletManager) 
-					this.getLastCustomNonConfigurationInstance();
-		}
+		ZLog.log("recreate manager from scratch");
+		this.walletManager = new OWWalletManager(this);
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
@@ -238,11 +230,12 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 	}
 	
-	@Override
-	public Object onRetainCustomNonConfigurationInstance() {
-		ZLog.log("saving manager");
-		return this.walletManager;
-	}
+//	@Override
+//	public Object onRetainCustomNonConfigurationInstance() {
+//		// We don't want to save the context, it will be re-initialized.
+//		this.walletManager.setContext(null);
+//		return this.walletManager;
+//	}
 	
 	/**
 	 * Starts a new fragment in the main layout space depending
@@ -276,7 +269,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			// If the fragment is already visible, no need to do anything
 			return;
 		}
-
+		
 		transaction.replace(R.id.oneWalletBaseFragmentHolder, fragToShow, tag);
 		transaction.commit();
 	}
@@ -566,20 +559,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		return walletManager;
 	}
 
-	/**
-	 * @param walletManager the walletManager to set
-	 */
-	public void setWalletManager(OWWalletManager walletManager) {
-		this.walletManager = walletManager;
-	}
-	
-	/**
-	 * @return the walletManager
-	 */
-	public void addToWalletManager(OWCoin.Type id, Wallet w) {
-		this.walletManager.addWallet(id, w);
-	}
-	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// Placeholder for anything we might need to do with the results

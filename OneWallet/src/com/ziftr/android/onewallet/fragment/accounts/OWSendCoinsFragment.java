@@ -29,7 +29,6 @@ import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.utils.Threading;
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
-import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -46,7 +45,10 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	private boolean changeFiatStartedFromProgram = false;
 
 	/** The view container for this fragment. */
-	protected View rootView;
+	private View rootView;
+	
+	/** The manager of all the wallets, set through acceptManager. */
+	private Wallet wallet;
 
 	/**
 	 * Get the market exchange prefix for the 
@@ -81,6 +83,10 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
+		
+		this.wallet = ((OWMainFragmentActivity) 
+				getActivity()).getWalletManager().getWallet(getCoinId());
+		
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
 
@@ -111,7 +117,7 @@ public abstract class OWSendCoinsFragment extends Fragment {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
+	
 	/**
 	 * This method is called at the beginning of onCreateView to
 	 * ensure that the wallet has been set (or is retrievable through 
@@ -301,7 +307,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	private void sendCoins(String address, BigInteger value, BigInteger feePerKb) 
 			throws AddressFormatException, InsufficientMoneyException {
 
-		Wallet wallet = this.getWallet();
 		// Create an address object based on network parameters in use 
 		// and the entered address. This is the address we will send coins to.
 		Address sendAddress = new Address(wallet.getNetworkParameters(), address);
@@ -340,16 +345,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 			}
 		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
 
-	}
-
-	private Wallet getWallet() {
-		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-				).getWalletManager();
-		if (m != null) {
-			return m.getWallet(getCoinId());
-		}
-		
-		return null;
 	}
 
 	/**

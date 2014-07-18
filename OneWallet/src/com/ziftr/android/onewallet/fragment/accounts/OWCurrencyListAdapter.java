@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
@@ -17,21 +16,51 @@ import com.ziftr.android.onewallet.R;
 /**
  * In the accounts section of the app there is a list of currencies/accounts
  * that the user has set up. This adapter gives views from instances of 
- * {@link OWCurrencyListItem}. 
+ * {@link OWCurrencyListItem}. It also makes the last item a footer type,
+ * with an add new currency bar instead of the usual coinType view. 
  */
 public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
-	private int resourceId;
 	private LayoutInflater inflater;
 	private Context context;
-	
-	public OWCurrencyListAdapter(Context ctx, int resourceId, 
-			List<OWCurrencyListItem> objects) {
-		super(ctx, resourceId, objects);
-		this.resourceId = resourceId;
+
+	/** Standard entries for wallets. */
+	public static final int coinType = 0;
+	/** The add new bar at the bottom. */
+	public static final int footerType = 1;
+
+	public OWCurrencyListAdapter(Context ctx, List<OWCurrencyListItem> objects) {
+		super(ctx, 0, objects);
 		this.inflater = LayoutInflater.from(ctx);
 		this.context = ctx;
 	}
-	
+
+	/**
+	 * Either coinType or footerType. Only footerType if it is 
+	 * the last element in the list. 
+	 */
+	@Override
+	public int getItemViewType(int position) {
+		if (position == (getCount()-1)) {
+			return footerType;
+		} else {
+			return coinType;
+		}
+	}
+
+	/**
+	 * We have two types, coinType and footerType. 
+	 */
+	@Override
+	public int getViewTypeCount() {
+		// 2 because we have 2 wallet types, coinTpe and footerType
+		return 2;
+	}
+
+	/**
+	 * Given the position of the item in the list, we get the list item
+	 * and recreate the view from it. Note that this method recycles 
+	 * the convertView when we have enough list elements. 
+	 */
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// The convertView is an oldView that android is recycling.
@@ -39,35 +68,41 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 		OWCurrencyListItem currencyListItem = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-        	convertView = (RelativeLayout) this.inflater.inflate(this.resourceId, null);
-        }
-		
-		String fiatSymbol = currencyListItem.getFiatType().getSymbol();
-		
-		// Whether or not we just created one, we reset all the resources
-		// to match the currencyListItem.
-		TextView coinName = (TextView) 
-				convertView.findViewById(R.id.coinName);
-		coinName.setText(currencyListItem.getCoinId().getTitle());
+			convertView = this.inflater.inflate(currencyListItem.getResId(), null);
+		}
 
-		TextView coinValue = (TextView) 
-				convertView.findViewById(R.id.coinUnitValue);
-		coinValue.setText(fiatSymbol + currencyListItem.getUnitFiatMarketValue());
-		
-		TextView walletTotal = (TextView) 
-				convertView.findViewById(R.id.coinWalletTotal);
-		walletTotal.setText(currencyListItem.getWalletTotal());
-		
-		TextView walletTotalFiatEquiv = (TextView) 
-				convertView.findViewById(R.id.coinWalletTotalFiatEquiv);
-		walletTotalFiatEquiv.setText(
-				fiatSymbol + currencyListItem.getWalletTotalFiatEquiv());
+		if (getItemViewType(position) == OWCurrencyListAdapter.coinType) {
+			String fiatSymbol = currencyListItem.getFiatType().getSymbol();
 
-		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.coinLogo);
-		Drawable image = context.getResources().getDrawable(
-				currencyListItem.getCoinLogoId());
-		coinLogo.setImageDrawable(image);
-		
-		return convertView;
+			// Whether or not we just created one, we reset all the resources
+			// to match the currencyListItem.
+			TextView coinName = (TextView) 
+					convertView.findViewById(R.id.coinName);
+			coinName.setText(currencyListItem.getCoinId().getLongTitle());
+
+			TextView coinValue = (TextView) 
+					convertView.findViewById(R.id.coinUnitValue);
+			coinValue.setText(fiatSymbol + currencyListItem.getUnitFiatMarketValue());
+
+			TextView walletTotal = (TextView) 
+					convertView.findViewById(R.id.coinWalletTotal);
+			walletTotal.setText(currencyListItem.getWalletTotal());
+
+			TextView walletTotalFiatEquiv = (TextView) 
+					convertView.findViewById(R.id.coinWalletTotalFiatEquiv);
+			walletTotalFiatEquiv.setText(
+					fiatSymbol + currencyListItem.getWalletTotalFiatEquiv());
+
+			ImageView coinLogo = (ImageView) convertView.findViewById(R.id.coinLogo);
+			Drawable image = context.getResources().getDrawable(
+					currencyListItem.getCoinId().getLogoResId());
+			coinLogo.setImageDrawable(image);
+
+			return convertView;
+		} else {
+			// No changes necessary for footers, return the same view
+			return convertView;
+		}
+
 	}
 }

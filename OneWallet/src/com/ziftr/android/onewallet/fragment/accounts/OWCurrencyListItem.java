@@ -21,9 +21,9 @@ public class OWCurrencyListItem {
 
 	/** The equivalent of walletTotal in the fiatType currency units. */
 	private String walletTotalFiatEquiv;
-
-	/** The resources id of the coin logo. e.g. drawable/icon_bitcoin_logo. */
-	private int coinLogoId;
+	
+	/** The resources id to draw the view for this list item. */
+	private int resId;
 
 	/**
 	 * Constructs a currency list itme from the given values. 
@@ -33,32 +33,17 @@ public class OWCurrencyListItem {
 	 * @param unitFiatMarketValue
 	 * @param walletTotal
 	 * @param walletTotalFiatEquiv
+	 * @param resId
 	 */
-	public OWCurrencyListItem(int coinLogoId, OWCoin.Type coinId, 
-			OWFiat.Type fiatType, String unitFiatMarketValue, 
-			String walletTotal, String walletTotalFiatEquiv) {
-		this.setCoinLogoId(coinLogoId);
+	public OWCurrencyListItem(OWCoin.Type coinId, OWFiat.Type fiatType, 
+			String unitFiatMarketValue, String walletTotal, 
+			String walletTotalFiatEquiv, int resId) {
 		this.setCoinId(coinId);
 		this.setFiatType(fiatType);
 		this.setUnitFiatMarketValue(unitFiatMarketValue);
 		this.setWalletTotal(walletTotal);
 		this.setWalletTotalFiatEquiv(walletTotalFiatEquiv);
-	}
-
-
-	/**
-	 * @return the coinLogoId
-	 */
-	public int getCoinLogoId() {
-		return coinLogoId;
-	}
-
-
-	/**
-	 * @param coinLogoId the coinLogoId to set
-	 */
-	public void setCoinLogoId(int coinLogoId) {
-		this.coinLogoId = coinLogoId;
+		this.setResId(resId);
 	}
 
 
@@ -139,6 +124,21 @@ public class OWCurrencyListItem {
 	 */
 	public void setWalletTotalFiatEquiv(String walletTotalFiatEquiv) {
 		this.walletTotalFiatEquiv = walletTotalFiatEquiv;
+	}
+	
+	/**
+	 * @return the resId
+	 */
+	public int getResId() {
+		return resId;
+	}
+
+
+	/**
+	 * @param resId the resId to set
+	 */
+	public void setResId(int resId) {
+		this.resId = resId;
 	}
 
 }

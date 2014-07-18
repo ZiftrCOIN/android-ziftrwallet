@@ -35,7 +35,6 @@ import com.google.bitcoin.net.discovery.DnsDiscovery;
 import com.google.bitcoin.store.BlockStore;
 import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
-import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.BriefLogFormatter;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.OWWalletManager;
@@ -68,7 +67,7 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	/** The wallet for this coin. */
 	private Wallet wallet;
 	/** The Network parameters for this coin. */
-	private NetworkParameters networkParams = this.getCoinNetworkParameters();
+	private NetworkParameters networkParams = this.getCoinId().getNetworkParameters();
 	/** A map of hashes to StoredBlocks to save StoredBlock objects to disk. */
 	private BlockStore blockStore;
 	/** The PeerGroup that this SPV node is connected to. */
@@ -81,18 +80,6 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
 	 */
 	public abstract OWCoin.Type getCoinId();
-
-	/**
-	 * Get the specific coin's network parameters. This 
-	 * is an instance which selects the network (production 
-	 * or test) you are on. <br/>
-	 * 
-	 * For example, to get the TestNetwork, use 
-	 * <pre>'return TestNet3Params.get();'.</pre>
-	 * 
-	 * @return A network parameters object. 
-	 */
-	public abstract NetworkParameters getCoinNetworkParameters();
 
 	/**
 	 * When this fragment is created, this method is called
@@ -111,13 +98,18 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
+		BriefLogFormatter.initVerbose();
 		
+		initializeFromManager();
+		if (wallet == null) {
+			throw new IllegalArgumentException(
+					"Shouldn't happen, this is just a safety check because we "
+					+ "need a wallet to send coins.");
+		}
+
 		// Need to give android system time to create activity and such before
 		// we can call these. That's why we do them here instead of onCreate.
-		this.setupWallet();
-		this.refreshWallet();
-		
-		BriefLogFormatter.initVerbose();
+		this.beginSyncWithNetwork();
 
 		rootView = inflater.inflate(R.layout.fragment_wallet, container, false);
 
@@ -190,7 +182,8 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 			// Make the new fragment of the correct type
 			Fragment fragToShow = this.getActivity().getSupportFragmentManager(
-					).findFragmentByTag("send_coins_fragment");
+					).findFragmentByTag(this.getCoinId().getShortTitle() + 
+							"_send_coins_fragment");
 			if (fragToShow == null) {
 				// If the fragment doesn't exist yet, make a new one
 				fragToShow = new OWSendBitcoinTestnetCoinsFragment();
@@ -222,113 +215,27 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 		}
 	}
 
-	/**
-	 * Setup a wallet object for this fragment by either loading it 
-	 * from an existing stored file or by creating a new one from 
-	 * network parameters. Note, though Android won't crash out because 
-	 * of it, this shouldn't be called from a UI thread due to the 
-	 * blocking nature of creating files.
-	 */
-	private void setupWallet() {
-
-		// Here we recreate the files or create them if this is the first
-		// time the user opens the app.
-		this.walletFile = null;
-		// This is application specific storage, will be deleted when app is uninstalled.
-		File externalDirectory = getActivity().getExternalFilesDir(null);
-		if (externalDirectory != null) {
-			this.walletFile = new File(
-					externalDirectory, getCoinId().toString() + "_wallet.dat");
-			this.blockStoreFile = new File(
-					externalDirectory, this.getCoinId().toString() + "_blockchain.store");
-		}
-
-		this.wallet = null;
-
-		// Try to load the wallet from a file
-		try {
-			this.wallet = Wallet.loadFromFile(walletFile);
-		} catch (UnreadableWalletException e) {
-			ZLog.log("Exception trying to load wallet file: ", e);
-		}
-
-		// If the load was unsucecssful (presumably only if this is the first 
-		// time this type of wallet was set up) then we make a new wallet and add
-		// a new key to the wallet.
-		if (this.wallet == null) {
-			this.wallet = new Wallet(networkParams);
-			try {
-				this.wallet.addKey(new ECKey());
-				this.wallet.saveToFile(this.walletFile);
-			} catch (IOException e) {
-				ZLog.log("Exception trying to save new wallet file: ", e);
-				return;
-				// TODO this is just test code of course but this is probably 
-				// "fatal" as if we can't save our wallet, that's a problem
-				//
-				// Just kill the activity for testing purposes
-				//super.onBackPressed(); 
-			}
-		}
+	private void initializeFromManager() {
+		OWWalletManager manager = ((OWMainFragmentActivity) 
+				getActivity()).getWalletManager();
 		
-		// Get wallet manager and add the wallet 
-		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-				).getWalletManager();
-		if (m != null) {
-			m.addWallet(this.getCoinId(), this.wallet);
-		} else {
-			ZLog.log("manager is null... this shouldn't happen.");
-		}
-
-		// How to watch an outside address, note: we probably 
-		// won't do this client side in the actual app
-		//		Address watchedAddress;
-		//		try {
-		//			watchedAddress = new Address(networkParams, 
-		//					"mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db");
-		//			wallet.addWatchedAddress(watchedAddress, 1402200000);
-		//		} catch (AddressFormatException e) {
-		//			ZLog.log("Exception trying to add a watched address: ", e);
-		//		}
-
-		// If it is encrypted, bitcoinj just works with it encrypted as long
-		// as all sendRequests etc have the 
-		//KeyParameter keyParam = wallet.encrypt("password");
-
-		// TODO autosave using 
-		// this.wallet.autosaveToFile(f, delayTime, timeUnit, eventListener);
-
-		// To decrypt the wallet. Note that this should only be done if 
-		// the user specifically requests that their wallet be unencrypted. 
-		//wallet.decrypt(wallet.getKeyCrypter().deriveKey("password"));
-
-		// Note: wallets should only be encrypted once using the 
-		// password, decryption is specifically for removing encryption 
-		// completely instead any spending transactions should set 
-		// SendRequest.aesKey and it will be used to decrypt keys as it signs.
-		// TODO Explain???
-
-		// if (!wallet.isEncrypted()) {
-		//     get a password from the user and encrypt
-		// }
-
-		//		ZLog.log("Test Wallet: ", wallet.toString());
-		//		ZLog.log("Earliest wallet creation time: ", String.valueOf(
-		//				wallet.getEarliestKeyCreationTime()));
-		//		ZLog.log("Wallet keys: ", wallet.getKeys().toString());
-
+		this.wallet = manager.getWallet(getCoinId());
+		this.walletFile = manager.getWalletFile(getCoinId());
 	}
 
 	/**
 	 * 
 	 */
-	private void refreshWallet() {
-
+	private void beginSyncWithNetwork() {
 		OWUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 
 				try {
+					File externalDirectory = getActivity().getExternalFilesDir(null);
+					blockStoreFile = new File(externalDirectory, 
+							getCoinId().getShortTitle() + "_blockchain.store");
+					
 					boolean blockStoreExists = blockStoreFile.exists();
 					// This creates the file if it doesn't exist, so check first
 					blockStore = new SPVBlockStore(
@@ -523,10 +430,10 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 					}
 
 					/**
-			        List<Transaction> recentTransactions = wallet.getRecentTransactions(20, true);
-			        for(Transaction tx : recentTransactions) {
-			        	ZLog.log("Recent transaction: ", tx);
-			        }
+		        List<Transaction> recentTransactions = wallet.getRecentTransactions(20, true);
+		        for(Transaction tx : recentTransactions) {
+		        	ZLog.log("Recent transaction: ", tx);
+		        }
 					 ***/
 
 				} catch (BlockStoreException e) {
@@ -535,14 +442,13 @@ public abstract class OWWalletFragment extends Fragment implements OnClickListen
 
 			}
 		});
-
 	}
-	
+
 	private void updateWalletBalance(BigInteger newBalance) {
 		if (walletBalanceText != null) {
-//			String balanceString = 
-//					Utils.bitcoinValueToFriendlyString(newBalance);
-			
+			//			String balanceString = 
+			//					Utils.bitcoinValueToFriendlyString(newBalance);
+
 			walletBalanceText.setText((new BigDecimal(newBalance, 8)).toPlainString());
 
 			String watchedBalance = 

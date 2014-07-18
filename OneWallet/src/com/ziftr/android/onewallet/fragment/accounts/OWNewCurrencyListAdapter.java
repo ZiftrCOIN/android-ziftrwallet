@@ -26,15 +26,15 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 	
 	private static OWNewCurrencyListItem[] coins = new OWNewCurrencyListItem[] {
 		// Mainnet coins
-		new OWNewCurrencyListItem(R.drawable.logo_bitcoin, OWCoin.Type.BTC),
-		new OWNewCurrencyListItem(R.drawable.logo_dogecoin, OWCoin.Type.DOGE),
-		new OWNewCurrencyListItem(R.drawable.logo_litecoin, OWCoin.Type.LTC),
-		new OWNewCurrencyListItem(R.drawable.logo_peercoin, OWCoin.Type.PPC),
+		new OWNewCurrencyListItem(OWCoin.Type.BTC),
+		new OWNewCurrencyListItem(OWCoin.Type.DOGE),
+		new OWNewCurrencyListItem(OWCoin.Type.LTC),
+		new OWNewCurrencyListItem(OWCoin.Type.PPC),
 		// Testnet coins
-		new OWNewCurrencyListItem(R.drawable.logo_bitcoin, OWCoin.Type.BTC_TEST),
-		new OWNewCurrencyListItem(R.drawable.logo_dogecoin, OWCoin.Type.DOGE_TEST),
-		new OWNewCurrencyListItem(R.drawable.logo_litecoin, OWCoin.Type.LTC_TEST),
-		new OWNewCurrencyListItem(R.drawable.logo_peercoin, OWCoin.Type.PPC_TEST),
+		new OWNewCurrencyListItem(OWCoin.Type.BTC_TEST),
+		new OWNewCurrencyListItem(OWCoin.Type.DOGE_TEST),
+		new OWNewCurrencyListItem(OWCoin.Type.LTC_TEST),
+		new OWNewCurrencyListItem(OWCoin.Type.PPC_TEST),
 	};
 	
 	public OWNewCurrencyListAdapter(Context ctx, int resourceId) {
@@ -61,13 +61,13 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		ImageView coinLogo = (ImageView) 
 				convertView.findViewById(R.id.coinLogoCentralImage);
 		Drawable image = context.getResources().getDrawable(
-				newCurrencyListItem.getCoinLogoResId());
+				newCurrencyListItem.getCoinId().getLogoResId());
 		coinLogo.setImageDrawable(image);
 		
 		// Set the text under the logo
 		TextView coinName = (TextView) 
 				convertView.findViewById(R.id.coinTitleTextView);
-		coinName.setText(newCurrencyListItem.getCoinId().getTitle());
+		coinName.setText(newCurrencyListItem.getCoinId().getLongTitle());
 
 		return convertView;
 	}

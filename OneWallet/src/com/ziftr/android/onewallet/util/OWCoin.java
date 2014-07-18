@@ -1,28 +1,56 @@
 package com.ziftr.android.onewallet.util;
 
+import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.params.MainNetParams;
+import com.google.bitcoin.params.TestNet3Params;
+import com.ziftr.android.onewallet.R;
+
 public class OWCoin {
 	public enum Type {
-		BTC("0.0001", "Bitcoin", 8),
-		PPC("0.01", "Peercoin", 8),
-		DOGE("1.0", "Dogecoin", 8),
-		LTC("0.001", "Litecoin", 8),
+		BTC("0.0001", "BTC", "Bitcoin", "BITCOIN", 
+				8, R.drawable.logo_bitcoin, MainNetParams.get()),
+		LTC("0.0010", "LTC", "Litecoin", "LITECOIN", 
+				8, R.drawable.logo_litecoin, null),
+		PPC("0.0100", "PPC", "Peercoin", "PEERCOIN", 
+				8, R.drawable.logo_peercoin, null),
+		DOGE("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 
+				8, R.drawable.logo_dogecoin, null),
 		
-		BTC_TEST("0.000", "BTC Testnet", 8),
-		PPC_TEST("0.0", "PPC Test", 8),
-		DOGE_TEST("0.0", "DOGE Testnet", 8),
-		LTC_TEST("0.000", "LTC Testnet", 8);
+		BTC_TEST("0.0000", "BTCt", "Bitcoin Testnet", "BITCOIN", 
+				8, R.drawable.logo_bitcoin, TestNet3Params.get()),
+		LTC_TEST("0.0000", "LTCt", "Litecoin Testnet", "LITECOIN", 
+				8, R.drawable.logo_litecoin, null),
+		PPC_TEST("0.0000", "PPCt", "Peercoin Testnet", "PEERCOIN", 
+				8, R.drawable.logo_peercoin, null),
+		DOGE_TEST("0.0000", "DOGEt", "Dogecoin Testnet", "DOGECOIN", 
+				8, R.drawable.logo_dogecoin, null),
+		;
 
 		private String defaultFeePerKb;
 
-		private String title;
+		private String shortTitle;
+		
+		private String longTitle;
+		
+		private String capsTitle;
 		
 		private int numberOfDigitsOfPrecision;
+		
+		private int logoResId;
+		
+		private NetworkParameters networkParameters;
 
-		private Type(String defaultFeePerKb, String title, 
-				int numberOfDigitsOfPrecision) {
+		private Type(String defaultFeePerKb, String shortTitle, 
+				String longTitle, String capsTitle,
+				int numberOfDigitsOfPrecision, int logoResId,
+				NetworkParameters networkParameters) {
 			this.defaultFeePerKb = defaultFeePerKb;
-			this.title = title;
+			this.shortTitle = shortTitle;
+			this.longTitle = longTitle;
+			this.capsTitle = capsTitle;
 			this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
+			this.logoResId = logoResId;
+			this.networkParameters = networkParameters;
 		}
 
 		/**
@@ -37,16 +65,32 @@ public class OWCoin {
 			return this.defaultFeePerKb;
 		}
 		
-		// TODO add getLongTitle, getMediumTitle, getShortTitle methods
+		/**
+		 * @return the shortTitle
+		 */
+		public String getShortTitle() {
+			return shortTitle;
+		}
 
+		/**
+		 * @return the longTitle
+		 */
+		public String getLongTitle() {
+			return longTitle;
+		}
+
+		/**
+		 * @return the capsTitle
+		 */
+		public String getCapsTitle() {
+			return capsTitle;
+		}
+		
 		/**
 		 * Gives the title of the coin. e.g. "Bitcoin" for OWCoin.Type.BTC, etc. 
 		 * 
 		 * @return as above
 		 */
-		public String getTitle() {
-			return this.title;
-		}
 		
 		/**
 		 * This is an okay place to get this information for now, but will likely 
@@ -61,7 +105,21 @@ public class OWCoin {
 			return this.numberOfDigitsOfPrecision;
 		}
 		
-	};
+		/**
+		 * @return the logoResId
+		 */
+		public int getLogoResId() {
+			return logoResId;
+		}
+		
 
+		/**
+		 * @return the networkParameters
+		 */
+		public NetworkParameters getNetworkParameters() {
+			return networkParameters;
+		}
+		
+	};
 
 }
