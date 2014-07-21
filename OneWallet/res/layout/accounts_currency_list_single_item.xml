@@ -1,66 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:minHeight="@dimen/ow_total_icon_side_length"
-    android:background="@drawable/currency_list_selector"
-    android:orientation="horizontal"
-    android:padding="5dip" >
+    android:layout_height="match_parent" >
 
-    <!-- ListRow Left side Thumbnail image -->
-
-    <ImageView
-        android:id="@+id/coinLogo"
-        android:layout_width="@dimen/ow_icon_size"
-        android:layout_height="@dimen/ow_icon_size"
-        android:layout_alignParentLeft="true"
-        android:layout_margin="@dimen/ow_icon_margin"
-        android:contentDescription="@string/bitcoin"
-        android:gravity="center_vertical"
-        android:src="@drawable/logo_bitcoin" />
-
-    <TextView
-        android:id="@+id/coinName"
+    <include
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@id/coinLogo"
-        android:layout_toRightOf="@+id/coinLogo"
-        android:text="@string/bitcoin"
-        android:textSize="15sp"
-        android:textStyle="bold" />
+        layout="@layout/_dual_icon_coin_view" />
 
-    <TextView
-        android:id="@+id/coinUnitValue"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/coinLogo"
-        android:layout_toRightOf="@id/coinLogo"
-        android:text="@string/bitcoin" />
-
-    <ImageView
-        android:id="@+id/rightArrowCaret"
-        android:layout_width="@dimen/ow_icon_size"
-        android:layout_height="@dimen/ow_icon_size"
-        android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/ow_icon_margin"
-        android:gravity="center_vertical"
-        android:contentDescription="@string/right_caret_content_description"
-        android:src="@drawable/icon_list_selector_caret" />
-
-    <TextView
-        android:id="@+id/coinWalletTotal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/rightArrowCaret"
-        android:layout_toLeftOf="@id/rightArrowCaret"
-        android:text="@string/send_default_total" />
-
-    <TextView
-        android:id="@+id/coinWalletTotalFiatEquiv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/rightArrowCaret"
-        android:layout_toLeftOf="@id/rightArrowCaret"
-        android:text="@string/send_default_total_fiat_equiv" />
-
-</RelativeLayout>
+</LinearLayout>

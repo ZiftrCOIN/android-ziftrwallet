@@ -36,7 +36,7 @@
                     android:layout_margin="@dimen/ow_icon_margin"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/old_passphrase_hint"
-                    android:src="@drawable/copy_icon" />
+                    android:src="@drawable/copy_down" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -71,7 +71,7 @@
                     android:layout_gravity="center"
                     android:layout_margin="@dimen/ow_icon_margin"
                     android:contentDescription="@string/old_passphrase_hint"
-                    android:src="@drawable/qr_icon" />
+                    android:src="@drawable/qrcode_down" />
             </LinearLayout>
 
             <LinearLayout
@@ -199,12 +199,13 @@
                         android:layout_height="wrap_content"
                         android:ems="1"
                         android:inputType="text" >
-                        <!-- 
+
+                        <!--
                         android:clickable="false"
                         android:cursorVisible="false"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                         -->
+                        -->
                     </EditText>
                 </LinearLayout>
 
@@ -299,40 +300,11 @@
         android:minHeight="@dimen/ow_send_list_spacing_top_margin" >
     </View>
 
-    <LinearLayout
-        android:id="@+id/sendCoinsButtonHolder"
+    <include
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_margin="0dp"
-        android:padding="0dp" >
-
-        <Button
-            android:id="@+id/cancelSendCoinsButton"
-            style="android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_margin="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/clickable_button_color"
-            android:gravity="center"
-            android:text="@string/cancel_button_text" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/Black" >
-        </View>
-
-        <Button
-            android:id="@+id/sendCoinsButton"
-            style="android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_margin="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/clickable_button_color"
-            android:gravity="center"
-            android:text="@string/send_button_text" />
-    </LinearLayout>
+        layout="@layout/_dual_button_footer"
+        android:padding="0dp" />
 
 </LinearLayout>

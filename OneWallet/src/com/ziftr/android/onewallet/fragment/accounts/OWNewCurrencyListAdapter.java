@@ -1,5 +1,7 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -11,7 +13,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.util.OWCoin;
 
 /**
  * In the accounts section of the app there is a list of currencies that opens
@@ -24,20 +25,8 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 	private LayoutInflater inflater;
 	private Context context;
 	
-	private static OWNewCurrencyListItem[] coins = new OWNewCurrencyListItem[] {
-		// Mainnet coins
-		new OWNewCurrencyListItem(OWCoin.Type.BTC),
-		new OWNewCurrencyListItem(OWCoin.Type.DOGE),
-		new OWNewCurrencyListItem(OWCoin.Type.LTC),
-		new OWNewCurrencyListItem(OWCoin.Type.PPC),
-		// Testnet coins
-		new OWNewCurrencyListItem(OWCoin.Type.BTC_TEST),
-		new OWNewCurrencyListItem(OWCoin.Type.DOGE_TEST),
-		new OWNewCurrencyListItem(OWCoin.Type.LTC_TEST),
-		new OWNewCurrencyListItem(OWCoin.Type.PPC_TEST),
-	};
-	
-	public OWNewCurrencyListAdapter(Context ctx, int resourceId) {
+	public OWNewCurrencyListAdapter(Context ctx, int resourceId, 
+			List<OWNewCurrencyListItem> coins) {
 		super(ctx, resourceId, coins);
 		this.resourceId = resourceId;
 		this.inflater = LayoutInflater.from(ctx);

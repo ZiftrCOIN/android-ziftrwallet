@@ -29,6 +29,7 @@ import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.utils.Threading;
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
+import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -46,9 +47,9 @@ public abstract class OWSendCoinsFragment extends Fragment {
 
 	/** The view container for this fragment. */
 	private View rootView;
-	
-	/** The manager of all the wallets, set through acceptManager. */
-	private Wallet wallet;
+
+	//	/** The manager of all the wallets, set through acceptManager. */
+	//	private Wallet wallet;
 
 	/**
 	 * Get the market exchange prefix for the 
@@ -83,10 +84,13 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		
-		this.wallet = ((OWMainFragmentActivity) 
-				getActivity()).getWalletManager().getWallet(getCoinId());
-		
+		ZLog.log("");
+		ZLog.log("create view of send coins fragment");
+		ZLog.log("");
+
+		//		this.wallet = ((OWMainFragmentActivity) 
+		//				getActivity()).getWalletManager().getWallet(getCoinId());
+
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
 
@@ -117,7 +121,7 @@ public abstract class OWSendCoinsFragment extends Fragment {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-	
+
 	/**
 	 * This method is called at the beginning of onCreateView to
 	 * ensure that the wallet has been set (or is retrievable through 
@@ -253,7 +257,8 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	 */
 	private void initializeButtons() {
 		Button cancelButton = (Button) 
-				this.rootView.findViewById(R.id.cancelSendCoinsButton);
+				this.rootView.findViewById(R.id.leftButton);
+		cancelButton.setText("CANCEL");
 		cancelButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -265,7 +270,8 @@ public abstract class OWSendCoinsFragment extends Fragment {
 		});
 
 		Button sendButton = (Button) 
-				this.rootView.findViewById(R.id.sendCoinsButton);
+				this.rootView.findViewById(R.id.rightButton);
+		sendButton.setText("SEND");
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -307,6 +313,8 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	private void sendCoins(String address, BigInteger value, BigInteger feePerKb) 
 			throws AddressFormatException, InsufficientMoneyException {
 
+		Wallet wallet = this.getWallet();
+
 		// Create an address object based on network parameters in use 
 		// and the entered address. This is the address we will send coins to.
 		Address sendAddress = new Address(wallet.getNetworkParameters(), address);
@@ -345,6 +353,16 @@ public abstract class OWSendCoinsFragment extends Fragment {
 			}
 		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
 
+	}
+
+	private Wallet getWallet() {
+		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
+				).getWalletManager();
+		if (m != null) {
+			return m.getWallet(getCoinId());
+		}
+
+		return null;
 	}
 
 	/**

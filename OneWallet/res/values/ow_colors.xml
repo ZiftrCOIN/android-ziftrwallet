@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="ow_menu_default">@color/MediumGray</color>
-    <color name="ow_menu_clicked">@color/MediumGray</color>
+    <color name="ow_menu_default">@color/LightGray</color>
+    <color name="ow_menu_clicked">@color/LimeGreen</color>
     <color name="ow_menu_button_clicked">@color/LimeGreen</color>
     
     <color name="ow_unpressed_button">@color/MediumGray</color>
@@ -10,10 +10,10 @@
     <color name="ow_selected_button">@color/DarkGray</color>
     <color name="ow_disabled_button">@color/LightGray</color>
     
-    <color name="ow_unpressed_menu_icon">@color/MediumGray</color>
+    <color name="ow_unpressed_menu_icon">@color/LightGray</color>
     <color name="ow_pressed_menu_icon">@color/LimeGreen</color>
     <color name="ow_selected_menu_icon">@color/LimeGreen</color>
-    <color name="ow_disabled_menu_icon">@color/DarkGray</color>
+    <color name="ow_disabled_menu_icon">@color/MediumGray</color>
     
     <color name="ow_menu_divider">@color/DarkGray</color>
     <color name="ow_action_bar_color">@color/MediumGray</color>
@@ -21,6 +21,8 @@
     <color name="ow_send_list_background">@color/LightGray</color>
     
     <color name="ow_add_currency_list_item_background">@color/MediumGray</color>
-    <color name="ow_add_currency_logo_with_text_background">@color/Ivory</color>
+    <color name="ow_add_currency_logo_with_text_background">@color/LightGray</color>
+    
+    <color name="ow_tx_list_divider">@color/LightGray</color>
 
 </resources>

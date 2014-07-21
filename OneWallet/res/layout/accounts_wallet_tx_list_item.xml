@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/currency_list_selector"
+    android:minHeight="@dimen/ow_total_icon_side_length"
+    android:orientation="horizontal"
+    android:padding="@dimen/ow_tx_list_item_padding" >
+
+    <!-- ListRow Left side Thumbnail image -->
+    
+    <ImageView
+        android:id="@+id/txIOIcon"
+        android:layout_width="@dimen/ow_icon_size"
+        android:layout_height="@dimen/ow_icon_size"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/ow_icon_margin"
+        android:contentDescription="@string/tx_list_io_icon_description"
+        android:gravity="center_vertical"
+        android:src="@drawable/received_up" />
+
+    <TextView
+        android:id="@+id/txAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/txIOIcon"
+        android:layout_toLeftOf="@id/txIOIcon"
+        android:text="@string/send_default_total" />
+
+    <TextView
+        android:id="@+id/txAmountFiatEquiv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/txIOIcon"
+        android:layout_toLeftOf="@id/txIOIcon"
+        android:text="@string/send_default_total_fiat_equiv" />
+
+    <TextView
+        android:id="@+id/txTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/tx_list_title_default"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/txIOIcon"
+        android:layout_alignParentLeft="true"
+        android:text="@string/tx_list_time_default" />
+
+    
+
+</RelativeLayout>

@@ -15,14 +15,14 @@ public class OWCoin {
 				8, R.drawable.logo_peercoin, null),
 		DOGE("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 
 				8, R.drawable.logo_dogecoin, null),
-		
-		BTC_TEST("0.0000", "BTCt", "Bitcoin Testnet", "BITCOIN", 
+				
+		BTC_TEST("0.0000", "BTC_TEST", "Bitcoin Testnet", "BITCOIN", 
 				8, R.drawable.logo_bitcoin, TestNet3Params.get()),
-		LTC_TEST("0.0000", "LTCt", "Litecoin Testnet", "LITECOIN", 
+		LTC_TEST("0.0000", "LTC_TEST", "Litecoin Testnet", "LITECOIN", 
 				8, R.drawable.logo_litecoin, null),
-		PPC_TEST("0.0000", "PPCt", "Peercoin Testnet", "PEERCOIN", 
+		PPC_TEST("0.0000", "PPC_TEST", "Peercoin Testnet", "PEERCOIN", 
 				8, R.drawable.logo_peercoin, null),
-		DOGE_TEST("0.0000", "DOGEt", "Dogecoin Testnet", "DOGECOIN", 
+		DOGE_TEST("0.0000", "DOGE_TEST", "Dogecoin Testnet", "DOGECOIN", 
 				8, R.drawable.logo_dogecoin, null),
 		;
 

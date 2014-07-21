@@ -29,7 +29,6 @@ import com.ziftr.android.onewallet.util.ZLog;
  * This is the main activity of the OneWallet application. It handles
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
- *                                                                                           
  */
 public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener {
 
@@ -73,6 +72,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	o 14. Turn the EditText field in the passphrase dialog into an xml just like
 	the reset passphrase dialog.
+	
+	o 15. Make the IO in loading/saving a wallet into an asynchrynous task
+	so as to not block the UI. Some lagging can be seen now, such as when you just
+	get into the accounts section and you try to rotate the screen horizontally.
+	
+	o 16. Make the backgrounds of the grid view in the new currency dialog
+	reflect which item is currenly selected.
+	
+	o 17. Add a nicer display to the dialogs than the default.
 
 	 */
 
@@ -169,7 +177,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		ZLog.log("recreate manager from scratch");
 		this.walletManager = new OWWalletManager(this);
 
 		// Everything is held within this main activity layout
@@ -230,13 +237,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 	}
 	
-//	@Override
-//	public Object onRetainCustomNonConfigurationInstance() {
-//		// We don't want to save the context, it will be re-initialized.
-//		this.walletManager.setContext(null);
-//		return this.walletManager;
-//	}
-	
+	/**
+	 * Here we need to close all the wallets. 
+	 */
+	@Override
+	protected void onDestroy() {
+		this.walletManager.closeAllSetupWallets();
+		super.onDestroy();
+	}
+
 	/**
 	 * Starts a new fragment in the main layout space depending
 	 * on which fragment FragmentType is passed in. 
@@ -286,13 +295,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			if (this.drawerMenuIsOpen()) {
 				// Set the icon here to avoid extra swapping while 
 				// drawer menu is closing
-				drawerMenuItem.setIcon(R.drawable.icon_menu);
+				drawerMenuItem.setIcon(R.drawable.menu_up);
 				// If drawer menu is open, close it
 				this.menuDrawer.closeDrawer(Gravity.LEFT);
 			} else {
 				// Set the icon here to avoid extra swapping while 
 				// drawer menu is opening
-				drawerMenuItem.setIcon(R.drawable.icon_menu_pressed);
+				drawerMenuItem.setIcon(R.drawable.menu_down);
 				// If drawer menu is closed, open it
 				this.menuDrawer.openDrawer(Gravity.LEFT);
 			}

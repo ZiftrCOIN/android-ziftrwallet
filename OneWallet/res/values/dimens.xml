@@ -17,4 +17,9 @@
     <!-- Quarter of the icon size -->
     <dimen name="ow_quarter_icon_size">10dp</dimen>
     
+    <dimen name="ow_tx_list_divider_padding">10dp</dimen>
+    <dimen name="ow_tx_list_item_padding">10dp</dimen>
+    
+    <dimen name="ow_button_footer_height">60dp</dimen>
+    
 </resources>

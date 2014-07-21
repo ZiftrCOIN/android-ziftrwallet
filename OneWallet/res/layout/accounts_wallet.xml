@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/baseWalletLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="0dp" >
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/_dual_icon_coin_view" />
+
+    <ListView
+        android:id="@+id/listOfUserWallets"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="5dp" >
+    </ListView>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/ow_button_footer_height"
+        layout="@layout/_dual_button_footer" />
+
+</LinearLayout>

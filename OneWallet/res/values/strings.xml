@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <string name="empty_string"></string>
 
     <string name="app_name">OneWallet</string>
     <string name="hello_world">Hello world!</string>
@@ -27,7 +29,7 @@
     <string name="send_total">TOTAL: </string>
     
     <string name="send_default_total">0.00</string>
-    <string name="send_default_total_fiat_equiv">(0.00)</string>
+    <string name="send_default_total_fiat_equiv">($0.00)</string>
     
     <string name="splash_screen_description">Splash Screen</string>
     <string name="splash_screen_activity_title">Splash</string>
@@ -39,5 +41,11 @@
     <string name="bitcoin_caps">BITCOIN</string>
     
     <string name="right_caret_content_description"></string>
+    
+    <string name="tx_list_divider_default">PENDING</string>
+    
+    <string name="tx_list_title_default">REI</string>
+    <string name="tx_list_time_default">June 30, 2014  5:03 pm</string>
+    <string name="tx_list_io_icon_description">Send/Receive</string>
 
 </resources>

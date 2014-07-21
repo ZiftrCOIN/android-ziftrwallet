@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -391,5 +392,28 @@ public class OWUtils {
 //		// Return the result
 //		return decToFormat;
 	}
+	
+	/**
+     * Returns the given value in nanocoins as a 0.12 type string. More digits after the decimal place will be used
+     * if necessary, but two will always be present.
+     */
+    public static String bitcoinValueToFriendlyString(BigInteger value) {
+        // TODO: This API is crap. This method should go away when we encapsulate money values.
+        boolean negative = value.compareTo(BigInteger.ZERO) < 0;
+        if (negative)
+            value = value.negate();
+        BigDecimal bd = new BigDecimal(value, 8);
+        String formatted = bd.toPlainString();   // Don't use scientific notation.
+        int decimalPoint = formatted.indexOf(".");
+        // Drop unnecessary zeros from the end.
+        int toDelete = 0;
+        for (int i = formatted.length() - 1; i > decimalPoint + 2; i--) {
+            if (formatted.charAt(i) == '0')
+                toDelete++;
+            else
+                break;
+        }
+        return (negative ? "-" : "") + formatted.substring(0, formatted.length() - toDelete);
+    }
 
 }

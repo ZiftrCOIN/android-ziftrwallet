@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/ow_total_icon_side_length"
+    android:background="@drawable/currency_list_selector"
+    android:orientation="horizontal"
+    android:padding="5dp" >
+
+    <!-- ListRow Left side Thumbnail image -->
+
+    <ImageView
+        android:id="@+id/leftIcon"
+        android:layout_width="@dimen/ow_icon_size"
+        android:layout_height="@dimen/ow_icon_size"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="@dimen/ow_icon_margin"
+        android:contentDescription="@string/empty_string"
+        android:gravity="center_vertical"
+        android:src="@drawable/logo_bitcoin" />
+
+    <TextView
+        android:id="@+id/topLeftTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/leftIcon"
+        android:layout_toRightOf="@+id/leftIcon"
+        android:text="@string/empty_string"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/bottomLeftTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/leftIcon"
+        android:layout_toRightOf="@id/leftIcon"
+        android:text="@string/empty_string" />
+
+    <ImageView
+        android:id="@+id/rightIcon"
+        android:layout_width="@dimen/ow_icon_size"
+        android:layout_height="@dimen/ow_icon_size"
+        android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/ow_icon_margin"
+        android:gravity="center_vertical"
+        android:contentDescription="@string/empty_string"
+        android:src="@drawable/next_down_2" />
+
+    <TextView
+        android:id="@+id/topRightTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/rightIcon"
+        android:layout_toLeftOf="@id/rightIcon"
+        android:text="@string/empty_string" />
+
+    <TextView
+        android:id="@+id/bottomRightTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/rightIcon"
+        android:layout_toLeftOf="@id/rightIcon"
+        android:text="@string/empty_string" />
+
+</RelativeLayout>

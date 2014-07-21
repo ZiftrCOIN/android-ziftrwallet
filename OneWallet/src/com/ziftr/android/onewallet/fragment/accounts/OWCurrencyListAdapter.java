@@ -77,26 +77,30 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView coinName = (TextView) 
-					convertView.findViewById(R.id.coinName);
+					convertView.findViewById(R.id.topLeftTextView);
 			coinName.setText(currencyListItem.getCoinId().getLongTitle());
 
 			TextView coinValue = (TextView) 
-					convertView.findViewById(R.id.coinUnitValue);
+					convertView.findViewById(R.id.bottomLeftTextView);
 			coinValue.setText(fiatSymbol + currencyListItem.getUnitFiatMarketValue());
 
 			TextView walletTotal = (TextView) 
-					convertView.findViewById(R.id.coinWalletTotal);
+					convertView.findViewById(R.id.topRightTextView);
 			walletTotal.setText(currencyListItem.getWalletTotal());
 
 			TextView walletTotalFiatEquiv = (TextView) 
-					convertView.findViewById(R.id.coinWalletTotalFiatEquiv);
+					convertView.findViewById(R.id.bottomRightTextView);
 			walletTotalFiatEquiv.setText(
 					fiatSymbol + currencyListItem.getWalletTotalFiatEquiv());
 
-			ImageView coinLogo = (ImageView) convertView.findViewById(R.id.coinLogo);
+			ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
 			Drawable image = context.getResources().getDrawable(
 					currencyListItem.getCoinId().getLogoResId());
 			coinLogo.setImageDrawable(image);
+			
+			ImageView nextArrow = (ImageView) convertView.findViewById(R.id.rightIcon);
+			Drawable image2 = context.getResources().getDrawable(R.drawable.next_down_2);
+			nextArrow.setImageDrawable(image2);
 
 			return convertView;
 		} else {
