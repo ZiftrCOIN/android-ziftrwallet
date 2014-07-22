@@ -14,7 +14,10 @@
         android:layout_width="@dimen/ow_icon_size"
         android:layout_height="@dimen/ow_icon_size"
         android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/ow_icon_margin"
+        android:layout_marginTop="@dimen/ow_icon_margin"
+        android:layout_marginRight="@dimen/ow_icon_margin"
+        android:layout_marginBottom="@dimen/ow_icon_margin"
+        android:layout_marginLeft="@dimen/ow_half_icon_size"
         android:contentDescription="@string/tx_list_io_icon_description"
         android:gravity="center_vertical"
         android:src="@drawable/received_up" />
@@ -52,7 +55,5 @@
         android:layout_alignBottom="@id/txIOIcon"
         android:layout_alignParentLeft="true"
         android:text="@string/tx_list_time_default" />
-
-    
 
 </RelativeLayout>

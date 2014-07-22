@@ -2,7 +2,6 @@ package com.ziftr.android.onewallet.fragment.accounts;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -32,11 +31,18 @@ import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
-import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
+/**
+ * The section of the app where users fill out a form and click send 
+ * to send coins. 
+ * 
+ * TODO make sure that we stop correctly when the user
+ * enters non-sensical values in fields.
+ */
 public abstract class OWSendCoinsFragment extends Fragment {
 
 	/** A boolean to keep track of changes to disallow infinite changes. */
@@ -48,9 +54,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	/** The view container for this fragment. */
 	private View rootView;
 
-	//	/** The manager of all the wallets, set through acceptManager. */
-	//	private Wallet wallet;
-
 	/**
 	 * Get the market exchange prefix for the 
 	 * actual sub-classing coin fragment type.
@@ -58,16 +61,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
 	 */
 	public abstract OWCoin.Type getCoinId();
-
-	/** 
-	 * Useful method to convert this method to any type of fiat currency.
-	 * May want to abstract this to somewhere else eventually.
-	 * 
-	 * @param fiatType - The fiat type to convert to
-	 * @return a big decimal that desribes how many of the given fiat type
-	 * of currency is equal to 1 coin of the actual subclassing type.
-	 */
-	public abstract BigDecimal getExchangeRateToFiat(OWFiat.Type fiatType);
 
 	/**
 	 * This is a placeholder for a spot to determine if a given address
@@ -84,12 +77,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		ZLog.log("");
-		ZLog.log("create view of send coins fragment");
-		ZLog.log("");
-
-		//		this.wallet = ((OWMainFragmentActivity) 
-		//				getActivity()).getWalletManager().getWallet(getCoinId());
 
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
@@ -386,19 +373,22 @@ public abstract class OWSendCoinsFragment extends Fragment {
 					BigDecimal newFiatVal = null;
 					try {
 						newCoinVal = new BigDecimal(newVal);
-						newFiatVal = convertCoinToFiat(newCoinVal);
+						// TODO make this not only be USD
+						newFiatVal = OWConverter.convert(
+								newCoinVal, getCoinId(), OWFiat.Type.USD); 
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
 						return;
 					} catch (ArithmeticException ae) {
 						// Shouldn't happen
-						ZLog.log("Shouldn't have happened, but it did!");
+						ZLog.log("User entered non-sensical value. Returning for now.");
 						return;
 					}
 
 					changeFiatStartedFromProgram = true;
-					fiatValEditText.setText(formatFiatAmount(newFiatVal).toPlainString());
+					fiatValEditText.setText(OWFiat.formatFiatAmount(
+							OWFiat.Type.USD, newFiatVal).toPlainString());
 					changeFiatStartedFromProgram = false;
 				}
 			}
@@ -426,9 +416,8 @@ public abstract class OWSendCoinsFragment extends Fragment {
 					BigDecimal newCoinVal = null;
 					try {
 						newFiatVal = new BigDecimal(newVal);
-						newCoinVal = newFiatVal.divide(
-								getExchangeRateToFiat(OWFiat.Type.USD), 
-								MathContext.DECIMAL64);
+						newCoinVal =  OWConverter.convert(
+								newFiatVal, OWFiat.Type.USD, getCoinId());
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -440,7 +429,8 @@ public abstract class OWSendCoinsFragment extends Fragment {
 					}
 
 					changeCoinStartedFromProgram = true;
-					coinValEditText.setText(formatCoinAmount(newCoinVal).toPlainString());
+					coinValEditText.setText(OWCoin.formatCoinAmount(
+							getCoinId(), newCoinVal).toPlainString());
 					changeCoinStartedFromProgram = false;
 				}
 			}
@@ -472,13 +462,14 @@ public abstract class OWSendCoinsFragment extends Fragment {
 		// Update the text in the total text view
 		TextView totalTextView = (TextView) this.rootView.findViewById(
 				R.id.send_total);
-		totalTextView.setText(this.formatCoinAmount(total).toPlainString());
+		totalTextView.setText(OWCoin.formatCoinAmount(
+				getCoinId(), total).toPlainString());
 
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.send_total_fiat_equiv);
-		totalEquivTextView.setText("(" + this.formatFiatAmount(this.convertCoinToFiat(
-				total)).toPlainString() + ")");
+		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.Type.USD, getCoinId());
+		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.Type.USD, fiatTotal).toPlainString() + ")");
 	}
 
 	/**
@@ -531,46 +522,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 			return new BigDecimal(0);
 		}
 		return fee;
-	}
-
-	/**
-	 * A convenience method to format a BigDecimal. In Standard use,
-	 * one can just use standard BigDecimal methods and use this
-	 * right before formatting for displaying a coin value.
-	 * 
-	 * @param toFormat - The BigDecimal to format.
-	 * @return as above
-	 */
-	private BigDecimal formatCoinAmount(BigDecimal toFormat) {
-		return OWUtils.formatToNDecimalPlaces(
-				this.getCoinId().getNumberOfDigitsOfPrecision(), toFormat);
-	}
-
-	/**
-	 * A convenience method to format a BigDecimal. In Standard use,
-	 * one can just use standard BigDecimal methods and use this
-	 * right before formatting for displaying a fiat value. 
-	 * 
-	 * @param toFormat - The BigDecimal to format.
-	 * @return as above
-	 */
-	private BigDecimal formatFiatAmount(BigDecimal toFormat) {
-		return OWUtils.formatToNDecimalPlaces(2, toFormat);
-	}
-
-	/**
-	 * Gives the Fiat equivalent of the BigDecimal given, represented
-	 * as another BigDecimal. 
-	 * 
-	 * TODO make this work for fiats other than just USD
-	 * 
-	 * @param coinVal - The amount to convert.
-	 * @return as above
-	 */
-	private BigDecimal convertCoinToFiat(BigDecimal coinVal) {
-		// 16 digit precision is more than enough
-		return coinVal.multiply(getExchangeRateToFiat(OWFiat.Type.USD), 
-				MathContext.DECIMAL64);
 	}
 
 	/**

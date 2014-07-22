@@ -52,7 +52,7 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 	 */
 	@Override
 	public int getViewTypeCount() {
-		// 2 because we have 2 wallet types, coinTpe and footerType
+		// 2 because we have 2 wallet types, coinType and footerType
 		return 2;
 	}
 

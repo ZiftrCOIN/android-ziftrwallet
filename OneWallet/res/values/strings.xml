@@ -1,51 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <string name="empty_string"></string>
 
+    <!-- Description here -->
+    <string name="empty_string"></string>
+    <!-- Description here -->
     <string name="app_name">OneWallet</string>
+    <!-- Description here -->
     <string name="hello_world">Hello world!</string>
+    <!-- Description here -->
     <string name="action_settings">Settings</string>
-    
+    <!-- Description here -->
     <string name="passphrase_hint">Enter your passphrase</string>
+    <!-- Description here -->
     <string name="old_passphrase_hint">Enter your old passphrase</string>
+    <!-- Description here -->
     <string name="new_passphrase_hint">Enter your new passphrase</string>
+    <!-- Description here -->
     <string name="confirm_passphrase_hint">Re-enter your passphrase</string>
-    
+    <!-- Description here -->
     <string name="menu_text_accounts">ACCOUNTS</string>
+    <!-- Description here -->
     <string name="menu_text_exchange">EXCHANGE</string>
+    <!-- Description here -->
     <string name="menu_text_settings">SETTINGS</string>
+    <!-- Description here -->
     <string name="menu_text_about">ABOUT</string>
+    <!-- Description here -->
     <string name="menu_text_contact">CONTACT</string>
-    
+    <!-- Description here -->
     <string name="cancel_button_text">CANCEL</string>
+    <!-- Description here -->
     <string name="send_button_text">SEND</string>
-    
+    <!-- Description here -->
     <string name="send_to_address">SEND TO: </string>
+    <!-- Description here -->
     <string name="send_to_address_name">NAME: </string>
+    <!-- Description here -->
     <string name="send_amount">AMOUNT: </string>
+    <!-- Description here -->
     <string name="send_amount_equivalent">USD</string>
+    <!-- Description here -->
     <string name="send_transaction_fee">FEE/KB: </string>
+    <!-- Description here -->
     <string name="send_total">TOTAL: </string>
-    
+    <!-- Description here -->
     <string name="send_default_total">0.00</string>
+    <!-- Description here -->
     <string name="send_default_total_fiat_equiv">($0.00)</string>
-    
+    <!-- Description here -->
     <string name="splash_screen_description">Splash Screen</string>
+    <!-- Description here -->
     <string name="splash_screen_activity_title">Splash</string>
-    
+    <!-- Description here -->
     <string name="add_new_wallet_content_description">Add New Wallet</string>
+    <!-- Description here -->
     <string name="add_currency">ADD CURRENCY</string>
-    
+    <!-- Description here -->
     <string name="bitcoin">Bitcoin</string>
+    <!-- Description here -->
     <string name="bitcoin_caps">BITCOIN</string>
-    
+    <!-- Description here -->
     <string name="right_caret_content_description"></string>
-    
+    <!-- Description here -->
     <string name="tx_list_divider_default">PENDING</string>
-    
+    <!-- Description here -->
     <string name="tx_list_title_default">REI</string>
+    <!-- Description here -->
     <string name="tx_list_time_default">June 30, 2014  5:03 pm</string>
+    <!-- Description here -->
     <string name="tx_list_io_icon_description">Send/Receive</string>
 
 </resources>

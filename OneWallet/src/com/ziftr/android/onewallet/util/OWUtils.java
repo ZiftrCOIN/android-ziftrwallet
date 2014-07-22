@@ -31,13 +31,13 @@ public class OWUtils {
 	private static final ExecutorService threadService = Executors.newCachedThreadPool();
 
 	/** formatting for date written like "2013-08-26T13:59:30-04:00" */
-	private static final DateFormat formatter = 
+	public static final DateFormat formatter = 
 			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
 	/** formatting for date written like "Tue, 19 Nov 2013 10:28:31 -0500" */
-	private static final DateFormat formatterExpanded = 
+	public static final DateFormat formatterExpanded = 
 			new SimpleDateFormat("EE, dd MMM yyyy HH:mm:ss Z", Locale.US);
 	/** formatting for date written like "2013-12-11 10:59:48" */
-	private static final DateFormat formatterNoTimeZone = 
+	public static final DateFormat formatterNoTimeZone = 
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); 
 
 	private static final MessageDigest digest;
@@ -105,6 +105,7 @@ public class OWUtils {
 
 		return -1;
 	}
+	
 
 	/** 
 	 * Converts the specified number of dp units to the system specific
@@ -415,5 +416,31 @@ public class OWUtils {
         }
         return (negative ? "-" : "") + formatted.substring(0, formatted.length() - toDelete);
     }
+    
+    /**
+	 * Based on the type, this method converts the number of atomic
+	 * units to a BigDecimal. 
+	 * 
+	 * @param type - OWCoin.Type.BTC for bitcoin, etc.
+	 * @param numAtomicUnits - The number of atomic units to convert. 
+	 * @return The big integer converted to a big decimal
+	 */
+	public static BigDecimal bigIntToBigDec(OWCurrency type, BigInteger numAtomicUnits) {
+		return new BigDecimal(numAtomicUnits, 
+				-1 * type.getNumberOfDigitsOfPrecision());
+	}
+	
+	/**
+	 * Based on the coin type, this method converts the number BigDecimal units
+	 * to a BigInteger (i.e. to the number of atomic units).
+	 * 
+	 * @param type - OWCoin.Type.BTC for bitcoin, etc.
+	 * @param amount - The BigDecimal to convert.
+	 * @return The big decimal converted to a big integer
+	 */
+	public static BigInteger bigDecToBigInt(OWCurrency type, BigDecimal amount) {
+		return amount.multiply(new BigDecimal(BigDecimal.TEN.toBigInteger(), 
+				type.getNumberOfDigitsOfPrecision())).toBigInteger();
+	}
 
 }

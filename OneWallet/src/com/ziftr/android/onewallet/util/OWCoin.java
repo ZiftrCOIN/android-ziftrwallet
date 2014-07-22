@@ -1,29 +1,31 @@
 package com.ziftr.android.onewallet.util;
 
+import java.math.BigDecimal;
+
 import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.params.MainNetParams;
 import com.google.bitcoin.params.TestNet3Params;
 import com.ziftr.android.onewallet.R;
 
 public class OWCoin {
-	public enum Type {
+	public enum Type implements OWCurrency {
 		BTC("0.0001", "BTC", "Bitcoin", "BITCOIN", 
-				8, R.drawable.logo_bitcoin, MainNetParams.get()),
+				8, R.drawable.logo_bitcoin, MainNetParams.get(), false),
 		LTC("0.0010", "LTC", "Litecoin", "LITECOIN", 
-				8, R.drawable.logo_litecoin, null),
+				8, R.drawable.logo_litecoin, null, false),
 		PPC("0.0100", "PPC", "Peercoin", "PEERCOIN", 
-				8, R.drawable.logo_peercoin, null),
+				8, R.drawable.logo_peercoin, null, false),
 		DOGE("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 
-				8, R.drawable.logo_dogecoin, null),
+				8, R.drawable.logo_dogecoin, null, false),
 				
 		BTC_TEST("0.0000", "BTC_TEST", "Bitcoin Testnet", "BITCOIN", 
-				8, R.drawable.logo_bitcoin, TestNet3Params.get()),
+				8, R.drawable.logo_bitcoin, TestNet3Params.get(), true),
 		LTC_TEST("0.0000", "LTC_TEST", "Litecoin Testnet", "LITECOIN", 
-				8, R.drawable.logo_litecoin, null),
+				8, R.drawable.logo_litecoin, null, true),
 		PPC_TEST("0.0000", "PPC_TEST", "Peercoin Testnet", "PEERCOIN", 
-				8, R.drawable.logo_peercoin, null),
+				8, R.drawable.logo_peercoin, null, true),
 		DOGE_TEST("0.0000", "DOGE_TEST", "Dogecoin Testnet", "DOGECOIN", 
-				8, R.drawable.logo_dogecoin, null),
+				8, R.drawable.logo_dogecoin, null, true)
 		;
 
 		private String defaultFeePerKb;
@@ -39,11 +41,13 @@ public class OWCoin {
 		private int logoResId;
 		
 		private NetworkParameters networkParameters;
+		
+		private boolean isTestNet;
 
 		private Type(String defaultFeePerKb, String shortTitle, 
 				String longTitle, String capsTitle,
 				int numberOfDigitsOfPrecision, int logoResId,
-				NetworkParameters networkParameters) {
+				NetworkParameters networkParameters, boolean isTestNet) {
 			this.defaultFeePerKb = defaultFeePerKb;
 			this.shortTitle = shortTitle;
 			this.longTitle = longTitle;
@@ -51,6 +55,14 @@ public class OWCoin {
 			this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
 			this.logoResId = logoResId;
 			this.networkParameters = networkParameters;
+			this.isTestNet = isTestNet;
+		}
+		
+		/**
+		 * @return whether or not this coin is a testnet coin
+		 */
+		public boolean isTestNet() {
+			return isTestNet;
 		}
 
 		/**
@@ -101,6 +113,7 @@ public class OWCoin {
 		 * 
 		 * @return as above
 		 */
+		@Override
 		public int getNumberOfDigitsOfPrecision() {
 			return this.numberOfDigitsOfPrecision;
 		}
@@ -121,5 +134,18 @@ public class OWCoin {
 		}
 		
 	};
+	
+	/**
+	 * A convenience method to format a BigDecimal. In Standard use,
+	 * one can just use standard BigDecimal methods and use this
+	 * right before formatting for displaying a coin value.
+	 * 
+	 * @param toFormat - The BigDecimal to format.
+	 * @return as above
+	 */
+	public static BigDecimal formatCoinAmount(OWCoin.Type coinType, BigDecimal toFormat) {
+		return OWUtils.formatToNDecimalPlaces(
+				coinType.getNumberOfDigitsOfPrecision(), toFormat);
+	}
 
 }
