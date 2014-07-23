@@ -20,7 +20,7 @@
         android:layout_marginLeft="@dimen/ow_half_icon_size"
         android:contentDescription="@string/tx_list_io_icon_description"
         android:gravity="center_vertical"
-        android:src="@drawable/received_up" />
+        android:src="@drawable/received_enabled" />
 
     <TextView
         android:id="@+id/txAmount"

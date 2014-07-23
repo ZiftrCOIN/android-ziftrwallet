@@ -12,7 +12,7 @@
         android:layout_gravity="center_vertical"
         android:layout_margin="@dimen/ow_icon_margin"
         android:contentDescription="@string/add_new_wallet_content_description"
-        android:src="@drawable/add_up" />
+        android:src="@drawable/add_white_enabled" />
 
     <TextView
         android:layout_width="wrap_content"

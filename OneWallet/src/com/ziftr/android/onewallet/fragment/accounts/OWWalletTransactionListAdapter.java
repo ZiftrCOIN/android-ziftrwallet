@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 
 /**
@@ -97,9 +98,11 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 
 			TextView txAmountFiatEquiv = (TextView) 
 					convertView.findViewById(R.id.txAmountFiatEquiv);
-			BigDecimal fiatAmt = OWFiat.formatFiatAmount(
-					txListItem.getFiatType(), txListItem.getTxAmount());
-			txAmountFiatEquiv.setText(fiatSymbol + fiatAmt.toPlainString());
+			BigDecimal fiatAmt = OWConverter.convert(txListItem.getTxAmount(), 
+					txListItem.getCoinId(), txListItem.getFiatType());
+			BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
+					txListItem.getFiatType(), fiatAmt);
+			txAmountFiatEquiv.setText(fiatSymbol + formattedfiatAmt.toPlainString());
 			
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
 			Drawable image = context.getResources().getDrawable(
@@ -136,16 +139,16 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 		if (txListItem.getTxAmount().compareTo(BigDecimal.ZERO) >= 0) {
 			// This means the tx is received (relative to user)
 			if (txListItem.isPending()) {
-				imgResId = R.drawable.received_pending;
+				imgResId = R.drawable.received_pending_enabled;
 			} else {
-				imgResId = R.drawable.received_up;
+				imgResId = R.drawable.received_enabled;
 			}
 		} else {
 			// This means the tx is sent (relative to user)
 			if (txListItem.isPending()) {
-				imgResId = R.drawable.sent_pending;
+				imgResId = R.drawable.sent_pending_enabled;
 			} else {
-				imgResId = R.drawable.sent_up;
+				imgResId = R.drawable.sent_enabled;
 			}
 		}
 		return imgResId;
@@ -159,8 +162,7 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 			// with a transaction that is not pending. Even if the data set
 			// only contains two items (the two dividers), the second will not 
 			// be pending.
-			// TODO index error here below
-		} while (!getItem(newIndex).isPending());
+		} while (getItem(newIndex).isPending());
 		this.historyIndex = newIndex;
 	}
 	

@@ -8,6 +8,7 @@
     android:horizontalSpacing="@dimen/ow_icon_margin"
     android:numColumns="auto_fit"
     android:padding="5dp"
+    android:listSelector="@drawable/currency_list_selector"
     android:stretchMode="columnWidth"
     android:verticalSpacing="@dimen/ow_icon_margin" >
 

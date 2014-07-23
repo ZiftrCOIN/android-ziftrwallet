@@ -426,8 +426,7 @@ public class OWUtils {
 	 * @return The big integer converted to a big decimal
 	 */
 	public static BigDecimal bigIntToBigDec(OWCurrency type, BigInteger numAtomicUnits) {
-		return new BigDecimal(numAtomicUnits, 
-				-1 * type.getNumberOfDigitsOfPrecision());
+		return new BigDecimal(numAtomicUnits, type.getNumberOfDigitsOfPrecision());
 	}
 	
 	/**

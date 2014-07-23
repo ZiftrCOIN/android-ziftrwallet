@@ -35,7 +35,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/*
 	--- TODO list for the OneWallet project ---
 
-	o 1. Ability to generate new address upon user request
+	X 1. Ability to generate new address upon user request
 	and be able to turn that into a QR code
 
 	o 2. Get transaction history for all addresses in wallet and
@@ -45,9 +45,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	o 4. Organizing tasks that need to be done and appr. difficulty
 
-	o 5. OW to start all of our classes.
+	o 5. Learn how to use sqlite and use it to save data about transactions, such
+	as the title of the transaction.
 
-	o 6. ZiftrUtils and Zlog for static useful methods.
+	X 6. ZiftrUtils and Zlog for static useful methods.
 	ex. ZLog.log("aa", "b"); (get's exception message, as well)
 	also autotags comments with class name and shuts itself off at
 	launch time for release build.
@@ -66,11 +67,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	o 12. Put menu icon on the top left part of action bar rather than the right.
 	To do this we need to make a custom action bar. Maybe just keep it on the right?
+	In general, need to figure out how to make a more customizable action bar, 
+	might just have to use custom actionbar layout.
 
 	X 13. make it so that the content is moved over whenever we click the menu 
 	button.
 
-	o 14. Turn the EditText field in the passphrase dialog into an xml just like
+	X 14. Turn the EditText field in the passphrase dialog into an xml just like
 	the reset passphrase dialog.
 	
 	o 15. Make the IO in loading/saving a wallet into an asynchrynous task
@@ -81,6 +84,19 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	reflect which item is currenly selected.
 	
 	o 17. Add a nicer display to the dialogs than the default.
+	
+	o 18. Redesign the send coins screen now that I know a little more about 
+	android layouts.
+	
+	o 19. Make it so that the wallet is actually user passphrase protected
+	
+	o 20. Make the Ôadd new currency' bar a footer of list rather than last element.
+	Make sure that all list views have headers/footers where appropriate rather
+	than just extra views in the xml files. 
+	
+	o 21. 
+	
+	TODO Maybe we don't want to set up all the open wallets right from the get go? 
 
 	 */
 
@@ -177,10 +193,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		this.walletManager = new OWWalletManager(this);
-
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
+		
+		// Recreate wallet manager
+		this.walletManager = new OWWalletManager(this);
 
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
@@ -295,13 +312,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			if (this.drawerMenuIsOpen()) {
 				// Set the icon here to avoid extra swapping while 
 				// drawer menu is closing
-				drawerMenuItem.setIcon(R.drawable.menu_up);
+				drawerMenuItem.setIcon(R.drawable.menu_white_enabled);
 				// If drawer menu is open, close it
 				this.menuDrawer.closeDrawer(Gravity.LEFT);
 			} else {
 				// Set the icon here to avoid extra swapping while 
 				// drawer menu is opening
-				drawerMenuItem.setIcon(R.drawable.menu_down);
+				drawerMenuItem.setIcon(R.drawable.menu_white_disabled);
 				// If drawer menu is closed, open it
 				this.menuDrawer.openDrawer(Gravity.LEFT);
 			}

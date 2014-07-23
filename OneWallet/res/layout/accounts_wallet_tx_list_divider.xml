@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:background="@color/ow_tx_list_divider"
     android:orientation="horizontal"
-    android:padding="@dimen/ow_tx_list_divider_padding" >
+    android:padding="@dimen/ow_tx_list_divider_padding" 
+    android:layout_marginBottom="@dimen/ow_tx_list_divider_bottom_margin" >
 
     <TextView
         android:id="@+id/walletTxListDividerTextView"

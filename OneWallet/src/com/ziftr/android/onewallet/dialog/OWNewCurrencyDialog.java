@@ -33,7 +33,7 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 
 	/** To keep track of which type user has selected. */
 	private OWCoin.Type currSelectedCoinType;
-	
+
 	/**
 	 * Sets up a new currency dialog with all
 	 * of the currencies in {@link OWCoin.Type}.
@@ -70,7 +70,7 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 		this.initializeFromBundle(args);
 		super.setArguments(args);
 	}
-	
+
 	/**
 	 * Creates and returns the dialog to show the user.
 	 * Sets all the basic text fields that all dialogs have 
@@ -101,17 +101,27 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 	 */
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-		OWNewCurrencyDialogHandler handler = this.getTargetFragment() == null ? 
+		// Might be null if user doesn't hit anything.
+		if (this.currSelectedCoinType != null) {
+			OWNewCurrencyDialogHandler handler = getHandler();
+			if (which == DialogInterface.BUTTON_POSITIVE) {
+				handler.handleNewCurrencyPositive(this.getTargetRequestCode(), 
+						this.currSelectedCoinType);
+			} else if (which == DialogInterface.BUTTON_NEGATIVE) {
+				handler.handleNegative(this.getTargetRequestCode());
+			} else {
+				ZLog.log("These dialogs shouldn't have neutral buttons.");
+			}
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	private OWNewCurrencyDialogHandler getHandler() {
+		return this.getTargetFragment() == null ? 
 				((OWNewCurrencyDialogHandler) this.getActivity()) : 
 					((OWNewCurrencyDialogHandler) this.getTargetFragment());
-				if (which == DialogInterface.BUTTON_POSITIVE) {
-					handler.handleNewCurrencyPositive(this.getTargetRequestCode(), 
-							this.currSelectedCoinType);
-				} else if (which == DialogInterface.BUTTON_NEGATIVE) {
-					handler.handleNegative(this.getTargetRequestCode());
-				} else {
-					ZLog.log("These dialogs shouldn't have neutral buttons.");
-				}
 	}
 
 	/**
@@ -138,7 +148,7 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 				this.getDialogView().findViewById(R.id.addNewCurrencyGridView);
 		grid.setAdapter(new OWNewCurrencyListAdapter(this.getActivity(), 
 				R.layout._coin_with_title, this.getItemsFromCoinTypes()));
-	
+
 		grid.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, 
@@ -146,10 +156,10 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 				OWNewCurrencyListItem newItem = (OWNewCurrencyListItem) 
 						parent.getItemAtPosition(position);
 				currSelectedCoinType = newItem.getCoinId();
-	
+
 				// TODO make sure it is selected correctly
 			}
-	
+
 		});
 	}
 

@@ -19,6 +19,7 @@
     
     <dimen name="ow_tx_list_divider_padding">10dp</dimen>
     <dimen name="ow_tx_list_item_padding">10dp</dimen>
+    <dimen name="ow_tx_list_divider_bottom_margin">5dp</dimen>
     
     <dimen name="ow_button_footer_height">60dp</dimen>
     

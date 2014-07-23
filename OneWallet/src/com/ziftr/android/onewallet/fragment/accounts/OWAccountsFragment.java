@@ -84,10 +84,10 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWNewCurrencyDialogHandler {
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		this.walletManager = ((OWMainFragmentActivity) getActivity()).getWalletManager();
-
 		this.rootView = inflater.inflate(
 				R.layout.section_accounts_layout, container, false);
+		
+		this.walletManager = ((OWMainFragmentActivity) getActivity()).getWalletManager();
 
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
@@ -161,12 +161,8 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWNewCurrencyDialogHandler {
 			return new OWCurrencyListItem(OWCoin.Type.BTC, OWFiat.Type.USD, 
 					"620.00", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.Type.BTC_TEST) {
-			String estimated = OWUtils.bitcoinValueToFriendlyString(
-					this.walletManager.getWallet(id).getBalance(BalanceType.ESTIMATED));
-			ZLog.log("estimated; ", estimated);
 			String balance = OWUtils.bitcoinValueToFriendlyString(
 					this.walletManager.getWallet(id).getBalance(BalanceType.AVAILABLE));
-			ZLog.log("available; ", balance);
 			return new OWCurrencyListItem(OWCoin.Type.BTC_TEST, OWFiat.Type.USD, 
 					"0.00", balance, "0.00", resId);
 		} else if (id == OWCoin.Type.LTC) {
@@ -210,7 +206,7 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWNewCurrencyDialogHandler {
 			boolean notOutOfBounds = indexToAddAt < (userWallets.size()-1);
 			while (notOutOfBounds && 
 					userWallets.get(indexToAddAt).getCoinId().getLongTitle(
-							).compareTo(coinType.getLongTitle()) > 0) {
+							).compareTo(coinType.getLongTitle()) < 0) {
 				indexToAddAt++;
 				notOutOfBounds = indexToAddAt < (userWallets.size()-1);
 			}
@@ -266,7 +262,9 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWNewCurrencyDialogHandler {
 					// If we have clicked the add new currency bar then
 					// make the choose new currency dialog (as long as there are new
 					// currencies to add
-					if (userWallets.size() < OWCoin.Type.values().length) {
+					
+					// The minus one is because the list contains the 
+					if (userWallets.size()-1 < OWCoin.Type.values().length) {
 						showChooseNewCurrencyDialog();
 					}
 				}
@@ -534,7 +532,8 @@ OWPassphraseDialogHandler, OWNeutralDialogHandler, OWNewCurrencyDialogHandler {
 		// in it which the user do
 		for (OWCurrencyListItem itemInList : userWallets) {
 			if (itemInList.getCoinId() == newItem) {
-				// Already in list
+				// Already in list, shouldn't ever get here though because
+				// we only show currencies in the dialog which we don't have
 				return;
 			}
 		}

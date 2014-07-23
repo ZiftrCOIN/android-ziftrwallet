@@ -3,11 +3,15 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,8 +25,6 @@ import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.utils.BriefLogFormatter;
-import com.ziftr.android.onewallet.OWMainFragmentActivity;
-import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
@@ -38,7 +40,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * TODO in the evenListener for the search bar, make a call to notifyDatasetChanged
  * so that all the transactions that don't match are filtered out. 
  */
-public abstract class OWWalletFragment extends Fragment {
+public abstract class OWWalletFragment extends OWWalletUserFragment {
 
 	/** The root view for this application. */
 	private View rootView;
@@ -46,14 +48,6 @@ public abstract class OWWalletFragment extends Fragment {
 	private ListView txListView;
 
 	private List<OWWalletTransactionListItem> txList;
-
-	/**
-	 * Get the market exchange prefix for the 
-	 * actual sub-classing coin fragment type.
-	 * 
-	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
-	 */
-	public abstract OWCoin.Type getCoinId();
 
 	/**
 	 * When this fragment is created, this method is called
@@ -94,67 +88,6 @@ public abstract class OWWalletFragment extends Fragment {
 		return this.rootView;
 	}
 
-	//	private File getWalletFile() {
-	//		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-	//				).getWalletManager();
-	//		if (m != null) {
-	//			return m.getWalletFile(getCoinId());
-	//		}
-	//		return null;
-	//	}
-
-	//	private void updateWalletBalance(BigInteger newBalance) {
-	//		if (walletBalanceText != null) {
-	//			//			String balanceString = 
-	//			//					Utils.bitcoinValueToFriendlyString(newBalance);
-	//
-	//			walletBalanceText.setText((new BigDecimal(newBalance, 8)).toPlainString());
-	//
-	//			String watchedBalance = 
-	//					Utils.bitcoinValueToFriendlyString(getWallet().getWatchedBalance());
-	//			outsideBalanceText.setText(watchedBalance);
-	//		}
-	//	}
-
-
-	/*
-	 * When this fragment is being destroyed we need to shut
-	 * down all of the wallet stuff and make sure the wallet is
-	 * saved to a file.
-	 */
-	//	@Override
-	//	public void onDestroy() {
-	// If the thread that is connecting with peers is still working,
-	// then we stop it here
-	//		if (peerGroup != null) {
-	//			peerGroup.stop();
-	//		}
-	//
-	//		// Close the blockstore because we are no longer going to be receiving
-	//		// and storing blocks
-	//		if (blockStore != null) {
-	//			try {
-	//				blockStore.close();
-	//			} catch (BlockStoreException e) {
-	//				ZLog.log("Exception closing block store: ", e);
-	//			}
-	//		}
-	//
-	//		// Save the wallet to the file. Not that this will save the wallet as either
-	//		// encrypted or decrypted, depending on which was set last using the encrypt
-	//		// or decrypt methods. 
-	//		if (wallet != null) {
-	//			try {
-	//				wallet.saveToFile(walletFile);
-	//			} catch (IOException e) {
-	//				ZLog.log("Exception saving wallet file on shutdown: ", e);
-	//			}
-	//		}
-	//
-	//	super.onDestroy();
-	//
-	//}
-
 	private void initializeWalletHeaderView() {
 		View headerView = this.rootView.findViewById(R.id.walletHeader);
 
@@ -190,7 +123,7 @@ public abstract class OWWalletFragment extends Fragment {
 
 		ImageView marketIcon = (ImageView) (headerView.findViewById(R.id.rightIcon));
 		Drawable marketImage = this.getActivity().getResources().getDrawable(
-				R.drawable.stats_up);
+				R.drawable.stats_enabled);
 		marketIcon.setImageDrawable(marketImage);
 	}
 
@@ -199,31 +132,35 @@ public abstract class OWWalletFragment extends Fragment {
 		// Add the Pending Divider
 		this.txList.add(new OWWalletTransactionListItem(null, null, "PENDING", null, null, 
 				false, R.layout.accounts_wallet_tx_list_divider));
+		Set<String> pendingTxHashes = new HashSet<String>();
 		// Add all the pending transactions
 		for (Transaction tx : this.getWallet().getPendingTransactions()) {
 			this.txList.add(new OWWalletTransactionListItem(
 					getCoinId(), 
 					OWFiat.Type.USD, 
-					tx.getHashAsString(), 
-					OWUtils.formatter.format(tx.getUpdateTime()),
+					tx.getHashAsString().substring(0, 6), 
+					OWUtils.formatterNoTimeZone.format(tx.getUpdateTime()),
 					OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
 					true, 
 					R.layout.accounts_wallet_tx_list_item));
-
+			pendingTxHashes.add(tx.getHashAsString());
 		}
+
 		// Add the History Divider
 		this.txList.add(new OWWalletTransactionListItem(null, null, "HISTORY", null, null, 
 				false, R.layout.accounts_wallet_tx_list_divider));
 		// Add all the pending transactions
 		for (Transaction tx : this.getWallet().getTransactionsByTime()) {
-			this.txList.add(new OWWalletTransactionListItem(
-					getCoinId(), 
-					OWFiat.Type.USD, 
-					tx.getHashAsString(), 
-					OWUtils.formatter.format(tx.getUpdateTime()),
-					OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
-					false, 
-					R.layout.accounts_wallet_tx_list_item));
+			if (!pendingTxHashes.contains(tx.getHashAsString())) {
+				this.txList.add(new OWWalletTransactionListItem(
+						getCoinId(), 
+						OWFiat.Type.USD, 
+						tx.getHashAsString().substring(0, 6), 
+						OWUtils.formatterNoTimeZone.format(tx.getUpdateTime()),
+						OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
+						false, 
+						R.layout.accounts_wallet_tx_list_item));
+			}
 		}
 
 		this.txListView = (ListView)
@@ -243,65 +180,91 @@ public abstract class OWWalletFragment extends Fragment {
 			}
 
 			// TODO override more methods here to do things like changing 
-			// transactions from pending to finalized, etc. 
+			// transactions from pending to finalized, etc.
 		});
 	}
 
+	/* (non-Javadoc)
+	 * @see android.support.v4.app.Fragment#onActivityResult(int, int, android.content.Intent)
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data != null) {
+			ZLog.log("received result: " + data.toString());
+		} else {
+			ZLog.log("received result!");
+		}
+
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
 	private void initializeButtons() {
-
-		//		// The transaction that will take place to show the new fragment
-		//		FragmentTransaction transaction = 
-		//				this.getActivity().getSupportFragmentManager().beginTransaction();
-		//
-		//		// TODO add animation to transaciton here
-		//
-		//		// Make the new fragment of the correct type
-		//		Fragment fragToShow = this.getActivity().getSupportFragmentManager(
-		//				).findFragmentByTag(this.getCoinId().getShortTitle() + 
-		//						"_send_coins_fragment");
-		//		if (fragToShow == null) {
-		//			// If the fragment doesn't exist yet, make a new one
-		//			fragToShow = new OWSendBitcoinTestnetCoinsFragment();
-		//		} else if (fragToShow.isVisible()) {
-		//			// If the fragment is already visible, no need to do anything
-		//			return;
-		//		}
-		//
-		//		transaction.replace(R.id.oneWalletBaseFragmentHolder, 
-		//				fragToShow, "send_coins_fragment");
-		//		transaction.addToBackStack(null);
-		//		transaction.commit();
-
-
-		Button sendButton = (Button) 
-				this.rootView.findViewById(R.id.leftButton);
-		sendButton.setText("SEND");
-		sendButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO do something when we click send
-			}
-		});
-
 		Button receiveButton = (Button) 
-				this.rootView.findViewById(R.id.rightButton);
+				this.rootView.findViewById(R.id.leftButton);
 		receiveButton.setText("RECEIVE");
 		receiveButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO do something when we click receive
+				// TODO this actually goes to wrong screen right now
+				// The transaction that will take place to show the new fragment
+				FragmentTransaction transaction = 
+						getActivity().getSupportFragmentManager().beginTransaction();
+
+				// TODO add animation to transaciton here
+
+				// Make the new fragment of the correct type
+				Fragment fragToShow = getActivity().getSupportFragmentManager(
+						).findFragmentByTag(getCoinId().getShortTitle() + 
+								"_receive_coins_fragment");
+				if (fragToShow == null) {
+					// If the fragment doesn't exist yet, make a new one
+					fragToShow = new OWReceiveBitcoinTestnetCoinsFragment();
+				} else if (fragToShow.isVisible()) {
+					// If the fragment is already visible, no need to do anything
+					return;
+				}
+
+				transaction.replace(R.id.oneWalletBaseFragmentHolder, 
+						fragToShow, getCoinId().getShortTitle() + 
+						"_receive_coins_fragment");
+				transaction.addToBackStack(null);
+				transaction.commit();
 			}
 		});
-	}
 
-	private Wallet getWallet() {
-		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-				).getWalletManager();
-		if (m != null) {
-			return m.getWallet(getCoinId());
-		}
+		Button sendButton = (Button) 
+				this.rootView.findViewById(R.id.rightButton);
+		sendButton.setText("SEND");
+		sendButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO this actually goes to wrong screen right now
+				// The transaction that will take place to show the new fragment
+				FragmentTransaction transaction = 
+						getActivity().getSupportFragmentManager().beginTransaction();
 
-		return null;
+				// TODO add animation to transaciton here
+
+				// Make the new fragment of the correct type
+				Fragment fragToShow = getActivity().getSupportFragmentManager(
+						).findFragmentByTag(getCoinId().getShortTitle() + 
+								"_send_coins_fragment");
+				if (fragToShow == null) {
+					// If the fragment doesn't exist yet, make a new one
+					fragToShow = new OWSendBitcoinTestnetCoinsFragment();
+				} else if (fragToShow.isVisible()) {
+					// If the fragment is already visible, no need to do anything
+					return;
+				}
+
+				transaction.replace(R.id.oneWalletBaseFragmentHolder, 
+						fragToShow, getCoinId().getShortTitle() + 
+						"_send_coins_fragment");
+				transaction.addToBackStack(null);
+				transaction.commit();
+			}
+		});
+
 	}
 
 	//	private File getWalletFile() {

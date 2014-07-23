@@ -38,6 +38,6 @@
         android:layout_alignRight="@id/coinLogoWithTextBelow"
         android:layout_below="@id/coinLogoWithTextBelow"
         android:contentDescription="@string/old_passphrase_hint"
-        android:src="@drawable/add_down" />
+        android:src="@drawable/add_white_enabled" />
 
 </RelativeLayout>

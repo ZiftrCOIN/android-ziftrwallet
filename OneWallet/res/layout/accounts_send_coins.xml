@@ -36,7 +36,7 @@
                     android:layout_margin="@dimen/ow_icon_margin"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/old_passphrase_hint"
-                    android:src="@drawable/copy_down" />
+                    android:src="@drawable/copy_enabled" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -71,7 +71,7 @@
                     android:layout_gravity="center"
                     android:layout_margin="@dimen/ow_icon_margin"
                     android:contentDescription="@string/old_passphrase_hint"
-                    android:src="@drawable/qrcode_down" />
+                    android:src="@drawable/qrcode_enabled" />
             </LinearLayout>
 
             <LinearLayout

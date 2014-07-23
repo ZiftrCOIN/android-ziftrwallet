@@ -10,7 +10,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -27,8 +26,6 @@ import com.google.bitcoin.core.InsufficientMoneyException;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.utils.Threading;
 import com.google.zxing.client.android.CaptureActivity;
-import com.ziftr.android.onewallet.OWMainFragmentActivity;
-import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
@@ -43,7 +40,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * TODO make sure that we stop correctly when the user
  * enters non-sensical values in fields.
  */
-public abstract class OWSendCoinsFragment extends Fragment {
+public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	/** A boolean to keep track of changes to disallow infinite changes. */
 	private boolean changeCoinStartedFromProgram = false;
@@ -53,14 +50,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 
 	/** The view container for this fragment. */
 	private View rootView;
-
-	/**
-	 * Get the market exchange prefix for the 
-	 * actual sub-classing coin fragment type.
-	 * 
-	 * @return "BTC" for Bitcoin, "LTC" for Litecoin, etc.
-	 */
-	public abstract OWCoin.Type getCoinId();
 
 	/**
 	 * This is a placeholder for a spot to determine if a given address
@@ -108,25 +97,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
-	/**
-	 * This method is called at the beginning of onCreateView to
-	 * ensure that the wallet has been set (or is retrievable through 
-	 * the activity's wallet manage). This needs to be done because 
-	 * we cannot possibly send coins if we do not have a wallet object.
-	 */
-	//	private void ensureWalletExists() {
-	//		if (this.wallet == null) {
-	//			this.wallet = ((OWMainFragmentActivity) 
-	//					this.getActivity()).getWalletManager().getWallet(getCoinId());
-	//		} 
-	//
-	//		// If it's still null we are going to 
-	//		if (this.wallet == null) {
-	//			throw new IllegalArgumentException(
-	//					"The wallet must be set to send coins.");
-	//		}
-	//	}
 
 	/**
 	 * Sets up all the useful icons in the form. Currently sets up the paste
@@ -340,16 +310,6 @@ public abstract class OWSendCoinsFragment extends Fragment {
 			}
 		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
 
-	}
-
-	private Wallet getWallet() {
-		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-				).getWalletManager();
-		if (m != null) {
-			return m.getWallet(getCoinId());
-		}
-
-		return null;
 	}
 
 	/**
