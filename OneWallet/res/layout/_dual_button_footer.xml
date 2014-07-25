@@ -12,7 +12,7 @@
             android:layout_weight="1"
             android:background="@drawable/clickable_button_color"
             android:gravity="center"
-            android:text="@string/cancel_button_text" />
+            android:text="@string/ow_cancel_button_text" />
 
         <View
             android:layout_width="1dp"
@@ -29,5 +29,5 @@
             android:layout_weight="1"
             android:background="@drawable/clickable_button_color"
             android:gravity="center"
-            android:text="@string/send_button_text" />
+            android:text="@string/ow_send_button_text" />
     </LinearLayout>

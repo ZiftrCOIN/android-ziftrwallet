@@ -23,8 +23,7 @@ import com.ziftr.android.onewallet.util.OWFiat;
 public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransactionListItem> {
 	private LayoutInflater inflater;
 	private Context context;
-	private int historyIndex;
-	
+
 	// TODO add a boolean returner that determines whether or not to add items
 	// to the list. This can be used in searching
 
@@ -32,13 +31,12 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 	public static final int transactionType = 0;
 	/** The divider type. */
 	public static final int dividerType = 1;
-	
+
 	public OWWalletTransactionListAdapter(Context ctx, 
 			List<OWWalletTransactionListItem> dataSet) {
 		super(ctx, 0, dataSet);
 		this.inflater = LayoutInflater.from(ctx);
 		this.context = ctx;
-		this.updateHistoryIndex();
 	}
 
 	/**
@@ -47,8 +45,8 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 	 */
 	@Override
 	public int getItemViewType(int position) {
-		this.updateHistoryIndex();
-		if (position == 0 || position == this.historyIndex) {
+		if (getItem(position).getTxType() == OWWalletTransactionListItem.Type.PendingDivider
+				|| getItem(position).getTxType() == OWWalletTransactionListItem.Type.HistoryDivider) {
 			return dividerType;
 		} else {
 			return transactionType;
@@ -80,17 +78,17 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 		}
 
 		if (getItemViewType(position) == transactionType) {
-			
+
 			String fiatSymbol = txListItem.getFiatType().getSymbol();
 
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView txTitleTextView = (TextView) convertView.findViewById(R.id.txTitle);
 			txTitleTextView.setText(txListItem.getTxTitle());
-			
+
 			TextView txTimeTextView = (TextView) convertView.findViewById(R.id.txTime);
 			txTimeTextView.setText(txListItem.getTxTime());
-			
+
 			TextView txAmount = (TextView) convertView.findViewById(R.id.txAmount);
 			BigDecimal amt = OWCoin.formatCoinAmount(
 					txListItem.getCoinId(), txListItem.getTxAmount());
@@ -103,12 +101,12 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 			BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
 					txListItem.getFiatType(), fiatAmt);
 			txAmountFiatEquiv.setText(fiatSymbol + formattedfiatAmt.toPlainString());
-			
+
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
 			Drawable image = context.getResources().getDrawable(
 					getImgResIdForItem(txListItem));
 			txIOIcon.setImageDrawable(image);
-			
+
 			return convertView;
 
 		} else {
@@ -122,15 +120,6 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 	}
 
 	/**
-	 * 
-	 */
-	@Override
-	public void notifyDataSetChanged() {
-		this.updateHistoryIndex();
-		super.notifyDataSetChanged();
-	}
-
-	/**
 	 * @param txListItem
 	 * @return
 	 */
@@ -138,14 +127,16 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 		int imgResId;
 		if (txListItem.getTxAmount().compareTo(BigDecimal.ZERO) >= 0) {
 			// This means the tx is received (relative to user)
-			if (txListItem.isPending()) {
+			if (txListItem.getTxType() == 
+					OWWalletTransactionListItem.Type.PendingTransaction) {
 				imgResId = R.drawable.received_pending_enabled;
 			} else {
 				imgResId = R.drawable.received_enabled;
 			}
 		} else {
 			// This means the tx is sent (relative to user)
-			if (txListItem.isPending()) {
+			if (txListItem.getTxType() == 
+					OWWalletTransactionListItem.Type.PendingTransaction) {
 				imgResId = R.drawable.sent_pending_enabled;
 			} else {
 				imgResId = R.drawable.sent_enabled;
@@ -154,16 +145,4 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 		return imgResId;
 	}
 
-	private void updateHistoryIndex() {
-		int newIndex = 0;
-		do {
-			newIndex++;
-			// Safe because we are assuming that the data set will always end
-			// with a transaction that is not pending. Even if the data set
-			// only contains two items (the two dividers), the second will not 
-			// be pending.
-		} while (getItem(newIndex).isPending());
-		this.historyIndex = newIndex;
-	}
-	
 }

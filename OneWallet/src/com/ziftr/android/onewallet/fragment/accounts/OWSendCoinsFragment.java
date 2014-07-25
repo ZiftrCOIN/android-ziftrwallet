@@ -57,6 +57,8 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	 * 
 	 * @param address - The address to verify the validity of.
 	 * @return as above
+	 * 
+	 * TODO use the checksum to make sure addresses are valid
 	 */
 	public abstract boolean addressIsValid(String address);
 

@@ -3,6 +3,7 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -129,36 +130,45 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 
 	private void initializeTxListView() {
 		this.txList = new ArrayList<OWWalletTransactionListItem>();
-		// Add the Pending Divider
-		this.txList.add(new OWWalletTransactionListItem(null, null, "PENDING", null, null, 
-				false, R.layout.accounts_wallet_tx_list_divider));
-		Set<String> pendingTxHashes = new HashSet<String>();
-		// Add all the pending transactions
-		for (Transaction tx : this.getWallet().getPendingTransactions()) {
+		Collection<Transaction> pendingTxs = this.getWallet().getPendingTransactions();
+		Set<String> pendingTxHashes = null;
+		if (pendingTxs.size() > 0) {
+			// Add the Pending Divider
 			this.txList.add(new OWWalletTransactionListItem(
-					getCoinId(), 
-					OWFiat.Type.USD, 
-					tx.getHashAsString().substring(0, 6), 
-					OWUtils.formatterNoTimeZone.format(tx.getUpdateTime()),
-					OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
-					true, 
-					R.layout.accounts_wallet_tx_list_item));
-			pendingTxHashes.add(tx.getHashAsString());
-		}
-
-		// Add the History Divider
-		this.txList.add(new OWWalletTransactionListItem(null, null, "HISTORY", null, null, 
-				false, R.layout.accounts_wallet_tx_list_divider));
-		// Add all the pending transactions
-		for (Transaction tx : this.getWallet().getTransactionsByTime()) {
-			if (!pendingTxHashes.contains(tx.getHashAsString())) {
+					null, null, "PENDING", null, null, 
+					OWWalletTransactionListItem.Type.PendingDivider, 
+					R.layout.accounts_wallet_tx_list_divider));
+			pendingTxHashes = new HashSet<String>();
+			// Add all the pending transactions
+			for (Transaction tx : pendingTxs) {
 				this.txList.add(new OWWalletTransactionListItem(
 						getCoinId(), 
 						OWFiat.Type.USD, 
 						tx.getHashAsString().substring(0, 6), 
 						OWUtils.formatterNoTimeZone.format(tx.getUpdateTime()),
 						OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
-						false, 
+						OWWalletTransactionListItem.Type.PendingTransaction, 
+						R.layout.accounts_wallet_tx_list_item));
+				pendingTxHashes.add(tx.getHashAsString());
+			}
+		}
+
+		// Add the History Divider
+		this.txList.add(new OWWalletTransactionListItem(
+				null, null, "HISTORY", null, null, 
+				OWWalletTransactionListItem.Type.HistoryDivider, 
+				R.layout.accounts_wallet_tx_list_divider));
+		// Add all the pending transactions
+		for (Transaction tx : this.getWallet().getTransactionsByTime()) {
+			if (pendingTxHashes == null || (pendingTxHashes != null && 
+					!pendingTxHashes.contains(tx.getHashAsString()))) {
+				this.txList.add(new OWWalletTransactionListItem(
+						getCoinId(), 
+						OWFiat.Type.USD, 
+						tx.getHashAsString().substring(0, 6), 
+						OWUtils.formatterNoTimeZone.format(tx.getUpdateTime()),
+						OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
+						OWWalletTransactionListItem.Type.ConfirmedTransaction, 
 						R.layout.accounts_wallet_tx_list_item));
 			}
 		}
@@ -266,259 +276,5 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 		});
 
 	}
-
-	//	private File getWalletFile() {
-	//		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-	//				).getWalletManager();
-	//		if (m != null) {
-	//			return m.getWalletFile(getCoinId());
-	//		}
-	//		return null;
-	//	}
-
-	//	private void updateWalletBalance(BigInteger newBalance) {
-	//		if (walletBalanceText != null) {
-	//			//			String balanceString = 
-	//			//					Utils.bitcoinValueToFriendlyString(newBalance);
-	//
-	//			walletBalanceText.setText((new BigDecimal(newBalance, 8)).toPlainString());
-	//
-	//			String watchedBalance = 
-	//					Utils.bitcoinValueToFriendlyString(getWallet().getWatchedBalance());
-	//			outsideBalanceText.setText(watchedBalance);
-	//		}
-	//	}
-
-
-	//	/**
-	//	 * 
-	//	 */
-	//	private void beginSyncWithNetwork() {
-	//		ZLog.log("");
-	//		ZLog.log("Sync wallet with network");
-	//		ZLog.log("");
-	//		
-	//		// TODO should all of this actually go into the wallet manager? 
-	//		
-	//		
-	//		OWUtils.runOnNewThread(new Runnable() {
-	//			@Override
-	//			public void run() {
-	//
-	//				try {
-	//					ZLog.log("RUNNING");
-	//					File externalDirectory = getActivity().getExternalFilesDir(null);
-	//					blockStoreFile = new File(externalDirectory, 
-	//							getCoinId().getShortTitle() + "_blockchain.store");
-	//					
-	//					boolean blockStoreExists = blockStoreFile.exists();
-	//					// This creates the file if it doesn't exist, so check first
-	//					blockStore = new SPVBlockStore(
-	//							networkParams, blockStoreFile); 
-	//
-	//					if (!blockStoreExists) {
-	//						// We're creating a new block store file here, so 
-	//						// use checkpoints to speed up network syncing
-	//						Activity act = getActivity();
-	//						if (act == null) {
-	//							// If this happens app is dying, so wait and 
-	//							// do this on the next run
-	//							return; 
-	//						}
-	//
-	//						InputStream inputSteam = act.getResources(
-	//								).openRawResource(R.raw.btc_checkpoints);
-	//						try {
-	//							CheckpointManager.checkpoint(
-	//									networkParams, inputSteam, blockStore, 
-	//									wallet.getEarliestKeyCreationTime());
-	//						} catch (IOException e) {
-	//							// We failed to read the checkpoints file 
-	//							// for some reason, still let the user 
-	//							// attempt sync the chain the slow way
-	//							ZLog.log("Failed to load chain checkpoint: ", e);
-	//						}
-	//					}
-	//
-	//					BlockChain chain = new BlockChain(
-	//							networkParams, wallet, blockStore);
-	//
-	//					peerGroup = new PeerGroup(networkParams, chain);
-	//
-	//					peerGroup.setUserAgent("OneWallet", "1.0");
-	//
-	//
-	//					// So the wallet receives broadcast transactions.
-	//					peerGroup.addWallet(wallet);
-	//
-	//					peerGroup.addPeerDiscovery(new DnsDiscovery(networkParams));
-	//
-	//
-	//					//peerGroup.setMaxConnections(25);
-	//
-	//					// This is for running local version of bitcoin 
-	//					// network for testing
-	//					//peerGroup.addAddress(InetAddress.getLocalHost()); 
-	//
-	//					// This starts the connecting with peers on a new thread
-	//					peerGroup.start();
-	//
-	//					ZLog.log("Connected peers: ", 
-	//							peerGroup.getConnectedPeers());
-	//
-	//					// Note that instead of using the anonymous inner class 
-	//					// based, we could use another class which implements 
-	//					// WalletEventListener, however that requires setting up a 
-	//					// bunch of methods we don't need for this simple test
-	//					wallet.addEventListener(new AbstractWalletEventListener() {
-	//						@Override
-	//						public synchronized void onCoinsReceived(
-	//								Wallet w, 
-	//								Transaction tx, 
-	//								BigInteger prevBalance, 
-	//								final BigInteger newBalance) {
-	//
-	//							try {
-	//								// Every time the wallet changes, we save it to the file
-	//								wallet.saveToFile(walletFile);
-	//							} catch (IOException e) {
-	//								// TODO what to do if this fails? 
-	//								ZLog.log("Failed to save updated wallet balance: ", e);
-	//							}
-	//
-	//							// Now update the UI with the new balance
-	//							Activity activity = getActivity();
-	//							if (activity != null) {
-	//								activity.runOnUiThread(new Runnable() {
-	//									public void run() {
-	//										updateWalletBalance(newBalance);
-	//									}
-	//								});
-	//							}
-	//						}
-	//					});
-	//
-	//
-	//					// Now download and process the block chain.
-	//					peerGroup.downloadBlockChain();
-	//
-	//					// TODO these are not safe because other threads can 
-	//					// modify the transaction collections while we iterate 
-	//					// through them, however this is just for testing right now
-	//
-	//					//also upload any pending transactions
-	//					Collection<Transaction> pendingTransactions = 
-	//							wallet.getPendingTransactions();
-	//					wallet.getKeyCrypter();
-	//
-	//					synchronized (pendingTransactions) {
-	//
-	//						for(Transaction tx : pendingTransactions) {
-	//							//ZLog.log("There is a pending transaction "
-	//							//		+ "in the wallet: ", tx.toString(chain));
-	//							//wallet.commitTx(tx);
-	//
-	//							try {
-	//								//wallet.commitTx(tx);
-	//								//wallet.cleanup();
-	//
-	//								if (!wallet.isConsistent()) {
-	//									ZLog.log("Wallet is inconsistent!!");
-	//								}
-	//
-	//								if (wallet.isTransactionRisky(tx, null)) {
-	//									ZLog.log("Transaction is risky...");
-	//								}
-	//
-	//								String logMsg = "Pending Transaction Details: \n";
-	//								logMsg += "isPending: " + String.valueOf(
-	//										tx.isPending()) +"\n";
-	//								logMsg += "isMature: " + String.valueOf(
-	//										tx.isMature()) + "\n";
-	//								logMsg += "isAnyOutputSpent: " + String.valueOf(
-	//										tx.isAnyOutputSpent()) + "\n";
-	//								logMsg += "sigOpCount: " + String.valueOf(
-	//										tx.getSigOpCount()) +"\n";
-	//
-	//								TransactionConfidence confidence = 
-	//										tx.getConfidence();
-	//
-	//								logMsg += "Confidence: \n" + 
-	//										confidence.toString() + "\n";
-	//
-	//								logMsg += "Confidence Type: " + String.valueOf(
-	//										confidence.getConfidenceType().getValue()) 
-	//										+ "\n";
-	//								logMsg += "Confidence Block Depth: " + 
-	//										String.valueOf(confidence.getDepthInBlocks(
-	//												)) + "\n";
-	//								logMsg += "Number Broadcast Peers: " + 
-	//										String.valueOf(confidence.numBroadcastPeers(
-	//												))+"\n";
-	//
-	//								String broadcastByString = "none";
-	//								ListIterator<PeerAddress> broadcastBy = 
-	//										confidence.getBroadcastBy();
-	//								if (broadcastBy != null) {
-	//									broadcastByString = "";
-	//									while(broadcastBy.hasNext()) {
-	//										broadcastByString += broadcastBy.next().toString() + "\n";
-	//									}
-	//								}
-	//
-	//								logMsg += "Broadcast by Peers: \n" + broadcastByString + "\n";
-	//								logMsg += "Confidence Source: " + confidence.getSource().name() +"\n";
-	//
-	//
-	//
-	//								logMsg += "version: " + String.valueOf(tx.getVersion()) +"\n";
-	//
-	//								String hashes = "null";
-	//								Map<Sha256Hash, Integer> hashesTransactionAppearsIn = tx.getAppearsInHashes();
-	//								if (hashesTransactionAppearsIn != null) {
-	//									hashes = hashesTransactionAppearsIn.toString();
-	//								}
-	//
-	//								logMsg += "Transaction Appears in Hashes: \n" + hashes +"\n";
-	//
-	//								logMsg += "Transaction Hash: " + tx.getHashAsString() + "\n";
-	//
-	//								logMsg += "Transaction Update Time: " + tx.getUpdateTime().toString() +"\n";
-	//
-	//								logMsg += "Transaction Value: " + String.valueOf(tx.getValue(wallet)) + "\n";
-	//
-	//								ZLog.log(logMsg);
-	//
-	//								//wallet.clearTransactions(0); //for testing... drop a bomb on our wallet
-	//
-	//							} catch(Exception e) {
-	//								ZLog.log("Caught Excpetion: ", e);
-	//							}
-	//
-	//							try {
-	//								//peerGroup.broadcastTransaction(tx);
-	//							} catch(Exception e) {
-	//								ZLog.log("Caught Excpetion: ", e);
-	//							}
-	//
-	//						} 
-	//					}
-	//
-	//					/**
-	//		        List<Transaction> recentTransactions = wallet.getRecentTransactions(20, true);
-	//		        for(Transaction tx : recentTransactions) {
-	//		        	ZLog.log("Recent transaction: ", tx);
-	//		        }
-	//					 ***/
-	//
-	//				} catch (BlockStoreException e) {
-	//					ZLog.log("Exeption creating block store: ", e);
-	//				} 
-	//				
-	//				ZLog.log("STOPPING");
-	//
-	//			}
-	//		});
-	//	}
 
 }

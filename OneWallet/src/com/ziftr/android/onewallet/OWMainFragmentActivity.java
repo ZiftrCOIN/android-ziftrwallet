@@ -94,9 +94,19 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	Make sure that all list views have headers/footers where appropriate rather
 	than just extra views in the xml files. 
 	
-	o 21. 
+	o 21. Don't show a pending transaction bar if there aren't any pending. 
+	
+	o 22. Add descriptions to each of the resources (like @string/ resources).
+	
+	o 23. Need to remember where we were when navigating back the accounts section
+	
+	o 24. Should only need to have passphrase when sending coins. 
+	
+	o 25. Need to have all the fragments start fragments by routing through
+	the activity so that the activity can do more complicated things.
 	
 	TODO Maybe we don't want to set up all the open wallets right from the get go? 
+	But we need to get the balance...
 
 	 */
 

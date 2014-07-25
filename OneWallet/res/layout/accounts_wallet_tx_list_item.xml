@@ -18,7 +18,7 @@
         android:layout_marginRight="@dimen/ow_icon_margin"
         android:layout_marginBottom="@dimen/ow_icon_margin"
         android:layout_marginLeft="@dimen/ow_half_icon_size"
-        android:contentDescription="@string/tx_list_io_icon_description"
+        android:contentDescription="@string/ow_tx_list_io_icon_description"
         android:gravity="center_vertical"
         android:src="@drawable/received_enabled" />
 
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/txIOIcon"
         android:layout_toLeftOf="@id/txIOIcon"
-        android:text="@string/send_default_total" />
+        android:text="@string/ow_send_default_total" />
 
     <TextView
         android:id="@+id/txAmountFiatEquiv"
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/txIOIcon"
         android:layout_toLeftOf="@id/txIOIcon"
-        android:text="@string/send_default_total_fiat_equiv" />
+        android:text="@string/ow_send_default_total_fiat_equiv" />
 
     <TextView
         android:id="@+id/txTitle"
@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="@string/tx_list_title_default"
+        android:text="@string/ow_tx_list_title_default"
         android:textSize="15sp"
         android:textStyle="bold" />
 
@@ -54,6 +54,6 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/txIOIcon"
         android:layout_alignParentLeft="true"
-        android:text="@string/tx_list_time_default" />
+        android:text="@string/ow_tx_list_time_default" />
 
 </RelativeLayout>

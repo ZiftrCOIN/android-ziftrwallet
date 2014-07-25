@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:minHeight="@dimen/ow_send_list_spacing_top_margin" >
+        android:minHeight="@dimen/ow_send_receive_list_spacing_top_margin" >
     </View>
 
     <ScrollView
@@ -25,7 +26,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/ow_send_list_background"
+                android:background="@color/ow_send_receive_list_background"
                 android:orientation="horizontal" >
 
                 <ImageView
@@ -35,7 +36,7 @@
                     android:layout_gravity="center"
                     android:layout_margin="@dimen/ow_icon_margin"
                     android:background="@android:color/transparent"
-                    android:contentDescription="@string/old_passphrase_hint"
+                    android:contentDescription="@string/ow_old_passphrase_hint"
                     android:src="@drawable/copy_enabled" />
 
                 <LinearLayout
@@ -52,7 +53,8 @@
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
                         android:gravity="left"
-                        android:text="@string/send_to_address" >
+                        android:text="@string/ow_send_to_address"
+                        android:textColor="@color/White" >
                     </TextView>
 
                     <EditText
@@ -70,15 +72,15 @@
                     android:layout_height="@dimen/ow_icon_size"
                     android:layout_gravity="center"
                     android:layout_margin="@dimen/ow_icon_margin"
-                    android:contentDescription="@string/old_passphrase_hint"
+                    android:contentDescription="@string/ow_old_passphrase_hint"
                     android:src="@drawable/qrcode_enabled" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
-                android:background="@color/ow_send_list_background"
+                android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                android:background="@color/ow_send_receive_list_background"
                 android:orientation="vertical"
                 android:paddingBottom="5dp"
                 android:paddingLeft="@dimen/ow_total_icon_side_length"
@@ -89,9 +91,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:textColor="@color/White"
                     android:layout_margin="5dp"
                     android:gravity="left"
-                    android:text="@string/send_to_address_name" >
+                    android:text="@string/ow_send_to_address_name" >
                 </TextView>
 
                 <EditText
@@ -106,8 +109,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
-                android:background="@color/ow_send_list_background"
+                android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                android:background="@color/ow_send_receive_list_background"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:paddingBottom="5dp"
@@ -119,16 +122,17 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@color/ow_send_list_background"
+                    android:background="@color/ow_send_receive_list_background"
                     android:orientation="vertical" >
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:textColor="@color/White"
                         android:layout_margin="5dp"
                         android:gravity="left"
-                        android:text="@string/send_amount" >
+                        android:text="@string/ow_send_amount" >
                     </TextView>
 
                     <EditText
@@ -144,7 +148,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:background="@color/ow_send_list_background"
+                    android:background="@color/ow_send_receive_list_background"
                     android:orientation="vertical" >
 
                     <TextView
@@ -152,8 +156,9 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
+                        android:textColor="@color/White"
                         android:gravity="left"
-                        android:text="@string/send_amount_equivalent" >
+                        android:text="@string/ow_send_amount_equivalent" >
                     </TextView>
 
                     <EditText
@@ -169,8 +174,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
-                android:background="@color/ow_send_list_background"
+                android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                android:background="@color/ow_send_receive_list_background"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:paddingBottom="5dp"
@@ -188,9 +193,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
+                        android:textColor="@color/White"
                         android:layout_margin="5dp"
                         android:gravity="left"
-                        android:text="@string/send_transaction_fee" >
+                        android:text="@string/ow_send_transaction_fee" >
                     </TextView>
 
                     <EditText
@@ -220,9 +226,10 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
+                        android:textColor="@color/White"
                         android:ems="1"
                         android:gravity="left"
-                        android:text="@string/send_amount_equivalent" >
+                        android:text="@string/ow_send_amount_equivalent" >
                     </TextView>
 
                     <EditText
@@ -242,8 +249,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/ow_send_list_spacing_top_margin"
-                android:background="@color/ow_send_list_background"
+                android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                android:background="@color/ow_send_receive_list_background"
                 android:orientation="vertical"
                 android:paddingBottom="5dp"
                 android:paddingLeft="@dimen/ow_total_icon_side_length"
@@ -255,8 +262,9 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="5dp"
+                    android:textColor="@color/White"
                     android:gravity="left"
-                    android:text="@string/send_total" >
+                    android:text="@string/ow_send_total" >
                 </TextView>
 
                 <LinearLayout
@@ -275,7 +283,7 @@
                         android:layout_gravity="bottom"
                         android:layout_margin="5dp"
                         android:gravity="bottom"
-                        android:text="@string/send_default_total"
+                        android:text="@string/ow_send_default_total"
                         android:textSize="24sp" >
                     </TextView>
 
@@ -286,7 +294,7 @@
                         android:layout_gravity="bottom"
                         android:layout_margin="5dp"
                         android:gravity="bottom"
-                        android:text="@string/send_default_total_fiat_equiv" >
+                        android:text="@string/ow_send_default_total_fiat_equiv" >
                     </TextView>
                 </LinearLayout>
             </LinearLayout>
@@ -297,7 +305,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:minHeight="@dimen/ow_send_list_spacing_top_margin" >
+        android:minHeight="@dimen/ow_send_receive_list_spacing_top_margin" >
     </View>
 
     <include

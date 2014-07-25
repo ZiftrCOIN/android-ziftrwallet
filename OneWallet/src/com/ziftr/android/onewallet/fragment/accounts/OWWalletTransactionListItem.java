@@ -10,6 +10,13 @@ import com.ziftr.android.onewallet.util.OWFiat;
  * This class is just a data holder for the {@link OWWalletTransactionListAdapter}.
  */
 public class OWWalletTransactionListItem {
+	
+	protected enum Type {
+		PendingTransaction,
+		ConfirmedTransaction,
+		PendingDivider,
+		HistoryDivider
+	}
 
 	/** The currency's title. e.g. "Bitcoin". */
 	private OWCoin.Type coinId;
@@ -30,7 +37,7 @@ public class OWWalletTransactionListItem {
 	private BigDecimal txAmount;
 
 	/** A boolean describing whether or not this transaction is pending. */
-	private boolean isPending;
+	private OWWalletTransactionListItem.Type txType;
 
 	/** The resources id to draw the view for this list item. */
 	private int resId;
@@ -40,14 +47,14 @@ public class OWWalletTransactionListItem {
 			String txTitle, 
 			String txTime, 
 			BigDecimal txAmount, 
-			boolean isPending, 
+			OWWalletTransactionListItem.Type txType,
 			int resId) {
 		this.setCoinId(coinId);
 		this.setFiatType(fiatType);
 		this.setTxTitle(txTitle);
 		this.setTxTime(txTime);
 		this.setTxAmount(txAmount);
-		this.setPending(isPending);
+		this.setTxType(txType);
 		this.setResId(resId);
 	}
 
@@ -122,17 +129,17 @@ public class OWWalletTransactionListItem {
 	}
 
 	/**
-	 * @return the isPending
+	 * @return the txType
 	 */
-	public boolean isPending() {
-		return isPending;
+	public OWWalletTransactionListItem.Type getTxType() {
+		return txType;
 	}
 
 	/**
-	 * @param isPending the isPending to set
+	 * @param txType the txType to set
 	 */
-	public void setPending(boolean isPending) {
-		this.isPending = isPending;
+	public void setTxType(OWWalletTransactionListItem.Type txType) {
+		this.txType = txType;
 	}
 
 	/**

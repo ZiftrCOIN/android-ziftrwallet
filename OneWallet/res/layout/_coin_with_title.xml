@@ -17,7 +17,7 @@
             android:layout_height="60dp"
             android:layout_gravity="center_horizontal"
             android:layout_margin="5dp"
-            android:contentDescription="@string/old_passphrase_hint"
+            android:contentDescription="@string/ow_old_passphrase_hint"
             android:src="@drawable/logo_bitcoin" />
 
         <TextView
@@ -27,7 +27,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="5dp"
             android:gravity="center_horizontal"
-            android:text="@string/bitcoin" />
+            android:text="@string/ow_bitcoin" />
     </LinearLayout>
 
     <ImageView
@@ -37,7 +37,7 @@
         android:layout_alignTop="@id/coinLogoWithTextBelow"
         android:layout_alignRight="@id/coinLogoWithTextBelow"
         android:layout_below="@id/coinLogoWithTextBelow"
-        android:contentDescription="@string/old_passphrase_hint"
+        android:contentDescription="@string/ow_old_passphrase_hint"
         android:src="@drawable/add_white_enabled" />
 
 </RelativeLayout>

@@ -156,10 +156,7 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 				OWNewCurrencyListItem newItem = (OWNewCurrencyListItem) 
 						parent.getItemAtPosition(position);
 				currSelectedCoinType = newItem.getCoinId();
-
-				// TODO make sure it is selected correctly
 			}
-
 		});
 	}
 

@@ -1,17 +1,98 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
     android:padding="0dp" >
 
-    <ImageView
-        android:id="@+id/show_qr_img"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_gravity="center"
-        android:layout_margin="@dimen/ow_icon_margin"
-        android:contentDescription="@string/empty_string"
-        android:src="@drawable/qrcode_enabled" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
-</LinearLayout>
+        <LinearLayout
+            android:id="@+id/addressNameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+            android:background="@color/ow_send_receive_list_background"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/ow_send_receive_list_block_padding"
+            android:paddingLeft="@dimen/ow_total_icon_side_length"
+            android:paddingRight="@dimen/ow_total_icon_side_length"
+            android:paddingTop="@dimen/ow_send_receive_list_block_padding" >
+
+            <TextView
+                android:id="@+id/addressNameTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ow_receive_coins_address_name_box_title"
+                android:textColor="@color/White"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/addressNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:textSize="14sp" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/addressValueLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+            android:background="@color/ow_send_receive_list_background"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/ow_send_receive_list_block_padding"
+            android:paddingLeft="0dp"
+            android:paddingRight="@dimen/ow_total_icon_side_length"
+            android:paddingTop="@dimen/ow_send_receive_list_block_padding" >
+
+            <ImageView
+                android:id="@+id/receiveCopyAddress"
+                android:layout_width="@dimen/ow_icon_size"
+                android:layout_height="@dimen/ow_icon_size"
+                android:layout_alignParentLeft="true"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/ow_icon_margin"
+                android:contentDescription="@string/ow_empty_string"
+                android:src="@drawable/copy_enabled" />
+
+            <TextView
+                android:id="@+id/addressValueTitleTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/receiveCopyAddress"
+                android:layout_toRightOf="@id/receiveCopyAddress"
+                android:text="@string/ow_receive_coins_address_value_box_title"
+                android:textColor="@color/White"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/addressValueTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/receiveCopyAddress"
+                android:layout_toRightOf="@id/receiveCopyAddress"
+                android:maxLines="1"
+                android:text="@string/ow_receive_coins_address_value_default"
+                android:textSize="14sp" >
+            </TextView>
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/show_qr_img"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/ow_icon_margin"
+            android:contentDescription="@string/ow_empty_string"
+            android:src="@drawable/qrcode_enabled" />
+    </LinearLayout>
+
+</ScrollView>

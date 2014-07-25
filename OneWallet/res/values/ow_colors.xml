@@ -18,7 +18,7 @@
     <color name="ow_menu_divider">@color/DarkGray</color>
     <color name="ow_action_bar_color">@color/LightGray</color>
     
-    <color name="ow_send_list_background">@color/LightGray</color>
+    <color name="ow_send_receive_list_background">@color/LightGray</color>
     
     <color name="ow_add_currency_list_item_background">@color/MediumGray</color>
     <color name="ow_add_currency_logo_with_text_background">@color/LightGray</color>

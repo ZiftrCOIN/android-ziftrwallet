@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
-                    android:text="@string/menu_text_accounts"
+                    android:text="@string/ow_menu_text_accounts"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/Black" />
             </LinearLayout>
@@ -110,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
-                    android:text="@string/menu_text_exchange"
+                    android:text="@string/ow_menu_text_exchange"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/Black" />
             </LinearLayout>
@@ -166,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
-                    android:text="@string/menu_text_settings"
+                    android:text="@string/ow_menu_text_settings"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/Black" />
             </LinearLayout>
@@ -222,7 +222,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
-                    android:text="@string/menu_text_about"
+                    android:text="@string/ow_menu_text_about"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/Black" />
             </LinearLayout>
@@ -278,7 +278,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
-                    android:text="@string/menu_text_contact"
+                    android:text="@string/ow_menu_text_contact"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/Black" />
             </LinearLayout>
