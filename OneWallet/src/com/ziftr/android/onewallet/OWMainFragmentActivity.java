@@ -1,10 +1,15 @@
 package com.ziftr.android.onewallet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -18,11 +23,23 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
+import com.ziftr.android.onewallet.dialog.OWNewCurrencyDialog;
+import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
+import com.ziftr.android.onewallet.dialog.OWValidatePassphraseDialog;
+import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
+import com.ziftr.android.onewallet.dialog.handlers.OWNewCurrencyDialogHandler;
+import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
+import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
 import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -30,7 +47,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener {
+public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWNewCurrencyDialogHandler, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 
 	/*
 	--- TODO list for the OneWallet project ---
@@ -75,36 +92,36 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	X 14. Turn the EditText field in the passphrase dialog into an xml just like
 	the reset passphrase dialog.
-	
+
 	o 15. Make the IO in loading/saving a wallet into an asynchrynous task
 	so as to not block the UI. Some lagging can be seen now, such as when you just
 	get into the accounts section and you try to rotate the screen horizontally.
-	
+
 	o 16. Make the backgrounds of the grid view in the new currency dialog
 	reflect which item is currenly selected.
-	
+
 	o 17. Add a nicer display to the dialogs than the default.
-	
+
 	o 18. Redesign the send coins screen now that I know a little more about 
 	android layouts.
-	
+
 	o 19. Make it so that the wallet is actually user passphrase protected
-	
+
 	o 20. Make the Ôadd new currency' bar a footer of list rather than last element.
 	Make sure that all list views have headers/footers where appropriate rather
 	than just extra views in the xml files. 
-	
+
 	o 21. Don't show a pending transaction bar if there aren't any pending. 
-	
+
 	o 22. Add descriptions to each of the resources (like @string/ resources).
-	
+
 	o 23. Need to remember where we were when navigating back the accounts section
-	
+
 	o 24. Should only need to have passphrase when sending coins. 
-	
+
 	o 25. Need to have all the fragments start fragments by routing through
 	the activity so that the activity can do more complicated things.
-	
+
 	TODO Maybe we don't want to set up all the open wallets right from the get go? 
 	But we need to get the balance...
 
@@ -124,9 +141,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	/** A float used in making the container move over when the drawer is moved. */
 	private float lastTranslate = 0.0f;
-	
+
 	/** This object is responsible for all the wallets. */
 	private OWWalletManager walletManager;
+
+	private OWNewCurrencyDialogHandler newCurrencyDialogHandler;
+	private OWValidatePassphraseDialogHandler validatePassphraseDialogHandler;
+
+	/** The key for getting the passphrase hash from the preferences. */
+	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -202,10 +225,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
-		
+
 		// Recreate wallet manager
 		this.walletManager = new OWWalletManager(this);
 
@@ -255,15 +278,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		if (curSelected == null) {
 			ZLog.log("No selected section... Why did this happen?");
 			super.onBackPressed();
-		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString(
-				).equals(curSelected)) {
+		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
 			super.onBackPressed();
 		} else {
-			OWMainFragmentActivity.this.showFragment(
+			OWMainFragmentActivity.this.showFragmentFromType(
 					FragmentType.ACCOUNT_FRAGMENT_TYPE);
 		}
 	}
-	
+
 	/**
 	 * Here we need to close all the wallets. 
 	 */
@@ -279,7 +301,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * 
 	 * @param fragmentType - The identifier for which type of fragment to start.
 	 */
-	private void showFragment(FragmentType fragmentType) {
+	private void showFragmentFromType(FragmentType fragmentType) {
 		// Go through menu options and select the right one, note  
 		// that not all menu options can be selected
 		if (fragmentType.getDrawerMenuView() != null) {
@@ -290,22 +312,35 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// The tag for fragments of this fragmentType
 		String tag = fragmentType.toString();
-		// The transaction that will take place to show the new fragment
-		FragmentTransaction transaction = 
-				this.getSupportFragmentManager().beginTransaction();
-
-		// TODO add animation to transaciton here
 
 		// Make the new fragment of the correct type
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
 			// If the fragment doesn't exist yet, make a new one
 			fragToShow = fragmentType.getNewFragment(); 
-		} else if (fragToShow.isVisible()) {
+		}
+
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder);
+	}
+
+	/**
+	 * 
+	 * @param fragmentType - 
+	 * @param tag - The tag of the new fragment.
+	 * @param resId - The view id to show the new fragment in.
+	 */
+	private void showFragment(Fragment fragToShow, String tag, int resId) {
+		// The transaction that will take place to show the new fragment
+		FragmentTransaction transaction = 
+				this.getSupportFragmentManager().beginTransaction();
+
+		// TODO add animation to transaciton here
+
+		if (fragToShow.isVisible()) {
 			// If the fragment is already visible, no need to do anything
 			return;
 		}
-		
+
 		transaction.replace(R.id.oneWalletBaseFragmentHolder, fragToShow, tag);
 		transaction.commit();
 	}
@@ -380,7 +415,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
-					OWMainFragmentActivity.this.showFragment(
+					OWMainFragmentActivity.this.showFragmentFromType(
 							FragmentType.ACCOUNT_FRAGMENT_TYPE);
 				}
 			});
@@ -394,7 +429,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
-					OWMainFragmentActivity.this.showFragment(
+					OWMainFragmentActivity.this.showFragmentFromType(
 							FragmentType.EXCHANGE_FRAGMENT_TYPE);
 				}
 			});
@@ -408,7 +443,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
-					OWMainFragmentActivity.this.showFragment(
+					OWMainFragmentActivity.this.showFragmentFromType(
 							FragmentType.SETTINGS_FRAGMENT_TYPE);
 				}
 			});
@@ -422,7 +457,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
-					OWMainFragmentActivity.this.showFragment(
+					OWMainFragmentActivity.this.showFragmentFromType(
 							FragmentType.ABOUT_FRAGMENT_TYPE);
 				}
 			});
@@ -436,7 +471,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
-					OWMainFragmentActivity.this.showFragment(
+					OWMainFragmentActivity.this.showFragmentFromType(
 							FragmentType.CONTACT_FRAGMENT_TYPE);
 				}
 			});
@@ -477,7 +512,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
-			this.showFragment(FragmentType.ACCOUNT_FRAGMENT_TYPE);
+			this.showFragmentFromType(FragmentType.ACCOUNT_FRAGMENT_TYPE);
 		} else {
 			// Here we must make sure that the drawer menu is still
 			// showing which section of the app is currently open.
@@ -587,7 +622,152 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 					).setIcon(R.drawable.icon_menu_statelist);
 		}
 	}
-	
+
+	/**
+	 * Sets the stored passphrase hash to be the specified
+	 * hash.
+	 * 
+	 * @param inputHash - The new passphrase's Sha256 hash
+	 */
+	private void setPassphraseHash(byte[] inputHash) {
+		SharedPreferences prefs = this.getSharedPreferences(
+				PASSPHRASE_KEY, Context.MODE_PRIVATE);
+		Editor editor = prefs.edit();
+		editor.putString(
+				this.PASSPHRASE_KEY, 
+				OWUtils.binaryToHexString(inputHash));
+		editor.commit();
+	}
+
+	/**
+	 * Gets the stored hash of the users passphrase, if there is one.
+	 * 
+	 * @return the stored hash of the users passphrase, if there is one.
+	 */
+	private byte[] getStoredPassphraseHash() {
+		// Get the preferences
+		SharedPreferences prefs = this.getSharedPreferences(
+				PASSPHRASE_KEY, Context.MODE_PRIVATE);
+		// Get the passphrase hash
+		String storedPassphrase = prefs.getString(this.PASSPHRASE_KEY, null);
+		// If it's not null, convert it back to a byte array
+		byte[] storedHash = (storedPassphrase == null) ?
+				null : OWUtils.hexStringToBinary(storedPassphrase);
+		// Return the result
+		return storedHash;
+	}
+
+	/**
+	 * Get a boolean describing whether or not the user 
+	 * has entered a passphrase before.
+	 * 
+	 * @return a boolean describing whether or not the user 
+	 * has entered a passphrase before.
+	 */
+	private boolean userHasPassphrase() {
+		return this.getStoredPassphraseHash() != null;
+	}
+
+	/**
+	 * Tells if the given hash matches the stored passphrase
+	 * hash.
+	 * 
+	 * @param inputHash - the hash to check agains
+	 * @return as above
+	 */
+	private boolean inputHashMatchesStoredHash(byte[] inputHash) {
+		byte[] storedHash = this.getStoredPassphraseHash();
+		if (storedHash != null && inputHash != null) {
+			return Arrays.equals(storedHash, inputHash); 
+		} else {
+			ZLog.log("Error, something was null that shouldn't have been.");
+			return false;
+		}
+	}
+
+	/**
+	 * Causes a dialog to pop up asking the user for his/her
+	 * passphrase. If the passphrase is successfully verified then
+	 * a {@link OWWalletFragment} fragment is started. 
+	 */
+	public void startWalletAfterValidation(OWCoin.Type typeToStart) {
+		if (typeToStart == OWCoin.Type.BTC_TEST) {
+			// tag: OWCoin.Type.BTC_TEST.getShortTitle() + "_wallet_fragment"
+			OWValidatePassphraseDialog passphraseDialog = 
+					new OWValidatePassphraseDialog();
+
+			Bundle b = new Bundle();
+			b.putBoolean(OWCoin.Type.BTC_TEST.toString(), true);
+			passphraseDialog.setArguments(b);
+
+			// TODO make a create new passphrase dialog
+			String message = "Please input your passphrase. ";
+
+			passphraseDialog.setupDialog("OneWallet", message, 
+					"Continue", null, "Cancel");
+			passphraseDialog.show(this.getSupportFragmentManager(), 
+					"open_bitcoin_wallet");
+		}
+	}
+
+	/**
+	 * Only works for BTC_TEST type right now. 
+	 * 
+	 * @param typeOfWalletToStart
+	 */
+	public void openWalletView(OWCoin.Type typeOfWalletToStart) {
+		String tag = typeOfWalletToStart.getShortTitle() + "_wallet_fragment";
+		Fragment fragToShow = null;
+		if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
+			fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+			if (fragToShow == null) {
+				fragToShow = new OWBitcoinTestnetWalletFragment();
+			}
+		} else {
+			return;
+		}
+		
+		// If we did a tablet view this might be different. 
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder);
+	}
+
+	/**
+	 * Creates and shows a dialog where the user picks which type of currency 
+	 * to add to the wallet. 
+	 * @param userWallets - The list of wallets that the user already has. This 
+	 * list is used to determine which wallets to show in the dialog.
+	 */
+	public void showChooseNewCurrencyDialog(OWNewCurrencyDialogHandler handler, 
+			List<OWCoin.Type> userWallets) {
+		this.newCurrencyDialogHandler = handler;
+
+		OWNewCurrencyDialog passphraseDialog = new OWNewCurrencyDialog();
+
+		// Here we get all the coins that the user doesn't currently 
+		// have a wallet for because those are the ones we put in the dialog.
+		Set<OWCoin.Type> coinsNotInListCurrently = new HashSet<OWCoin.Type>(
+				Arrays.asList(OWCoin.Type.values()));
+		for (OWCoin.Type cListItem : userWallets) {
+			coinsNotInListCurrently.remove(cListItem);
+		}
+
+		// We communicate which items to show through the use of a bundle.
+		// All keys in the bundle for which a true boolean is put are ones
+		// that the dialog should include in the selection grid.
+		Bundle b = new Bundle();
+		for (OWCoin.Type type : coinsNotInListCurrently) {
+			b.putBoolean(type.toString(), true);
+		}
+		passphraseDialog.setArguments(b);
+
+		String message = "Please select the currency that "
+				+ "you would like to add.";
+		passphraseDialog.setupDialog("OneWallet", message, 
+				"Select", null, "Cancel");
+		passphraseDialog.show(this.getSupportFragmentManager(), 
+				"get_new_currency_dialog");
+	}
+
 	/**
 	 * @return the walletManager
 	 */
@@ -598,7 +778,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// Placeholder for anything we might need to do with the results
-		
+
 		// Goes here first, then this calls the current fragment's on activity result
 		super.onActivityResult(requestCode, resultCode, data);
 	}
@@ -629,17 +809,129 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public void onDrawerSlide(View drawerView, float slideOffset) {
 		// Here we need to 
 		float moveFactor = (drawerView.getWidth() * (slideOffset - this.lastTranslate));
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			this.baseFragmentContainer.setTranslationX(moveFactor);
-		} else {
-			ZLog.log("Older than honeycomb, which we don't support");
-		}
+		this.baseFragmentContainer.setTranslationX(moveFactor);
 	}
 
 	@Override
 	public void onDrawerStateChanged(int newState) {
 		// Nothing to do
+	}
+
+	/**
+	 * Pops up a dialog to give the user some information. 
+	 * 
+	 * @param message
+	 * @param tag
+	 */
+	public void alertUser(String message, String tag) {
+		OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
+
+		// Set negative text to null to not have negative button
+		alertUserDialog.setupDialog("OneWallet", message, null, "OK", null);
+		alertUserDialog.show(this.getSupportFragmentManager(), tag);
+	}
+
+	///////////// Passer methods /////////////
+
+	@Override
+	public void handleNewCurrencyPositive(int requestCode, OWCoin.Type id) {
+		switch(requestCode) {
+		case OWRequestCodes.NEW_CURRENCY_DIALOG:
+			// Just need to pass the result to the Accounts fragment
+			// (the newCurencyDialogHandler is the accounts fragment, most likely)
+			this.newCurrencyDialogHandler.handleNewCurrencyPositive(requestCode, id);
+			break;
+		}
+	}
+
+	@Override
+	public void handleNegative(int requestCode) {
+		switch(requestCode) {
+		case OWRequestCodes.NEW_CURRENCY_DIALOG:
+			this.newCurrencyDialogHandler.handleNegative(requestCode);
+			break;
+		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG:
+			this.validatePassphraseDialogHandler.handleNegative(requestCode);
+			break;
+		}
+	}
+
+	@Override
+	public void handlePassphrasePositive(int requestCode, 
+			byte[] passphrase, Bundle info) {
+
+		switch(requestCode) {
+		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG:
+			if (this.validatePassphraseDialogHandler != null) {
+				this.validatePassphraseDialogHandler.handlePassphrasePositive(
+						requestCode, passphrase, info);
+				break;
+			}
+
+			byte[] inputHash = OWUtils.Sha256Hash(passphrase);
+			if (this.userHasPassphrase()) {
+				if (this.inputHashMatchesStoredHash(inputHash)) {
+					if (info != null) {
+						OWCoin.Type typeOfWalletToStart = null;
+						for (OWCoin.Type type : OWCoin.Type.values()) {
+							if (info.getBoolean(type.toString())) {
+								typeOfWalletToStart = type;
+								break;
+							}
+						}
+						this.openWalletView(typeOfWalletToStart);
+					}
+				} else {
+					// TODO maybe make a OWTags.java class that keeps track of 
+					// tags for different fragments? Could handle making the tags
+					// from OWCoin.Types as well. 
+					this.alertUser(
+							"Error: Passphrases don't match. ", "wrong_passphrase");
+				}
+			} 
+//			else {
+//			this.setPassphraseHash(inputHash);
+//			this.startFragmentToOpenOnCorrectPassphrase();
+//		}
+			break;
+		}
+	}
+
+	/**
+	 * By positive, this means that the user has selected 'Yes' or 'Okay' 
+	 * rather than cancel or exiting the dialog. This is called when
+	 * the user opens a reset passphrase dialog and 
+	 */
+	@Override
+	public void handleResetPassphrasePositive(int requestCode,
+			byte[] oldPassphrase, byte[] newPassphrase, byte[] confirmPassphrase) {
+		// Can assume that there was a previously entered passphrase because 
+		// of the way the dialog was set up. 
+
+		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
+			byte[] inputHash = OWUtils.Sha256Hash(oldPassphrase);
+			if (this.inputHashMatchesStoredHash(inputHash)) {
+				// If the old matches, set the new passphrase hash
+				this.setPassphraseHash(OWUtils.Sha256Hash(newPassphrase));
+			} else {
+				// If don't match, tell user. 
+				this.alertUser("The passphrase you entered doesn't match your "
+						+ "previous passphrase. Your previous passphrase is "
+						+ "still in place.", "passphrases_dont_match");
+			}
+		} else {
+			this.alertUser("The passphrases you entered don't match. Your previous "
+					+ "passphrase is still in place.", "wrong_re-enter_passphrase");
+		}
+	}
+
+	@Override
+	public void handleNeutral(int requestCode) {
+		switch(requestCode) {
+		case OWRequestCodes.ALERT_USER_DIALOG:
+			// Nothing to do 
+			break;
+		}
 	}
 
 }

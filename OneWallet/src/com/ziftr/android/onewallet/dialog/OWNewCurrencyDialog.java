@@ -119,9 +119,7 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 	 * @return
 	 */
 	private OWNewCurrencyDialogHandler getHandler() {
-		return this.getTargetFragment() == null ? 
-				((OWNewCurrencyDialogHandler) this.getActivity()) : 
-					((OWNewCurrencyDialogHandler) this.getTargetFragment());
+		return ((OWNewCurrencyDialogHandler) this.getActivity());
 	}
 
 	/**

@@ -75,9 +75,8 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	 */
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-		OWResetPassphraseDialogHandler handler = this.getTargetFragment() == null ? 
-				((OWResetPassphraseDialogHandler) this.getActivity()) : 
-					((OWResetPassphraseDialogHandler) this.getTargetFragment());
+		OWResetPassphraseDialogHandler handler = 
+				(OWResetPassphraseDialogHandler) this.getActivity();
 
 		if (which == DialogInterface.BUTTON_POSITIVE) {
 			// Have the handler handle the data

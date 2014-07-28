@@ -153,13 +153,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	 * @param c - The handler class for this type of dialog.
 	 */
 	protected void validateHandler(Activity activity, Class<?> c) {
-		if (this.getTargetFragment() != null) {
-			if (!(c.isAssignableFrom(this.getTargetFragment().getClass()))) {
-				throw new ClassCastException(this.getTargetFragment().toString() + 
-						" must implement " + c.toString() + 
-						" to be able to use this kind of dialog.");
-			}
-		} else if (!(c.isAssignableFrom(activity.getClass()))) {
+		if (!(c.isAssignableFrom(activity.getClass()))) {
 			throw new ClassCastException(activity.getClass().toString() + 
 					" must implement " + c.toString() + 
 					" to be able to use this kind of dialog.");

@@ -1,10 +1,12 @@
 package com.ziftr.android.onewallet.dialog.handlers;
 
+import android.os.Bundle;
+
 /**
  *  A simple handler for handling a dialog where the
  *  user enters their passphrase.
  */
-public interface OWPassphraseDialogHandler {
+public interface OWValidatePassphraseDialogHandler {
 	
 	/**
 	 * Implement this to determine what the app does when
@@ -16,7 +18,7 @@ public interface OWPassphraseDialogHandler {
 	 * @param passPhrase - The passphrase is given to the activity/fragment
 	 * so that they can use the result appropriately.
 	 */
-	public void handlePassphrasePositive(int requestCode, byte[] passphrase);
+	public void handlePassphrasePositive(int requestCode, byte[] passphrase, Bundle info);
 	
 	/**
 	 * Implement this method to determine what the app does when

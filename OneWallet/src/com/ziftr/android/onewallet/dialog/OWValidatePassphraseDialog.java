@@ -7,30 +7,33 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.dialog.handlers.OWPassphraseDialogHandler;
+import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * Dialogs where the app requests to get the passphrase
  * from the user.
  */
-public class OWPassphraseDialog extends OWDialogFragment {
+public class OWValidatePassphraseDialog extends OWDialogFragment {
 	
 	/** The key to save the text in the box. */
 	private static final String CURRENT_ENTERED_TEXT_KEY = "entered_text";
+	
+	/** A bundle to pass extra info to the handler of a positive response. */
+	private Bundle info;
 	
 	/**
 	 * Whenever this is fragment is attached to an activity 
 	 * we must make sure that it is able to handle accepting 
 	 * and cancelling from passphrase dialogs.
 	 * 
-	 * This method throws an exception if neither the newly attached activity
-	 * nor the target fragment are instances of {@link OWPassphraseDialogHandler}.
+	 * This method throws an exception if neither the newly attached activity nor 
+	 * the target fragment are instances of {@link OWValidatePassphraseDialogHandler}.
 	 */
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		this.validateHandler(activity, OWPassphraseDialogHandler.class);
+		this.validateHandler(activity, OWValidatePassphraseDialogHandler.class);
 	}
 
 	/**
@@ -55,18 +58,29 @@ public class OWPassphraseDialog extends OWDialogFragment {
 		
 		return builder.create();
 	}
+	
+	
+
+	/**
+	 * Initializes the validate passphrase dialog, using the bundle to
+	 * pass information along. 
+	 */
+	@Override
+	public void setArguments(Bundle args) {
+		this.info = args;
+		super.setArguments(args);
+	}
 
 	/**
 	 * Handle clicks on this dialog. 
 	 */
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-		OWPassphraseDialogHandler handler = this.getTargetFragment() == null ? 
-				((OWPassphraseDialogHandler) this.getActivity()) : 
-					((OWPassphraseDialogHandler) this.getTargetFragment());
+		OWValidatePassphraseDialogHandler handler = 
+				(OWValidatePassphraseDialogHandler) this.getActivity();
 		if (which == DialogInterface.BUTTON_POSITIVE) {
 			handler.handlePassphrasePositive(this.getTargetRequestCode(), 
-					this.getBytesFromEditText(R.id.textbox_passphrase));
+					this.getBytesFromEditText(R.id.textbox_passphrase), this.info);
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
 			handler.handleNegative(this.getTargetRequestCode());
 		} else {
