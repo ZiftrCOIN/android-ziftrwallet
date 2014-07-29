@@ -95,7 +95,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	so as to not block the UI. Some lagging can be seen now, such as when you just
 	get into the accounts section and you try to rotate the screen horizontally.
 
-	o 16. Make the backgrounds of the grid view in the new currency dialog
+	X 16. Make the backgrounds of the grid view in the new currency dialog
 	reflect which item is currenly selected.
 
 	o 17. Add a nicer display to the dialogs than the default.
@@ -103,21 +103,23 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	o 18. Redesign the send coins screen now that I know a little more about 
 	android layouts.
 
-	o 19. Make it so that the wallet is actually user passphrase protected
+	o 19. Make it so that the wallet is actually user passphrase protected. Right
+	now it just won't let you in unless you know the passphrase. We want to actually
+	encrypt the wallet.
 
 	o 20. Make the Ôadd new currency' bar a footer of list rather than last element.
 	Make sure that all list views have headers/footers where appropriate rather
 	than just extra views in the xml files. 
 
-	o 21. Don't show a pending transaction bar if there aren't any pending. 
+	X 21. Don't show a pending transaction bar if there aren't any pending. 
 
 	o 22. Add descriptions to each of the resources (like @string/ resources).
 
 	o 23. Need to remember where we were when navigating back the accounts section
 
-	o 24. Should only need to have passphrase when sending coins. 
+	o 24. Should only need to have passphrase when sending coins.
 
-	o 25. Need to have all the fragments start fragments by routing through
+	X 25. Need to have all the fragments start fragments by routing through
 	the activity so that the activity can do more complicated things.
 
 	TODO Maybe we don't want to set up all the open wallets right from the get go? 
@@ -143,9 +145,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	/** This object is responsible for all the wallets. */
 	private OWWalletManager walletManager;
-
-	/** The handler that, if set, we can pass validation events to. */
-	private OWValidatePassphraseDialogHandler validatePassphraseDialogHandler;
 
 	/** The key for getting the passphrase hash from the preferences. */
 	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
@@ -695,7 +694,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	public void startWalletAfterValidation(OWCoin.Type typeToStart) {
 		if (typeToStart == OWCoin.Type.BTC_TEST) {
-			// tag: OWCoin.Type.BTC_TEST.getShortTitle() + "_wallet_fragment"
+			String tag = OWCoin.Type.BTC_TEST.getShortTitle() + 
+					"_validate_passphrase_dialog";
+
 			OWValidatePassphraseDialog passphraseDialog = 
 					new OWValidatePassphraseDialog();
 
@@ -711,8 +712,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 			passphraseDialog.setupDialog("OneWallet", message, 
 					"Continue", null, "Cancel");
-			passphraseDialog.show(this.getSupportFragmentManager(), 
-					"open_bitcoin_wallet");
+			passphraseDialog.show(this.getSupportFragmentManager(), tag);
 		}
 	}
 
@@ -770,7 +770,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
 	}
-	
+
 	/**
 	 * Only works for BTC_TEST type right now. 
 	 * 
@@ -863,7 +863,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public void handleNegative(int requestCode) {
 		switch(requestCode) {
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG:
-			this.validatePassphraseDialogHandler.handleNegative(requestCode);
+			// Nothing to do
 			break;
 		case OWRequestCodes.ALERT_USER_DIALOG:
 			// Nothing to do
@@ -880,12 +880,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		switch(requestCode) {
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG:
-			if (this.validatePassphraseDialogHandler != null) {
-				this.validatePassphraseDialogHandler.handlePassphrasePositive(
-						requestCode, passphrase, info);
-				break;
-			}
-
 			byte[] inputHash = OWUtils.Sha256Hash(passphrase);
 			if (this.userHasPassphrase()) {
 				if (this.inputHashMatchesStoredHash(inputHash)) {
@@ -899,7 +893,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				}
 			} 
 
-			// TODO thisis useful for now to be able to set the passphrase the
+			// TODO this is useful for now to be able to set the passphrase the
 			// first time but we need to 
 			else {
 				this.setPassphraseHash(inputHash);
