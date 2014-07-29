@@ -8,11 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +23,7 @@ import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.Wallet;
 import com.google.bitcoin.utils.BriefLogFormatter;
+import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
@@ -194,20 +192,6 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 		});
 	}
 
-	/* (non-Javadoc)
-	 * @see android.support.v4.app.Fragment#onActivityResult(int, int, android.content.Intent)
-	 */
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (data != null) {
-			ZLog.log("received result: " + data.toString());
-		} else {
-			ZLog.log("received result!");
-		}
-
-		super.onActivityResult(requestCode, resultCode, data);
-	}
-
 	private void initializeButtons() {
 		Button receiveButton = (Button) 
 				this.rootView.findViewById(R.id.leftButton);
@@ -215,30 +199,9 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 		receiveButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO this actually goes to wrong screen right now
-				// The transaction that will take place to show the new fragment
-				FragmentTransaction transaction = 
-						getActivity().getSupportFragmentManager().beginTransaction();
-
-				// TODO add animation to transaciton here
-
-				// Make the new fragment of the correct type
-				Fragment fragToShow = getActivity().getSupportFragmentManager(
-						).findFragmentByTag(getCoinId().getShortTitle() + 
-								"_receive_coins_fragment");
-				if (fragToShow == null) {
-					// If the fragment doesn't exist yet, make a new one
-					fragToShow = new OWReceiveBitcoinTestnetCoinsFragment();
-				} else if (fragToShow.isVisible()) {
-					// If the fragment is already visible, no need to do anything
-					return;
-				}
-
-				transaction.replace(R.id.oneWalletBaseFragmentHolder, 
-						fragToShow, getCoinId().getShortTitle() + 
-						"_receive_coins_fragment");
-				transaction.addToBackStack(null);
-				transaction.commit();
+				OWMainFragmentActivity mActivity = 
+						(OWMainFragmentActivity) getActivity();
+				mActivity.openReceiveCoinsView(getCoinId());
 			}
 		});
 
@@ -248,30 +211,9 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO this actually goes to wrong screen right now
-				// The transaction that will take place to show the new fragment
-				FragmentTransaction transaction = 
-						getActivity().getSupportFragmentManager().beginTransaction();
-
-				// TODO add animation to transaciton here
-
-				// Make the new fragment of the correct type
-				Fragment fragToShow = getActivity().getSupportFragmentManager(
-						).findFragmentByTag(getCoinId().getShortTitle() + 
-								"_send_coins_fragment");
-				if (fragToShow == null) {
-					// If the fragment doesn't exist yet, make a new one
-					fragToShow = new OWSendBitcoinTestnetCoinsFragment();
-				} else if (fragToShow.isVisible()) {
-					// If the fragment is already visible, no need to do anything
-					return;
-				}
-
-				transaction.replace(R.id.oneWalletBaseFragmentHolder, 
-						fragToShow, getCoinId().getShortTitle() + 
-						"_send_coins_fragment");
-				transaction.addToBackStack(null);
-				transaction.commit();
+				OWMainFragmentActivity mActivity = 
+						(OWMainFragmentActivity) getActivity();
+				mActivity.openSendCoinsView(getCoinId());
 			}
 		});
 

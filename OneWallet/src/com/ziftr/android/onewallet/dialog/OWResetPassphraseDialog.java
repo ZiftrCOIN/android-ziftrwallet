@@ -34,7 +34,7 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		this.validateHandler(activity, OWResetPassphraseDialogHandler.class);
+		this.validateHandler(OWResetPassphraseDialogHandler.class);
 	}
 
 	/**
@@ -108,6 +108,11 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 				this.getStringFromEditText(R.id.textbox_new_passphrase));
 		outState.putString(CONFIRM_PASSPHRASE_KEY, 
 				this.getStringFromEditText(R.id.textbox_confirm_passphrase));
+	}
+	
+	@Override
+	protected Object getHandler() {
+		return this.getActivity();
 	}
 	
 }

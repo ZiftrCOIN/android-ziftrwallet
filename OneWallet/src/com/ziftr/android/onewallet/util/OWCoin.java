@@ -8,6 +8,10 @@ import com.google.bitcoin.params.TestNet3Params;
 import com.ziftr.android.onewallet.R;
 
 public class OWCoin {
+	
+	/** When using bundles, this can be used to store a specific coin type. */
+	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
+	
 	public enum Type implements OWCurrency {
 		BTC("0.0001", "BTC", "Bitcoin", "BITCOIN", 
 				8, R.drawable.logo_bitcoin, MainNetParams.get(), false),

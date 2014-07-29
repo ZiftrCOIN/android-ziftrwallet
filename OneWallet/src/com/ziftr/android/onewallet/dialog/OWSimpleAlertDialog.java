@@ -23,7 +23,7 @@ public class OWSimpleAlertDialog extends OWDialogFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		this.validateHandler(activity, OWNeutralDialogHandler.class);
+		this.validateHandler(OWNeutralDialogHandler.class);
 	}
 	
 	/**
@@ -48,4 +48,8 @@ public class OWSimpleAlertDialog extends OWDialogFragment {
 		}
 	}
 
+	@Override
+	protected Object getHandler() {
+		return this.getActivity();
+	}
 }

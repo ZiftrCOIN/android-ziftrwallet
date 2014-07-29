@@ -57,7 +57,7 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		this.validateHandler(activity, OWNewCurrencyDialogHandler.class);
+		this.validateHandler(OWNewCurrencyDialogHandler.class);
 	}
 
 	/**
@@ -103,7 +103,9 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 	public void onClick(DialogInterface dialog, int which) {
 		// Might be null if user doesn't hit anything.
 		if (this.currSelectedCoinType != null) {
-			OWNewCurrencyDialogHandler handler = getHandler();
+			ZLog.log("curSelectedCoinType was NOT null. ");
+			OWNewCurrencyDialogHandler handler = 
+					(OWNewCurrencyDialogHandler) getHandler();
 			if (which == DialogInterface.BUTTON_POSITIVE) {
 				handler.handleNewCurrencyPositive(this.getTargetRequestCode(), 
 						this.currSelectedCoinType);
@@ -115,12 +117,11 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 		}
 	}
 
-	/**
-	 * @return
-	 */
-	private OWNewCurrencyDialogHandler getHandler() {
-		return ((OWNewCurrencyDialogHandler) this.getActivity());
+	@Override
+	protected Object getHandler() {
+		return this.getTargetFragment();
 	}
+	
 
 	/**
 	 * When we save the instance, in addition to doing everything that

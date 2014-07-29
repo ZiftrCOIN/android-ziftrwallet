@@ -15,13 +15,10 @@ import com.ziftr.android.onewallet.util.ZLog;
  * from the user.
  */
 public class OWValidatePassphraseDialog extends OWDialogFragment {
-	
+
 	/** The key to save the text in the box. */
 	private static final String CURRENT_ENTERED_TEXT_KEY = "entered_text";
-	
-	/** A bundle to pass extra info to the handler of a positive response. */
-	private Bundle info;
-	
+
 	/**
 	 * Whenever this is fragment is attached to an activity 
 	 * we must make sure that it is able to handle accepting 
@@ -33,7 +30,7 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		this.validateHandler(activity, OWValidatePassphraseDialogHandler.class);
+		this.validateHandler(OWValidatePassphraseDialogHandler.class);
 	}
 
 	/**
@@ -44,31 +41,19 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
-		
+
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
 				R.layout.dialog_new_passphrase, null));
 		builder.setView(this.getDialogView());
-		
+
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
 				this.setStringInEditText(R.id.textbox_passphrase, 
 						savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY));
 			}
 		}
-		
-		return builder.create();
-	}
-	
-	
 
-	/**
-	 * Initializes the validate passphrase dialog, using the bundle to
-	 * pass information along. 
-	 */
-	@Override
-	public void setArguments(Bundle args) {
-		this.info = args;
-		super.setArguments(args);
+		return builder.create();
 	}
 
 	/**
@@ -80,14 +65,15 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 				(OWValidatePassphraseDialogHandler) this.getActivity();
 		if (which == DialogInterface.BUTTON_POSITIVE) {
 			handler.handlePassphrasePositive(this.getTargetRequestCode(), 
-					this.getBytesFromEditText(R.id.textbox_passphrase), this.info);
+					this.getBytesFromEditText(R.id.textbox_passphrase), 
+					this.getArguments());
 		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
 			handler.handleNegative(this.getTargetRequestCode());
 		} else {
 			ZLog.log("These dialogs shouldn't have neutral buttons.");
 		}
 	}
-	
+
 	/**
 	 * When we save the instance, in addition to doing everything that
 	 * all dialogs must do, we also have to store the current entered 
@@ -96,10 +82,15 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		
+
 		// Save all of the important strings in the dialog
 		outState.putString(CURRENT_ENTERED_TEXT_KEY, 
 				this.getStringFromEditText(R.id.textbox_passphrase));
+	}
+
+	@Override
+	protected Object getHandler() {
+		return this.getActivity();
 	}
 
 }

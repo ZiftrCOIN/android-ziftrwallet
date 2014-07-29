@@ -1,7 +1,10 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -15,15 +18,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.google.bitcoin.core.Wallet.BalanceType;
-import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.dialog.OWNewCurrencyDialog;
 import com.ziftr.android.onewallet.dialog.handlers.OWNewCurrencyDialogHandler;
 import com.ziftr.android.onewallet.fragment.OWSectionFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 
@@ -46,8 +50,6 @@ OWNewCurrencyDialogHandler {
 
 	/** The wallet manager. This fragment works with */
 	private OWWalletManager walletManager;
-	
-	private OWMainFragmentActivity mActivity;
 
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
@@ -70,10 +72,8 @@ OWNewCurrencyDialogHandler {
 
 		this.rootView = inflater.inflate(
 				R.layout.section_accounts_layout, container, false);
-		
-		this.mActivity = (OWMainFragmentActivity) getActivity();
-		
-		this.walletManager = this.mActivity.getWalletManager();
+
+		this.walletManager = this.getOWMainActivity().getWalletManager();
 
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
@@ -170,11 +170,11 @@ OWNewCurrencyDialogHandler {
 			return new OWCurrencyListItem(OWCoin.Type.DOGE_TEST, OWFiat.Type.USD, 
 					"0.00", "0.00000000", "0.00", resId);
 		}  
-		
+
 		// Should never get here
 		return null;
 	}
-
+	
 	/**
 	 * When we add an item to the list of currencies we make sure they are 
 	 * alphabetized. This helps to get the index that new coin types
@@ -239,7 +239,7 @@ OWNewCurrencyDialogHandler {
 					// If we have clicked the add new currency bar then
 					// make the choose new currency dialog (as long as there are new
 					// currencies to add
-					
+
 					// The minus one is because the list contains the add new 
 					// currency bar
 					if (userWallets.size()-1 < OWCoin.Type.values().length) {
@@ -251,25 +251,25 @@ OWNewCurrencyDialogHandler {
 						for (OWCurrencyListItem newItem : userWallets) {
 							usersCurWallets.add(newItem.getCoinId());
 						}
-						mActivity.showChooseNewCurrencyDialog(
+						showChooseNewCurrencyDialog(
 								OWAccountsFragment.this, usersCurWallets);
 					}
-					
+
 					// Return because in this case we don't need to 
 					// actually start a wallet.  
 					return;
 				}
-				
+
 				OWCurrencyListItem item = (OWCurrencyListItem) 
 						parent.getItemAtPosition(position);
 				// If we are using the test net network then we make sure the
 				// user has a passphrase and 
-				mActivity.startWalletAfterValidation(item.getCoinId());
+				getOWMainActivity().startWalletAfterValidation(item.getCoinId());
 			}
 		});
-		
+
 	}
-	
+
 	/**
 	 * Handles negative dialog entries, like 'Cancel' or hitting off of the screen.
 	 */
@@ -286,6 +286,7 @@ OWNewCurrencyDialogHandler {
 
 	@Override
 	public void handleNewCurrencyPositive(int requestCode, OWCoin.Type newItem) {
+		ZLog.log("handle new currency in accounts fragment");
 		// TODO make sure that this view only has wallets
 		// in it which the user do
 		for (OWCurrencyListItem itemInList : userWallets) {
@@ -306,14 +307,49 @@ OWNewCurrencyDialogHandler {
 		if (newItem == OWCoin.Type.BTC_TEST) {
 			// We can assume the wallet hasn't been set up yet
 			// or we wouldn't have gotten here 
-			
+
 			// TODO see java docs for this method. Is it okay to 
 			// have this called here? 
 			walletManager.setUpWallet(newItem);
 		}
-		
+
 		userWallets.add(indexToAddAt, getItemForCoinType(newItem));
 		refreshListOfUserWallets();
+	}
+
+	/**
+	 * Creates and shows a dialog where the user picks which type of currency 
+	 * to add to the wallet. 
+	 * @param userWallets - The list of wallets that the user already has. This 
+	 * list is used to determine which wallets to show in the dialog.
+	 */
+	private void showChooseNewCurrencyDialog(OWNewCurrencyDialogHandler handler, 
+			List<OWCoin.Type> userWallets) {
+		OWNewCurrencyDialog newCurrencyDialog = new OWNewCurrencyDialog();
+
+		// Here we get all the coins that the user doesn't currently 
+		// have a wallet for because those are the ones we put in the dialog.
+		Set<OWCoin.Type> coinsNotInListCurrently = new HashSet<OWCoin.Type>(
+				Arrays.asList(OWCoin.Type.values()));
+		coinsNotInListCurrently.removeAll(userWallets);
+
+		newCurrencyDialog.setTargetFragment(this, OWRequestCodes.NEW_CURRENCY_DIALOG);
+
+		// We communicate which items to show through the use of a bundle.
+		// All keys in the bundle for which a true boolean is put are ones
+		// that the dialog should include in the selection grid.
+		Bundle b = new Bundle();
+		for (OWCoin.Type type : coinsNotInListCurrently) {
+			b.putBoolean(type.toString(), true);
+		}
+		newCurrencyDialog.setArguments(b);
+
+		String message = "Please select the currency that "
+				+ "you would like to add.";
+		newCurrencyDialog.setupDialog("OneWallet", message, 
+				"Select", null, "Cancel");
+		newCurrencyDialog.show(this.getFragmentManager(), 
+				"get_new_currency_dialog");
 	}
 
 }

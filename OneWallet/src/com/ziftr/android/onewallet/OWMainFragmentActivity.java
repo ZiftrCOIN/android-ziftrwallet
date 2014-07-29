@@ -2,9 +2,7 @@ package com.ziftr.android.onewallet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,11 +21,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
 
-import com.ziftr.android.onewallet.dialog.OWNewCurrencyDialog;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.dialog.OWValidatePassphraseDialog;
 import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
-import com.ziftr.android.onewallet.dialog.handlers.OWNewCurrencyDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
@@ -36,6 +32,8 @@ import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoinsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
@@ -47,7 +45,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWNewCurrencyDialogHandler, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
+public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
 
 	/*
 	--- TODO list for the OneWallet project ---
@@ -124,6 +122,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	TODO Maybe we don't want to set up all the open wallets right from the get go? 
 	But we need to get the balance...
+	This will be made easier with the API.
 
 	 */
 
@@ -145,7 +144,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** This object is responsible for all the wallets. */
 	private OWWalletManager walletManager;
 
-	private OWNewCurrencyDialogHandler newCurrencyDialogHandler;
+	/** The handler that, if set, we can pass validation events to. */
 	private OWValidatePassphraseDialogHandler validatePassphraseDialogHandler;
 
 	/** The key for getting the passphrase hash from the preferences. */
@@ -320,7 +319,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			fragToShow = fragmentType.getNewFragment(); 
 		}
 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, false);
 	}
 
 	/**
@@ -329,7 +328,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param tag - The tag of the new fragment.
 	 * @param resId - The view id to show the new fragment in.
 	 */
-	private void showFragment(Fragment fragToShow, String tag, int resId) {
+	private void showFragment(Fragment fragToShow, String tag, 
+			int resId, boolean addToBackStack) {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = 
 				this.getSupportFragmentManager().beginTransaction();
@@ -342,6 +342,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		transaction.replace(R.id.oneWalletBaseFragmentHolder, fragToShow, tag);
+		if (addToBackStack) {
+			transaction.addToBackStack(null);
+		}
 		transaction.commit();
 	}
 
@@ -696,8 +699,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			OWValidatePassphraseDialog passphraseDialog = 
 					new OWValidatePassphraseDialog();
 
+			passphraseDialog.setTargetFragment(
+					null, OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG);
+
 			Bundle b = new Bundle();
-			b.putBoolean(OWCoin.Type.BTC_TEST.toString(), true);
+			b.putString(OWCoin.TYPE_KEY, OWCoin.Type.BTC_TEST.toString());
 			passphraseDialog.setArguments(b);
 
 			// TODO make a create new passphrase dialog
@@ -716,56 +722,74 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param typeOfWalletToStart
 	 */
 	public void openWalletView(OWCoin.Type typeOfWalletToStart) {
-		String tag = typeOfWalletToStart.getShortTitle() + "_wallet_fragment";
-		Fragment fragToShow = null;
-		if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
-			fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
-			if (fragToShow == null) {
-				fragToShow = new OWBitcoinTestnetWalletFragment();
-			}
-		} else {
+		// Temporarily need to just work for BTC_TEST only
+		if (typeOfWalletToStart != OWCoin.Type.BTC_TEST) {
 			return;
 		}
-		
+
+		String tag = typeOfWalletToStart.getShortTitle() + "_wallet_fragment";
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+		if (fragToShow == null) {
+			fragToShow = new OWBitcoinTestnetWalletFragment();
+		}
+
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
 	}
 
 	/**
-	 * Creates and shows a dialog where the user picks which type of currency 
-	 * to add to the wallet. 
-	 * @param userWallets - The list of wallets that the user already has. This 
-	 * list is used to determine which wallets to show in the dialog.
+	 * A convenience method that we can use to start a dialog from this bundle.
+	 * The bundle should contain one string OWCoin.Type.___.toString() which 
+	 * can be extracted by getting from the bundle with the key OWCoin.TYPE_KEY.
+	 * 
+	 * @param info - The bundle used to tell which wallet to open.
 	 */
-	public void showChooseNewCurrencyDialog(OWNewCurrencyDialogHandler handler, 
-			List<OWCoin.Type> userWallets) {
-		this.newCurrencyDialogHandler = handler;
+	public void openWalletViewFromBundle(Bundle info) {
+		if (info != null) {
+			this.openWalletView(OWCoin.Type.valueOf(info.getString(OWCoin.TYPE_KEY)));
+		}
+	}
 
-		OWNewCurrencyDialog passphraseDialog = new OWNewCurrencyDialog();
-
-		// Here we get all the coins that the user doesn't currently 
-		// have a wallet for because those are the ones we put in the dialog.
-		Set<OWCoin.Type> coinsNotInListCurrently = new HashSet<OWCoin.Type>(
-				Arrays.asList(OWCoin.Type.values()));
-		for (OWCoin.Type cListItem : userWallets) {
-			coinsNotInListCurrently.remove(cListItem);
+	/**
+	 * Only works for BTC_TEST type right now. 
+	 * 
+	 * @param typeOfWalletToStart
+	 */
+	public void openReceiveCoinsView(OWCoin.Type typeOfWalletToStart) {
+		// Temporarily need to just work for BTC_TEST only
+		if (typeOfWalletToStart != OWCoin.Type.BTC_TEST) {
+			return;
 		}
 
-		// We communicate which items to show through the use of a bundle.
-		// All keys in the bundle for which a true boolean is put are ones
-		// that the dialog should include in the selection grid.
-		Bundle b = new Bundle();
-		for (OWCoin.Type type : coinsNotInListCurrently) {
-			b.putBoolean(type.toString(), true);
+		String tag = typeOfWalletToStart.getShortTitle() + "_receive_coins_fragment";
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+		if (fragToShow == null) {
+			fragToShow = new OWReceiveBitcoinTestnetCoinsFragment();
 		}
-		passphraseDialog.setArguments(b);
 
-		String message = "Please select the currency that "
-				+ "you would like to add.";
-		passphraseDialog.setupDialog("OneWallet", message, 
-				"Select", null, "Cancel");
-		passphraseDialog.show(this.getSupportFragmentManager(), 
-				"get_new_currency_dialog");
+		// If we did a tablet view this might be different. 
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
+	}
+	
+	/**
+	 * Only works for BTC_TEST type right now. 
+	 * 
+	 * @param typeOfWalletToStart
+	 */
+	public void openSendCoinsView(OWCoin.Type typeOfWalletToStart) {
+		// Temporarily need to just work for BTC_TEST only
+		if (typeOfWalletToStart != OWCoin.Type.BTC_TEST) {
+			return;
+		}
+
+		String tag = typeOfWalletToStart.getShortTitle() + "_send_coins_fragment";
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+		if (fragToShow == null) {
+			fragToShow = new OWSendBitcoinTestnetCoinsFragment();
+		}
+
+		// If we did a tablet view this might be different. 
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
 	}
 
 	/**
@@ -826,6 +850,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public void alertUser(String message, String tag) {
 		OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 
+		alertUserDialog.setTargetFragment(null, OWRequestCodes.ALERT_USER_DIALOG);
+
 		// Set negative text to null to not have negative button
 		alertUserDialog.setupDialog("OneWallet", message, null, "OK", null);
 		alertUserDialog.show(this.getSupportFragmentManager(), tag);
@@ -834,24 +860,16 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	///////////// Passer methods /////////////
 
 	@Override
-	public void handleNewCurrencyPositive(int requestCode, OWCoin.Type id) {
-		switch(requestCode) {
-		case OWRequestCodes.NEW_CURRENCY_DIALOG:
-			// Just need to pass the result to the Accounts fragment
-			// (the newCurencyDialogHandler is the accounts fragment, most likely)
-			this.newCurrencyDialogHandler.handleNewCurrencyPositive(requestCode, id);
-			break;
-		}
-	}
-
-	@Override
 	public void handleNegative(int requestCode) {
 		switch(requestCode) {
-		case OWRequestCodes.NEW_CURRENCY_DIALOG:
-			this.newCurrencyDialogHandler.handleNegative(requestCode);
-			break;
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG:
 			this.validatePassphraseDialogHandler.handleNegative(requestCode);
+			break;
+		case OWRequestCodes.ALERT_USER_DIALOG:
+			// Nothing to do
+			break;
+		case OWRequestCodes.RESET_PASSPHRASE_DIALOG:
+			// Nothing to do
 			break;
 		}
 	}
@@ -871,16 +889,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			byte[] inputHash = OWUtils.Sha256Hash(passphrase);
 			if (this.userHasPassphrase()) {
 				if (this.inputHashMatchesStoredHash(inputHash)) {
-					if (info != null) {
-						OWCoin.Type typeOfWalletToStart = null;
-						for (OWCoin.Type type : OWCoin.Type.values()) {
-							if (info.getBoolean(type.toString())) {
-								typeOfWalletToStart = type;
-								break;
-							}
-						}
-						this.openWalletView(typeOfWalletToStart);
-					}
+					this.openWalletViewFromBundle(info);
 				} else {
 					// TODO maybe make a OWTags.java class that keeps track of 
 					// tags for different fragments? Could handle making the tags
@@ -889,10 +898,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 							"Error: Passphrases don't match. ", "wrong_passphrase");
 				}
 			} 
-//			else {
-//			this.setPassphraseHash(inputHash);
-//			this.startFragmentToOpenOnCorrectPassphrase();
-//		}
+
+			// TODO thisis useful for now to be able to set the passphrase the
+			// first time but we need to 
+			else {
+				this.setPassphraseHash(inputHash);
+				this.openWalletViewFromBundle(info);
+			}
 			break;
 		}
 	}
