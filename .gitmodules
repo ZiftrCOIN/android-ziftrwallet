@@ -5,3 +5,4 @@
 [submodule "zxing"]
 	path = zxing
 	url = git@github.com:Ziftr/zxing.git
+	branch = master
