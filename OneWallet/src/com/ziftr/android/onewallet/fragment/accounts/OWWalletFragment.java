@@ -22,7 +22,6 @@ import android.widget.TextView;
 import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.Transaction;
 import com.google.bitcoin.core.Wallet;
-import com.google.bitcoin.utils.BriefLogFormatter;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
@@ -67,8 +66,6 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-
-		BriefLogFormatter.initVerbose();
 
 		if (getWallet() == null) {
 			throw new IllegalArgumentException(

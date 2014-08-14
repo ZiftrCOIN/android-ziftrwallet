@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 
+import com.google.bitcoin.utils.BriefLogFormatter;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -24,6 +25,8 @@ public class OWSplashScreenActivity extends FragmentActivity {
 
         // First just set view to splash screen
         this.setContentView(R.layout.splash_layout);
+        
+        BriefLogFormatter.initVerbose();
 
         loadAppOneSecondLater();
         

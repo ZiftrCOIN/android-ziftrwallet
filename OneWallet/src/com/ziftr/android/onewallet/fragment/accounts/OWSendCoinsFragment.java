@@ -423,13 +423,13 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 		// Update the text in the total text view
 		TextView totalTextView = (TextView) this.rootView.findViewById(
-				R.id.send_total);
+				R.id.sendTotalTextView);
 		totalTextView.setText(OWCoin.formatCoinAmount(
 				getCoinId(), total).toPlainString());
 
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
-				R.id.send_total_fiat_equiv);
+				R.id.sendTotalFiatEquivTextView);
 		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.Type.USD, getCoinId());
 		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.Type.USD, fiatTotal).toPlainString() + ")");
 	}
@@ -494,7 +494,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	private EditText getSendToAddressEditText() {
 		return (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_receiver_address);
+				R.id.sendEditTextReceiverAddress);
 	}
 
 	/**
@@ -502,7 +502,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	private EditText getFiatFeeEditText() {
 		return (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_transaction_fee_fiat_equiv);
+				R.id.sendEditTextTransactionFeeFiatEquiv);
 	}
 
 	/**
@@ -510,7 +510,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	private EditText getCoinFeeEditText() {
 		return (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_transaction_fee);
+				R.id.sendEditTextTransactionFee);
 	}
 
 	/**
@@ -518,7 +518,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	private EditText getFiatAmountEditText() {
 		return (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_amount_fiat_equiv);
+				R.id.sendEditTextAmountFiatEquiv);
 	}
 
 	/**
@@ -526,7 +526,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	private EditText getCoinAmountEditText() {
 		return (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_amount);
+				R.id.sendEditTextAmount);
 	}
 
 }

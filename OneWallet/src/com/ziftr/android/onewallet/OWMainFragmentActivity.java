@@ -315,7 +315,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
 			// If the fragment doesn't exist yet, make a new one
-			fragToShow = fragmentType.getNewFragment(); 
+			fragToShow = fragmentType.getNewFragment();
 		}
 
 		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, false);

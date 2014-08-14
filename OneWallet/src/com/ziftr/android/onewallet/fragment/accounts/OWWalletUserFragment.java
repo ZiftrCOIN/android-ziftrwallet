@@ -7,16 +7,9 @@ import android.support.v4.app.Fragment;
 import com.google.bitcoin.core.Wallet;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.OWWalletManager;
-import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWCoinRelative;
 
-public abstract class OWWalletUserFragment extends Fragment {
-	
-	/**
-	 * Get the OWCoin.Type for the actual subclassing fragment.
-	 * 
-	 * @return OWCoin.Type.BTC for Bitcoin, OWCoin.Type.LTC for Litecoin, etc.
-	 */
-	public abstract OWCoin.Type getCoinId();
+public abstract class OWWalletUserFragment extends Fragment implements OWCoinRelative {
 	
 	/** 
 	 * Gets the wallet from the wallet manager, which is stored in the activity.
