@@ -33,12 +33,12 @@
     
     <style name="txn_labels">
         <item name="android:textColor">@color/Gray</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">@dimen/ow_txn_small</item>
     </style>
     
     <style name="txn_values">
         <item name="android:textColor">@color/DarkGray</item>
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">@dimen/ow_txn_medium</item>
     </style>
 
 </resources>

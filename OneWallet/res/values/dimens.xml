@@ -24,5 +24,9 @@
     
     <dimen name="ow_button_footer_height">60dp</dimen>
     
+    <!-- txn details text sizes -->
+    <dimen name="ow_txn_large">65dp</dimen>
+    <dimen name="ow_txn_medium">28dp</dimen>
+    <dimen name="ow_txn_small">22dp</dimen>
     
 </resources>
