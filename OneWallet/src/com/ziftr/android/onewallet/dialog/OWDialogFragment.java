@@ -6,8 +6,11 @@ import android.app.Dialog;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.EditText;
+
+import com.ziftr.android.onewallet.R;
 
 public abstract class OWDialogFragment extends DialogFragment implements OnClickListener {
 
@@ -94,7 +97,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 		}
 		
 		AlertDialog.Builder builder = 
-				new AlertDialog.Builder(this.getActivity());
+				new AlertDialog.Builder(new ContextThemeWrapper(this.getActivity(), R.style.ow_dialog));
 		
 		builder.setTitle(title);
 		if (message != null) {
