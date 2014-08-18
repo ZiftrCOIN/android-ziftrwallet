@@ -1,0 +1,186 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/amount_sent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-75"
+                android:textColor="@color/Crimson"
+                android:textSize="@dimen/abc_dropdownitem_icon_width" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="7dp"
+                android:layout_marginStart="7dp"
+                android:text="@string/ow_tx_details_pending_label"
+                android:textColor="@color/Crimson"
+                android:textSize="@dimen/abc_action_bar_subtitle_text_size" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/txn_labels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_tx_details_amount_sent_label" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5" />
+
+        <TextView
+            android:id="@+id/currency_value"
+            style="@style/txn_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Placeholder" />
+
+        <TextView
+            android:id="@+id/currency_type"
+            style="@style/txn_labels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Placeholder" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5" />
+
+        <TextView
+            android:id="@+id/confirmation_fee_amount"
+            style="@style/txn_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Placeholder" />
+
+        <TextView
+            style="@style/txn_labels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_tx_details_confirmation_fee_label" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5" />
+
+        <TextView
+            android:id="@+id/io"
+            style="@style/txn_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Placeholder" />
+
+        <TextView
+            style="@style/txn_labels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_tx_details_io_label" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5" />
+
+        <TextView
+            android:id="@+id/routing_address_name"
+            style="@style/txn_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Placeholder" />
+
+        <TextView
+            style="@style/txn_labels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_tx_details_routing_address_name" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5" />
+
+        <TextView
+            android:id="@+id/routing_address"
+            style="@style/txn_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Placeholder" />
+
+        <TextView
+            style="@style/txn_labels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_tx_details_routing_address_label" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5" />
+
+        <TextView
+            style="@style/txn_values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Placeholder" />
+
+        <TextView
+            android:id="@+id/date_sent"
+            style="@style/txn_labels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_tx_details_sent" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/status"
+                style="@style/txn_labels"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/progress_bar"
+                android:layout_below="@id/progress_bar"
+                android:text="@string/ow_tx_details_sent" />
+
+            <TextView
+                android:id="@+id/time_left"
+                style="@style/txn_labels"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignRight="@id/progress_bar"
+                android:layout_below="@id/progress_bar"
+                android:text="@string/ow_tx_details_sent" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</ScrollView>
