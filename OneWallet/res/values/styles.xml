@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
@@ -40,5 +41,10 @@
         <item name="android:textColor">@color/DarkGray</item>
         <item name="android:textSize">@dimen/ow_txn_medium</item>
     </style>
+
+	<style name="ow_dialog">
+        <item name="android:textColor">@color/Black</item>
+        <item name="android:background">@color/LimeGreen</item>
+	</style>
 
 </resources>
