@@ -174,7 +174,7 @@ OWNewCurrencyDialogHandler {
 		// Should never get here
 		return null;
 	}
-	
+
 	/**
 	 * When we add an item to the list of currencies we make sure they are 
 	 * alphabetized. This helps to get the index that new coin types
@@ -310,11 +310,12 @@ OWNewCurrencyDialogHandler {
 
 			// TODO see java docs for this method. Is it okay to 
 			// have this called here? 
-			walletManager.setUpWallet(newItem);
+			if (walletManager.setUpWallet(newItem)) {
+				userWallets.add(indexToAddAt, getItemForCoinType(newItem));
+				refreshListOfUserWallets();	
+			}
 		}
-
-		userWallets.add(indexToAddAt, getItemForCoinType(newItem));
-		refreshListOfUserWallets();
+		
 	}
 
 	/**

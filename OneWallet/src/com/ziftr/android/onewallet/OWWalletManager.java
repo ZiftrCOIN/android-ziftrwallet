@@ -11,6 +11,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.bitcoin.core.BlockChain;
 import com.google.bitcoin.core.CheckpointManager;
@@ -26,6 +27,7 @@ import com.google.bitcoin.store.BlockStore;
 import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
+import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -70,13 +72,13 @@ public class OWWalletManager {
 	 * TODO maybe we want to get this everytime?
 	 * or maybe a weak reference? 
 	 */
-	private Activity activity;
+	private FragmentActivity activity;
 	
 	/**
 	 * Make a new manager. This context should be cleared and then re-added when
 	 * saving and bringing back the wallet manager. 
 	 */
-	public OWWalletManager(Activity activity) {
+	public OWWalletManager(FragmentActivity activity) {
 		this.activity = activity;
 		
 		for (OWCoin.Type enabledType : enabledCoinTypes) {
@@ -175,7 +177,7 @@ public class OWWalletManager {
 	/**
 	 * @param activity the context to set
 	 */
-	public void setActivity(Activity activity) {
+	public void setActivity(FragmentActivity activity) {
 		this.activity = activity;
 	}
 	
@@ -210,7 +212,7 @@ public class OWWalletManager {
 	 * 
 	 * TODO check to make sure all places where this is called is okay.
 	 */
-	public void setUpWallet(OWCoin.Type id) {
+	public boolean setUpWallet(OWCoin.Type id) {
 
 		// Here we recreate the files or create them if this is the first
 		// time the user opens the app.
@@ -222,7 +224,11 @@ public class OWWalletManager {
 			this.walletFiles.put(id, new File(
 					externalDirectory, id.getShortTitle() + "_wallet.dat"));
 		} else {
-			ZLog.log("CHECK ON THIS, external directory was null.");
+			ZLog.log("null NULL EXTERNAL DIR");
+			OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
+			alertUserDialog.setupDialog("OneWallet", "Error: No external storage detected.", null, "OK", null);
+			alertUserDialog.show(this.activity.getSupportFragmentManager(), "null_externalDirectory");
+			return false;
 		}
 
 		this.walletMap.put(id, null);
@@ -246,7 +252,7 @@ public class OWWalletManager {
 				ZLog.log("Exception trying to save new wallet file: ", e);
 				// TODO this is just test code of course but this is probably 
 				// "fatal" as if we can't save our wallet, that's a problem
-				return;
+				return false;
 			}
 		}
 		
@@ -279,6 +285,7 @@ public class OWWalletManager {
 		// TODO Explain???
 
 		this.beginSyncWithNetwork(id);
+		return true;
 	}
 	
 	public void closeWallet(OWCoin.Type id) {

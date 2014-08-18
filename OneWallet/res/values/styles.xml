@@ -30,5 +30,15 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
         <!-- <item name="android:windowNoTitle">true</item> -->
     </style>
+    
+    <style name="txn_labels">
+        <item name="android:textColor">@color/Gray</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+    
+    <style name="txn_values">
+        <item name="android:textColor">@color/DarkGray</item>
+        <item name="android:textSize">30sp</item>
+    </style>
 
 </resources>
