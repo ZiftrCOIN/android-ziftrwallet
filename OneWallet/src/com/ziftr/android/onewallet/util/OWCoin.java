@@ -7,51 +7,63 @@ import com.google.bitcoin.params.MainNetParams;
 import com.google.bitcoin.params.TestNet3Params;
 import com.ziftr.android.onewallet.R;
 
+/**
+ * This class holds the Type enum. Each member of the enum can be thought of as an identifier for 
+ * that cryptocurrency type. Abstract classes can define an abstract getCoinId() method and 
+ * then subclasses can be made that implement this method, which is very useful for making classes 
+ * applicable to many types of cryptocurrencies. 
+ * 
+ * TODO somehow incorporate a list of address prefixes for each coin type. 
+ * e.g. bitcoin address start with a 1, bitcoin private keys start with 
+ * 
+ * Four leading prefixes are needed, currently, for each coin type:
+ *     1. pubKeyHashPrefix
+ *     2. scriptHashPrefix
+ *     3. uncompressedPrivKeyPrefix
+ *     4. compressedPrivKeyPrefix
+ */
 public class OWCoin {
-	
+
 	/** When using bundles, this can be used to store a specific coin type. */
 	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
-	
+
 	public enum Type implements OWCurrency {
-		BTC("0.0001", "BTC", "Bitcoin", "BITCOIN", 
-				8, R.drawable.logo_bitcoin, MainNetParams.get(), false),
-		LTC("0.0010", "LTC", "Litecoin", "LITECOIN", 
-				8, R.drawable.logo_litecoin, null, false),
-		PPC("0.0100", "PPC", "Peercoin", "PEERCOIN", 
-				8, R.drawable.logo_peercoin, null, false),
-		DOGE("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 
-				8, R.drawable.logo_dogecoin, null, false),
-				
-		BTC_TEST("0.0000", "BTC_TEST", "Bitcoin Testnet", "BITCOIN", 
-				8, R.drawable.logo_bitcoin, TestNet3Params.get(), true),
-		LTC_TEST("0.0000", "LTC_TEST", "Litecoin Testnet", "LITECOIN", 
-				8, R.drawable.logo_litecoin, null, true),
-		PPC_TEST("0.0000", "PPC_TEST", "Peercoin Testnet", "PEERCOIN", 
-				8, R.drawable.logo_peercoin, null, true),
-		DOGE_TEST("0.0000", "DOGE_TEST", "Dogecoin Testnet", "DOGECOIN", 
-				8, R.drawable.logo_dogecoin, null, true)
+		BTC("0.0001", "BTC", "Bitcoin", "BITCOIN", 8, R.drawable.logo_bitcoin, MainNetParams.get(), false,
+				(byte) 0, (byte) 5, (byte) 0, (byte) 0),
+		LTC("0.0010", "LTC", "Litecoin", "LITECOIN", 8, R.drawable.logo_litecoin, null, false,
+				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+		PPC("0.0100", "PPC", "Peercoin", "PEERCOIN", 8, R.drawable.logo_peercoin, null, false,
+				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+		DOGE("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, false,
+				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+
+		BTC_TEST("0.0000", "BTC_TEST", "Bitcoin Testnet", "BITCOIN", 8, R.drawable.logo_bitcoin, TestNet3Params.get(), true,
+				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+		LTC_TEST("0.0000", "LTC_TEST", "Litecoin Testnet", "LITECOIN", 8, R.drawable.logo_litecoin, null, true,
+				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+		PPC_TEST("0.0000", "PPC_TEST", "Peercoin Testnet", "PEERCOIN", 8, R.drawable.logo_peercoin, null, true,
+				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+		DOGE_TEST("0.0000", "DOGE_TEST", "Dogecoin Testnet", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, true,
+				(byte) 0, (byte) 0, (byte) 0, (byte) 0)
 		;
 
 		private String defaultFeePerKb;
-
 		private String shortTitle;
-		
 		private String longTitle;
-		
 		private String capsTitle;
-		
 		private int numberOfDigitsOfPrecision;
-		
 		private int logoResId;
-		
 		private NetworkParameters networkParameters;
-		
 		private boolean isTestNet;
+		private byte pubKeyHashPrefix;
+		private byte scriptHashPrefix;
+		private byte uncompressedPrivKeyPrefix;
+		private byte compressedPrivKeyPrefix;
 
-		private Type(String defaultFeePerKb, String shortTitle, 
-				String longTitle, String capsTitle,
-				int numberOfDigitsOfPrecision, int logoResId,
-				NetworkParameters networkParameters, boolean isTestNet) {
+		private Type(String defaultFeePerKb, String shortTitle, String longTitle, String capsTitle,
+				int numberOfDigitsOfPrecision, int logoResId, NetworkParameters networkParameters, 
+				boolean isTestNet, byte pubKeyHashPrefix, byte scriptHashPrefix, 
+				byte uncompressedPrivKeyPrefix, byte compressedPrivKeyPrefix) {
 			this.defaultFeePerKb = defaultFeePerKb;
 			this.shortTitle = shortTitle;
 			this.longTitle = longTitle;
@@ -60,8 +72,12 @@ public class OWCoin {
 			this.logoResId = logoResId;
 			this.networkParameters = networkParameters;
 			this.isTestNet = isTestNet;
+			this.pubKeyHashPrefix = pubKeyHashPrefix;
+			this.scriptHashPrefix = scriptHashPrefix;
+			this.uncompressedPrivKeyPrefix = uncompressedPrivKeyPrefix;
+			this.compressedPrivKeyPrefix = compressedPrivKeyPrefix;
 		}
-		
+
 		/**
 		 * @return whether or not this coin is a testnet coin
 		 */
@@ -80,7 +96,7 @@ public class OWCoin {
 		public String getDefaultFeePerKb() {
 			return this.defaultFeePerKb;
 		}
-		
+
 		/**
 		 * @return the shortTitle
 		 */
@@ -101,13 +117,13 @@ public class OWCoin {
 		public String getCapsTitle() {
 			return capsTitle;
 		}
-		
+
 		/**
 		 * Gives the title of the coin. e.g. "Bitcoin" for OWCoin.Type.BTC, etc. 
 		 * 
 		 * @return as above
 		 */
-		
+
 		/**
 		 * This is an okay place to get this information for now, but will likely 
 		 * want to get this info somewhere else eventually. This gets the number of 
@@ -121,14 +137,14 @@ public class OWCoin {
 		public int getNumberOfDigitsOfPrecision() {
 			return this.numberOfDigitsOfPrecision;
 		}
-		
+
 		/**
 		 * @return the logoResId
 		 */
 		public int getLogoResId() {
 			return logoResId;
 		}
-		
+
 
 		/**
 		 * @return the networkParameters
@@ -137,8 +153,36 @@ public class OWCoin {
 			return networkParameters;
 		}
 		
+		/**
+		 * @return the pubKeyHashPrefix
+		 */
+		public byte getPubKeyHashPrefix() {
+			return pubKeyHashPrefix;
+		}
+
+		/**
+		 * @return the scriptHashPrefix
+		 */
+		public byte getScriptHashPrefix() {
+			return scriptHashPrefix;
+		}
+
+		/**
+		 * @return the uncompressedPrivKeyPrefix
+		 */
+		public byte getUncompressedPrivKeyPrefix() {
+			return uncompressedPrivKeyPrefix;
+		}
+
+		/**
+		 * @return the compressedPrivKeyPrefix
+		 */
+		public byte getCompressedPrivKeyPrefix() {
+			return compressedPrivKeyPrefix;
+		}
+
 	};
-	
+
 	/**
 	 * A convenience method to format a BigDecimal. In Standard use,
 	 * one can just use standard BigDecimal methods and use this

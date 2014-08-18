@@ -20,6 +20,7 @@ public class OWApplication extends Application {
 		super.onCreate();
 		isDebuggable = (0 != 
 				(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+		PRNGFixes.apply();
 	}
 
 	/**

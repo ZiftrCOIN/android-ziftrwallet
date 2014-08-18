@@ -3,6 +3,7 @@ package com.ziftr.android.onewallet.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +20,12 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.spongycastle.crypto.digests.RIPEMD160Digest;
+
+import com.google.bitcoin.core.Utils;
+import com.google.bitcoin.core.VarInt;
+import com.google.common.base.Charsets;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,6 +46,10 @@ public class OWUtils {
 	/** formatting for date written like "2013-12-11 10:59:48" */
 	public static final DateFormat formatterNoTimeZone = 
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); 
+	
+	/** The string that prefixes all text messages signed using Bitcoin keys. */
+    public static final String BITCOIN_SIGNED_MESSAGE_HEADER = "Bitcoin Signed Message:\n";
+    public static final byte[] BITCOIN_SIGNED_MESSAGE_HEADER_BYTES = BITCOIN_SIGNED_MESSAGE_HEADER.getBytes(Charsets.UTF_8);
 
 	private static final MessageDigest digest;
 	static {
@@ -415,6 +426,90 @@ public class OWUtils {
                 break;
         }
         return (negative ? "-" : "") + formatted.substring(0, formatted.length() - toDelete);
+    }
+    
+    /**
+	 * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
+	 */
+	public static byte[] sha256hash160(byte[] input) {
+	    try {
+	        byte[] sha256 = MessageDigest.getInstance("SHA-256").digest(input);
+	        RIPEMD160Digest digest = new RIPEMD160Digest();
+	        digest.update(sha256, 0, sha256.length);
+	        byte[] out = new byte[20];
+	        digest.doFinal(out, 0);
+	        return out;
+	    } catch (NoSuchAlgorithmException e) {
+	        throw new RuntimeException(e);  // Cannot happen.
+	    }
+	}
+	
+	/**
+     * See {@link Utils#doubleDigest(byte[], int, int)}.
+     */
+    public static byte[] doubleDigest(byte[] input) {
+        return doubleDigest(input, 0, input.length);
+    }
+
+    /**
+     * Calculates the SHA-256 hash of the given byte range, and then hashes the resulting hash again. This is
+     * standard procedure in Bitcoin. The resulting hash is in big endian form.
+     */
+    public static byte[] doubleDigest(byte[] input, int offset, int length) {
+        synchronized (digest) {
+            digest.reset();
+            digest.update(input, offset, length);
+            byte[] first = digest.digest();
+            return digest.digest(first);
+        }
+    }
+
+    public static byte[] singleDigest(byte[] input, int offset, int length) {
+        synchronized (digest) {
+            digest.reset();
+            digest.update(input, offset, length);
+            return digest.digest();
+        }
+    }
+    
+    /**
+     * <p>Given a textual message, returns a byte buffer formatted as follows:</p>
+     *
+     * <tt><p>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
+     */
+    public static byte[] formatMessageForSigning(String message) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES.length);
+            bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES);
+            byte[] messageBytes = message.getBytes(Charsets.UTF_8);
+            VarInt size = new VarInt(messageBytes.length);
+            bos.write(size.encode());
+            bos.write(messageBytes);
+            return bos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);  // Cannot happen.
+        }
+    }
+
+	/**
+     * The regular {@link java.math.BigInteger#toByteArray()} method isn't quite what we often need: it appends a
+     * leading zero to indicate that the number is positive and may need padding.
+     *
+     * @param b the integer to format into a byte array
+     * @param numBytes the desired size of the resulting byte array
+     * @return numBytes byte long array.
+     */
+    public static byte[] bigIntegerToBytes(BigInteger b, int numBytes) {
+        if (b == null) {
+            return null;
+        }
+        byte[] bytes = new byte[numBytes];
+        byte[] biBytes = b.toByteArray();
+        int start = (biBytes.length == numBytes + 1) ? 1 : 0;
+        int length = Math.min(biBytes.length, numBytes);
+        System.arraycopy(biBytes, start, bytes, numBytes - length, length);
+        return bytes;        
     }
     
     /**
