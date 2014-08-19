@@ -32,6 +32,7 @@
         <!-- <item name="android:windowNoTitle">true</item> -->
     </style>
 
+    <!-- transactions page style -->
     <style name="txn_labels">
         <item name="android:textColor">@color/Gray</item>
         <item name="android:textSize">@dimen/ow_txn_small</item>
@@ -42,9 +43,26 @@
         <item name="android:textSize">@dimen/ow_txn_medium</item>
     </style>
 
-	<style name="ow_dialog">
-        <item name="android:textColor">@color/Black</item>
+    <!-- dialog styles -->
+    <style name="ow_dialog_theme">
+        <item name="android:alertDialogStyle">@style/ow_dialog</item>
+    </style>
+
+    <style name="ow_dialog">
+        <item name="android:fullDark">@color/Red</item>
+        <item name="android:topDark">@color/Red</item>
+        <item name="android:centerDark">@color/Red</item>
+        <item name="android:bottomDark">@color/Red</item>
+        <item name="android:fullBright">@color/Red</item>
+        <item name="android:topBright">@color/Red</item>
+        <item name="android:centerBright">@color/Red</item>
+        <item name="android:bottomBright">@color/Red</item>
+        <item name="android:bottomMedium">@color/Red</item>
+        <item name="android:centerMedium">@color/Red</item>
+    </style>
+
+    <style name="dialog_title" parent="android:Widget.TextView">
         <item name="android:background">@color/LimeGreen</item>
-	</style>
+    </style>
 
 </resources>

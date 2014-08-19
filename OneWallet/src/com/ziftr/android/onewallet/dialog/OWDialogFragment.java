@@ -7,8 +7,10 @@ import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
 
@@ -64,6 +66,11 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
+		LayoutInflater inflater = this.getActivity().getLayoutInflater();
+		View view = inflater.inflate(R.layout.dialog_default, null);
+		TextView titlefield = (TextView) view.findViewById(R.id.dialog_title);
+		titlefield.setText(this.title);
+		builder.setView(view);
 		return builder.create();
 	}
 
@@ -97,8 +104,8 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 		}
 		
 		AlertDialog.Builder builder = 
-				new AlertDialog.Builder(new ContextThemeWrapper(this.getActivity(), R.style.ow_dialog));
-		
+				new AlertDialog.Builder(new ContextThemeWrapper(this.getActivity(), R.style.ow_dialog_theme));
+
 		builder.setTitle(title);
 		if (message != null) {
 			builder.setMessage(message);

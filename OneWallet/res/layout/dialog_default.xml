@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/Green"
+        android:gravity="center_vertical|start"
+        android:minHeight="64dp">
+        <com.android.internal.widget.DialogTitle android:id="@+id/dialog_title"
+                android:singleLine="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+            />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:minHeight="64dp">
+        <ScrollView 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false">
+        <TextView
+        android:id="@+id/dialog_mesfrsage"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/White"
+        android:text="Message" 
+        android:padding="10dp"/>
+        </ScrollView>
+	</LinearLayout>        
+
+</LinearLayout>
