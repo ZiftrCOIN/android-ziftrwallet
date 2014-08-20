@@ -27,7 +27,7 @@ public class OWApplication extends Application {
 	 * Gives a boolean which describes whether or not this application 
 	 * is debuggable. 
 	 * 
-	 * @return a boolean which describes whether or not this application 
+	 * @return - a boolean which describes whether or not this application 
 	 * is debuggable.
 	 */
 	public static boolean isDebuggable() {
