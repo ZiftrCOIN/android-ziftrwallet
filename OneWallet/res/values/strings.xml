@@ -86,5 +86,6 @@
     <string name="ow_ok">OK</string>
     <string name="ow_dialog_cancel">Cancel</string>
     <string name="ow_dialog_select">Select</string>
+    <string name="ow_dialog_continue">Continue</string>
 
 </resources>

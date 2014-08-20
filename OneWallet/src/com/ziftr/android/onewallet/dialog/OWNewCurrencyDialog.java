@@ -6,10 +6,8 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -86,7 +84,6 @@ public class OWNewCurrencyDialog extends OWDialogFragment{
 				R.layout.dialog_get_new_currency, null));
 		this.initDialogFields();
 		builder.setView(this.getDialogView());
-		final Dialog dialog = builder.create();
 		
 		Button select = (Button) this.getDialogView().findViewById(R.id.dialog_button2);
 		Button cancel = (Button) this.getDialogView().findViewById(R.id.dialog_button1);
@@ -102,7 +99,7 @@ public class OWNewCurrencyDialog extends OWDialogFragment{
 
 		this.initialzeGridView();
 
-		return dialog;
+		return builder.create();
 	}
 	
 	/**
@@ -122,33 +119,11 @@ public class OWNewCurrencyDialog extends OWDialogFragment{
 							(OWNewCurrencyDialogHandler) getHandler();
 					handler.handleNewCurrencyPositive(this.getTargetRequestCode(), 
 							this.currSelectedCoinType);
+					this.dismiss();
 				}
-				break;
 		}
 	}
 
-
-	/**
-	 * Handle clicks on this dialog. 
-	 *
-	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		// Might be null if user doesn't hit anything.
-		ZLog.log(which);
-		if (this.currSelectedCoinType != null) {
-			ZLog.log("curSelectedCoinType was NOT null. ");
-			OWNewCurrencyDialogHandler handler = 
-					(OWNewCurrencyDialogHandler) getHandler();
-			if (which == DialogInterface.BUTTON_POSITIVE) {
-				handler.handleNewCurrencyPositive(this.getTargetRequestCode(), 
-						this.currSelectedCoinType);
-			} else if (which == DialogInterface.BUTTON_NEGATIVE) {
-				handler.handleNegative(this.getTargetRequestCode());
-			} else {
-				ZLog.log("These dialogs shouldn't have neutral buttons.");
-			}
-		}
-	}*/
 
 	@Override
 	protected Object getHandler() {

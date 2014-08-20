@@ -41,9 +41,6 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	/** The view for this dialog. */
 	private View dialogView;
 	
-	/** dialog */
-	protected Dialog dialog;
-
 	/**
 	 * Set's up a basic dialog with all of its content.
 	 * 
@@ -69,8 +66,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
-		this.dialog = builder.create();
-		return this.dialog;
+		return builder.create();
 	}
 
 	/**

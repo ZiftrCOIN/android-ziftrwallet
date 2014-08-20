@@ -24,12 +24,11 @@
     </GridView>
 
     <LinearLayout
-        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="?android:attr/dividerHorizontal"
+        android:divider="@color/LightGray"
         android:orientation="horizontal"
-        android:showDividers="beginning" >
+        android:showDividers="middle" >
 
         <Button
             android:id="@+id/dialog_button1"
