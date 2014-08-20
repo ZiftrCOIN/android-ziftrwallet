@@ -44,25 +44,16 @@
     </style>
 
     <!-- dialog styles -->
-    <style name="ow_dialog_theme">
-        <item name="android:alertDialogStyle">@style/ow_dialog</item>
+    <style name="ow_dialog_theme"></style>
+
+    <style name="dialog_title_text" parent="@android:style/TextAppearance.DialogWindowTitle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/White</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="ow_dialog">
-        <item name="android:fullDark">@color/Red</item>
-        <item name="android:topDark">@color/Red</item>
-        <item name="android:centerDark">@color/Red</item>
-        <item name="android:bottomDark">@color/Red</item>
-        <item name="android:fullBright">@color/Red</item>
-        <item name="android:topBright">@color/Red</item>
-        <item name="android:centerBright">@color/Red</item>
-        <item name="android:bottomBright">@color/Red</item>
-        <item name="android:bottomMedium">@color/Red</item>
-        <item name="android:centerMedium">@color/Red</item>
-    </style>
-
-    <style name="dialog_title" parent="android:Widget.TextView">
-        <item name="android:background">@color/LimeGreen</item>
+    <style name="dialog_button" parent="@android:attr/buttonBarButtonStyle">
+        <item name="android:background">@drawable/dialog_button</item>
     </style>
 
 </resources>

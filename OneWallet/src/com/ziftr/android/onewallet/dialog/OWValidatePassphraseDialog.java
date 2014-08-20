@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHandler;
@@ -56,9 +57,13 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		return builder.create();
 	}
 
+	public void onClick(View view){
+		//TODO
+	}
+
 	/**
 	 * Handle clicks on this dialog. 
-	 */
+	 *
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
 		OWValidatePassphraseDialogHandler handler = 
@@ -72,7 +77,7 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		} else {
 			ZLog.log("These dialogs shouldn't have neutral buttons.");
 		}
-	}
+	}*/
 
 	/**
 	 * When we save the instance, in addition to doing everything that

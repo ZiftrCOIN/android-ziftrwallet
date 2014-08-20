@@ -4,39 +4,35 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/Green"
-        android:gravity="center_vertical|start"
-        android:minHeight="64dp">
-        <com.android.internal.widget.DialogTitle android:id="@+id/dialog_title"
-                android:singleLine="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-            />
-    </LinearLayout>
+    <include layout="@layout/custom_dialog_title"/>
+
+    <include layout="@layout/custom_dialog_message" />
     
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/LightGray" />
+
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:minHeight="64dp">
-        <ScrollView 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false">
-        <TextView
-        android:id="@+id/dialog_mesfrsage"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@color/White"
-        android:text="Message" 
-        android:padding="10dp"/>
-        </ScrollView>
-	</LinearLayout>        
+        android:divider="?android:attr/dividerHorizontal"
+        android:orientation="horizontal"
+        android:showDividers="beginning" >
+
+        <Button
+            android:id="@+id/dialog_button1"
+            style="@style/dialog_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:minHeight="45dp"
+            android:text="@string/ow_ok"
+            android:textSize="14sp" >
+        </Button>
+    </LinearLayout>
 
 </LinearLayout>
