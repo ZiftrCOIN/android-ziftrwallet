@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.onewallet.crypto.ECKey;
-import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
 import com.ziftr.android.onewallet.util.OWUtils;
 
@@ -39,6 +38,13 @@ implements OWCoinRelative {
 	 * and this may just be the last known balance. 
 	 */
 	public static final String COLUMN_BALANCE = "balance";
+	
+	/** 
+	 * This is the last time that address was used in a transaction. Note that this
+	 * table may not always be up to date and this may just be the last known time
+	 * that the address was used. 
+	 */
+	public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
 	
 	/** 
 	 * This is the last time that address was used in a transaction. Note that this
