@@ -20,7 +20,6 @@
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/jcip/jcip-annotations/1.0/jcip-annotations-1.0.jar" sourcepath="M2_REPO/net/jcip/jcip-annotations/1.0/jcip-annotations-1.0-sources.jar"/>
 	<classpathentry exported="true" kind="var" path="M2_REPO/org/slf4j/slf4j-android/1.6.1-RC1/slf4j-android-1.6.1-RC1.jar"/>
 	<classpathentry exported="true" kind="var" path="M2_REPO/net/sf/jopt-simple/jopt-simple/4.3/jopt-simple-4.3.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/google/zxing/core/3.1.0/core-3.1.0.jar"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
