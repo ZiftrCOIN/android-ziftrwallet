@@ -812,7 +812,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				ZLog.log("Null TxAmount");
 				return;
 			}
-			data.putString("amountsent", TxItem.getTxAmount().toString());
+			data.putString("amount", TxItem.getTxAmount().toString());
 			data.putString("currencyval", OWConverter.convert(TxItem.getTxAmount(), TxItem.getCoinId(), TxItem.getFiatType()).toString());
 			data.putString("date", TxItem.getTxTime());
 			data.putString("currencytype", TxItem.getFiatType().getName());

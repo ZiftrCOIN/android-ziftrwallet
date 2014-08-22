@@ -175,9 +175,10 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 		this.txListView.setAdapter(new OWWalletTransactionListAdapter(
 				this.getActivity(), this.txList));
 		
-		// TODO add click listener here to tell activity to show transaction and 
-		// then activity will swap the frame to have the pending/transaction view fragment, which
-		// doesn't exist yet.
+		/**
+		 *  Opens transactions details fragment by calling openTxnDetails in MainActivity, passing
+		 *  the txnItem when user clicks a txn list item.
+		 */
 		this.txListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,

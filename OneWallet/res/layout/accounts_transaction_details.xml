@@ -16,11 +16,10 @@
             android:orientation="horizontal" >
 
             <TextView
-                android:id="@+id/amount_sent"
+                android:id="@+id/amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-70"
-                android:textColor="@color/Crimson"
+                android:textColor="@color/DarkGray"
                 android:textSize="@dimen/ow_txn_large" />
 
             <TextView
@@ -35,6 +34,7 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/amount_label"
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -149,7 +149,7 @@
             android:text="@string/Placeholder" />
 
         <TextView
-            android:id="@+id/date_sent"
+            android:id="@+id/date_label"
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

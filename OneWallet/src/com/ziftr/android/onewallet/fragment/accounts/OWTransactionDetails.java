@@ -1,5 +1,7 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
+import java.math.BigDecimal;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -35,13 +37,25 @@ public class OWTransactionDetails extends Fragment{
 	 */
 	public void init_fields(Bundle args){
 		
-		TextView amountsent = (TextView) rootView.findViewById(R.id.amount_sent);
-		amountsent.setText(getArguments().getString("amountsent"));
+		TextView amount = (TextView) rootView.findViewById(R.id.amount);
+		BigDecimal amountvalue = new BigDecimal(getArguments().getString("amount"));
+		
+		TextView amount_label = (TextView) rootView.findViewById(R.id.amount_label);
+		TextView time_label = (TextView) rootView.findViewById(R.id.date_label);
+		if ( amountvalue.compareTo(BigDecimal.ZERO) > 0){
+			amount_label.setText("Amount Received");
+			time_label.setText("Received");
+		} else {
+			amount_label.setText("Amount Sent");
+			time_label.setText("Sent");
+		}
+		amount.setText(amountvalue.toString());
 		TextView pending = (TextView) rootView.findViewById(R.id.pending);
+		
 		if (getArguments().getBoolean("pending")){
 			pending.setVisibility(rootView.VISIBLE);
 			pending.setTextColor(getResources().getColor(R.color.Crimson));
-			amountsent.setTextColor(getResources().getColor(R.color.Crimson));
+			amount.setTextColor(getResources().getColor(R.color.Crimson));
 		} else {
 			pending.setVisibility(rootView.INVISIBLE);
 		}
