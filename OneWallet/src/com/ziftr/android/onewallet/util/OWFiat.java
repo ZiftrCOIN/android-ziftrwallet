@@ -4,17 +4,21 @@ import java.math.BigDecimal;
 
 public class OWFiat {
 	public enum Type implements OWCurrency {
-		USD("$", 2),
-		EUR(String.valueOf((char) 0x80), 2);
+		USD("US Dollars","$", 2),
+		EUR("Euros", String.valueOf((char) 0x80), 2);
 		
 		/** This is the symbol for the currency. "$" for USD, etc. */
 		private String symbol;
 		
+		/** Name of currency US Dollars for USD*/
+		private String name;
+		
 		/** For most currencies this is 2, as non-whole amounts are displayed as 0.XX */
 		private int numberOfDigitsOfPrecision;
 		
-		private Type(String symbol, int numberOfDigitsOfPrecision) {
+		private Type(String name, String symbol, int numberOfDigitsOfPrecision) {
 			this.symbol = symbol;
+			this.name = name;
 			this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
 		}
 		
@@ -24,7 +28,13 @@ public class OWFiat {
 		public String getSymbol() {
 			return symbol;
 		}
-
+		
+		/**
+		 * @return name
+		 */
+		public String getName(){
+			return name;
+		}
 		/**
 		 * @return the numberOfDigitsOfPrecision
 		 */

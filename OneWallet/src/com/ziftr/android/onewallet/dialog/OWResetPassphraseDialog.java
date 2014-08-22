@@ -3,13 +3,11 @@ package com.ziftr.android.onewallet.dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
-import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * Dialogs where the app requests to get the passphrase

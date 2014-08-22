@@ -9,7 +9,6 @@ import android.widget.Button;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHandler;
-import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * Dialogs where the app requests to get the passphrase

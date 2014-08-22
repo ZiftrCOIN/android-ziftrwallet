@@ -7,8 +7,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="20dp" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,6 +24,7 @@
                 android:textSize="@dimen/ow_txn_large" />
 
             <TextView
+                android:id="@+id/pending"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="7dp"
@@ -42,7 +43,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="10dp" />
 
         <TextView
             android:id="@+id/currency_value"
@@ -55,13 +57,13 @@
             android:id="@+id/currency_type"
             style="@style/txn_labels"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="US dollar" />
+            android:layout_height="wrap_content" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="10dp" />
 
         <TextView
             android:id="@+id/confirmation_fee_amount"
@@ -79,7 +81,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="10dp" />
 
         <TextView
             android:id="@+id/io"
@@ -97,7 +100,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="10dp" />
 
         <TextView
             android:id="@+id/routing_address_name"
@@ -115,7 +119,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="10dp" />
 
         <TextView
             android:id="@+id/routing_address"
@@ -133,9 +138,11 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="10dp" />
 
         <TextView
+            android:id="@+id/date"
             style="@style/txn_values"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -151,7 +158,8 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:minHeight="10dp" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -182,4 +190,5 @@
                 android:text="@string/ow_tx_details_sent" />
         </RelativeLayout>
     </LinearLayout>
+
 </ScrollView>

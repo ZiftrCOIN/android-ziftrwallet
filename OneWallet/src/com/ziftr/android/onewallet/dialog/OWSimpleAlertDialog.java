@@ -9,8 +9,6 @@ import android.widget.Button;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
-import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * A persistent (doesn't go away when the view is destroyed) dialog

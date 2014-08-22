@@ -14,10 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.Transaction;
@@ -172,6 +174,22 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 				this.rootView.findViewById(R.id.txListView);
 		this.txListView.setAdapter(new OWWalletTransactionListAdapter(
 				this.getActivity(), this.txList));
+		
+		// TODO add click listener here to tell activity to show transaction and 
+		// then activity will swap the frame to have the pending/transaction view fragment, which
+		// doesn't exist yet.
+		this.txListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				OWWalletTransactionListItem txItem = (OWWalletTransactionListItem) 
+						txListView.getItemAtPosition(position);
+				OWMainFragmentActivity mActivity = 
+						(OWMainFragmentActivity) getActivity();
+				
+				mActivity.openTxnDetails(txItem);
+			}
+		});
 
 		this.getWallet().addEventListener(new AbstractWalletEventListener() {
 			@Override
