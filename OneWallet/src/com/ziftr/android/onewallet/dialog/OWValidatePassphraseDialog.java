@@ -64,17 +64,18 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		return builder.create();
 	}
 
-	public void onClick(View view) {
+	public void onClick(View view){
+		OWValidatePassphraseDialogHandler handler = 
+				(OWValidatePassphraseDialogHandler) this.getActivity();
+		
 		switch(view.getId()) {
 		case R.id.left_dialog_button:
 			//CANCEL
+			handler.handleNegative(this.getTargetRequestCode());
 			this.dismiss();
 			break;
 		case R.id.right_dialog_button:
 			//CONTINUE
-			OWValidatePassphraseDialogHandler handler = 
-			(OWValidatePassphraseDialogHandler) this.getActivity();
-
 			handler.handlePassphrasePositive(this.getTargetRequestCode(), 
 					this.getBytesFromEditText(R.id.textbox_passphrase), 
 					this.getArguments());

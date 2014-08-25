@@ -38,10 +38,10 @@ import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetails;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListItem;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
-import com.ziftr.android.onewallet.util.OWConverter;
 
 /**
  * This is the main activity of the OneWallet application. It handles
@@ -124,7 +124,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	X 25. Need to have all the fragments start fragments by routing through
 	the activity so that the activity can do more complicated things.
-	
+
 	o 26. BUG: sending 0 testnet coins to valid address throws IllegalStateException (actually might just be bitcoinj)
 
 	TODO Maybe we don't want to set up all the open wallets right from the get go? 
@@ -284,8 +284,12 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
 			super.onBackPressed();
 		} else {
-			OWMainFragmentActivity.this.showFragmentFromType(
-					FragmentType.ACCOUNT_FRAGMENT_TYPE);
+			ZLog.log("a");
+			if (!getSupportFragmentManager().popBackStackImmediate("account", 0)) {
+				ZLog.log("b");
+				OWMainFragmentActivity.this.showFragmentFromType(
+						FragmentType.ACCOUNT_FRAGMENT_TYPE);
+			}
 		}
 	}
 
@@ -323,7 +327,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			fragToShow = fragmentType.getNewFragment();
 		}
 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, false);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, null);
 	}
 
 	/**
@@ -333,7 +337,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param resId - The view id to show the new fragment in.
 	 */
 	private void showFragment(Fragment fragToShow, String tag, 
-			int resId, boolean addToBackStack) {
+			int resId, boolean addToBackStack, String backStackTag) {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = 
 				this.getSupportFragmentManager().beginTransaction();
@@ -346,7 +350,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		transaction.replace(resId, fragToShow, tag);
 		if (addToBackStack) {
-			transaction.addToBackStack(null);
+			transaction.addToBackStack(backStackTag);
 		}
 		transaction.commit();
 	}
@@ -420,9 +424,20 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			accountsMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
+					ZLog.log("accounts clicked from actionbar");
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
-					OWMainFragmentActivity.this.showFragmentFromType(
-							FragmentType.ACCOUNT_FRAGMENT_TYPE);
+					if (!FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(
+							OWMainFragmentActivity.this.getCurrentlySelectedDrawerMenuOption())) {
+
+						OWMainFragmentActivity.this.showFragmentFromType(
+								FragmentType.ACCOUNT_FRAGMENT_TYPE);
+
+					}
+					if (!getSupportFragmentManager().popBackStackImmediate("account", 0)) {
+						ZLog.log("asdf");
+						OWMainFragmentActivity.this.showFragmentFromType(
+								FragmentType.ACCOUNT_FRAGMENT_TYPE);
+					}
 				}
 			});
 
@@ -738,7 +753,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
 	}
 
 	/**
@@ -772,7 +787,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
 	}
 
 	/**
@@ -793,9 +808,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
 	}
-	
+
 	/**
 	 * Open the view for transaction details
 	 */
@@ -808,8 +823,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			if (TxItem == null) {
 				ZLog.log("NULL");
 			}
-			if (TxItem.getTxAmount() == null) {
-				ZLog.log("Null TxAmount");
+			if (TxItem.getTxAmount() == null){
+				ZLog.log("Null TxAmount, user pressed divider");
 				return;
 			}
 			data.putString("amount", TxItem.getTxAmount().toString());
@@ -820,7 +835,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			fragToShow = new OWTransactionDetails();
 			fragToShow.setArguments(data);
 		}
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
 	}
 
 	/**
