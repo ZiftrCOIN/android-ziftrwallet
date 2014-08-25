@@ -285,7 +285,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			super.onBackPressed();
 		} else {
 			ZLog.log("a");
-			if (!getSupportFragmentManager().popBackStackImmediate("account", 0)) {
+			if (!getSupportFragmentManager().popBackStackImmediate(
+					FragmentType.ACCOUNT_FRAGMENT_TYPE.toString(), 0)) {
 				ZLog.log("b");
 				OWMainFragmentActivity.this.showFragmentFromType(
 						FragmentType.ACCOUNT_FRAGMENT_TYPE);
@@ -327,7 +328,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			fragToShow = fragmentType.getNewFragment();
 		}
 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, null);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, fragmentType.toString());
 	}
 
 	/**
@@ -426,14 +427,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				public void onClick(View clickedView) {
 					ZLog.log("accounts clicked from actionbar");
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
-					if (!FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(
-							OWMainFragmentActivity.this.getCurrentlySelectedDrawerMenuOption())) {
-
-						OWMainFragmentActivity.this.showFragmentFromType(
-								FragmentType.ACCOUNT_FRAGMENT_TYPE);
-
-					}
-					if (!getSupportFragmentManager().popBackStackImmediate("account", 0)) {
+					//					if (!FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(
+					//							OWMainFragmentActivity.this.getCurrentlySelectedDrawerMenuOption())) {
+					//
+					//						OWMainFragmentActivity.this.showFragmentFromType(
+					//								FragmentType.ACCOUNT_FRAGMENT_TYPE);
+					//
+					//					}
+					if (!getSupportFragmentManager().popBackStackImmediate(
+							FragmentType.ACCOUNT_FRAGMENT_TYPE.toString(), 0)) {
 						ZLog.log("asdf");
 						OWMainFragmentActivity.this.showFragmentFromType(
 								FragmentType.ACCOUNT_FRAGMENT_TYPE);
@@ -753,7 +755,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 	}
 
 	/**
@@ -787,7 +789,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 	}
 
 	/**
@@ -808,7 +810,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 	}
 
 	/**
@@ -823,19 +825,21 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			if (TxItem == null) {
 				ZLog.log("NULL");
 			}
-			if (TxItem.getTxAmount() == null){
+			if (TxItem.getTxAmount() == null) {
 				ZLog.log("Null TxAmount, user pressed divider");
 				return;
 			}
 			data.putString("amount", TxItem.getTxAmount().toString());
-			data.putString("currencyval", OWConverter.convert(TxItem.getTxAmount(), TxItem.getCoinId(), TxItem.getFiatType()).toString());
+			data.putString("currencyval", OWConverter.convert(
+					TxItem.getTxAmount(), TxItem.getCoinId(), TxItem.getFiatType()).toString());
 			data.putString("date", TxItem.getTxTime());
 			data.putString("currencytype", TxItem.getFiatType().getName());
 			data.putBoolean("pending", TxItem.isPending());
 			fragToShow = new OWTransactionDetails();
 			fragToShow.setArguments(data);
 		}
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, "account");
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, 
+				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 	}
 
 	/**

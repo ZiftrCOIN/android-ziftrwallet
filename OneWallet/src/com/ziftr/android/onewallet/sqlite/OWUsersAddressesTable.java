@@ -1,6 +1,7 @@
 package com.ziftr.android.onewallet.sqlite;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.onewallet.crypto.ECKey;
@@ -90,6 +91,10 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 		
 		long insertId = database.insert(getAddressesTableNameString(coinId), null, values);
 		key.setId(insertId);
+	}
+	
+	public static Cursor getAllUserAddresses(OWCoin.Type coinId, SQLiteDatabase database) {
+		return database.query(getAddressesTableNameString(coinId), null, null, null, null, null, null);
 	}
 
 }

@@ -41,10 +41,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @return
 	 */
-	public Cursor getAllUsersAddresses() {
-		Cursor cursor = database.query(MySQLiteHelper.TABLE_COMMENTS,
-				allColumns, MySQLiteHelper.COLUMN_ID + " = " + insertId, null,
-				null, null, null);
+	public Cursor getAllUsersAddresses(OWCoin.Type coinId) {
+		Cursor cursor = OWUsersAddressesTable.getAllUserAddresses(coinId, this.getReadableDatabase());
 		cursor.moveToFirst();
 		return cursor;
 	}
