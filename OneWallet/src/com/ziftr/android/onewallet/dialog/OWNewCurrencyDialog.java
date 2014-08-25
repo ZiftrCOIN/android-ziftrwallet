@@ -85,8 +85,8 @@ public class OWNewCurrencyDialog extends OWDialogFragment{
 		this.initDialogFields();
 		builder.setView(this.getDialogView());
 		
-		Button select = (Button) this.getDialogView().findViewById(R.id.dialog_button2);
-		Button cancel = (Button) this.getDialogView().findViewById(R.id.dialog_button1);
+		Button select = (Button) this.getDialogView().findViewById(R.id.right_dialog_button);
+		Button cancel = (Button) this.getDialogView().findViewById(R.id.left_dialog_button);
 		cancel.setOnClickListener(this);
 		select.setOnClickListener(this);
 				
@@ -110,12 +110,12 @@ public class OWNewCurrencyDialog extends OWDialogFragment{
 				(OWNewCurrencyDialogHandler) getHandler();
 
 		switch(view.getId()){
-			case R.id.dialog_button1:
+			case R.id.left_dialog_button:
 				//CANCEL
 				handler.handleNegative(this.getTargetRequestCode());
 				this.dismiss();
 				break;
-			case R.id.dialog_button2:
+			case R.id.right_dialog_button:
 				//SELECT
 				if (this.currSelectedCoinType!=null){
 					ZLog.log("curSelectedCoinType was NOT null. ");

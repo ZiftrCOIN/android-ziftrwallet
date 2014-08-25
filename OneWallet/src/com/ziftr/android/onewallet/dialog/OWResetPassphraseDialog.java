@@ -68,8 +68,13 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 		return builder.create();
 	}
 	
-	public void onClick(View view){
-		//TODO
+	/**
+	 * Handle clicks on this dialog.
+	 */
+	@Override
+	public void onClick(View view) {
+		// TODO
+		// Isn't the below method still corect?
 	}
 
 	/**
@@ -79,7 +84,7 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
 		OWResetPassphraseDialogHandler handler = 
-				(OWResetPassphraseDialogHandler) this.getActivity();
+				(OWResetPassphraseDialogHandler) this.getHandler();
 
 		if (which == DialogInterface.BUTTON_POSITIVE) {
 			// Have the handler handle the data

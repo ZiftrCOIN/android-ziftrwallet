@@ -814,13 +814,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Open the view for transaction details
 	 */
-	public void openTxnDetails(OWWalletTransactionListItem TxItem){
+	public void openTxnDetails(OWWalletTransactionListItem TxItem) {
 
 		String tag = "txn_details_fragment";
-		OWTransactionDetails fragToShow = (OWTransactionDetails)this.getSupportFragmentManager().findFragmentByTag(tag);
+		OWTransactionDetails fragToShow = (OWTransactionDetails) this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
 			Bundle data = new Bundle();
-			if (TxItem == null){
+			if (TxItem == null) {
 				ZLog.log("NULL");
 			}
 			if (TxItem.getTxAmount() == null){

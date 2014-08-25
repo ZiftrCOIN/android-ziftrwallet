@@ -36,7 +36,7 @@ public class OWSimpleAlertDialog extends OWDialogFragment {
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(R.layout.dialog_default, null));
 		this.initDialogFields();
 		builder.setView(this.getDialogView());
-		Button okbutton = (Button) this.getDialogView().findViewById(R.id.dialog_button1);
+		Button okbutton = (Button) this.getDialogView().findViewById(R.id.left_dialog_button);
 		okbutton.setOnClickListener(this);
 		
 		return builder.create();
@@ -44,7 +44,7 @@ public class OWSimpleAlertDialog extends OWDialogFragment {
 	
 	public void onClick(View view){
 		switch(view.getId()){
-			case R.id.dialog_button1:
+			case R.id.left_dialog_button:
 				//CANCEL
 				this.dismiss();
 				break;
