@@ -6,11 +6,11 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.GridView;
 
 import com.ziftr.android.onewallet.R;
@@ -23,7 +23,7 @@ import com.ziftr.android.onewallet.util.ZLog;
 /**
  * Dialogs where the app requests to get a new currency to add.
  */
-public class OWNewCurrencyDialog extends OWDialogFragment {
+public class OWNewCurrencyDialog extends OWDialogFragment{
 
 	/** We only want to show the coins that the user doesn't already have a wallet for. */
 	private List<OWCoin.Type> coinsToShowInDialog;
@@ -82,8 +82,14 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
 				R.layout.dialog_get_new_currency, null));
+		this.initDialogFields();
 		builder.setView(this.getDialogView());
-
+		
+		Button select = (Button) this.getDialogView().findViewById(R.id.dialog_button2);
+		Button cancel = (Button) this.getDialogView().findViewById(R.id.dialog_button1);
+		cancel.setOnClickListener(this);
+		select.setOnClickListener(this);
+				
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(SELECTED_CURRENCY_KEY) != null) {
 				this.currSelectedCoinType = OWCoin.Type.valueOf(
@@ -95,27 +101,29 @@ public class OWNewCurrencyDialog extends OWDialogFragment {
 
 		return builder.create();
 	}
-
+	
 	/**
-	 * Handle clicks on this dialog. 
+	 * Handle button clicks
 	 */
-	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		// Might be null if user doesn't hit anything.
-		if (this.currSelectedCoinType != null) {
-			ZLog.log("curSelectedCoinType was NOT null. ");
-			OWNewCurrencyDialogHandler handler = 
-					(OWNewCurrencyDialogHandler) getHandler();
-			if (which == DialogInterface.BUTTON_POSITIVE) {
-				handler.handleNewCurrencyPositive(this.getTargetRequestCode(), 
-						this.currSelectedCoinType);
-			} else if (which == DialogInterface.BUTTON_NEGATIVE) {
-				handler.handleNegative(this.getTargetRequestCode());
-			} else {
-				ZLog.log("These dialogs shouldn't have neutral buttons.");
-			}
+	public void onClick(View view){
+		switch(view.getId()){
+			case R.id.dialog_button1:
+				//CANCEL
+				this.dismiss();
+				break;
+			case R.id.dialog_button2:
+				//SELECT
+				if (this.currSelectedCoinType!=null){
+					ZLog.log("curSelectedCoinType was NOT null. ");
+					OWNewCurrencyDialogHandler handler = 
+							(OWNewCurrencyDialogHandler) getHandler();
+					handler.handleNewCurrencyPositive(this.getTargetRequestCode(), 
+							this.currSelectedCoinType);
+					this.dismiss();
+				}
 		}
 	}
+
 
 	@Override
 	protected Object getHandler() {

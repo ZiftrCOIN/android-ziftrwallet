@@ -34,11 +34,14 @@ import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetails;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListItem;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.OWConverter;
 
 /**
  * This is the main activity of the OneWallet application. It handles
@@ -121,6 +124,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	X 25. Need to have all the fragments start fragments by routing through
 	the activity so that the activity can do more complicated things.
+	
+	o 26. BUG: sending 0 testnet coins to valid address throws IllegalStateException (actually might just be bitcoinj)
 
 	TODO Maybe we don't want to set up all the open wallets right from the get go? 
 	But we need to get the balance...
@@ -332,7 +337,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = 
 				this.getSupportFragmentManager().beginTransaction();
-
 		// TODO add animation to transaciton here
 
 		if (fragToShow.isVisible()) {
@@ -789,6 +793,33 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
+	}
+	
+	/**
+	 * Open the view for transaction details
+	 */
+	public void openTxnDetails(OWWalletTransactionListItem TxItem){
+
+		String tag = "txn_details_fragment";
+		OWTransactionDetails fragToShow = (OWTransactionDetails)this.getSupportFragmentManager().findFragmentByTag(tag);
+		if (fragToShow == null) {
+			Bundle data = new Bundle();
+			if (TxItem == null){
+				ZLog.log("NULL");
+			}
+			if (TxItem.getTxAmount() == null){
+				ZLog.log("Null TxAmount");
+				return;
+			}
+			data.putString("amount", TxItem.getTxAmount().toString());
+			data.putString("currencyval", OWConverter.convert(TxItem.getTxAmount(), TxItem.getCoinId(), TxItem.getFiatType()).toString());
+			data.putString("date", TxItem.getTxTime());
+			data.putString("currencytype", TxItem.getFiatType().getName());
+			data.putBoolean("pending", TxItem.isPending());
+			fragToShow = new OWTransactionDetails();
+			fragToShow.setArguments(data);
+		}
 		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true);
 	}
 

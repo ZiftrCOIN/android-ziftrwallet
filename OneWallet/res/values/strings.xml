@@ -73,7 +73,7 @@
     <string name="ow_receive_coins_address_name_box_title">ADDRESS NAME</string>
     <!-- Description here -->
     <string name="ow_receive_coins_address_value_box_title">ADDRESS</string>
-	<!-- Description here -->
+    <!-- Description here -->
     <string name="ow_receive_coins_address_value_default">1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU</string>
     <string name="ow_tx_details_pending_label">(Pending)</string>
     <string name="ow_tx_details_amount_sent_label">Amount Sent</string>
@@ -83,5 +83,9 @@
     <string name="ow_tx_details_routing_address_name">Routing Address Name</string>
     <string name="ow_tx_details_routing_address_label">Routing Address</string>
     <string name="ow_tx_details_sent">Sent</string>
-    
+    <string name="ow_ok">OK</string>
+    <string name="ow_dialog_cancel">Cancel</string>
+    <string name="ow_dialog_select">Select</string>
+    <string name="ow_dialog_continue">Continue</string>
+
 </resources>

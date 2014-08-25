@@ -3,16 +3,18 @@ package com.ziftr.android.onewallet.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.util.ZLog;
 
-public abstract class OWDialogFragment extends DialogFragment implements OnClickListener {
+
+public abstract class OWDialogFragment extends DialogFragment implements View.OnClickListener {
 
 	/** The title of the dialog. */
 	protected String title;
@@ -24,7 +26,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	protected String neutralButtonText;
 	/** The negative button's text. */
 	protected String negativeButtonText;
-	
+
 	/** The key to save the Dialog's title text in the bundle. */
 	private static final String TITLE_KEY = "title";
 	/** The key to save the Dialog's message text in the bundle. */
@@ -35,10 +37,10 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	private static final String NEUTRAL_BUTTON_TEXT_KEY = "neutral";
 	/** The key to save the negative button text in the bundle. */
 	private static final String NEGATIVE_BUTTON_TEXT_KEY = "negative";
-	
+
 	/** The view for this dialog. */
 	private View dialogView;
-
+	
 	/**
 	 * Set's up a basic dialog with all of its content.
 	 * 
@@ -55,7 +57,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 		this.neutralButtonText = neuButtonText;
 		this.negativeButtonText = negButtonText;
 	}
-	
+
 	/**
 	 * Creates and returns the dialog to show the user.
 	 * Sets all the basic text fields that all dialogs have 
@@ -95,25 +97,29 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 						NEGATIVE_BUTTON_TEXT_KEY);
 			}
 		}
-		
+
 		AlertDialog.Builder builder = 
-				new AlertDialog.Builder(new ContextThemeWrapper(this.getActivity(), R.style.ow_dialog));
-		
-		builder.setTitle(title);
-		if (message != null) {
-			builder.setMessage(message);
-		}
-		if (positiveButtonText != null) {
-			builder.setPositiveButton(positiveButtonText, this);
-		}
-		if (neutralButtonText != null) {
-			builder.setNeutralButton(this.neutralButtonText, this);
-		}
-		if (negativeButtonText != null) {
-			builder.setNegativeButton(negativeButtonText, this);
-		}
+				new AlertDialog.Builder(new ContextThemeWrapper(this.getActivity(), R.style.ow_dialog_theme));
+
 		return builder;
 	}
+	/**
+	 * Method to set the title and message text fields for the dialogs.
+	 */
+	public void initDialogFields(){
+		View view = this.getDialogView();
+		//setTitle
+		TextView titlefield = (TextView) view.findViewById(R.id.dialog_title);
+		titlefield.setText(this.title);
+		//setMessage
+		if (this.message != null){
+			ZLog.log(this.message);
+			TextView messagefield = (TextView) view.findViewById(R.id.dialog_message);
+			messagefield.setText(this.message);
+		}
+
+	}	
+	
 	
 	/**
 	 * When we save the instance, we put the four basic text fields
@@ -127,10 +133,10 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 		outState.putString(POSITIVE_BUTTON_TEXT_KEY, this.positiveButtonText);
 		outState.putString(NEUTRAL_BUTTON_TEXT_KEY, this.neutralButtonText);
 		outState.putString(NEGATIVE_BUTTON_TEXT_KEY, this.negativeButtonText);
-		
+
 		super.onSaveInstanceState(outState);
 	}
-	
+
 	/**
 	 * @return the dialogView
 	 */
@@ -144,7 +150,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	public void setDialogView(View dialogView) {
 		this.dialogView = dialogView;
 	}
-	
+
 	/**
 	 * If this is a dialog that is specific to a particular fragment, then we
 	 * return this.getTargetFragment();
@@ -154,7 +160,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 	 * @return
 	 */
 	protected abstract Object getHandler();
-	
+
 	/**
 	 * OWDialogs must have their own respective handlers. When
 	 * the activity is attached, this method should be called in
@@ -170,7 +176,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 					" to be able to use this kind of dialog.");
 		}
 	}
-	
+
 	/**
 	 * Sets a specified EditText to have the string setVal in it's 
 	 * writable field. 
@@ -185,7 +191,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 		EditText textBox = (EditText) this.getDialogView().findViewById(id);
 		textBox.setText(setVal);
 	}
-	
+
 	/**
 	 * Given a resource id, this method finds the correpsonding
 	 * view and then gets the text from from that view, returning 
@@ -200,7 +206,7 @@ public abstract class OWDialogFragment extends DialogFragment implements OnClick
 		EditText textBox = (EditText) this.getDialogView().findViewById(id);
 		return textBox.getText().toString();
 	}
-	
+
 	/**
 	 * Given a resource id, this method finds the correpsonding
 	 * view and then gets the text from from that view, returning 

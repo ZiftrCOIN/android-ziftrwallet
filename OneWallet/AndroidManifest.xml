@@ -58,7 +58,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.ziftr.android.onewallet.OWMainFragmentActivity" >
+            android:name="com.ziftr.android.onewallet.OWMainFragmentActivity">
         </activity>
         <activity
             android:name="com.google.zxing.client.android.CaptureActivity"
