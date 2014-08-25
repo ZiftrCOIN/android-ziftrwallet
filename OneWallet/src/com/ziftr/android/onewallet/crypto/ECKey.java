@@ -102,7 +102,7 @@ public class ECKey {
 	/**
 	 * The id for storage in an sqlite table. 
 	 */
-	private int id;
+	private long id;
 
 	/**
 	 * If "priv" is set, "pub" can always be calculated. If "pub" is set but not "priv", we
@@ -890,14 +890,14 @@ public class ECKey {
 	/**
 	 * @return the id
 	 */
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 

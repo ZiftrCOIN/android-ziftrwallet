@@ -1,14 +1,12 @@
 package com.ziftr.android.onewallet.sqlite;
 
-import android.content.Context;
-
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoin.Type;
 
-public class OWBitcoinTestnetUsersAddressesSQLiteHelper extends OWUsersAddressesSQLiteHelper {
+public class OWBitcoinTestnetUsersAddressesSQLiteHelper extends OWUsersAddressesTable {
 
-	public OWBitcoinTestnetUsersAddressesSQLiteHelper(Context context) {
-		super(context);
+	public OWBitcoinTestnetUsersAddressesSQLiteHelper() {
+		super();
 	}
 
 	@Override

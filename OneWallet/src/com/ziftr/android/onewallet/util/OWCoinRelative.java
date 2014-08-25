@@ -7,6 +7,6 @@ public interface OWCoinRelative {
 	 * 
 	 * @return OWCoin.Type.BTC for Bitcoin, OWCoin.Type.LTC for Litecoin, etc.
 	 */
-	public abstract OWCoin.Type getCoinId();
+	public OWCoin.Type getCoinId();
 	
 }
