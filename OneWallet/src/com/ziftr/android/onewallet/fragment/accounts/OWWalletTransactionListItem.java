@@ -155,12 +155,12 @@ public class OWWalletTransactionListItem {
 	public void setResId(int resId) {
 		this.resId = resId;
 	}
+	
 	/**
-	 * 
 	 * @return True if this transaction type is pending
 	 */
-	public Boolean isPending(){
-		return this.txType.name() == "PendingTransaction";
+	public Boolean isPending() {
+		return this.txType == Type.PendingTransaction;
 	}
 
 }

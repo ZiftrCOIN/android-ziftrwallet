@@ -22,7 +22,7 @@
         android:showDividers="beginning" >
 
         <Button
-            android:id="@+id/dialog_button1"
+            android:id="@+id/left_dialog_button"
             style="@style/dialog_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

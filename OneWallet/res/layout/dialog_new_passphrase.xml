@@ -27,7 +27,7 @@
         android:showDividers="middle" >
 
         <Button
-            android:id="@+id/dialog_button1"
+            android:id="@+id/left_dialog_button"
             style="@style/dialog_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -40,7 +40,7 @@
         </Button>
 
         <Button
-            android:id="@+id/dialog_button2"
+            android:id="@+id/right_dialog_button"
             style="@style/dialog_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
