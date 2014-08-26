@@ -109,7 +109,8 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 				byte[] privKeyBytes = OWUtils.hexStringToBinary(privKeyHex);
 				ECKey newKey = new ECKey(new BigInteger(privKeyBytes));
 
-				// Reset all the keys parameters for use elsewhere 
+				// Reset all the keys parameters for use elsewhere
+				newKey.setAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
 				newKey.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
 				newKey.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
 				newKey.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
