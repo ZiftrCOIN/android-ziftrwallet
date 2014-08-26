@@ -35,7 +35,7 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 	 * The address column. This is the encoded public key, along with coin type
 	 * byte and double hash checksum.
 	 */
-//	public static final String COLUMN_ADDRESS = "address";
+	public static final String COLUMN_ADDRESS = "address";
 
 	/** The note column. This is for users to keep a string attached to an address. */
 	public static final String COLUMN_NOTE = "note";
@@ -65,7 +65,7 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 				COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 				COLUMN_PRIV_KEY + " TEXT NOT NULL, " + 
 				COLUMN_PUB_KEY + " TEXT NOT NULL, " +
-//				COLUMN_ADDRESS + " TEXT NOT NULL, " + 
+				COLUMN_ADDRESS + " TEXT NOT NULL, " + 
 				COLUMN_NOTE + " TEXT, " + 
 				COLUMN_BALANCE + " INTEGER, " +
 				COLUMN_CREATION_TIMESTAMP + " INTEGER, " +

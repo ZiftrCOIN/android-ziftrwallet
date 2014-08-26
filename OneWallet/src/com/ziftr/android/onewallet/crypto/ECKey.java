@@ -114,6 +114,11 @@ public class ECKey {
 	 * The public key for this ECKey.
 	 */
 	private byte[] pub;
+	
+	/**
+	 * The address for this key.
+	 */
+	private String address;
 
 	/**
 	 * The note that the user has applied to this given address. 
@@ -899,6 +904,20 @@ public class ECKey {
 	 */
 	public void setId(long id) {
 		this.id = id;
+	}
+	
+	/**
+	 * @return the address
+	 */
+	public String getAddress() {
+		return address;
+	}
+
+	/**
+	 * @param address the address to set
+	 */
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	/**
