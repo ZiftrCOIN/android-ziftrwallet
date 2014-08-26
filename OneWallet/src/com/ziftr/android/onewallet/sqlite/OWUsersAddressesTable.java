@@ -1,5 +1,9 @@
 package com.ziftr.android.onewallet.sqlite;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,6 +20,9 @@ import com.ziftr.android.onewallet.util.OWUtils;
  */
 public abstract class OWUsersAddressesTable implements OWCoinRelative {
 
+	/** The postfix that assists in making the names for the users addresses table. */
+	private static final String TABLE_POSTFIX = "_users_addresses";
+
 	/** The id column. All Tables must have this to work well with adapters. */
 	public static final String COLUMN_ID = "_id";
 
@@ -29,7 +36,7 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 	 * The address column. This is the encoded public key, along with coin type
 	 * byte and double hash checksum.
 	 */
-	public static final String COLUMN_ADDRESS = "address";
+//	public static final String COLUMN_ADDRESS = "address";
 
 	/** The note column. This is for users to keep a string attached to an address. */
 	public static final String COLUMN_NOTE = "note";
@@ -54,47 +61,67 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 	 */
 	public static final String COLUMN_MODIFIED_TIMESTAMP = "time";
 
-	public static String getCreateTableString(OWCoin.Type coinId) {
-		return "CREATE TABLE IF NOT EXISTS " + coinId.toString() + "_users_addresses" + " (" + 
+	protected static String getCreateTableString(OWCoin.Type coinId) {
+		return "CREATE TABLE IF NOT EXISTS " + getAddressesTableNameString(coinId) + " (" + 
 				COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 				COLUMN_PRIV_KEY + " TEXT NOT NULL, " + 
 				COLUMN_PUB_KEY + " TEXT NOT NULL, " +
-				COLUMN_ADDRESS + " TEXT NOT NULL, " + 
+//				COLUMN_ADDRESS + " TEXT NOT NULL, " + 
 				COLUMN_NOTE + " TEXT, " + 
 				COLUMN_BALANCE + " INTEGER, " +
 				COLUMN_CREATION_TIMESTAMP + " INTEGER, " +
 				COLUMN_MODIFIED_TIMESTAMP + " INTEGER );";
 	}
-	
-	public static String getAddressesTableNameString(OWCoin.Type coinId) {
-		return coinId + "_users_addresses";
-	}
-	
-	public static void onUpgrade(OWCoin.Type coinId, SQLiteDatabase db, int oldVersion, int newVersion) {
-		// Used for porting old versions of an app to a newer version and retaining
-		// the data in the old database even when the format of the new database
-		// changes.
 
-		//db.execSQL("DROP TABLE IF EXISTS " + USER_ADDRESSES_TABLE + ";");
-		//db.execSQL(CREATE_TABLE);
+	protected static String getAddressesTableNameString(OWCoin.Type coinId) {
+		return coinId.toString() + TABLE_POSTFIX;
 	}
-	
-	public static void insert(OWCoin.Type coinId, ECKey key, SQLiteDatabase database) {
+
+	protected static void insert(OWCoin.Type coinId, ECKey key, SQLiteDatabase db) {
+		if (key.getPrivKeyBytes() == null) {
+			throw new IllegalArgumentException("Must have access to private key to insert. ");
+		}
+		
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_PRIV_KEY, OWUtils.binaryToHexString(key.getPrivKeyBytes()));
 		values.put(COLUMN_PUB_KEY, OWUtils.binaryToHexString(key.getPubKey()));
-		values.put(COLUMN_ADDRESS, Base58.encode(coinId.getPubKeyHashPrefix(), key.getPubKey()));
+//		values.put(COLUMN_ADDRESS, Base58.encode(coinId.getPubKeyHashPrefix(), key.getPubKeyHash()));
 		values.put(COLUMN_NOTE, key.getNote());
 		values.put(COLUMN_BALANCE, key.getLastKnownBalance());
 		values.put(COLUMN_CREATION_TIMESTAMP, key.getCreationTimeSeconds());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, key.getLastTimeModifiedSeconds());
-		
-		long insertId = database.insert(getAddressesTableNameString(coinId), null, values);
+
+		long insertId = db.insert(getAddressesTableNameString(coinId), null, values);
 		key.setId(insertId);
 	}
 	
-	public static Cursor getAllUserAddresses(OWCoin.Type coinId, SQLiteDatabase database) {
-		return database.query(getAddressesTableNameString(coinId), null, null, null, null, null, null);
+	protected static List<ECKey> read(OWCoin.Type coinId, SQLiteDatabase db) {
+		List<ECKey> keys = new ArrayList<ECKey>();
+		
+		String selectQuery = "SELECT * FROM " + getAddressesTableNameString(coinId) + ";";
+		Cursor c = db.rawQuery(selectQuery, null);
+		
+		// Move to first returns false if cursor is empty
+		if (c.moveToFirst()) {
+			do {
+				// Recreate key from stored private key
+				// TODO deal with encryption of private key
+				String privKeyHex = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
+				byte[] privKeyBytes = OWUtils.hexStringToBinary(privKeyHex);
+				ECKey newKey = new ECKey(new BigInteger(privKeyBytes));
+
+				// Reset all the keys parameters for use elsewhere 
+				newKey.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
+				newKey.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
+				newKey.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+				newKey.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
+				
+				// Add the new key to the list
+				keys.add(newKey);
+	        } while (c.moveToNext());
+		}
+
+		return keys;
 	}
 
 }
