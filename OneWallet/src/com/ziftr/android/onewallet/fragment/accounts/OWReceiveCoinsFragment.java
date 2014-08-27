@@ -43,6 +43,13 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		
 		return this.rootView;
 	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		this.getOWMainActivity().editTitle("RECEIVE");
+	}
+
 
 	private void initializeAddress() {
 		TextView addressTextView = (TextView) 

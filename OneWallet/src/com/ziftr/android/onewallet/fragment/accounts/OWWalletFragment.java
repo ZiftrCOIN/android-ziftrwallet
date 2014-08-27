@@ -60,6 +60,12 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 		super.onCreate(savedInstanceState);
 	}
 
+	@Override
+	public void onResume(){
+		super.onResume();
+		this.getOWMainActivity().editTitle("ACCOUNT");
+	}
+
 	/**
 	 * When the view is created, we must initialize the header, the list
 	 * view with all of the transactions in it, and the buttons at the
@@ -174,7 +180,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 				this.rootView.findViewById(R.id.txListView);
 		this.txListView.setAdapter(new OWWalletTransactionListAdapter(
 				this.getActivity(), this.txList));
-		
+
 		/**
 		 *  Opens transactions details fragment by calling openTxnDetails in MainActivity, passing
 		 *  the txnItem when user clicks a txn list item.
@@ -187,7 +193,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 						txListView.getItemAtPosition(position);
 				OWMainFragmentActivity mActivity = 
 						(OWMainFragmentActivity) getActivity();
-				
+
 				mActivity.openTxnDetails(txItem);
 			}
 		});
