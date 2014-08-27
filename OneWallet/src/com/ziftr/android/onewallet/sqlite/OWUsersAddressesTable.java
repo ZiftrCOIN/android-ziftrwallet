@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.onewallet.crypto.ECKey;
+import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -16,6 +17,8 @@ import com.ziftr.android.onewallet.util.OWUtils;
 
 /**
  * Make one table accessing class per coin type. Could those all subclass 
+ * 
+ * TODO should have a method that inserts a new key and returns the key.
  */
 public abstract class OWUsersAddressesTable implements OWCoinRelative {
 
@@ -84,7 +87,7 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_PRIV_KEY, OWUtils.binaryToHexString(key.getPrivKeyBytes()));
 		values.put(COLUMN_PUB_KEY, OWUtils.binaryToHexString(key.getPubKey()));
-//		values.put(COLUMN_ADDRESS, Base58.encode(coinId.getPubKeyHashPrefix(), key.getPubKeyHash()));
+		values.put(COLUMN_ADDRESS, Base58.encode(coinId.getPubKeyHashPrefix(), key.getPubKeyHash()));
 		values.put(COLUMN_NOTE, key.getNote());
 		values.put(COLUMN_BALANCE, key.getLastKnownBalance());
 		values.put(COLUMN_CREATION_TIMESTAMP, key.getCreationTimeSeconds());
