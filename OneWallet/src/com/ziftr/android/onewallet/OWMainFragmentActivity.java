@@ -447,6 +447,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 							FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER", 0)) {
 						OWMainFragmentActivity.this.showFragmentFromType(
 								FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
+						OWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
 					}
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 				}

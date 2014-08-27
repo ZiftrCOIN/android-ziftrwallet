@@ -44,8 +44,6 @@
     </style>
 
     <!-- dialog styles -->
-    <style name="ow_dialog_theme"></style>
-
     <style name="dialog_title_text" parent="@android:style/TextAppearance.DialogWindowTitle">
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">@color/White</item>
