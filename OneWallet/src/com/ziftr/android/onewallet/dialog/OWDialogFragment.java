@@ -99,7 +99,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		}
 
 		AlertDialog.Builder builder = 
-				new AlertDialog.Builder(new ContextThemeWrapper(this.getActivity(), R.style.ow_dialog_theme));
+				new AlertDialog.Builder(this.getActivity());
 
 		return builder;
 	}
