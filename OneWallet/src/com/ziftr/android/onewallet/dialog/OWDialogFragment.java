@@ -3,12 +3,14 @@ package com.ziftr.android.onewallet.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -39,7 +41,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 
 	/** The view for this dialog. */
 	private View dialogView;
-	
+
 	/**
 	 * Set's up a basic dialog with all of its content.
 	 * 
@@ -118,8 +120,8 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		}
 
 	}	
-	
-	
+
+
 	/**
 	 * When we save the instance, we put the four basic text fields
 	 * in the bundle.
@@ -218,6 +220,18 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	 */
 	protected byte[] getBytesFromEditText(int id) {
 		return this.getStringFromEditText(id).getBytes();
+	}
+
+	@Override
+	public void onStart(){
+		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(true);
+		super.onStart();
+	}
+
+	@Override
+	public void onDetach(){
+		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(false);
+		super.onDetach();
 	}
 
 }

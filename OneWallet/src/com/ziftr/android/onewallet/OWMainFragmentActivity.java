@@ -155,6 +155,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** The key for getting the passphrase hash from the preferences. */
 	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
 
+	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
+	private boolean showingDialog = false;
+
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -255,7 +258,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		
+
 		//setup actionbar menu
 		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 		menuButton.setOnClickListener(new OnClickListener() {
@@ -264,7 +267,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			public void onClick(View v) {
 				onActionBarMenuIconClicked();		
 			}
-			
+
 		});
 
 		// Make sure the icon matches the current open/close state
@@ -764,7 +767,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			// TODO make a create new passphrase dialog
 			String message = "Please input your passphrase. ";
 
-			passphraseDialog.setupDialog("OneWallet", message, 
+			passphraseDialog.setupDialog("ziftrWALLET", message, 
 					"Continue", null, "Cancel");
 			passphraseDialog.show(this.getSupportFragmentManager(), tag);
 		}
@@ -936,7 +939,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		alertUserDialog.setTargetFragment(null, OWRequestCodes.ALERT_USER_DIALOG);
 
 		// Set negative text to null to not have negative button
-		alertUserDialog.setupDialog("OneWallet", message, null, "OK", null);
+		alertUserDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
 		alertUserDialog.show(this.getSupportFragmentManager(), tag);
 	}
 
@@ -960,7 +963,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	public void handlePassphrasePositive(int requestCode, 
 			byte[] passphrase, Bundle info) {
-
 		switch(requestCode) {
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG:
 			byte[] inputHash = OWUtils.Sha256Hash(passphrase);
@@ -1018,9 +1020,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public void handleNeutral(int requestCode) {
 		switch(requestCode) {
 		case OWRequestCodes.ALERT_USER_DIALOG:
-			// Nothing to do 
 			break;
 		}
 	}
 
+	public void setshowingDialog(boolean showing){
+		this.showingDialog = showing;
+	}
+
+	public boolean showingDialog(){
+		return this.showingDialog;
+	}
 }
