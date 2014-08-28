@@ -31,6 +31,10 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
+		// TODO add a pivotal ticket for ellipsis bug
+		// also add a pivotal ticket for generating compressed keys - 3
+		// adding new keys to the database - 2
+		// do a feature request for a share button
 
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
 
