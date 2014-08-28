@@ -8,9 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ziftr.android.onewallet.crypto.ECKey;
-import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -100,6 +98,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	///////////////////////////////////////////////////////
 
 	private OWSQLiteOpenHelper(Context context) {
+		// If the database path is null then an in memory database is used
 		super(context, databasePath, null, DATABASE_VERSION);
 	}
 
