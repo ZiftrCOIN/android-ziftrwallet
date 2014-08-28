@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.ziftr.android.onewallet.R;
 
 
-public class OWExchangeFragment extends OWSectionFragment {
+public class OWExchangeFragment extends OWFragment {
 	
 	/**
 	 * Load the view.
@@ -18,5 +18,10 @@ public class OWExchangeFragment extends OWSectionFragment {
 			ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.section_exchange_layout, container, false);
 	}
+	public void onResume(){
+		super.onResume();
+		this.getOWMainActivity().editTitle("EXCHANGE");
+	}
+
 	
 }

@@ -1,44 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:resauto="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navBarLayout"
     android:layout_width="match_parent"
-    android:layout_height="10dp"
-    android:background="@color/ow_action_bar_color"
-    android:gravity="left"
-    android:orientation="horizontal" >
+    android:layout_height="match_parent"
+    android:background="@color/ow_action_bar_color" >
 
-    <menu>
-
-        <item
-            android:id="@+id/switchTaskMenuButton"
-            android:icon="@drawable/icon_menu_statelist"
-            resauto:showAsAction="always"/>
-    </menu>
-
-    <!--
     <ImageView
         android:id="@+id/switchTaskMenuButton"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="4dp"
-        android:scaleType="fitCenter"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+		android:padding="10dp"
+		android:clickable="true"
+        android:layout_alignParentLeft="true"
         android:src="@drawable/icon_menu_statelist" />
 
-    
-    <TextView 
-        android:id="@+id/oneWalletLogo"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/actionBarTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:adjustViewBounds="true"
+        android:layout_centerInParent="true"
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
-        android:text="@string/app_name"
-        
-        
-        android:adjustViewBounds="true"
-        />
-    -->
+        android:textSize="24dp"
+        android:text="@string/ow_app_name"
+        android:textColor="@color/ow_menu_default" />
 
-</LinearLayout>
+</RelativeLayout>

@@ -84,6 +84,13 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 		return this.rootView;
 	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		this.getOWMainActivity().editTitle("SEND");
+	}
+
 
 	/** 
 	 * When a barcode is scanned we change the text of the 

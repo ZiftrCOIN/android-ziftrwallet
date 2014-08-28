@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.dialog.OWValidatePassphraseDialog;
@@ -137,9 +140,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
 
-	/** The menu for our app. */
-	private Menu actionBarMenu;
-
 	/** Use this key to save which section of the drawer menu is open. */
 	private final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
 
@@ -236,12 +236,17 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Recreate wallet manager
 		this.walletManager = new OWWalletManager(this);
 
+		//setup actionbar
+		ActionBar actionbar = this.getActionBar();
+		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		actionbar.setCustomView(R.layout._app_header_bar);
+		this.editTitle("ziftrWALLET");
+
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
 
 		// Make sure the base fragment view is initialized
 		this.initizalizeBaseFragmentView(savedInstanceState);
-
 	}
 
 	/**
@@ -250,9 +255,17 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		this.getMenuInflater().inflate(R.menu.ow_action_bar_menu, menu);
-		this.actionBarMenu = menu;
+		
+		//setup actionbar menu
+		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
+		menuButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				onActionBarMenuIconClicked();		
+			}
+			
+		});
 
 		// Make sure the icon matches the current open/close state
 		this.setActionBarMenuIcon(this.drawerMenuIsOpen());
@@ -296,6 +309,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 			}
 		}
+	}
+	/**
+	 * Set title in the middle of actionbar to specified name
+	 * @param name
+	 */
+	public void editTitle(String name){
+		ZLog.log(name);
+		TextView title = (TextView) findViewById(R.id.actionBarTitle);
+		title.setText(name);
 	}
 
 	/**
@@ -370,19 +392,20 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * to avoid extra swapping.
 	 */
 	private void toggleDrawerPosition() {
-		MenuItem drawerMenuItem = this.actionBarMenu.findItem(R.id.switchTaskMenuButton);
+		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
+
 
 		if (this.menuDrawer != null) {
 			if (this.drawerMenuIsOpen()) {
 				// Set the icon here to avoid extra swapping while 
 				// drawer menu is closing
-				drawerMenuItem.setIcon(R.drawable.menu_white_enabled);
+				menuButton.setImageResource(R.drawable.menu_white_enabled);
 				// If drawer menu is open, close it
 				this.menuDrawer.closeDrawer(Gravity.LEFT);
 			} else {
 				// Set the icon here to avoid extra swapping while 
 				// drawer menu is opening
-				drawerMenuItem.setIcon(R.drawable.menu_white_disabled);
+				menuButton.setImageResource(R.drawable.menu_white_disabled);
 				// If drawer menu is closed, open it
 				this.menuDrawer.openDrawer(Gravity.LEFT);
 			}
@@ -441,8 +464,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 						OWMainFragmentActivity.this.showFragmentFromType(
 								FragmentType.ACCOUNT_FRAGMENT_TYPE, false);
-						
-					//Else accounts is not selected so resume previous accounts activity
+
+						//Else accounts is not selected so resume previous accounts activity
 					} else if (!getSupportFragmentManager().popBackStackImmediate(
 							FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER", 0)) {
 						OWMainFragmentActivity.this.showFragmentFromType(
@@ -648,12 +671,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param open - whether or not the drawer menu is open
 	 */
 	private void setActionBarMenuIcon(boolean open) {
+		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 		if (open) {
-			this.actionBarMenu.findItem(R.id.switchTaskMenuButton
-					).setIcon(R.drawable.icon_menu_statelist_reverse);
+			menuButton.setImageResource(R.drawable.icon_menu_statelist_reverse);
 		} else {
-			this.actionBarMenu.findItem(R.id.switchTaskMenuButton
-					).setIcon(R.drawable.icon_menu_statelist);
+			menuButton.setImageResource(R.drawable.icon_menu_statelist);
 		}
 	}
 

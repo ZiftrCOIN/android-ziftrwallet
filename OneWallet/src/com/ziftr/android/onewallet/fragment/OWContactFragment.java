@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.ziftr.android.onewallet.R;
 
 
-public class OWContactFragment extends OWSectionFragment {
+public class OWContactFragment extends OWFragment {
 	
 	/**
 	 * Load the view.
@@ -18,5 +18,9 @@ public class OWContactFragment extends OWSectionFragment {
 			ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.section_contact_layout, container, false);
 	}
-	
+	public void onResume(){
+		super.onResume();
+		this.getOWMainActivity().editTitle("CONTACT");
+	}
+
 }

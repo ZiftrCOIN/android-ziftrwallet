@@ -2,14 +2,13 @@ package com.ziftr.android.onewallet.fragment.accounts;
 
 import java.io.File;
 
-import android.support.v4.app.Fragment;
-
 import com.google.bitcoin.core.Wallet;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.OWWalletManager;
+import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
 
-public abstract class OWWalletUserFragment extends Fragment implements OWCoinRelative {
+public abstract class OWWalletUserFragment extends OWFragment implements OWCoinRelative {
 	
 	/** 
 	 * Gets the wallet from the wallet manager, which is stored in the activity.

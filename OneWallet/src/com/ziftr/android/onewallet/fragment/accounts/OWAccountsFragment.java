@@ -22,7 +22,7 @@ import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.OWNewCurrencyDialog;
 import com.ziftr.android.onewallet.dialog.handlers.OWNewCurrencyDialogHandler;
-import com.ziftr.android.onewallet.fragment.OWSectionFragment;
+import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
@@ -34,7 +34,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * associated with list view of user wallets and a bar at the bottom of the list
  * view which opens a dialog to add rows to the list view.  
  */
-public class OWAccountsFragment extends OWSectionFragment implements 
+public class OWAccountsFragment extends OWFragment implements 
 OWNewCurrencyDialogHandler {
 
 	/** The view container for this fragment. */
@@ -60,6 +60,12 @@ OWNewCurrencyDialogHandler {
 		super.onCreate(savedInstanceState);
 
 	}
+	
+	public void onResume(){
+		super.onResume();
+		this.getOWMainActivity().editTitle("ziftrWALLET");
+	}
+
 
 	/**
 	 * To create the view for this fragment, we start with the 

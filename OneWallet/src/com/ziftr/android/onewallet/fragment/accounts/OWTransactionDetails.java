@@ -10,8 +10,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.fragment.OWFragment;
 
-public class OWTransactionDetails extends Fragment{
+public class OWTransactionDetails extends OWFragment{
 
 	private View rootView;
 
@@ -31,6 +32,14 @@ public class OWTransactionDetails extends Fragment{
 		this.init_fields(savedInstanceState);
 		return this.rootView;
 	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		this.getOWMainActivity().editTitle("TRANSACTION");
+	}
+
+	
 	/**
 	 * Get the arguments passed from the activity and set the text fields on the view
 	 * 
