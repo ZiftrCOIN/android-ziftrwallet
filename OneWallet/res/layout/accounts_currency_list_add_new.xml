@@ -10,7 +10,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center_vertical"
-        android:layout_margin="@dimen/ow_icon_margin"
+        android:layout_margin="@dimen/ow_bordered_icon_margin"
         android:contentDescription="@string/ow_add_new_wallet_content_description"
         android:src="@drawable/add_white_enabled" />
 

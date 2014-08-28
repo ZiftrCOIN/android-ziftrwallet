@@ -19,8 +19,7 @@ import com.ziftr.android.onewallet.R;
  * Four leading prefixes are needed, currently, for each coin type:
  *     1. pubKeyHashPrefix
  *     2. scriptHashPrefix
- *     3. uncompressedPrivKeyPrefix
- *     4. compressedPrivKeyPrefix
+ *     3. privKeyPrefix
  */
 public class OWCoin {
 
@@ -29,22 +28,23 @@ public class OWCoin {
 
 	public enum Type implements OWCurrency {
 		BTC("0.0001", "BTC", "Bitcoin", "BITCOIN", 8, R.drawable.logo_bitcoin, MainNetParams.get(), false,
-				(byte) 0, (byte) 5, (byte) 0, (byte) 0),
+				(byte) 0, (byte) 5, (byte) 128),
 		LTC("0.0010", "LTC", "Litecoin", "LITECOIN", 8, R.drawable.logo_litecoin, null, false,
-				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+				(byte) 0, (byte) 0, (byte) 0),
 		PPC("0.0100", "PPC", "Peercoin", "PEERCOIN", 8, R.drawable.logo_peercoin, null, false,
-				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+				(byte) 0, (byte) 0, (byte) 0),
 		DOGE("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, false,
-				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+				(byte) 0, (byte) 0, (byte) 0),
 
 		BTC_TEST("0.0000", "BTC_TEST", "Bitcoin Testnet", "BITCOIN", 8, R.drawable.logo_bitcoin, TestNet3Params.get(), true,
-				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+				(byte) 0, (byte) 5, (byte) 128),
+//				(byte) 111, (byte) 196, (byte) 239, (byte) 239),
 		LTC_TEST("0.0000", "LTC_TEST", "Litecoin Testnet", "LITECOIN", 8, R.drawable.logo_litecoin, null, true,
-				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+				(byte) 0, (byte) 0, (byte) 0),
 		PPC_TEST("0.0000", "PPC_TEST", "Peercoin Testnet", "PEERCOIN", 8, R.drawable.logo_peercoin, null, true,
-				(byte) 0, (byte) 0, (byte) 0, (byte) 0),
+				(byte) 0, (byte) 0, (byte) 0),
 		DOGE_TEST("0.0000", "DOGE_TEST", "Dogecoin Testnet", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, true,
-				(byte) 0, (byte) 0, (byte) 0, (byte) 0)
+				(byte) 0, (byte) 0, (byte) 0)
 		;
 
 		private String defaultFeePerKb;
@@ -57,13 +57,12 @@ public class OWCoin {
 		private boolean isTestNet;
 		private byte pubKeyHashPrefix;
 		private byte scriptHashPrefix;
-		private byte uncompressedPrivKeyPrefix;
-		private byte compressedPrivKeyPrefix;
+		private byte privKeyPrefix;
 
 		private Type(String defaultFeePerKb, String shortTitle, String longTitle, String capsTitle,
 				int numberOfDigitsOfPrecision, int logoResId, NetworkParameters networkParameters, 
 				boolean isTestNet, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-				byte uncompressedPrivKeyPrefix, byte compressedPrivKeyPrefix) {
+				byte privKeyPrefix) {
 			this.defaultFeePerKb = defaultFeePerKb;
 			this.shortTitle = shortTitle;
 			this.longTitle = longTitle;
@@ -74,8 +73,7 @@ public class OWCoin {
 			this.isTestNet = isTestNet;
 			this.pubKeyHashPrefix = pubKeyHashPrefix;
 			this.scriptHashPrefix = scriptHashPrefix;
-			this.uncompressedPrivKeyPrefix = uncompressedPrivKeyPrefix;
-			this.compressedPrivKeyPrefix = compressedPrivKeyPrefix;
+			this.privKeyPrefix = privKeyPrefix;
 		}
 
 		/**
@@ -170,16 +168,10 @@ public class OWCoin {
 		/**
 		 * @return the uncompressedPrivKeyPrefix
 		 */
-		public byte getUncompressedPrivKeyPrefix() {
-			return uncompressedPrivKeyPrefix;
+		public byte getPrivKeyPrefix() {
+			return privKeyPrefix;
 		}
 
-		/**
-		 * @return the compressedPrivKeyPrefix
-		 */
-		public byte getCompressedPrivKeyPrefix() {
-			return compressedPrivKeyPrefix;
-		}
 
 	};
 

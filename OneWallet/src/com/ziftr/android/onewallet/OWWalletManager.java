@@ -28,6 +28,7 @@ import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
+import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -213,6 +214,11 @@ public class OWWalletManager {
 	 * TODO check to make sure all places where this is called is okay.
 	 */
 	public boolean setUpWallet(OWCoin.Type id) {
+		
+		// Set up the SQLite tables
+		OWSQLiteOpenHelper database = OWSQLiteOpenHelper.getInstance(this.getActivity());
+		database.activateCoinType(id);
+		OWSQLiteOpenHelper.closeInstance();
 
 		// Here we recreate the files or create them if this is the first
 		// time the user opens the app.

@@ -23,7 +23,7 @@ import com.ziftr.android.onewallet.util.ZLog;
 /**
  * Dialogs where the app requests to get a new currency to add.
  */
-public class OWNewCurrencyDialog extends OWDialogFragment{
+public class OWNewCurrencyDialog extends OWDialogFragment {
 
 	/** We only want to show the coins that the user doesn't already have a wallet for. */
 	private List<OWCoin.Type> coinsToShowInDialog;

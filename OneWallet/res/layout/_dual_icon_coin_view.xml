@@ -11,10 +11,10 @@
 
     <ImageView
         android:id="@+id/leftIcon"
-        android:layout_width="@dimen/ow_icon_size"
-        android:layout_height="@dimen/ow_icon_size"
+        android:layout_width="@dimen/ow_bordered_icon_size"
+        android:layout_height="@dimen/ow_bordered_icon_size"
         android:layout_alignParentLeft="true"
-        android:layout_margin="@dimen/ow_icon_margin"
+        android:layout_margin="@dimen/ow_bordered_icon_margin"
         android:contentDescription="@string/ow_empty_string"
         android:gravity="center_vertical"
         android:src="@drawable/logo_bitcoin" />
@@ -39,10 +39,10 @@
 
     <ImageView
         android:id="@+id/rightIcon"
-        android:layout_width="@dimen/ow_icon_size"
-        android:layout_height="@dimen/ow_icon_size"
+        android:layout_width="@dimen/ow_bordered_icon_size"
+        android:layout_height="@dimen/ow_bordered_icon_size"
         android:layout_alignParentRight="true"
-        android:layout_margin="@dimen/ow_icon_margin"
+        android:layout_margin="@dimen/ow_bordered_icon_margin"
         android:gravity="center_vertical"
         android:contentDescription="@string/ow_empty_string"
         android:src="@drawable/next_down_2" />

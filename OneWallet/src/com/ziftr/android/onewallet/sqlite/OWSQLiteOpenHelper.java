@@ -1,5 +1,6 @@
 package com.ziftr.android.onewallet.sqlite;
 
+import java.io.File;
 import java.util.List;
 
 import android.content.Context;
@@ -7,20 +8,21 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ziftr.android.onewallet.crypto.ECKey;
+import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
-
-//TODO
-// Use singleton patern where must close the database before 
-// you can get a new OWSQLiteOpenHelper
-
-// TODO add method to ECKey (if not exists) to determine if it has private key
-
-// TODO add a long click to list items to delete coin types
-
-// TODO how does the encrypting of the private keys work into this?
-
+/**
+ * This class gives the app access to a database that will persist in different
+ * sessions of the app being opened. 
+ * 
+ * To get an instance of this class call OWSQLiteOpenHelper.getInstance(Context).
+ * When finished accessing the database, call OWSQLiteOpenHelper.closeInstance().
+ * 
+ * TODO add a long click to list items to delete coin types
+ * TODO how does the encrypting of the private keys work into this?
+ */
 public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	/** Following the standard, we name our wallet file as below. */
@@ -37,6 +39,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	/** Used for table types that used to be ACTIVATED, but now user deactivated them. */
 	public static final int DEACTIVATED = 2;
+	
+	private static String databasePath;
 
 
 	///////////////////////////////////////////////////////
@@ -50,7 +54,23 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * Gets the singleton instance of the database helper, making it if necessary. 
 	 */
 	public static synchronized OWSQLiteOpenHelper getInstance(Context context) {
+		
 		if (instance == null) {
+			
+			// Here we build the path for the first time if have not yet already
+			if (databasePath == null) {
+				File externalDirectory = context.getExternalFilesDir(null);
+				if (externalDirectory != null) {
+					databasePath = new File(externalDirectory, DATABASE_NAME).getAbsolutePath();
+				} else {
+					// If we couldn't get the external directory the user is doing something weird with their sd card
+					// Leaving databaseName as null will let the database exist in memory
+					
+					//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
+					ZLog.log("CANNOT ACCESS LOCAL STORAGE!");
+				}
+			}
+			
 			instance = new OWSQLiteOpenHelper(context);
 		} else {
 			// If used right shouldn't happen because close should always
@@ -80,7 +100,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	///////////////////////////////////////////////////////
 
 	private OWSQLiteOpenHelper(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		super(context, databasePath, null, DATABASE_VERSION);
 	}
 
 	@Override
@@ -111,7 +131,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId
 	 */
-	public void createTableSet(OWCoin.Type coinId) {
+	public void activateCoinType(OWCoin.Type coinId) {
 		// Safety check
 		if (typeIsActivated(coinId)) {
 			ZLog.log("createTableSet was called even though ", 
@@ -120,18 +140,19 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		}
 
 		// TODO create tables for coin type
+		OWUsersAddressesTable.create(coinId, getWritableDatabase());
 		
 		// Update table to match activated status
 		this.updateTableActivitedStatus(coinId, ACTIVATED);
 	}
-
-	public List<OWCoin.Type> readAllActivatedTypes() {
-		return OWCoinActivationStatusTable.getAllActivatedTypes(this.getReadableDatabase());
-	}
-
+	
 	public boolean typeIsActivated(OWCoin.Type coinId) {
 		return OWCoinActivationStatusTable.getActivatedStatus(
 				getReadableDatabase(), coinId) == ACTIVATED;
+	}
+
+	public List<OWCoin.Type> readAllActivatedTypes() {
+		return OWCoinActivationStatusTable.getAllActivatedTypes(this.getReadableDatabase());
 	}
 
 	public void updateTableActivitedStatus(OWCoin.Type coinId, int status) {
@@ -152,22 +173,54 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * As part of the C in CRUD, this method adds a personal (owned by the user)
 	 * address to the correct table within our database.
 	 * 
+	 * Default values will be used in this method for the note, balance, and status.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 */
+	public ECKey createPersonal(OWCoin.Type coinId) {
+		return createPersonal(coinId, "");
+	}
+	
+	/**
+	 * As part of the C in CRUD, this method adds a personal (owned by the user)
+	 * address to the correct table within our database.
+	 * 
+	 * Default values will be used in this method for the balance and status.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param note - The note that the user associates with this address.
+	 */
+	public ECKey createPersonal(OWCoin.Type coinId, String note) {
+		long time = System.currentTimeMillis() / 1000;
+		return createPersonal(coinId, note, 0, time, time);
+	}
+	
+	/**
+	 * As part of the C in CRUD, this method adds a personal (owned by the user)
+	 * address to the correct table within our database.
+	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
 	 */
-	public void createPersonal(OWCoin.Type coinId, ECKey key) {
+	public ECKey createPersonal(OWCoin.Type coinId, String note, 
+			long balance, long creation, long modified) {
+		ECKey key = new ECKey();
+		key.setNote(note);
+		key.setLastKnownBalance(balance);
+		key.setCreationTimeSeconds(creation);
+		key.setLastTimeModifiedSeconds(modified);
 		OWUsersAddressesTable.insert(coinId, key, this.getWritableDatabase());
+		return key;
 	}
 
 	/**
-	 * As part of the R in CRUD, this method gets all the ECKeys from the 
+	 * As part of the R in CRUD, this method gets all the personally owned ECKeys from the 
 	 * database for the given coin type.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public List<ECKey> readAllPersonal(OWCoin.Type coinId) {
-		// TODO
-		return null;
+	public List<ECKey> readAllPersonalAddresses(OWCoin.Type coinId) {
+		return OWUsersAddressesTable.readAllKeys(coinId, getReadableDatabase());
 	}
 
 	/**
@@ -176,9 +229,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public int getNumPersonal(OWCoin.Type coinId) {
-		// TODO
-		return -1;
+	public int getNumPersonalAddresses(OWCoin.Type coinId) {
+		return OWUsersAddressesTable.numPersonalAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
@@ -189,15 +241,14 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public void updatePersonal(OWCoin.Type coinId, ECKey key) {
-		// TODO check that public keys match, if not throw error
-		// update all other info that doesn't relate to key stuff
+	public void updatePersonalAddress(OWCoin.Type coinId, ECKey key) {
+		OWUsersAddressesTable.updatePersonalAddress(coinId, key, getWritableDatabase());
 	}
 
-	/*
+	/* 
 	 * NOTE:
 	 * Note that we don't give the option to delete an address, shouldn't ever
-	 * delete anything.
+	 * delete an address just in case someone sends coins to an old address.
 	 */
 
 }

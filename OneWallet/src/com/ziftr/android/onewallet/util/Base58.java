@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import com.ziftr.android.onewallet.crypto.ECKey;
+
 /**
  * <p>Base58 is a way to encode Bitcoin addresses as numbers and letters. Note that this is not the same base58 as used by
  * Flickr, which you may see reference to around the internet.</p>
@@ -219,21 +221,17 @@ public class Base58 {
     
     public static void main(String[] args) {
     	try {
-			System.out.println("K: " + (decode("K")[0] & 0xff));
-			System.out.println("L: " + (decode("L")[0] & 0xff));
-			System.out.println("m: " + (decode("m")[0] & 0xff));
-			System.out.println("n: " + (decode("n")[0] & 0xff));
+    		BigInteger bi = new BigInteger(1, OWUtils.hexStringToBytes("9e4cc0c2243c26fa5821583a471df80ba98695f47d9c1018e215d9ab21f8d672"));
+    		System.out.println(bi.toString());
+    		System.out.println(OWUtils.bytesToHexString(bi.toByteArray()));
+    		System.out.println(OWUtils.bytesToHexString(OWUtils.bigIntegerToBytes(bi, 32)));
+    		ECKey key = new ECKey(bi);
+    		String encoded = encode((byte) 128, key.getPrivKeyBytesForAddressEncoding());
+    		System.out.println("priv: " + OWUtils.bytesToHexString(key.getPrivKeyBytes()));
+			System.out.println("encoded: " + encoded);
+			byte[] x = OWUtils.wifPrivBytesToStandardPrivBytes(decodeChecked(encoded));
+			System.out.println("decoded: " + (x.length) + "  " + OWUtils.bytesToHexString(x));
 			
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			if (decode("K").length == 1) {
-				throw new AddressFormatException("blah");
-			}
 		} catch (AddressFormatException e) {
 			e.printStackTrace();
 		}

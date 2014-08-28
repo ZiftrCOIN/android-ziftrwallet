@@ -306,10 +306,10 @@
 
                     <ImageView
                         android:id="@+id/send_paste_icon"
-                        android:layout_width="@dimen/ow_icon_size"
-                        android:layout_height="@dimen/ow_icon_size"
+                        android:layout_width="@dimen/ow_bordered_icon_size"
+                        android:layout_height="@dimen/ow_bordered_icon_size"
                         android:layout_gravity="center"
-                        android:layout_margin="@dimen/ow_icon_margin"
+                        android:layout_margin="@dimen/ow_bordered_icon_margin"
                         android:background="@android:color/transparent"
                         android:contentDescription="@string/ow_old_passphrase_hint"
                         android:src="@drawable/copy_enabled" />
@@ -322,10 +322,10 @@
 
                     <ImageView
                         android:id="@+id/send_qr_icon"
-                        android:layout_width="@dimen/ow_icon_size"
-                        android:layout_height="@dimen/ow_icon_size"
+                        android:layout_width="@dimen/ow_bordered_icon_size"
+                        android:layout_height="@dimen/ow_bordered_icon_size"
                         android:layout_gravity="center"
-                        android:layout_margin="@dimen/ow_icon_margin"
+                        android:layout_margin="@dimen/ow_bordered_icon_margin"
                         android:contentDescription="@string/ow_old_passphrase_hint"
                         android:src="@drawable/qrcode_enabled" />
 
@@ -337,10 +337,10 @@
 
                     <ImageView
                         android:id="@+id/sendGetAddressFromHistoryIcon"
-                        android:layout_width="@dimen/ow_icon_size"
-                        android:layout_height="@dimen/ow_icon_size"
+                        android:layout_width="@dimen/ow_bordered_icon_size"
+                        android:layout_height="@dimen/ow_bordered_icon_size"
                         android:layout_gravity="center"
-                        android:layout_margin="@dimen/ow_icon_margin"
+                        android:layout_margin="@dimen/ow_bordered_icon_margin"
                         android:contentDescription="@string/ow_old_passphrase_hint"
                         android:src="@drawable/from_history_icon" />
                 </LinearLayout>

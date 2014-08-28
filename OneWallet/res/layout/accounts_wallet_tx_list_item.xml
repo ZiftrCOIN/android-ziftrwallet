@@ -11,12 +11,12 @@
     
     <ImageView
         android:id="@+id/txIOIcon"
-        android:layout_width="@dimen/ow_icon_size"
-        android:layout_height="@dimen/ow_icon_size"
+        android:layout_width="@dimen/ow_bordered_icon_size"
+        android:layout_height="@dimen/ow_bordered_icon_size"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="@dimen/ow_icon_margin"
-        android:layout_marginRight="@dimen/ow_icon_margin"
-        android:layout_marginBottom="@dimen/ow_icon_margin"
+        android:layout_marginTop="@dimen/ow_bordered_icon_margin"
+        android:layout_marginRight="@dimen/ow_bordered_icon_margin"
+        android:layout_marginBottom="@dimen/ow_bordered_icon_margin"
         android:layout_marginLeft="@dimen/ow_half_icon_size"
         android:contentDescription="@string/ow_tx_list_io_icon_description"
         android:gravity="center_vertical"

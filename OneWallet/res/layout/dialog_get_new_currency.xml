@@ -21,13 +21,13 @@
         android:layout_weight="1"
         android:columnWidth="80dp"
         android:gravity="center"
-        android:horizontalSpacing="@dimen/ow_icon_margin"
+        android:horizontalSpacing="@dimen/ow_bordered_icon_margin"
         android:listSelector="@drawable/new_currency_grid_selector"
         android:numColumns="auto_fit"
         android:overScrollMode="never"
         android:padding="5dp"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="@dimen/ow_icon_margin" >
+        android:verticalSpacing="@dimen/ow_bordered_icon_margin" >
     </GridView>
 
     <View

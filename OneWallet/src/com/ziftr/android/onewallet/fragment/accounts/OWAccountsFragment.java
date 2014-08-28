@@ -251,8 +251,7 @@ OWNewCurrencyDialogHandler {
 						for (OWCurrencyListItem newItem : userWallets) {
 							usersCurWallets.add(newItem.getCoinId());
 						}
-						showChooseNewCurrencyDialog(
-								OWAccountsFragment.this, usersCurWallets);
+						showChooseNewCurrencyDialog(OWAccountsFragment.this, usersCurWallets);
 					}
 
 					// Return because in this case we don't need to 
@@ -298,8 +297,7 @@ OWNewCurrencyDialogHandler {
 		}
 
 		// Make sure it is added in alphabetical order
-		int indexToAddAt = 
-				getIndexToAlphabeticallyAddUserWallet(newItem);
+		int indexToAddAt = getIndexToAlphabeticallyAddUserWallet(newItem);
 
 		// TODO add this for all coin types eventually 
 		// walletManager.setupWallet(newItem.getCoinId());

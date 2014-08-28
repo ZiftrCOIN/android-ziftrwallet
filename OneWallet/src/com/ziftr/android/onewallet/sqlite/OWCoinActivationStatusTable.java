@@ -48,39 +48,47 @@ public class OWCoinActivationStatusTable {
 		String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE " + 
 				COLUMN_ACTIVATED_STATUS + " = " + OWSQLiteOpenHelper.ACTIVATED + ";";
 		Cursor c = db.rawQuery(selectQuery, null);
-		
+
 		// Move to first returns false if cursor is empty
 		if (c.moveToFirst()) {
 			do {
 				// Add the coin type to the list
 				activatedCoinTypes.add(OWCoin.Type.valueOf(
 						c.getString(c.getColumnIndex(COLUMN_COIN_ID))));
-	        } while (c.moveToNext());
+			} while (c.moveToNext());
 		}
+
+		// Make sure we close the cursor
+		c.close();
 
 		return activatedCoinTypes;
 	}
-	
+
 	protected static int getActivatedStatus(SQLiteDatabase db, OWCoin.Type coinId) {
 		String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE " + 
 				COLUMN_COIN_ID + " = '" + coinId.toString() + "';";
 		Cursor c = db.rawQuery(selectQuery, null);
-		
+
 		// Move to first returns false if cursor is empty
 		if (c.moveToFirst()) {
-			do {
-				return c.getInt(c.getColumnIndex(COLUMN_ACTIVATED_STATUS));
-	        } while (c.moveToNext());
+			if (!c.isLast()) {
+				c.close();
+				throw new RuntimeException("There was more than one row in sql query.");
+			} else {
+				int activatedStatus = c.getInt(c.getColumnIndex(COLUMN_ACTIVATED_STATUS));
+				c.close();
+				return activatedStatus;
+			}
 		} else {
-			return -1;
+			c.close();
+			throw new RuntimeException("Row does not exist in table.");
 		}
 	}
-	
+
 	protected static void update(OWCoin.Type coinId, int status, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ACTIVATED_STATUS, status);
-
-		db.update(TABLE_NAME, values, COLUMN_COIN_ID + " = " + coinId.toString(), null);
+		db.update(TABLE_NAME, values, COLUMN_COIN_ID + " = '" + coinId.toString() + "'", null);
 	}
 
 }

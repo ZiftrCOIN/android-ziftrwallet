@@ -669,7 +669,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		Editor editor = prefs.edit();
 		editor.putString(
 				this.PASSPHRASE_KEY, 
-				OWUtils.binaryToHexString(inputHash));
+				OWUtils.bytesToHexString(inputHash));
 		editor.commit();
 	}
 
@@ -686,7 +686,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		String storedPassphrase = prefs.getString(this.PASSPHRASE_KEY, null);
 		// If it's not null, convert it back to a byte array
 		byte[] storedHash = (storedPassphrase == null) ?
-				null : OWUtils.hexStringToBinary(storedPassphrase);
+				null : OWUtils.hexStringToBytes(storedPassphrase);
 		// Return the result
 		return storedHash;
 	}

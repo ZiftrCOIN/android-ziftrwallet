@@ -111,7 +111,7 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
 
     @Override
     public String toString() {
-        return OWUtils.binaryToHexString(bytes);
+        return OWUtils.bytesToHexString(bytes);
     }
 
     /**

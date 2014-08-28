@@ -252,7 +252,7 @@ public class OWUtils {
 	 * @param data - The byte array to convert.
 	 * @return The result of the conversion.
 	 */
-	public static String binaryToHexString(byte[] data) {
+	public static String bytesToHexString(byte[] data) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < data.length; i++) {
 			sb.append(String.format("%02x", data[i]));
@@ -271,7 +271,7 @@ public class OWUtils {
 	 * @param hexStr - The string to convert.
 	 * @return The result of the conversion.
 	 */
-	public static byte[] hexStringToBinary(String hexStr) {
+	public static byte[] hexStringToBytes(String hexStr) {
 		// TODO is this the same: Hex.decode(hexStr); ???
 		byte bArray[] = new byte[hexStr.length()/2];  
 		for (int i=0; i<(hexStr.length()/2); i++) {
@@ -385,28 +385,8 @@ public class OWUtils {
 	 */
 	public static String trimZeroes(BigDecimal decToFormat) {
 		return String.format("%s", decToFormat.doubleValue());
-		//		// Check that not null
-		//		if (decToFormat == null) {
-		//			return null;
-		//		}
-		//		
-		//		// Trim white space
-		//		decToFormat = decToFormat.trim();
-		//		
-		//		// Get rid of leading zeroes
-		//		while (decToFormat.startsWith("0")) {
-		//			decToFormat = decToFormat.substring(1);
-		//		}
-		//		
-		//		// Get rid of trailing zeroes
-		//		while (decToFormat.endsWith("0")) {
-		//			decToFormat = decToFormat.substring(0, decToFormat.length()-1);
-		//		}
-		//		
-		//		// Return the result
-		//		return decToFormat;
 	}
-
+	
 	/**
 	 * Returns the given value in nanocoins as a 0.12 type string. More digits after the decimal place will be used
 	 * if necessary, but two will always be present.
@@ -537,6 +517,24 @@ public class OWUtils {
 	public static BigInteger bigDecToBigInt(OWCurrency type, BigDecimal amount) {
 		return amount.multiply(new BigDecimal(BigDecimal.TEN.toBigInteger(), 
 				type.getNumberOfDigitsOfPrecision())).toBigInteger();
+	}
+	
+	/**
+	 * Decoded bytes sometimes have format (when for uncompressed private keys):
+	 *   version byte + data
+	 * Other times they have the format (when for compressed private keys):
+	 *   version byte + data + 0x01
+	 * 
+	 * When getting back the the private key bytes all we want is the middle data section.
+	 * Use this method to get just that middle data section. 
+	 * 
+	 * @param wifPrivBytes
+	 * @return
+	 */
+	public static byte[] wifPrivBytesToStandardPrivBytes(byte[] wifPrivBytes) {
+		byte[] privBytes = new byte[32];
+		System.arraycopy(wifPrivBytes, 1, privBytes, 0, 32);
+		return privBytes;
 	}
 
 }

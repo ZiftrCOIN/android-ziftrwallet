@@ -70,22 +70,34 @@
     <!-- Description here -->
     <string name="ow_tx_list_io_icon_description">Send/Receive</string>
     <!-- Description here -->
-    <string name="ow_receive_coins_address_name_box_title">ADDRESS NAME</string>
+    <string name="ow_receive_coins_address_note_box_title">ADDRESS NOTE</string>
     <!-- Description here -->
     <string name="ow_receive_coins_address_value_box_title">ADDRESS</string>
     <!-- Description here -->
     <string name="ow_receive_coins_address_value_default">1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU</string>
+    <!-- Description here -->
     <string name="ow_tx_details_pending_label">(Pending)</string>
+    <!-- Description here -->
     <string name="ow_tx_details_amount_sent_label">Amount Sent</string>
+    <!-- Description here -->
     <string name="Placeholder">Placeholder</string>
+    <!-- Description here -->
     <string name="ow_tx_details_confirmation_fee_label">Confirmation Fee</string>
+    <!-- Description here -->
     <string name="ow_tx_details_io_label">Total Inputs/Outputs</string>
+    <!-- Description here -->
     <string name="ow_tx_details_routing_address_name">Routing Address Name</string>
+    <!-- Description here -->
     <string name="ow_tx_details_routing_address_label">Routing Address</string>
+    <!-- Description here -->
     <string name="ow_tx_details_sent">Sent</string>
+    <!-- Description here -->
     <string name="ow_ok">OK</string>
+    <!-- Description here -->
     <string name="ow_dialog_cancel">Cancel</string>
+    <!-- Description here -->
     <string name="ow_dialog_select">Select</string>
+    <!-- Description here -->
     <string name="ow_dialog_continue">Continue</string>
 
 </resources>

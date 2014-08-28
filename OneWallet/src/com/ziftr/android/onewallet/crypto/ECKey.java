@@ -102,7 +102,7 @@ public class ECKey {
 	/**
 	 * The id for storage in an sqlite table. 
 	 */
-	private long id;
+	private long id = -1;
 
 	/**
 	 * If "priv" is set, "pub" can always be calculated. If "pub" is set but not "priv", we
@@ -128,7 +128,7 @@ public class ECKey {
 	/**
 	 * The last known balance for this address. May not be up to date.
 	 */
-	private int lastKnownBalance;
+	private long lastKnownBalance;
 
 	/**
 	 * Creation time of the key in seconds since the epoch, or zero if the key was deserialized from a 
@@ -251,7 +251,7 @@ public class ECKey {
 	 * be used for signing.
 	 */
 	private ECKey(@Nullable BigInteger privKey, @Nullable byte[] pubKey) {
-		this(privKey, pubKey, false);
+		this(privKey, pubKey, true);
 	}
 
 	public boolean isPubKeyOnly() {
@@ -265,6 +265,8 @@ public class ECKey {
 	/**
 	 * Output this ECKey as an ASN.1 encoded private key, as understood by OpenSSL or used by the BitCoin reference
 	 * implementation in its wallet storage format.
+	 * 
+	 * TODO if we use this, change the version bytes
 	 */
 	public byte[] toASN1() {
 		try {
@@ -323,7 +325,7 @@ public class ECKey {
 
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append("pub:").append(OWUtils.binaryToHexString(pub));
+		b.append("pub:").append(OWUtils.bytesToHexString(pub));
 		if (creationTimeSeconds != 0) {
 			b.append(" timestamp:").append(creationTimeSeconds);
 		}
@@ -341,7 +343,7 @@ public class ECKey {
 		StringBuilder b = new StringBuilder();
 		b.append(toString());
 		if (priv != null) {
-			b.append(" priv:").append(OWUtils.binaryToHexString(priv.toByteArray()));
+			b.append(" priv:").append(OWUtils.bytesToHexString(priv.toByteArray()));
 		}
 		return b.toString();
 	}
@@ -726,6 +728,22 @@ public class ECKey {
 	public byte[] getPrivKeyBytes() {
 		return OWUtils.bigIntegerToBytes(priv, 32);
 	}
+	
+	/**
+	 * Returns a 32 byte array containing the private key, or null if the key is encrypted or public only
+	 */
+	@Nullable
+	public byte[] getPrivKeyBytesForAddressEncoding() {
+		byte[] privBytes = OWUtils.bigIntegerToBytes(priv, 32);
+		if (this.isCompressed()) {
+			byte[] privBytesForAddressEncoding = new byte[33];
+			System.arraycopy(privBytes, 0, privBytesForAddressEncoding, 0, 32);
+			privBytesForAddressEncoding[privBytesForAddressEncoding.length - 1] = (byte) 0x01; 
+			return privBytesForAddressEncoding;
+		} else {
+			return privBytes;
+		}
+	}
 
 	/**
 	 * Exports the private key in the form used by the Satoshi client "dumpprivkey" and "importprivkey" commands. Use
@@ -937,14 +955,14 @@ public class ECKey {
 	/**
 	 * @return the lastKnownBalance
 	 */
-	public int getLastKnownBalance() {
+	public long getLastKnownBalance() {
 		return lastKnownBalance;
 	}
 
 	/**
 	 * @param lastKnownBalance the lastKnownBalance to set
 	 */
-	public void setLastKnownBalance(int lastKnownBalance) {
+	public void setLastKnownBalance(long lastKnownBalance) {
 		this.lastKnownBalance = lastKnownBalance;
 	}
 
