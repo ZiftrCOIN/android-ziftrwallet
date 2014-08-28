@@ -20,7 +20,7 @@ public class OWContactFragment extends OWFragment {
 	}
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().editTitle("CONTACT");
+		this.getOWMainActivity().changeActionBar("CONTACT", false, true, false);
 	}
 
 }

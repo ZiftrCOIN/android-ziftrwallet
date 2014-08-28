@@ -11,10 +11,12 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.bitcoin.core.Wallet.BalanceType;
@@ -61,11 +63,18 @@ OWNewCurrencyDialogHandler {
 
 	}
 	
+	@Override
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().editTitle("ziftrWALLET");
+		this.getOWMainActivity().changeActionBar("ziftrWALLET", true, true, false);
+		ImageView homeButton = (ImageView) this.getActivity().findViewById(R.id.actionBarHome);
+		homeButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				
+			}
+		});
 	}
-
 
 	/**
 	 * To create the view for this fragment, we start with the 

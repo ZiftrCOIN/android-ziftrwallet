@@ -15,11 +15,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
 import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.Transaction;
@@ -63,7 +63,8 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 	@Override
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().editTitle("ACCOUNT");
+		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, true);
+
 	}
 
 	/**

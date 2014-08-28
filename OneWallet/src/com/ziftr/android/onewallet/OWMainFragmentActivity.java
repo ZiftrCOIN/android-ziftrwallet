@@ -239,17 +239,16 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Recreate wallet manager
 		this.walletManager = new OWWalletManager(this);
 
-		//setup actionbar
-		ActionBar actionbar = this.getActionBar();
-		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-		actionbar.setCustomView(R.layout._app_header_bar);
-		this.editTitle("ziftrWALLET");
-
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
 
 		// Make sure the base fragment view is initialized
 		this.initizalizeBaseFragmentView(savedInstanceState);
+		
+		//set up actionbar
+		ActionBar actionbar = this.getActionBar();
+		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		actionbar.setCustomView(R.layout._app_header_bar);
 	}
 
 	/**
@@ -258,8 +257,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-
-		//setup actionbar menu
+		//setup actionbar menu button
 		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 		menuButton.setOnClickListener(new OnClickListener() {
 
@@ -269,7 +267,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			}
 
 		});
-
 		// Make sure the icon matches the current open/close state
 		this.setActionBarMenuIcon(this.drawerMenuIsOpen());
 		return super.onCreateOptionsMenu(menu);
@@ -313,15 +310,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			}
 		}
 	}
-	/**
-	 * Set title in the middle of actionbar to specified name
-	 * @param name
-	 */
-	public void editTitle(String name){
-		ZLog.log(name);
-		TextView title = (TextView) findViewById(R.id.actionBarTitle);
-		title.setText(name);
-	}
+
 
 	/**
 	 * Here we need to close all the wallets. 
@@ -894,18 +883,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle presses on the aciton bar items
-		switch(item.getItemId()) {
-		case R.id.switchTaskMenuButton:
-			this.onActionBarMenuIconClicked();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
-
-	@Override
 	public void onDrawerClosed(View arg0) {
 		this.setActionBarMenuIcon(false);
 	}
@@ -1030,5 +1007,64 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	public boolean showingDialog(){
 		return this.showingDialog;
+	}
+	
+	/**
+	 * Customize actionbar
+	 * @param title - text in middle of actionbar
+	 * @param menu - boolean determine if menu button to open drawer is visible, if false, the back button will be visible
+	 * @param home - boolean to display home button
+	 * @param search - boolean to display search button
+	 */
+	public void changeActionBar(String title, boolean menu, boolean home, boolean search){
+
+		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
+		ImageView backButton = (ImageView) this.findViewById(R.id.actionBarBack);
+		ImageView homeButton = (ImageView) this.findViewById(R.id.actionBarHome);
+		ImageView searchButton = (ImageView) this.findViewById(R.id.actionBarSearch);
+		TextView titleview = (TextView) findViewById(R.id.actionBarTitle);
+		titleview.setText(title);
+
+		if (menu){
+			backButton.setVisibility(View.GONE);
+			menuButton.setVisibility(View.VISIBLE);
+		} else {
+			backButton.setVisibility(View.VISIBLE);
+			backButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					OWMainFragmentActivity.this.onBackPressed();
+				}
+				
+			});
+			menuButton.setVisibility(View.GONE);
+		}
+	
+		
+		if (home){
+			homeButton.setVisibility(View.VISIBLE);
+			
+			//setup actionbar home click listener
+			homeButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					//clear backstack
+					OWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+					//show home
+					OWMainFragmentActivity.this.showFragmentFromType(
+							FragmentType.ACCOUNT_FRAGMENT_TYPE, false);
+
+				}
+			});
+			
+		} else {
+			homeButton.setVisibility(View.GONE);
+		}
+		
+		if(search){
+			searchButton.setVisibility(View.VISIBLE);
+		} else {
+			searchButton.setVisibility(View.GONE);
+		}
 	}
 }

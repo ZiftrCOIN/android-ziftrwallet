@@ -20,7 +20,7 @@ public class OWExchangeFragment extends OWFragment {
 	}
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().editTitle("EXCHANGE");
+		this.getOWMainActivity().changeActionBar("EXCHANGE", false, true, false);
 	}
 
 	
