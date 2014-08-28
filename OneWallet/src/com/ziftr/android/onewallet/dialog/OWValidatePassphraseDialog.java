@@ -102,5 +102,6 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	protected Object getHandler() {
 		return this.getActivity();
 	}
+	
 
 }

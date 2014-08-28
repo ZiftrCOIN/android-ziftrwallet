@@ -269,7 +269,9 @@ OWNewCurrencyDialogHandler {
 						parent.getItemAtPosition(position);
 				// If we are using the test net network then we make sure the
 				// user has a passphrase and 
-				getOWMainActivity().startWalletAfterValidation(item.getCoinId());
+				if (!getOWMainActivity().showingDialog()){
+					getOWMainActivity().startWalletAfterValidation(item.getCoinId());
+				}
 			}
 		});
 
@@ -353,8 +355,11 @@ OWNewCurrencyDialogHandler {
 				+ "you would like to add.";
 		newCurrencyDialog.setupDialog("OneWallet", message, 
 				"Select", null, "Cancel");
-		newCurrencyDialog.show(this.getFragmentManager(), 
+		
+		if (!this.getOWMainActivity().showingDialog()){
+			newCurrencyDialog.show(this.getFragmentManager(), 
 				"get_new_currency_dialog");
+		}
 	}
 
 }
