@@ -8,15 +8,13 @@
     <dimen name="ow_send_receive_list_block_padding">5dp</dimen>
     
     <!-- These are for icons that do have a border built in. -->
-    <dimen name="ow_bordered_icon_size">40dp</dimen>
-    <dimen name="ow_bordered_icon_margin">5dp</dimen>
+    <dimen name="ow_bordered_icon_margin">4dp</dimen>
     
     <!-- These are for icons that don't have a border built in. -->
-    <dimen name="ow_borderless_icon_size">34dp</dimen>
-    <dimen name="ow_borderless_icon_margin">8dp</dimen>
+    <dimen name="ow_borderless_icon_margin">6dp</dimen>
     
     <!-- 2*margin + size == empty_space_padding -->
-    <dimen name="ow_total_icon_side_length">50dp</dimen>
+    <dimen name="ow_total_icon_side_length">45dp</dimen>
     
     <!-- Half of the icon size -->
     <dimen name="ow_half_icon_size">20dp</dimen>
@@ -33,5 +31,8 @@
     <dimen name="ow_txn_large">65dp</dimen>
     <dimen name="ow_txn_medium">28dp</dimen>
     <dimen name="ow_txn_small">22dp</dimen>
+    
+    <dimen name="ow_edit_text_padding">5dp</dimen>
+    <dimen name="ow_edit_text_height">@dimen/ow_total_icon_side_length</dimen>
     
 </resources>

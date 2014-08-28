@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.util.ZLog;
 
 
 public class OWAboutFragment extends OWFragment {

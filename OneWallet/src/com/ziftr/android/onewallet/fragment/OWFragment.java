@@ -1,8 +1,8 @@
 package com.ziftr.android.onewallet.fragment;
 
-import com.ziftr.android.onewallet.OWMainFragmentActivity;
-
 import android.support.v4.app.Fragment;
+
+import com.ziftr.android.onewallet.OWMainFragmentActivity;
 
 
 public class OWFragment extends Fragment {

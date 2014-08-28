@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import com.google.bitcoin.core.VersionedChecksummedBytes;
 import com.ziftr.android.onewallet.crypto.ECKey;
 
 /**

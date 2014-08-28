@@ -23,15 +23,15 @@ import java.util.concurrent.Executors;
 
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
-import com.google.bitcoin.core.Utils;
-import com.google.bitcoin.core.VarInt;
-import com.google.common.base.Charsets;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import com.google.bitcoin.core.Utils;
+import com.google.bitcoin.core.VarInt;
+import com.google.common.base.Charsets;
 
 public class OWUtils {
 

@@ -1,8 +1,8 @@
 package com.ziftr.android.onewallet.util;
 
-import com.ziftr.android.onewallet.OWApplication;
-
 import android.util.Log;
+
+import com.ziftr.android.onewallet.OWApplication;
 
 public abstract class ZLog {
 	

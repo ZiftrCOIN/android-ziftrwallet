@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <color name="ziftrWALLETBlue">#32828c</color>
+    <color name="ziftrWALLETDarkBlue">#286870</color>
 
     <color name="ow_menu_default">@color/LightGray</color>
     <color name="ow_menu_clicked">@color/LimeGreen</color>
     <color name="ow_menu_button_clicked">@color/LimeGreen</color>
     
-    <color name="ow_unpressed_button">@color/MediumGray</color>
-    <color name="ow_pressed_button">@color/DarkGray</color>
-    <color name="ow_selected_button">@color/DarkGray</color>
+    <color name="ow_unpressed_button">@color/ziftrWALLETBlue</color>
+    <color name="ow_pressed_button">@color/ziftrWALLETDarkBlue</color>
+    <color name="ow_selected_button">@color/ziftrWALLETDarkBlue</color>
     <color name="ow_disabled_button">@color/LightGray</color>
     
     <color name="ow_unpressed_menu_icon">@color/LightGray</color>
@@ -18,11 +21,14 @@
     <color name="ow_menu_divider">@color/DarkGray</color>
     <color name="ow_action_bar_color">#64676C</color>
     
-    <color name="ow_send_receive_list_background">@color/LightGray</color>
+    <color name="ow_send_receive_list_background">@color/MediumGray</color>
     
     <color name="ow_add_currency_list_item_background">@color/MediumGray</color>
     <color name="ow_add_currency_logo_with_text_background">@color/LightGray</color>
     
     <color name="ow_tx_list_divider">@color/LightGray</color>
+    
+    <color name="ow_edit_text_background_color">@color/White</color>
+    <color name="ow_copy_icon_next_to_text_color">@color/ziftrWALLETBlue</color>
 
 </resources>

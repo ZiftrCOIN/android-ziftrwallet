@@ -74,7 +74,7 @@
     <!-- Description here -->
     <string name="ow_receive_coins_address_value_box_title">ADDRESS</string>
     <!-- Description here -->
-    <string name="ow_receive_coins_address_value_default">1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU</string>
+    <string name="ow_receive_coins_address_value_default">1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU</string>
     <!-- Description here -->
     <string name="ow_tx_details_pending_label">(Pending)</string>
     <!-- Description here -->
