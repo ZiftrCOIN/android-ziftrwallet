@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/ziftr_blue"
+        android:background="@color/ziftrWALLETBlue"
         android:gravity="center_vertical|start"
         android:minHeight="64dp"
         android:orientation="vertical" >

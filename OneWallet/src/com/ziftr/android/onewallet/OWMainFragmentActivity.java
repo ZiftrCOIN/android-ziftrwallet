@@ -16,9 +16,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBarActivity;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
@@ -158,6 +158,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
+	/** This text watcher handles the text changes in the search bar. */
+	private TextWatcher searchHandler;
+
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -244,11 +247,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Make sure the base fragment view is initialized
 		this.initizalizeBaseFragmentView(savedInstanceState);
-		
-		//set up actionbar
-		ActionBar actionbar = this.getActionBar();
-		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-		actionbar.setCustomView(R.layout._app_header_bar);
+
+		// Make sure the action bar changes with what fragment we are in
+		this.initializeActionBar();
+
 	}
 
 	/**
@@ -267,6 +269,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			}
 
 		});
+
+
+
+
 		// Make sure the icon matches the current open/close state
 		this.setActionBarMenuIcon(this.drawerMenuIsOpen());
 		return super.onCreateOptionsMenu(menu);
@@ -579,6 +585,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				}
 			}
 		}
+	}
+
+	private void initializeActionBar() {
+		// Set up actionbar
+		ActionBar actionbar = this.getActionBar();
+		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+		actionbar.setCustomView(R.layout._app_header_bar);
 	}
 
 	/**
@@ -1008,7 +1021,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public boolean showingDialog(){
 		return this.showingDialog;
 	}
-	
+
 	/**
 	 * Customize actionbar
 	 * @param title - text in middle of actionbar
@@ -1035,15 +1048,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				public void onClick(View v) {
 					OWMainFragmentActivity.this.onBackPressed();
 				}
-				
+
 			});
 			menuButton.setVisibility(View.GONE);
 		}
-	
-		
+
+
 		if (home){
 			homeButton.setVisibility(View.VISIBLE);
-			
+
 			//setup actionbar home click listener
 			homeButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -1056,11 +1069,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 				}
 			});
-			
+
 		} else {
 			homeButton.setVisibility(View.GONE);
 		}
-		
+
 		if(search){
 			searchButton.setVisibility(View.VISIBLE);
 		} else {

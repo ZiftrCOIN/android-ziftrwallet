@@ -17,6 +17,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:clickable="true"
+            android:contentDescription="@string/ow_ab_menu_description"
             android:gravity="start"
             android:padding="10dp"
             android:src="@drawable/icon_menu_statelist"
@@ -28,6 +29,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:clickable="true"
+            android:contentDescription="@string/ow_ab_back_description"
             android:gravity="start"
             android:padding="10dp"
             android:src="@drawable/previous_enabled_white"
@@ -38,9 +40,10 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:clickable="true"
+            android:contentDescription="@string/ow_ab_home_description"
             android:gravity="start"
             android:padding="10dp"
-            android:src="@drawable/home_white_enabled"
+            android:src="@drawable/icon_home_statelist"
             android:visibility="visible" />
     </LinearLayout>
 
@@ -53,7 +56,7 @@
         android:paddingTop="4dp"
         android:text="@string/ow_app_name"
         android:textColor="@color/ow_menu_default"
-        android:textSize="24dp" />
+        android:textSize="24sp" />
 
     <ImageView
         android:id="@+id/actionBarSearch"
@@ -61,8 +64,9 @@
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:clickable="true"
+        android:contentDescription="@string/ow_ab_search_description"
         android:padding="10dp"
-        android:src="@drawable/search_white_enabled"
+        android:src="@drawable/icon_search_statelist"
         android:visibility="visible" />
 
 </RelativeLayout>

@@ -3,21 +3,19 @@
     
     <color name="ziftrWALLETBlue">#32828c</color>
     <color name="ziftrWALLETDarkBlue">#286870</color>
-
+	<color name="ziftrWALLETBluelight">#D3E5E9</color>
+    
     <color name="ow_menu_default">@color/LightGray</color>
     <color name="ow_menu_clicked">@color/LimeGreen</color>
     <color name="ow_menu_button_clicked">@color/LimeGreen</color>
-    <color name="ziftr_blue_light">#D3E5E9</color>
-    <color name="ziftr_blue">#32828c</color>
-    
     <color name="ow_unpressed_button">@color/ziftrWALLETBlue</color>
     <color name="ow_pressed_button">@color/ziftrWALLETDarkBlue</color>
     <color name="ow_selected_button">@color/ziftrWALLETDarkBlue</color>
     <color name="ow_disabled_button">@color/LightGray</color>
     
     <color name="ow_unpressed_menu_icon">@color/LightGray</color>
-    <color name="ow_pressed_menu_icon">@color/LimeGreen</color>
-    <color name="ow_selected_menu_icon">@color/LimeGreen</color>
+    <color name="ow_pressed_menu_icon">@color/ziftrWALLETBlue</color>
+    <color name="ow_selected_menu_icon">@color/ziftrWALLETBlue</color>
     <color name="ow_disabled_menu_icon">@color/MediumGray</color>
     
     <color name="ow_menu_divider">@color/DarkGray</color>
@@ -32,5 +30,7 @@
     
     <color name="ow_edit_text_background_color">@color/White</color>
     <color name="ow_copy_icon_next_to_text_color">@color/ziftrWALLETBlue</color>
+    
+    <color name="ow_search_background">#32353A</color>
 
 </resources>

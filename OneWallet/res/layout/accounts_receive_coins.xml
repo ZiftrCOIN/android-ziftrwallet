@@ -8,6 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:duplicateParentState="true"
         android:orientation="vertical" >
 
         <RelativeLayout
@@ -70,7 +71,8 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:layout_margin="0dp"
-                    android:background="@drawable/clickable_button_color"
+                    android:background="@drawable/clickable_menu_color"
+                    android:clickable="true"
                     android:contentDescription="@string/ow_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
                     android:src="@drawable/copy_enabled" />

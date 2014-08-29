@@ -21,7 +21,7 @@
         android:id="@+id/headerBarDivider"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="@color/LimeGreen" />
+        android:background="@color/ziftrWALLETBlue" />
 
     <!-- The drawer layout that contains the main fragment frame. -->
 

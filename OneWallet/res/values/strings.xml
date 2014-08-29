@@ -99,5 +99,13 @@
     <string name="ow_dialog_select">Select</string>
     <!-- Description here -->
     <string name="ow_dialog_continue">Continue</string>
+    <!-- Description here -->
+    <string name="ow_ab_menu_description">Menu</string>
+    <!-- Description here -->
+    <string name="ow_ab_home_description">Home</string>
+    <!-- Description here -->
+    <string name="ow_ab_back_description">Back</string>
+    <!-- Description here -->
+    <string name="ow_ab_search_description">Search</string>
 
 </resources>

@@ -3,9 +3,7 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -77,15 +75,7 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	}
 
 	private void initializeAddressUtilityIcons() {
-		// The copy icon
-		final ImageView copyIcon = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
-		copyIcon.setOnTouchListener(new OnTouchListener() {
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1) {
-				copyIcon.setSelected(arg1.getAction()==MotionEvent.ACTION_DOWN);
-				return true;
-			}
-		});
+		// TODO
 	}
 
 	private void initializeQrCode(String newAddress) {

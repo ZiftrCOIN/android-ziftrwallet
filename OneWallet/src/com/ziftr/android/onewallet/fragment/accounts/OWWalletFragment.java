@@ -10,6 +10,8 @@ import java.util.Set;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,6 +29,7 @@ import com.google.bitcoin.core.Wallet;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWCoin.Type;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -40,7 +43,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * TODO in the evenListener for the search bar, make a call to notifyDatasetChanged
  * so that all the transactions that don't match are filtered out. 
  */
-public abstract class OWWalletFragment extends OWWalletUserFragment {
+public abstract class OWWalletFragment extends OWWalletUserFragment implements TextWatcher {
 
 	/** The root view for this application. */
 	private View rootView;
@@ -66,6 +69,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, true);
 
 	}
+	
 
 	/**
 	 * When the view is created, we must initialize the header, the list
@@ -240,6 +244,26 @@ public abstract class OWWalletFragment extends OWWalletUserFragment {
 			}
 		});
 
+	}
+
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
