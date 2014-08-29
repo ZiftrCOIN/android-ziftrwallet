@@ -72,7 +72,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
 
-		// Sets the onclicks for qr code icon, copy/paste icon, any help icons.
+		// Sets the onclicks for qr code icon, paste icon, any help icons.
 		this.initializeIcons();
 
 		// Whenever one of the amount views changes, all the other views should
@@ -252,16 +252,19 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 					try {
 						sendCoins(getSendToAddressEditText().getText().toString(), 
 								amountSending, feeSending);
-
-						// To exit out of the send coins fragment
-						getActivity().onBackPressed();
 					} catch(AddressFormatException afe) {
 						// TODO alert user if address has errors
 						ZLog.log("There was a problem with the address.");
 					} catch(InsufficientMoneyException ime) {
 						// TODO alert user if not enough money in wallet.
 						ZLog.log("There was not enough money in the wallet.");
-					} 
+					}
+					
+					// To exit out of the send coins fragment
+					Activity a = getActivity();
+					if (a != null) {
+						a.onBackPressed();
+					}
 				}
 			}
 		});

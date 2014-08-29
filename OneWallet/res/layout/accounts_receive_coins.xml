@@ -29,6 +29,7 @@
                 android:layout_height="@dimen/ow_total_icon_side_length"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
+                android:clickable="true"
                 android:contentDescription="@string/ow_empty_string"
                 android:padding="@dimen/ow_borderless_icon_margin"
                 android:src="@drawable/from_history" />
@@ -39,10 +40,11 @@
                 android:layout_height="@dimen/ow_total_icon_side_length"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
+                android:clickable="true"
                 android:contentDescription="@string/ow_empty_string"
                 android:gravity="center"
                 android:padding="@dimen/ow_bordered_icon_margin"
-                android:src="@drawable/add_white_enabled" />
+                android:src="@drawable/add_white_icon_clickable" />
 
             <TextView
                 android:id="@+id/addressValueTitleTextView"
@@ -71,11 +73,11 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:layout_margin="0dp"
-                    android:background="@drawable/clickable_menu_color"
+                    android:background="@color/ow_copy_icon_next_to_text_color"
                     android:clickable="true"
                     android:contentDescription="@string/ow_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
-                    android:src="@drawable/copy_enabled" />
+                    android:src="@drawable/copy_icon_clickable" />
 
                 <EditText
                     android:id="@+id/addressValueTextView"

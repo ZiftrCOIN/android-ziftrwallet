@@ -6,6 +6,7 @@ import com.google.bitcoin.core.Wallet;
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.fragment.OWFragment;
+import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
 
 public abstract class OWWalletUserFragment extends OWFragment implements OWCoinRelative {
@@ -40,6 +41,16 @@ public abstract class OWWalletUserFragment extends OWFragment implements OWCoinR
 			return m.getWalletFile(getCoinId());
 		}
 		return null;
+	}
+	
+	/**
+	 * A convenience method for fragments to get and then work with 
+	 * the database helper. 
+	 * 
+	 * @return the database helper from the activity. 
+	 */
+	protected OWSQLiteOpenHelper getDatabaseHelper() {
+		return this.getOWMainActivity().getDatabaseHelper();
 	}
 	
 }

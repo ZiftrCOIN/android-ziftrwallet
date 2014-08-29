@@ -126,15 +126,15 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Should only be called if typeIsActivated returns false. 
+	 * Call this method to activate a coin type if it is not already activated.
+	 * If it has not been activated then this method will create the necessary tables 
+	 * for the coin type given and update the activated statuses table appropriately.
 	 * 
 	 * @param coinId
 	 */
-	public void activateCoinType(OWCoin.Type coinId) {
+	public void ensureCoinTypeActivated(OWCoin.Type coinId) {
 		// Safety check
 		if (typeIsActivated(coinId)) {
-			ZLog.log("createTableSet was called even though ", 
-					coinId.toString(), " has already been activated.");
 			return;
 		}
 

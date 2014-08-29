@@ -1,13 +1,18 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -16,6 +21,7 @@ import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.ECKey;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.Base58;
+import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 
 public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
@@ -23,42 +29,40 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	/** The view container for this fragment. */
 	private View rootView;
 
+	/** The address that will be displayed in the QR code and where others can send coins to us at. */
+	private String addressToReceiveOn;
+	
+	private boolean newAddressClicked;
+
+	private static final String KEY_ADDRESS = "KEY_ADDRESS";
+
 	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
 	@Override
-	public View onCreateView(LayoutInflater inflater, 
-			ViewGroup container, Bundle savedInstanceState) {
-		// TODO add a pivotal ticket for ellipsis bug
-		// also add a pivotal ticket for generating compressed keys - 3
-		// adding new keys to the database - 2
-		// do a feature request for a share button
-
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
-
-		// TODO get database from activity and have activity open/close
-		// Use callbacks so that UI can load quickly
-		OWSQLiteOpenHelper database = OWSQLiteOpenHelper.getInstance(getActivity());
-		ECKey key = null;
-		if (database.getNumPersonalAddresses(getCoinId()) >= 1) {
-			key = database.readAllPersonalAddresses(getCoinId()).get(0);
-		} else {
-			key = database.createPersonal(getCoinId());
-		}
-		OWSQLiteOpenHelper.closeInstance();
-		String newAddress = Base58.encode(getCoinId().getPubKeyHashPrefix(), key.getPubKeyHash()); 
-		
-		// initialize the displaying of the address.
-		this.initializeAddress(newAddress);
-		
-		// initialize the icons that 
-		// Make the image view have the data bitmap
-		this.initializeQrCode(newAddress);
 
 		// Initialize the icons so they do the correct things onClick
 		this.initializeAddressUtilityIcons();
 
+		if (savedInstanceState == null) {
+			// Set the address to initially be empty
+			this.refresh("");
+		} else {
+			// Get the saved address from bundle
+			this.refresh(savedInstanceState.getString(KEY_ADDRESS));
+		}
+
 		return this.rootView;
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		if (this.addressToReceiveOn != null) {
+			outState.putString(KEY_ADDRESS, this.addressToReceiveOn);
+		}
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -67,24 +71,43 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		this.getOWMainActivity().changeActionBar("RECEIVE", false, true, false);
 	}
 
-
-	private void initializeAddress(String newAddress) {
-		TextView addressTextView = (EditText) 
-				this.rootView.findViewById(R.id.addressValueTextView);
-		addressTextView.setText(newAddress);
-	}
-
 	private void initializeAddressUtilityIcons() {
 		// TODO
+		ImageView newAddressIcon = (ImageView) this.rootView.findViewById(R.id.generateNewAddressIcon);
+		newAddressIcon.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				loadAddressFromDatabase();
+			}
+		});
+
+		// For the 'copy' button
+		View copyButton = this.rootView.findViewById(R.id.receiveCopyIcon);
+		// Set the listener for the clicks
+		copyButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (addressToReceiveOn != null && !addressToReceiveOn.isEmpty()) {
+					// Gets a handle to the clipboard service.
+					ClipboardManager clipboard = (ClipboardManager)
+							getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+
+					ClipData clip = ClipData.newPlainText(KEY_ADDRESS, addressToReceiveOn);
+					clipboard.setPrimaryClip(clip);
+
+					Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
 	}
 
-	private void initializeQrCode(String newAddress) {
+	private void generateQrCode() {
 		// TODO make it so that whenever the text changes the bit map changes
 		ImageView imageView = (ImageView) this.rootView.findViewById(R.id.show_qr_img);
 
 		int qrCodeDimention = 500;
 
-		QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(newAddress, null,
+		QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(this.addressToReceiveOn, null,
 				Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), qrCodeDimention);
 
 		try {
@@ -94,6 +117,50 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 			e.printStackTrace();
 		}
 
+	}
+
+	/**
+	 * Refreshes the display with the new address. Should only be run on 
+	 * the UI thread. 
+	 * 
+	 * @param newAddress
+	 */
+	private void refresh(String newAddress) {
+		this.addressToReceiveOn = newAddress;
+
+		TextView addressTextView = (EditText) 
+				this.rootView.findViewById(R.id.addressValueTextView);
+		addressTextView.setText(this.addressToReceiveOn);
+
+		// initialize the icons that 
+		// Make the image view have the data bitmap
+		this.generateQrCode();
+	}
+
+	/**
+	 * This method gets the database from the activity on the UI thread,
+	 * gets a new key from the database helper on an extra thread, and
+	 * then updates the UI with the new address on the UI thread. 
+	 */
+	private void loadAddressFromDatabase() {
+		// Get the database from the activity on the UI thread
+		final OWSQLiteOpenHelper database = this.getDatabaseHelper();
+
+		// Run database IO on new thread
+		OWUtils.runOnNewThread(new Runnable() {
+			@Override
+			public void run() {
+				final ECKey key = database.createPersonal(getCoinId());
+
+				// Run the updating of the UI on the UI thread
+				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						refresh(Base58.encode(getCoinId().getPubKeyHashPrefix(), key.getPubKeyHash()));
+					}
+				});
+			}
+		});
 	}
 
 }

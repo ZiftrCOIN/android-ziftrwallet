@@ -41,6 +41,7 @@ import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFr
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetails;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListItem;
+import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
@@ -161,6 +162,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** This text watcher handles the text changes in the search bar. */
 	private TextWatcher searchHandler;
 
+	/** The database helper object. Open and closed in onResume/onPause. */
+	private OWSQLiteOpenHelper databaseHelper;
+
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -239,6 +243,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
 
+		if (this.databaseHelper == null) {
+			this.databaseHelper = OWSQLiteOpenHelper.getInstance(this);
+		}
+
 		// Recreate wallet manager
 		this.walletManager = new OWWalletManager(this);
 
@@ -270,9 +278,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		});
 
-
-
-
 		// Make sure the icon matches the current open/close state
 		this.setActionBarMenuIcon(this.drawerMenuIsOpen());
 		return super.onCreateOptionsMenu(menu);
@@ -289,6 +294,21 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Save which part of the app is currently open.
 		outState.putString(this.SELECTED_SECTION_KEY, 
 				this.getCurrentlySelectedDrawerMenuOption());
+	}
+
+	@Override
+	public void onPause() {
+		this.databaseHelper = null;
+		OWSQLiteOpenHelper.closeInstance();
+		super.onPause();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (this.databaseHelper == null) {
+			this.databaseHelper = OWSQLiteOpenHelper.getInstance(this);
+		}
 	}
 
 	/**
@@ -744,6 +764,16 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			ZLog.log("Error, something was null that shouldn't have been.");
 			return false;
 		}
+	}
+
+	/**
+	 * Gives the database helper for working with the SQLite 
+	 * tables.
+	 * 
+	 * @return as above
+	 */
+	public OWSQLiteOpenHelper getDatabaseHelper() {
+		return this.databaseHelper;
 	}
 
 	/**
