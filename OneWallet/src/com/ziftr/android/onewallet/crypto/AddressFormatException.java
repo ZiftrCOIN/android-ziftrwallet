@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ziftr.android.onewallet.util;
+package com.ziftr.android.onewallet.crypto;
 
 @SuppressWarnings("serial")
 public class AddressFormatException extends Exception {

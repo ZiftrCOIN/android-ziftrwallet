@@ -34,7 +34,7 @@ public class OWCoinActivationStatusTable {
 		db.execSQL(CREATE_TABLE);
 	}
 
-	protected static void insert(SQLiteDatabase db, OWCoin.Type coinId, int status) {
+	protected static void insert(OWCoin.Type coinId, int status, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_COIN_ID, coinId.toString());
 		values.put(COLUMN_ACTIVATED_STATUS, status);
@@ -64,7 +64,7 @@ public class OWCoinActivationStatusTable {
 		return activatedCoinTypes;
 	}
 
-	protected static int getActivatedStatus(SQLiteDatabase db, OWCoin.Type coinId) {
+	protected static int getActivatedStatus(OWCoin.Type coinId, SQLiteDatabase db) {
 		String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE " + 
 				COLUMN_COIN_ID + " = '" + coinId.toString() + "';";
 		Cursor c = db.rawQuery(selectQuery, null);

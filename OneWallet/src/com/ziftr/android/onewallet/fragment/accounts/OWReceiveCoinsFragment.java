@@ -32,8 +32,7 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	/** The address that will be displayed in the QR code and where others can send coins to us at. */
 	private String addressToReceiveOn;
 	
-	private boolean newAddressClicked;
-
+	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
 
 	/**

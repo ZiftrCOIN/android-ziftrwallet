@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import com.google.bitcoin.core.VersionedChecksummedBytes;
+import com.ziftr.android.onewallet.crypto.AddressFormatException;
 import com.ziftr.android.onewallet.crypto.ECKey;
 
 /**
@@ -230,7 +231,7 @@ public class Base58 {
     		String encoded = encode((byte) 128, key.getPrivKeyBytesForAddressEncoding());
     		System.out.println("priv: " + OWUtils.bytesToHexString(key.getPrivKeyBytes()));
 			System.out.println("encoded: " + encoded);
-			byte[] x = OWUtils.wifPrivBytesToStandardPrivBytes(decodeChecked(encoded));
+			byte[] x = OWUtils.stripVersionAndChecksum(decodeChecked(encoded));
 			System.out.println("decoded: " + (x.length) + "  " + OWUtils.bytesToHexString(x));
 			
 		} catch (AddressFormatException e) {

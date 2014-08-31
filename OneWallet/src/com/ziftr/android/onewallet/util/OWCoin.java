@@ -171,6 +171,10 @@ public class OWCoin {
 		public byte getPrivKeyPrefix() {
 			return privKeyPrefix;
 		}
+		
+		public byte[] getAcceptableAddressCodes() {
+			return new byte[] {getPubKeyHashPrefix(), getScriptHashPrefix()};
+		}
 
 
 	};

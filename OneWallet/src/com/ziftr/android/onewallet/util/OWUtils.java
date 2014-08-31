@@ -531,7 +531,7 @@ public class OWUtils {
 	 * @param wifPrivBytes
 	 * @return
 	 */
-	public static byte[] wifPrivBytesToStandardPrivBytes(byte[] wifPrivBytes) {
+	public static byte[] stripVersionAndChecksum(byte[] wifPrivBytes) {
 		byte[] privBytes = new byte[32];
 		System.arraycopy(wifPrivBytes, 1, privBytes, 0, 32);
 		return privBytes;

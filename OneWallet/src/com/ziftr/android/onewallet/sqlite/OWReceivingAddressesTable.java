@@ -8,8 +8,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ziftr.android.onewallet.crypto.AddressFormatException;
 import com.ziftr.android.onewallet.crypto.ECKey;
-import com.ziftr.android.onewallet.util.AddressFormatException;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
@@ -23,10 +23,10 @@ import com.ziftr.android.onewallet.util.ZLog;
  * TODO should have a method that inserts a new key and returns the key.
  * Get rid of duplicate strings in strings.xml.
  */
-public abstract class OWUsersAddressesTable implements OWCoinRelative {
+public abstract class OWReceivingAddressesTable implements OWCoinRelative {
 
 	/** The postfix that assists in making the names for the users addresses table. */
-	private static final String TABLE_POSTFIX = "_users_addresses";
+	private static final String TABLE_POSTFIX = "_receiving_addresses";
 
 	/** The id column. All Tables must have this to work well with adapters. */
 	public static final String COLUMN_ID = "_id";
@@ -52,11 +52,7 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 	 */
 	public static final String COLUMN_BALANCE = "balance";
 
-	/** 
-	 * This is the last time that address was used in a transaction. Note that this
-	 * table may not always be up to date and this may just be the last known time
-	 * that the address was used. 
-	 */
+	/** This is the timestamp when the address was created. */
 	public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
 
 	/** 
@@ -114,7 +110,7 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 							wifPrivKeyBytes[0] != coinId.getPrivKeyPrefix()) {
 						throw new AddressFormatException();
 					}
-					ECKey newKey = new ECKey(new BigInteger(1, OWUtils.wifPrivBytesToStandardPrivBytes(wifPrivKeyBytes)));
+					ECKey newKey = new ECKey(new BigInteger(1, OWUtils.stripVersionAndChecksum(wifPrivKeyBytes)));
 
 					// Reset all the keys parameters for use elsewhere
 					newKey.setAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
@@ -158,9 +154,11 @@ public abstract class OWUsersAddressesTable implements OWCoinRelative {
 
 	private static ContentValues keyToContentValues(OWCoin.Type coinId, ECKey key, boolean forInsert) {
 		ContentValues values = new ContentValues();
+		// TODO can we do this as a blob?
 		values.put(COLUMN_PRIV_KEY, Base58.encode(
 				coinId.getPrivKeyPrefix(), key.getPrivKeyBytesForAddressEncoding()));
 		
+		// Either for insert or for update
 		if (forInsert) {
 			// For inserting a key into the db, we need the keys but the id
 			// will be generated upon insertion.

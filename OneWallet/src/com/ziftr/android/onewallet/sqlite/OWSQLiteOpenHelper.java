@@ -37,9 +37,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	/** Used for table types that used to be ACTIVATED, but now user deactivated them. */
 	public static final int DEACTIVATED = 2;
-	
-	private static String databasePath;
 
+	/** The path where the database will be stored. */
+	private static String databasePath;
 
 	///////////////////////////////////////////////////////
 	//////////  Static Singleton Access Members ///////////
@@ -50,11 +50,13 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	/** 
 	 * Gets the singleton instance of the database helper, making it if necessary. 
+	 * 
+	 * TODO what if context passed in isn't the context of instance's?
 	 */
 	public static synchronized OWSQLiteOpenHelper getInstance(Context context) {
-		
+
 		if (instance == null) {
-			
+
 			// Here we build the path for the first time if have not yet already
 			if (databasePath == null) {
 				File externalDirectory = context.getExternalFilesDir(null);
@@ -63,12 +65,12 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 				} else {
 					// If we couldn't get the external directory the user is doing something weird with their sd card
 					// Leaving databaseName as null will let the database exist in memory
-					
+
 					//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
 					ZLog.log("CANNOT ACCESS LOCAL STORAGE!");
 				}
 			}
-			
+
 			instance = new OWSQLiteOpenHelper(context);
 		} else {
 			// If used right shouldn't happen because close should always
@@ -88,7 +90,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		} else {
 			// If used right shouldn't happen because get instance should always
 			// be called before every close call.
-			ZLog.log("instance was null when we called getInstance...");
+			ZLog.log("instance was null when we called closeInstance...");
 		}
 		instance = null;
 	}
@@ -111,7 +113,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		// Fill in the table with all coin types, using UNACTIVATED as the status
 		for (OWCoin.Type t : OWCoin.Type.values()) {
-			OWCoinActivationStatusTable.insert(db, t, UNACTIVATED);
+			OWCoinActivationStatusTable.insert(t, UNACTIVATED, db);
 		}
 	}
 
@@ -139,15 +141,15 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		}
 
 		// TODO create tables for coin type
-		OWUsersAddressesTable.create(coinId, getWritableDatabase());
-		
+		OWReceivingAddressesTable.create(coinId, getWritableDatabase());
+
 		// Update table to match activated status
 		this.updateTableActivitedStatus(coinId, ACTIVATED);
 	}
-	
+
 	public boolean typeIsActivated(OWCoin.Type coinId) {
 		return OWCoinActivationStatusTable.getActivatedStatus(
-				getReadableDatabase(), coinId) == ACTIVATED;
+				coinId, getReadableDatabase()) == ACTIVATED;
 	}
 
 	public List<OWCoin.Type> readAllActivatedTypes() {
@@ -157,7 +159,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public void updateTableActivitedStatus(OWCoin.Type coinId, int status) {
 		OWCoinActivationStatusTable.update(coinId, status, getWritableDatabase());
 	}
-	
+
 	/*
 	 * NOTE:
 	 * Shouldn't ever insert/delete from activated status table, so we don't
@@ -179,7 +181,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public ECKey createPersonal(OWCoin.Type coinId) {
 		return createPersonal(coinId, "");
 	}
-	
+
 	/**
 	 * As part of the C in CRUD, this method adds a personal (owned by the user)
 	 * address to the correct table within our database.
@@ -193,7 +195,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		long time = System.currentTimeMillis() / 1000;
 		return createPersonal(coinId, note, 0, time, time);
 	}
-	
+
 	/**
 	 * As part of the C in CRUD, this method adds a personal (owned by the user)
 	 * address to the correct table within our database.
@@ -208,7 +210,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		key.setLastKnownBalance(balance);
 		key.setCreationTimeSeconds(creation);
 		key.setLastTimeModifiedSeconds(modified);
-		OWUsersAddressesTable.insert(coinId, key, this.getWritableDatabase());
+		OWReceivingAddressesTable.insert(coinId, key, this.getWritableDatabase());
 		return key;
 	}
 
@@ -219,7 +221,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public List<ECKey> readAllPersonalAddresses(OWCoin.Type coinId) {
-		return OWUsersAddressesTable.readAllKeys(coinId, getReadableDatabase());
+		return OWReceivingAddressesTable.readAllKeys(coinId, getReadableDatabase());
 	}
 
 	/**
@@ -228,8 +230,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public int getNumPersonalAddresses(OWCoin.Type coinId) {
-		return OWUsersAddressesTable.numPersonalAddresses(coinId, getReadableDatabase());
+	public int readNumPersonalAddresses(OWCoin.Type coinId) {
+		return OWReceivingAddressesTable.numPersonalAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
@@ -241,7 +243,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public void updatePersonalAddress(OWCoin.Type coinId, ECKey key) {
-		OWUsersAddressesTable.updatePersonalAddress(coinId, key, getWritableDatabase());
+		OWReceivingAddressesTable.updatePersonalAddress(coinId, key, getWritableDatabase());
 	}
 
 	/* 
@@ -249,5 +251,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * Note that we don't give the option to delete an address, shouldn't ever
 	 * delete an address just in case someone sends coins to an old address.
 	 */
+
+	/////////////////////////////////////////////////////////////////
+	//////////  Interface for CRUDing personal addresses  ///////////
+	/////////////////////////////////////////////////////////////////
+	
+	
 
 }
