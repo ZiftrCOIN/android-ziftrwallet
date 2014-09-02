@@ -100,11 +100,6 @@ public class ECKey {
 	}
 
 	/**
-	 * The id for storage in an sqlite table. 
-	 */
-	private long id = -1;
-
-	/**
 	 * If "priv" is set, "pub" can always be calculated. If "pub" is set but not "priv", we
 	 * can only verify signatures not make them. 
 	 */
@@ -114,32 +109,12 @@ public class ECKey {
 	 * The public key for this ECKey.
 	 */
 	private byte[] pub;
-	
-	/**
-	 * The address for this key.
-	 */
-	private String address;
-
-	/**
-	 * The note that the user has applied to this given address. 
-	 */
-	private String note;
-
-	/**
-	 * The last known balance for this address. May not be up to date.
-	 */
-	private long lastKnownBalance;
 
 	/**
 	 * Creation time of the key in seconds since the epoch, or zero if the key was deserialized from a 
 	 * version that did not have this field.
 	 */
 	private long creationTimeSeconds;
-
-	/**
-	 * The most recent time that this address had a transaction made using it. May not be up to date.
-	 */
-	private long lastTimeModifiedSeconds;
 
 	/**
 	 * Instance of the KeyCrypter interface to use for encrypting and decrypting the key.
@@ -173,7 +148,6 @@ public class ECKey {
 		pub = compressed.getEncoded();
 
 		creationTimeSeconds = System.currentTimeMillis() / 1000;
-		lastTimeModifiedSeconds = System.currentTimeMillis() / 1000; 
 	}
 
 	private static ECPoint compressPoint(ECPoint uncompressed) {
@@ -326,9 +300,6 @@ public class ECKey {
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append("pub:").append(OWUtils.bytesToHexString(pub));
-		if (creationTimeSeconds != 0) {
-			b.append(" timestamp:").append(creationTimeSeconds);
-		}
 		if (isEncrypted()) {
 			b.append(" encrypted");
 		}
@@ -728,7 +699,7 @@ public class ECKey {
 	public byte[] getPrivKeyBytes() {
 		return OWUtils.bigIntegerToBytes(priv, 32);
 	}
-	
+
 	/**
 	 * Returns a 32 byte array containing the private key, or null if the key is encrypted or public only
 	 */
@@ -760,16 +731,16 @@ public class ECKey {
 	//    }
 
 	/**
-	 * Returns the creation time of this key or zero if the key was deserialized from a version that did not store
-	 * that data.
+	 * Returns the creation time of this key or zero if the key was deserialized from a version 
+	 * that did not store that data.
 	 */
 	public long getCreationTimeSeconds() {
 		return creationTimeSeconds;
 	}
 
 	/**
-	 * Sets the creation time of this key. Zero is a convention to mean "unavailable". This method can be useful when
-	 * you have a raw key you are importing from somewhere else.
+	 * Sets the creation time of this key. Zero is a convention to mean "unavailable". This 
+	 * method can be useful when you have a raw key you are importing from somewhere else.
 	 */
 	public void setCreationTimeSeconds(long newCreationTimeSeconds) {
 		if (newCreationTimeSeconds < 0)
@@ -910,74 +881,5 @@ public class ECKey {
 		return keyCrypter;
 	}
 
-	/**
-	 * @return the id
-	 */
-	public long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(long id) {
-		this.id = id;
-	}
-	
-	/**
-	 * @return the address
-	 */
-	public String getAddress() {
-		return address;
-	}
-
-	/**
-	 * @param address the address to set
-	 */
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	/**
-	 * @return the note
-	 */
-	public String getNote() {
-		return note;
-	}
-
-	/**
-	 * @param note the note to set
-	 */
-	public void setNote(String note) {
-		this.note = note;
-	}
-
-	/**
-	 * @return the lastKnownBalance
-	 */
-	public long getLastKnownBalance() {
-		return lastKnownBalance;
-	}
-
-	/**
-	 * @param lastKnownBalance the lastKnownBalance to set
-	 */
-	public void setLastKnownBalance(long lastKnownBalance) {
-		this.lastKnownBalance = lastKnownBalance;
-	}
-
-	/**
-	 * @return the lastTimeModifiedSeconds
-	 */
-	public long getLastTimeModifiedSeconds() {
-		return lastTimeModifiedSeconds;
-	}
-
-	/**
-	 * @param lastTimeModifiedSeconds the lastTimeModifiedSeconds to set
-	 */
-	public void setLastTimeModifiedSeconds(long lastTimeModifiedSeconds) {
-		this.lastTimeModifiedSeconds = lastTimeModifiedSeconds;
-	}
 
 }

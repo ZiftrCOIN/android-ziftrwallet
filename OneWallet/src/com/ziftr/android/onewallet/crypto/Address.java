@@ -23,12 +23,13 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoin.Type;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
 import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * <p>An address looks like 1MsScoe2fTJoq4ZPdQgqyhgWeoNamYPevy and is derived from an 
  * elliptic curve public key plus a coinId. </p>
  *
- * <p>A standard address is built by taking the RIPE-MD160 hash of the public key bytes, 
+ * <p>A standard address is built by taking RIPEMD160(SHA256( public key bytes )), 
  * with a version prefix and a checksum suffix, then encoding it textually as base58. 
  * The version prefix is used to both denote the network for which the address is 
  * valid (see {@link OWCoin.Type}), and also to indicate how the bytes inside the address
@@ -36,81 +37,186 @@ import com.ziftr.android.onewallet.util.OWUtils;
  * another (currently not fully supported type) can contain a hash of a script instead.</p>
  */
 public class Address implements OWCoinRelative {
+
+	///////////////////////////////////////
+	//////////  Database Fields  //////////
+	///////////////////////////////////////
+
 	/**
-	 * An address is a RIPEMD160 hash of a public key, therefore is always 160 bits or 20 bytes.
+	 * The id for storage in an sqlite table. 
+	 */
+	private long id = -1;
+
+	/**
+	 * The note that the user has applied to this given address. 
+	 */
+	private String note;
+
+	/**
+	 * The last known balance for this address. May not be up to date.
+	 * 
+	 * TODO do we really need this for all addresses or can this go in the ECKey class?
+	 */
+	private long lastKnownBalance;
+	
+	/**
+	 * The most recent time that this address had a transaction made using it. May not be up to date.
+	 */
+	private long lastTimeModifiedSeconds;
+
+
+	//////////////////////////////////////////////
+	//////////  Address Content Fields  //////////
+	//////////////////////////////////////////////
+
+	/**
+	 * An address is a RIPEMD160 hash of a public key, therefore is always 
+	 * 160 bits, or 20 bytes.
 	 */
 	public static final int LENGTH = 20;
 
+	/** The type of coin that this is an address for. */
 	private OWCoin.Type coinId;
 
+	/** The version byte specifies what type of address it is (P2SH, P2PubKey, etc). */
 	private byte versionByte;
 
+	/** 
+	 * Addresses are ripemd(sha256( pub_key )) encoded in base 58. This is the holder
+	 * for the result of that computation. 
+	 */
 	private byte[] hash160;
 
+	/** The ECKey for this address, if known. May be null. */
+	private ECKey key;
+	
 	/**
-	 * Construct an address from coinId, the address version, and the 
-	 * hash160 form. <p>
-	 * @throws AddressFormatException 
+	 * <p>Uses a new ECKey to make an Address.</p> 
+	 * 
+	 * @param coinId
+	 * @param key
+	 * @throws AddressFormatException
+	 */
+	public Address(OWCoin.Type coinId) {
+		try {
+			this.key = new ECKey();
+			this.initialize(coinId, coinId.getPubKeyHashPrefix(), key.getPubKeyHash());
+		} catch(AddressFormatException afe) {
+			ZLog.log("Error making new address, this should not have happened.");
+		}
+	}
+
+	/**
+	 * <p>Uses an ECKey to make an Address. The ECKey need not necessarilty have access
+	 * to a private key as this class can be used for both sending (non-owned) and 
+	 * receiving (owned) addresses.</p> 
+	 * 
+	 * @param coinId
+	 * @param key
+	 * @throws AddressFormatException
+	 */
+	public Address(OWCoin.Type coinId, ECKey key) throws AddressFormatException {
+		this.initialize(coinId, coinId.getPubKeyHashPrefix(), key.getPubKeyHash());
+		this.key = key;
+	}
+
+	/**
+	 * <p>Decodes the given address and determines the coin type and version byte.</p>
+	 * 
+	 * @param address
+	 * @throws AddressFormatException
+	 */
+	public Address(String address) throws AddressFormatException {
+		this(null, address);
+	}
+
+	/**
+	 * <p>Construct an address from parameters and the standard "human readable" form.</p>
+	 *  
+	 * @param coinId
+	 * @param address
+	 * @throws AddressFormatException
+	 */
+	public Address(OWCoin.Type coinId, String address) throws AddressFormatException {
+		// Checksum is validated in the decoding
+		byte[] allData = Base58.decodeChecked(address);
+		byte[] hash160 = OWUtils.stripVersionAndChecksum(allData);
+
+		this.initialize(coinId, allData[0], hash160);
+	}
+
+	/**
+	 * <p>Construct an address from coinId, the address version, and the 
+	 * hash160 form.</p>
+	 * 
+	 * @param coinId
+	 * @param versionByte
+	 * @param hash160
+	 * @throws AddressFormatException
 	 */
 	public Address(OWCoin.Type coinId, byte versionByte, byte[] hash160) throws AddressFormatException {
-		if (coinId == null) {
-
-		}
-
-		if (hash160.length != 20) {
-			throw new AddressFormatException("Addresses are 160-bit hashes, so you must provide 20 bytes");
-		}
-
-		this.coinId = coinId;
-		this.versionByte = versionByte;
-		this.hash160 = hash160;
+		this.initialize(coinId, versionByte, hash160);
 	}
 
 	/** 
-	 * Returns an Address that represents the default P2PubKeyHash address. 
+	 * <p>Returns an Address that represents the default P2PubKeyHash address.</p> 
+	 * 
 	 * @throws AddressFormatException 
 	 */
 	public Address(OWCoin.Type coinId, byte[] hash160) throws AddressFormatException {
 		this(coinId, coinId.getPubKeyHashPrefix(), hash160);
 	}
 
-	//	/** Returns an Address that represents the script hash extracted from the given scriptPubKey */
-	//	public static Address fromP2SHScript(NetworkParameters params, Script scriptPubKey) {
-	//		checkArgument(scriptPubKey.isPayToScriptHash(), "Not a P2SH script");
-	//		return fromP2SHHash(params, scriptPubKey.getPubKeyHash());
-	//	}
-
 	/**
-	 * Construct an address from parameters and the standard "human readable" form. Example:<p>
-	 *
-	 * <pre>new Address(NetworkParameters.prodNet(), "17kzeh4N8g49GFvdDzSf8PjaPfyoD1MndL");</pre><p>
-	 *
-	 * @param params The expected NetworkParameters or null if you don't want validation.
-	 * @param address The textual form of the address, such as "17kzeh4N8g49GFvdDzSf8PjaPfyoD1MndL"
-	 * @throws AddressFormatException if the given address doesn't parse or the checksum is invalid
-	 * @throws WrongNetworkException if the given address is valid but for a different chain (eg testnet vs prodnet)
+	 * A private helper method for initialization that prevents code duplication. 
+	 * 
+	 * @param coinId
+	 * @param versionByte
+	 * @param hash160
 	 */
-	public Address(OWCoin.Type coinId, String address) throws AddressFormatException {
-		// Checksum is validated in the decoding
-		byte[] allData = Base58.decodeChecked(address);
-		byte[] hash160 = OWUtils.stripVersionAndChecksum(allData);
-		if (coinId != null) {
-			if (!this.isAcceptableVersion(coinId, allData[0])) {
-				throw new WrongNetworkException(allData[0], coinId.getAcceptableAddressCodes());
-			}
-		} else {
-			// We need to infer what the coinType is 
-			for (OWCoin.Type type : OWCoin.Type.values()) {
-				if (this.isAcceptableVersion(type, allData[0])) {
-					coinId = type;
-					break;
-				}
-			}
+	private void initialize(OWCoin.Type coinId, byte versionByte, byte[] hash160) throws AddressFormatException {
+		if (hash160.length != 20) {
+			throw new AddressFormatException("Addresses are 160-bit hashes, so you must provide 20 bytes");
 		}
 
-		this.coinId = coinId; 
-		this.versionByte = allData[0];
+		if (coinId != null) {
+			if (!isAcceptableVersion(coinId, versionByte)) {
+				throw new WrongNetworkException(versionByte, coinId.getAcceptableAddressCodes());
+			}
+		} else {
+			// If null then we need to infer what the coinType is 
+			coinId = getCoinTypeFromVersionByte(versionByte);
+		}
+
+		if (coinId == null) {
+			throw new AddressFormatException("Version byte does not match any supported coin types");
+		}
+
+		this.coinId = coinId;
+		this.versionByte = versionByte;
 		this.hash160 = hash160;
+		
+		// Default, should be overridden with the setter method
+		lastTimeModifiedSeconds = System.currentTimeMillis() / 1000;
+	}
+
+	@Override
+	public Type getCoinId() {
+		return this.getCoinId();
+	}
+
+	/**
+	 * @return the versionByte
+	 */
+	public byte getVersionByte() {
+		return versionByte;
+	}
+
+	/**
+	 * @return the key
+	 */
+	public ECKey getKey() {
+		return key;
 	}
 
 	/** The (big endian) 20 byte hash that is the core of an address. */
@@ -124,7 +230,80 @@ public class Address implements OWCoinRelative {
 	 * Address Format for pay-to-script-hash.
 	 */
 	public boolean isP2SHAddress() {
-		return coinId != null && this.versionByte == coinId.getScriptHashPrefix();
+		return coinId != null && this.versionByte == this.coinId.getScriptHashPrefix();
+	}
+
+	public boolean isPersonalAddress() {
+		return key != null && key.getPrivKeyBytes() != null;
+	}
+
+	@Override
+	public String toString() {
+		return Base58.encode(this.versionByte, this.hash160);
+	}
+
+	///////////////////////////////////////////
+	//////////  Getters and Setters  //////////
+	///////////////////////////////////////////
+
+	/**
+	 * @return the id
+	 */
+	public long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id the id to set
+	 */
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return the note
+	 */
+	public String getNote() {
+		return note;
+	}
+
+	/**
+	 * @param note the note to set
+	 */
+	public void setNote(String note) {
+		this.note = note;
+	}
+
+	/**
+	 * @return the lastKnownBalance
+	 */
+	public long getLastKnownBalance() {
+		return lastKnownBalance;
+	}
+
+	/**
+	 * @param lastKnownBalance the lastKnownBalance to set
+	 */
+	public void setLastKnownBalance(long lastKnownBalance) {
+		this.lastKnownBalance = lastKnownBalance;
+	}
+	
+	/**
+	 * @return the lastTimeModifiedSeconds
+	 */
+	public long getLastTimeModifiedSeconds() {
+		return lastTimeModifiedSeconds;
+	}
+
+	/**
+	 * @param lastTimeModifiedSeconds the lastTimeModifiedSeconds to set
+	 */
+	public void setLastTimeModifiedSeconds(long lastTimeModifiedSeconds) {
+		this.lastTimeModifiedSeconds = lastTimeModifiedSeconds;
+	}
+	
+	public static boolean isAcceptableVersion(OWCoin.Type coinId, byte b) {
+		return coinId.getPubKeyHashPrefix() == b || coinId.getScriptHashPrefix() == b;
 	}
 
 	/**
@@ -135,20 +314,22 @@ public class Address implements OWCoinRelative {
 	 */
 	@Nullable
 	public static OWCoin.Type getCoinTypeFromAddress(String address) throws AddressFormatException {
-		try {
-			return new Address(null, address).getCoinId();
-		} catch (WrongNetworkException e) {
-			throw new RuntimeException(e);  // Cannot happen.
+		return getCoinTypeFromDecodedAddress(Base58.decodeChecked(address));
+	}
+
+	@Nullable
+	private static OWCoin.Type getCoinTypeFromDecodedAddress(byte[] allData) {
+		return getCoinTypeFromVersionByte(allData[0]);
+	}
+
+	@Nullable
+	private static OWCoin.Type getCoinTypeFromVersionByte(byte version) {
+		for (OWCoin.Type type : OWCoin.Type.values()) {
+			if (isAcceptableVersion(type, version)) {
+				return type;
+			}
 		}
-	}
-
-	private boolean isAcceptableVersion(OWCoin.Type coinId, byte b) {
-		return coinId.getPubKeyHashPrefix() == b || coinId.getScriptHashPrefix() == b;
-	}
-
-	@Override
-	public Type getCoinId() {
-		return this.getCoinId();
+		return null;
 	}
 
 }

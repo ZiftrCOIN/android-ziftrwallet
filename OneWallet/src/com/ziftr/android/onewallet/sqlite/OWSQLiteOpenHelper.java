@@ -7,7 +7,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.ziftr.android.onewallet.crypto.ECKey;
+import com.ziftr.android.onewallet.crypto.Address;
+import com.ziftr.android.onewallet.crypto.AddressFormatException;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -142,6 +143,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		// TODO create tables for coin type
 		OWReceivingAddressesTable.create(coinId, getWritableDatabase());
+		OWSendingAddressesTable.create(coinId, getWritableDatabase());
 
 		// Update table to match activated status
 		this.updateTableActivitedStatus(coinId, ACTIVATED);
@@ -166,24 +168,24 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * supply insert/delete convenience methods here, only an update.
 	 */
 
-	/////////////////////////////////////////////////////////////////
-	//////////  Interface for CRUDing personal addresses  ///////////
-	/////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////
+	//////////  Interface for CRUDing receiving addresses  ///////////
+	//////////////////////////////////////////////////////////////////
 
 	/**
-	 * As part of the C in CRUD, this method adds a personal (owned by the user)
+	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
 	 * address to the correct table within our database.
 	 * 
 	 * Default values will be used in this method for the note, balance, and status.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public ECKey createPersonal(OWCoin.Type coinId) {
-		return createPersonal(coinId, "");
+	public Address createReceivingAddress(OWCoin.Type coinId) {
+		return createReceivingAddress(coinId, "");
 	}
 
 	/**
-	 * As part of the C in CRUD, this method adds a personal (owned by the user)
+	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
 	 * address to the correct table within our database.
 	 * 
 	 * Default values will be used in this method for the balance and status.
@@ -191,59 +193,62 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param note - The note that the user associates with this address.
 	 */
-	public ECKey createPersonal(OWCoin.Type coinId, String note) {
+	public Address createReceivingAddress(OWCoin.Type coinId, String note) {
 		long time = System.currentTimeMillis() / 1000;
-		return createPersonal(coinId, note, 0, time, time);
+		return createReceivingAddress(coinId, note, 0, time, time);
 	}
 
 	/**
-	 * As part of the C in CRUD, this method adds a personal (owned by the user)
+	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
 	 * address to the correct table within our database.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
 	 */
-	public ECKey createPersonal(OWCoin.Type coinId, String note, 
+	public Address createReceivingAddress(OWCoin.Type coinId, String note, 
 			long balance, long creation, long modified) {
-		ECKey key = new ECKey();
-		key.setNote(note);
-		key.setLastKnownBalance(balance);
-		key.setCreationTimeSeconds(creation);
-		key.setLastTimeModifiedSeconds(modified);
-		OWReceivingAddressesTable.insert(coinId, key, this.getWritableDatabase());
-		return key;
+		Address address = new Address(coinId);
+		address.setNote(note);
+		address.setLastKnownBalance(balance);
+		address.getKey().setCreationTimeSeconds(creation);
+		address.setLastTimeModifiedSeconds(modified);
+		OWReceivingAddressesTable.insert(address, this.getWritableDatabase());
+		return address;
 	}
 
 	/**
-	 * As part of the R in CRUD, this method gets all the personally owned ECKeys from the 
+	 * As part of the R in CRUD, this method gets all the receiving addresses from the 
 	 * database for the given coin type.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public List<ECKey> readAllPersonalAddresses(OWCoin.Type coinId) {
-		return OWReceivingAddressesTable.readAllKeys(coinId, getReadableDatabase());
+	public List<Address> readAllReceivingAddresses(OWCoin.Type coinId) {
+		return OWReceivingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
 	 * As part of the R in CRUD, this method gives the number of entries
-	 * in the personal addresses table for the coin type specified. 
+	 * in the receiving addresses table for the coin type specified. 
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public int readNumPersonalAddresses(OWCoin.Type coinId) {
-		return OWReceivingAddressesTable.numPersonalAddresses(coinId, getReadableDatabase());
+	public int readNumReceivingAddresses(OWCoin.Type coinId) {
+		return OWReceivingAddressesTable.numAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
-	 * As part of the U in CRUD, this method updates the personal addresses table in 
+	 * As part of the U in CRUD, this method updates the  addresses table in 
 	 * the database for the given coin type and key. Doesn't update any pub/address 
 	 * related data, just the private key (if encryption phrase changes) and the other 
-	 * data associated with this key, such as timestamp, note, etc. 
+	 * data associated with this key, such as timestamp, note, etc.
+	 * 
+	 * TODO is there a way to make sure that the new private key matches the old,
+	 * even on encryption state changes?
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public void updatePersonalAddress(OWCoin.Type coinId, ECKey key) {
-		OWReceivingAddressesTable.updatePersonalAddress(coinId, key, getWritableDatabase());
+	public void updateReceivingAddress(Address address) {
+		OWReceivingAddressesTable.updateAddress(address, getWritableDatabase());
 	}
 
 	/* 
@@ -252,10 +257,94 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * delete an address just in case someone sends coins to an old address.
 	 */
 
-	/////////////////////////////////////////////////////////////////
-	//////////  Interface for CRUDing personal addresses  ///////////
-	/////////////////////////////////////////////////////////////////
-	
-	
+	////////////////////////////////////////////////////////////////
+	//////////  Interface for CRUDing sending addresses  ///////////
+	////////////////////////////////////////////////////////////////
+
+	/**
+	 * As part of the C in CRUD, this method adds a sending (not owned by the user)
+	 * address to the correct table within our database.
+	 * 
+	 * Default values will be used in this method for the note, balance, and status.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @throws AddressFormatException 
+	 */
+	public Address createSendingAddress(OWCoin.Type coinId, String addressString) 
+			throws AddressFormatException {
+		return createSendingAddress(coinId, addressString, "");
+	}
+
+	/**
+	 * As part of the C in CRUD, this method adds a sending (not owned by the user)
+	 * address to the correct table within our database.
+	 * 
+	 * Default values will be used in this method for the balance and status.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param note - The note that the user associates with this address.
+	 * @throws AddressFormatException 
+	 */
+	public Address createSendingAddress(OWCoin.Type coinId, String addressString, String note) throws AddressFormatException {
+		long time = System.currentTimeMillis() / 1000;
+		return createSendingAddress(coinId, addressString, note, 0, time);
+	}
+
+	/**
+	 * As part of the C in CRUD, this method adds a sending (not owned by the user)
+	 * address to the correct table within our database.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param key - The key to use.
+	 * @throws AddressFormatException 
+	 */
+	public Address createSendingAddress(OWCoin.Type coinId, String addressString, String note, 
+			long balance, long modified) throws AddressFormatException {
+		Address address = new Address(coinId, addressString);
+		address.setNote(note);
+		address.setLastKnownBalance(balance);
+		//address.getKey().setCreationTimeSeconds(creation);
+		address.setLastTimeModifiedSeconds(modified);
+		OWSendingAddressesTable.insert(address, this.getWritableDatabase());
+		return address;
+	}
+
+	/**
+	 * As part of the R in CRUD, this method gets all the known external (not 
+	 * owned) addresses from the database for the given coin type.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 */
+	public List<Address> readAllSendingAddresses(OWCoin.Type coinId) {
+		return OWSendingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
+	}
+
+	/**
+	 * As part of the R in CRUD, this method gives the number of entries
+	 * in the sending addresses table for the coin type specified. 
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 */
+	public int readNumSendingAddresses(OWCoin.Type coinId) {
+		return OWSendingAddressesTable.numAddresses(coinId, getReadableDatabase());
+	}
+
+	/**
+	 * As part of the U in CRUD, this method updates the sending addresses table in 
+	 * the database for the given address. Doesn't the actual address, just the data 
+	 * associated with this key, such as timestamp, note, etc. We don't update the
+	 * actual address string because addresses should not be deleted, only added.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 */
+	public void updateSendingAddress(Address address) {
+		OWSendingAddressesTable.updateAddress(address, getWritableDatabase());
+	}
+
+	/* 
+	 * NOTE:
+	 * Note that we don't currently give the option to delete a sending address. Might 
+	 * want to add this feature? Maybe a long click in the address list?
+	 */
 
 }

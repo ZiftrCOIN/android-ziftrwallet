@@ -7,10 +7,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ziftr.android.onewallet.crypto.ECKey;
-import com.ziftr.android.onewallet.util.Base58;
+import com.ziftr.android.onewallet.crypto.Address;
+import com.ziftr.android.onewallet.crypto.AddressFormatException;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
+import com.ziftr.android.onewallet.util.ZLog;
 
 
 /**
@@ -44,8 +45,8 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 	 */
 	public static final String COLUMN_BALANCE = "balance";
 
-	/** The first time that this address was seen by this phone. */
-	public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
+	///** The first time that this address was seen by this phone. */
+	//public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
 
 	/** The most recent time that this address was seen by this phone. */
 	public static final String COLUMN_MODIFIED_TIMESTAMP = "modified_timestamp";
@@ -60,7 +61,7 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 				COLUMN_ADDRESS + " TEXT NOT NULL, " + 
 				COLUMN_NOTE + " TEXT, " + 
 				COLUMN_BALANCE + " INTEGER, " +
-				COLUMN_CREATION_TIMESTAMP + " INTEGER, " +
+				//COLUMN_CREATION_TIMESTAMP + " INTEGER, " +
 				COLUMN_MODIFIED_TIMESTAMP + " INTEGER );";
 	}
 
@@ -68,14 +69,14 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		return coinId.toString() + TABLE_POSTFIX;
 	}
 
-	protected static void insert(OWCoin.Type coinId, ECKey key, SQLiteDatabase db) {
-		long insertId = db.insert(getTableName(coinId), 
-				null, keyToContentValues(coinId, key, true));
-		key.setId(insertId);
+	protected static void insert(Address address, SQLiteDatabase db) {
+		long insertId = db.insert(getTableName(address.getCoinId()), 
+				null, keyToContentValues(address, true));
+		address.setId(insertId);
 	}
 
-	protected static List<ECKey> readAllKeys(OWCoin.Type coinId, SQLiteDatabase db) {
-		List<ECKey> keys = new ArrayList<ECKey>();
+	protected static List<Address> readAllAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
+		List<Address> addresses = new ArrayList<Address>();
 
 		String selectQuery = "SELECT * FROM " + getTableName(coinId) + ";";
 		Cursor c = db.rawQuery(selectQuery, null);
@@ -83,27 +84,27 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		// Move to first returns false if cursor is empty
 		if (c.moveToFirst()) {
 			do {
-				ECKey newKey = new ECKey();
+				try {
+					Address newAddress = cursorToAddress(coinId, c);
 
-				// Reset all the keys parameters for use elsewhere
-				newKey.setAddress(c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
-				newKey.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
-				newKey.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
-				newKey.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
-				newKey.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
-
-				// Add the new key to the list
-				keys.add(newKey);
+					// Add the new key to the list
+					addresses.add(newAddress);
+				} catch(AddressFormatException afe) {
+					ZLog.log("Error loading address from ", coinId.toString(), 
+							" sending addresses database.");
+					afe.printStackTrace();
+				}
+				
 			} while (c.moveToNext());
 		}
 
 		// Make sure we close the cursor
 		c.close();
 
-		return keys;
+		return addresses;
 	}
 
-	protected static int numPersonalAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected static int numAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
 		String countQuery = "SELECT  * FROM " + getTableName(coinId);
 		Cursor cursor = db.rawQuery(countQuery, null);
 		int count = cursor.getCount();
@@ -111,27 +112,45 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		return count;
 	}
 
-	protected static void updatePersonalAddress(OWCoin.Type coinId, ECKey key, SQLiteDatabase db) {
-		if (key.getId() == -1) {
+	protected static void updateAddress(Address address, SQLiteDatabase db) {
+		if (address.getId() == -1) {
 			// Shouldn't happen
 			throw new RuntimeException("Error: id has not been set.");
 		}
-		ContentValues values = keyToContentValues(coinId, key, false);
-		db.update(getTableName(coinId), values, COLUMN_ID + " = " + key.getId(), null);
+		ContentValues values = keyToContentValues(address, false);
+		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
 	}
 
-	private static ContentValues keyToContentValues(OWCoin.Type coinId, ECKey key, boolean forInsert) {
+	/**
+	 * @param coinId
+	 * @param c
+	 * @return
+	 * @throws AddressFormatException
+	 */
+	private static Address cursorToAddress(OWCoin.Type coinId, Cursor c) throws AddressFormatException {
+		Address newAddress = new Address(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
+
+		// Reset all the keys parameters for use elsewhere
+		newAddress.setId(c.getLong(c.getColumnIndex(COLUMN_ID)));
+		newAddress.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
+		newAddress.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
+		newAddress.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
+		//newAddress.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+		return newAddress;
+	}
+
+	private static ContentValues keyToContentValues(Address address, boolean forInsert) {
 		ContentValues values = new ContentValues();
-		
+
 		if (forInsert) {
 			// For inserting a key into the db, we need the keys but the id
 			// will be generated upon insertion.
-			values.put(COLUMN_ADDRESS, Base58.encode(coinId.getPubKeyHashPrefix(), key.getPubKeyHash()));
+			values.put(COLUMN_ADDRESS, address.toString());
 		} 
-		values.put(COLUMN_NOTE, key.getNote());
-		values.put(COLUMN_BALANCE, key.getLastKnownBalance());
-		values.put(COLUMN_CREATION_TIMESTAMP, key.getCreationTimeSeconds());
-		values.put(COLUMN_MODIFIED_TIMESTAMP, key.getLastTimeModifiedSeconds());
+		values.put(COLUMN_NOTE, address.getNote());
+		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
+		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());
+		//values.put(COLUMN_CREATION_TIMESTAMP, address.getCreationTimeSeconds());
 		return values;
 	}
 
