@@ -28,7 +28,7 @@ public class OWWalletTransactionListItem {
 	 * The title of the transaction. This is given in the send/recieve
 	 * section when the user makes/receivers a transaction.
 	 */
-	private String txTitle;
+	private String txNote;
 
 	/** The time that the transaction took place. */
 	private String txTime;
@@ -44,14 +44,14 @@ public class OWWalletTransactionListItem {
 
 	public OWWalletTransactionListItem(OWCoin.Type coinId, 
 			OWFiat.Type fiatType, 
-			String txTitle, 
+			String txNote, 
 			String txTime, 
 			BigDecimal txAmount, 
 			OWWalletTransactionListItem.Type txType,
 			int resId) {
 		this.setCoinId(coinId);
 		this.setFiatType(fiatType);
-		this.setTxTitle(txTitle);
+		this.setTxNote(txNote);
 		this.setTxTime(txTime);
 		this.setTxAmount(txAmount);
 		this.setTxType(txType);
@@ -87,17 +87,17 @@ public class OWWalletTransactionListItem {
 	}
 
 	/**
-	 * @return the txTitle
+	 * @return the txNote
 	 */
-	public String getTxTitle() {
-		return txTitle;
+	public String getTxNote() {
+		return txNote;
 	}
 
 	/**
-	 * @param txTitle the txTitle to set
+	 * @param txNote the txNote to set
 	 */
-	public void setTxTitle(String txTitle) {
-		this.txTitle = txTitle;
+	public void setTxNote(String txNote) {
+		this.txNote = txNote;
 	}
 
 	/**

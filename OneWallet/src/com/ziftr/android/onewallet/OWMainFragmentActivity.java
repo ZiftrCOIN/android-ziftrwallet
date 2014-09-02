@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewTreeObserver;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -40,6 +42,7 @@ import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoin
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetails;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletSearchableListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListItem;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
@@ -159,11 +162,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
-	/** This text watcher handles the text changes in the search bar. */
-	private TextWatcher searchHandler;
 
 	/** The database helper object. Open and closed in onResume/onPause. */
 	private OWSQLiteOpenHelper databaseHelper;
+
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -294,6 +296,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Save which part of the app is currently open.
 		outState.putString(this.SELECTED_SECTION_KEY, 
 				this.getCurrentlySelectedDrawerMenuOption());
+
 	}
 
 	@Override
@@ -409,6 +412,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * Also sets the icons to a static resource while opening/closing
 	 * to avoid extra swapping.
 	 */
+	@SuppressLint("RtlHardcoded")
 	private void toggleDrawerPosition() {
 		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 
@@ -564,7 +568,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	private void initizalizeBaseFragmentView(Bundle savedInstanceState) {
 		// Set the base fragment container
-		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseFragmentHolder);
+		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseHolder);
 
 		// To make sure the content doesn't go behind the drawer menu
 		this.baseFragmentContainer.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -612,6 +616,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		ActionBar actionbar = this.getActionBar();
 		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 		actionbar.setCustomView(R.layout._app_header_bar);
+
 	}
 
 	/**
@@ -673,6 +678,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @return a boolean that describes whether or not the drawer menu is
 	 * currenly open
 	 */
+	@SuppressLint("RtlHardcoded")
 	private boolean drawerMenuIsOpen() {
 		return this.menuDrawer.isDrawerOpen(Gravity.LEFT);
 	}
@@ -1059,12 +1065,28 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param home - boolean to display home button
 	 * @param search - boolean to display search button
 	 */
-	public void changeActionBar(String title, boolean menu, boolean home, boolean search){
+	public void changeActionBar(String title, boolean menu, boolean home) {
+		this.changeActionBar(title, menu, home, null, null);
+	}
+
+	/**
+	 * Customize actionbar
+	 * @param title - text in middle of actionbar
+	 * @param menu - boolean determine if menu button to open drawer is visible, if false, the back button will be visible
+	 * @param home - boolean to display home button
+	 * @param search - boolean to display search button
+	 */
+	public void changeActionBar(String title, boolean menu, boolean home, 
+			final TextWatcher textWatcher, 
+			final OWWalletSearchableListAdapter adapter) {
 
 		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 		ImageView backButton = (ImageView) this.findViewById(R.id.actionBarBack);
 		ImageView homeButton = (ImageView) this.findViewById(R.id.actionBarHome);
 		ImageView searchButton = (ImageView) this.findViewById(R.id.actionBarSearch);
+
+		final View searchBar = findViewById(R.id.searchBar);
+
 		TextView titleview = (TextView) findViewById(R.id.actionBarTitle);
 		titleview.setText(title);
 
@@ -1076,6 +1098,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			backButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					if (OWMainFragmentActivity.this.drawerMenuIsOpen()) {
+						toggleDrawerPosition();
+					}
 					OWMainFragmentActivity.this.onBackPressed();
 				}
 
@@ -1084,19 +1109,21 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 
-		if (home){
+		if (home) {
 			homeButton.setVisibility(View.VISIBLE);
 
 			//setup actionbar home click listener
 			homeButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					if (OWMainFragmentActivity.this.drawerMenuIsOpen()) {
+						toggleDrawerPosition();
+					}					
 					//clear backstack
 					OWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 					//show home
 					OWMainFragmentActivity.this.showFragmentFromType(
 							FragmentType.ACCOUNT_FRAGMENT_TYPE, false);
-
 				}
 			});
 
@@ -1104,10 +1131,78 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			homeButton.setVisibility(View.GONE);
 		}
 
-		if(search){
+		// For search bar
+		if (textWatcher != null) {
+			filterAccordingToVisibility(adapter);
+
+			this.specifySearchBarTextWatcher(textWatcher);
+
+			final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
+
+			View clearbutton = findViewById(R.id.clearSearchBarTextIcon);
+			clearbutton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					searchText.setText("");
+				}
+
+			});
+
 			searchButton.setVisibility(View.VISIBLE);
+
+			searchButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (OWMainFragmentActivity.this.drawerMenuIsOpen()) {
+						toggleDrawerPosition();
+					}					
+
+					if (!searchBarIsVisible()) {
+						searchBar.setVisibility(View.VISIBLE);
+						// TODO why doen't keyboard come up?
+						searchText.requestFocus();
+					} else {
+						searchBar.setVisibility(View.GONE);
+					}
+
+					filterAccordingToVisibility(adapter);
+				}
+			});
+
 		} else {
 			searchButton.setVisibility(View.GONE);
+			searchBar.setVisibility(View.GONE);
 		}
+	}
+
+	private void filterAccordingToVisibility(
+			final OWWalletSearchableListAdapter adapter) {
+		final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
+		if (!searchBarIsVisible()) {
+			ZLog.log("Not visible");
+			// Filter
+			adapter.getFilter().filter("");
+		} else {
+			ZLog.log("Visible");
+			// Stop filtering
+			adapter.getFilter().filter(searchText.getText());			
+		}
+	}
+
+	public void specifySearchBarTextWatcher(TextWatcher textWatcher) {
+		// called in onCreate of all fragments that use the search bar
+		EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
+		searchText.addTextChangedListener(textWatcher);
+	}
+
+	public void unregisterSearchBarTextWatcher(TextWatcher textWatcher) {
+		// TODO Called in onDestroy of all fragments that use the search bar
+		EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
+		searchText.removeTextChangedListener(textWatcher);
+	}
+
+	public boolean searchBarIsVisible() {
+		View search = findViewById(R.id.searchBar);
+		return search.getVisibility() != View.GONE;
 	}
 }

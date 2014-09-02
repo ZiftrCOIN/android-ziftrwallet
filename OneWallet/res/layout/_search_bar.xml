@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/searchBarContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/ow_search_background"
     android:orientation="horizontal"
+    android:visibility="gone"
     android:padding="20dp" >
 
     <EditText
-        android:id="@+id/search"
+        android:id="@+id/searchBarEditText"
         android:layout_width="0dp"
         android:layout_height="@dimen/ow_total_icon_side_length"
         android:layout_weight="1"
+        android:padding="10dp"
         android:background="@color/White"
         android:inputType="text" />
 
     <ImageView
-        android:id="@+id/close_search"
+        android:id="@+id/clearSearchBarTextIcon"
         android:layout_width="@dimen/ow_total_icon_side_length"
         android:layout_height="@dimen/ow_total_icon_side_length"
         android:background="@drawable/clickable_menu_color"

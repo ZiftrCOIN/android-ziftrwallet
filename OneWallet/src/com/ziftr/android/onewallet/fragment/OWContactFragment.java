@@ -18,9 +18,9 @@ public class OWContactFragment extends OWFragment {
 			ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.section_contact_layout, container, false);
 	}
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("CONTACT", false, true, false);
+		this.getOWMainActivity().changeActionBar("CONTACT", false, true);
 	}
 
 }

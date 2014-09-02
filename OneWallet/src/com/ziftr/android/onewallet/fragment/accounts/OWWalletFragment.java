@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import android.graphics.drawable.Drawable;
@@ -49,7 +48,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 
 	private ListView txListView;
 
-	private List<OWWalletTransactionListItem> txList;
+	private OWWalletTransactionListAdapter txAdapter;
 
 	/**
 	 * When this fragment is created, this method is called
@@ -63,12 +62,40 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 	}
 
 	@Override
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, true);
+		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, this, this.txAdapter);
+	}
 
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);
+		outState.putBoolean("search_visible", searchBar.getVisibility() == View.VISIBLE);
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		if (savedInstanceState != null && savedInstanceState.getBoolean("search_visible")){
+			View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);
+			searchBar.setVisibility(View.VISIBLE);
+		}		
+		super.onActivityCreated(savedInstanceState);
+	}
+
+	@Override
+	public void onStop() {
+		//detoggle search bar if user navigates away
+		View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);
+		searchBar.setVisibility(View.GONE);
+		super.onStop();
 	}
 	
+	@Override
+	public void onDestroy() {
+		this.getOWMainActivity().unregisterSearchBarTextWatcher(this);
+		super.onDestroy();
+	}
 
 	/**
 	 * When the view is created, we must initialize the header, the list
@@ -136,19 +163,23 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 	}
 
 	private void initializeTxListView() {
-		this.txList = new ArrayList<OWWalletTransactionListItem>();
+		this.txAdapter = new OWWalletTransactionListAdapter(
+				this.getActivity(), 
+				new ArrayList<OWWalletTransactionListItem>(),
+				new ArrayList<OWWalletTransactionListItem>());
+
 		Collection<Transaction> pendingTxs = this.getWallet().getPendingTransactions();
 		Set<String> pendingTxHashes = null;
 		if (pendingTxs.size() > 0) {
 			// Add the Pending Divider
-			this.txList.add(new OWWalletTransactionListItem(
+			this.txAdapter.getFullPendingTxList().add(new OWWalletTransactionListItem(
 					null, null, "PENDING", null, null, 
 					OWWalletTransactionListItem.Type.PendingDivider, 
 					R.layout.accounts_wallet_tx_list_divider));
 			pendingTxHashes = new HashSet<String>();
 			// Add all the pending transactions
 			for (Transaction tx : pendingTxs) {
-				this.txList.add(new OWWalletTransactionListItem(
+				this.txAdapter.getFullPendingTxList().add(new OWWalletTransactionListItem(
 						getCoinId(), 
 						OWFiat.Type.USD, 
 						tx.getHashAsString().substring(0, 6), 
@@ -161,7 +192,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		}
 
 		// Add the History Divider
-		this.txList.add(new OWWalletTransactionListItem(
+		this.txAdapter.getFullConfirmedTxList().add(new OWWalletTransactionListItem(
 				null, null, "HISTORY", null, null, 
 				OWWalletTransactionListItem.Type.HistoryDivider, 
 				R.layout.accounts_wallet_tx_list_divider));
@@ -169,7 +200,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		for (Transaction tx : this.getWallet().getTransactionsByTime()) {
 			if (pendingTxHashes == null || (pendingTxHashes != null && 
 					!pendingTxHashes.contains(tx.getHashAsString()))) {
-				this.txList.add(new OWWalletTransactionListItem(
+				this.txAdapter.getFullConfirmedTxList().add(new OWWalletTransactionListItem(
 						getCoinId(), 
 						OWFiat.Type.USD, 
 						tx.getHashAsString().substring(0, 6), 
@@ -180,24 +211,21 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 			}
 		}
 
-		this.txListView = (ListView)
-				this.rootView.findViewById(R.id.txListView);
-		this.txListView.setAdapter(new OWWalletTransactionListAdapter(
-				this.getActivity(), this.txList));
-
-		/**
-		 *  Opens transactions details fragment by calling openTxnDetails in MainActivity, passing
-		 *  the txnItem when user clicks a txn list item.
-		 */
+		this.txAdapter.refreshWorkingList();
+		this.txAdapter.notifyDataSetChanged();
+		
+		this.txListView = (ListView) this.rootView.findViewById(R.id.txListView);
+		this.txListView.setAdapter(this.txAdapter);
+		
+		// Opens transactions details fragment by calling openTxnDetails in MainActivity, passing
+		// the txnItem when user clicks a txn list item.
 		this.txListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				OWWalletTransactionListItem txItem = (OWWalletTransactionListItem) 
 						txListView.getItemAtPosition(position);
-				OWMainFragmentActivity mActivity = 
-						(OWMainFragmentActivity) getActivity();
-
+				OWMainFragmentActivity mActivity = (OWMainFragmentActivity) getActivity();
 				mActivity.openTxnDetails(txItem);
 			}
 		});
@@ -245,24 +273,22 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 
 	}
 
-
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void afterTextChanged(Editable s) {
 		// TODO Auto-generated method stub
-		
+		this.txAdapter.getFilter().filter(s);
 	}
 
 }

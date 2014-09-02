@@ -1,14 +1,15 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,11 +19,13 @@ import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 
 /**
- * 
+ * TODO make abstract class OWSearchableListAdapter
  */
-public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransactionListItem> {
-	private LayoutInflater inflater;
-	private Context context;
+public class OWWalletTransactionListAdapter extends OWWalletSearchableListAdapter {
+	
+	private List<OWWalletTransactionListItem> fullPendingTxList;
+	
+	private List<OWWalletTransactionListItem> fullConfirmedTxList;
 
 	// TODO add a boolean returner that determines whether or not to add items
 	// to the list. This can be used in searching
@@ -32,11 +35,37 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 	/** The divider type. */
 	public static final int dividerType = 1;
 
+	private OWWalletTransactionListAdapter(Context ctx, List<OWWalletTransactionListItem> txList) {
+		super(ctx, txList);
+	}
+	
 	public OWWalletTransactionListAdapter(Context ctx, 
-			List<OWWalletTransactionListItem> dataSet) {
-		super(ctx, 0, dataSet);
-		this.inflater = LayoutInflater.from(ctx);
-		this.context = ctx;
+			List<OWWalletTransactionListItem> fullPendingTxList, 
+			List<OWWalletTransactionListItem> fullConfirmedTxList) {
+		this(ctx, combineLists(fullPendingTxList, fullConfirmedTxList));
+		this.fullPendingTxList = fullPendingTxList;
+		this.fullConfirmedTxList = fullConfirmedTxList;
+
+	}
+	
+	private static List<OWWalletTransactionListItem> combineLists(
+			List<OWWalletTransactionListItem> fullPendingTxList, 
+			List<OWWalletTransactionListItem> fullConfirmedTxList) {
+		List<OWWalletTransactionListItem> combined = new ArrayList<OWWalletTransactionListItem>();
+		combined.addAll(fullPendingTxList);
+		combined.addAll(fullConfirmedTxList);
+		return combined;
+	}
+	
+	@Override
+	public void refreshWorkingList() {
+		this.refreshWorkingList(this.fullPendingTxList, this.fullConfirmedTxList);
+	}
+	
+	private void refreshWorkingList(List<OWWalletTransactionListItem> pendingTxList, 
+			List<OWWalletTransactionListItem> confirmedTxList) {
+		this.getWorkingTxList().clear();
+		this.getWorkingTxList().addAll(combineLists(pendingTxList, confirmedTxList));
 	}
 
 	/**
@@ -45,8 +74,12 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 	 */
 	@Override
 	public int getItemViewType(int position) {
-		if (getItem(position).getTxType() == OWWalletTransactionListItem.Type.PendingDivider
-				|| getItem(position).getTxType() == OWWalletTransactionListItem.Type.HistoryDivider) {
+		return getItemViewType(getItem(position));
+	}
+	
+	private int getItemViewType(OWWalletTransactionListItem item) {
+		if (item.getTxType() == OWWalletTransactionListItem.Type.PendingDivider
+				|| item.getTxType() == OWWalletTransactionListItem.Type.HistoryDivider) {
 			return dividerType;
 		} else {
 			return transactionType;
@@ -74,7 +107,7 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 		OWWalletTransactionListItem txListItem = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-			convertView = this.inflater.inflate(txListItem.getResId(), null);
+			convertView = this.getInflater().inflate(txListItem.getResId(), null);
 		}
 
 		if (getItemViewType(position) == transactionType) {
@@ -84,7 +117,7 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView txTitleTextView = (TextView) convertView.findViewById(R.id.txTitle);
-			txTitleTextView.setText(txListItem.getTxTitle());
+			txTitleTextView.setText(txListItem.getTxNote());
 
 			TextView txTimeTextView = (TextView) convertView.findViewById(R.id.txTime);
 			txTimeTextView.setText(txListItem.getTxTime());
@@ -103,7 +136,7 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 			txAmountFiatEquiv.setText(fiatSymbol + formattedfiatAmt.toPlainString());
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
-			Drawable image = context.getResources().getDrawable(
+			Drawable image = this.getContext().getResources().getDrawable(
 					getImgResIdForItem(txListItem));
 			txIOIcon.setImageDrawable(image);
 
@@ -113,11 +146,62 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 			// Just have to make sure the text is set for the appropriate divider
 			TextView walletTxListTextView = (TextView) 
 					convertView.findViewById(R.id.walletTxListDividerTextView);
-			walletTxListTextView.setText(txListItem.getTxTitle());
+			walletTxListTextView.setText(txListItem.getTxNote());
 			return convertView;
 		}
 
 	}
+
+	@SuppressLint("DefaultLocale")
+	@Override
+	public Filter getFilter(){
+		Filter filter = new Filter() {
+
+			@Override
+			protected FilterResults performFiltering(CharSequence constraint) {
+				// Seems a little hacky, but we don't use the filter results at all
+				
+				List<OWWalletTransactionListItem> workingPendingTxList = 
+						new ArrayList<OWWalletTransactionListItem>();
+				List<OWWalletTransactionListItem> workingConfirmedTxList = 
+						new ArrayList<OWWalletTransactionListItem>();
+				
+				constraint = constraint.toString().toLowerCase();
+				
+				for (OWWalletTransactionListItem item : fullPendingTxList) {
+					if (getItemViewType(item) == dividerType ||
+							item.getTxNote().toLowerCase().contains(constraint)) {
+						workingPendingTxList.add(item);
+					}
+				}
+				
+				// If only the divider is in the list then we don't need the divider
+				if (workingPendingTxList.size() == 1) {
+					workingPendingTxList.clear();
+				}
+				
+				for (OWWalletTransactionListItem item : fullConfirmedTxList) {
+					if (getItemViewType(item) == dividerType ||
+							item.getTxNote().toLowerCase().contains(constraint)) {
+						workingConfirmedTxList.add(item);
+					}
+				}
+				
+				refreshWorkingList(workingPendingTxList, workingConfirmedTxList);
+				
+				return null;
+			}
+
+			@Override
+			protected void publishResults(CharSequence constraint,
+					FilterResults results) {
+				notifyDataSetChanged();
+			}
+
+		};
+		return filter;
+	}
+
 
 	/**
 	 * @param txListItem
@@ -143,6 +227,14 @@ public class OWWalletTransactionListAdapter extends ArrayAdapter<OWWalletTransac
 			}
 		}
 		return imgResId;
+	}
+	
+	public List<OWWalletTransactionListItem> getFullPendingTxList() {
+		return fullPendingTxList;
+	}
+
+	public List<OWWalletTransactionListItem> getFullConfirmedTxList() {
+		return fullConfirmedTxList;
 	}
 
 }

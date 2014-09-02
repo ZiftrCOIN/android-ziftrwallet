@@ -8,12 +8,14 @@
 
     <!-- The header bar at the top of the activity. -->
 
-	<!-- 
+
+    <!--
     <include
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/_app_header_bar" />
-         -->
+    -->
+
 
     <!-- A small divider to make the bar look nicer. -->
 
@@ -31,11 +33,24 @@
         android:layout_height="match_parent"
         android:animateFirstView="false" >
 
-        <FrameLayout
-            android:id="@+id/oneWalletBaseFragmentHolder"
+        <LinearLayout
+            android:id="@+id/oneWalletBaseHolder"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-        </FrameLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <include
+                android:id="@+id/searchBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/_search_bar" />
+
+            <FrameLayout
+                android:id="@+id/oneWalletBaseFragmentHolder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+            </FrameLayout>
+        </LinearLayout>
 
         <include
             android:layout_width="wrap_content"

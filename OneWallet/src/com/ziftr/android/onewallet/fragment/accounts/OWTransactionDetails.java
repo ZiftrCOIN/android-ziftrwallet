@@ -35,7 +35,7 @@ public class OWTransactionDetails extends OWFragment{
 	@Override
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false, false);
+		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
 	}
 
 	

@@ -19,9 +19,9 @@ public class OWAboutFragment extends OWFragment {
 		return inflater.inflate(R.layout.section_about_layout, container, false);
 	}
 	
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ABOUT", false, true, false);
+		this.getOWMainActivity().changeActionBar("ABOUT", false, true);
 	}
 	
 }

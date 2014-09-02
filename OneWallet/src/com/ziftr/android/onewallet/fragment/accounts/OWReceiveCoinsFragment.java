@@ -66,7 +66,7 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	@Override
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("RECEIVE", false, true, false);
+		this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
 	}
 
 	private void initializeAddressUtilityIcons() {

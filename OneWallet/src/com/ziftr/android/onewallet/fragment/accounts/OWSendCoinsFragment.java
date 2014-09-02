@@ -88,7 +88,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	@Override
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("SEND", false, true, false);
+		this.getOWMainActivity().changeActionBar("SEND", false, true);
 	}
 
 
