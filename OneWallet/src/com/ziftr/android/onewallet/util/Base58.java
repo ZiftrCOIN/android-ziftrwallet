@@ -21,8 +21,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import com.google.bitcoin.core.VersionedChecksummedBytes;
-import com.ziftr.android.onewallet.crypto.AddressFormatException;
-import com.ziftr.android.onewallet.crypto.ECKey;
+import com.ziftr.android.onewallet.crypto.OWAddressFormatException;
+import com.ziftr.android.onewallet.crypto.OWECKey;
 
 /**
  * <p>Base58 is a way to encode Bitcoin addresses as numbers and letters. Note that this is not the same base58 as used by
@@ -110,7 +110,7 @@ public class Base58 {
         }
     }
 
-    public static byte[] decode(String input) throws AddressFormatException {
+    public static byte[] decode(String input) throws OWAddressFormatException {
         if (input.length() == 0) {
             return new byte[0];
         }
@@ -124,7 +124,7 @@ public class Base58 {
                 digit58 = INDEXES[c];
             }
             if (digit58 < 0) {
-                throw new AddressFormatException("Illegal character " + c + " at " + i);
+                throw new OWAddressFormatException("Illegal character " + c + " at " + i);
             }
 
             input58[i] = (byte) digit58;
@@ -155,7 +155,7 @@ public class Base58 {
         return copyOfRange(temp, j - zeroCount, temp.length);
     }
     
-    public static BigInteger decodeToBigInteger(String input) throws AddressFormatException {
+    public static BigInteger decodeToBigInteger(String input) throws OWAddressFormatException {
         return new BigInteger(1, decode(input));
     }
 
@@ -163,19 +163,19 @@ public class Base58 {
      * Uses the checksum in the last 4 bytes of the decoded data to verify the rest are correct. The checksum is
      * removed from the returned data.
      *
-     * @throws AddressFormatException if the input is not base 58 or the checksum does not validate.
+     * @throws OWAddressFormatException if the input is not base 58 or the checksum does not validate.
      */
-    public static byte[] decodeChecked(String input) throws AddressFormatException {
+    public static byte[] decodeChecked(String input) throws OWAddressFormatException {
         byte tmp [] = decode(input);
         if (tmp.length < 4)
-            throw new AddressFormatException("Input too short");
+            throw new OWAddressFormatException("Input too short");
         byte[] bytes = copyOfRange(tmp, 0, tmp.length - 4);
         byte[] checksum = copyOfRange(tmp, tmp.length - 4, tmp.length);
         
         tmp = OWUtils.doubleDigest(bytes);
         byte[] hash = copyOfRange(tmp, 0, 4);
         if (!Arrays.equals(checksum, hash)) 
-            throw new AddressFormatException("Checksum does not validate");
+            throw new OWAddressFormatException("Checksum does not validate");
         
         return bytes;
     }
@@ -227,14 +227,14 @@ public class Base58 {
     		System.out.println(bi.toString());
     		System.out.println(OWUtils.bytesToHexString(bi.toByteArray()));
     		System.out.println(OWUtils.bytesToHexString(OWUtils.bigIntegerToBytes(bi, 32)));
-    		ECKey key = new ECKey(bi);
+    		OWECKey key = new OWECKey(bi);
     		String encoded = encode((byte) 128, key.getPrivKeyBytesForAddressEncoding());
     		System.out.println("priv: " + OWUtils.bytesToHexString(key.getPrivKeyBytes()));
 			System.out.println("encoded: " + encoded);
 			byte[] x = OWUtils.stripVersionAndChecksum(decodeChecked(encoded));
 			System.out.println("decoded: " + (x.length) + "  " + OWUtils.bytesToHexString(x));
 			
-		} catch (AddressFormatException e) {
+		} catch (OWAddressFormatException e) {
 			e.printStackTrace();
 		}
     }

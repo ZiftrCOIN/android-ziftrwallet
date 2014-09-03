@@ -1,14 +1,16 @@
 package com.ziftr.android.onewallet.sqlite;
 
-import java.io.File;
+import java.math.BigInteger;
 import java.util.List;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.ziftr.android.onewallet.crypto.Address;
-import com.ziftr.android.onewallet.crypto.AddressFormatException;
+import com.ziftr.android.onewallet.crypto.OWAddress;
+import com.ziftr.android.onewallet.crypto.OWAddressFormatException;
+import com.ziftr.android.onewallet.crypto.OWSha256Hash;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -39,68 +41,35 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	/** Used for table types that used to be ACTIVATED, but now user deactivated them. */
 	public static final int DEACTIVATED = 2;
 
-	/** The path where the database will be stored. */
-	private static String databasePath;
-
-	///////////////////////////////////////////////////////
-	//////////  Static Singleton Access Members ///////////
-	///////////////////////////////////////////////////////
-
-	/** The single instance of the database helper that we use. */
-	private static OWSQLiteOpenHelper instance;
-
-	/** 
-	 * Gets the singleton instance of the database helper, making it if necessary. 
-	 * 
-	 * TODO what if context passed in isn't the context of instance's?
-	 */
-	public static synchronized OWSQLiteOpenHelper getInstance(Context context) {
-
-		if (instance == null) {
-
-			// Here we build the path for the first time if have not yet already
-			if (databasePath == null) {
-				File externalDirectory = context.getExternalFilesDir(null);
-				if (externalDirectory != null) {
-					databasePath = new File(externalDirectory, DATABASE_NAME).getAbsolutePath();
-				} else {
-					// If we couldn't get the external directory the user is doing something weird with their sd card
-					// Leaving databaseName as null will let the database exist in memory
-
-					//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
-					ZLog.log("CANNOT ACCESS LOCAL STORAGE!");
-				}
-			}
-
-			instance = new OWSQLiteOpenHelper(context);
-		} else {
-			// If used right shouldn't happen because close should always
-			// be called after every get instance call.
-			ZLog.log("instance wasn't null and we called getInstance...");
-		}
-		return instance;
-	}
-
 	/**
-	 * Closes the database helper instance. Also resets the singleton instance
-	 * to be null.
+	 * <p>It's possible to calculate a wallets balance from multiple points of view. This enum specifies which
+	 * of the two methods the getWallatBalance() should use.</p>
+	 *
+	 * <p>Consider a real-world example: you buy a snack costing $5 but you only have a $10 bill. At the start you have
+	 * $10 viewed from every possible angle. After you order the snack you hand over your $10 bill. From the
+	 * perspective of your wallet you have zero dollars (AVAILABLE). But you know in a few seconds the shopkeeper
+	 * will give you back $5 change so most people in practice would say they have $5 (ESTIMATED).</p>
 	 */
-	public static synchronized void closeInstance() {
-		if (instance != null) {
-			instance.close();
-		} else {
-			// If used right shouldn't happen because get instance should always
-			// be called before every close call.
-			ZLog.log("instance was null when we called closeInstance...");
-		}
-		instance = null;
+	public enum BalanceType {
+		/**
+		 * Balance calculated assuming all pending transactions are in fact included into the best chain by miners.
+		 * This includes the value of immature coinbase transactions.
+		 */
+		ESTIMATED,
+
+		/**
+		 * Balance that can be safely used to create new spends. This is whatever the default coin selector would
+		 * make available, which by default means transaction outputs with at least 1 confirmation and pending
+		 * transactions created by our own wallet which have been propagated across the network.
+		 */
+		AVAILABLE
 	}
 
 	///////////////////////////////////////////////////////
 	//////////  Boiler plate SQLite Table Stuff ///////////
 	///////////////////////////////////////////////////////
 
-	private OWSQLiteOpenHelper(Context context) {
+	protected OWSQLiteOpenHelper(Context context, String databasePath) {
 		// If the database path is null then an in memory database is used
 		super(context, databasePath, null, DATABASE_VERSION);
 	}
@@ -180,7 +149,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public Address createReceivingAddress(OWCoin.Type coinId) {
+	public OWAddress createReceivingAddress(OWCoin.Type coinId) {
 		return createReceivingAddress(coinId, "");
 	}
 
@@ -193,7 +162,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param note - The note that the user associates with this address.
 	 */
-	public Address createReceivingAddress(OWCoin.Type coinId, String note) {
+	public OWAddress createReceivingAddress(OWCoin.Type coinId, String note) {
 		long time = System.currentTimeMillis() / 1000;
 		return createReceivingAddress(coinId, note, 0, time, time);
 	}
@@ -205,9 +174,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
 	 */
-	public Address createReceivingAddress(OWCoin.Type coinId, String note, 
+	public OWAddress createReceivingAddress(OWCoin.Type coinId, String note, 
 			long balance, long creation, long modified) {
-		Address address = new Address(coinId);
+		OWAddress address = new OWAddress(coinId);
 		address.setNote(note);
 		address.setLastKnownBalance(balance);
 		address.getKey().setCreationTimeSeconds(creation);
@@ -222,7 +191,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public List<Address> readAllReceivingAddresses(OWCoin.Type coinId) {
+	public List<OWAddress> readAllReceivingAddresses(OWCoin.Type coinId) {
 		return OWReceivingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
 	}
 
@@ -247,7 +216,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public void updateReceivingAddress(Address address) {
+	public void updateReceivingAddress(OWAddress address) {
 		OWReceivingAddressesTable.updateAddress(address, getWritableDatabase());
 	}
 
@@ -268,10 +237,10 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * Default values will be used in this method for the note, balance, and status.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
-	 * @throws AddressFormatException 
+	 * @throws OWAddressFormatException 
 	 */
-	public Address createSendingAddress(OWCoin.Type coinId, String addressString) 
-			throws AddressFormatException {
+	public OWAddress createSendingAddress(OWCoin.Type coinId, String addressString) 
+			throws OWAddressFormatException {
 		return createSendingAddress(coinId, addressString, "");
 	}
 
@@ -283,9 +252,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param note - The note that the user associates with this address.
-	 * @throws AddressFormatException 
+	 * @throws OWAddressFormatException 
 	 */
-	public Address createSendingAddress(OWCoin.Type coinId, String addressString, String note) throws AddressFormatException {
+	public OWAddress createSendingAddress(OWCoin.Type coinId, String addressString, String note) throws OWAddressFormatException {
 		long time = System.currentTimeMillis() / 1000;
 		return createSendingAddress(coinId, addressString, note, 0, time);
 	}
@@ -296,11 +265,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
-	 * @throws AddressFormatException 
+	 * @throws OWAddressFormatException 
 	 */
-	public Address createSendingAddress(OWCoin.Type coinId, String addressString, String note, 
-			long balance, long modified) throws AddressFormatException {
-		Address address = new Address(coinId, addressString);
+	public OWAddress createSendingAddress(OWCoin.Type coinId, String addressString, String note, 
+			long balance, long modified) throws OWAddressFormatException {
+		OWAddress address = new OWAddress(coinId, addressString);
 		address.setNote(note);
 		address.setLastKnownBalance(balance);
 		//address.getKey().setCreationTimeSeconds(creation);
@@ -315,7 +284,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public List<Address> readAllSendingAddresses(OWCoin.Type coinId) {
+	public List<OWAddress> readAllSendingAddresses(OWCoin.Type coinId) {
 		return OWSendingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
 	}
 
@@ -328,7 +297,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public int readNumSendingAddresses(OWCoin.Type coinId) {
 		return OWSendingAddressesTable.numAddresses(coinId, getReadableDatabase());
 	}
-
+	
 	/**
 	 * As part of the U in CRUD, this method updates the sending addresses table in 
 	 * the database for the given address. Doesn't the actual address, just the data 
@@ -337,20 +306,88 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public void updateSendingAddress(Address address) {
+	public void updateSendingAddress(OWAddress address) {
 		OWSendingAddressesTable.updateAddress(address, getWritableDatabase());
 	}
-
+	
 	/* 
 	 * NOTE:
 	 * Note that we don't currently give the option to delete a sending address. Might 
 	 * want to add this feature? Maybe a long click in the address list?
 	 */
-
+	
+	//////////////////////////////////////////////////////////
+	//////////  Helpful method for combining lists  //////////
+	//////////////////////////////////////////////////////////
+	
+	/**
+	 * As part of the R in CRUD, this method gets all the known external (not 
+	 * owned) addresses from the database for the given coin type.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 */
+	public List<OWAddress> readAllAddresses(OWCoin.Type coinId) {
+		List<OWAddress> addresses = this.readAllReceivingAddresses(coinId);
+		addresses.addAll(this.readAllSendingAddresses(coinId));
+		return addresses;
+	}
+	
 	///////////////////////////////////////////////////////////
 	//////////  Interface for CRUDing transactions  ///////////
 	///////////////////////////////////////////////////////////
-	
-//	public void createTx
+
+	/**
+	 * As part of the C in CRUD, this method adds a new transaction
+	 * to the correct table within our database.
+	 * 
+	 * Default values will be used in this method for the hahs, note, time, 
+	 * and numConfirmations.
+	 * 
+	 * @param coinId - The coin type to determine which table we use.
+	 * @param txAmount - See {@link OWWalletTransaction}
+	 * @param txFee- See {@link OWWalletTransaction}
+	 * @param displayAddress - See {@link OWWalletTransaction}
+	 */
+	public OWWalletTransaction createTransaction(OWCoin.Type coinId, BigInteger txAmount,
+			BigInteger txFee, OWAddress displayAddress) {
+		return createTransaction(coinId, txAmount, txFee, 
+				displayAddress, new OWSha256Hash(""), "", -1);
+	}
+
+	/**
+	 * As part of the C in CRUD, this method adds a new transaction
+	 * to the correct table within our database.
+	 * 
+	 * Default values will be used in this method for the hahs, note, time, 
+	 * and numConfirmations.
+	 * 
+	 * @param coinId - The coin type to determine which table we use.
+	 * @param txAmount - See {@link OWWalletTransaction}
+	 * @param txFee- See {@link OWWalletTransaction}
+	 * @param displayAddress - See {@link OWWalletTransaction}
+	 */
+	public OWWalletTransaction createTransaction(OWCoin.Type coinId, BigInteger txAmount,
+			BigInteger txFee, OWAddress displayAddress, OWSha256Hash hash, 
+			String note, int numConfirmations) {
+		// TODO 
+		return null;
+	}
+
+	public BigInteger getWalletBalance(OWCoin.Type coinId, BalanceType bType) {
+		// TODO 
+		return null;
+	}
+
+	public List<OWWalletTransaction> getPendingTransactions(OWCoin.Type coinId) {
+		// TODO 
+		return null;
+	}
+
+	public List<OWWalletTransaction> getConfirmedTransactions(OWCoin.Type coinId) {
+		// TODO 
+		return null;
+	}
+
+	// TODO Maybe make a method to get a list of all transactions?
 
 }

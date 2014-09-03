@@ -33,14 +33,14 @@ import com.ziftr.android.onewallet.util.OWUtils;
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be used as keys in a
  * map. It also checks that the length is correct and provides a bit more type safety.
  */
-public class Sha256Hash implements Comparable<Sha256Hash> {
+public class OWSha256Hash implements Comparable<OWSha256Hash> {
     private byte[] bytes;
-    public static final Sha256Hash ZERO_HASH = new Sha256Hash(new byte[32]);
+    public static final OWSha256Hash ZERO_HASH = new OWSha256Hash(new byte[32]);
 
     /**
      * Creates a Sha256Hash by wrapping the given byte array. It must be 32 bytes long.
      */
-    public Sha256Hash(byte[] rawHashBytes) {
+    public OWSha256Hash(byte[] rawHashBytes) {
         checkArgument(rawHashBytes.length == 32, "Must only be exactly 32 bytes");
         this.bytes = rawHashBytes;
 
@@ -49,7 +49,7 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
     /**
      * Creates a Sha256Hash by decoding the given hex string. It must be 64 characters long.
      */
-    public Sha256Hash(String hexString) {
+    public OWSha256Hash(String hexString) {
         checkArgument(hexString.length() == 64, "Must only be exactly 64 hex chars");
         this.bytes = OWUtils.hexStringToBytes(hexString);
     }
@@ -57,10 +57,10 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
     /**
      * Calculates the (one-time) hash of contents and returns it as a new wrapped hash.
      */
-    public static Sha256Hash create(byte[] contents) {
+    public static OWSha256Hash create(byte[] contents) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return new Sha256Hash(digest.digest(contents));
+            return new OWSha256Hash(digest.digest(contents));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);  // Cannot happen.
         }
@@ -69,8 +69,8 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
     /**
      * Calculates the hash of the hash of the contents. This is a standard operation in Bitcoin.
      */
-    public static Sha256Hash createDouble(byte[] contents) {
-        return new Sha256Hash(OWUtils.doubleDigest(contents));
+    public static OWSha256Hash createDouble(byte[] contents) {
+        return new OWSha256Hash(OWUtils.doubleDigest(contents));
     }
 
     /**
@@ -78,7 +78,7 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
      * small files.
      * @throws IOException
      */
-    public static Sha256Hash hashFileContents(File f) throws IOException {
+    public static OWSha256Hash hashFileContents(File f) throws IOException {
         FileInputStream in = new FileInputStream(f);
         try {
             return create(ByteStreams.toByteArray(in));
@@ -92,8 +92,8 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
      */
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof Sha256Hash)) return false;
-        return Arrays.equals(bytes, ((Sha256Hash) other).bytes);
+        if (!(other instanceof OWSha256Hash)) return false;
+        return Arrays.equals(bytes, ((OWSha256Hash) other).bytes);
     }
 
     /**
@@ -123,14 +123,14 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
         return bytes;
     }
 
-    public Sha256Hash duplicate() {
-        return new Sha256Hash(bytes);
+    public OWSha256Hash duplicate() {
+        return new OWSha256Hash(bytes);
     }
 
     @Override
-    public int compareTo(Sha256Hash hashToCompare) {
+    public int compareTo(OWSha256Hash hashToCompare) {
         int thisCode = this.hashCode();
-        int oCode = ((Sha256Hash)hashToCompare).hashCode();
+        int oCode = ((OWSha256Hash)hashToCompare).hashCode();
         return thisCode > oCode ? 1 : (thisCode == oCode ? 0 : -1);
     }
     

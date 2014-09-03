@@ -515,7 +515,7 @@ public class OWUtils {
 	 * @return The big decimal converted to a big integer
 	 */
 	public static BigInteger bigDecToBigInt(OWCurrency type, BigDecimal amount) {
-		return amount.multiply(new BigDecimal(BigDecimal.TEN.toBigInteger(), 
+		return amount.multiply(new BigDecimal(BigInteger.TEN, 
 				type.getNumberOfDigitsOfPrecision())).toBigInteger();
 	}
 	

@@ -1,56 +1,21 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
-import java.io.File;
-
-import com.google.bitcoin.core.Wallet;
-import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.fragment.OWFragment;
-import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
 
+// TODO refactor to OWWalletManagerFragment
 public abstract class OWWalletUserFragment extends OWFragment implements OWCoinRelative {
 	
-	/** 
-	 * Gets the wallet from the wallet manager, which is stored in the activity.
-	 * Note: the activity using this fragment must be a {@link OWMainFragmentActivity}.
-	 * 
-	 * @return The wallet of type getCoinId()
-	 */
-	protected Wallet getWallet() {
-		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-				).getWalletManager();
-		if (m != null) {
-			return m.getWallet(getCoinId());
-		}
-
-		return null;
-	}
-	
 	/**
-	 * Gets the wallet file from the wallet manager, which is store din the activity. 
-	 * Note: the activity using this fragment must be a {@link OWMainFragmentActivity}.
+	 * Gives the globally accessible wallet manager. All coin-network related
+	 * things should be done through this class as it chooses whether to use
+	 * (temporary) bitcoinj or to use the SQLite tables and API (future). 
 	 * 
-	 * @return The file where the wallet of type getCoinId() is stored, if 
-	 * there is one. Returns null if no wallet file for the type exists. 
+	 * @return the wallet manager
 	 */
-	protected File getWalletFile() {
-		OWWalletManager m = ((OWMainFragmentActivity) this.getActivity()
-				).getWalletManager();
-		if (m != null) {
-			return m.getWalletFile(getCoinId());
-		}
-		return null;
-	}
-	
-	/**
-	 * A convenience method for fragments to get and then work with 
-	 * the database helper. 
-	 * 
-	 * @return the database helper from the activity. 
-	 */
-	protected OWSQLiteOpenHelper getDatabaseHelper() {
-		return this.getOWMainActivity().getDatabaseHelper();
+	protected OWWalletManager getWalletManager() {
+		return this.getOWMainActivity().getWalletManager();
 	}
 	
 }

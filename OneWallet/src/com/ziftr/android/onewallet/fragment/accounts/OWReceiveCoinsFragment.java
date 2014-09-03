@@ -18,7 +18,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.crypto.Address;
+import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
@@ -142,13 +142,14 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	 */
 	private void loadAddressFromDatabase() {
 		// Get the database from the activity on the UI thread
-		final OWSQLiteOpenHelper database = this.getDatabaseHelper();
+		final OWSQLiteOpenHelper database = this.getWalletManager();
+		
 
 		// Run database IO on new thread
 		OWUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final Address address = database.createReceivingAddress(getCoinId());
+				final OWAddress address = database.createReceivingAddress(getCoinId());
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {

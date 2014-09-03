@@ -20,17 +20,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.InsufficientMoneyException;
-import com.google.bitcoin.core.Wallet;
-import com.google.bitcoin.utils.Threading;
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -243,14 +241,12 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 			public void onClick(View v) {
 				if (addressIsValid(getSendToAddressEditText().getText().toString())) {
 					// Need to make sure amount to send is less than balance
-					BigInteger amountSending = getAmountToSendFromEditText().multiply(
-							(new BigDecimal("10").pow(getCoinId(
-									).getNumberOfDigitsOfPrecision()))).toBigInteger();
-					BigInteger feeSending = getFeeFromEditText().multiply(
-							(new BigDecimal("10").pow(getCoinId(
-									).getNumberOfDigitsOfPrecision()))).toBigInteger();
+					BigInteger amountSending = OWUtils.bigDecToBigInt(getCoinId(), 
+							getAmountToSendFromEditText());
+					BigInteger feeSending = OWUtils.bigDecToBigInt(getCoinId(), 
+							getFeeFromEditText());
 					try {
-						sendCoins(getSendToAddressEditText().getText().toString(), 
+						getWalletManager().sendCoins(getCoinId(), getSendToAddressEditText().getText().toString(), 
 								amountSending, feeSending);
 					} catch(AddressFormatException afe) {
 						// TODO alert user if address has errors
@@ -268,60 +264,6 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 				}
 			}
 		});
-	}
-
-	/**
-	 * Sends the type of coin that this thread actually represents to 
-	 * the specified address. 
-	 * 
-	 * @param address - The address to send coins to.
-	 * @param value - The number of atomic units (satoshis for BTC) to send
-	 * @throws AddressFormatException
-	 * @throws InsufficientMoneyException
-	 */
-	private void sendCoins(String address, BigInteger value, BigInteger feePerKb) 
-			throws AddressFormatException, InsufficientMoneyException {
-
-		Wallet wallet = this.getWallet();
-
-		// Create an address object based on network parameters in use 
-		// and the entered address. This is the address we will send coins to.
-		Address sendAddress = new Address(wallet.getNetworkParameters(), address);
-
-		// Use the address and the value to create a new send request object
-		Wallet.SendRequest sendRequest = Wallet.SendRequest.to(sendAddress, value);
-
-
-		// If the wallet is encrypted then we have to load the AES key so that the
-		// wallet can get at the private keys and sign the data.
-		if (wallet.isEncrypted()) {
-			sendRequest.aesKey = wallet.getKeyCrypter().deriveKey("password");
-		}
-
-		// Make sure we aren't adding any additional fees
-		sendRequest.ensureMinRequiredFee = false;
-
-		// Set a fee for the transaction, always the minimum for now.
-		// sendRequest.fee = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
-		sendRequest.fee = BigInteger.ZERO;
-
-		// TODO make the rest of the code have variable names that reflect that this
-		// is actually a fee per kilobyte.
-		sendRequest.feePerKb = feePerKb;
-
-		// I don't think we want to do this. 
-		//wallet.decrypt(null);
-
-		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
-		sendResult.broadcastComplete.addListener(new Runnable() {
-			@Override
-			public void run() {
-				// TODO if we want something to be done here that relates
-				// to the gui thread, how do we do that?
-				ZLog.log("Successfully sent coins to address!");
-			}
-		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
-
 	}
 
 	/**

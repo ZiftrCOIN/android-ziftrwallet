@@ -26,7 +26,7 @@ import java.util.Arrays;
  * an AES key that is derived from a user entered password. You need the password to recreate the AES key in order
  * to decrypt these bytes.</p>
  */
-public class EncryptedPrivateKey {
+public class OWEncryptedPrivateKey {
 
     private byte[] initialisationVector = null;
     private byte[] encryptedPrivateBytes = null;
@@ -35,7 +35,7 @@ public class EncryptedPrivateKey {
      * Cloning constructor.
      * @param encryptedPrivateKey EncryptedPrivateKey to clone.
      */
-    public EncryptedPrivateKey(EncryptedPrivateKey encryptedPrivateKey) {
+    public OWEncryptedPrivateKey(OWEncryptedPrivateKey encryptedPrivateKey) {
         setInitialisationVector(encryptedPrivateKey.getInitialisationVector());
         setEncryptedPrivateBytes(encryptedPrivateKey.getEncryptedBytes());
     }
@@ -44,7 +44,7 @@ public class EncryptedPrivateKey {
      * @param iv
      * @param encryptedPrivateKeys
      */
-    public EncryptedPrivateKey(byte[] initialisationVector, byte[] encryptedPrivateKeys) {
+    public OWEncryptedPrivateKey(byte[] initialisationVector, byte[] encryptedPrivateKeys) {
         setInitialisationVector(initialisationVector);
         setEncryptedPrivateBytes(encryptedPrivateKeys);
     }
@@ -89,8 +89,8 @@ public class EncryptedPrivateKey {
     }
 
     @Override
-    public EncryptedPrivateKey clone() {
-        return new EncryptedPrivateKey(getInitialisationVector(), getEncryptedBytes());
+    public OWEncryptedPrivateKey clone() {
+        return new OWEncryptedPrivateKey(getInitialisationVector(), getEncryptedBytes());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class EncryptedPrivateKey {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final EncryptedPrivateKey other = (EncryptedPrivateKey) obj;
+        final OWEncryptedPrivateKey other = (OWEncryptedPrivateKey) obj;
 
         return com.google.common.base.Objects.equal(this.initialisationVector, other.initialisationVector)
                 && com.google.common.base.Objects.equal(this.encryptedPrivateBytes, other.encryptedPrivateBytes);

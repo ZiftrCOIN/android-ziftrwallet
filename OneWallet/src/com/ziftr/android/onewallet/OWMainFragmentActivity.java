@@ -43,8 +43,7 @@ import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListItem;
-import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -161,11 +160,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
-
-	/** The database helper object. Open and closed in onResume/onPause. */
-	private OWSQLiteOpenHelper databaseHelper;
-
-
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -244,12 +238,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
 
-		if (this.databaseHelper == null) {
-			this.databaseHelper = OWSQLiteOpenHelper.getInstance(this);
-		}
-
 		// Recreate wallet manager
-		this.walletManager = new OWWalletManager(this);
+		this.walletManager = OWWalletManager.getInstance(this);
 
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
@@ -298,21 +288,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	}
 
-	@Override
-	public void onPause() {
-		this.databaseHelper = null;
-		OWSQLiteOpenHelper.closeInstance();
-		super.onPause();
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (this.databaseHelper == null) {
-			this.databaseHelper = OWSQLiteOpenHelper.getInstance(this);
-		}
-	}
-
 	/**
 	 * When the back button is pressed from this activity we
 	 * go to the accounts fragment if we are somewhere else, and from
@@ -345,7 +320,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	@Override
 	protected void onDestroy() {
+		// TODO how should these combined?
 		this.walletManager.closeAllSetupWallets();
+		OWWalletManager.closeInstance();
 		super.onDestroy();
 	}
 
@@ -772,16 +749,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	/**
-	 * Gives the database helper for working with the SQLite 
-	 * tables.
-	 * 
-	 * @return as above
-	 */
-	public OWSQLiteOpenHelper getDatabaseHelper() {
-		return this.databaseHelper;
-	}
-
-	/**
 	 * Causes a dialog to pop up asking the user for his/her
 	 * passphrase. If the passphrase is successfully verified then
 	 * a {@link OWWalletFragment} fragment is started. 
@@ -889,7 +856,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Open the view for transaction details
 	 */
-	public void openTxnDetails(OWWalletTransactionListItem txItem) {
+	public void openTxnDetails(OWWalletTransaction txItem) {
 
 		String tag = "txn_details_fragment";
 		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
@@ -1175,19 +1142,20 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	public void specifySearchBarTextWatcher(TextWatcher textWatcher) {
-		// called in onCreate of all fragments that use the search bar
+		// called in onResume of all fragments that use the search bar
+		// Can, instead, also be called by calling the change action bar method
 		EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
 		searchText.addTextChangedListener(textWatcher);
 	}
 
 	public void unregisterSearchBarTextWatcher(TextWatcher textWatcher) {
-		// TODO Called in onDestroy of all fragments that use the search bar
+		// TODO Called in onPause of all fragments that use the search bar
 		EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
 		searchText.removeTextChangedListener(textWatcher);
 	}
 
 	public boolean searchBarIsVisible() {
 		View search = findViewById(R.id.searchBar);
-		return search.getVisibility() != View.GONE;
+		return search.getVisibility() == View.VISIBLE;
 	}
 }

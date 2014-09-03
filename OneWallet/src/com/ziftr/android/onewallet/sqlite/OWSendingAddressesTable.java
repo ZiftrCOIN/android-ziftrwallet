@@ -7,8 +7,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ziftr.android.onewallet.crypto.Address;
-import com.ziftr.android.onewallet.crypto.AddressFormatException;
+import com.ziftr.android.onewallet.crypto.OWAddress;
+import com.ziftr.android.onewallet.crypto.OWAddressFormatException;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoinRelative;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -69,14 +69,14 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		return coinId.toString() + TABLE_POSTFIX;
 	}
 
-	protected static void insert(Address address, SQLiteDatabase db) {
+	protected static void insert(OWAddress address, SQLiteDatabase db) {
 		long insertId = db.insert(getTableName(address.getCoinId()), 
 				null, keyToContentValues(address, true));
 		address.setId(insertId);
 	}
 
-	protected static List<Address> readAllAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
-		List<Address> addresses = new ArrayList<Address>();
+	protected static List<OWAddress> readAllAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
+		List<OWAddress> addresses = new ArrayList<OWAddress>();
 
 		String selectQuery = "SELECT * FROM " + getTableName(coinId) + ";";
 		Cursor c = db.rawQuery(selectQuery, null);
@@ -85,11 +85,11 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		if (c.moveToFirst()) {
 			do {
 				try {
-					Address newAddress = cursorToAddress(coinId, c);
+					OWAddress newAddress = cursorToAddress(coinId, c);
 
 					// Add the new key to the list
 					addresses.add(newAddress);
-				} catch(AddressFormatException afe) {
+				} catch(OWAddressFormatException afe) {
 					ZLog.log("Error loading address from ", coinId.toString(), 
 							" sending addresses database.");
 					afe.printStackTrace();
@@ -112,7 +112,7 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		return count;
 	}
 
-	protected static void updateAddress(Address address, SQLiteDatabase db) {
+	protected static void updateAddress(OWAddress address, SQLiteDatabase db) {
 		if (address.getId() == -1) {
 			// Shouldn't happen
 			throw new RuntimeException("Error: id has not been set.");
@@ -125,10 +125,10 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 	 * @param coinId
 	 * @param c
 	 * @return
-	 * @throws AddressFormatException
+	 * @throws OWAddressFormatException
 	 */
-	private static Address cursorToAddress(OWCoin.Type coinId, Cursor c) throws AddressFormatException {
-		Address newAddress = new Address(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
+	private static OWAddress cursorToAddress(OWCoin.Type coinId, Cursor c) throws OWAddressFormatException {
+		OWAddress newAddress = new OWAddress(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
 
 		// Reset all the keys parameters for use elsewhere
 		newAddress.setId(c.getLong(c.getColumnIndex(COLUMN_ID)));
@@ -139,7 +139,7 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		return newAddress;
 	}
 
-	private static ContentValues keyToContentValues(Address address, boolean forInsert) {
+	private static ContentValues keyToContentValues(OWAddress address, boolean forInsert) {
 		ContentValues values = new ContentValues();
 
 		if (forInsert) {

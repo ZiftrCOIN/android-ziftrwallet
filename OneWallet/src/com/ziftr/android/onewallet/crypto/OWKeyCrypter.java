@@ -33,7 +33,7 @@ import org.spongycastle.crypto.params.KeyParameter;
  *<p>There can be different algorithms used for encryption/ decryption so the getUnderstoodEncryptionType is used
  *to determine whether any given KeyCrypter can understand the type of encrypted data you have.</p>
  */
-public interface KeyCrypter extends Serializable {
+public interface OWKeyCrypter extends Serializable {
 
     /**
      * Return the EncryptionType enum value which denotes the type of encryption/ decryption that this KeyCrypter
@@ -45,22 +45,22 @@ public interface KeyCrypter extends Serializable {
      * Create a KeyParameter (which typically contains an AES key)
      * @param password
      * @return KeyParameter The KeyParameter which typically contains the AES key to use for encrypting and decrypting
-     * @throws KeyCrypterException
+     * @throws OWKeyCrypterException
      */
-    public KeyParameter deriveKey(CharSequence password) throws KeyCrypterException;
+    public KeyParameter deriveKey(CharSequence password) throws OWKeyCrypterException;
 
     /**
      * Decrypt the provided encrypted bytes, converting them into unencrypted bytes.
      *
-     * @throws KeyCrypterException if decryption was unsuccessful.
+     * @throws OWKeyCrypterException if decryption was unsuccessful.
      */
-    public byte[] decrypt(EncryptedPrivateKey encryptedBytesToDecode, KeyParameter aesKey) throws KeyCrypterException;
+    public byte[] decrypt(OWEncryptedPrivateKey encryptedBytesToDecode, KeyParameter aesKey) throws OWKeyCrypterException;
 
     /**
      * Encrypt the supplied bytes, converting them into ciphertext.
      *
      * @return encryptedPrivateKey An encryptedPrivateKey containing the encrypted bytes and an initialisation vector.
-     * @throws KeyCrypterException if encryption was unsuccessful
+     * @throws OWKeyCrypterException if encryption was unsuccessful
      */
-    public EncryptedPrivateKey encrypt(byte[] plainBytes, KeyParameter aesKey) throws KeyCrypterException;
+    public OWEncryptedPrivateKey encrypt(byte[] plainBytes, KeyParameter aesKey) throws OWKeyCrypterException;
 }

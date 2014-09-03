@@ -24,9 +24,9 @@ import java.util.Arrays;
  * different chains, an operation that is guaranteed to destroy the money.
  */
 @SuppressWarnings("serial")
-public class WrongNetworkException extends AddressFormatException {
+public class OWWrongNetworkException extends OWAddressFormatException {
 
-	public WrongNetworkException(byte verCode, byte[] acceptableVersions) {
+	public OWWrongNetworkException(byte verCode, byte[] acceptableVersions) {
 		super("Version code of address did not match acceptable versions for network: " + 
 				String.valueOf(verCode) + " not in " +
 				Arrays.toString(acceptableVersions));

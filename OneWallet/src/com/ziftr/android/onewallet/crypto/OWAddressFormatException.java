@@ -17,12 +17,12 @@
 package com.ziftr.android.onewallet.crypto;
 
 @SuppressWarnings("serial")
-public class AddressFormatException extends Exception {
-    public AddressFormatException() {
+public class OWAddressFormatException extends Exception {
+    public OWAddressFormatException() {
         super();
     }
 
-    public AddressFormatException(String message) {
+    public OWAddressFormatException(String message) {
         super(message);
     }
 }

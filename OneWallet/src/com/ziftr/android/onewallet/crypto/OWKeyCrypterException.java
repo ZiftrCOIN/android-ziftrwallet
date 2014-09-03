@@ -9,14 +9,14 @@ package com.ziftr.android.onewallet.crypto;
  * that reported in the exception message). Since this is in English, it may not be worth reporting directly
  * to the user other than as part of a "general failure to parse" response.</p>
  */
-public class KeyCrypterException extends RuntimeException {
+public class OWKeyCrypterException extends RuntimeException {
     private static final long serialVersionUID = -4441989608332681377L;
 
-    public KeyCrypterException(String s) {
+    public OWKeyCrypterException(String s) {
         super(s);
     }
 
-    public KeyCrypterException(String s, Throwable throwable) {
+    public OWKeyCrypterException(String s, Throwable throwable) {
         super(s, throwable);
     }
 }

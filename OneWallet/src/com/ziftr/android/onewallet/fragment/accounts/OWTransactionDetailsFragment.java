@@ -21,7 +21,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 
 	private View rootView;
 	
-	private OWWalletTransactionListItem txItem;
+	private OWWalletTransaction txItem;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
@@ -99,14 +99,14 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	/**
 	 * @return the txItem
 	 */
-	public OWWalletTransactionListItem getTxItem() {
+	public OWWalletTransaction getTxItem() {
 		return txItem;
 	}
 
 	/**
 	 * @param txItem the txItem to set
 	 */
-	public void setTxItem(OWWalletTransactionListItem txItem) {
+	public void setTxItem(OWWalletTransaction txItem) {
 		this.txItem = txItem;
 	}
 

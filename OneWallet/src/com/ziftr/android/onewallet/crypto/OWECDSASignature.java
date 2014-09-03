@@ -15,14 +15,14 @@ import org.spongycastle.asn1.DLSequence;
  * how ECDSA signatures are represented when embedded in other data structures in the Bitcoin protocol. The raw
  * components can be useful for doing further EC maths on them.
  */
-public class ECDSASignature {
+public class OWECDSASignature {
 	/** The two components of the signature. */
 	public BigInteger r, s;
 
 	/**
 	 * Constructs a signature with the given components. Does NOT automatically canonicalise the signature.
 	 */
-	public ECDSASignature(BigInteger r, BigInteger s) {
+	public OWECDSASignature(BigInteger r, BigInteger s) {
 		this.r = r;
 		this.s = s;
 	}
@@ -35,13 +35,13 @@ public class ECDSASignature {
 	 * considered legal and the other will be banned.
 	 */
 	public void ensureCanonical() {
-		if (s.compareTo(ECKey.HALF_CURVE_ORDER) > 0) {
+		if (s.compareTo(OWECKey.HALF_CURVE_ORDER) > 0) {
 			// The order of the curve is the number of valid points that exist on that curve. If S is in the upper
 			// half of the number of valid points, then bring it back to the lower half. Otherwise, imagine that
 			//    N = 10
 			//    s = 8, so (-8 % 10 == 2) thus both (r, 8) and (r, 2) are valid solutions.
 			//    10 - 8 == 2, giving us always the latter solution, which is canonical.
-			s = ECKey.CURVE.getN().subtract(s);
+			s = OWECKey.CURVE.getN().subtract(s);
 		}
 	}
 
@@ -58,7 +58,7 @@ public class ECDSASignature {
 		}
 	}
 
-	public static ECDSASignature decodeFromDER(byte[] bytes) {
+	public static OWECDSASignature decodeFromDER(byte[] bytes) {
 		try {
 			ASN1InputStream decoder = new ASN1InputStream(bytes);
 			DLSequence seq = (DLSequence) decoder.readObject();
@@ -73,7 +73,7 @@ public class ECDSASignature {
 			}
 			// OpenSSL deviates from the DER spec by interpreting these values as unsigned, though they should not be
 			// Thus, we always use the positive versions. See: http://r6.ca/blog/20111119T211504Z.html
-			return new ECDSASignature(r.getPositiveValue(), s.getPositiveValue());
+			return new OWECDSASignature(r.getPositiveValue(), s.getPositiveValue());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
