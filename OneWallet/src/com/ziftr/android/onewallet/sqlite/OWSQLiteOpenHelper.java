@@ -347,4 +347,10 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * want to add this feature? Maybe a long click in the address list?
 	 */
 
+	///////////////////////////////////////////////////////////
+	//////////  Interface for CRUDing transactions  ///////////
+	///////////////////////////////////////////////////////////
+	
+	
+
 }
