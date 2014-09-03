@@ -1,7 +1,9 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.annotation.SuppressLint;
@@ -17,11 +19,12 @@ import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
+import com.ziftr.android.onewallet.util.OWUtils;
 
 /**
- * TODO make abstract class OWSearchableListAdapter
+ * An adapter class for transactions.
  */
-public class OWWalletTransactionListAdapter extends OWWalletSearchableListAdapter {
+public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 	
 	private List<OWWalletTransactionListItem> fullPendingTxList;
 	
@@ -32,6 +35,7 @@ public class OWWalletTransactionListAdapter extends OWWalletSearchableListAdapte
 
 	/** Standard entries for transactions. */
 	public static final int transactionType = 0;
+	
 	/** The divider type. */
 	public static final int dividerType = 1;
 
@@ -45,7 +49,6 @@ public class OWWalletTransactionListAdapter extends OWWalletSearchableListAdapte
 		this(ctx, combineLists(fullPendingTxList, fullConfirmedTxList));
 		this.fullPendingTxList = fullPendingTxList;
 		this.fullConfirmedTxList = fullConfirmedTxList;
-
 	}
 	
 	private static List<OWWalletTransactionListItem> combineLists(
@@ -120,7 +123,9 @@ public class OWWalletTransactionListAdapter extends OWWalletSearchableListAdapte
 			txTitleTextView.setText(txListItem.getTxNote());
 
 			TextView txTimeTextView = (TextView) convertView.findViewById(R.id.txTime);
-			txTimeTextView.setText(txListItem.getTxTime());
+			// TODO we will continue using the seconds value for now. Is this right, though?
+			Date date = new Date(txListItem.getTxTime() * 1000);
+			txTimeTextView.setText(OWUtils.formatterNoTimeZone.format(date));
 
 			TextView txAmount = (TextView) convertView.findViewById(R.id.txAmount);
 			BigDecimal amt = OWCoin.formatCoinAmount(
@@ -129,10 +134,10 @@ public class OWWalletTransactionListAdapter extends OWWalletSearchableListAdapte
 
 			TextView txAmountFiatEquiv = (TextView) 
 					convertView.findViewById(R.id.txAmountFiatEquiv);
-			BigDecimal fiatAmt = OWConverter.convert(txListItem.getTxAmount(), 
+			BigInteger fiatAmt = OWConverter.convert(txListItem.getTxAmount(), 
 					txListItem.getCoinId(), txListItem.getFiatType());
 			BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
-					txListItem.getFiatType(), fiatAmt);
+					txListItem.getFiatType(), OWUtils.bigIntToBigDec(txListItem.getCoinId(), fiatAmt));
 			txAmountFiatEquiv.setText(fiatSymbol + formattedfiatAmt.toPlainString());
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
@@ -209,7 +214,7 @@ public class OWWalletTransactionListAdapter extends OWWalletSearchableListAdapte
 	 */
 	private int getImgResIdForItem(OWWalletTransactionListItem txListItem) {
 		int imgResId;
-		if (txListItem.getTxAmount().compareTo(BigDecimal.ZERO) >= 0) {
+		if (txListItem.getTxAmount().compareTo(BigInteger.ZERO) >= 0) {
 			// This means the tx is received (relative to user)
 			if (txListItem.getTxType() == 
 					OWWalletTransactionListItem.Type.PendingTransaction) {

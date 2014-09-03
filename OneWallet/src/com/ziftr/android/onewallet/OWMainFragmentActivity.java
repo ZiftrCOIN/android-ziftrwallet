@@ -39,14 +39,13 @@ import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoinsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetails;
+import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWWalletSearchableListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListItem;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -890,28 +889,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Open the view for transaction details
 	 */
-	public void openTxnDetails(OWWalletTransactionListItem TxItem) {
+	public void openTxnDetails(OWWalletTransactionListItem txItem) {
 
 		String tag = "txn_details_fragment";
-		OWTransactionDetails fragToShow = (OWTransactionDetails) this.getSupportFragmentManager().findFragmentByTag(tag);
+		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			Bundle data = new Bundle();
-			if (TxItem == null) {
-				ZLog.log("NULL");
-			}
-			if (TxItem.getTxAmount() == null) {
-				ZLog.log("Null TxAmount, user pressed divider");
-				return;
-			}
-			data.putString("amount", TxItem.getTxAmount().toString());
-			data.putString("currencyval", OWConverter.convert(
-					TxItem.getTxAmount(), TxItem.getCoinId(), TxItem.getFiatType()).toString());
-			data.putString("date", TxItem.getTxTime());
-			data.putString("currencytype", TxItem.getFiatType().getName());
-			data.putBoolean("pending", TxItem.isPending());
-			fragToShow = new OWTransactionDetails();
-			fragToShow.setArguments(data);
+			fragToShow = new OWTransactionDetailsFragment();
 		}
+		fragToShow.setTxItem(txItem);
 		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, 
 				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 	}
@@ -1078,7 +1063,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	public void changeActionBar(String title, boolean menu, boolean home, 
 			final TextWatcher textWatcher, 
-			final OWWalletSearchableListAdapter adapter) {
+			final OWSearchableListAdapter adapter) {
 
 		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 		ImageView backButton = (ImageView) this.findViewById(R.id.actionBarBack);
@@ -1176,7 +1161,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	private void filterAccordingToVisibility(
-			final OWWalletSearchableListAdapter adapter) {
+			final OWSearchableListAdapter adapter) {
 		final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
 		if (!searchBarIsVisible()) {
 			ZLog.log("Not visible");

@@ -1,8 +1,10 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
+import com.ziftr.android.onewallet.crypto.Address;
+import com.ziftr.android.onewallet.crypto.Sha256Hash;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
 
@@ -10,19 +12,28 @@ import com.ziftr.android.onewallet.util.OWFiat;
  * This class is just a data holder for the {@link OWWalletTransactionListAdapter}.
  */
 public class OWWalletTransactionListItem {
+
+	// Database stuff
 	
-	protected enum Type {
-		PendingTransaction,
-		ConfirmedTransaction,
-		PendingDivider,
-		HistoryDivider
-	}
+	/** The id of this transaction in the database. */
+	private long _id = -1;
 
-	/** The currency's title. e.g. "Bitcoin". */
-	private OWCoin.Type coinId;
+	/** The identifier of this transaciton in the network. */
+	private Sha256Hash sha256Hash;
 
-	/** They type of fiat. e.g. Fiat.Type.USD. */
-	private OWFiat.Type fiatType;
+	/** 
+	 * The amount that the transaction caused the balance of this wallet to change by. 
+	 * If this is a received transaction, then the fee was not paid by 
+	 * us, and so does not affect the wallet balance.
+	 */
+	private BigInteger txAmount;
+
+	/** 
+	 * The fee paid to the miners for this tx. May or may not have been paid by user.
+	 * If this is a sending transaction, user paid. If it is a reciving transaction, 
+	 * then the sender paid. 
+	 */
+	private BigInteger txFee;
 
 	/** 
 	 * The title of the transaction. This is given in the send/recieve
@@ -30,11 +41,34 @@ public class OWWalletTransactionListItem {
 	 */
 	private String txNote;
 
-	/** The time that the transaction took place. */
-	private String txTime;
+	/** The time this transaction was broadcasted to the network. */
+	private long txTime;
+	
+	/** The last known number of confirmations for this tx. May be out of date. */
+	private int numConfirmations;
+	
+	/** 
+	 * The one address of all the output addresses that is most representative 
+	 * of this transaction. For sending txs, this will just be the address we 
+	 * sent coins to. For receiving txs, this will likely be the first in the list
+	 * of outputs that is an address that belongs to us.
+	 */
+	private Address displayAddress;
+	
+	// Viewing stuff
 
-	/** The amount that the transaction causes the wallet balance to change by. */
-	private BigDecimal txAmount;
+	/** The currency's title. e.g. "Bitcoin". */
+	private OWCoin.Type coinId;
+
+	/** They type of fiat. e.g. Fiat.Type.USD. */
+	private OWFiat.Type fiatType;
+
+	protected enum Type {
+		PendingTransaction,
+		ConfirmedTransaction,
+		PendingDivider,
+		HistoryDivider
+	}
 
 	/** A boolean describing whether or not this transaction is pending. */
 	private OWWalletTransactionListItem.Type txType;
@@ -45,8 +79,8 @@ public class OWWalletTransactionListItem {
 	public OWWalletTransactionListItem(OWCoin.Type coinId, 
 			OWFiat.Type fiatType, 
 			String txNote, 
-			String txTime, 
-			BigDecimal txAmount, 
+			long txTime, 
+			BigInteger txAmount, 
 			OWWalletTransactionListItem.Type txType,
 			int resId) {
 		this.setCoinId(coinId);
@@ -101,30 +135,72 @@ public class OWWalletTransactionListItem {
 	}
 
 	/**
+	 * @return the _id
+	 */
+	public long get_id() {
+		return _id;
+	}
+
+	/**
+	 * @param _id the _id to set
+	 */
+	public void set_id(long _id) {
+		this._id = _id;
+	}
+
+	/**
+	 * @return the sha256Hash
+	 */
+	public Sha256Hash getSha256Hash() {
+		return sha256Hash;
+	}
+
+	/**
+	 * @param sha256Hash the sha256Hash to set
+	 */
+	public void setSha256Hash(Sha256Hash sha256Hash) {
+		this.sha256Hash = sha256Hash;
+	}
+
+	/**
+	 * @return the txFee
+	 */
+	public BigInteger getTxFee() {
+		return txFee;
+	}
+
+	/**
+	 * @param txFee the txFee to set
+	 */
+	public void setTxFee(BigInteger txFee) {
+		this.txFee = txFee;
+	}
+
+	/**
 	 * @return the txTime
 	 */
-	public String getTxTime() {
+	public long getTxTime() {
 		return txTime;
 	}
 
 	/**
 	 * @param txTime the txTime to set
 	 */
-	public void setTxTime(String txTime) {
+	public void setTxTime(long txTime) {
 		this.txTime = txTime;
 	}
-
+	
 	/**
 	 * @return the txAmount
 	 */
-	public BigDecimal getTxAmount() {
+	public BigInteger getTxAmount() {
 		return txAmount;
 	}
 
 	/**
 	 * @param txAmount the txAmount to set
 	 */
-	public void setTxAmount(BigDecimal txAmount) {
+	public void setTxAmount(BigInteger txAmount) {
 		this.txAmount = txAmount;
 	}
 
@@ -155,12 +231,40 @@ public class OWWalletTransactionListItem {
 	public void setResId(int resId) {
 		this.resId = resId;
 	}
-	
+
 	/**
 	 * @return True if this transaction type is pending
 	 */
 	public Boolean isPending() {
 		return this.txType == Type.PendingTransaction;
+	}
+	
+	/**
+	 * @return the numConfirmations
+	 */
+	public int getNumConfirmations() {
+		return numConfirmations;
+	}
+
+	/**
+	 * @param numConfirmations the numConfirmations to set
+	 */
+	public void setNumConfirmations(int numConfirmations) {
+		this.numConfirmations = numConfirmations;
+	}
+
+	/**
+	 * @return the displayAddress
+	 */
+	public Address getDisplayAddress() {
+		return displayAddress;
+	}
+
+	/**
+	 * @param displayAddress the displayAddress to set
+	 */
+	public void setDisplayAddress(Address displayAddress) {
+		this.displayAddress = displayAddress;
 	}
 
 }

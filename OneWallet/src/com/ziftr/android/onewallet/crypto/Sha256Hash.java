@@ -16,8 +16,6 @@
 
 package com.ziftr.android.onewallet.crypto;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +24,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import org.spongycastle.util.encoders.Hex;
+import org.spongycastle.crypto.RuntimeCryptoException;
 
 import com.google.common.io.ByteStreams;
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -43,7 +41,7 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
      * Creates a Sha256Hash by wrapping the given byte array. It must be 32 bytes long.
      */
     public Sha256Hash(byte[] rawHashBytes) {
-        checkArgument(rawHashBytes.length == 32);
+        checkArgument(rawHashBytes.length == 32, "Must only be exactly 32 bytes");
         this.bytes = rawHashBytes;
 
     }
@@ -52,8 +50,8 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
      * Creates a Sha256Hash by decoding the given hex string. It must be 64 characters long.
      */
     public Sha256Hash(String hexString) {
-        checkArgument(hexString.length() == 64);
-        this.bytes = Hex.decode(hexString);
+        checkArgument(hexString.length() == 64, "Must only be exactly 64 hex chars");
+        this.bytes = OWUtils.hexStringToBytes(hexString);
     }
 
     /**
@@ -134,5 +132,11 @@ public class Sha256Hash implements Comparable<Sha256Hash> {
         int thisCode = this.hashCode();
         int oCode = ((Sha256Hash)hashToCompare).hashCode();
         return thisCode > oCode ? 1 : (thisCode == oCode ? 0 : -1);
+    }
+    
+    private static void checkArgument(boolean arg, String error) {
+    	if (!arg) {
+    		throw new RuntimeCryptoException(error);
+    	}
     }
 }

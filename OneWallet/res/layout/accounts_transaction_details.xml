@@ -34,7 +34,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/amount_label"
+            android:id="@+id/amountLabel"
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -47,14 +47,14 @@
             android:minHeight="10dp" />
 
         <TextView
-            android:id="@+id/currency_value"
+            android:id="@+id/currencyValue"
             style="@style/txn_values"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/Placeholder" />
 
         <TextView
-            android:id="@+id/currency_type"
+            android:id="@+id/currencyType"
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

@@ -90,7 +90,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		searchBar.setVisibility(View.GONE);
 		super.onStop();
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		this.getOWMainActivity().unregisterSearchBarTextWatcher(this);
@@ -172,28 +172,30 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		Set<String> pendingTxHashes = null;
 		if (pendingTxs.size() > 0) {
 			// Add the Pending Divider
-			this.txAdapter.getFullPendingTxList().add(new OWWalletTransactionListItem(
-					null, null, "PENDING", null, null, 
-					OWWalletTransactionListItem.Type.PendingDivider, 
-					R.layout.accounts_wallet_tx_list_divider));
+			this.txAdapter.getFullPendingTxList().add(
+					new OWWalletTransactionListItem(
+							null, null, "PENDING", -1, null, 
+							OWWalletTransactionListItem.Type.PendingDivider, 
+							R.layout.accounts_wallet_tx_list_divider));
 			pendingTxHashes = new HashSet<String>();
 			// Add all the pending transactions
 			for (Transaction tx : pendingTxs) {
-				this.txAdapter.getFullPendingTxList().add(new OWWalletTransactionListItem(
-						getCoinId(), 
-						OWFiat.Type.USD, 
-						tx.getHashAsString().substring(0, 6), 
-						OWUtils.formatterNoTimeZone.format(tx.getUpdateTime()),
-						OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
-						OWWalletTransactionListItem.Type.PendingTransaction, 
-						R.layout.accounts_wallet_tx_list_item));
+				this.txAdapter.getFullPendingTxList().add(
+						new OWWalletTransactionListItem(
+								getCoinId(), 
+								OWFiat.Type.USD, 
+								tx.getHashAsString().substring(0, 6), 
+								tx.getUpdateTime().getTime() / 1000,
+								tx.getValue(getWallet()), 
+								OWWalletTransactionListItem.Type.PendingTransaction, 
+								R.layout.accounts_wallet_tx_list_item));
 				pendingTxHashes.add(tx.getHashAsString());
 			}
 		}
 
 		// Add the History Divider
 		this.txAdapter.getFullConfirmedTxList().add(new OWWalletTransactionListItem(
-				null, null, "HISTORY", null, null, 
+				null, null, "HISTORY", -1, null, 
 				OWWalletTransactionListItem.Type.HistoryDivider, 
 				R.layout.accounts_wallet_tx_list_divider));
 		// Add all the pending transactions
@@ -204,8 +206,8 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 						getCoinId(), 
 						OWFiat.Type.USD, 
 						tx.getHashAsString().substring(0, 6), 
-						OWUtils.formatterNoTimeZone.format(tx.getUpdateTime()),
-						OWUtils.bigIntToBigDec(getCoinId(), tx.getValue(getWallet())), 
+						tx.getUpdateTime().getTime() / 1000,
+						tx.getValue(getWallet()),
 						OWWalletTransactionListItem.Type.ConfirmedTransaction, 
 						R.layout.accounts_wallet_tx_list_item));
 			}
@@ -213,20 +215,21 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 
 		this.txAdapter.refreshWorkingList();
 		this.txAdapter.notifyDataSetChanged();
-		
+
 		this.txListView = (ListView) this.rootView.findViewById(R.id.txListView);
 		this.txListView.setAdapter(this.txAdapter);
-		
+
 		// Opens transactions details fragment by calling openTxnDetails in MainActivity, passing
 		// the txnItem when user clicks a txn list item.
 		this.txListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				OWWalletTransactionListItem txItem = (OWWalletTransactionListItem) 
-						txListView.getItemAtPosition(position);
-				OWMainFragmentActivity mActivity = (OWMainFragmentActivity) getActivity();
-				mActivity.openTxnDetails(txItem);
+				if (txAdapter.getItemViewType(position) == OWWalletTransactionListAdapter.dividerType) {
+					OWWalletTransactionListItem txItem = (OWWalletTransactionListItem) 
+							txListView.getItemAtPosition(position);
+					getOWMainActivity().openTxnDetails(txItem);
+				}
 			}
 		});
 

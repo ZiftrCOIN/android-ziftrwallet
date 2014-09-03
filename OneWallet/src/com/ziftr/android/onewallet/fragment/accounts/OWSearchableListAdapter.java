@@ -7,12 +7,12 @@ import android.view.LayoutInflater;
 import android.widget.ArrayAdapter;
 import android.widget.Filterable;
 
-public abstract class OWWalletSearchableListAdapter extends ArrayAdapter<OWWalletTransactionListItem> implements Filterable {
+public abstract class OWSearchableListAdapter extends ArrayAdapter<OWWalletTransactionListItem> implements Filterable {
 	private Context context;
 	private LayoutInflater inflater;
 	private List<OWWalletTransactionListItem> workingTxList;
 	
-	public OWWalletSearchableListAdapter(Context ctx, List<OWWalletTransactionListItem> txList) {
+	public OWSearchableListAdapter(Context ctx, List<OWWalletTransactionListItem> txList) {
 		super(ctx, 0, txList);
 		this.setInflater(LayoutInflater.from(ctx));
 		this.setContext(ctx);

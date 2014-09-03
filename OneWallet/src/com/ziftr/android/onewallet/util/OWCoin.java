@@ -1,6 +1,7 @@
 package com.ziftr.android.onewallet.util;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.params.MainNetParams;
@@ -190,6 +191,19 @@ public class OWCoin {
 	public static BigDecimal formatCoinAmount(OWCoin.Type coinType, BigDecimal toFormat) {
 		return OWUtils.formatToNDecimalPlaces(
 				coinType.getNumberOfDigitsOfPrecision(), toFormat);
+	}
+	
+	/**
+	 * A convenience method to format a BigDecimal. In Standard use,
+	 * one can just use standard BigDecimal methods and use this
+	 * right before formatting for displaying a coin value.
+	 * 
+	 * @param toFormat - The BigDecimal to format.
+	 * @return as above
+	 */
+	public static BigDecimal formatCoinAmount(OWCoin.Type coinType, BigInteger toFormat) {
+		return OWUtils.formatToNDecimalPlaces(
+				coinType.getNumberOfDigitsOfPrecision(), new BigDecimal(toFormat, coinType.getNumberOfDigitsOfPrecision()));
 	}
 
 }

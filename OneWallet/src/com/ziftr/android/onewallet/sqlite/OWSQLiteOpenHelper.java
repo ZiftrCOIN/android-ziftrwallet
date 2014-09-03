@@ -351,6 +351,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	//////////  Interface for CRUDing transactions  ///////////
 	///////////////////////////////////////////////////////////
 	
-	
+//	public void createTx
 
 }
