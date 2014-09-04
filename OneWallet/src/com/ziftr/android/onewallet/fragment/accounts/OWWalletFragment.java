@@ -1,9 +1,7 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,17 +12,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
-import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWConverter;
-import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -118,44 +109,6 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		return this.rootView;
 	}
 
-	private void initializeWalletHeaderView() {
-		View headerView = this.rootView.findViewById(R.id.walletHeader);
-
-		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
-		Drawable coinImage = this.getActivity().getResources().getDrawable(
-				getCoinId().getLogoResId());
-		coinLogo.setImageDrawable(coinImage);
-
-		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
-		coinTitle.setText(getCoinId().getLongTitle());
-
-		TextView coinUnitPriceInFiatTextView = (TextView) 
-				headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = OWConverter.convert(
-				BigDecimal.ONE, getCoinId(), OWFiat.Type.USD);
-		coinUnitPriceInFiatTextView.setText(OWFiat.Type.USD.getSymbol() + 
-				OWFiat.formatFiatAmount(OWFiat.Type.USD, 
-						unitPriceInFiat).toPlainString());
-
-		TextView walletBalanceTextView = (TextView) 
-				headerView.findViewById(R.id.topRightTextView);
-		BigDecimal walletBallance = OWUtils.bigIntToBigDec(getCoinId(), 
-				getWalletManager().getWalletBalance(getCoinId(), OWSQLiteOpenHelper.BalanceType.ESTIMATED));
-		walletBalanceTextView.setText(
-				OWCoin.formatCoinAmount(getCoinId(), walletBallance).toPlainString());
-
-		TextView walletBalanceFiatEquivTextView = (TextView) 
-				headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceFiatEquiv = OWConverter.convert(
-				walletBallance, getCoinId(), OWFiat.Type.USD);
-		walletBalanceFiatEquivTextView.setText(OWFiat.Type.USD.getSymbol() + 
-				walletBalanceFiatEquiv.toPlainString());
-
-		ImageView marketIcon = (ImageView) (headerView.findViewById(R.id.rightIcon));
-		Drawable marketImage = this.getActivity().getResources().getDrawable(
-				R.drawable.stats_enabled);
-		marketIcon.setImageDrawable(marketImage);
-	}
 
 	private void initializeTxListView() {
 		this.txAdapter = new OWWalletTransactionListAdapter(this.getActivity());
@@ -198,7 +151,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				if (txAdapter.getItemViewType(position) == OWWalletTransactionListAdapter.dividerType) {
+				if (txAdapter.getItemViewType(position) != OWWalletTransactionListAdapter.transactionType) {
 					OWWalletTransaction txItem = (OWWalletTransaction) 
 							txListView.getItemAtPosition(position);
 					getOWMainActivity().openTxnDetails(txItem);
@@ -244,7 +197,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+		//nothing
 	}
 
 	@Override

@@ -16,11 +16,12 @@ public class OWSettingsFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
+		this.getOWMainActivity().hideWalletHeader();
 		return inflater.inflate(R.layout.section_settings_layout, container, false);
 	}
 	public void onResume(){
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ABOUT", false, true);
+		this.getOWMainActivity().changeActionBar("SETTINGS", true, true);
 	}
 
 	

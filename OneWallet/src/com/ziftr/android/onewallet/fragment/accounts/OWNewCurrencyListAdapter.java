@@ -48,15 +48,19 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 
 		// Set the coin logo image view
 		ImageView coinLogo = (ImageView) 
-				convertView.findViewById(R.id.coinLogoCentralImage);
+				convertView.findViewById(R.id.leftIcon);
 		Drawable image = context.getResources().getDrawable(
 				newCurrencyListItem.getCoinId().getLogoResId());
 		coinLogo.setImageDrawable(image);
 		
-		// Set the text under the logo
+		// Set the text next to logo
 		TextView coinName = (TextView) 
-				convertView.findViewById(R.id.coinTitleTextView);
+				convertView.findViewById(R.id.topLeftTextView);
 		coinName.setText(newCurrencyListItem.getCoinId().getLongTitle());
+		
+		//Set the add button image
+		ImageView addImage = (ImageView) convertView.findViewById(R.id.rightIcon);
+		addImage.setImageDrawable(context.getResources().getDrawable(R.drawable.add_white_enabled));
 
 		return convertView;
 	}

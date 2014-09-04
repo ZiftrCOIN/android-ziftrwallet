@@ -67,6 +67,8 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
+		this.initializeWalletHeaderView();
+		
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
 

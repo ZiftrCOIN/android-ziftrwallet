@@ -5,7 +5,7 @@
     android:minHeight="@dimen/ow_total_icon_side_length"
     android:background="@drawable/currency_list_selector"
     android:orientation="horizontal"
-    android:padding="5dp" >
+    android:padding="10dp" >
 
     <!-- ListRow Left side Thumbnail image -->
 

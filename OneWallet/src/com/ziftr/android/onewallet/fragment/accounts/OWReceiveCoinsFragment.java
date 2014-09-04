@@ -44,6 +44,8 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		// Initialize the icons so they do the correct things onClick
 		this.initializeAddressUtilityIcons();
 
+		this.initializeWalletHeaderView();
+		
 		if (savedInstanceState == null) {
 			// Set the address to initially be empty
 			this.refresh("");

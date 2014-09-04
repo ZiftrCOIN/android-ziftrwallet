@@ -2,7 +2,9 @@ package com.ziftr.android.onewallet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -22,7 +24,9 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,6 +42,7 @@ import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWNewCurrencyFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
@@ -250,6 +255,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Make sure the action bar changes with what fragment we are in
 		this.initializeActionBar();
 
+		this.initializeSearchBarText();
 	}
 
 	/**
@@ -595,6 +601,22 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	}
 
+	private void initializeSearchBarText(){
+		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
+		final EditText searchEditText = (EditText) findViewById(R.id.searchBarEditText);
+		searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				if (hasFocus){
+					imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
+				} else {
+					imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
+				}
+			}
+		});
+	}
+
 	/**
 	 * Should be called whenever any of the menu items in the
 	 * drawer menu are selected. Basically just contains code 
@@ -869,6 +891,30 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	/**
+	 * Open view for add new currency
+	 */
+	public void openAddCurrency(List<OWCoin.Type> userCurWallets){
+		String tag = "add_new_currency";
+		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
+		if (fragToShow == null) {
+			fragToShow = new OWNewCurrencyFragment();
+		}
+		// Here we get all the coins that the user doesn't currently 
+		// have a wallet for because those are the ones we put in the new view.
+		Set<OWCoin.Type> coinsNotInListCurrently = new HashSet<OWCoin.Type>(
+				Arrays.asList(OWCoin.Type.values()));
+		coinsNotInListCurrently.removeAll(userCurWallets);
+		Bundle b = new Bundle();
+		for (OWCoin.Type type : coinsNotInListCurrently) {
+			b.putBoolean(type.toString(), true);
+		}
+		fragToShow.setArguments(b);
+		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, 
+				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+
+	}
+	
+	/**
 	 * @return the walletManager
 	 */
 	public OWWalletManager getWalletManager() {
@@ -1111,7 +1157,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 					if (!searchBarIsVisible()) {
 						searchBar.setVisibility(View.VISIBLE);
-						// TODO why doen't keyboard come up?
 						searchText.requestFocus();
 					} else {
 						searchBar.setVisibility(View.GONE);
@@ -1131,11 +1176,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			final OWSearchableListAdapter adapter) {
 		final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
 		if (!searchBarIsVisible()) {
-			ZLog.log("Not visible");
 			// Filter
 			adapter.getFilter().filter("");
 		} else {
-			ZLog.log("Visible");
 			// Stop filtering
 			adapter.getFilter().filter(searchText.getText());			
 		}
@@ -1157,5 +1200,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public boolean searchBarIsVisible() {
 		View search = findViewById(R.id.searchBar);
 		return search.getVisibility() == View.VISIBLE;
+	}
+	
+	public void hideWalletHeader(){
+		View walletHeader = findViewById(R.id.walletHeader);
+		walletHeader.setVisibility(View.GONE);
 	}
 }

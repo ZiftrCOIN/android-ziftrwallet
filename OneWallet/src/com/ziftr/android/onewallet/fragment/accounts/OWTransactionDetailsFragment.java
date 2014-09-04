@@ -26,7 +26,9 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-
+		
+		this.getOWMainActivity().hideWalletHeader();
+		
 		this.rootView = inflater.inflate(
 				R.layout.accounts_transaction_details, container, false);
 

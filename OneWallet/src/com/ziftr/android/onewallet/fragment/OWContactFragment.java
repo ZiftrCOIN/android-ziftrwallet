@@ -16,11 +16,12 @@ public class OWContactFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
+		this.getOWMainActivity().hideWalletHeader();
 		return inflater.inflate(R.layout.section_contact_layout, container, false);
 	}
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("CONTACT", false, true);
+		this.getOWMainActivity().changeActionBar("CONTACT", true, true);
 	}
 
 }

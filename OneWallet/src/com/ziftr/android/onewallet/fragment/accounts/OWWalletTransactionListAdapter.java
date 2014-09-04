@@ -20,6 +20,7 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * An adapter class for transactions.
@@ -116,7 +117,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 			// If it doesn't have an old view then we make a new one 
 			convertView = this.getInflater().inflate(txListItem.getResId(), null);
 		}
-
+		ZLog.log(position + " asdnaidiwj");
 		if (getItemViewType(position) == transactionType) {
 
 			String fiatSymbol = txListItem.getFiatType().getSymbol();
@@ -194,6 +195,11 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 							item.getTxNote().toLowerCase().contains(constraint)) {
 						workingConfirmedTxList.add(item);
 					}
+				}
+				
+				// If only the divider is in the list then we don't need the divider
+				if (workingConfirmedTxList.size() == 1) {
+					workingConfirmedTxList.clear();
 				}
 				
 				refreshWorkingList(workingPendingTxList, workingConfirmedTxList);
