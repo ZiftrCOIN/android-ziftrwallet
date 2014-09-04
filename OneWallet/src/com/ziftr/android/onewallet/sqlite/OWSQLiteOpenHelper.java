@@ -8,8 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ziftr.android.onewallet.crypto.OWAddress;
-import com.ziftr.android.onewallet.crypto.OWAddressFormatException;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
+import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.ZLog;
@@ -65,6 +65,12 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		AVAILABLE
 	}
 
+	/** The helper for doing all things related to the receiving addresses table. */
+	private OWAddressesTable receivingAddressesTable;
+	
+	/** The helper for doing all things related to the sending addresses table. */
+	private OWAddressesTable sendingAddressesTable;
+
 	///////////////////////////////////////////////////////
 	//////////  Boiler plate SQLite Table Stuff ///////////
 	///////////////////////////////////////////////////////
@@ -72,6 +78,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	protected OWSQLiteOpenHelper(Context context, String databasePath) {
 		// If the database path is null then an in memory database is used
 		super(context, databasePath, null, DATABASE_VERSION);
+		
+		this.sendingAddressesTable = new OWSendingAddressesTable();
+		this.receivingAddressesTable = new OWReceivingAddressesTable();
 	}
 
 	@Override
@@ -111,8 +120,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		}
 
 		// TODO create tables for coin type
-		OWReceivingAddressesTable.create(coinId, getWritableDatabase());
-		OWSendingAddressesTable.create(coinId, getWritableDatabase());
+		this.receivingAddressesTable.create(coinId, getWritableDatabase());
+		this.sendingAddressesTable.create(coinId, getWritableDatabase());
 
 		// Update table to match activated status
 		this.updateTableActivitedStatus(coinId, ACTIVATED);
@@ -181,8 +190,30 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		address.setLastKnownBalance(balance);
 		address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
-		OWReceivingAddressesTable.insert(address, this.getWritableDatabase());
+		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
 		return address;
+	}
+	
+	/**
+	 * As part of the R in CRUD, this method gets a receiving address from the 
+	 * database for the given coin type.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param address - The 1xyz... (Base58) encoded address in the database. 
+	 */
+	public OWAddress readReceivingAddress(OWCoin.Type coinId, String address) {
+		return this.receivingAddressesTable.readAddress(coinId, address, getReadableDatabase());
+	}
+	
+	/**
+	 * As part of the R in CRUD, this method gets a receiving address from the 
+	 * database for the given coin type.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param address - The 1xyz... (Base58) encoded address in the database. 
+	 */
+	public List<OWAddress> readReceivingAddress(OWCoin.Type coinId, List<String> addresses) {
+		return this.receivingAddressesTable.readAddresses(coinId, addresses, getReadableDatabase());
 	}
 
 	/**
@@ -192,7 +223,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public List<OWAddress> readAllReceivingAddresses(OWCoin.Type coinId) {
-		return OWReceivingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
+		return this.receivingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
@@ -202,7 +233,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public int readNumReceivingAddresses(OWCoin.Type coinId) {
-		return OWReceivingAddressesTable.numAddresses(coinId, getReadableDatabase());
+		return this.receivingAddressesTable.numAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
@@ -217,7 +248,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public void updateReceivingAddress(OWAddress address) {
-		OWReceivingAddressesTable.updateAddress(address, getWritableDatabase());
+		this.receivingAddressesTable.updateAddress(address, getWritableDatabase());
 	}
 
 	/* 
@@ -274,8 +305,19 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		address.setLastKnownBalance(balance);
 		//address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
-		OWSendingAddressesTable.insert(address, this.getWritableDatabase());
+		this.sendingAddressesTable.insert(address, this.getWritableDatabase());
 		return address;
+	}
+	
+	/**
+	 * As part of the R in CRUD, this method gets a receiving address from the 
+	 * database for the given coin type.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param address - The 1xyz... (Base58) encoded address in the database. 
+	 */
+	public OWAddress readSendingAddress(OWCoin.Type coinId, String address) {
+		return this.sendingAddressesTable.readAddress(coinId, address, getReadableDatabase());
 	}
 
 	/**
@@ -285,7 +327,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public List<OWAddress> readAllSendingAddresses(OWCoin.Type coinId) {
-		return OWSendingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
+		return this.sendingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
@@ -295,7 +337,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public int readNumSendingAddresses(OWCoin.Type coinId) {
-		return OWSendingAddressesTable.numAddresses(coinId, getReadableDatabase());
+		return this.sendingAddressesTable.numAddresses(coinId, getReadableDatabase());
 	}
 	
 	/**
@@ -307,7 +349,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public void updateSendingAddress(OWAddress address) {
-		OWSendingAddressesTable.updateAddress(address, getWritableDatabase());
+		this.sendingAddressesTable.updateAddress(address, getWritableDatabase());
 	}
 	
 	/* 

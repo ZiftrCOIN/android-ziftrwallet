@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- TODO Get rid of duplicate strings -->
 
     <!-- Description here -->
     <string name="ow_empty_string"></string>

@@ -26,6 +26,7 @@ public class OWSplashScreenActivity extends FragmentActivity {
         // First just set view to splash screen
         this.setContentView(R.layout.splash_layout);
         
+        // Temporary Bitcoinj logging
         BriefLogFormatter.initVerbose();
 
         loadAppOneSecondLater();

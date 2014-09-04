@@ -20,15 +20,14 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import com.google.bitcoin.core.VersionedChecksummedBytes;
-import com.ziftr.android.onewallet.crypto.OWAddressFormatException;
 import com.ziftr.android.onewallet.crypto.OWECKey;
+import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 
 /**
  * <p>Base58 is a way to encode Bitcoin addresses as numbers and letters. Note that this is not the same base58 as used by
  * Flickr, which you may see reference to around the internet.</p>
  *
- * <p>You may instead wish to work with {@link VersionedChecksummedBytes}, which adds support for testing the prefix
+ * <p>You may instead wish to work with VersionedChecksummedBytes, which adds support for testing the prefix
  * and suffix bytes commonly found in addresses.</p>
  *
  * <p>Satoshi says: why base-58 instead of standard base-64 encoding?<p>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ziftr.android.onewallet.crypto;
+package com.ziftr.android.onewallet.exceptions;
 
 import java.util.Arrays;
 

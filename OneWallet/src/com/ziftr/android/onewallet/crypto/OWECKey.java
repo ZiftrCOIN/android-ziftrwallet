@@ -345,7 +345,7 @@ public class OWECKey {
 
 	/**
 	 * Signs the given hash and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
-	 * usually encoded using DER format, so you want {@link com.google.bitcoin.core.ECKey.ECDSASignature#toASN1()}
+	 * usually encoded using DER format, so you want ECDSASignature#toASN1()
 	 * instead. However sometimes the independent components can be useful, for instance, if you're doing to do
 	 * further EC maths on them.
 	 * @throws OWKeyCrypterException if this ECKey doesn't have a private part.
@@ -357,9 +357,9 @@ public class OWECKey {
 
 	/**
 	 * Signs the given hash and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
-	 * usually encoded using DER format, so you want {@link com.google.bitcoin.core.ECKey.ECDSASignature#encodeToDER()}
+	 * usually encoded using DER format, so you want ECKey.ECDSASignature#encodeToDER()
 	 * instead. However sometimes the independent components can be useful, for instance, if you're doing to do further
-	 * EC maths on them.
+	 * EC math using the R and S components.
 	 *
 	 * @param aesKey The AES key to use for decryption of the private key. If null then no decryption is required.
 	 * @throws OWKeyCrypterException if this ECKey doesn't have a private part.
@@ -717,20 +717,6 @@ public class OWECKey {
 			return privBytes;
 		}
 	}
-
-	/**
-	 * Exports the private key in the form used by the Satoshi client "dumpprivkey" and "importprivkey" commands. Use
-	 * the {@link com.google.bitcoin.core.DumpedPrivateKey#toString()} method to get the string.
-	 *
-	 * @param params The network this key is intended for use on.
-	 * @return Private key bytes as a {@link DumpedPrivateKey}.
-	 * @throws IllegalStateException if the private key is not available.
-	 */
-	//    public DumpedPrivateKey getPrivateKeyEncoded(NetworkParameters params) {
-	//        final byte[] privKeyBytes = getPrivKeyBytes();
-	//        checkState(privKeyBytes != null, "Private key is not available");
-	//        return new DumpedPrivateKey(params, privKeyBytes, isCompressed());
-	//    }
 
 	/**
 	 * Returns the creation time of this key or zero if the key was deserialized from a version 

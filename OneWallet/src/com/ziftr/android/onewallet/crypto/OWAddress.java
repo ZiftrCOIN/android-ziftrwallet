@@ -18,6 +18,8 @@ package com.ziftr.android.onewallet.crypto;
 
 import javax.annotation.Nullable;
 
+import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
+import com.ziftr.android.onewallet.exceptions.OWWrongNetworkException;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoin.Type;

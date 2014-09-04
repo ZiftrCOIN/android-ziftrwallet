@@ -20,10 +20,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.bitcoin.core.AddressFormatException;
-import com.google.bitcoin.core.InsufficientMoneyException;
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
+import com.ziftr.android.onewallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -248,10 +248,10 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 					try {
 						getWalletManager().sendCoins(getCoinId(), getSendToAddressEditText().getText().toString(), 
 								amountSending, feeSending);
-					} catch(AddressFormatException afe) {
+					} catch(OWAddressFormatException afe) {
 						// TODO alert user if address has errors
 						ZLog.log("There was a problem with the address.");
-					} catch(InsufficientMoneyException ime) {
+					} catch(OWInsufficientMoneyException ime) {
 						// TODO alert user if not enough money in wallet.
 						ZLog.log("There was not enough money in the wallet.");
 					}

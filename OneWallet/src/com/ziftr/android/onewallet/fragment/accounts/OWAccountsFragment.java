@@ -17,12 +17,12 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.google.bitcoin.core.Wallet.BalanceType;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.OWNewCurrencyDialog;
 import com.ziftr.android.onewallet.dialog.handlers.OWNewCurrencyDialogHandler;
 import com.ziftr.android.onewallet.fragment.OWFragment;
+import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
@@ -161,7 +161,7 @@ OWNewCurrencyDialogHandler {
 					"620.00", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.Type.BTC_TEST) {
 			String balance = OWUtils.bitcoinValueToFriendlyString(
-					this.walletManager.getWallet(id).getBalance(BalanceType.AVAILABLE));
+					this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
 			return new OWCurrencyListItem(OWCoin.Type.BTC_TEST, OWFiat.Type.USD, 
 					"0.00", balance, "0.00", resId);
 		} else if (id == OWCoin.Type.LTC) {

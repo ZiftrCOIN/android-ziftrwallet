@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +37,8 @@ import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWECKey;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
+import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
+import com.ziftr.android.onewallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
@@ -587,7 +588,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @throws InsufficientMoneyException
 	 */
 	public void sendCoins(OWCoin.Type coinId, String address, BigInteger value, BigInteger feePerKb) 
-			throws AddressFormatException, InsufficientMoneyException {
+			throws OWAddressFormatException, OWInsufficientMoneyException {
 
 		// TODO should database be updated here or should we do it after API call, or... ?
 
@@ -595,7 +596,12 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		// Create an address object based on network parameters in use 
 		// and the entered address. This is the address we will send coins to.
-		Address sendAddress = new Address(wallet.getNetworkParameters(), address);
+		Address sendAddress;
+		try {
+			sendAddress = new Address(wallet.getNetworkParameters(), address);
+		} catch (AddressFormatException e) {
+			throw new OWAddressFormatException(e.getMessage());
+		}
 
 		// Use the address and the value to create a new send request object
 		Wallet.SendRequest sendRequest = Wallet.SendRequest.to(sendAddress, value);
@@ -621,7 +627,12 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		// I don't think we want to do this. 
 		//wallet.decrypt(null);
 
-		Wallet.SendResult sendResult = wallet.sendCoins(sendRequest);
+		Wallet.SendResult sendResult;
+		try {
+			sendResult = wallet.sendCoins(sendRequest);
+		} catch (InsufficientMoneyException e) {
+			throw new OWInsufficientMoneyException(coinId, e.missing, e.getMessage());
+		}
 		sendResult.broadcastComplete.addListener(new Runnable() {
 			@Override
 			public void run() {
@@ -645,7 +656,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			long balance, long creation, long modified) {
 		OWAddress addr = super.createReceivingAddress(coinId, note, 
 				balance, creation, modified);
-		this.getWallet(coinId).addKey(ziftrWalletKeytoBitcoinjKey(addr.getKey()));
+		this.getWallet(coinId).addKey(owKeytoBitcoinjKey(addr.getKey()));
 		return addr;
 	}
 
@@ -685,7 +696,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 		}
 		
-		ZLog.log("Printing all known txs {");
 		for (Transaction tx : this.walletMap.get(coinId).getTransactionsByTime()) {
 			ZLog.log(tx.toString());
 			if (pendingTxHashes == null || (pendingTxHashes != null && 
@@ -693,13 +703,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				confirmedTransactions.add(bitcoinjTransactionToOWTransaction(coinId, tx));
 			}
 		}
-		ZLog.log("}");
-		
-		ZLog.log("Printing all known addresses {");
-		for (ECKey a : this.getWallet(coinId).getKeys()) {
-			ZLog.log(a.toStringWithPrivate());
-		}
-		ZLog.log("}");
 		
 		// TODO when ready, insert txs into database
 
@@ -725,19 +728,35 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				R.layout.accounts_wallet_tx_list_item);
 		owTx.setSha256Hash(new OWSha256Hash(tx.getHash().toString()));
 		
-		// Just picking the zero-eth element ad the display address for now
-		outerLoop: for (OWAddress a : this.readAllAddresses(coinId)) {
-			// This is a stupid way to do it, but for now we loop through the whole thing
-			// TODO split based on positive, negative value of transaction
-			// TODO add a readAddress method to the helper to lookup a specific address in the table.
-			for (TransactionOutput to : tx.getOutputs()) {
-				byte[] hash160 = to.getScriptPubKey().getToAddress(coinId.getNetworkParameters()).getHash160();
-				if (Arrays.equals(a.getHash160(), hash160)) {
-					owTx.setDisplayAddress(a);
-					break outerLoop;
-				}
+		OWAddress addr = null;
+		boolean receiving = tx.getValue(this.getWallet(coinId)).compareTo(BigInteger.ZERO) > 0;
+		for (TransactionOutput to : tx.getOutputs()) {
+			String addrString = to.getScriptPubKey().getToAddress(coinId.getNetworkParameters()).toString();
+			if (receiving) {
+				addr = this.readReceivingAddress(coinId, addrString);
+			} else {
+				addr = this.readSendingAddress(coinId, addrString);
+			}
+			
+			if (addr != null) {
+				break;
 			}
 		}
+		owTx.setDisplayAddress(addr);
+		
+//		// Just picking the zero-eth element ad the display address for now
+//		outerLoop: for (OWAddress a : this.readAllAddresses(coinId)) {
+//			// This is a stupid way to do it, but for now we loop through the whole thing
+//			// TODO split based on positive, negative value of transaction
+//			// TODO add a readAddress method to the helper to lookup a specific address in the table.
+//			for (TransactionOutput to : tx.getOutputs()) {
+//				byte[] hash160 = null;
+//				if (Arrays.equals(a.getHash160(), hash160)) {
+//					owTx.setDisplayAddress(a);
+//					break outerLoop;
+//				}
+//			}
+//		}
 		
 		owTx.setFiatType(OWFiat.Type.USD);
 		owTx.setNumConfirmations(tx.getConfidence().getDepthInBlocks());
@@ -746,7 +765,11 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		// TODO not right, but can't get it from bitcoinj apparently
 		owTx.setTxFee(BigInteger.ZERO);
 		// autofill the note of the transaction as the note of the address
-		owTx.setTxNote(owTx.getDisplayAddress().getNote());
+		if (!owTx.getDisplayAddress().getNote().trim().isEmpty()) {
+			owTx.setTxNote(owTx.getDisplayAddress().getNote());
+		} else {
+			owTx.setTxNote(tx.getHashAsString().substring(0, 6));
+		}
 		owTx.setTxTime(tx.getUpdateTime().getTime() / 1000);
 		owTx.setTxType(OWWalletTransaction.Type.Transaction);
 		return owTx;
@@ -771,7 +794,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param tx
 	 * @return
 	 */
-	private ECKey ziftrWalletKeytoBitcoinjKey(OWECKey ziftrKey) {
+	private ECKey owKeytoBitcoinjKey(OWECKey ziftrKey) {
 		return new ECKey(new BigInteger(1, ziftrKey.getPrivKeyBytes()), ziftrKey.getPubKey(), ziftrKey.isCompressed());
 	}
 	

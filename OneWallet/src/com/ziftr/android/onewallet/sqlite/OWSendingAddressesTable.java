@@ -1,133 +1,34 @@
 package com.ziftr.android.onewallet.sqlite;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.onewallet.crypto.OWAddress;
-import com.ziftr.android.onewallet.crypto.OWAddressFormatException;
+import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWCoinRelative;
-import com.ziftr.android.onewallet.util.ZLog;
 
+public class OWSendingAddressesTable extends OWAddressesTable {
 
-/**
- * Make one table accessing class per coin type. Could those all subclass 
- * 
- * TODO should have a method that inserts a new key and returns the key.
- * Get rid of duplicate strings in strings.xml.
- * 
- * TODO lots of work in here
- */
-public abstract class OWSendingAddressesTable implements OWCoinRelative {
-
-	/** The postfix that assists in making the names for the external addresses table. */
-	private static final String TABLE_POSTFIX = "_sending_addresses";
-
-	/** The id column. All Tables must have this to work well with adapters. */
-	public static final String COLUMN_ID = "_id";
-
-	/** 
-	 * The address column. This is the encoded public key, along with coin type
-	 * byte and double hash checksum.
-	 */
-	public static final String COLUMN_ADDRESS = "address";
-
-	/** The note column. This is for users to keep a string attached to an address. */
-	public static final String COLUMN_NOTE = "note";
-
-	/** 
-	 * The balance column. Note that the table may not always be up to date 
-	 * and this may just be the last known balance. 
-	 */
-	public static final String COLUMN_BALANCE = "balance";
-
-	///** The first time that this address was seen by this phone. */
-	//public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
-
-	/** The most recent time that this address was seen by this phone. */
-	public static final String COLUMN_MODIFIED_TIMESTAMP = "modified_timestamp";
-
-	protected static void create(OWCoin.Type coinId, SQLiteDatabase db) {
-		db.execSQL(getCreateTableString(coinId));
+	@Override
+	protected String getTablePostfix() {
+		return "_sending_addresses";
 	}
 
-	protected static String getCreateTableString(OWCoin.Type coinId) {
-		return "CREATE TABLE IF NOT EXISTS " + getTableName(coinId) + " (" + 
-				COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-				COLUMN_ADDRESS + " TEXT NOT NULL, " + 
-				COLUMN_NOTE + " TEXT, " + 
-				COLUMN_BALANCE + " INTEGER, " +
-				//COLUMN_CREATION_TIMESTAMP + " INTEGER, " +
-				COLUMN_MODIFIED_TIMESTAMP + " INTEGER );";
+	@Override
+	protected String getCreateTableString(OWCoin.Type coinId) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
+		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
+		sb.append(COLUMN_ADDRESS).append(" TEXT NOT NULL, ");
+		sb.append(COLUMN_NOTE).append(" TEXT, ");
+		sb.append(COLUMN_BALANCE).append(" INTEGER, ");
+		//sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
+		sb.append(COLUMN_MODIFIED_TIMESTAMP).append(" INTEGER );");
+		return sb.toString();
 	}
 
-	protected static String getTableName(OWCoin.Type coinId) {
-		return coinId.toString() + TABLE_POSTFIX;
-	}
-
-	protected static void insert(OWAddress address, SQLiteDatabase db) {
-		long insertId = db.insert(getTableName(address.getCoinId()), 
-				null, keyToContentValues(address, true));
-		address.setId(insertId);
-	}
-
-	protected static List<OWAddress> readAllAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
-		List<OWAddress> addresses = new ArrayList<OWAddress>();
-
-		String selectQuery = "SELECT * FROM " + getTableName(coinId) + ";";
-		Cursor c = db.rawQuery(selectQuery, null);
-
-		// Move to first returns false if cursor is empty
-		if (c.moveToFirst()) {
-			do {
-				try {
-					OWAddress newAddress = cursorToAddress(coinId, c);
-
-					// Add the new key to the list
-					addresses.add(newAddress);
-				} catch(OWAddressFormatException afe) {
-					ZLog.log("Error loading address from ", coinId.toString(), 
-							" sending addresses database.");
-					afe.printStackTrace();
-				}
-				
-			} while (c.moveToNext());
-		}
-
-		// Make sure we close the cursor
-		c.close();
-
-		return addresses;
-	}
-
-	protected static int numAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
-		String countQuery = "SELECT  * FROM " + getTableName(coinId);
-		Cursor cursor = db.rawQuery(countQuery, null);
-		int count = cursor.getCount();
-		cursor.close();
-		return count;
-	}
-
-	protected static void updateAddress(OWAddress address, SQLiteDatabase db) {
-		if (address.getId() == -1) {
-			// Shouldn't happen
-			throw new RuntimeException("Error: id has not been set.");
-		}
-		ContentValues values = keyToContentValues(address, false);
-		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
-	}
-
-	/**
-	 * @param coinId
-	 * @param c
-	 * @return
-	 * @throws OWAddressFormatException
-	 */
-	private static OWAddress cursorToAddress(OWCoin.Type coinId, Cursor c) throws OWAddressFormatException {
+	@Override
+	protected OWAddress cursorToAddress(OWCoin.Type coinId, Cursor c) throws OWAddressFormatException {
 		OWAddress newAddress = new OWAddress(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
 
 		// Reset all the keys parameters for use elsewhere
@@ -139,7 +40,8 @@ public abstract class OWSendingAddressesTable implements OWCoinRelative {
 		return newAddress;
 	}
 
-	private static ContentValues keyToContentValues(OWAddress address, boolean forInsert) {
+	@Override
+	protected ContentValues addressToContentValues(OWAddress address, boolean forInsert) {
 		ContentValues values = new ContentValues();
 
 		if (forInsert) {

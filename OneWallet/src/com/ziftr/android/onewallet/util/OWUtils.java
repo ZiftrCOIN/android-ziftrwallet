@@ -29,9 +29,9 @@ import android.content.res.Resources;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.google.bitcoin.core.Utils;
-import com.google.bitcoin.core.VarInt;
 import com.google.common.base.Charsets;
+import com.google.common.primitives.UnsignedLongs;
+import com.ziftr.android.onewallet.crypto.OWVarInt;
 
 public class OWUtils {
 
@@ -427,7 +427,7 @@ public class OWUtils {
 	}
 
 	/**
-	 * See {@link Utils#doubleDigest(byte[], int, int)}.
+	 * See Utils#doubleDigest(byte[], int, int).
 	 */
 	public static byte[] doubleDigest(byte[] input) {
 		return doubleDigest(input, 0, input.length);
@@ -465,7 +465,7 @@ public class OWUtils {
 			bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES.length);
 			bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES);
 			byte[] messageBytes = message.getBytes(Charsets.UTF_8);
-			VarInt size = new VarInt(messageBytes.length);
+			OWVarInt size = new OWVarInt(messageBytes.length);
 			bos.write(size.encode());
 			bos.write(messageBytes);
 			return bos.toByteArray();
@@ -473,6 +473,13 @@ public class OWUtils {
 			throw new RuntimeException(e);  // Cannot happen.
 		}
 	}
+	
+	/**
+     * Work around lack of unsigned types in Java.
+     */
+    public static boolean isLessThanUnsigned(long n1, long n2) {
+        return UnsignedLongs.compare(n1, n2) < 0;
+    }
 
 	/**
 	 * The regular {@link java.math.BigInteger#toByteArray()} method isn't quite what we often need: it appends a
@@ -536,5 +543,59 @@ public class OWUtils {
 		System.arraycopy(wifPrivBytes, 1, privBytes, 0, 32);
 		return privBytes;
 	}
+	
+	public static long readUint32(byte[] bytes, int offset) {
+        return ((bytes[offset++] & 0xFFL) << 0) |
+                ((bytes[offset++] & 0xFFL) << 8) |
+                ((bytes[offset++] & 0xFFL) << 16) |
+                ((bytes[offset] & 0xFFL) << 24);
+    }
+    
+    public static long readInt64(byte[] bytes, int offset) {
+        return ((bytes[offset++] & 0xFFL) << 0) |
+               ((bytes[offset++] & 0xFFL) << 8) |
+               ((bytes[offset++] & 0xFFL) << 16) |
+               ((bytes[offset++] & 0xFFL) << 24) |
+               ((bytes[offset++] & 0xFFL) << 32) |
+               ((bytes[offset++] & 0xFFL) << 40) |
+               ((bytes[offset++] & 0xFFL) << 48) |
+               ((bytes[offset] & 0xFFL) << 56);
+    }
+
+    public static long readUint32BE(byte[] bytes, int offset) {
+        return ((bytes[offset + 0] & 0xFFL) << 24) |
+                ((bytes[offset + 1] & 0xFFL) << 16) |
+                ((bytes[offset + 2] & 0xFFL) << 8) |
+                ((bytes[offset + 3] & 0xFFL) << 0);
+    }
+
+    public static int readUint16BE(byte[] bytes, int offset) {
+        return ((bytes[offset] & 0xff) << 8) | bytes[offset + 1] & 0xff;
+    }
+    
+    public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
+        out[offset + 0] = (byte) (0xFF & (val >> 24));
+        out[offset + 1] = (byte) (0xFF & (val >> 16));
+        out[offset + 2] = (byte) (0xFF & (val >> 8));
+        out[offset + 3] = (byte) (0xFF & (val >> 0));
+    }
+
+    public static void uint32ToByteArrayLE(long val, byte[] out, int offset) {
+        out[offset + 0] = (byte) (0xFF & (val >> 0));
+        out[offset + 1] = (byte) (0xFF & (val >> 8));
+        out[offset + 2] = (byte) (0xFF & (val >> 16));
+        out[offset + 3] = (byte) (0xFF & (val >> 24));
+    }
+
+    public static void uint64ToByteArrayLE(long val, byte[] out, int offset) {
+        out[offset + 0] = (byte) (0xFF & (val >> 0));
+        out[offset + 1] = (byte) (0xFF & (val >> 8));
+        out[offset + 2] = (byte) (0xFF & (val >> 16));
+        out[offset + 3] = (byte) (0xFF & (val >> 24));
+        out[offset + 4] = (byte) (0xFF & (val >> 32));
+        out[offset + 5] = (byte) (0xFF & (val >> 40));
+        out[offset + 6] = (byte) (0xFF & (val >> 48));
+        out[offset + 7] = (byte) (0xFF & (val >> 56));
+    }
 
 }
