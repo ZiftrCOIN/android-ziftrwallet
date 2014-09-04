@@ -22,7 +22,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	private View rootView;
 	
 	private OWWalletTransaction txItem;
-
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
@@ -32,6 +32,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		this.rootView = inflater.inflate(
 				R.layout.accounts_transaction_details, container, false);
 
+		this.txItem = getArguments().getParcelable("txItem");
 		this.init_fields(savedInstanceState);
 		return this.rootView;
 	}
@@ -96,20 +97,6 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		//TODO add confirmation fee field for OWWalletTransactionListItem
 		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
 
-	}
-
-	/**
-	 * @return the txItem
-	 */
-	public OWWalletTransaction getTxItem() {
-		return txItem;
-	}
-
-	/**
-	 * @param txItem the txItem to set
-	 */
-	public void setTxItem(OWWalletTransaction txItem) {
-		this.txItem = txItem;
 	}
 
 }
