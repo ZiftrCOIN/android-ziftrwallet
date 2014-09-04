@@ -90,6 +90,7 @@ public abstract class OWAddressesTable {
 	protected void insert(OWAddress address, SQLiteDatabase db) {
 		long insertId = db.insert(getTableName(address.getCoinId()), 
 				null, addressToContentValues(address, true));
+		ZLog.log("inserted!!!!");
 		address.setId(insertId);
 	}
 	
@@ -100,7 +101,13 @@ public abstract class OWAddressesTable {
 
 		List<String> addresses = new ArrayList<String>();
 		addresses.add(address);
-		return readAddresses(coinId, addresses, db).get(0);
+		
+		List<OWAddress> readAddresses = readAddresses(coinId, addresses, db);
+		if (readAddresses.size() == 0) {
+			return null;
+		} else {
+			return readAddresses.get(0);
+		}
 	}
 	
 	/**
@@ -139,7 +146,9 @@ public abstract class OWAddressesTable {
 		}
 		
 		sb.append(";");
-		Cursor c = db.rawQuery(sb.toString(), null);
+		String toQuery = sb.toString();
+		ZLog.log("Query: " + toQuery);
+		Cursor c = db.rawQuery(toQuery, null);
 
 		List<OWAddress> newAddress = new ArrayList<OWAddress>();
 

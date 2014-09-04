@@ -42,7 +42,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		sb.append(COLUMN_ADDRESS).append(" TEXT NOT NULL, ");
 		sb.append(COLUMN_NOTE).append(" TEXT, ");
 		sb.append(COLUMN_BALANCE).append(" INTEGER, ");
-		sb.append(COLUMN_CREATION_TIMESTAMP).append("INTEGER, ");
+		sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
 		sb.append(COLUMN_MODIFIED_TIMESTAMP).append(" INTEGER );");
 		return sb.toString();
 	}

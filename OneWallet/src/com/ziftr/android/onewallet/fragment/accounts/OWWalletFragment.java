@@ -151,7 +151,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				if (txAdapter.getItemViewType(position) != OWWalletTransactionListAdapter.transactionType) {
+				if (txAdapter.getItemViewType(position) == OWWalletTransactionListAdapter.TRANSACTION_TYPE) {
 					OWWalletTransaction txItem = (OWWalletTransaction) 
 							txListView.getItemAtPosition(position);
 					getOWMainActivity().openTxnDetails(txItem);

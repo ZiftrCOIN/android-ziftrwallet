@@ -33,7 +33,7 @@ public abstract class OWWalletUserFragment extends OWFragment implements OWCoinR
 	
 	protected void initializeWalletHeaderView() {
 		View headerView = this.getOWMainActivity().findViewById(R.id.walletHeader);
-
+		headerView.setVisibility(View.VISIBLE);
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		Drawable coinImage = this.getActivity().getResources().getDrawable(
 				getCoinId().getLogoResId());

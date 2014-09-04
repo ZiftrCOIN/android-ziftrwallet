@@ -186,9 +186,12 @@ public class OWAccountsFragment extends OWFragment {
 	/**
 	 * Notifies the list view adapter that the data set has changed
 	 * to initialize a redraw. 
+	 * 
+	 * May save this for later to refresh when deleting a wallet from the list
+	 * of wallets on this accounts page. 
 	 */
 	@SuppressWarnings("unchecked")
-	private void refreshListOfUserWallets() {
+	protected void refreshListOfUserWallets() {
 		((ArrayAdapter<OWCurrencyListItem>) 
 				this.currencyListView.getAdapter()).notifyDataSetChanged();
 	}

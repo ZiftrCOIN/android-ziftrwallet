@@ -10,12 +10,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.ZLog;
 
 public class OWNewCurrencyFragment extends OWFragment {
 
@@ -37,14 +37,6 @@ public class OWNewCurrencyFragment extends OWFragment {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("CURRENCY", true, true);
 	}
-	
-	@Override
-	public void onSaveInstanceState(Bundle outState){
-		for (OWCoin.Type type : this.coinsToShow) {
-			outState.putBoolean(type.toString(), true);
-		}
-		super.onSaveInstanceState(outState);
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
@@ -52,18 +44,14 @@ public class OWNewCurrencyFragment extends OWFragment {
 
 		this.walletManager = this.getOWMainActivity().getWalletManager();
 
-		//rootView = inflater.inflate(R.layout.currency_get_new_list, container, false);
-		if (savedInstanceState != null){
-			initializeFromBundle(savedInstanceState);
-		} else {
-			initializeFromBundle(this.getArguments());
-		}
+		rootView = inflater.inflate(R.layout.currency_get_new_list, container, false);
+		initializeFromBundle(this.getArguments());
 		initializeCurrencyList();
 		return this.rootView;
 	}
 
-	public void initializeCurrencyList(){
-		setCurrencyList(this.coinsToShow);
+	public void initializeCurrencyList() {
+		generateCurrencyListFrom(this.coinsToShow);
 		this.currencyAdapter = new OWNewCurrencyListAdapter(this.getActivity(), R.layout._dual_icon_coin_view, 
 				this.currencyList);
 		
@@ -81,7 +69,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 		});
 	}
 	
-	public List<OWNewCurrencyListItem> setCurrencyList(List<OWCoin.Type> list){
+	public List<OWNewCurrencyListItem> generateCurrencyListFrom(List<OWCoin.Type> list) {
 		this.currencyList.clear();
 		for (OWCoin.Type type : list) {
 			this.currencyList.add(new OWNewCurrencyListItem(type));
@@ -120,13 +108,15 @@ public class OWNewCurrencyFragment extends OWFragment {
 	}
 	
 	public void clickAddNewCurrency(OWCoin.Type newItem) {
-		ZLog.log("handle new currency in accounts fragment");
-		// TODO make sure that this view only has wallets
+		// Make sure that this view only has wallets
 		// in it which the user do
 		for (OWCoin.Type type : this.walletManager.getAllUsersWalletTypes()) {
 			if (type == newItem) {
 				// Already in list, shouldn't ever get here though because
 				// we only show currencies in the dialog which we don't have
+				this.coinsToShow.remove(newItem);
+				this.generateCurrencyListFrom(coinsToShow);
+				this.currencyAdapter.notifyDataSetChanged();
 				return;
 			}
 		}
@@ -134,17 +124,13 @@ public class OWNewCurrencyFragment extends OWFragment {
 		// TODO add this for all coin types eventually 
 		// walletManager.setupWallet(newItem.getCoinId());
 		// Right now we are just doing it for the testnet
-		if (newItem == OWCoin.Type.BTC_TEST) {
+		if (newItem == OWCoin.Type.BTC_TEST || newItem == OWCoin.Type.BTC) {
 			// We can assume the wallet hasn't been set up yet
 			// or we wouldn't have gotten here 
 
-			// TODO see java docs for this method. Is it okay to 
-			// have this called here? 
 			if (walletManager.setUpWallet(newItem)) {
-				ZLog.log("added new currency " + newItem.toString());
-				this.coinsToShow.remove(newItem);
-				setCurrencyList(this.coinsToShow);
-				this.currencyAdapter.notifyDataSetChanged();
+				Toast.makeText(getOWMainActivity(), "Wallet Created!", Toast.LENGTH_LONG).show();
+				this.getOWMainActivity().onBackPressed();
 			}
 		}
 		

@@ -145,7 +145,6 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	private void loadAddressFromDatabase() {
 		// Get the database from the activity on the UI thread
 		final OWSQLiteOpenHelper database = this.getWalletManager();
-		
 
 		// Run database IO on new thread
 		OWUtils.runOnNewThread(new Runnable() {

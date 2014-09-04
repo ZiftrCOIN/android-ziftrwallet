@@ -199,7 +199,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * database for the given coin type.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
-	 * @param address - The 1xyz... (Base58) encoded address in the database. 
+	 * @param address - The list of 1xyz... (Base58) encoded address in the database. 
 	 */
 	public OWAddress readReceivingAddress(OWCoin.Type coinId, String address) {
 		return this.receivingAddressesTable.readAddress(coinId, address, getReadableDatabase());
@@ -212,7 +212,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param address - The 1xyz... (Base58) encoded address in the database. 
 	 */
-	public List<OWAddress> readReceivingAddress(OWCoin.Type coinId, List<String> addresses) {
+	public List<OWAddress> readReceivingAddresses(OWCoin.Type coinId, List<String> addresses) {
 		return this.receivingAddressesTable.readAddresses(coinId, addresses, getReadableDatabase());
 	}
 
@@ -318,6 +318,17 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public OWAddress readSendingAddress(OWCoin.Type coinId, String address) {
 		return this.sendingAddressesTable.readAddress(coinId, address, getReadableDatabase());
+	}
+	
+	/**
+	 * As part of the R in CRUD, this method gets a sending address from the 
+	 * database for the given coin type.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param address - The list of 1xyz... (Base58) encoded address in the database. 
+	 */
+	public List<OWAddress> readSendingAddresses(OWCoin.Type coinId, List<String> addresses) {
+		return this.sendingAddressesTable.readAddresses(coinId, addresses, getReadableDatabase());
 	}
 
 	/**

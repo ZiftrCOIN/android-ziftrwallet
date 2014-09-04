@@ -42,10 +42,13 @@ import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWNewCurrencyFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoinsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
@@ -776,44 +779,60 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * a {@link OWWalletFragment} fragment is started. 
 	 */
 	public void startWalletAfterValidation(OWCoin.Type typeToStart) {
-		if (typeToStart == OWCoin.Type.BTC_TEST) {
-			String tag = OWCoin.Type.BTC_TEST.getShortTitle() + 
-					"_validate_passphrase_dialog";
+		for (OWCoin.Type enabledType : OWWalletManager.enabledCoinTypes) {
+			if (typeToStart == enabledType) {
+				String tag = typeToStart.getShortTitle() + 
+						"_validate_passphrase_dialog";
 
-			OWValidatePassphraseDialog passphraseDialog = 
-					new OWValidatePassphraseDialog();
+				OWValidatePassphraseDialog passphraseDialog = 
+						new OWValidatePassphraseDialog();
 
-			passphraseDialog.setTargetFragment(
-					null, OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG);
+				passphraseDialog.setTargetFragment(
+						null, OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG);
 
-			Bundle b = new Bundle();
-			b.putString(OWCoin.TYPE_KEY, OWCoin.Type.BTC_TEST.toString());
-			passphraseDialog.setArguments(b);
+				Bundle b = new Bundle();
+				b.putString(OWCoin.TYPE_KEY, typeToStart.toString());
+				passphraseDialog.setArguments(b);
 
-			// TODO make a create new passphrase dialog
-			String message = "Please input your passphrase. ";
+				// TODO make a create new passphrase dialog
+				String message = "Please input your passphrase. ";
 
-			passphraseDialog.setupDialog("ziftrWALLET", message, 
-					"Continue", null, "Cancel");
-			passphraseDialog.show(this.getSupportFragmentManager(), tag);
+				passphraseDialog.setupDialog("ziftrWALLET", message, 
+						"Continue", null, "Cancel");
+				passphraseDialog.show(this.getSupportFragmentManager(), tag);
+				break;
+			}
+
 		}
 	}
 
 	/**
-	 * Only works for BTC_TEST type right now. 
+	 * Only works for enabled types right now. 
 	 * 
 	 * @param typeOfWalletToStart
 	 */
 	public void openWalletView(OWCoin.Type typeOfWalletToStart) {
-		// Temporarily need to just work for BTC_TEST only
-		if (typeOfWalletToStart != OWCoin.Type.BTC_TEST) {
+		// Temporarily need to just work for enabled types only
+		OWCoin.Type t = null;
+		for (OWCoin.Type enabledType : OWWalletManager.enabledCoinTypes) {
+			if (typeOfWalletToStart == enabledType) {
+				t = enabledType;
+			}
+		}
+
+		// Coin type is not enabled
+		if (t == null) {
 			return;
 		}
 
 		String tag = typeOfWalletToStart.getShortTitle() + "_wallet_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			fragToShow = new OWBitcoinTestnetWalletFragment();
+			if (typeOfWalletToStart == OWCoin.Type.BTC) {
+				fragToShow = new OWBitcoinWalletFragment();
+			} else if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
+				fragToShow = new OWBitcoinTestnetWalletFragment();
+			}
 		}
 
 		// If we did a tablet view this might be different. 
@@ -834,20 +853,32 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	/**
-	 * Only works for BTC_TEST type right now. 
+	 * Only works for enabled types right now. 
 	 * 
 	 * @param typeOfWalletToStart
 	 */
 	public void openReceiveCoinsView(OWCoin.Type typeOfWalletToStart) {
-		// Temporarily need to just work for BTC_TEST only
-		if (typeOfWalletToStart != OWCoin.Type.BTC_TEST) {
+		// Temporarily need to just work for enabled types only
+		OWCoin.Type t = null;
+		for (OWCoin.Type enabledType : OWWalletManager.enabledCoinTypes) {
+			if (typeOfWalletToStart == enabledType) {
+				t = enabledType;
+			}
+		}
+
+		// Coin type is not enabled
+		if (t == null) {
 			return;
 		}
 
 		String tag = typeOfWalletToStart.getShortTitle() + "_receive_coins_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			fragToShow = new OWReceiveBitcoinTestnetCoinsFragment();
+			if (typeOfWalletToStart == OWCoin.Type.BTC) {
+				fragToShow = new OWReceiveBitcoinsFragment();
+			} else if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
+				fragToShow = new OWReceiveBitcoinTestnetCoinsFragment();
+			}
 		}
 
 		// If we did a tablet view this might be different. 
@@ -855,20 +886,32 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	/**
-	 * Only works for BTC_TEST type right now. 
+	 * Only works for enabled types type right now. 
 	 * 
 	 * @param typeOfWalletToStart
 	 */
 	public void openSendCoinsView(OWCoin.Type typeOfWalletToStart) {
-		// Temporarily need to just work for BTC_TEST only
-		if (typeOfWalletToStart != OWCoin.Type.BTC_TEST) {
+		// Temporarily need to just work for enabled types only
+		OWCoin.Type t = null;
+		for (OWCoin.Type enabledType : OWWalletManager.enabledCoinTypes) {
+			if (typeOfWalletToStart == enabledType) {
+				t = enabledType;
+			}
+		}
+
+		// Coin type is not enabled
+		if (t == null) {
 			return;
 		}
 
 		String tag = typeOfWalletToStart.getShortTitle() + "_send_coins_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			fragToShow = new OWSendBitcoinTestnetCoinsFragment();
+			if (typeOfWalletToStart == OWCoin.Type.BTC) {
+				fragToShow = new OWSendBitcoinsFragment();
+			} else if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
+				fragToShow = new OWSendBitcoinTestnetCoinsFragment();
+			}
 		}
 
 		// If we did a tablet view this might be different. 
@@ -913,7 +956,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 
 	}
-	
+
 	/**
 	 * @return the walletManager
 	 */
@@ -1201,7 +1244,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		View search = findViewById(R.id.searchBar);
 		return search.getVisibility() == View.VISIBLE;
 	}
-	
+
 	public void hideWalletHeader(){
 		View walletHeader = findViewById(R.id.walletHeader);
 		walletHeader.setVisibility(View.GONE);

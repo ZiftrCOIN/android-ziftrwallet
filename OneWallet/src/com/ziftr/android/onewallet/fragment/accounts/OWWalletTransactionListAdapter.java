@@ -20,7 +20,6 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWUtils;
-import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * An adapter class for transactions.
@@ -35,10 +34,10 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 	// to the list. This can be used in searching
 
 	/** Standard entries for transactions. */
-	public static final int transactionType = 0;
+	public static final int TRANSACTION_TYPE = 0;
 	
 	/** The divider type. */
-	public static final int dividerType = 1;
+	public static final int DIVIDER_TYPE = 1;
 
 	private OWWalletTransactionListAdapter(Context ctx, List<OWWalletTransaction> txList) {
 		super(ctx, txList);
@@ -88,9 +87,9 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 	
 	private int getItemViewType(OWWalletTransaction item) {
 		if (item.getTxType() == OWWalletTransaction.Type.Divider) {
-			return dividerType;
+			return DIVIDER_TYPE;
 		} else {
-			return transactionType;
+			return TRANSACTION_TYPE;
 		}
 	}
 
@@ -117,8 +116,8 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 			// If it doesn't have an old view then we make a new one 
 			convertView = this.getInflater().inflate(txListItem.getResId(), null);
 		}
-		ZLog.log(position + " asdnaidiwj");
-		if (getItemViewType(position) == transactionType) {
+
+		if (getItemViewType(position) == TRANSACTION_TYPE) {
 
 			String fiatSymbol = txListItem.getFiatType().getSymbol();
 
@@ -179,7 +178,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 				constraint = constraint.toString().toLowerCase();
 				
 				for (OWWalletTransaction item : fullPendingTxList) {
-					if (getItemViewType(item) == dividerType ||
+					if (getItemViewType(item) == DIVIDER_TYPE ||
 							item.getTxNote().toLowerCase().contains(constraint)) {
 						workingPendingTxList.add(item);
 					}
@@ -191,15 +190,10 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter {
 				}
 				
 				for (OWWalletTransaction item : fullConfirmedTxList) {
-					if (getItemViewType(item) == dividerType ||
+					if (getItemViewType(item) == DIVIDER_TYPE ||
 							item.getTxNote().toLowerCase().contains(constraint)) {
 						workingConfirmedTxList.add(item);
 					}
-				}
-				
-				// If only the divider is in the list then we don't need the divider
-				if (workingConfirmedTxList.size() == 1) {
-					workingConfirmedTxList.clear();
 				}
 				
 				refreshWorkingList(workingPendingTxList, workingConfirmedTxList);
