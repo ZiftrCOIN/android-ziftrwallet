@@ -12,10 +12,7 @@ import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.ZLog;
 
-public abstract class OWAddressesTable {
-
-	/** The id column. All Tables must have this to work well with adapters. */
-	public static final String COLUMN_ID = "_id";
+public abstract class OWAddressesTable extends OWCoinRelativeTable {
 
 	/** 
 	 * The address column. This is the encoded public key, along with coin type
@@ -23,17 +20,11 @@ public abstract class OWAddressesTable {
 	 */
 	public static final String COLUMN_ADDRESS = "address";
 
-	/** The note column. This is for users to keep a string attached to an address. */
-	public static final String COLUMN_NOTE = "note";
-
 	/** 
 	 * The balance column. Note that the table may not always be up to date 
 	 * and this may just be the last known balance. 
 	 */
 	public static final String COLUMN_BALANCE = "balance";
-
-	///** The first time that this address was seen by this phone. */
-	//public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
 
 	/** 
 	 * This is the last time that address was used in a transaction. Note that this
@@ -41,19 +32,6 @@ public abstract class OWAddressesTable {
 	 * that the address was used. 
 	 */
 	public static final String COLUMN_MODIFIED_TIMESTAMP = "modified_timestamp";
-	
-	/** 
-	 * The postfix that assists in making the names for the external addresses table. 
-	 */
-	protected abstract String getTablePostfix();
-	
-	/**
-	 * The string that will be executed when creating a table.
-	 * 
-	 * @param coinId - The table specifier.
-	 * @return
-	 */
-	protected abstract String getCreateTableString(OWCoin.Type coinId);
 	
 	/**
 	 * A useful method to convert a cursor (pointer to a row in a table) to an address.
@@ -70,27 +48,16 @@ public abstract class OWAddressesTable {
 	/**
 	 * For updating and insertion with android SQLite helper methods, we need to make a 
 	 * {@link ContentValues} object. This also has to be done differently for the table of 
-	 * receiving addresses and the table of sending addresses, and whether or not the content
-	 * values is to be used in inserting or in deleting.
+	 * receiving addresses and the table of sending addresses.
 	 * 
 	 * @param address - The address to convert.
-	 * @param forInsert - either for insert/update
 	 * @return
 	 */
-	protected abstract ContentValues addressToContentValues(OWAddress address, boolean forInsert);
-	
-	protected String getTableName(OWCoin.Type coinId) {
-		return coinId.toString() + getTablePostfix();
-	}
-
-	protected void create(OWCoin.Type coinId, SQLiteDatabase db) {
-		db.execSQL(getCreateTableString(coinId));
-	}
+	protected abstract ContentValues addressToContentValues(OWAddress address);
 	
 	protected void insert(OWAddress address, SQLiteDatabase db) {
 		long insertId = db.insert(getTableName(address.getCoinId()), 
-				null, addressToContentValues(address, true));
-		ZLog.log("inserted!!!!");
+				null, addressToContentValues(address));
 		address.setId(insertId);
 	}
 	
@@ -111,8 +78,8 @@ public abstract class OWAddressesTable {
 	}
 	
 	/**
-	 * Gets a list of addresses from the database.
-	 * If addresses is null then
+	 * Gets a list of addresses from the database. If addresses is null 
+	 * then it gets all addresses from the database. 
 	 * 
 	 * @param coinId
 	 * @param addresses
@@ -150,7 +117,7 @@ public abstract class OWAddressesTable {
 		ZLog.log("Query: " + toQuery);
 		Cursor c = db.rawQuery(toQuery, null);
 
-		List<OWAddress> newAddress = new ArrayList<OWAddress>();
+		List<OWAddress> newAddresses = new ArrayList<OWAddress>();
 
 		// Move to first returns false if cursor is empty
 		if (c.moveToFirst()) {
@@ -158,7 +125,7 @@ public abstract class OWAddressesTable {
 			try {
 				do {
 					// TODO deal with encryption of private key
-					newAddress.add(cursorToAddress(coinId, c));
+					newAddresses.add(cursorToAddress(coinId, c));
 				} while (c.moveToNext());
 			} catch (OWAddressFormatException afe) {
 				ZLog.log("Error loading address from ", coinId.toString(), 
@@ -170,27 +137,19 @@ public abstract class OWAddressesTable {
 		// Make sure we close the cursor
 		c.close();
 
-		return newAddress;
+		return newAddresses;
 	}
 	
 	protected List<OWAddress> readAllAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
 		return this.readAddresses(coinId, null, db);
 	}
 	
-	protected int numAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
-		String countQuery = "SELECT  * FROM " + getTableName(coinId);
-		Cursor cursor = db.rawQuery(countQuery, null);
-		int count = cursor.getCount();
-		cursor.close();
-		return count;
-	}
-
 	protected void updateAddress(OWAddress address, SQLiteDatabase db) {
 		if (address.getId() == -1) {
 			// Shouldn't happen
 			throw new RuntimeException("Error: id has not been set.");
 		}
-		ContentValues values = addressToContentValues(address, false);
+		ContentValues values = addressToContentValues(address);
 		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
 	}
 

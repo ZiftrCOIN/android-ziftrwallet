@@ -2,9 +2,12 @@ package com.ziftr.android.onewallet.fragment.accounts;
 
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Locale;
 
 import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter.Type;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
 
@@ -13,7 +16,7 @@ import com.ziftr.android.onewallet.util.OWFiat;
  * 
  * TODO do we need to add any of the functionality from Bitcoinj's TransactionOutput or TransactionInput?
  */
-public class OWWalletTransaction {
+public class OWWalletTransaction implements OWSearchableListItem {
 
 	// Database stuff
 	
@@ -72,7 +75,7 @@ public class OWWalletTransaction {
 	 * of outputs that is an address that belongs to us.
 	 * Should always be included in all creates.
 	 */
-	private OWAddress displayAddress;
+	private List<OWAddress> displayAddresses;
 	
 	// Viewing stuff
 
@@ -81,31 +84,26 @@ public class OWWalletTransaction {
 
 	/** They type of fiat. e.g. Fiat.Type.USD. */
 	private OWFiat.Type fiatType;
-
-	public enum Type {
-		Transaction,
-		Divider
-	}
-
-	/** A boolean describing whether or not this transaction is pending. */
-	private OWWalletTransaction.Type txType;
+	
+	private OWWalletTransactionListAdapter.Type txViewType;
 
 	/** The resources id to draw the view for this list item. */
 	private int resId;
 
+	// TODO figure out what really needs to be in this constructor.
 	public OWWalletTransaction(OWCoin.Type coinId, 
 			OWFiat.Type fiatType, 
 			String txNote, 
 			long txTime, 
 			BigInteger txAmount, 
-			OWWalletTransaction.Type txType,
+			OWWalletTransactionListAdapter.Type txViewType,
 			int resId) {
 		this.setCoinId(coinId);
 		this.setFiatType(fiatType);
 		this.setTxNote(txNote);
 		this.setTxTime(txTime);
 		this.setTxAmount(txAmount);
-		this.setTxType(txType);
+		this.setTxViewType(txViewType);
 		this.setResId(resId);
 	}
 
@@ -154,14 +152,14 @@ public class OWWalletTransaction {
 	/**
 	 * @return the _id
 	 */
-	public long get_id() {
+	public long getId() {
 		return _id;
 	}
 
 	/**
 	 * @param _id the _id to set
 	 */
-	public void set_id(long _id) {
+	public void setId(long _id) {
 		this._id = _id;
 	}
 
@@ -220,19 +218,19 @@ public class OWWalletTransaction {
 	public void setTxAmount(BigInteger txAmount) {
 		this.txAmount = txAmount;
 	}
-
+	
 	/**
-	 * @return the txType
+	 * @return the txViewType
 	 */
-	public OWWalletTransaction.Type getTxType() {
-		return txType;
+	public OWWalletTransactionListAdapter.Type getTxViewType() {
+		return txViewType;
 	}
 
 	/**
-	 * @param txType the txType to set
+	 * @param txViewType the txViewType to set
 	 */
-	public void setTxType(OWWalletTransaction.Type txType) {
-		this.txType = txType;
+	public void setTxViewType(OWWalletTransactionListAdapter.Type txViewType) {
+		this.txViewType = txViewType;
 	}
 
 	/**
@@ -282,15 +280,49 @@ public class OWWalletTransaction {
 	/**
 	 * @return the displayAddress
 	 */
-	public OWAddress getDisplayAddress() {
-		return displayAddress;
+	public List<OWAddress> getDisplayAddresses() {
+		return displayAddresses;
 	}
 
 	/**
-	 * @param displayAddress the displayAddress to set
+	 * @param displayAddresses the displayAddress to set
 	 */
-	public void setDisplayAddress(OWAddress displayAddress) {
-		this.displayAddress = displayAddress;
+	public void setDisplayAddresses(List<OWAddress> displayAddresses) {
+		this.displayAddresses = displayAddresses;
+	}
+	
+	public void addDisplayAddress(OWAddress address) {
+		if (this.displayAddresses != null) {
+			this.displayAddresses.add(address);
+		}
+	}
+	
+	public String getAddressAsCommaListString() {
+		if (this.displayAddresses == null || this.displayAddresses.size() == 0) {
+			return "";
+		} else {
+			StringBuilder sb = new StringBuilder();
+			sb.append(",");
+			for (OWAddress address : this.getDisplayAddresses()) {
+				sb.append(address.toString()).append(",");
+			}
+			return sb.toString();
+		}
+	}
+	
+	public boolean isDivider() {
+		return this.getTxViewType() == Type.PENDING_DIVIDER ||
+				this.getTxViewType() == Type.HISTORY_DIVIDER;
+	}
+	
+	@Override
+	public boolean matches(CharSequence constraint) {
+		// TODO fix the pending bar always showing up in searches issue
+		if (this.isDivider()) {
+			return true;
+		} else {
+			return this.getTxNote().toLowerCase(Locale.ENGLISH).contains(constraint);
+		}
 	}
 
 }

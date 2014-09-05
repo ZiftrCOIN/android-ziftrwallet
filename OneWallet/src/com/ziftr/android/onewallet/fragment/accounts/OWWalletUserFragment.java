@@ -47,8 +47,7 @@ public abstract class OWWalletUserFragment extends OWFragment implements OWCoinR
 		BigDecimal unitPriceInFiat = OWConverter.convert(
 				BigDecimal.ONE, getCoinId(), OWFiat.Type.USD);
 		coinUnitPriceInFiatTextView.setText(OWFiat.Type.USD.getSymbol() + 
-				OWFiat.formatFiatAmount(OWFiat.Type.USD, 
-						unitPriceInFiat).toPlainString());
+				OWFiat.formatFiatAmount(OWFiat.Type.USD, unitPriceInFiat).toPlainString());
 
 		TextView walletBalanceTextView = (TextView) 
 				headerView.findViewById(R.id.topRightTextView);

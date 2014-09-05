@@ -111,6 +111,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 
 
 	private void initializeTxListView() {
+		// TODO make this non-UI blocking
 		this.txAdapter = new OWWalletTransactionListAdapter(this.getActivity());
 
 		Collection<OWWalletTransaction> pendingTxs = 
@@ -118,25 +119,25 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 
 		if (pendingTxs.size() > 0) {
 			// Add the Pending Divider
-			this.txAdapter.getFullPendingTxList().add(
+			this.txAdapter.getFullList().add(
 					new OWWalletTransaction(
 							null, null, "PENDING", -1, null, 
-							OWWalletTransaction.Type.Divider, 
+							OWWalletTransactionListAdapter.Type.PENDING_DIVIDER,
 							R.layout.accounts_wallet_tx_list_divider));
 			// Add all the pending transactions
 			for (OWWalletTransaction tx : pendingTxs) {
-				this.txAdapter.getFullPendingTxList().add(tx);
+				this.txAdapter.getFullList().add(tx);
 			}
 		}
 
 		// Add the History Divider
-		this.txAdapter.getFullConfirmedTxList().add(new OWWalletTransaction(
+		this.txAdapter.getFullList().add(new OWWalletTransaction(
 				null, null, "HISTORY", -1, null, 
-				OWWalletTransaction.Type.Divider, 
+				OWWalletTransactionListAdapter.Type.HISTORY_DIVIDER,
 				R.layout.accounts_wallet_tx_list_divider));
 		// Add all the pending transactions
 		for (OWWalletTransaction tx : this.getWalletManager().getConfirmedTransactions(getCoinId())) {
-			this.txAdapter.getFullConfirmedTxList().add(tx);
+			this.txAdapter.getFullList().add(tx);
 		}
 
 		this.txAdapter.refreshWorkingList();
@@ -151,7 +152,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				if (txAdapter.getItemViewType(position) == OWWalletTransactionListAdapter.TRANSACTION_TYPE) {
+				if (!txAdapter.getItem(position).isDivider()) {
 					OWWalletTransaction txItem = (OWWalletTransaction) 
 							txListView.getItemAtPosition(position);
 					getOWMainActivity().openTxnDetails(txItem);

@@ -41,14 +41,9 @@ public class OWSendingAddressesTable extends OWAddressesTable {
 	}
 
 	@Override
-	protected ContentValues addressToContentValues(OWAddress address, boolean forInsert) {
+	protected ContentValues addressToContentValues(OWAddress address) {
 		ContentValues values = new ContentValues();
-
-		if (forInsert) {
-			// For inserting a key into the db, we need the keys but the id
-			// will be generated upon insertion.
-			values.put(COLUMN_ADDRESS, address.toString());
-		} 
+		values.put(COLUMN_ADDRESS, address.toString());
 		values.put(COLUMN_NOTE, address.getNote());
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());

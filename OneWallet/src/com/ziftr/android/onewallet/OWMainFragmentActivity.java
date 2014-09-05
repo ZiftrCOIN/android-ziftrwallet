@@ -47,6 +47,7 @@ import com.ziftr.android.onewallet.fragment.accounts.OWNewCurrencyFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
+import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
@@ -1119,7 +1120,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	public void changeActionBar(String title, boolean menu, boolean home, 
 			final TextWatcher textWatcher, 
-			final OWSearchableListAdapter adapter) {
+			final OWSearchableListAdapter<? extends OWSearchableListItem> adapter) {
 
 		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 		ImageView backButton = (ImageView) this.findViewById(R.id.actionBarBack);
@@ -1216,7 +1217,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	}
 
 	private void filterAccordingToVisibility(
-			final OWSearchableListAdapter adapter) {
+			final OWSearchableListAdapter<? extends OWSearchableListItem> adapter) {
 		final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
 		if (!searchBarIsVisible()) {
 			// Filter

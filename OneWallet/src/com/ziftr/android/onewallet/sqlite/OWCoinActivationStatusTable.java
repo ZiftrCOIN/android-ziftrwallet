@@ -10,10 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.ziftr.android.onewallet.util.OWCoin;
 
 
-public class OWCoinActivationStatusTable {
-
-	/** The id column. All Tables must have this to work well with adapters. */
-	public static final String COLUMN_ID = "_id";
+public class OWCoinActivationStatusTable extends OWTable {
 
 	/** The title of the column that contains a string identifying the OWCoin.Type for the row. */
 	public static final String COLUMN_COIN_ID = "coin_type";
@@ -21,31 +18,38 @@ public class OWCoinActivationStatusTable {
 	/** The title of the column that keeps track of the un/de/activated status. */
 	public static final String COLUMN_ACTIVATED_STATUS = "status";
 
-	/** The name of the table to store the status of all the coin types. */
-	public static final String TABLE_NAME = "coin_activation_status";
-
-	/** The string that can be used to create the coin activation status table. */
-	public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + 
-			COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-			COLUMN_COIN_ID + " TEXT NOT NULL, " + 
-			COLUMN_ACTIVATED_STATUS + " INTEGER );";
-
-	protected static void create(SQLiteDatabase db) {
-		db.execSQL(CREATE_TABLE);
+	protected String getTableName() {
+		return "coin_activation_status";
 	}
 
-	protected static void insert(OWCoin.Type coinId, int status, SQLiteDatabase db) {
+	/** 
+	 * The string that can be used to create the coin activation status table. 
+	 */
+	protected String getCreateTableString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName()).append(" (");
+		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
+		sb.append(COLUMN_COIN_ID).append(" TEXT NOT NULL, ");
+		sb.append(COLUMN_ACTIVATED_STATUS).append(" INTEGER );");
+		return sb.toString();
+	}
+	
+	protected void create(SQLiteDatabase db) {
+		db.execSQL(getCreateTableString());
+	}
+	
+	protected void insert(OWCoin.Type coinId, int status, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_COIN_ID, coinId.toString());
 		values.put(COLUMN_ACTIVATED_STATUS, status);
 
-		db.insert(TABLE_NAME, null, values);
+		db.insert(getTableName(), null, values);
 	}
 
-	protected static List<OWCoin.Type> getAllActivatedTypes(SQLiteDatabase db) {
+	protected List<OWCoin.Type> getAllActivatedTypes(SQLiteDatabase db) {
 		List<OWCoin.Type> activatedCoinTypes = new ArrayList<OWCoin.Type>();
 
-		String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE " + 
+		String selectQuery = "SELECT * FROM " + getTableName() + " WHERE " + 
 				COLUMN_ACTIVATED_STATUS + " = " + OWSQLiteOpenHelper.ACTIVATED + ";";
 		Cursor c = db.rawQuery(selectQuery, null);
 
@@ -64,8 +68,8 @@ public class OWCoinActivationStatusTable {
 		return activatedCoinTypes;
 	}
 
-	protected static int getActivatedStatus(OWCoin.Type coinId, SQLiteDatabase db) {
-		String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE " + 
+	protected int getActivatedStatus(OWCoin.Type coinId, SQLiteDatabase db) {
+		String selectQuery = "SELECT * FROM " + getTableName() + " WHERE " + 
 				COLUMN_COIN_ID + " = '" + coinId.toString() + "';";
 		Cursor c = db.rawQuery(selectQuery, null);
 
@@ -85,10 +89,10 @@ public class OWCoinActivationStatusTable {
 		}
 	}
 
-	protected static void update(OWCoin.Type coinId, int status, SQLiteDatabase db) {
+	protected void update(OWCoin.Type coinId, int status, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ACTIVATED_STATUS, status);
-		db.update(TABLE_NAME, values, COLUMN_COIN_ID + " = '" + coinId.toString() + "'", null);
+		db.update(getTableName(), values, COLUMN_COIN_ID + " = '" + coinId.toString() + "'", null);
 	}
 
 }

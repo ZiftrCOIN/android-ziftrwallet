@@ -40,6 +40,7 @@ import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -724,7 +725,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				tx.getHashAsString().substring(0, 6), 
 				tx.getUpdateTime().getTime() / 1000,
 				tx.getValue(this.walletMap.get(coinId)),
-				OWWalletTransaction.Type.Transaction, 
+				OWWalletTransactionListAdapter.Type.TRANSACTION,
 				R.layout.accounts_wallet_tx_list_item);
 		owTx.setSha256Hash(new OWSha256Hash(tx.getHash().toString()));
 
@@ -741,27 +742,43 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			addresses = this.readSendingAddresses(coinId, addressStrings);
 		}
-		if (addresses == null || addresses.size() == 0) {
-			throw new RuntimeException("No address found. ");
-		} else {
-			// TODO make transactions have a list and insert the whole list here
-			owTx.setDisplayAddress(addresses.get(0));
-		}
+		
+		owTx.setDisplayAddresses(addresses);
 
+		// TODO get this from settings
 		owTx.setFiatType(OWFiat.Type.USD);
+		
+		// The number of confirmations from bitcoin j.
 		owTx.setNumConfirmations(tx.getConfidence().getDepthInBlocks());
 
 		owTx.setTxAmount(tx.getValue(this.getWallet(coinId)));
 		// TODO not right, but can't get it from bitcoinj apparently
 		owTx.setTxFee(BigInteger.ZERO);
-		// autofill the note of the transaction as the note of the address
-		if (!owTx.getDisplayAddress().getNote().trim().isEmpty()) {
-			owTx.setTxNote(owTx.getDisplayAddress().getNote());
-		} else {
+		
+		// autofill the note of the transaction as the note of the first non-empty address
+		if (addresses == null || addresses.size() == 0) {
 			owTx.setTxNote(tx.getHashAsString().substring(0, 6));
+		} else {
+			String note = null;
+			for (OWAddress a : addresses) {
+				if (a.getNote() != null && !a.getNote().trim().isEmpty()) {
+					note = a.getNote();
+					break;
+				}
+			}
+			if (note != null) {
+				owTx.setTxNote(note);
+			} else {
+				owTx.setTxNote(tx.getHashAsString().substring(0, 6));
+			}
 		}
+		
+		// Get the tx's time
 		owTx.setTxTime(tx.getUpdateTime().getTime() / 1000);
-		owTx.setTxType(OWWalletTransaction.Type.Transaction);
+		
+		ZLog.log("Addresses!!: " + owTx.getAddressAsCommaListString());
+		ZLog.log(owTx.getTxNote());
+		
 		return owTx;
 	}
 

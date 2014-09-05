@@ -24,9 +24,6 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	/** The public key, encoded as a string. */
 	public static final String COLUMN_PUB_KEY = "pub_key";
 
-	/** This is the timestamp when the address was created. */
-	public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
-
 	@Override
 	protected String getTablePostfix() {
 		return TABLE_POSTFIX;
@@ -50,6 +47,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	@Override
 	protected OWAddress cursorToAddress(OWCoin.Type coinId, Cursor c) throws OWAddressFormatException {
 		String encodedPrivKey = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
+		// TODO deal with encryption
 		byte[] wifPrivKeyBytes = Base58.decodeChecked(encodedPrivKey);
 		OWECKey newKey = new OWECKey(new BigInteger(1, OWUtils.stripVersionAndChecksum(wifPrivKeyBytes)));
 		OWAddress newAddress = new OWAddress(coinId, newKey);
@@ -63,20 +61,16 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	}
 
 	@Override
-	protected ContentValues addressToContentValues(OWAddress address, boolean forInsert) {
+	protected ContentValues addressToContentValues(OWAddress address) {
 		// Can assume here that address.getKey() doesn't return null.
 
 		ContentValues values = new ContentValues();
 		// TODO can we do this as a blob?
+		// TODO deal with encryption
 		values.put(COLUMN_PRIV_KEY, Base58.encode(
 				address.getCoinId().getPrivKeyPrefix(), address.getKey().getPrivKeyBytesForAddressEncoding()));
-
-		// Either for insert or for update
-		if (forInsert) {
-			// For inserting a key into the db, we need the keys
-			values.put(COLUMN_PUB_KEY, OWUtils.bytesToHexString(address.getKey().getPubKey()));
-			values.put(COLUMN_ADDRESS, Base58.encode(address.getCoinId().getPubKeyHashPrefix(), address.getHash160()));
-		} 
+		values.put(COLUMN_PUB_KEY, OWUtils.bytesToHexString(address.getKey().getPubKey()));
+		values.put(COLUMN_ADDRESS, Base58.encode(address.getCoinId().getPubKeyHashPrefix(), address.getHash160()));
 		values.put(COLUMN_NOTE, address.getNote());
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getKey().getCreationTimeSeconds());
