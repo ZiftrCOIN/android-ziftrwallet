@@ -40,7 +40,6 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
-
 		// Initialize the icons so they do the correct things onClick
 		this.initializeAddressUtilityIcons();
 

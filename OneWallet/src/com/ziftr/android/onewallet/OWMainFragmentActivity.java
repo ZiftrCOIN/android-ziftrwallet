@@ -97,7 +97,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	X 11. Get Fragment switching working with selection in the drawer layout
 
-	o 12. Put menu icon on the top left part of action bar rather than the right.
+	X 12. Put menu icon on the top left part of action bar rather than the right.
 	To do this we need to make a custom action bar. Maybe just keep it on the right?
 	In general, need to figure out how to make a more customizable action bar, 
 	might just have to use custom actionbar layout.
@@ -115,7 +115,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	X 16. Make the backgrounds of the grid view in the new currency dialog
 	reflect which item is currenly selected.
 
-	o 17. Add a nicer display to the dialogs than the default.
+	X 17. Add a nicer display to the dialogs than the default.
 
 	o 18. Redesign the send coins screen now that I know a little more about 
 	android layouts.
@@ -132,7 +132,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	o 22. Add descriptions to each of the resources (like @string/ resources).
 
-	o 23. Need to remember where we were when navigating back the accounts section
+	X 23. Need to remember where we were when navigating back the accounts section
 
 	o 24. Should only need to have passphrase when sending coins.
 
