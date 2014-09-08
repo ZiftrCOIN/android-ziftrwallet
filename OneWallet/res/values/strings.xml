@@ -108,5 +108,6 @@
     <string name="ow_ab_back_description">Back</string>
     <!-- Description here -->
     <string name="ow_ab_search_description">Search</string>
-
+	<!-- string with link for website -->
+	<string name="ow_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
 </resources>

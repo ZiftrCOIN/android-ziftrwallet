@@ -44,7 +44,6 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		this.initializeAddressUtilityIcons();
 
 		this.initializeWalletHeaderView();
-		
 		if (savedInstanceState == null) {
 			// Set the address to initially be empty
 			this.refresh("");
@@ -130,7 +129,6 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		TextView addressTextView = (EditText) 
 				this.rootView.findViewById(R.id.addressValueTextView);
 		addressTextView.setText(this.addressToReceiveOn);
-
 		// initialize the icons that 
 		// Make the image view have the data bitmap
 		this.generateQrCode();
