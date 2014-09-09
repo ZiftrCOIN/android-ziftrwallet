@@ -5,9 +5,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
+import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 
 /**
  * Dialogs where the app requests to get the passphrase
@@ -47,7 +49,16 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
 				R.layout.dialog_reset_passphrase, null));
+		
+		this.initDialogFields();
+
 		builder.setView(this.getDialogView());
+		
+		Button cancel = (Button) this.getDialogView().findViewById(R.id.left_dialog_button);
+		cancel.setOnClickListener(this);
+		
+		Button cont = (Button) this.getDialogView().findViewById(R.id.right_dialog_button);
+		cont.setOnClickListener(this);
 		
 		// Do this after the view has been inflated so views with ids exist
 		if (savedInstanceState != null) {
@@ -73,32 +84,26 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 	 */
 	@Override
 	public void onClick(View view) {
-		// TODO
-		// Isn't the below method still corect?
-	}
-
-	/**
-	 * Handle clicks on this dialog. Just calls the handler for this
-	 * reset.
-	 *
-	@Override
-	public void onClick(DialogInterface dialog, int which) {
 		OWResetPassphraseDialogHandler handler = 
 				(OWResetPassphraseDialogHandler) this.getHandler();
-
-		if (which == DialogInterface.BUTTON_POSITIVE) {
-			// Have the handler handle the data
+		
+		switch(view.getId()) {
+		case R.id.left_dialog_button:
+			//CANCEL
+			handler.handleNegative(this.getTargetRequestCode());
+			this.dismiss();
+			break;
+		case R.id.right_dialog_button:
+			//CONTINUE
 			handler.handleResetPassphrasePositive(
 					this.getTargetRequestCode(), 
 					this.getBytesFromEditText(R.id.textbox_old_passphrase), 
 					this.getBytesFromEditText(R.id.textbox_new_passphrase), 
 					this.getBytesFromEditText(R.id.textbox_confirm_passphrase));
-		} else if (which == DialogInterface.BUTTON_NEGATIVE) {
-			handler.handleNegative(this.getTargetRequestCode());
-		} else {
-			ZLog.log("These dialogs shouldn't have neutral buttons.");
+			this.dismiss();
+			break;
 		}
-	}*/
+	}
 
 	/**
 	 * When we save the instance, in addition to doing everything that

@@ -752,7 +752,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @return a boolean describing whether or not the user 
 	 * has entered a passphrase before.
 	 */
-	private boolean userHasPassphrase() {
+	public boolean userHasPassphrase() {
 		return this.getStoredPassphraseHash() != null;
 	}
 

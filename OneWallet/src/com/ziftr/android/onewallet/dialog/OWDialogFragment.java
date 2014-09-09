@@ -113,7 +113,6 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		titlefield.setText(this.title);
 		//setMessage
 		if (this.message != null){
-			ZLog.log(this.message);
 			TextView messagefield = (TextView) view.findViewById(R.id.dialog_message);
 			messagefield.setText(this.message);
 		}

@@ -28,27 +28,74 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:orientation="vertical" >
+                    android:orientation="vertical"
+                    android:paddingLeft="0dp"
+                    android:paddingRight="0dp" >
+
+                    <ImageView
+                        android:id="@+id/sendGetAddressFromHistoryIcon"
+                        android:layout_width="@dimen/ow_total_icon_side_length"
+                        android:layout_height="@dimen/ow_total_icon_side_length"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentLeft="true"
+                        android:contentDescription="@string/ow_old_passphrase_hint"
+                        android:padding="@dimen/ow_borderless_icon_margin"
+                        android:src="@drawable/from_history" />
+
+                    <ImageView
+                        android:id="@+id/send_qr_icon"
+                        android:layout_width="@dimen/ow_total_icon_side_length"
+                        android:layout_height="@dimen/ow_total_icon_side_length"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/ow_old_passphrase_hint"
+                        android:padding="@dimen/ow_bordered_icon_margin"
+                        android:src="@drawable/qrcode_enabled" />
 
                     <TextView
                         android:id="@+id/sendToAddressTitleView"
                         style="@style/send_receive_label"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
+                        android:layout_alignTop="@id/send_qr_icon"
                         android:layout_gravity="center"
+                        android:layout_toLeftOf="@id/send_qr_icon"
+                        android:layout_toRightOf="@id/sendGetAddressFromHistoryIcon"
                         android:gravity="left"
                         android:text="@string/ow_send_to_address" >
                     </TextView>
 
-                    <EditText
-                        android:id="@+id/sendEditTextReceiverAddress"
-                        style="@style/send_receive_edit_text"
+                    <RelativeLayout
                         android:layout_width="match_parent"
+                        android:layout_height="@dimen/ow_edit_text_height"
                         android:layout_below="@id/sendToAddressTitleView"
-                        android:inputType="text" >
-                    </EditText>
+                        android:layout_toLeftOf="@id/send_qr_icon"
+                        android:layout_toRightOf="@id/sendGetAddressFromHistoryIcon"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:id="@+id/send_paste_icon"
+                            android:layout_width="@dimen/ow_total_icon_side_length"
+                            android:layout_height="@dimen/ow_total_icon_side_length"
+                            android:layout_alignParentRight="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_gravity="center"
+                            android:background="@color/White"
+                            android:clickable="true"
+                            android:contentDescription="@string/ow_old_passphrase_hint"
+                            android:padding="@dimen/ow_bordered_icon_margin"
+                            android:src="@drawable/copy_icon_clickable" />
+
+                        <EditText
+                            android:id="@+id/sendEditTextReceiverAddress"
+                            style="@style/send_receive_edit_text"
+                            android:layout_width="match_parent"
+                            android:layout_alignTop="@id/send_paste_icon"
+                            android:layout_toLeftOf="@id/send_paste_icon"
+                            android:inputType="text" >
+                        </EditText>
+                    </RelativeLayout>
                 </RelativeLayout>
 
                 <RelativeLayout
@@ -169,7 +216,7 @@
                             android:id="@+id/sendEditTextTransactionFee"
                             style="@style/send_receive_edit_text"
                             android:layout_width="match_parent"
-                            android:inputType="text" >
+                            android:inputType="numberDecimal" >
 
                             <!--
                         android:clickable="false"
@@ -270,55 +317,6 @@
                 </LinearLayout>
                     -->
                 </RelativeLayout>
-
-                <LinearLayout
-                    style="@style/send_receive_block_containers"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal" >
-
-                    <ImageView
-                        android:id="@+id/send_paste_icon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
-                        android:layout_gravity="center"
-                        android:background="@android:color/transparent"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_bordered_icon_margin"
-                        android:src="@drawable/copy_enabled" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
-                    </View>
-
-                    <ImageView
-                        android:id="@+id/send_qr_icon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
-                        android:layout_gravity="center"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_bordered_icon_margin"
-                        android:src="@drawable/qrcode_enabled" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1" >
-                    </View>
-
-                    <ImageView
-                        android:id="@+id/sendGetAddressFromHistoryIcon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
-                        android:layout_gravity="center"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_bordered_icon_margin"
-                        android:src="@drawable/from_history_icon" />
-                </LinearLayout>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
