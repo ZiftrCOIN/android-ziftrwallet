@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ziftr.android.onewallet.dialog.OWDialogFragment;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.dialog.OWValidatePassphraseDialog;
 import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
@@ -787,11 +788,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				OWValidatePassphraseDialog passphraseDialog = 
 						new OWValidatePassphraseDialog();
 
-				passphraseDialog.setTargetFragment(
-						null, OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG);
-
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, typeToStart.toString());
+				b.putInt(OWDialogFragment.REQUEST_CODE_KEY, OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG);
 				passphraseDialog.setArguments(b);
 
 				// TODO make a create new passphrase dialog

@@ -15,10 +15,9 @@ import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHan
  * from the user.
  */
 public class OWValidatePassphraseDialog extends OWDialogFragment {
-
 	/** The key to save the text in the box. */
 	private static final String CURRENT_ENTERED_TEXT_KEY = "entered_text";
-
+	
 	/**
 	 * Whenever this is fragment is attached to an activity 
 	 * we must make sure that it is able to handle accepting 
@@ -64,19 +63,19 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		return builder.create();
 	}
 
-	public void onClick(View view){
+	public void onClick(View view) {
 		OWValidatePassphraseDialogHandler handler = 
-				(OWValidatePassphraseDialogHandler) this.getActivity();
+				(OWValidatePassphraseDialogHandler) this.getHandler();
 		
 		switch(view.getId()) {
 		case R.id.left_dialog_button:
 			//CANCEL
-			handler.handleNegative(this.getTargetRequestCode());
+			handler.handleNegative(this.getRequestCode());
 			this.dismiss();
 			break;
 		case R.id.right_dialog_button:
 			//CONTINUE
-			handler.handlePassphrasePositive(this.getTargetRequestCode(), 
+			handler.handlePassphrasePositive(this.getRequestCode(), 
 					this.getBytesFromEditText(R.id.textbox_passphrase), 
 					this.getArguments());
 			this.dismiss();
@@ -102,6 +101,5 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	protected Object getHandler() {
 		return this.getActivity();
 	}
-	
 
 }

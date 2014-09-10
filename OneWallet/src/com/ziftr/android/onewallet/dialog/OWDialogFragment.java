@@ -41,6 +41,8 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	/** The view for this dialog. */
 	private View dialogView;
 
+	public static final String REQUEST_CODE_KEY = "request_code";
+
 	/**
 	 * Set's up a basic dialog with all of its content.
 	 * 
@@ -97,7 +99,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 						NEGATIVE_BUTTON_TEXT_KEY);
 			}
 		}
-
+		
 		AlertDialog.Builder builder = 
 				new AlertDialog.Builder(this.getActivity());
 
@@ -106,7 +108,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	/**
 	 * Method to set the title and message text fields for the dialogs.
 	 */
-	public void initDialogFields(){
+	public void initDialogFields() {
 		View view = this.getDialogView();
 		//setTitle
 		TextView titlefield = (TextView) view.findViewById(R.id.dialog_title);
@@ -230,6 +232,18 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	public void onDetach(){
 		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(false);
 		super.onDetach();
+	}
+
+	/**
+	 * @return the requestCode
+	 */
+	public int getRequestCode() {
+		Bundle args = this.getArguments();
+		if (args != null && args.getInt(REQUEST_CODE_KEY, -1) != -1) {
+			return args.getInt(REQUEST_CODE_KEY);	
+		}
+		ZLog.log("No request code set, that's a problem!");
+		return 0;
 	}
 
 }
