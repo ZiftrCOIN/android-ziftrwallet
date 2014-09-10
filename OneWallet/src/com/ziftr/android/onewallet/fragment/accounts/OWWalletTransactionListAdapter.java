@@ -30,7 +30,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWWa
 		HISTORY_DIVIDER
 	}
 
-	private OWWalletTransactionListAdapter(Context ctx, List<OWWalletTransaction> txList) {
+	public OWWalletTransactionListAdapter(Context ctx, List<OWWalletTransaction> txList) {
 		super(ctx, txList);
 	}
 	

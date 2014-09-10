@@ -316,9 +316,15 @@ public class OWWalletTransaction implements OWSearchableListItem {
 	}
 	
 	@Override
-	public boolean matches(CharSequence constraint) {
-		// TODO fix the pending bar always showing up in searches issue
-		if (this.isDivider()) {
+	public boolean matches(CharSequence constraint, OWSearchableListItem nextItem) {
+		// TODO This isn't quite right because the next item in this list doesn't necessarily 
+		// also meet the search criteria...
+		
+		OWWalletTransaction owNextTransaction = (OWWalletTransaction) nextItem;
+		if (this.isDivider() && owNextTransaction != null && owNextTransaction.isDivider()) {
+			// The pending bar shouldn't show if it the only bar
+			return false;
+		} else if (this.isDivider()) {
 			return true;
 		} else {
 			return this.getTxNote().toLowerCase(Locale.ENGLISH).contains(constraint);
