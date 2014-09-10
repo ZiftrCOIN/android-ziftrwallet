@@ -39,8 +39,10 @@ public class OWSettingsFragment extends OWFragment {
 							OWRequestCodes.RESET_PASSPHRASE_DIALOG);
 					passphraseDialog.setupDialog("ziftrWALLET", null, 
 							"Continue", null, "Cancel");
+					if (!getOWMainActivity().showingDialog()){
 					passphraseDialog.show(OWSettingsFragment.this.getFragmentManager(), 
 							"scan_qr");
+					}
 				} else {
 					// Make a new alert dialog
 					OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();

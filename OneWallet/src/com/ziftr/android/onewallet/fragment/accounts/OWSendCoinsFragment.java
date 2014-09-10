@@ -243,32 +243,39 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 			@Override
 			public void onClick(View v) {
 				if (addressIsValid(getSendToAddressEditText().getText().toString())) {
-					// Need to make sure amount to send is less than balance
-					BigInteger amountSending = OWUtils.bigDecToBigInt(getCoinId(), 
-							getAmountToSendFromEditText());
-					BigInteger feeSending = OWUtils.bigDecToBigInt(getCoinId(), 
-							getFeeFromEditText());
-					try {
-						getWalletManager().sendCoins(getCoinId(), getSendToAddressEditText().getText().toString(), 
-								amountSending, feeSending);
-					} catch(OWAddressFormatException afe) {
-						// TODO alert user if address has errors
-						ZLog.log("There was a problem with the address.");
-					} catch(OWInsufficientMoneyException ime) {
-						// TODO alert user if not enough money in wallet.
-						ZLog.log("There was not enough money in the wallet.");
-					}
-					
-					// To exit out of the send coins fragment
-					Activity a = getActivity();
-					if (a != null) {
-						a.onBackPressed();
-					}
+					Bundle b = new Bundle();
+					b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
+					getOWMainActivity().alertPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
+							"validate_passphrase_dialog_send");
 				}
 			}
 		});
 	}
 
+	public void clickSendCoins(){
+		// Need to make sure amount to send is less than balance
+		BigInteger amountSending = OWUtils.bigDecToBigInt(getCoinId(), 
+				getAmountToSendFromEditText());
+		BigInteger feeSending = OWUtils.bigDecToBigInt(getCoinId(), 
+				getFeeFromEditText());
+		try {
+			getWalletManager().sendCoins(getCoinId(), getSendToAddressEditText().getText().toString(), 
+					amountSending, feeSending);
+		} catch(OWAddressFormatException afe) {
+			// TODO alert user if address has errors
+			ZLog.log("There was a problem with the address.");
+		} catch(OWInsufficientMoneyException ime) {
+			// TODO alert user if not enough money in wallet.
+			ZLog.log("There was not enough money in the wallet.");
+		}
+		
+		// To exit out of the send coins fragment
+		Activity a = getActivity();
+		if (a != null) {
+			a.onBackPressed();
+		}
+	}
+	
 	/**
 	 * This is a useful method that binds two textviews together with
 	 * TextWatchers in such a way that when one changes the other also 

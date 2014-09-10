@@ -212,7 +212,7 @@ public class OWAccountsFragment extends OWFragment {
 				// If we are using the test net network then we make sure the
 				// user has a passphrase and 
 				if (!getOWMainActivity().showingDialog()){
-					getOWMainActivity().startWalletAfterValidation(item.getCoinId());
+					getOWMainActivity().openWalletView(item.getCoinId());
 				}
 			}
 		});

@@ -70,6 +70,8 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 		return builder.create();
 	}
+	
+
 
 	/**
 	 * Makes a builder for a basic dialog with all of the common
@@ -134,7 +136,6 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		outState.putString(POSITIVE_BUTTON_TEXT_KEY, this.positiveButtonText);
 		outState.putString(NEUTRAL_BUTTON_TEXT_KEY, this.neutralButtonText);
 		outState.putString(NEGATIVE_BUTTON_TEXT_KEY, this.negativeButtonText);
-
 		super.onSaveInstanceState(outState);
 	}
 
@@ -233,7 +234,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(false);
 		super.onDetach();
 	}
-
+	
 	/**
 	 * @return the requestCode
 	 */
