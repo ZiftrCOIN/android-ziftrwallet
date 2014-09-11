@@ -38,7 +38,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * TODO make sure that we stop correctly when the user
  * enters non-sensical values in fields.
  */
-public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
+public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	/** A boolean to keep track of changes to disallow infinite changes. */
 	private boolean changeCoinStartedFromProgram = false;
@@ -48,17 +48,6 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	/** The view container for this fragment. */
 	private View rootView;
-
-	/**
-	 * This is a placeholder for a spot to determine if a given address
-	 * is valid.
-	 * 
-	 * @param address - The address to verify the validity of.
-	 * @return as above
-	 * 
-	 * TODO use the checksum to make sure addresses are valid
-	 */
-	public abstract boolean addressIsValid(String address);
 
 	/**
 	 * Inflate, initialize, and return the send coins layout.
@@ -207,7 +196,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 		// Set the fee to the default and set send amount to 0 initially 
 		changeFiatStartedFromProgram = true;
-		feeTextView.setText(this.getCoinId().getDefaultFeePerKb());
+		feeTextView.setText(this.getCurSelectedCoinType().getDefaultFeePerKb());
 		changeFiatStartedFromProgram = false;
 
 		changeCoinStartedFromProgram = true;
@@ -241,9 +230,9 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (addressIsValid(getSendToAddressEditText().getText().toString())) {
+				if (getCurSelectedCoinType().addressIsValid(getSendToAddressEditText().getText().toString())) {
 					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
+					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
 					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
 							"validate_passphrase_dialog_send");
 				}
@@ -253,12 +242,12 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	public void clickSendCoins() {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = OWUtils.bigDecToBigInt(getCoinId(), 
+		BigInteger amountSending = OWUtils.bigDecToBigInt(getCurSelectedCoinType(), 
 				getAmountToSendFromEditText());
-		BigInteger feeSending = OWUtils.bigDecToBigInt(getCoinId(), 
+		BigInteger feeSending = OWUtils.bigDecToBigInt(getCurSelectedCoinType(), 
 				getFeeFromEditText());
 		try {
-			getWalletManager().sendCoins(getCoinId(), getSendToAddressEditText().getText().toString(), 
+			getWalletManager().sendCoins(getCurSelectedCoinType(), getSendToAddressEditText().getText().toString(), 
 					amountSending, feeSending);
 		} catch(OWAddressFormatException afe) {
 			// TODO alert user if address has errors
@@ -298,7 +287,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 						newCoinVal = new BigDecimal(newVal);
 						// TODO make this not only be USD
 						newFiatVal = OWConverter.convert(
-								newCoinVal, getCoinId(), OWFiat.USD); 
+								newCoinVal, getCurSelectedCoinType(), OWFiat.USD); 
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -340,7 +329,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 					try {
 						newFiatVal = new BigDecimal(newVal);
 						newCoinVal =  OWConverter.convert(
-								newFiatVal, OWFiat.USD, getCoinId());
+								newFiatVal, OWFiat.USD, getCurSelectedCoinType());
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -353,7 +342,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 					changeCoinStartedFromProgram = true;
 					coinValEditText.setText(OWCoin.formatCoinAmount(
-							getCoinId(), newCoinVal).toPlainString());
+							getCurSelectedCoinType(), newCoinVal).toPlainString());
 					changeCoinStartedFromProgram = false;
 				}
 			}
@@ -386,12 +375,12 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 		TextView totalTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalTextView);
 		totalTextView.setText(OWCoin.formatCoinAmount(
-				getCoinId(), total).toPlainString());
+				getCurSelectedCoinType(), total).toPlainString());
 
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCoinId());
+		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCurSelectedCoinType());
 		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal).toPlainString() + ")");
 	}
 

@@ -225,13 +225,13 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 
 	@Override
 	public void onStart() {
-		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(true);
+		((OWMainFragmentActivity) this.getActivity()).setShowingDialog(true);
 		super.onStart();
 	}
 
 	@Override
 	public void onDetach() {
-		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(false);
+		((OWMainFragmentActivity) this.getActivity()).setShowingDialog(false);
 		super.onDetach();
 	}
 	

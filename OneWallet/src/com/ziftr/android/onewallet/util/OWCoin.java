@@ -7,6 +7,7 @@ import com.google.bitcoin.core.NetworkParameters;
 import com.google.bitcoin.params.MainNetParams;
 import com.google.bitcoin.params.TestNet3Params;
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 
 /**
  * This class holds the Type enum. Each member of the enum can be thought of as an identifier for 
@@ -229,6 +230,33 @@ public class OWCoin implements OWCurrency {
 	public static BigDecimal formatCoinAmount(OWCoin coinType, BigInteger toFormat) {
 		return OWUtils.formatToNDecimalPlaces(
 				coinType.getNumberOfDigitsOfPrecision(), new BigDecimal(toFormat, coinType.getNumberOfDigitsOfPrecision()));
+	}
+
+	/**
+	 * This is a placeholder for a spot to determine if a given address
+	 * is valid.
+	 * 
+	 * @param address - The address to verify the validity of.
+	 * @return as above
+	 * 
+	 * TODO use the checksum to make sure addresses are valid
+	 */
+	public boolean addressIsValid(String address) {
+		if (address == null || address.isEmpty()) {
+			return false;
+		}
+
+		try {
+			byte[] decodedBytes = Base58.decode(address);
+			for (byte b : this.getAcceptableAddressCodes()) {
+				if (decodedBytes[0] == b) {
+					return true;
+				}
+			}
+			return false;
+		} catch(OWAddressFormatException afe) {
+			return false;
+		}
 	}
 
 }

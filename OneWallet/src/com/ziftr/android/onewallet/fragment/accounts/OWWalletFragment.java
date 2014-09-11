@@ -14,9 +14,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
+import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -26,7 +26,7 @@ import com.ziftr.android.onewallet.crypto.OWTransaction;
  * TODO in the evenListener for the search bar, make a call to notifyDatasetChanged
  * so that all the transactions that don't match are filtered out. 
  */
-public abstract class OWWalletFragment extends OWWalletUserFragment implements TextWatcher {
+public class OWWalletFragment extends OWWalletUserFragment implements TextWatcher {
 
 	/** The root view for this application. */
 	private View rootView;
@@ -93,7 +93,12 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		if (getWalletManager() == null || getWalletManager().getWallet(getCoinId()) == null) {
+		ZLog.log("wallet manager: " + getWalletManager());
+		ZLog.log("coin: " + getCurSelectedCoinType());
+		if (getWalletManager() != null) {
+			ZLog.log("wallet: " + getWalletManager().getWallet(getCurSelectedCoinType()));
+		}
+		if (getWalletManager() == null || getWalletManager().getWallet(getCurSelectedCoinType()) == null) {
 			throw new IllegalArgumentException(
 					"Shouldn't happen, this is just a safety check because we "
 							+ "need a wallet to send coins.");
@@ -116,7 +121,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		this.txAdapter = new OWWalletTransactionListAdapter(this.getActivity());
 
 		Collection<OWTransaction> pendingTxs = 
-				this.getWalletManager().getPendingTransactions(getCoinId());
+				this.getWalletManager().getPendingTransactions(getCurSelectedCoinType());
 
 		if (pendingTxs.size() > 0) {
 			// Add the Pending Divider
@@ -137,7 +142,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 				OWWalletTransactionListAdapter.Type.HISTORY_DIVIDER,
 				R.layout.accounts_wallet_tx_list_divider));
 		// Add all the pending transactions
-		for (OWTransaction tx : this.getWalletManager().getConfirmedTransactions(getCoinId())) {
+		for (OWTransaction tx : this.getWalletManager().getConfirmedTransactions(getCurSelectedCoinType())) {
 			this.txAdapter.getFullList().add(tx);
 		}
 
@@ -170,9 +175,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		receiveButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				OWMainFragmentActivity mActivity = 
-						(OWMainFragmentActivity) getActivity();
-				mActivity.openReceiveCoinsView(getCoinId());
+				getOWMainActivity().openReceiveCoinsView();
 			}
 		});
 
@@ -182,9 +185,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				OWMainFragmentActivity mActivity = 
-						(OWMainFragmentActivity) getActivity();
-				mActivity.openSendCoinsView(getCoinId());
+				getOWMainActivity().openSendCoinsView();
 			}
 		});
 

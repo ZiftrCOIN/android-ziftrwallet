@@ -27,7 +27,6 @@ import com.ziftr.android.onewallet.exceptions.OWWrongNetworkException;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWCoinRelative;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -42,7 +41,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * should be interpreted. Whilst almost all addresses today are hashes of public keys, 
  * another (currently not fully supported type) can contain a hash of a script instead.</p>
  */
-public class OWAddress implements OWCoinRelative, OWSearchableListItem {
+public class OWAddress implements OWSearchableListItem {
 
 	///////////////////////////////////////
 	//////////  Database Fields  //////////
@@ -206,7 +205,6 @@ public class OWAddress implements OWCoinRelative, OWSearchableListItem {
 		lastTimeModifiedSeconds = System.currentTimeMillis() / 1000;
 	}
 
-	@Override
 	public OWCoin getCoinId() {
 		return this.coinId;
 	}

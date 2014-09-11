@@ -21,14 +21,13 @@ import java.math.BigInteger;
 import javax.annotation.Nullable;
 
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWCoinRelative;
 
 /**
  * Thrown to indicate that you don't have enough money available 
  * to perform the requested operation.
  */
 @SuppressWarnings("serial")
-public class OWInsufficientMoneyException extends Exception implements OWCoinRelative {
+public class OWInsufficientMoneyException extends Exception {
     
 	/**
 	 * The type of coin that this exception was thrown for.
@@ -57,7 +56,6 @@ public class OWInsufficientMoneyException extends Exception implements OWCoinRel
         this.insufficientByAmount = missing;
     }
 
-	@Override
 	public OWCoin getCoinId() {
 		return this.coinId;
 	}

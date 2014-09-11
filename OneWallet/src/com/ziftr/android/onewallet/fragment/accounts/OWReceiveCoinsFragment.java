@@ -25,7 +25,7 @@ import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 
-public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
+public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 
 	/** The view container for this fragment. */
 	private View rootView;
@@ -78,7 +78,7 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 			@Override
 			public void onClick(View v) {
 				Bundle b = new Bundle();
-				b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
+				b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
 				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						"validate_passphrase_dialog_new_key");
 			}
@@ -151,7 +151,7 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		OWUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final OWAddress address = database.createReceivingAddress(getCoinId());
+				final OWAddress address = database.createReceivingAddress(getCurSelectedCoinType());
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {

@@ -211,7 +211,7 @@ public class OWAccountsFragment extends OWFragment {
 						parent.getItemAtPosition(position);
 				// If we are using the test net network then we make sure the
 				// user has a passphrase and 
-				if (!getOWMainActivity().showingDialog()) {
+				if (!getOWMainActivity().isShowingDialog()) {
 					getOWMainActivity().openWalletView(item.getCoinId());
 				}
 			}

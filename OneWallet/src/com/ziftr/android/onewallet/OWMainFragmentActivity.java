@@ -45,18 +45,13 @@ import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.OWWelcomeFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWNewCurrencyFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinTestnetCoinsFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWReceiveBitcoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
-import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -173,6 +168,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
+	/** When the user navigates to different sections of the app, this */
+	private OWCoin curSelectedCoinType;
+
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -257,6 +255,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
+		
+		// Get the saved cur selected coin type
+		this.initializeCoinType(savedInstanceState);
 
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance(this);
@@ -265,11 +266,12 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		this.initializeDrawerLayout();
 
 		// Make sure the base fragment view is initialized
-		this.initizalizeBaseFragmentView(savedInstanceState);
+		this.initializeBaseFragmentContainer(savedInstanceState);
 
 		// Make sure the action bar changes with what fragment we are in
 		this.initializeActionBar();
 
+		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
 	}
 
@@ -304,9 +306,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		super.onSaveInstanceState(outState);
 
 		// Save which part of the app is currently open.
-		outState.putString(this.SELECTED_SECTION_KEY, 
-				this.getCurrentlySelectedDrawerMenuOption());
-
+		outState.putString(this.SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
+		if (this.getCurSelectedCoinType() != null) {
+			outState.putString(OWCoin.TYPE_KEY, this.getCurSelectedCoinType().toString());
+		}
 	}
 
 	/**
@@ -461,8 +464,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param savedInstanceState - The saved instance state 
 	 */
 	private void initializeDrawerLayout() {
-		this.menuDrawer = 
-				(DrawerLayout) this.findViewById(R.id.oneWalletBaseDrawer);
+		this.menuDrawer = (DrawerLayout) this.findViewById(R.id.oneWalletBaseDrawer);
 
 		if (this.menuDrawer != null) {
 			this.menuDrawer.setDrawerListener(this);
@@ -563,7 +565,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * and opens the right fragment if the bundle has extra information
 	 * in it.
 	 */
-	private void initizalizeBaseFragmentView(Bundle savedInstanceState) {
+	private void initializeCoinType(Bundle args) {
+		if (args != null) {
+			if (args.getString(OWCoin.TYPE_KEY) != null) {
+				this.curSelectedCoinType = OWCoin.valueOf(args.getString(OWCoin.TYPE_KEY));
+			}
+		}
+	}
+
+	private void initializeBaseFragmentContainer(Bundle savedInstanceState) {
 		// Set the base fragment container
 		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseHolder);
 
@@ -584,7 +594,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 						baseFragmentContainer.setTranslationX(offset);
 					}
 				});
-
+		
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
@@ -592,14 +602,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		} else {
 			// Here we must make sure that the drawer menu is still
 			// showing which section of the app is currently open.
-			String prevSelectedSectionString = 
-					savedInstanceState.getString(this.SELECTED_SECTION_KEY);
+			String prevSelectedSectionString = savedInstanceState.getString(this.SELECTED_SECTION_KEY);
 			if (prevSelectedSectionString != null) {
-				FragmentType fragmentType = 
-						FragmentType.valueOf(prevSelectedSectionString);
+				FragmentType fragmentType = FragmentType.valueOf(prevSelectedSectionString);
 				if (fragmentType.getDrawerMenuView() != null) {
-					this.selectSingleDrawerMenuOption(
-							fragmentType.getDrawerMenuView());
+					this.selectSingleDrawerMenuOption(fragmentType.getDrawerMenuView());
 				} else {
 					ZLog.log("The drawer menu was null, "
 							+ "can't select... shouldn't happen1");
@@ -821,6 +828,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param typeOfWalletToStart
 	 */
 	public void openWalletView(OWCoin typeOfWalletToStart) {
+		this.setCurSelectedCoinType(typeOfWalletToStart);
+
 		// Temporarily need to just work for enabled types only
 		OWCoin t = null;
 		for (OWCoin enabledType : OWWalletManager.enabledCoinTypes) {
@@ -834,14 +843,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			return;
 		}
 
-		String tag = typeOfWalletToStart.getShortTitle() + "_wallet_fragment";
+		String tag = "wallet_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			if (typeOfWalletToStart == OWCoin.BTC) {
-				fragToShow = new OWBitcoinWalletFragment();
-			} else if (typeOfWalletToStart == OWCoin.BTC_TEST) {
-				fragToShow = new OWBitcoinTestnetWalletFragment();
-			}
+			fragToShow = new OWWalletFragment();
 		}
 
 		// If we did a tablet view this might be different. 
@@ -866,28 +871,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openReceiveCoinsView(OWCoin typeOfWalletToStart) {
-		// Temporarily need to just work for enabled types only
-		OWCoin t = null;
-		for (OWCoin enabledType : OWWalletManager.enabledCoinTypes) {
-			if (typeOfWalletToStart == enabledType) {
-				t = enabledType;
-			}
-		}
-
-		// Coin type is not enabled
-		if (t == null) {
-			return;
-		}
-
-		String tag = typeOfWalletToStart.getShortTitle() + "_receive_coins_fragment";
+	public void openReceiveCoinsView() {
+		String tag = "receive_coins_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			if (typeOfWalletToStart == OWCoin.BTC) {
-				fragToShow = new OWReceiveBitcoinsFragment();
-			} else if (typeOfWalletToStart == OWCoin.BTC_TEST) {
-				fragToShow = new OWReceiveBitcoinTestnetCoinsFragment();
-			}
+			fragToShow = new OWReceiveCoinsFragment();
 		}
 
 		// If we did a tablet view this might be different. 
@@ -899,28 +887,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openSendCoinsView(OWCoin typeOfWalletToStart) {
-		// Temporarily need to just work for enabled types only
-		OWCoin t = null;
-		for (OWCoin enabledType : OWWalletManager.enabledCoinTypes) {
-			if (typeOfWalletToStart == enabledType) {
-				t = enabledType;
-			}
-		}
-
-		// Coin type is not enabled
-		if (t == null) {
-			return;
-		}
-
-		String tag = typeOfWalletToStart.getShortTitle() + "_send_coins_fragment";
+	public void openSendCoinsView() {
+		String tag = "send_coins_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			if (typeOfWalletToStart == OWCoin.BTC) {
-				fragToShow = new OWSendBitcoinsFragment();
-			} else if (typeOfWalletToStart == OWCoin.BTC_TEST) {
-				fragToShow = new OWSendBitcoinTestnetCoinsFragment();
-			}
+			fragToShow = new OWSendCoinsFragment();
 		}
 
 		// If we did a tablet view this might be different. 
@@ -1039,7 +1010,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		passphraseDialog.setupDialog("ziftrWALLET", message, 
 				"Continue", null, "Cancel");
 
-		if (!showingDialog()) {
+		if (!isShowingDialog()) {
 			passphraseDialog.show(this.getSupportFragmentManager(), 
 					tag);
 		}
@@ -1077,9 +1048,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			break;
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
-				OWCoin type = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
-				OWReceiveCoinsFragment frag = (OWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(
-						type.getShortTitle() + "_receive_coins_fragment");
+				OWReceiveCoinsFragment frag = (OWReceiveCoinsFragment) getSupportFragmentManager(
+						).findFragmentByTag("receive_coins_fragment");
 				frag.loadAddressFromDatabase();
 			} else {
 				this.alertUser(
@@ -1088,9 +1058,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			break;
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
-				OWCoin type = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
-				OWSendCoinsFragment frag = (OWSendCoinsFragment) getSupportFragmentManager().findFragmentByTag(
-						type.getShortTitle() + "_send_coins_fragment");
+				OWSendCoinsFragment frag = (OWSendCoinsFragment) getSupportFragmentManager(
+						).findFragmentByTag("send_coins_fragment");
 				frag.clickSendCoins();
 
 			} else {
@@ -1136,12 +1105,26 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 	}
 
-	public void setshowingDialog(boolean showing) {
+	public void setShowingDialog(boolean showing) {
 		this.showingDialog = showing;
 	}
 
-	public boolean showingDialog() {
+	public boolean isShowingDialog() {
 		return this.showingDialog;
+	}
+
+	/**
+	 * @return the curSelectedCoinType
+	 */
+	public OWCoin getCurSelectedCoinType() {
+		return curSelectedCoinType;
+	}
+
+	/**
+	 * @param curSelectedCoinType the curSelectedCoinType to set
+	 */
+	public void setCurSelectedCoinType(OWCoin curSelectedCoinType) {
+		this.curSelectedCoinType = curSelectedCoinType;
 	}
 
 	/**
