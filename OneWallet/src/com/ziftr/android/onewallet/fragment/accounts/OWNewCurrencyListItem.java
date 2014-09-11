@@ -13,7 +13,7 @@ import com.ziftr.android.onewallet.util.OWCoin;
 public class OWNewCurrencyListItem {
 	
 	/** The name of the coin to put under the logo. */
-	private OWCoin.Type coinType;
+	private OWCoin coinType;
 	
 	/**
 	 * Make a new {@link OWNewCurrencyListItem} and set the appropriate
@@ -22,21 +22,21 @@ public class OWNewCurrencyListItem {
 	 * @param coinLogoResId
 	 * @param coinType
 	 */
-	public OWNewCurrencyListItem(OWCoin.Type coinType) {
+	public OWNewCurrencyListItem(OWCoin coinType) {
 		this.setCoinType(coinType);
 	}
 
 	/**
 	 * @return the coinType
 	 */
-	public OWCoin.Type getCoinId() {
+	public OWCoin getCoinId() {
 		return coinType;
 	}
 
 	/**
 	 * @param coinType the coinType to set
 	 */
-	public void setCoinType(OWCoin.Type coinType) {
+	public void setCoinType(OWCoin coinType) {
 		this.coinType = coinType;
 	}
 

@@ -19,22 +19,22 @@ public abstract class OWCoinRelativeTable extends OWTable {
 	 * @param coinId - The table specifier.
 	 * @return
 	 */
-	protected abstract String getCreateTableString(OWCoin.Type coinId);
+	protected abstract String getCreateTableString(OWCoin coinId);
 
 	/** 
 	 * The postfix that assists in making the names for the external addresses table. 
 	 */
 	protected abstract String getTablePostfix();
 
-	protected String getTableName(OWCoin.Type coinId) {
+	protected String getTableName(OWCoin coinId) {
 		return coinId.toString() + getTablePostfix();
 	}
 
-	protected void create(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected void create(OWCoin coinId, SQLiteDatabase db) {
 		db.execSQL(getCreateTableString(coinId));
 	}
 	
-	protected int numEntries(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected int numEntries(OWCoin coinId, SQLiteDatabase db) {
 		String countQuery = "SELECT  * FROM " + getTableName(coinId);
 		Cursor cursor = db.rawQuery(countQuery, null);
 		int count = cursor.getCount();

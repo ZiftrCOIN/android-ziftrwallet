@@ -10,7 +10,6 @@ import com.ziftr.android.onewallet.crypto.OWECKey;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWCoin.Type;
 import com.ziftr.android.onewallet.util.OWUtils;
 
 public class OWReceivingAddressesTable extends OWAddressesTable {
@@ -30,7 +29,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	}
 
 	@Override
-	protected String getCreateTableString(Type coinId) {
+	protected String getCreateTableString(OWCoin coinId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
 		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -45,7 +44,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	}
 
 	@Override
-	protected OWAddress cursorToAddress(OWCoin.Type coinId, Cursor c) throws OWAddressFormatException {
+	protected OWAddress cursorToAddress(OWCoin coinId, Cursor c) throws OWAddressFormatException {
 		String encodedPrivKey = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
 		// TODO deal with encryption
 		byte[] wifPrivKeyBytes = Base58.decodeChecked(encodedPrivKey);

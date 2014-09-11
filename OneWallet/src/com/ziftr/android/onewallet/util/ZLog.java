@@ -15,7 +15,7 @@ public abstract class ZLog {
 	private static final ZLog logger = initLogger();
 	
 	private static ZLog initLogger() {
-		if(OWApplication.isDebuggable()) {
+		if (OWApplication.isDebuggable()) {
 			return new AndroidLogger();
 		}
 		
@@ -36,7 +36,7 @@ public abstract class ZLog {
 		int charCount = 0;
 		while(charCount < bigString.length()) {
 			
-			if( (charCount + 3000) > bigString.length()) {
+			if ( (charCount + 3000) > bigString.length()) {
 				log(bigString.substring(charCount));
 			}
 			else {
@@ -51,10 +51,10 @@ public abstract class ZLog {
 	private static String getCurrentClassName(int stackDepth) {
 		StackTraceElement[] elements = Thread.currentThread().getStackTrace();
 		
-		if(elements.length > stackDepth) {
+		if (elements.length > stackDepth) {
 			StackTraceElement element = elements[stackDepth];
 			String className = element.getClassName();
-			if(className.contains(".")) {
+			if (className.contains(".")) {
 				className = className.substring(className.lastIndexOf(".")+1);
 			}
 			return className;
@@ -77,12 +77,12 @@ public abstract class ZLog {
 		@Override
 		protected void doLog(String tag, int logLevel, Object... messages) {
 			
-			if(logLevel <= this.logLevel) {
+			if (logLevel <= this.logLevel) {
 				
 				StringBuilder logMessage = new StringBuilder();
-				for(Object msg : messages) {
-					if(msg != null) {
-						if(msg instanceof Exception) {
+				for (Object msg : messages) {
+					if (msg != null) {
+						if (msg instanceof Exception) {
 							Exception e = (Exception)msg;
 							logMessage.append(Log.getStackTraceString(e));
 						}
@@ -92,16 +92,16 @@ public abstract class ZLog {
 					}
 				}
 				
-				if(logLevel <= 0) {
+				if (logLevel <= 0) {
 					Log.e(tag, logMessage.toString());
 				}
-				else if(logLevel <= 1) {
+				else if (logLevel <= 1) {
 					Log.w(tag, logMessage.toString());
 				}
-				else if(logLevel <= 2) {
+				else if (logLevel <= 2) {
 					Log.d(tag, logMessage.toString());
 				}
-				else if(logLevel <= 3) {
+				else if (logLevel <= 3) {
 					Log.i(tag, logMessage.toString());
 				}
 				else {

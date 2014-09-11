@@ -68,7 +68,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		if (savedInstanceState != null && savedInstanceState.getBoolean("search_visible")){
+		if (savedInstanceState != null && savedInstanceState.getBoolean("search_visible")) {
 			View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);
 			searchBar.setVisibility(View.VISIBLE);
 		}		

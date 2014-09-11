@@ -5,8 +5,8 @@ import com.ziftr.android.onewallet.util.OWCoin;
 public class OWBitcoinWalletFragment extends OWWalletFragment {
 
 	@Override
-	public OWCoin.Type getCoinId() {
-		return OWCoin.Type.BTC;
+	public OWCoin getCoinId() {
+		return OWCoin.BTC;
 	}
 
 }

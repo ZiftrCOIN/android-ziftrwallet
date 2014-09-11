@@ -505,7 +505,7 @@ public class OWUtils {
 	 * Based on the type, this method converts the number of atomic
 	 * units to a BigDecimal. 
 	 * 
-	 * @param type - OWCoin.Type.BTC for bitcoin, etc.
+	 * @param type - OWCoin.BTC for bitcoin, etc.
 	 * @param numAtomicUnits - The number of atomic units to convert. 
 	 * @return The big integer converted to a big decimal
 	 */
@@ -517,7 +517,7 @@ public class OWUtils {
 	 * Based on the coin type, this method converts the number BigDecimal units
 	 * to a BigInteger (i.e. to the number of atomic units).
 	 * 
-	 * @param type - OWCoin.Type.BTC for bitcoin, etc.
+	 * @param type - OWCoin.BTC for bitcoin, etc.
 	 * @param amount - The BigDecimal to convert.
 	 * @return The big decimal converted to a big integer
 	 */

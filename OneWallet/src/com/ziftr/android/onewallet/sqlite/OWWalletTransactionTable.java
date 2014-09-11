@@ -46,7 +46,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	/**
 	 * The number of confirmations column. This is used to keep track of whether
 	 * or not transactions are pending. When a transaction has at least 
-	 * {@link OWCoin.Type#getNumRecommendedConfirmations()} then it can be considered save.
+	 * {@link OWCoin#getNumRecommendedConfirmations()} then it can be considered save.
 	 */
 	public static final String COLUMN_NUM_CONFIRMATIONS = "num_confirmations";
 
@@ -72,7 +72,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	}
 
 	@Override
-	protected String getCreateTableString(OWCoin.Type coinId) {
+	protected String getCreateTableString(OWCoin coinId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
 		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -91,7 +91,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		tx.setId(insertId);
 	}
 
-	protected OWTransaction readTransactionByHash(OWCoin.Type coinId, String hash, SQLiteDatabase db) {
+	protected OWTransaction readTransactionByHash(OWCoin coinId, String hash, SQLiteDatabase db) {
 		if (hash == null) {
 			return null;
 		}
@@ -117,7 +117,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	protected List<OWTransaction> readTransactionsByAddress(OWCoin.Type coinId, 
+	protected List<OWTransaction> readTransactionsByAddress(OWCoin coinId, 
 			String address, SQLiteDatabase db) {
 
 		if (address != null && address.trim().isEmpty()) {
@@ -146,7 +146,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	protected List<OWTransaction> readTransactionsByHash(OWCoin.Type coinId, 
+	protected List<OWTransaction> readTransactionsByHash(OWCoin coinId, 
 			List<String> hashes, SQLiteDatabase db) {
 
 		if (hashes != null && hashes.size() == 0) {
@@ -173,7 +173,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return this.readTransactions(coinId, where.toString(), db);
 	}
 
-	protected List<OWTransaction> readPendingTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected List<OWTransaction> readPendingTransactions(OWCoin coinId, SQLiteDatabase db) {
 
 		StringBuilder where = new StringBuilder("");
 
@@ -184,7 +184,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return this.readTransactions(coinId, where.toString(), db);
 	}
 	
-	protected List<OWTransaction> readConfirmedTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected List<OWTransaction> readConfirmedTransactions(OWCoin coinId, SQLiteDatabase db) {
 
 		StringBuilder where = new StringBuilder("");
 
@@ -205,7 +205,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	private List<OWTransaction> readTransactions(OWCoin.Type coinId, String where, SQLiteDatabase db) {
+	private List<OWTransaction> readTransactions(OWCoin coinId, String where, SQLiteDatabase db) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coinId));
@@ -242,7 +242,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return newTxs;
 	}
 
-	protected List<OWTransaction> readAllTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected List<OWTransaction> readAllTransactions(OWCoin coinId, SQLiteDatabase db) {
 		return this.readTransactions(coinId, null, db);
 	}
 
@@ -271,11 +271,11 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		db.delete(getTableName(tx.getCoinId()), where.toString(), null);
 	}
 
-	private OWTransaction cursorToTransaction(OWCoin.Type coinId, Cursor c,
+	private OWTransaction cursorToTransaction(OWCoin coinId, Cursor c,
 			SQLiteDatabase db) {
 
 		// TODO get from settings
-		OWFiat.Type fiatType = OWFiat.Type.USD;
+		OWFiat fiatType = OWFiat.USD;
 
 		OWTransaction tx = new OWTransaction(coinId, fiatType, 
 				c.getString(c.getColumnIndex(COLUMN_NOTE)), 
@@ -322,7 +322,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * 
 	 * @param displayAddressesStr
 	 */
-	private List<OWAddress> parseDisplayAddresses(OWCoin.Type coinId, 
+	private List<OWAddress> parseDisplayAddresses(OWCoin coinId, 
 			String displayAddressesStr, SQLiteDatabase db, OWAddressesTable addressTable) {
 		if (displayAddressesStr == null || displayAddressesStr.trim().isEmpty()) {
 			return null;

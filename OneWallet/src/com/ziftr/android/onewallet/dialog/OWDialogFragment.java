@@ -116,7 +116,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		TextView titlefield = (TextView) view.findViewById(R.id.dialog_title);
 		titlefield.setText(this.title);
 		//setMessage
-		if (this.message != null){
+		if (this.message != null) {
 			TextView messagefield = (TextView) view.findViewById(R.id.dialog_message);
 			messagefield.setText(this.message);
 		}
@@ -224,13 +224,13 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	}
 
 	@Override
-	public void onStart(){
+	public void onStart() {
 		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(true);
 		super.onStart();
 	}
 
 	@Override
-	public void onDetach(){
+	public void onDetach() {
 		((OWMainFragmentActivity) this.getActivity()).setshowingDialog(false);
 		super.onDetach();
 	}

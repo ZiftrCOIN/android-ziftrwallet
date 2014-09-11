@@ -616,14 +616,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	}
 
-	private void initializeSearchBarText(){
+	private void initializeSearchBarText() {
 		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
 		final EditText searchEditText = (EditText) findViewById(R.id.searchBarEditText);
 		searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				if (hasFocus){
+				if (hasFocus) {
 					imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
 				} else {
 					imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
@@ -789,13 +789,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * called after user enters password for creating new wallet 
 	 * 
-	 * @param bundle with OWCoin.Type of wallet to add
+	 * @param bundle with OWCoin of wallet to add
 	 */
-	public void addNewCurrency(Bundle info){
-		OWCoin.Type newItem = OWCoin.Type.valueOf(info.getString(OWCoin.TYPE_KEY));
+	public void addNewCurrency(Bundle info) {
+		OWCoin newItem = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
+		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
 		// Make sure that this view only has wallets
 		// in it which the user do
-		for (OWCoin.Type type : this.walletManager.getAllUsersWalletTypes()) {
+		for (OWCoin type : this.walletManager.getAllUsersWalletTypes()) {
 			if (type == newItem) {
 				// Already in list, shouldn't ever get here though because
 				// we only show currencies in the dialog which we don't have
@@ -803,7 +804,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				return;
 			}
 		}
-		if (newItem == OWCoin.Type.BTC_TEST || newItem == OWCoin.Type.BTC) {
+		if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
 			// We can assume the wallet hasn't been set up yet
 			// or we wouldn't have gotten here 
 
@@ -819,10 +820,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openWalletView(OWCoin.Type typeOfWalletToStart) {
+	public void openWalletView(OWCoin typeOfWalletToStart) {
 		// Temporarily need to just work for enabled types only
-		OWCoin.Type t = null;
-		for (OWCoin.Type enabledType : OWWalletManager.enabledCoinTypes) {
+		OWCoin t = null;
+		for (OWCoin enabledType : OWWalletManager.enabledCoinTypes) {
 			if (typeOfWalletToStart == enabledType) {
 				t = enabledType;
 			}
@@ -836,9 +837,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		String tag = typeOfWalletToStart.getShortTitle() + "_wallet_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			if (typeOfWalletToStart == OWCoin.Type.BTC) {
+			if (typeOfWalletToStart == OWCoin.BTC) {
 				fragToShow = new OWBitcoinWalletFragment();
-			} else if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
+			} else if (typeOfWalletToStart == OWCoin.BTC_TEST) {
 				fragToShow = new OWBitcoinTestnetWalletFragment();
 			}
 		}
@@ -849,14 +850,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	/**
 	 * A convenience method that we can use to start a dialog from this bundle.
-	 * The bundle should contain one string OWCoin.Type.___.toString() which 
+	 * The bundle should contain one string OWCoin.___.toString() which 
 	 * can be extracted by getting from the bundle with the key OWCoin.TYPE_KEY.
 	 * 
 	 * @param info - The bundle used to tell which wallet to open.
 	 */
 	public void openWalletViewFromBundle(Bundle info) {
 		if (info != null) {
-			this.openWalletView(OWCoin.Type.valueOf(info.getString(OWCoin.TYPE_KEY)));
+			this.openWalletView(OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY)));
 		}
 	}
 
@@ -865,10 +866,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openReceiveCoinsView(OWCoin.Type typeOfWalletToStart) {
+	public void openReceiveCoinsView(OWCoin typeOfWalletToStart) {
 		// Temporarily need to just work for enabled types only
-		OWCoin.Type t = null;
-		for (OWCoin.Type enabledType : OWWalletManager.enabledCoinTypes) {
+		OWCoin t = null;
+		for (OWCoin enabledType : OWWalletManager.enabledCoinTypes) {
 			if (typeOfWalletToStart == enabledType) {
 				t = enabledType;
 			}
@@ -882,9 +883,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		String tag = typeOfWalletToStart.getShortTitle() + "_receive_coins_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			if (typeOfWalletToStart == OWCoin.Type.BTC) {
+			if (typeOfWalletToStart == OWCoin.BTC) {
 				fragToShow = new OWReceiveBitcoinsFragment();
-			} else if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
+			} else if (typeOfWalletToStart == OWCoin.BTC_TEST) {
 				fragToShow = new OWReceiveBitcoinTestnetCoinsFragment();
 			}
 		}
@@ -898,10 +899,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openSendCoinsView(OWCoin.Type typeOfWalletToStart) {
+	public void openSendCoinsView(OWCoin typeOfWalletToStart) {
 		// Temporarily need to just work for enabled types only
-		OWCoin.Type t = null;
-		for (OWCoin.Type enabledType : OWWalletManager.enabledCoinTypes) {
+		OWCoin t = null;
+		for (OWCoin enabledType : OWWalletManager.enabledCoinTypes) {
 			if (typeOfWalletToStart == enabledType) {
 				t = enabledType;
 			}
@@ -915,9 +916,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		String tag = typeOfWalletToStart.getShortTitle() + "_send_coins_fragment";
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
-			if (typeOfWalletToStart == OWCoin.Type.BTC) {
+			if (typeOfWalletToStart == OWCoin.BTC) {
 				fragToShow = new OWSendBitcoinsFragment();
-			} else if (typeOfWalletToStart == OWCoin.Type.BTC_TEST) {
+			} else if (typeOfWalletToStart == OWCoin.BTC_TEST) {
 				fragToShow = new OWSendBitcoinTestnetCoinsFragment();
 			}
 		}
@@ -946,7 +947,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Open view for add new currency
 	 */
-	public void openAddCurrency(List<OWCoin.Type> userCurWallets) {
+	public void openAddCurrency(List<OWCoin> userCurWallets) {
 		String tag = "add_new_currency";
 		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {
@@ -954,11 +955,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 		// Here we get all the coins that the user doesn't currently 
 		// have a wallet for because those are the ones we put in the new view.
-		Set<OWCoin.Type> coinsNotInListCurrently = new HashSet<OWCoin.Type>(
-				Arrays.asList(OWCoin.Type.values()));
+		Set<OWCoin> coinsNotInListCurrently = new HashSet<OWCoin>(
+				Arrays.asList(OWCoin.values()));
 		coinsNotInListCurrently.removeAll(userCurWallets);
 		Bundle b = new Bundle();
-		for (OWCoin.Type type : coinsNotInListCurrently) {
+		for (OWCoin type : coinsNotInListCurrently) {
 			b.putBoolean(type.toString(), true);
 		}
 		fragToShow.setArguments(b);
@@ -1025,22 +1026,22 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param requestcode = OWRequestcodes parameter to differentiate where the password dialog is
 	 * @param args = bundle with OWCoinType of currency to add if user is adding currency
 	 */
-	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag){
+	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag) {
 		OWValidatePassphraseDialog passphraseDialog = 
 				new OWValidatePassphraseDialog();
-		
+
 		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
-		
+
 		String message = "Please input your passphrase. ";
 
 		passphraseDialog.setArguments(args);
-		
+
 		passphraseDialog.setupDialog("ziftrWALLET", message, 
 				"Continue", null, "Cancel");
-		
-		if (!showingDialog()){
-		passphraseDialog.show(this.getSupportFragmentManager(), 
-				tag);
+
+		if (!showingDialog()) {
+			passphraseDialog.show(this.getSupportFragmentManager(), 
+					tag);
 		}
 	}
 
@@ -1067,18 +1068,18 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		byte[] inputHash = OWUtils.Sha256Hash(passphrase);
 		switch(requestCode) {
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
-				if (this.inputHashMatchesStoredHash(inputHash)) {
-					addNewCurrency(info);
-				} else {
-					this.alertUser(
-							"Error: Passphrases don't match. ", "wrong_passphrase");
-				}
-				break;
+			if (this.inputHashMatchesStoredHash(inputHash)) {
+				addNewCurrency(info);
+			} else {
+				this.alertUser(
+						"Error: Passphrases don't match. ", "wrong_passphrase");
+			}
+			break;
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
-				OWCoin.Type type = OWCoin.Type.valueOf(info.getString(OWCoin.TYPE_KEY));
+				OWCoin type = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
 				OWReceiveCoinsFragment frag = (OWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(
-						 type.getShortTitle() + "_receive_coins_fragment");
+						type.getShortTitle() + "_receive_coins_fragment");
 				frag.loadAddressFromDatabase();
 			} else {
 				this.alertUser(
@@ -1087,9 +1088,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			break;
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
-				OWCoin.Type type = OWCoin.Type.valueOf(info.getString(OWCoin.TYPE_KEY));
+				OWCoin type = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
 				OWSendCoinsFragment frag = (OWSendCoinsFragment) getSupportFragmentManager().findFragmentByTag(
-						 type.getShortTitle() + "_send_coins_fragment");
+						type.getShortTitle() + "_send_coins_fragment");
 				frag.clickSendCoins();
 
 			} else {
@@ -1135,11 +1136,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 	}
 
-	public void setshowingDialog(boolean showing){
+	public void setshowingDialog(boolean showing) {
 		this.showingDialog = showing;
 	}
 
-	public boolean showingDialog(){
+	public boolean showingDialog() {
 		return this.showingDialog;
 	}
 
@@ -1175,7 +1176,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		TextView titleview = (TextView) findViewById(R.id.actionBarTitle);
 		titleview.setText(title);
 
-		if (menu){
+		if (menu) {
 			backButton.setVisibility(View.GONE);
 			menuButton.setVisibility(View.VISIBLE);
 		} else {
@@ -1289,9 +1290,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		return search.getVisibility() == View.VISIBLE;
 	}
 
-	public void hideWalletHeader(){
+	public void hideWalletHeader() {
 		View walletHeader = findViewById(R.id.walletHeader);
 		walletHeader.setVisibility(View.GONE);
 	}
-	
+
 }

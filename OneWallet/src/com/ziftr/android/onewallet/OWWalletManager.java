@@ -64,29 +64,29 @@ import com.ziftr.android.onewallet.util.ZLog;
 public class OWWalletManager extends OWSQLiteOpenHelper {
 
 	/** The map which holds all of the wallets. */
-	private Map<OWCoin.Type, Wallet> walletMap = new HashMap<OWCoin.Type, Wallet>();
+	private Map<OWCoin, Wallet> walletMap = new HashMap<OWCoin, Wallet>();
 
 	/** The wallet files for each of the coin types. */
-	private Map<OWCoin.Type, File> walletFiles = new HashMap<OWCoin.Type, File>();
+	private Map<OWCoin, File> walletFiles = new HashMap<OWCoin, File>();
 
 	/** The file where the BlockStore for this coin will be stored. */
-	private Map<OWCoin.Type, File> blockStoreFiles = new HashMap<OWCoin.Type, File>();
+	private Map<OWCoin, File> blockStoreFiles = new HashMap<OWCoin, File>();
 
 	/** A map of hashes to StoredBlocks to save StoredBlock objects to disk. */
-	private Map<OWCoin.Type, BlockStore> blockStores = 
-			new HashMap<OWCoin.Type, BlockStore>();
+	private Map<OWCoin, BlockStore> blockStores = 
+			new HashMap<OWCoin, BlockStore>();
 
 	/** The PeerGroup that this SPV node is connected to. */
-	private Map<OWCoin.Type, PeerGroup> peerGroups = 
-			new HashMap<OWCoin.Type, PeerGroup>();
+	private Map<OWCoin, PeerGroup> peerGroups = 
+			new HashMap<OWCoin, PeerGroup>();
 
 	/** 
 	 * When the app is started it searches through all of these and looks for 
 	 * any wallet files that alread exists. If they do, it sets them up.  
 	 */
-	public static OWCoin.Type[] enabledCoinTypes = new OWCoin.Type[] {
-		OWCoin.Type.BTC_TEST,
-		OWCoin.Type.BTC
+	public static OWCoin[] enabledCoinTypes = new OWCoin[] {
+		OWCoin.BTC_TEST,
+		OWCoin.BTC
 	};
 
 	/** 
@@ -165,7 +165,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		super(activity, databasePath);
 		this.activity = activity;
 
-		for (OWCoin.Type enabledType : enabledCoinTypes) {
+		for (OWCoin enabledType : enabledCoinTypes) {
 			if (this.userHasCreatedWalletBefore(enabledType)) {
 				// TODO see java docs for this method. Is it okay to 
 				// have this called here? 
@@ -183,7 +183,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param id - The coin type to test for
 	 * @return as above
 	 */
-	public boolean walletHasBeenSetUp(OWCoin.Type id) {
+	public boolean walletHasBeenSetUp(OWCoin id) {
 		// There is no add wallet method, so the only way
 		// a wallet can be added to the map is by setupWallet.
 		return walletMap.get(id) != null;
@@ -198,7 +198,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param id - The type of coin wallet to test for
 	 * @return as above
 	 */
-	public boolean userHasCreatedWalletBefore(OWCoin.Type id) {
+	public boolean userHasCreatedWalletBefore(OWCoin id) {
 		if (this.walletHasBeenSetUp(id)) {
 			return true;
 		}
@@ -214,9 +214,9 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * 
 	 * @return as above
 	 */
-	public List<OWCoin.Type> getAllUsersWalletTypes() {
-		ArrayList<OWCoin.Type> list = new ArrayList<OWCoin.Type>();
-		for (OWCoin.Type type : OWCoin.Type.values()) {
+	public List<OWCoin> getAllUsersWalletTypes() {
+		ArrayList<OWCoin> list = new ArrayList<OWCoin>();
+		for (OWCoin type : OWCoin.values()) {
 			if (this.userHasCreatedWalletBefore(type)) {
 				list.add(type);
 			}
@@ -231,9 +231,9 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * 
 	 * @return as above
 	 */
-	public List<OWCoin.Type> getAllSetupWalletTypes() {
-		ArrayList<OWCoin.Type> list = new ArrayList<OWCoin.Type>();
-		for (OWCoin.Type type : OWCoin.Type.values()) {
+	public List<OWCoin> getAllSetupWalletTypes() {
+		ArrayList<OWCoin> list = new ArrayList<OWCoin>();
+		for (OWCoin type : OWCoin.values()) {
 			if (this.walletHasBeenSetUp(type)) {
 				list.add(type);
 			}
@@ -246,7 +246,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * set up. 
 	 */
 	public void closeAllSetupWallets() {
-		for (OWCoin.Type type : this.getAllSetupWalletTypes()) {
+		for (OWCoin type : this.getAllSetupWalletTypes()) {
 			this.closeWallet(type);
 		}
 	}
@@ -260,7 +260,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * 
 	 * TODO check to make sure all places where this is called is okay.
 	 */
-	public boolean setUpWallet(final OWCoin.Type id) {
+	public boolean setUpWallet(final OWCoin id) {
 		// Have to do this for both SQLite and bitcoinj right now.
 
 		// Set up the SQLite tables
@@ -355,7 +355,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		return true;
 	}
 
-	public void closeWallet(OWCoin.Type id) {
+	public void closeWallet(OWCoin id) {
 		if (peerGroups.get(id) != null) {
 			peerGroups.get(id).stop();
 		}
@@ -385,7 +385,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	/**
 	 * 
 	 */
-	private void beginSyncWithNetwork(final OWCoin.Type id) {
+	private void beginSyncWithNetwork(final OWCoin id) {
 		OWUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
@@ -472,7 +472,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 					synchronized (pendingTransactions) {
 
-						for(Transaction tx : pendingTransactions) {
+						for (Transaction tx : pendingTransactions) {
 							//ZLog.log("There is a pending transaction "
 							//		+ "in the wallet: ", tx.toString(chain));
 							//wallet.commitTx(tx);
@@ -565,7 +565,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 					/**
 		        List<Transaction> recentTransactions = wallet.getRecentTransactions(20, true);
-		        for(Transaction tx : recentTransactions) {
+		        for (Transaction tx : recentTransactions) {
 		        	ZLog.log("Recent transaction: ", tx);
 		        }
 					 ***/
@@ -589,7 +589,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @throws AddressFormatException
 	 * @throws InsufficientMoneyException
 	 */
-	public void sendCoins(OWCoin.Type coinId, String address, BigInteger value, BigInteger feePerKb) 
+	public void sendCoins(OWCoin coinId, String address, BigInteger value, BigInteger feePerKb) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
 
 		// TODO should database be updated here or should we do it after API call, or... ?
@@ -654,7 +654,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
 	 */
-	public OWAddress createReceivingAddress(OWCoin.Type coinId, String note, 
+	public OWAddress createReceivingAddress(OWCoin coinId, String note, 
 			long balance, long creation, long modified) {
 		OWAddress addr = super.createReceivingAddress(coinId, note, 
 				balance, creation, modified);
@@ -663,14 +663,14 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	}
 
 	@Override
-	public BigInteger getWalletBalance(OWCoin.Type coinId, BalanceType bType) {
+	public BigInteger getWalletBalance(OWCoin coinId, BalanceType bType) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
 		// method is called. 
 		return this.walletMap.get(coinId).getBalance(Wallet.BalanceType.valueOf(bType.toString()));
 	}
 
 	@Override
-	public List<OWTransaction> getPendingTransactions(OWCoin.Type coinId) {
+	public List<OWTransaction> getPendingTransactions(OWCoin coinId) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
 		// method is called. 
 		List<OWTransaction> pendingTransactions = new ArrayList<OWTransaction>();
@@ -681,7 +681,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	}
 
 	@Override
-	public List<OWTransaction> getConfirmedTransactions(OWCoin.Type coinId) {
+	public List<OWTransaction> getConfirmedTransactions(OWCoin coinId) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
 		// method is called. 
 		// Unfortunately, bitcoinj doesn't make it easy to just get confirmed. 
@@ -718,10 +718,10 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param tx
 	 * @return
 	 */
-	private OWTransaction bitcoinjTransactionToOWTransaction(OWCoin.Type coinId, Transaction tx) {
+	private OWTransaction bitcoinjTransactionToOWTransaction(OWCoin coinId, Transaction tx) {
 		OWTransaction owTx = new OWTransaction(
 				coinId, 
-				OWFiat.Type.USD, 
+				OWFiat.USD, 
 				tx.getHashAsString().substring(0, 6), 
 				tx.getUpdateTime().getTime() / 1000,
 				tx.getValue(this.walletMap.get(coinId)),
@@ -746,7 +746,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		owTx.setDisplayAddresses(addresses);
 
 		// TODO get this from settings
-		owTx.setFiatType(OWFiat.Type.USD);
+		owTx.setFiatType(OWFiat.USD);
 		
 		// The number of confirmations from bitcoin j.
 		owTx.setNumConfirmations(tx.getConfidence().getDepthInBlocks());
@@ -782,7 +782,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		return owTx;
 	}
 
-	//	private OWAddress bitcoinjAddressToOWAddress(OWCoin.Type coinId, Address address) {
+	//	private OWAddress bitcoinjAddressToOWAddress(OWCoin coinId, Address address) {
 	//		OWAddress owAddress = null;
 	//		try {
 	//			owAddress = new OWAddress(coinId, (byte) (address.getVersion()&0xff), address.getHash160());
@@ -826,7 +826,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param id - The coin type to get the wallet for. 
 	 * @return as above
 	 */
-	public Wallet getWallet(OWCoin.Type id) {
+	public Wallet getWallet(OWCoin id) {
 		return this.walletMap.get(id);
 	}
 
@@ -837,7 +837,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param id - The coin type of the wallet file to get
 	 * @return as above
 	 */
-	public File getWalletFile(OWCoin.Type id) {
+	public File getWalletFile(OWCoin id) {
 		return this.walletFiles.get(id);
 	}
 

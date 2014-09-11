@@ -45,7 +45,7 @@ public class OWWelcomeFragment extends OWFragment {
 		
 		return rootView;
 	}
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("ziftrWALLET",true, false);
 	}

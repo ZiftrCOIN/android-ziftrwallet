@@ -19,7 +19,7 @@ public class OWExchangeFragment extends OWFragment {
 		this.getOWMainActivity().hideWalletHeader();
 		return inflater.inflate(R.layout.section_exchange_layout, container, false);
 	}
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("EXCHANGE", true, true);
 	}

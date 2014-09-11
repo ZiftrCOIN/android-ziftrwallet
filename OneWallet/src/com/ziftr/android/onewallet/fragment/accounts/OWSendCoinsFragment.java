@@ -86,7 +86,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 	}
 	
 	@Override
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("SEND", false, true);
 	}
@@ -251,7 +251,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 		});
 	}
 
-	public void clickSendCoins(){
+	public void clickSendCoins() {
 		// Need to make sure amount to send is less than balance
 		BigInteger amountSending = OWUtils.bigDecToBigInt(getCoinId(), 
 				getAmountToSendFromEditText());
@@ -298,7 +298,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 						newCoinVal = new BigDecimal(newVal);
 						// TODO make this not only be USD
 						newFiatVal = OWConverter.convert(
-								newCoinVal, getCoinId(), OWFiat.Type.USD); 
+								newCoinVal, getCoinId(), OWFiat.USD); 
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -311,7 +311,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 
 					changeFiatStartedFromProgram = true;
 					fiatValEditText.setText(OWFiat.formatFiatAmount(
-							OWFiat.Type.USD, newFiatVal).toPlainString());
+							OWFiat.USD, newFiatVal).toPlainString());
 					changeFiatStartedFromProgram = false;
 				}
 			}
@@ -340,7 +340,7 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 					try {
 						newFiatVal = new BigDecimal(newVal);
 						newCoinVal =  OWConverter.convert(
-								newFiatVal, OWFiat.Type.USD, getCoinId());
+								newFiatVal, OWFiat.USD, getCoinId());
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -391,8 +391,8 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.Type.USD, getCoinId());
-		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.Type.USD, fiatTotal).toPlainString() + ")");
+		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCoinId());
+		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal).toPlainString() + ")");
 	}
 
 	/**

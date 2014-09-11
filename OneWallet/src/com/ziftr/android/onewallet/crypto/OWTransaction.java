@@ -84,10 +84,10 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 	// Viewing stuff
 
 	/** The currency's title. e.g. "Bitcoin". */
-	private OWCoin.Type coinId;
+	private OWCoin coinId;
 
 	/** They type of fiat. e.g. Fiat.Type.USD. */
-	private OWFiat.Type fiatType;
+	private OWFiat fiatType;
 	
 	private OWWalletTransactionListAdapter.Type txViewType;
 
@@ -95,8 +95,8 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 	private int resId;
 
 	// TODO figure out what really needs to be in this constructor.
-	public OWTransaction(OWCoin.Type coinId, 
-			OWFiat.Type fiatType, 
+	public OWTransaction(OWCoin coinId, 
+			OWFiat fiatType, 
 			String txNote, 
 			long txTime, 
 			BigInteger txAmount, 
@@ -114,28 +114,28 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 	/**
 	 * @return the coinId
 	 */
-	public OWCoin.Type getCoinId() {
+	public OWCoin getCoinId() {
 		return coinId;
 	}
 
 	/**
 	 * @param coinId the coinId to set
 	 */
-	public void setCoinId(OWCoin.Type coinId) {
+	public void setCoinId(OWCoin coinId) {
 		this.coinId = coinId;
 	}
 
 	/**
 	 * @return the fiatType
 	 */
-	public OWFiat.Type getFiatType() {
+	public OWFiat getFiatType() {
 		return fiatType;
 	}
 
 	/**
 	 * @param fiatType the fiatType to set
 	 */
-	public void setFiatType(OWFiat.Type fiatType) {
+	public void setFiatType(OWFiat fiatType) {
 		this.fiatType = fiatType;
 	}
 
@@ -357,8 +357,8 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 
 		@Override
 		public OWTransaction createFromParcel(Parcel source) {
-			return new OWTransaction( OWCoin.Type.valueOf(source.readString()), 
-					OWFiat.Type.valueOf(source.readString()), 
+			return new OWTransaction( OWCoin.valueOf(source.readString()), 
+					OWFiat.valueOf(source.readString()), 
 					source.readString(), 
 					source.readLong(), 
 					new BigInteger(source.readString()), 

@@ -42,7 +42,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	}
 	
 	@Override
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
 	}
@@ -75,11 +75,11 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		
 		TextView pending = (TextView) rootView.findViewById(R.id.pending);
 			
-		if (txItem.isPending()){
+		if (txItem.isPending()) {
 			
 			int maxWidth;
 			//get width of screen use newer api if available, otherwise must use deprecated getwidth
-			if (android.os.Build.VERSION.SDK_INT >=13){
+			if (android.os.Build.VERSION.SDK_INT >=13) {
 				Point size = new Point();
 				this.getOWMainActivity().getWindowManager().getDefaultDisplay().getSize(size);
 				maxWidth=size.x;

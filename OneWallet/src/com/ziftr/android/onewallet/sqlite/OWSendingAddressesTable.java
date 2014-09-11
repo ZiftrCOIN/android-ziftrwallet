@@ -15,7 +15,7 @@ public class OWSendingAddressesTable extends OWAddressesTable {
 	}
 
 	@Override
-	protected String getCreateTableString(OWCoin.Type coinId) {
+	protected String getCreateTableString(OWCoin coinId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
 		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -28,7 +28,7 @@ public class OWSendingAddressesTable extends OWAddressesTable {
 	}
 
 	@Override
-	protected OWAddress cursorToAddress(OWCoin.Type coinId, Cursor c) throws OWAddressFormatException {
+	protected OWAddress cursorToAddress(OWCoin coinId, Cursor c) throws OWAddressFormatException {
 		OWAddress newAddress = new OWAddress(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
 
 		// Reset all the keys parameters for use elsewhere

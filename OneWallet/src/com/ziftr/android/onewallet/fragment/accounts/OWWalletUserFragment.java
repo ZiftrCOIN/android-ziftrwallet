@@ -45,9 +45,9 @@ public abstract class OWWalletUserFragment extends OWFragment implements OWCoinR
 		TextView coinUnitPriceInFiatTextView = (TextView) 
 				headerView.findViewById(R.id.bottomLeftTextView);
 		BigDecimal unitPriceInFiat = OWConverter.convert(
-				BigDecimal.ONE, getCoinId(), OWFiat.Type.USD);
-		coinUnitPriceInFiatTextView.setText(OWFiat.Type.USD.getSymbol() + 
-				OWFiat.formatFiatAmount(OWFiat.Type.USD, unitPriceInFiat).toPlainString());
+				BigDecimal.ONE, getCoinId(), OWFiat.USD);
+		coinUnitPriceInFiatTextView.setText(OWFiat.USD.getSymbol() + 
+				OWFiat.formatFiatAmount(OWFiat.USD, unitPriceInFiat).toPlainString());
 
 		TextView walletBalanceTextView = (TextView) 
 				headerView.findViewById(R.id.topRightTextView);
@@ -59,8 +59,8 @@ public abstract class OWWalletUserFragment extends OWFragment implements OWCoinR
 		TextView walletBalanceFiatEquivTextView = (TextView) 
 				headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceFiatEquiv = OWConverter.convert(
-				walletBallance, getCoinId(), OWFiat.Type.USD);
-		walletBalanceFiatEquivTextView.setText(OWFiat.Type.USD.getSymbol() + 
+				walletBallance, getCoinId(), OWFiat.USD);
+		walletBalanceFiatEquivTextView.setText(OWFiat.USD.getSymbol() + 
 				walletBalanceFiatEquiv.toPlainString());
 
 		ImageView marketIcon = (ImageView) (headerView.findViewById(R.id.rightIcon));

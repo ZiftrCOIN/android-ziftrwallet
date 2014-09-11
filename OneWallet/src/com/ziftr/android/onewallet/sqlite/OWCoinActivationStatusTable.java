@@ -12,7 +12,7 @@ import com.ziftr.android.onewallet.util.OWCoin;
 
 public class OWCoinActivationStatusTable extends OWTable {
 
-	/** The title of the column that contains a string identifying the OWCoin.Type for the row. */
+	/** The title of the column that contains a string identifying the OWCoin for the row. */
 	public static final String COLUMN_COIN_ID = "coin_type";
 
 	/** The title of the column that keeps track of the un/de/activated status. */
@@ -38,7 +38,7 @@ public class OWCoinActivationStatusTable extends OWTable {
 		db.execSQL(getCreateTableString());
 	}
 	
-	protected void insert(OWCoin.Type coinId, int status, SQLiteDatabase db) {
+	protected void insert(OWCoin coinId, int status, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_COIN_ID, coinId.toString());
 		values.put(COLUMN_ACTIVATED_STATUS, status);
@@ -46,8 +46,8 @@ public class OWCoinActivationStatusTable extends OWTable {
 		db.insert(getTableName(), null, values);
 	}
 
-	protected List<OWCoin.Type> getAllActivatedTypes(SQLiteDatabase db) {
-		List<OWCoin.Type> activatedCoinTypes = new ArrayList<OWCoin.Type>();
+	protected List<OWCoin> getAllActivatedTypes(SQLiteDatabase db) {
+		List<OWCoin> activatedCoinTypes = new ArrayList<OWCoin>();
 
 		String selectQuery = "SELECT * FROM " + getTableName() + " WHERE " + 
 				COLUMN_ACTIVATED_STATUS + " = " + OWSQLiteOpenHelper.ACTIVATED + ";";
@@ -57,7 +57,7 @@ public class OWCoinActivationStatusTable extends OWTable {
 		if (c.moveToFirst()) {
 			do {
 				// Add the coin type to the list
-				activatedCoinTypes.add(OWCoin.Type.valueOf(
+				activatedCoinTypes.add(OWCoin.valueOf(
 						c.getString(c.getColumnIndex(COLUMN_COIN_ID))));
 			} while (c.moveToNext());
 		}
@@ -68,7 +68,7 @@ public class OWCoinActivationStatusTable extends OWTable {
 		return activatedCoinTypes;
 	}
 
-	protected int getActivatedStatus(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected int getActivatedStatus(OWCoin coinId, SQLiteDatabase db) {
 		String selectQuery = "SELECT * FROM " + getTableName() + " WHERE " + 
 				COLUMN_COIN_ID + " = '" + coinId.toString() + "';";
 		Cursor c = db.rawQuery(selectQuery, null);
@@ -89,7 +89,7 @@ public class OWCoinActivationStatusTable extends OWTable {
 		}
 	}
 
-	protected void update(OWCoin.Type coinId, int status, SQLiteDatabase db) {
+	protected void update(OWCoin coinId, int status, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ACTIVATED_STATUS, status);
 		db.update(getTableName(), values, COLUMN_COIN_ID + " = '" + coinId.toString() + "'", null);

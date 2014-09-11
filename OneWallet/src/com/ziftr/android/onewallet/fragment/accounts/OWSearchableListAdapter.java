@@ -20,8 +20,8 @@ public abstract class OWSearchableListAdapter<T extends OWSearchableListItem> ex
 	/** This is the list of all items which can be filtered and added to the working list. */
 	private List<T> fullList;
 
-	public OWSearchableListAdapter(Context ctx, List<T> txList) {
-		super(ctx, 0, txList);
+	public OWSearchableListAdapter(Context ctx, int resource, List<T> txList) {
+		super(ctx, resource, txList);
 		this.setInflater(LayoutInflater.from(ctx));
 		this.setContext(ctx);
 		this.workingList = txList;
@@ -66,7 +66,7 @@ public abstract class OWSearchableListAdapter<T extends OWSearchableListItem> ex
 				for (int i = (fullList.size() - 1); i >= 0; i--) {
 					T item = fullList.get(i);
 					T nextItem = reversedSearchResult.size() <= 0 ? null : 
-						reversedSearchResult.get(reversedSearchResult.size() -1);
+						reversedSearchResult.get(reversedSearchResult.size() - 1);
 					if (item.matches(constraint, nextItem)) {
 						reversedSearchResult.add(item);
 					}

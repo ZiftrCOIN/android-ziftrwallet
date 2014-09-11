@@ -24,7 +24,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 	private View rootView;
 	
 	/** We only want to show the coins that the user doesn't already have a wallet for. List of types from args */
-	private List<OWCoin.Type> coinsToShow;
+	private List<OWCoin> coinsToShow;
 	
 	/** List of items currently used by adapter to display currencies */
 	private List<OWNewCurrencyListItem> currencyList = new ArrayList<OWNewCurrencyListItem>();
@@ -73,7 +73,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 						parent.getItemAtPosition(position);
 				
 				Bundle b = new Bundle();
-				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
+				b.putString(OWCoin_KEY, newItem.getCoinId().toString());
 				passphraseDialog.setArguments(b);
 				
 				String message = "Please input your passphrase. ";
@@ -81,7 +81,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 				passphraseDialog.setupDialog("ziftrWALLET", message, 
 						"Continue", null, "Cancel");
 				
-				if (!getOWMainActivity().showingDialog()){
+				if (!getOWMainActivity().showingDialog()) {
 				passphraseDialog.show(OWNewCurrencyFragment.this.getFragmentManager(), 
 						"validate_passphrase_dialog_new_currency");
 				}*/
@@ -90,16 +90,16 @@ public class OWNewCurrencyFragment extends OWFragment {
 		});
 	}
 	
-	public List<OWNewCurrencyListItem> generateCurrencyListFrom(List<OWCoin.Type> list) {
+	public List<OWNewCurrencyListItem> generateCurrencyListFrom(List<OWCoin> list) {
 		this.currencyList.clear();
-		for (OWCoin.Type type : list) {
+		for (OWCoin type : list) {
 			this.currencyList.add(new OWNewCurrencyListItem(type));
 		}
 		return this.currencyList;
 	}
 	
 	/**
-	 * The bundle should have booleans put into it, one for each {@link OWCoin.Type}.
+	 * The bundle should have booleans put into it, one for each {@link OWCoin}.
 	 * The boolean should describe whether or not to include the currency
 	 * in the view. Used only when initially navigating to currency screen from accounts
 	 */
@@ -111,16 +111,16 @@ public class OWNewCurrencyFragment extends OWFragment {
 	
 	/**
 	 * We initialize the list of coins to show in the dialog and then 
-	 * for each OWCoin.Type.___.toString() that has a boolean value
+	 * for each OWCoin.___.toString() that has a boolean value
 	 * of true in the bundle we add it to the list.
 	 *  
 	 * @param args - The bundle with the booleans put into it. The keys are 
-	 * the toString()s of the different OWCoin.Type possible values.
+	 * the toString()s of the different OWCoin possible values.
 	 */
 	private void initializeFromBundle(Bundle args) {
-		this.coinsToShow = new ArrayList<OWCoin.Type>();
+		this.coinsToShow = new ArrayList<OWCoin>();
 		if (args != null) {
-			for (OWCoin.Type type : OWCoin.Type.values()) {
+			for (OWCoin type : OWCoin.values()) {
 				if (args.getBoolean(type.toString())) {
 					this.coinsToShow.add(type);
 				}

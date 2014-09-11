@@ -60,7 +60,7 @@ public class OWAccountsFragment extends OWFragment {
 	
 	
 	@Override
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("ziftrWALLET", true, false);
 	}
@@ -106,37 +106,37 @@ public class OWAccountsFragment extends OWFragment {
 	 * @param id - The type of coin to get a new {@link OWCurrencyListItem} for. 
 	 * @return as above
 	 */
-	private OWCurrencyListItem getItemForCoinType(OWCoin.Type id) {
+	private OWCurrencyListItem getItemForCoinType(OWCoin id) {
 		// TODO need to get market values from some sort of an API
 
 		// TODO see if we can get the constructor of OWCurrencyListItem 
 		// to take very few things
 		int resId = R.layout.accounts_currency_list_single_item;
-		if (id == OWCoin.Type.BTC) {
-			return new OWCurrencyListItem(OWCoin.Type.BTC, OWFiat.Type.USD, 
+		if (id == OWCoin.BTC) {
+			return new OWCurrencyListItem(OWCoin.BTC, OWFiat.USD, 
 					"620.00", "0.00000000", "0.00", resId);
-		} else if (id == OWCoin.Type.BTC_TEST) {
+		} else if (id == OWCoin.BTC_TEST) {
 			String balance = OWUtils.bitcoinValueToFriendlyString(
 					this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
-			return new OWCurrencyListItem(OWCoin.Type.BTC_TEST, OWFiat.Type.USD, 
+			return new OWCurrencyListItem(OWCoin.BTC_TEST, OWFiat.USD, 
 					"0.00", balance, "0.00", resId);
-		} else if (id == OWCoin.Type.LTC) {
-			return new OWCurrencyListItem(OWCoin.Type.LTC, OWFiat.Type.USD, 
+		} else if (id == OWCoin.LTC) {
+			return new OWCurrencyListItem(OWCoin.LTC, OWFiat.USD, 
 					"6.70", "0.00000000", "0.00", resId);
-		} else if (id == OWCoin.Type.LTC_TEST) {
-			return new OWCurrencyListItem(OWCoin.Type.LTC_TEST, OWFiat.Type.USD, 
+		} else if (id == OWCoin.LTC_TEST) {
+			return new OWCurrencyListItem(OWCoin.LTC_TEST, OWFiat.USD, 
 					"0.00", "0.00000000", "0.00", resId);
-		} else if (id == OWCoin.Type.PPC) {
-			return new OWCurrencyListItem(OWCoin.Type.PPC, OWFiat.Type.USD, 
+		} else if (id == OWCoin.PPC) {
+			return new OWCurrencyListItem(OWCoin.PPC, OWFiat.USD, 
 					"1.40", "0.00000000", "0.00", resId);
-		} else if (id == OWCoin.Type.PPC_TEST) {
-			return new OWCurrencyListItem(OWCoin.Type.PPC_TEST, OWFiat.Type.USD, 
+		} else if (id == OWCoin.PPC_TEST) {
+			return new OWCurrencyListItem(OWCoin.PPC_TEST, OWFiat.USD, 
 					"0.00", "0.00000000", "0.00", resId);
-		} else if (id == OWCoin.Type.DOGE) {
-			return new OWCurrencyListItem(OWCoin.Type.DOGE, OWFiat.Type.USD, 
+		} else if (id == OWCoin.DOGE) {
+			return new OWCurrencyListItem(OWCoin.DOGE, OWFiat.USD, 
 					"0.0023", "0.00000000", "0.00", resId);
-		} else if (id == OWCoin.Type.DOGE_TEST) {
-			return new OWCurrencyListItem(OWCoin.Type.DOGE_TEST, OWFiat.Type.USD, 
+		} else if (id == OWCoin.DOGE_TEST) {
+			return new OWCurrencyListItem(OWCoin.DOGE_TEST, OWFiat.USD, 
 					"0.00", "0.00000000", "0.00", resId);
 		}  
 
@@ -166,7 +166,7 @@ public class OWAccountsFragment extends OWFragment {
 	private void initializeCurrencyListView() {
 		// Get the values from the manager and initialize the list view from them
 		this.userWallets = new ArrayList<OWCurrencyListItem>();
-		for (OWCoin.Type type : this.walletManager.getAllUsersWalletTypes()) {
+		for (OWCoin type : this.walletManager.getAllUsersWalletTypes()) {
 			this.userWallets.add(this.getItemForCoinType(type));
 		}
 		// The bar at the bottom
@@ -190,12 +190,12 @@ public class OWAccountsFragment extends OWFragment {
 
 					// The minus one is because the list contains the add new 
 					// currency bar
-					if (userWallets.size()-1 < OWCoin.Type.values().length) {
+					if (userWallets.size()-1 < OWCoin.values().length) {
 						// TODO may want to change the list to just be
 						// walletManager.getAllUsersWalletTypes(); but since
 						// that wouldn't include temporarily added wallets we will
 						// do this for now.
-						List<OWCoin.Type> usersCurWallets = new ArrayList<OWCoin.Type>();
+						List<OWCoin> usersCurWallets = new ArrayList<OWCoin>();
 						for (OWCurrencyListItem newItem : userWallets) {
 							usersCurWallets.add(newItem.getCoinId());
 						}
@@ -211,7 +211,7 @@ public class OWAccountsFragment extends OWFragment {
 						parent.getItemAtPosition(position);
 				// If we are using the test net network then we make sure the
 				// user has a passphrase and 
-				if (!getOWMainActivity().showingDialog()){
+				if (!getOWMainActivity().showingDialog()) {
 					getOWMainActivity().openWalletView(item.getCoinId());
 				}
 			}

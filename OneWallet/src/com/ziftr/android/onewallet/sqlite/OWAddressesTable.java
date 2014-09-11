@@ -43,7 +43,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * @return
 	 * @throws OWAddressFormatException
 	 */
-	protected abstract OWAddress cursorToAddress(OWCoin.Type coinId, Cursor c) throws OWAddressFormatException;
+	protected abstract OWAddress cursorToAddress(OWCoin coinId, Cursor c) throws OWAddressFormatException;
 	
 	/**
 	 * For updating and insertion with android SQLite helper methods, we need to make a 
@@ -61,7 +61,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		address.setId(insertId);
 	}
 	
-	protected OWAddress readAddress(OWCoin.Type coinId, String address, SQLiteDatabase db) {
+	protected OWAddress readAddress(OWCoin coinId, String address, SQLiteDatabase db) {
 		if (address == null) {
 			return null;
 		}
@@ -86,7 +86,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	protected List<OWAddress> readAddresses(OWCoin.Type coinId, List<String> addresses, SQLiteDatabase db) {
+	protected List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, SQLiteDatabase db) {
 		if (addresses != null && addresses.size() == 0) {
 			return null;
 		}
@@ -140,7 +140,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		return newAddresses;
 	}
 	
-	protected List<OWAddress> readAllAddresses(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected List<OWAddress> readAllAddresses(OWCoin coinId, SQLiteDatabase db) {
 		return this.readAddresses(coinId, null, db);
 	}
 	

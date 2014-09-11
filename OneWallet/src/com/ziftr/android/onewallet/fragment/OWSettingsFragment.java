@@ -39,7 +39,7 @@ public class OWSettingsFragment extends OWFragment {
 							OWRequestCodes.RESET_PASSPHRASE_DIALOG);
 					passphraseDialog.setupDialog("ziftrWALLET", null, 
 							"Continue", null, "Cancel");
-					if (!getOWMainActivity().showingDialog()){
+					if (!getOWMainActivity().showingDialog()) {
 					passphraseDialog.show(OWSettingsFragment.this.getFragmentManager(), 
 							"scan_qr");
 					}
@@ -61,7 +61,7 @@ public class OWSettingsFragment extends OWFragment {
 		
 		return rootView;
 	}
-	public void onResume(){
+	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("SETTINGS", true, true);
 	}

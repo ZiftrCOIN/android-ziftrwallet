@@ -32,12 +32,12 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 	}
 
 	public OWWalletTransactionListAdapter(Context ctx, List<OWTransaction> txList) {
-		super(ctx, txList);
+		super(ctx, 0, txList);
 	}
 	
 	public OWWalletTransactionListAdapter(Context context) {
 		// Had to add this constructor to get rid of warnings, for some reason.
-	    super(context, new ArrayList<OWTransaction>());
+	    this(context, new ArrayList<OWTransaction>());
 	}
 	
 	/**

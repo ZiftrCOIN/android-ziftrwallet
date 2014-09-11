@@ -33,7 +33,7 @@ public class OWInsufficientMoneyException extends Exception implements OWCoinRel
 	/**
 	 * The type of coin that this exception was thrown for.
 	 */
-	private final OWCoin.Type coinId;
+	private final OWCoin coinId;
 	
 	/** 
      * Contains the number of satoshis that would have been required to 
@@ -42,23 +42,23 @@ public class OWInsufficientMoneyException extends Exception implements OWCoinRel
     @Nullable
     private final BigInteger insufficientByAmount;
 
-	protected OWInsufficientMoneyException(OWCoin.Type coinId) {
+	protected OWInsufficientMoneyException(OWCoin coinId) {
 		this.coinId = coinId;
         this.insufficientByAmount = null;
     }
 
-    public OWInsufficientMoneyException(OWCoin.Type coinId, BigInteger missing) {
+    public OWInsufficientMoneyException(OWCoin coinId, BigInteger missing) {
         this(coinId, missing, "Insufficient money,  missing " + missing + " atomic units");
     }
 
-    public OWInsufficientMoneyException(OWCoin.Type coinId, BigInteger missing, String message) {
+    public OWInsufficientMoneyException(OWCoin coinId, BigInteger missing, String message) {
         super(message);
         this.coinId = coinId;
         this.insufficientByAmount = missing;
     }
 
 	@Override
-	public OWCoin.Type getCoinId() {
+	public OWCoin getCoinId() {
 		return this.coinId;
 	}
 	

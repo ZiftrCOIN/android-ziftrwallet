@@ -42,8 +42,8 @@ public class OWSimpleAlertDialog extends OWDialogFragment {
 		return builder.create();
 	}
 	
-	public void onClick(View view){
-		switch(view.getId()){
+	public void onClick(View view) {
+		switch(view.getId()) {
 			case R.id.left_dialog_button:
 				//CANCEL
 				this.dismiss();
