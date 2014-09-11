@@ -1022,14 +1022,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * generate dialog to ask for passphrase
 	 * 
-	 * @param type = OWRequestcodes parameter to differentiate where the password dialog is
+	 * @param requestcode = OWRequestcodes parameter to differentiate where the password dialog is
 	 * @param args = bundle with OWCoinType of currency to add if user is adding currency
 	 */
-	public void alertPassphraseDialog(int type, Bundle args, String tag){
+	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag){
 		OWValidatePassphraseDialog passphraseDialog = 
 				new OWValidatePassphraseDialog();
 		
-		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, type);
+		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
 		
 		String message = "Please input your passphrase. ";
 

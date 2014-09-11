@@ -79,7 +79,7 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 			public void onClick(View v) {
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
-				getOWMainActivity().alertPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
+				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						"validate_passphrase_dialog_new_key");
 			}
 		});

@@ -61,7 +61,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 				
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
-				getOWMainActivity().alertPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY, b, 
+				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY, b, 
 						"validate_passphrase_dialog_new_currency");
 				/**
 				OWValidatePassphraseDialog passphraseDialog = 
