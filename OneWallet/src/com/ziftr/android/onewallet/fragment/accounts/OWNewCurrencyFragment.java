@@ -10,12 +10,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWRequestCodes;
 
 public class OWNewCurrencyFragment extends OWFragment {
 
@@ -30,8 +29,6 @@ public class OWNewCurrencyFragment extends OWFragment {
 	/** List of items currently used by adapter to display currencies */
 	private List<OWNewCurrencyListItem> currencyList = new ArrayList<OWNewCurrencyListItem>();
 	
-	private OWWalletManager walletManager;
-
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -41,8 +38,6 @@ public class OWNewCurrencyFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-
-		this.walletManager = this.getOWMainActivity().getWalletManager();
 
 		rootView = inflater.inflate(R.layout.currency_get_new_list, container, false);
 		initializeFromBundle(this.getArguments());
@@ -63,7 +58,33 @@ public class OWNewCurrencyFragment extends OWFragment {
 					int position, long id) {
 				OWNewCurrencyListItem newItem = (OWNewCurrencyListItem) 
 						parent.getItemAtPosition(position);
-				clickAddNewCurrency(newItem.getCoinId());
+				
+				Bundle b = new Bundle();
+				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
+				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY, b, 
+						"validate_passphrase_dialog_new_currency");
+				/**
+				OWValidatePassphraseDialog passphraseDialog = 
+						new OWValidatePassphraseDialog();
+				
+				passphraseDialog.setTargetFragment(
+						OWNewCurrencyFragment.this, OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY);
+				OWNewCurrencyListItem newItem = (OWNewCurrencyListItem) 
+						parent.getItemAtPosition(position);
+				
+				Bundle b = new Bundle();
+				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
+				passphraseDialog.setArguments(b);
+				
+				String message = "Please input your passphrase. ";
+
+				passphraseDialog.setupDialog("ziftrWALLET", message, 
+						"Continue", null, "Cancel");
+				
+				if (!getOWMainActivity().showingDialog()){
+				passphraseDialog.show(OWNewCurrencyFragment.this.getFragmentManager(), 
+						"validate_passphrase_dialog_new_currency");
+				}*/
 				//TODO remove addedCurrency from list
 			}
 		});
@@ -105,35 +126,6 @@ public class OWNewCurrencyFragment extends OWFragment {
 				}
 			}
 		}
-	}
-	
-	public void clickAddNewCurrency(OWCoin.Type newItem) {
-		// Make sure that this view only has wallets
-		// in it which the user do
-		for (OWCoin.Type type : this.walletManager.getAllUsersWalletTypes()) {
-			if (type == newItem) {
-				// Already in list, shouldn't ever get here though because
-				// we only show currencies in the dialog which we don't have
-				this.coinsToShow.remove(newItem);
-				this.generateCurrencyListFrom(coinsToShow);
-				this.currencyAdapter.notifyDataSetChanged();
-				return;
-			}
-		}
-
-		// TODO add this for all coin types eventually 
-		// walletManager.setupWallet(newItem.getCoinId());
-		// Right now we are just doing it for the testnet
-		if (newItem == OWCoin.Type.BTC_TEST || newItem == OWCoin.Type.BTC) {
-			// We can assume the wallet hasn't been set up yet
-			// or we wouldn't have gotten here 
-
-			if (walletManager.setUpWallet(newItem)) {
-				Toast.makeText(getOWMainActivity(), "Wallet Created!", Toast.LENGTH_LONG).show();
-				this.getOWMainActivity().onBackPressed();
-			}
-		}
-		
 	}
 	
 }

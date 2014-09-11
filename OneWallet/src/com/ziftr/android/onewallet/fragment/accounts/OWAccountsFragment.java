@@ -84,44 +84,6 @@ public class OWAccountsFragment extends OWFragment {
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
 
-		/*
-
-		// For the getQRCodeButton
-		View resetPassphraseButton = rootView.findViewById(R.id.resetPassphraseButton);
-		// Set the listener for the clicks
-		resetPassphraseButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				if (OWAccountsFragment.this.userHasPassphrase()) {
-					OWResetPassphraseDialog passphraseDialog = 
-							new OWResetPassphraseDialog();
-
-					// Set the target fragment
-					passphraseDialog.setTargetFragment(OWAccountsFragment.this, 
-							OWRequestCodes.RESET_PASSPHRASE_DIALOG);
-					passphraseDialog.setupDialog("OneWallet", null, 
-							"Continue", null, "Cancel");
-					passphraseDialog.show(OWAccountsFragment.this.getFragmentManager(), 
-							"scan_qr");
-				} else {
-					// Make a new alert dialog
-					OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
-					alertUserDialog.setTargetFragment(OWAccountsFragment.this, 
-							OWRequestCodes.ALERT_USER_DIALOG);
-					// Set up the dialog with message and other info
-					alertUserDialog.setupDialog("OneWallet", 
-							"You must set a passphrase before you can "
-									+ "reset your passphrase.", null, "OK", null);
-					// Pop up the dialog
-					alertUserDialog.show(OWAccountsFragment.this.getFragmentManager(), 
-							"no_passphrase_currently_set_alert_dialog");
-				}
-			}
-		});
-
-		 */
-		
-
 		// Return the view which was inflated
 		return rootView;
 	}
@@ -250,7 +212,7 @@ public class OWAccountsFragment extends OWFragment {
 				// If we are using the test net network then we make sure the
 				// user has a passphrase and 
 				if (!getOWMainActivity().showingDialog()){
-					getOWMainActivity().startWalletAfterValidation(item.getCoinId());
+					getOWMainActivity().openWalletView(item.getCoinId());
 				}
 			}
 		});

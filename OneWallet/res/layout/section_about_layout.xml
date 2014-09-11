@@ -5,10 +5,23 @@
     android:orientation="vertical"
     android:padding="10dp" >
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:scaleType="fitStart"
+        android:src="@drawable/ziftrwallet_logo_temp" >
+    </ImageView>
+
     <TextView
         android:id="@+id/aboutPlaceholderText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Placeholder for about section layout" />
+        android:text="Placeholder for about section layout. asduhfuidh saasdf" />
+
+    <TextView
+        android:id="@+id/about_website_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ow_ziftr_site_link" />
 
 </LinearLayout>

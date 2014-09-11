@@ -26,7 +26,6 @@
         <item name="background">@color/ow_action_bar_color</item>
     </style>
 
-
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
@@ -53,6 +52,30 @@
 
     <style name="dialog_button" parent="@android:attr/buttonBarButtonStyle">
         <item name="android:background">@drawable/dialog_button</item>
+    </style>
+
+    <!-- send_receive page styles -->
+    <style name="send_receive_label">
+        <item name="android:paddingRight">4dp</item>        
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:textColor">@color/White</item>
+        <item name="android:textSize">@dimen/ow_send_receive_label_text_size</item>
+    </style>
+
+    <style name="send_receive_edit_text">
+        <item name="android:layout_height">@dimen/ow_edit_text_height</item>
+        <item name="android:background">@color/ow_edit_text_background_color</item>
+        <item name="android:padding">@dimen/ow_edit_text_padding</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="send_receive_block_containers">
+        <item name="android:background">@color/ow_send_receive_list_background</item>
+        <item name="android:paddingBottom">@dimen/ow_send_receive_list_block_padding_bottom</item>
+        <item name="android:paddingLeft">@dimen/ow_total_icon_side_length</item>
+        <item name="android:paddingRight">@dimen/ow_total_icon_side_length</item>
+        <item name="android:paddingTop">@dimen/ow_send_receive_list_block_padding_top</item>
     </style>
 
 </resources>

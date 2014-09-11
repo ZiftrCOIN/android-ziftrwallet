@@ -20,6 +20,8 @@ import com.google.zxing.client.android.Contents;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
+import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 
@@ -40,12 +42,10 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
-
 		// Initialize the icons so they do the correct things onClick
 		this.initializeAddressUtilityIcons();
 
 		this.initializeWalletHeaderView();
-		
 		if (savedInstanceState == null) {
 			// Set the address to initially be empty
 			this.refresh("");
@@ -77,7 +77,10 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		newAddressIcon.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				loadAddressFromDatabase();
+				Bundle b = new Bundle();
+				b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
+				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
+						"validate_passphrase_dialog_new_key");
 			}
 		});
 
@@ -131,7 +134,6 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		TextView addressTextView = (EditText) 
 				this.rootView.findViewById(R.id.addressValueTextView);
 		addressTextView.setText(this.addressToReceiveOn);
-
 		// initialize the icons that 
 		// Make the image view have the data bitmap
 		this.generateQrCode();
@@ -142,10 +144,9 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	 * gets a new key from the database helper on an extra thread, and
 	 * then updates the UI with the new address on the UI thread. 
 	 */
-	private void loadAddressFromDatabase() {
+	public void loadAddressFromDatabase() {
 		// Get the database from the activity on the UI thread
 		final OWSQLiteOpenHelper database = this.getWalletManager();
-
 		// Run database IO on new thread
 		OWUtils.runOnNewThread(new Runnable() {
 			@Override

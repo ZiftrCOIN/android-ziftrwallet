@@ -4,9 +4,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -33,6 +36,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		this.rootView = inflater.inflate(
 				R.layout.accounts_transaction_details, container, false);
 
+		this.txItem = getArguments().getParcelable("txItem");
 		this.init_fields(savedInstanceState);
 		return this.rootView;
 	}
@@ -43,7 +47,6 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
 	}
 
-	
 	/**
 	 * Get the arguments passed from the activity and set the text fields on the view
 	 * 
@@ -51,13 +54,13 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	 * 
 	 * @param args
 	 */
+	@SuppressLint("NewApi")
 	public void init_fields(Bundle args) {
 
 		TextView amount = (TextView) rootView.findViewById(R.id.amount);
 		BigInteger baseAmount = this.txItem.getTxAmount();
 		BigDecimal amountValue = OWUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
 		amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
-		
 		TextView amountLabel = (TextView) rootView.findViewById(R.id.amountLabel);
 		TextView timeLabel = (TextView) rootView.findViewById(R.id.date_label);
 		if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
@@ -71,13 +74,28 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		}
 		
 		TextView pending = (TextView) rootView.findViewById(R.id.pending);
-
-		if (txItem.isPending()) {
-			pending.setVisibility(View.VISIBLE);
-			pending.setTextColor(getResources().getColor(R.color.Crimson));
+			
+		if (txItem.isPending()){
+			
+			int maxWidth;
+			//get width of screen use newer api if available, otherwise must use deprecated getwidth
+			if (android.os.Build.VERSION.SDK_INT >=13){
+				Point size = new Point();
+				this.getOWMainActivity().getWindowManager().getDefaultDisplay().getSize(size);
+				maxWidth=size.x;
+			} else {
+				maxWidth = this.getOWMainActivity().getWindowManager().getDefaultDisplay().getWidth();
+			}
+			pending.measure(MeasureSpec.UNSPECIFIED,MeasureSpec.UNSPECIFIED);
+			amount.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+			
+			//show only if there is room for the (pending) text
+			if (amount.getMeasuredWidth() + pending.getMeasuredWidth() < maxWidth) {
+				pending.setVisibility(View.VISIBLE);
+			}
 			amount.setTextColor(getResources().getColor(R.color.Crimson));
 		} else {
-			pending.setVisibility(View.INVISIBLE);
+			pending.setVisibility(View.GONE);
 		}
 		
 		TextView currency = (TextView) rootView.findViewById(R.id.currencyValue);
@@ -97,20 +115,6 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		//TODO add confirmation fee field for OWWalletTransactionListItem
 		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
 
-	}
-
-	/**
-	 * @return the txItem
-	 */
-	public OWTransaction getTxItem() {
-		return txItem;
-	}
-
-	/**
-	 * @param txItem the txItem to set
-	 */
-	public void setTxItem(OWTransaction txItem) {
-		this.txItem = txItem;
 	}
 
 }

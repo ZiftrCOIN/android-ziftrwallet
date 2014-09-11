@@ -6,36 +6,35 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     
     <dimen name="ow_send_receive_list_spacing_top_margin">5dp</dimen>
-    <dimen name="ow_send_receive_list_block_padding">5dp</dimen>
-    
+    <dimen name="ow_send_receive_list_block_padding_top">4dp</dimen>
+    <dimen name="ow_send_receive_list_block_padding_bottom">16dp</dimen>
+    <dimen name="ow_send_receive_label_text_size">13sp</dimen>
+
     <!-- These are for icons that do have a border built in. -->
     <dimen name="ow_bordered_icon_margin">4dp</dimen>
-    
+
     <!-- These are for icons that don't have a border built in. -->
     <dimen name="ow_borderless_icon_margin">6dp</dimen>
-    
+
     <!-- 2*margin + size == empty_space_padding -->
     <dimen name="ow_total_icon_side_length">45dp</dimen>
     <!-- SearchBar edit text height -->
-    <dimen name="ow_searchBarEditText">40dp</dimen>
-    
+    <dimen name="ow_searchBarEditText">35dp</dimen>
+
     <!-- Half of the icon size -->
     <dimen name="ow_half_icon_size">20dp</dimen>
     <!-- Quarter of the icon size -->
     <dimen name="ow_quarter_icon_size">10dp</dimen>
-    
     <dimen name="ow_tx_list_divider_padding">10dp</dimen>
     <dimen name="ow_tx_list_item_padding">10dp</dimen>
     <dimen name="ow_tx_list_divider_bottom_margin">5dp</dimen>
-    
     <dimen name="ow_button_footer_height">60dp</dimen>
-    
+
     <!-- txn details text sizes -->
-    <dimen name="ow_txn_large">65dp</dimen>
-    <dimen name="ow_txn_medium">28dp</dimen>
+    <dimen name="ow_txn_large">50dp</dimen>
+    <dimen name="ow_txn_medium">26dp</dimen>
     <dimen name="ow_txn_small">22dp</dimen>
-    
     <dimen name="ow_edit_text_padding">5dp</dimen>
     <dimen name="ow_edit_text_height">@dimen/ow_total_icon_side_length</dimen>
-    
+
 </resources>

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- TODO Get rid of duplicate strings -->
+
 
     <!-- Description here -->
     <string name="ow_empty_string"></string>
@@ -108,5 +110,9 @@
     <string name="ow_ab_back_description">Back</string>
     <!-- Description here -->
     <string name="ow_ab_search_description">Search</string>
+    <!-- string with link for website -->
+    <string name="ow_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
+    <!-- label for reset password -->
+    <string name="ow_reset_password">Reset Password</string>
 
 </resources>
