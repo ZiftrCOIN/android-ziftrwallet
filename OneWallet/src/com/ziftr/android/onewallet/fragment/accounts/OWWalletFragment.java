@@ -16,6 +16,7 @@ import android.widget.ListView;
 
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.crypto.OWTransaction;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -114,29 +115,29 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 		// TODO make this non-UI blocking
 		this.txAdapter = new OWWalletTransactionListAdapter(this.getActivity());
 
-		Collection<OWWalletTransaction> pendingTxs = 
+		Collection<OWTransaction> pendingTxs = 
 				this.getWalletManager().getPendingTransactions(getCoinId());
 
 		if (pendingTxs.size() > 0) {
 			// Add the Pending Divider
 			this.txAdapter.getFullList().add(
-					new OWWalletTransaction(
+					new OWTransaction(
 							null, null, "PENDING", -1, null, 
 							OWWalletTransactionListAdapter.Type.PENDING_DIVIDER,
 							R.layout.accounts_wallet_tx_list_divider));
 			// Add all the pending transactions
-			for (OWWalletTransaction tx : pendingTxs) {
+			for (OWTransaction tx : pendingTxs) {
 				this.txAdapter.getFullList().add(tx);
 			}
 		}
 
 		// Add the History Divider
-		this.txAdapter.getFullList().add(new OWWalletTransaction(
+		this.txAdapter.getFullList().add(new OWTransaction(
 				null, null, "HISTORY", -1, null, 
 				OWWalletTransactionListAdapter.Type.HISTORY_DIVIDER,
 				R.layout.accounts_wallet_tx_list_divider));
 		// Add all the pending transactions
-		for (OWWalletTransaction tx : this.getWalletManager().getConfirmedTransactions(getCoinId())) {
+		for (OWTransaction tx : this.getWalletManager().getConfirmedTransactions(getCoinId())) {
 			this.txAdapter.getFullList().add(tx);
 		}
 
@@ -153,7 +154,7 @@ public abstract class OWWalletFragment extends OWWalletUserFragment implements T
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				if (!txAdapter.getItem(position).isDivider()) {
-					OWWalletTransaction txItem = (OWWalletTransaction) 
+					OWTransaction txItem = (OWTransaction) 
 							txListView.getItemAtPosition(position);
 					getOWMainActivity().openTxnDetails(txItem);
 				}

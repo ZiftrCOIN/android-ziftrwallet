@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.dialog.OWDialogFragment;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.dialog.OWValidatePassphraseDialog;
@@ -53,7 +54,6 @@ import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinTestnetCoinsFr
 import com.ziftr.android.onewallet.fragment.accounts.OWSendBitcoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -921,7 +921,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Open the view for transaction details
 	 */
-	public void openTxnDetails(OWWalletTransaction txItem) {
+	public void openTxnDetails(OWTransaction txItem) {
 
 		String tag = "txn_details_fragment";
 		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
@@ -936,7 +936,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Open view for add new currency
 	 */
-	public void openAddCurrency(List<OWCoin.Type> userCurWallets){
+	public void openAddCurrency(List<OWCoin.Type> userCurWallets) {
 		String tag = "add_new_currency";
 		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
 		if (fragToShow == null) {

@@ -11,8 +11,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
+import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
-import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -412,11 +412,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * and numConfirmations.
 	 * 
 	 * @param coinId - The coin type to determine which table we use.
-	 * @param txAmount - See {@link OWWalletTransaction}
-	 * @param txFee- See {@link OWWalletTransaction}
-	 * @param displayAddress - See {@link OWWalletTransaction}
+	 * @param txAmount - See {@link OWTransaction}
+	 * @param txFee- See {@link OWTransaction}
+	 * @param displayAddress - See {@link OWTransaction}
 	 */
-	public OWWalletTransaction createTransaction(OWCoin.Type coinId, BigInteger txAmount,
+	public OWTransaction createTransaction(OWCoin.Type coinId, BigInteger txAmount,
 			BigInteger txFee, List<OWAddress> displayAddress) {
 		return createTransaction(coinId, txAmount, txFee, 
 				displayAddress, new OWSha256Hash(""), "", -1);
@@ -430,14 +430,14 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * and numConfirmations.
 	 * 
 	 * @param coinId - The coin type to determine which table we use.
-	 * @param txAmount - See {@link OWWalletTransaction}
-	 * @param txFee- See {@link OWWalletTransaction}
-	 * @param displayAddress - See {@link OWWalletTransaction}
+	 * @param txAmount - See {@link OWTransaction}
+	 * @param txFee- See {@link OWTransaction}
+	 * @param displayAddress - See {@link OWTransaction}
 	 */
-	public OWWalletTransaction createTransaction(OWCoin.Type coinId, BigInteger txAmount,
+	public OWTransaction createTransaction(OWCoin.Type coinId, BigInteger txAmount,
 			BigInteger txFee, List<OWAddress> displayAddresses, OWSha256Hash hash, 
 			String note, int numConfirmations) {
-		OWWalletTransaction tx = new OWWalletTransaction(coinId, OWFiat.Type.USD, 
+		OWTransaction tx = new OWTransaction(coinId, OWFiat.Type.USD, 
 				note, System.currentTimeMillis() / 100, txAmount, 
 				OWWalletTransactionListAdapter.Type.TRANSACTION, 
 				R.layout.accounts_wallet_tx_list_item);
@@ -448,7 +448,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return tx;
 	}
 	
-	public OWWalletTransaction readTransactionByHash(OWCoin.Type coinId, String hash) {
+	public OWTransaction readTransactionByHash(OWCoin.Type coinId, String hash) {
 		if (hash == null) {
 			return null;
 		}
@@ -456,7 +456,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		List<String> hashes = new ArrayList<String>();
 		hashes.add(hash);
 
-		List<OWWalletTransaction> readAddresses = 
+		List<OWTransaction> readAddresses = 
 				this.transactionsTable.readTransactionsByHash(coinId, hashes, this.getReadableDatabase());
 		if (readAddresses.size() == 0) {
 			return null;
@@ -475,7 +475,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param db
 	 * @return
 	 */
-	public List<OWWalletTransaction> readTransactionsByAddress(OWCoin.Type coinId, String address) {
+	public List<OWTransaction> readTransactionsByAddress(OWCoin.Type coinId, String address) {
 		return transactionsTable.readTransactionsByAddress(coinId, address, getReadableDatabase());
 	}
 
@@ -489,29 +489,29 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param db
 	 * @return
 	 */
-	public List<OWWalletTransaction> readTransactionsByHash(OWCoin.Type coinId, 
+	public List<OWTransaction> readTransactionsByHash(OWCoin.Type coinId, 
 			List<String> hashes) {
 		return transactionsTable.readTransactionsByHash(coinId, hashes, getReadableDatabase());
 	}
 	
-	public List<OWWalletTransaction> readAllTransactions(OWCoin.Type coinId) {
+	public List<OWTransaction> readAllTransactions(OWCoin.Type coinId) {
 		return this.transactionsTable.readAllTransactions(coinId, getReadableDatabase());
 	}
 	
-	public void updateTransaction(OWWalletTransaction tx) {
+	public void updateTransaction(OWTransaction tx) {
 		this.transactionsTable.updateTransaction(tx, getWritableDatabase());
 	}
 
 
-	protected void deleteTransaction(OWWalletTransaction tx) {
+	protected void deleteTransaction(OWTransaction tx) {
 		this.transactionsTable.deleteTransaction(tx, getWritableDatabase());
 	}
 
 	public BigInteger getWalletBalance(OWCoin.Type coinId, BalanceType bType) {
 		BigInteger balance = BigInteger.ZERO;
-		List<OWWalletTransaction> txs = this.readAllTransactions(coinId);
+		List<OWTransaction> txs = this.readAllTransactions(coinId);
 		
-		for (OWWalletTransaction tx : txs) {
+		for (OWTransaction tx : txs) {
 			if (bType == BalanceType.AVAILABLE) {
 				if (!tx.isPending()) {
 					balance = balance.add(tx.getTxAmount());
@@ -523,11 +523,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return balance;
 	}
 
-	public List<OWWalletTransaction> getPendingTransactions(OWCoin.Type coinId) {
+	public List<OWTransaction> getPendingTransactions(OWCoin.Type coinId) {
 		return transactionsTable.readPendingTransactions(coinId, getReadableDatabase());
 	}
 
-	public List<OWWalletTransaction> getConfirmedTransactions(OWCoin.Type coinId) {
+	public List<OWTransaction> getConfirmedTransactions(OWCoin.Type coinId) {
 		return transactionsTable.readConfirmedTransactions(coinId, getReadableDatabase());
 	}
 

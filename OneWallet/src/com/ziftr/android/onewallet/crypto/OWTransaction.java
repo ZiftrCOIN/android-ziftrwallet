@@ -1,12 +1,14 @@
-package com.ziftr.android.onewallet.fragment.accounts;
+package com.ziftr.android.onewallet.crypto;
 
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Locale;
 
-import com.ziftr.android.onewallet.crypto.OWAddress;
-import com.ziftr.android.onewallet.crypto.OWSha256Hash;
+import android.annotation.SuppressLint;
+
+import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
+import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter.Type;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -16,7 +18,7 @@ import com.ziftr.android.onewallet.util.OWFiat;
  * 
  * TODO do we need to add any of the functionality from Bitcoinj's TransactionOutput or TransactionInput?
  */
-public class OWWalletTransaction implements OWSearchableListItem {
+public class OWTransaction implements OWSearchableListItem {
 
 	// Database stuff
 	
@@ -91,7 +93,7 @@ public class OWWalletTransaction implements OWSearchableListItem {
 	private int resId;
 
 	// TODO figure out what really needs to be in this constructor.
-	public OWWalletTransaction(OWCoin.Type coinId, 
+	public OWTransaction(OWCoin.Type coinId, 
 			OWFiat.Type fiatType, 
 			String txNote, 
 			long txTime, 
@@ -315,19 +317,20 @@ public class OWWalletTransaction implements OWSearchableListItem {
 				this.getTxViewType() == Type.HISTORY_DIVIDER;
 	}
 	
+	@SuppressLint("DefaultLocale")
 	@Override
 	public boolean matches(CharSequence constraint, OWSearchableListItem nextItem) {
 		// TODO This isn't quite right because the next item in this list doesn't necessarily 
 		// also meet the search criteria...
 		
-		OWWalletTransaction owNextTransaction = (OWWalletTransaction) nextItem;
+		OWTransaction owNextTransaction = (OWTransaction) nextItem;
 		if (this.isDivider() && owNextTransaction != null && owNextTransaction.isDivider()) {
 			// The pending bar shouldn't show if it the only bar
 			return false;
 		} else if (this.isDivider()) {
 			return true;
 		} else {
-			return this.getTxNote().toLowerCase(Locale.ENGLISH).contains(constraint);
+			return this.getTxNote().toLowerCase(Locale.ENGLISH).contains(constraint.toString().toLowerCase());
 		}
 	}
 

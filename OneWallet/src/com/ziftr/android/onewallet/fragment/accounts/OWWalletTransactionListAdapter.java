@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -22,7 +23,7 @@ import com.ziftr.android.onewallet.util.OWUtils;
 /**
  * An adapter class for transactions.
  */
-public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWWalletTransaction> {
+public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTransaction> {
 	
 	public enum Type {
 		TRANSACTION,
@@ -30,13 +31,13 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWWa
 		HISTORY_DIVIDER
 	}
 
-	public OWWalletTransactionListAdapter(Context ctx, List<OWWalletTransaction> txList) {
+	public OWWalletTransactionListAdapter(Context ctx, List<OWTransaction> txList) {
 		super(ctx, txList);
 	}
 	
 	public OWWalletTransactionListAdapter(Context context) {
 		// Had to add this constructor to get rid of warnings, for some reason.
-	    super(context, new ArrayList<OWWalletTransaction>());
+	    super(context, new ArrayList<OWTransaction>());
 	}
 	
 	/**
@@ -48,7 +49,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWWa
 		return getItemViewType(getItem(position));
 	}
 	
-	private int getItemViewType(OWWalletTransaction item) {
+	private int getItemViewType(OWTransaction item) {
 		return item.getTxViewType().ordinal();
 	}
 
@@ -69,7 +70,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWWa
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// The convertView is an oldView that android is recycling.
 
-		OWWalletTransaction txListItem = getItem(position);
+		OWTransaction txListItem = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
 			convertView = this.getInflater().inflate(txListItem.getResId(), null);
@@ -123,7 +124,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWWa
 	 * @param txListItem
 	 * @return
 	 */
-	private int getImgResIdForItem(OWWalletTransaction txListItem) {
+	private int getImgResIdForItem(OWTransaction txListItem) {
 		int imgResId;
 		if (txListItem.getTxAmount().compareTo(BigInteger.ZERO) >= 0) {
 			// This means the tx is received (relative to user)

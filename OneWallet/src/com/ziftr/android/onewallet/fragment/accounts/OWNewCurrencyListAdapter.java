@@ -16,7 +16,7 @@ import com.ziftr.android.onewallet.R;
 
 /**
  * In the accounts section of the app there is a list of currencies that opens
- * when the user hits "+ New Currency". In the GridView that opens is a list
+ * when the user hits "+ New Currency". In the ListView that opens is a list
  * of currencies the user can choose from. This adapts each option to form
  * a view for each currency, reusing old views to improve efficiency. 
  */
@@ -47,15 +47,12 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		// to match the newCurrencyListItem.
 
 		// Set the coin logo image view
-		ImageView coinLogo = (ImageView) 
-				convertView.findViewById(R.id.leftIcon);
-		Drawable image = context.getResources().getDrawable(
-				newCurrencyListItem.getCoinId().getLogoResId());
+		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
+		Drawable image = context.getResources().getDrawable(newCurrencyListItem.getCoinId().getLogoResId());
 		coinLogo.setImageDrawable(image);
 		
 		// Set the text next to logo
-		TextView coinName = (TextView) 
-				convertView.findViewById(R.id.topLeftTextView);
+		TextView coinName = (TextView) convertView.findViewById(R.id.topLeftTextView);
 		coinName.setText(newCurrencyListItem.getCoinId().getLongTitle());
 		
 		//Set the add button image

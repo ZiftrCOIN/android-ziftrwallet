@@ -16,10 +16,15 @@
 
 package com.ziftr.android.onewallet.crypto;
 
+import java.util.Locale;
+
 import javax.annotation.Nullable;
+
+import android.annotation.SuppressLint;
 
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.exceptions.OWWrongNetworkException;
+import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWCoin.Type;
@@ -38,7 +43,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * should be interpreted. Whilst almost all addresses today are hashes of public keys, 
  * another (currently not fully supported type) can contain a hash of a script instead.</p>
  */
-public class OWAddress implements OWCoinRelative {
+public class OWAddress implements OWCoinRelative, OWSearchableListItem {
 
 	///////////////////////////////////////
 	//////////  Database Fields  //////////
@@ -332,6 +337,12 @@ public class OWAddress implements OWCoinRelative {
 			}
 		}
 		return null;
+	}
+
+	@SuppressLint("DefaultLocale")
+	@Override
+	public boolean matches(CharSequence constraint, OWSearchableListItem nextItem) {
+		return this.toString().toLowerCase(Locale.ENGLISH).contains(constraint.toString().toLowerCase());
 	}
 
 }

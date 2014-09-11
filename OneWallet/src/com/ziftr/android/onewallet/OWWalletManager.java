@@ -36,10 +36,10 @@ import com.google.bitcoin.utils.Threading;
 import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWECKey;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
+import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.exceptions.OWInsufficientMoneyException;
-import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
@@ -670,10 +670,10 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	}
 
 	@Override
-	public List<OWWalletTransaction> getPendingTransactions(OWCoin.Type coinId) {
+	public List<OWTransaction> getPendingTransactions(OWCoin.Type coinId) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
 		// method is called. 
-		List<OWWalletTransaction> pendingTransactions = new ArrayList<OWWalletTransaction>();
+		List<OWTransaction> pendingTransactions = new ArrayList<OWTransaction>();
 		for (Transaction tx : this.walletMap.get(coinId).getPendingTransactions()) {
 			pendingTransactions.add(bitcoinjTransactionToOWTransaction(coinId, tx));
 		}
@@ -681,19 +681,19 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	}
 
 	@Override
-	public List<OWWalletTransaction> getConfirmedTransactions(OWCoin.Type coinId) {
+	public List<OWTransaction> getConfirmedTransactions(OWCoin.Type coinId) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
 		// method is called. 
 		// Unfortunately, bitcoinj doesn't make it easy to just get confirmed. 
 		// For now, we have to make sure we 
-		List<OWWalletTransaction> confirmedTransactions = new ArrayList<OWWalletTransaction>();
-		List<OWWalletTransaction> pendingTransactions = getPendingTransactions(coinId);
+		List<OWTransaction> confirmedTransactions = new ArrayList<OWTransaction>();
+		List<OWTransaction> pendingTransactions = getPendingTransactions(coinId);
 
 		Set<String> pendingTxHashes = null;
 
 		if (pendingTransactions.size() > 0) {
 			pendingTxHashes = new HashSet<String>();
-			for (OWWalletTransaction tx : pendingTransactions) {
+			for (OWTransaction tx : pendingTransactions) {
 				pendingTxHashes.add(tx.getSha256Hash().toString());
 			}
 		}
@@ -718,8 +718,8 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param tx
 	 * @return
 	 */
-	private OWWalletTransaction bitcoinjTransactionToOWTransaction(OWCoin.Type coinId, Transaction tx) {
-		OWWalletTransaction owTx = new OWWalletTransaction(
+	private OWTransaction bitcoinjTransactionToOWTransaction(OWCoin.Type coinId, Transaction tx) {
+		OWTransaction owTx = new OWTransaction(
 				coinId, 
 				OWFiat.Type.USD, 
 				tx.getHashAsString().substring(0, 6), 

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
@@ -21,7 +22,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 
 	private View rootView;
 	
-	private OWWalletTransaction txItem;
+	private OWTransaction txItem;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
@@ -101,14 +102,14 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	/**
 	 * @return the txItem
 	 */
-	public OWWalletTransaction getTxItem() {
+	public OWTransaction getTxItem() {
 		return txItem;
 	}
 
 	/**
 	 * @param txItem the txItem to set
 	 */
-	public void setTxItem(OWWalletTransaction txItem) {
+	public void setTxItem(OWTransaction txItem) {
 		this.txItem = txItem;
 	}
 

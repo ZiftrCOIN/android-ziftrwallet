@@ -14,15 +14,14 @@ import android.widget.Toast;
 
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 
-public class OWNewCurrencyFragment extends OWFragment {
+public abstract class OWAddressBookFragment extends OWWalletUserFragment {
 
 	private OWNewCurrencyListAdapter currencyAdapter;
 	
 	/** The root view for this application. */
-	private View rootView;
+	private View rootView; 
 	
 	/** We only want to show the coins that the user doesn't already have a wallet for. List of types from args */
 	private List<OWCoin.Type> coinsToShow;
@@ -135,5 +134,6 @@ public class OWNewCurrencyFragment extends OWFragment {
 		}
 		
 	}
+
 	
 }

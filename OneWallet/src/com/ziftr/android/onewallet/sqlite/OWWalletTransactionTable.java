@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
-import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransaction;
+import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
@@ -85,13 +85,13 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return sb.toString();
 	}
 
-	protected void insert(OWWalletTransaction tx, SQLiteDatabase db) {
+	protected void insert(OWTransaction tx, SQLiteDatabase db) {
 		long insertId = db.insert(getTableName(tx.getCoinId()), 
 				null, txToContentValues(tx));
 		tx.setId(insertId);
 	}
 
-	protected OWWalletTransaction readTransactionByHash(OWCoin.Type coinId, String hash, SQLiteDatabase db) {
+	protected OWTransaction readTransactionByHash(OWCoin.Type coinId, String hash, SQLiteDatabase db) {
 		if (hash == null) {
 			return null;
 		}
@@ -99,7 +99,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		List<String> hashes = new ArrayList<String>();
 		hashes.add(hash);
 
-		List<OWWalletTransaction> readAddresses = readTransactionsByHash(coinId, hashes, db);
+		List<OWTransaction> readAddresses = readTransactionsByHash(coinId, hashes, db);
 		if (readAddresses.size() == 0) {
 			return null;
 		} else {
@@ -117,7 +117,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	protected List<OWWalletTransaction> readTransactionsByAddress(OWCoin.Type coinId, 
+	protected List<OWTransaction> readTransactionsByAddress(OWCoin.Type coinId, 
 			String address, SQLiteDatabase db) {
 
 		if (address != null && address.trim().isEmpty()) {
@@ -146,7 +146,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	protected List<OWWalletTransaction> readTransactionsByHash(OWCoin.Type coinId, 
+	protected List<OWTransaction> readTransactionsByHash(OWCoin.Type coinId, 
 			List<String> hashes, SQLiteDatabase db) {
 
 		if (hashes != null && hashes.size() == 0) {
@@ -173,7 +173,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return this.readTransactions(coinId, where.toString(), db);
 	}
 
-	protected List<OWWalletTransaction> readPendingTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected List<OWTransaction> readPendingTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
 
 		StringBuilder where = new StringBuilder("");
 
@@ -184,7 +184,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return this.readTransactions(coinId, where.toString(), db);
 	}
 	
-	protected List<OWWalletTransaction> readConfirmedTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected List<OWTransaction> readConfirmedTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
 
 		StringBuilder where = new StringBuilder("");
 
@@ -205,7 +205,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	private List<OWWalletTransaction> readTransactions(OWCoin.Type coinId, String where, SQLiteDatabase db) {
+	private List<OWTransaction> readTransactions(OWCoin.Type coinId, String where, SQLiteDatabase db) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coinId));
@@ -225,7 +225,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		ZLog.log("Query: " + toQuery);
 		Cursor c = db.rawQuery(toQuery, null);
 
-		List<OWWalletTransaction> newTxs = new ArrayList<OWWalletTransaction>();
+		List<OWTransaction> newTxs = new ArrayList<OWTransaction>();
 
 		// Move to first returns false if cursor is empty
 		if (c.moveToFirst()) {
@@ -242,11 +242,11 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return newTxs;
 	}
 
-	protected List<OWWalletTransaction> readAllTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
+	protected List<OWTransaction> readAllTransactions(OWCoin.Type coinId, SQLiteDatabase db) {
 		return this.readTransactions(coinId, null, db);
 	}
 
-	protected void updateTransaction(OWWalletTransaction tx, SQLiteDatabase db) {
+	protected void updateTransaction(OWTransaction tx, SQLiteDatabase db) {
 		if (tx.getId() == -1) {
 			// Shouldn't happen
 			throw new RuntimeException("Error: id has not been set.");
@@ -256,7 +256,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	}
 
 
-	protected void deleteTransaction(OWWalletTransaction tx, SQLiteDatabase db) {
+	protected void deleteTransaction(OWTransaction tx, SQLiteDatabase db) {
 		if (tx.getId() == -1) {
 			// Shouldn't happen
 			throw new RuntimeException("Error: id has not been set.");
@@ -271,13 +271,13 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		db.delete(getTableName(tx.getCoinId()), where.toString(), null);
 	}
 
-	private OWWalletTransaction cursorToTransaction(OWCoin.Type coinId, Cursor c,
+	private OWTransaction cursorToTransaction(OWCoin.Type coinId, Cursor c,
 			SQLiteDatabase db) {
 
 		// TODO get from settings
 		OWFiat.Type fiatType = OWFiat.Type.USD;
 
-		OWWalletTransaction tx = new OWWalletTransaction(coinId, fiatType, 
+		OWTransaction tx = new OWTransaction(coinId, fiatType, 
 				c.getString(c.getColumnIndex(COLUMN_NOTE)), 
 				c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)), 
 				new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))), 
@@ -300,7 +300,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 	}
 
-	private ContentValues txToContentValues(OWWalletTransaction tx) {
+	private ContentValues txToContentValues(OWTransaction tx) {
 		ContentValues values = new ContentValues();
 
 		values.put(COLUMN_ID, tx.getId());
