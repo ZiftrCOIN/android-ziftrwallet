@@ -242,10 +242,14 @@ public abstract class OWSendCoinsFragment extends OWWalletUserFragment {
 			@Override
 			public void onClick(View v) {
 				if (addressIsValid(getSendToAddressEditText().getText().toString())) {
-					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
-					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
-							"validate_passphrase_dialog_send");
+					if (getOWMainActivity().userHasPassphrase()){
+						Bundle b = new Bundle();
+						b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
+						getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
+								"validate_passphrase_dialog_send");
+					} else {
+						clickSendCoins();
+					}
 				}
 			}
 		});

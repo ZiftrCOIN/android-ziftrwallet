@@ -4,7 +4,6 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    
     <dimen name="ow_send_receive_list_spacing_top_margin">5dp</dimen>
     <dimen name="ow_send_receive_list_block_padding_top">4dp</dimen>
     <dimen name="ow_send_receive_list_block_padding_bottom">16dp</dimen>
@@ -30,10 +29,12 @@
     <dimen name="ow_tx_list_divider_bottom_margin">5dp</dimen>
     <dimen name="ow_button_footer_height">60dp</dimen>
 
-    <!-- txn details text sizes -->
-    <dimen name="ow_txn_large">50dp</dimen>
-    <dimen name="ow_txn_medium">26dp</dimen>
-    <dimen name="ow_txn_small">22dp</dimen>
+    <!-- ow default text sizes -->
+    <dimen name="ow_txt_largest">40sp</dimen>
+    <dimen name="ow_txt_large">30sp</dimen>
+    <dimen name="ow_txt_medium">20sp</dimen>
+    <dimen name="ow_txt_mediumsmall">16sp</dimen>
+    <dimen name="ow_txt_small">14sp</dimen>
     <dimen name="ow_edit_text_padding">5dp</dimen>
     <dimen name="ow_edit_text_height">@dimen/ow_total_icon_side_length</dimen>
 

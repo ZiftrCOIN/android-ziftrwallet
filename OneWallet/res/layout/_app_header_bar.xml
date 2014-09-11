@@ -56,7 +56,7 @@
         android:paddingTop="4dp"
         android:text="@string/ow_app_name"
         android:textColor="@color/ow_menu_default"
-        android:textSize="24sp" />
+        android:textSize="@dimen/ow_txt_medium" />
 
     <ImageView
         android:id="@+id/actionBarSearch"

@@ -21,7 +21,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/DarkGray"
                 android:maxLines="1"
-                android:textSize="@dimen/ow_txn_large" />
+                android:textSize="@dimen/ow_txt_largest" />
 
             <TextView
                 android:id="@+id/pending"
@@ -32,7 +32,7 @@
 				android:visibility="gone"
                 android:text="@string/ow_tx_details_pending_label"
                 android:textColor="@color/Crimson"
-                android:textSize="@dimen/ow_txn_medium" />
+                android:textSize="@dimen/ow_txt_medium" />
         </LinearLayout>
 
         <TextView

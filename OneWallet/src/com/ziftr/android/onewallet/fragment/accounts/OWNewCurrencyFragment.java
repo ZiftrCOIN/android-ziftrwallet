@@ -61,31 +61,12 @@ public class OWNewCurrencyFragment extends OWFragment {
 				
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
-				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY, b, 
+				if (getOWMainActivity().userHasPassphrase()){
+					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY, b, 
 						"validate_passphrase_dialog_new_currency");
-				/**
-				OWValidatePassphraseDialog passphraseDialog = 
-						new OWValidatePassphraseDialog();
-				
-				passphraseDialog.setTargetFragment(
-						OWNewCurrencyFragment.this, OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY);
-				OWNewCurrencyListItem newItem = (OWNewCurrencyListItem) 
-						parent.getItemAtPosition(position);
-				
-				Bundle b = new Bundle();
-				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
-				passphraseDialog.setArguments(b);
-				
-				String message = "Please input your passphrase. ";
-
-				passphraseDialog.setupDialog("ziftrWALLET", message, 
-						"Continue", null, "Cancel");
-				
-				if (!getOWMainActivity().showingDialog()){
-				passphraseDialog.show(OWNewCurrencyFragment.this.getFragmentManager(), 
-						"validate_passphrase_dialog_new_currency");
-				}*/
-				//TODO remove addedCurrency from list
+				} else {
+					getOWMainActivity().addNewCurrency(b);
+				}
 			}
 		});
 	}

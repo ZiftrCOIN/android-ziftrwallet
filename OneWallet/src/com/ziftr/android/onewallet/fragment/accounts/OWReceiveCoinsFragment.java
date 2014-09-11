@@ -77,10 +77,14 @@ public abstract class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		newAddressIcon.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Bundle b = new Bundle();
-				b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
-				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
+				if (getOWMainActivity().userHasPassphrase()){
+					Bundle b = new Bundle();
+					b.putString(OWCoin.TYPE_KEY, getCoinId().toString());
+					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						"validate_passphrase_dialog_new_key");
+				} else {
+					loadAddressFromDatabase();
+				}
 			}
 		});
 

@@ -43,7 +43,6 @@ import com.ziftr.android.onewallet.fragment.OWAboutFragment;
 import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
-import com.ziftr.android.onewallet.fragment.OWWelcomeFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinTestnetWalletFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWBitcoinWalletFragment;
@@ -168,7 +167,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	private OWWalletManager walletManager;
 
 	/** The key for getting the passphrase hash from the preferences. */
-	private final String PASSPHRASE_KEY = "ow_passphrase_key_1";
+	public final static String PASSPHRASE_KEY = "ow_passphrase_key_1";
 
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
@@ -213,15 +212,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			public Fragment getNewFragment() {
 				return new OWContactFragment();
 			}
-		},
-		/** The enum to identify the welcome fragment of the app. */
-		WELCOME_FRAGMENT_TYPE {
-			@Override
-			public Fragment getNewFragment() {
-				return new OWWelcomeFragment();
-			}
 		};
-
+	
 		/** The drawer menu view associated with this section of the app. */
 		private View drawerMenuView;
 
@@ -254,6 +246,12 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		//Get passphrase from welcome screen if exists
+		Bundle info = getIntent().getExtras();
+		if (info != null && info.getByteArray("SET_PASSPHRASE") != null){
+			setPassphraseHash(info.getByteArray("SET_PASSPHRASE"));
+		}
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
@@ -588,7 +586,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {
-			this.showFragmentFromType(FragmentType.WELCOME_FRAGMENT_TYPE, false);
+			this.showFragmentFromType(FragmentType.ACCOUNT_FRAGMENT_TYPE, false);
 		} else {
 			// Here we must make sure that the drawer menu is still
 			// showing which section of the app is currently open.

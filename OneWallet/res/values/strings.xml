@@ -114,5 +114,11 @@
     <string name="ow_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
     <!-- label for reset password -->
     <string name="ow_reset_password">Reset Password</string>
+    <!-- welcome label -->
+    <string name="ow_welcome">Welcome!</string>
+    <!-- message in welcome screen -->
+    <string name="ow_welcome_message">Below is a passphrase that keeps your account secure. 
+        Your passphrase will not be shown again. Without it you will lose access to your ziftrWALLET
+         and any digital currency inside. To prevent this screen from showing up, go to settings page or set a passphrase.</string>
 
 </resources>

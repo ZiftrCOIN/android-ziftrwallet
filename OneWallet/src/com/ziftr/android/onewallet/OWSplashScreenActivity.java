@@ -1,6 +1,8 @@
 package com.ziftr.android.onewallet;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -15,7 +17,8 @@ import com.ziftr.android.onewallet.util.ZLog;
  * based on whether or not we are compiling for a tablet.  
  */
 public class OWSplashScreenActivity extends FragmentActivity {
-
+	
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	// Here we just load the splash screen and then start the app one
@@ -88,10 +91,22 @@ public class OWSplashScreenActivity extends FragmentActivity {
 	
 	
     private void loadNoFragmentUi() {
-    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
-    			OWMainFragmentActivity.class);
-    	noFragmentIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivity(noFragmentIntent);
+		SharedPreferences prefs = this.getSharedPreferences(
+				OWMainFragmentActivity.PASSPHRASE_KEY, Context.MODE_PRIVATE);
+		// Get the passphrase hash
+		String storedPassphrase = prefs.getString(OWMainFragmentActivity.PASSPHRASE_KEY, null);
+		if (storedPassphrase == null){
+	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
+	    			OWWelcomeActivity.class);
+	    	noFragmentIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+	        startActivity(noFragmentIntent);
+		} else {
+	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
+	    			OWMainFragmentActivity.class);
+	    	noFragmentIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+	        startActivity(noFragmentIntent);
+
+		}
     }
     
     private void loadFragmentBasedUi() {
