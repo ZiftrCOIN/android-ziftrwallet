@@ -351,19 +351,22 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 		dest.writeString(txAmount.toString());
 		dest.writeString(this.getTxViewType().toString());
 		dest.writeInt(resId);
+		dest.writeLong(getId());
 	}
 	
 	public static final Parcelable.Creator<OWTransaction> CREATOR = new Parcelable.Creator<OWTransaction>() {
 
 		@Override
 		public OWTransaction createFromParcel(Parcel source) {
-			return new OWTransaction( OWCoin.valueOf(source.readString()), 
+			OWTransaction txn = new OWTransaction( OWCoin.valueOf(source.readString()), 
 					OWFiat.valueOf(source.readString()), 
 					source.readString(), 
 					source.readLong(), 
 					new BigInteger(source.readString()), 
 					OWWalletTransactionListAdapter.Type.valueOf(source.readString()),
 					source.readInt());
+			txn.setId(source.readLong());
+			return txn;
 		}
 
 		@Override

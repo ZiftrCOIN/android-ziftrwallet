@@ -53,6 +53,7 @@ import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragmen
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -841,14 +842,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			return;
 		}
 
-		String tag = "wallet_fragment";
-		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.WALLET_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWWalletFragment();
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+		this.showFragment(fragToShow, OWTags.WALLET_FRAGMENT, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 	}
 
 	/**
@@ -870,14 +870,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param typeOfWalletToStart
 	 */
 	public void openReceiveCoinsView() {
-		String tag = "receive_coins_fragment";
-		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWReceiveCoinsFragment();
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+		this.showFragment(fragToShow, OWTags.RECIEVE_FRAGMENT, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 	}
 
 	/**
@@ -886,14 +885,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param typeOfWalletToStart
 	 */
 	public void openSendCoinsView() {
-		String tag = "send_coins_fragment";
-		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(tag);
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.SEND_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWSendCoinsFragment();
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 	}
 
 	/**
@@ -901,15 +899,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	public void openTxnDetails(OWTransaction txItem) {
 
-		String tag = "txn_details_fragment";
-		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
+		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) this.getSupportFragmentManager().findFragmentByTag(OWTags.TXN_DETAILS);
 		if (fragToShow == null) {
 			fragToShow = new OWTransactionDetailsFragment();
 		}
 		Bundle b = new Bundle();
 		b.putParcelable("txItem", txItem);
 		fragToShow.setArguments(b);
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, 
+		this.showFragment(fragToShow, OWTags.TXN_DETAILS, R.id.oneWalletBaseFragmentHolder, true, 
 				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 	}
 
@@ -917,8 +914,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * Open view for add new currency
 	 */
 	public void openAddCurrency(List<OWCoin> userCurWallets) {
-		String tag = "add_new_currency";
-		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
+		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) this.getSupportFragmentManager().findFragmentByTag(OWTags.ADD_CURRENCY);
 		if (fragToShow == null) {
 			fragToShow = new OWNewCurrencyFragment();
 		}
@@ -932,7 +928,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			b.putBoolean(type.toString(), true);
 		}
 		fragToShow.setArguments(b);
-		this.showFragment(fragToShow, tag, R.id.oneWalletBaseFragmentHolder, true, 
+		this.showFragment(fragToShow, OWTags.ADD_CURRENCY, R.id.oneWalletBaseFragmentHolder, true, 
 				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 
 	}
@@ -1047,7 +1043,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
 				OWReceiveCoinsFragment frag = (OWReceiveCoinsFragment) getSupportFragmentManager(
-						).findFragmentByTag("receive_coins_fragment");
+						).findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
 				frag.loadAddressFromDatabase();
 			} else {
 				this.alertUser(
@@ -1057,7 +1053,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
 				OWSendCoinsFragment frag = (OWSendCoinsFragment) getSupportFragmentManager(
-						).findFragmentByTag("send_coins_fragment");
+						).findFragmentByTag(OWTags.SEND_FRAGMENT);
 				frag.onClickSendCoins();
 
 			} else {

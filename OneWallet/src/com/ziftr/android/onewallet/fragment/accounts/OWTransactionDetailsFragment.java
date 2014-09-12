@@ -10,7 +10,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
@@ -26,19 +30,32 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	private View rootView;
 	
 	private OWTransaction txItem;
+	
+	private boolean isEditing;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 		
+		//resize view when keyboard pops up instead of just default pan so user can see field more clearly
+		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+		
 		this.getOWMainActivity().hideWalletHeader();
 		
 		this.rootView = inflater.inflate(
 				R.layout.accounts_transaction_details, container, false);
-
+		if (savedInstanceState != null && savedInstanceState.containsKey("isEditing")){
+			this.isEditing = savedInstanceState.getBoolean("isEditing");
+		}
 		this.txItem = getArguments().getParcelable("txItem");
-		this.init_fields(savedInstanceState);
+		this.init_fields();
 		return this.rootView;
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState){
+		outState.putBoolean("isEditing", this.isEditing);
+		super.onSaveInstanceState(outState);
 	}
 	
 	@Override
@@ -51,11 +68,10 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	 * Get the arguments passed from the activity and set the text fields on the view
 	 * 
 	 * TODO the string constants should be public static final fields in this class. 
-	 * 
-	 * @param args
+	 *  
 	 */
 	@SuppressLint("NewApi")
-	public void init_fields(Bundle args) {
+	public void init_fields() {
 
 		TextView amount = (TextView) rootView.findViewById(R.id.amount);
 		BigInteger baseAmount = this.txItem.getTxAmount();
@@ -72,32 +88,10 @@ public class OWTransactionDetailsFragment extends OWFragment {
 			amountLabel.setText("Amount Received");
 			timeLabel.setText("Received");
 		}
-		
-		TextView pending = (TextView) rootView.findViewById(R.id.pending);
-			
 		if (txItem.isPending()) {
-			
-			int maxWidth;
-			//get width of screen use newer api if available, otherwise must use deprecated getwidth
-			if (android.os.Build.VERSION.SDK_INT >=13) {
-				Point size = new Point();
-				this.getOWMainActivity().getWindowManager().getDefaultDisplay().getSize(size);
-				maxWidth=size.x;
-			} else {
-				maxWidth = this.getOWMainActivity().getWindowManager().getDefaultDisplay().getWidth();
-			}
-			pending.measure(MeasureSpec.UNSPECIFIED,MeasureSpec.UNSPECIFIED);
-			amount.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-			
-			//show only if there is room for the (pending) text
-			if (amount.getMeasuredWidth() + pending.getMeasuredWidth() < maxWidth) {
-				pending.setVisibility(View.VISIBLE);
-			}
 			amount.setTextColor(getResources().getColor(R.color.Crimson));
-		} else {
-			pending.setVisibility(View.GONE);
+			amountLabel.append(" (pending)");
 		}
-		
 		TextView currency = (TextView) rootView.findViewById(R.id.currencyValue);
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
@@ -114,6 +108,33 @@ public class OWTransactionDetailsFragment extends OWFragment {
 
 		//TODO add confirmation fee field for OWWalletTransactionListItem
 		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
+		
+		final ImageView editLabel = (ImageView) rootView.findViewById(R.id.edit_routing_address_label);
+		final EditText routingAddressLabel = (EditText) rootView.findViewById(R.id.routing_address_label);
+		editLabel.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (!isEditing){
+					routingAddressLabel.setBackgroundResource(android.R.drawable.editbox_background_normal);
+					routingAddressLabel.setFocusable(true);
+					routingAddressLabel.setFocusableInTouchMode(true);
+					routingAddressLabel.requestFocus();
+					editLabel.setImageResource(R.drawable.close_enabled);
+					isEditing = true;
+				} else {
+					routingAddressLabel.setFocusable(false);
+					routingAddressLabel.setFocusableInTouchMode(false);
+					routingAddressLabel.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+					routingAddressLabel.setPadding(0, 0, 0, 0);
+					editLabel.setImageResource(R.drawable.edit_enabled);
+					isEditing = false;
+					//TODO call method to update database with
+					//txItem.getId() = the id of the txn to update
+					// add as name routingAddressLabel.getText().toString()
+				}
+			}
+		});
 
 	}
 

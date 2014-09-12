@@ -98,12 +98,12 @@ public class OWSplashScreenActivity extends FragmentActivity {
 		if (storedPassphrase == null){
 	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
 	    			OWWelcomeActivity.class);
-	    	noFragmentIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+	    	noFragmentIntent.setFlags(noFragmentIntent.getFlags()|Intent.FLAG_ACTIVITY_NO_HISTORY);
 	        startActivity(noFragmentIntent);
 		} else {
 	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
 	    			OWMainFragmentActivity.class);
-	    	noFragmentIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+	    	noFragmentIntent.setFlags(noFragmentIntent.getFlags()|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 	        startActivity(noFragmentIntent);
 
 		}
