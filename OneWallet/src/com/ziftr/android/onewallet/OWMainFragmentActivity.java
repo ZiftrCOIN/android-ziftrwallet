@@ -211,7 +211,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				return new OWContactFragment();
 			}
 		};
-	
+
 		/** The drawer menu view associated with this section of the app. */
 		private View drawerMenuView;
 
@@ -244,7 +244,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		//Get passphrase from welcome screen if exists
 		Bundle info = getIntent().getExtras();
 		if (info != null && info.getByteArray("SET_PASSPHRASE") != null){
@@ -253,7 +253,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
-		
+
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
 
@@ -592,7 +592,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 						baseFragmentContainer.setTranslationX(offset);
 					}
 				});
-		
+
 		// If the app has just been launched (so the fragment
 		// doesn't exist yet), we create the main fragment.
 		if (savedInstanceState == null) {

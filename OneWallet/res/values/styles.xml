@@ -56,7 +56,7 @@
 
     <!-- send_receive page styles -->
     <style name="send_receive_label">
-        <item name="android:paddingRight">4dp</item>        
+        <item name="android:paddingRight">4dp</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:textColor">@color/White</item>
@@ -70,12 +70,15 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="send_receive_block_containers">
-        <item name="android:background">@color/ow_send_receive_list_background</item>
+    <style name="send_receive_block_container">
         <item name="android:paddingBottom">@dimen/ow_send_receive_list_block_padding_bottom</item>
         <item name="android:paddingLeft">@dimen/ow_total_icon_side_length</item>
         <item name="android:paddingRight">@dimen/ow_total_icon_side_length</item>
         <item name="android:paddingTop">@dimen/ow_send_receive_list_block_padding_top</item>
+    </style>
+
+    <style name="send_receive_block_container_with_background" parent="@style/send_receive_block_container">
+        <item name="android:background">@color/ow_send_receive_list_background</item>
     </style>
 
 </resources>
