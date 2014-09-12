@@ -57,7 +57,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 			ViewGroup container, Bundle savedInstanceState) {
 
 		this.initializeWalletHeaderView();
-		
+
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
 
@@ -73,7 +73,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 		return this.rootView;
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -231,16 +231,20 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 			@Override
 			public void onClick(View v) {
 				if (getCurSelectedCoinType().addressIsValid(getSendToAddressEditText().getText().toString())) {
-					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
-					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
-							"validate_passphrase_dialog_send");
+					if (getOWMainActivity().userHasPassphrase()){
+						Bundle b = new Bundle();
+						b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+						getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
+								"validate_passphrase_dialog_send");
+					} else {
+						onClickSendCoins();
+					}
 				}
 			}
 		});
 	}
 
-	public void clickSendCoins() {
+	public void onClickSendCoins() {
 		// Need to make sure amount to send is less than balance
 		BigInteger amountSending = OWUtils.bigDecToBigInt(getCurSelectedCoinType(), 
 				getAmountToSendFromEditText());
@@ -256,14 +260,14 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 			// TODO alert user if not enough money in wallet.
 			ZLog.log("There was not enough money in the wallet.");
 		}
-		
+
 		// To exit out of the send coins fragment
 		Activity a = getActivity();
 		if (a != null) {
 			a.onBackPressed();
 		}
 	}
-	
+
 	/**
 	 * This is a useful method that binds two textviews together with
 	 * TextWatchers in such a way that when one changes the other also 

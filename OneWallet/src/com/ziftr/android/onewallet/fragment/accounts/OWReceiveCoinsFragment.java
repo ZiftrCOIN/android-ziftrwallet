@@ -32,7 +32,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 
 	/** The address that will be displayed in the QR code and where others can send coins to us at. */
 	private String addressToReceiveOn;
-	
+
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
 
@@ -77,10 +77,14 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		newAddressIcon.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Bundle b = new Bundle();
-				b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
-				getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
-						"validate_passphrase_dialog_new_key");
+				if (getOWMainActivity().userHasPassphrase()){
+					Bundle b = new Bundle();
+					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
+							"validate_passphrase_dialog_new_key");
+				} else {
+					loadAddressFromDatabase();
+				}
 			}
 		});
 

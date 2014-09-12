@@ -3,8 +3,10 @@ package com.ziftr.android.onewallet.dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import com.ziftr.android.onewallet.R;
@@ -53,7 +55,6 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		Button next = (Button) this.getDialogView().findViewById(R.id.right_dialog_button);
 		next.setOnClickListener(this);
 
-
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
 				this.setStringInEditText(R.id.textbox_passphrase, 
@@ -101,5 +102,14 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	protected Object getHandler() {
 		return this.getActivity();
 	}
+	
+	@Override
+	public void dismiss(){
+		//close keyboard
+		InputMethodManager inputMan = (InputMethodManager)this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		inputMan.hideSoftInputFromWindow(this.getDialogView().findViewById(R.id.textbox_passphrase).getWindowToken(), 0);
+		super.dismiss();
+	}
+	
 
 }
