@@ -29,7 +29,7 @@
     <color name="ow_tx_list_divider">@color/LightGray</color>
     
     <color name="ow_edit_text_background_color">@color/White</color>
-    <color name="ow_copy_icon_next_to_text_color">@color/ow_ziftrWALLETBlue</color>
+    <color name="ow_new_receiving_address_icon_color">@color/ow_ziftrWALLETBlue</color>
     
     <color name="ow_search_background">#32353A</color>
 

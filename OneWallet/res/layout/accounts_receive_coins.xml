@@ -16,7 +16,6 @@
             style="@style/send_receive_block_container_with_background"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
             android:orientation="vertical"
             android:paddingLeft="0dp"
             android:paddingRight="0dp" >
@@ -75,7 +74,7 @@
                     android:maxLines="1"
                     android:scrollHorizontally="true"
                     android:singleLine="true"
-                    android:text="@string/ow_receive_coins_address_value_default" >
+                    android:text="@string/ow_empty_string" >
                 </EditText>
             </RelativeLayout>
         </RelativeLayout>
@@ -85,7 +84,6 @@
             style="@style/send_receive_block_container_with_background"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
             android:orientation="vertical" >
 
             <TextView
@@ -117,10 +115,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:padding="50dp"
                 android:adjustViewBounds="true"
-                android:background="@color/ow_copy_icon_next_to_text_color"
+                android:background="@color/ow_new_receiving_address_icon_color"
                 android:contentDescription="@string/ow_empty_string"
+                android:padding="50dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/add_white_icon_clickable" />
         </LinearLayout>

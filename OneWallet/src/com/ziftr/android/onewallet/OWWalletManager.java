@@ -108,6 +108,14 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	/** The single instance of the database helper that we use. */
 	private static OWWalletManager instance;
 
+	private static boolean logging = false;
+
+	private static void log(Object... messages) {
+		if (logging) {
+			ZLog.log(messages);
+		}
+	}
+
 	/** 
 	 * Gets the singleton instance of the database helper, making it if necessary. 
 	 * 
@@ -127,7 +135,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 					// Leaving databaseName as null will let the database exist in memory
 
 					//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
-					ZLog.log("CANNOT ACCESS LOCAL STORAGE!");
+					log("CANNOT ACCESS LOCAL STORAGE!");
 				}
 			}
 
@@ -135,7 +143,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			// If used right shouldn't happen because close should always
 			// be called after every get instance call.
-			ZLog.log("instance wasn't null and we called getInstance...");
+			log("instance wasn't null and we called getInstance...");
 		}
 		return instance;
 	}
@@ -150,7 +158,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			// If used right shouldn't happen because get instance should always
 			// be called before every close call.
-			ZLog.log("instance was null when we called closeInstance...");
+			log("instance was null when we called closeInstance...");
 		}
 		instance = null;
 	}
@@ -276,7 +284,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			this.walletFiles.put(id, new File(
 					externalDirectory, id.getShortTitle() + "_wallet.dat"));
 		} else {
-			ZLog.log("null NULL EXTERNAL DIR");
+			log("null NULL EXTERNAL DIR");
 			OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 			alertUserDialog.setupDialog("OneWallet", "Error: No external storage detected.", null, "OK", null);
 			alertUserDialog.show(this.activity.getSupportFragmentManager(), "null_externalDirectory");
@@ -289,7 +297,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		try {
 			this.walletMap.put(id, Wallet.loadFromFile(this.walletFiles.get(id)));
 		} catch (UnreadableWalletException e) {
-			ZLog.log("Exception trying to load wallet file: ", e);
+			log("Exception trying to load wallet file: ", e);
 		}
 
 		// If the load was unsucecssful (presumably only if this is the first 
@@ -301,7 +309,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				this.walletMap.get(id).addKey(new ECKey());
 				this.walletMap.get(id).saveToFile(this.walletFiles.get(id));
 			} catch (IOException e) {
-				ZLog.log("Exception trying to save new wallet file: ", e);
+				log("Exception trying to save new wallet file: ", e);
 				// TODO this is just test code of course but this is probably 
 				// "fatal" as if we can't save our wallet, that's a problem
 				return false;
@@ -316,7 +324,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 					BigInteger prevBalance, 
 					final BigInteger newBalance) {
 				// TODO need to update the data in the list of transactions
-				ZLog.log(id.toString() + ": coins received...!");
+				log(id.toString() + ": coins received...!");
 			}
 
 			// TODO override more methods here to do things like changing 
@@ -331,7 +339,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		//					"mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db");
 		//			wallet.addWatchedAddress(watchedAddress, 1402200000);
 		//		} catch (AddressFormatException e) {
-		//			ZLog.log("Exception trying to add a watched address: ", e);
+		//			log("Exception trying to add a watched address: ", e);
 		//		}
 
 		// If it is encrypted, bitcoinj just works with it encrypted as long
@@ -366,7 +374,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			try {
 				blockStores.get(id).close();
 			} catch (BlockStoreException e) {
-				ZLog.log("Exception closing block store: ", e);
+				log("Exception closing block store: ", e);
 			}
 		}
 
@@ -377,7 +385,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			try {
 				walletMap.get(id).saveToFile(walletFiles.get(id));
 			} catch (IOException e) {
-				ZLog.log("Exception saving wallet file on shutdown: ", e);
+				log("Exception saving wallet file on shutdown: ", e);
 			}
 		}
 	}
@@ -391,7 +399,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			public void run() {
 
 				try {
-					ZLog.log("RUNNING");
+					log("RUNNING");
 
 					// TODO do I have multiple of these running? 
 					// At one time we did, not sure about now...
@@ -412,7 +420,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 						if (activity == null) {
 							// If this happens app is dying, so wait and 
 							// do this on the next run
-							ZLog.log("activity was null and we returned early.");
+							log("activity was null and we returned early.");
 							return; 
 						}
 
@@ -427,7 +435,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 							// We failed to read the checkpoints file 
 							// for some reason, still let the user 
 							// attempt sync the chain the slow way
-							ZLog.log("Failed to load chain checkpoint: ", e);
+							log("Failed to load chain checkpoint: ", e);
 						}
 					}
 
@@ -473,7 +481,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 					synchronized (pendingTransactions) {
 
 						for (Transaction tx : pendingTransactions) {
-							//ZLog.log("There is a pending transaction "
+							//log("There is a pending transaction "
 							//		+ "in the wallet: ", tx.toString(chain));
 							//wallet.commitTx(tx);
 
@@ -482,11 +490,11 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 								//wallet.cleanup();
 
 								if (!walletMap.get(id).isConsistent()) {
-									ZLog.log("Wallet is inconsistent!!");
+									log("Wallet is inconsistent!!");
 								}
 
 								if (walletMap.get(id).isTransactionRisky(tx, null)) {
-									ZLog.log("Transaction is risky...");
+									log("Transaction is risky...");
 								}
 
 								String logMsg = "Pending Transaction Details: \n";
@@ -546,18 +554,18 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 								logMsg += "Transaction Value: " + String.valueOf(tx.getValue(walletMap.get(id))) + "\n";
 
-								ZLog.log(logMsg);
+								log(logMsg);
 
 								//wallet.clearTransactions(0); //for testing... drop a bomb on our wallet
 
 							} catch(Exception e) {
-								ZLog.log("Caught Excpetion: ", e);
+								log("Caught Excpetion: ", e);
 							}
 
 							try {
 								//peerGroup.broadcastTransaction(tx);
 							} catch(Exception e) {
-								ZLog.log("Caught Excpetion: ", e);
+								log("Caught Excpetion: ", e);
 							}
 
 						} 
@@ -566,15 +574,15 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 					/**
 		        List<Transaction> recentTransactions = wallet.getRecentTransactions(20, true);
 		        for (Transaction tx : recentTransactions) {
-		        	ZLog.log("Recent transaction: ", tx);
+		        	log("Recent transaction: ", tx);
 		        }
 					 ***/
 
 				} catch (BlockStoreException e) {
-					ZLog.log("Exeption creating block store: ", e);
+					log("Exeption creating block store: ", e);
 				} 
 
-				ZLog.log("STOPPING");
+				log("STOPPING");
 
 			}
 		});
@@ -640,7 +648,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			public void run() {
 				// TODO if we want something to be done here that relates
 				// to the gui thread, how do we do that?
-				ZLog.log("Successfully sent coins to address!");
+				log("Successfully sent coins to address!");
 			}
 		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
 
@@ -742,19 +750,19 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			addresses = this.readSendingAddresses(coinId, addressStrings);
 		}
-		
+
 		owTx.setDisplayAddresses(addresses);
 
 		// TODO get this from settings
 		owTx.setFiatType(OWFiat.USD);
-		
+
 		// The number of confirmations from bitcoin j.
 		owTx.setNumConfirmations(tx.getConfidence().getDepthInBlocks());
 
 		owTx.setTxAmount(tx.getValue(this.getWallet(coinId)));
 		// TODO not right, but can't get it from bitcoinj apparently
 		owTx.setTxFee(BigInteger.ZERO);
-		
+
 		// autofill the note of the transaction as the note of the first non-empty address
 		if (addresses == null || addresses.size() == 0) {
 			owTx.setTxNote(tx.getHashAsString().substring(0, 6));
@@ -772,13 +780,13 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				owTx.setTxNote(tx.getHashAsString().substring(0, 6));
 			}
 		}
-		
+
 		// Get the tx's time
 		owTx.setTxTime(tx.getUpdateTime().getTime() / 1000);
-		
-		ZLog.log("Addresses!!: " + owTx.getAddressAsCommaListString());
-		ZLog.log(owTx.getTxNote());
-		
+
+		log("Addresses!!: " + owTx.getAddressAsCommaListString());
+		log(owTx.getTxNote());
+
 		return owTx;
 	}
 
@@ -788,7 +796,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	//			owAddress = new OWAddress(coinId, (byte) (address.getVersion()&0xff), address.getHash160());
 	//		} catch (OWAddressFormatException e) {
 	//			// TODO Auto-generated catch block
-	//			ZLog.log("Address could not be converted correctly");
+	//			log("Address could not be converted correctly");
 	//			e.printStackTrace();
 	//		}
 	//		return owAddress;
