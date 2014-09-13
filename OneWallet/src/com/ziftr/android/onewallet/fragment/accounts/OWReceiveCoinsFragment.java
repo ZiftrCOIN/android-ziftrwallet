@@ -90,6 +90,12 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	private View getAddressQrCodeContainer() {
 		return this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 	}
+	
+	@Override
+	public void onStop() {
+		this.setQrCodeGenerated(false);
+		super.onStop();
+	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
@@ -190,7 +196,15 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	 * @param newAddress
 	 */
 	private void initializeQrCodeFromBundle(Bundle savedInstanceState) {
-
+		if (savedInstanceState == null) {
+			ZLog.log("savedInstanceState == null");
+		} else if (savedInstanceState.getString(KEY_ADDRESS) == null) {
+			ZLog.log("savedInstanceState.getString(KEY_ADDRESS) == null");
+		} else {
+			ZLog.log("address from savedInstanceState: " + savedInstanceState.getString(KEY_ADDRESS));
+		}
+		
+		
 		boolean initializedWithAddress = savedInstanceState != null && 
 				savedInstanceState.getString(KEY_ADDRESS) != null;
 
@@ -220,6 +234,10 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 					generateQrCode(false);
 					ZLog.log("onGlobalLayout");
 				}
+				
+//				if (!getAddressEditText().getText().toString().equals(addressToReceiveOn)) {
+//					getAddressEditText().setText(addressToReceiveOn);
+//				}
 			}
 		});
 	}
