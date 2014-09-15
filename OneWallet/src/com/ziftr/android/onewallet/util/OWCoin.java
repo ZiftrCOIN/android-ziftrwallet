@@ -29,25 +29,25 @@ public class OWCoin implements OWCurrency {
 	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
 
 	public static final OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "BITCOIN", 8, R.drawable.logo_bitcoin, MainNetParams.get(), false,
-			(byte) 0, (byte) 5, (byte) 128, 6);
+			(byte) 0, (byte) 5, (byte) 128, 6, 600);
 
 	public static final OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "LITECOIN", 8, R.drawable.logo_litecoin, null, false,
-			(byte) 0, (byte) 0, (byte) 0, 12);
+			(byte) 0, (byte) 0, (byte) 0, 12, 150);
 
 	public static final OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "PEERCOIN", 8, R.drawable.logo_peercoin, null, false,
-			(byte) 0, (byte) 0, (byte) 0, 520);
+			(byte) 0, (byte) 0, (byte) 0, 520, 0);
 	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, false,
-			(byte) 0, (byte) 0, (byte) 0, 20);
+			(byte) 0, (byte) 0, (byte) 0, 20, 0);
 
 	public static final OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "BITCOIN", 8, R.drawable.logo_bitcoin, TestNet3Params.get(), true,
 			// (byte) 0, (byte) 5, (byte) 128, 6);
-			(byte) 111, (byte) 196, (byte) 239, 6);
+			(byte) 111, (byte) 196, (byte) 239, 6, 600);
 	public static final OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "LITECOIN", 8, R.drawable.logo_litecoin, null, true,
-			(byte) 0, (byte) 0, (byte) 0, 12);
+			(byte) 0, (byte) 0, (byte) 0, 12, 150);
 	public static final OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "PEERCOIN", 8, R.drawable.logo_peercoin, null, true,
-			(byte) 0, (byte) 0, (byte) 0, 520);
+			(byte) 0, (byte) 0, (byte) 0, 520, 0);
 	public static final OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, true,
-			(byte) 0, (byte) 0, (byte) 0, 20);
+			(byte) 0, (byte) 0, (byte) 0, 20, 0);
 
 	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE, BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
 
@@ -76,11 +76,12 @@ public class OWCoin implements OWCurrency {
 	private byte scriptHashPrefix;
 	private byte privKeyPrefix;
 	private int numRecommendedConfirmations;
+	private int secondsPerAverageBlockSolve;
 
 	private OWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String capsTitle,
 			int numberOfDigitsOfPrecision, int logoResId, NetworkParameters networkParameters, 
 			boolean isTestNet, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int numRecommendedConfirmations) {
+			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve) {
 		this.defaultFeePerKb = defaultFeePerKb;
 		this.shortTitle = shortTitle;
 		this.longTitle = longTitle;
@@ -93,6 +94,7 @@ public class OWCoin implements OWCurrency {
 		this.scriptHashPrefix = scriptHashPrefix;
 		this.privKeyPrefix = privKeyPrefix;
 		this.numRecommendedConfirmations = numRecommendedConfirmations;
+		this.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
 	}
 
 	/**
@@ -199,6 +201,13 @@ public class OWCoin implements OWCurrency {
 
 	public byte[] getAcceptableAddressCodes() {
 		return new byte[] {getPubKeyHashPrefix(), getScriptHashPrefix()};
+	}
+	
+	/**
+	 * @return the secondsPerAverageBlockSolve
+	 */
+	public int getSecondsPerAverageBlockSolve() {
+		return secondsPerAverageBlockSolve;
 	}
 
 	@Override
