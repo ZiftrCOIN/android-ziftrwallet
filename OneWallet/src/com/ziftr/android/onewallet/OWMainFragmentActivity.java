@@ -740,7 +740,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				PASSPHRASE_KEY, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
 		editor.putString(
-				this.PASSPHRASE_KEY, 
+				PASSPHRASE_KEY, 
 				OWUtils.bytesToHexString(inputHash));
 		editor.commit();
 	}
@@ -755,7 +755,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		SharedPreferences prefs = this.getSharedPreferences(
 				PASSPHRASE_KEY, Context.MODE_PRIVATE);
 		// Get the passphrase hash
-		String storedPassphrase = prefs.getString(this.PASSPHRASE_KEY, null);
+		String storedPassphrase = prefs.getString(PASSPHRASE_KEY, null);
 		// If it's not null, convert it back to a byte array
 		byte[] storedHash = (storedPassphrase == null) ?
 				null : OWUtils.hexStringToBytes(storedPassphrase);

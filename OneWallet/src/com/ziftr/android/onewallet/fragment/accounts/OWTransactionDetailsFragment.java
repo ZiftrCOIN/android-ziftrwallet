@@ -5,11 +5,9 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import android.annotation.SuppressLint;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -19,13 +17,12 @@ import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
-import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWUtils;
 
-public class OWTransactionDetailsFragment extends OWFragment {
+public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 
 	private View rootView;
 	
@@ -42,13 +39,12 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		
 		this.getOWMainActivity().hideWalletHeader();
 		
-		this.rootView = inflater.inflate(
-				R.layout.accounts_transaction_details, container, false);
+		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
 		if (savedInstanceState != null && savedInstanceState.containsKey("isEditing")){
 			this.isEditing = savedInstanceState.getBoolean("isEditing");
 		}
 		this.txItem = getArguments().getParcelable("txItem");
-		this.init_fields();
+		this.initFields();
 		return this.rootView;
 	}
 	
@@ -71,8 +67,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 	 *  
 	 */
 	@SuppressLint("NewApi")
-	public void init_fields() {
-
+	public void initFields() {
 		TextView amount = (TextView) rootView.findViewById(R.id.amount);
 		BigInteger baseAmount = this.txItem.getTxAmount();
 		BigDecimal amountValue = OWUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
@@ -129,9 +124,9 @@ public class OWTransactionDetailsFragment extends OWFragment {
 					routingAddressLabel.setPadding(0, 0, 0, 0);
 					editLabel.setImageResource(R.drawable.edit_enabled);
 					isEditing = false;
-					//TODO call method to update database with
-					//txItem.getId() = the id of the txn to update
-					// add as name routingAddressLabel.getText().toString()
+
+					txItem.setTxNote(routingAddressLabel.getText().toString());
+					getWalletManager().updateTransactionNote(txItem);
 				}
 			}
 		});

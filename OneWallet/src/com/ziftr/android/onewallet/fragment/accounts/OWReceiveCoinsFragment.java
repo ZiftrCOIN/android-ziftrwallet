@@ -28,7 +28,6 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
-import com.ziftr.android.onewallet.util.ZLog;
 
 public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 
@@ -44,7 +43,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	private static final int FADE_DURATION = 500;
 
 	private boolean qrCodeGenerated = false;
-	
+
 	/**
 	 * @return the qrCodeGenerated
 	 */
@@ -68,9 +67,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
 
-		ZLog.log("oncreate 1");
 		this.initializeQrCodeFromBundle(savedInstanceState);
-		ZLog.log("oncreate 2");
 
 		// Initialize the icons so they do the correct things onClick
 		this.initializeAddressUtilityIcons();
@@ -90,7 +87,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	private View getAddressQrCodeContainer() {
 		return this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 	}
-	
+
 	@Override
 	public void onStop() {
 		this.setQrCodeGenerated(false);
@@ -154,10 +151,6 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	}
 
 	private void generateQrCode(String newAddress, boolean withAnimation) {
-		ZLog.log("generateQrCode");
-		ZLog.log("curAdd: " + this.addressToReceiveOn);
-		ZLog.log("curAddInET: " + this.getAddressEditText().getText().toString());
-		
 		this.addressToReceiveOn = newAddress;
 
 		this.getAddressQrCodeContainer().setVisibility(View.VISIBLE);
@@ -196,15 +189,6 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	 * @param newAddress
 	 */
 	private void initializeQrCodeFromBundle(Bundle savedInstanceState) {
-		if (savedInstanceState == null) {
-			ZLog.log("savedInstanceState == null");
-		} else if (savedInstanceState.getString(KEY_ADDRESS) == null) {
-			ZLog.log("savedInstanceState.getString(KEY_ADDRESS) == null");
-		} else {
-			ZLog.log("address from savedInstanceState: " + savedInstanceState.getString(KEY_ADDRESS));
-		}
-		
-		
 		boolean initializedWithAddress = savedInstanceState != null && 
 				savedInstanceState.getString(KEY_ADDRESS) != null;
 
@@ -216,28 +200,23 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 
 			this.addressToReceiveOn = savedInstanceState.getString(KEY_ADDRESS);
 		} else {
-			this.addressToReceiveOn = "";
+			// Sometimes the address will be saved (if onDestroy is never called), so
+			// only reset if we need to.
+			if (!fragmentHasAddress()) {
+				this.addressToReceiveOn = "";
+			}
 		}
-		
-		ZLog.log("curAddText: " + this.getAddressEditText().getText().toString());
 
 		putCurAddressIntoEditText();
-		
-		ZLog.log("curAddText: " + this.getAddressEditText().getText().toString());
 
 		final ImageView imageLayout = getAddressQrCodeImageView();
-		final ViewTreeObserver viewObserver = imageLayout.getViewTreeObserver();
+		ViewTreeObserver viewObserver = imageLayout.getViewTreeObserver();
 		viewObserver.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
 				if (fragmentHasAddress() && !isQrCodeGenerated()) {
 					generateQrCode(false);
-					ZLog.log("onGlobalLayout");
 				}
-				
-//				if (!getAddressEditText().getText().toString().equals(addressToReceiveOn)) {
-//					getAddressEditText().setText(addressToReceiveOn);
-//				}
 			}
 		});
 	}
@@ -250,9 +229,6 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 	 * 
 	 */
 	private void setAddressInEditText(String newAddress) {
-		ZLog.log("asdf addressToReceiveOn: " + this.addressToReceiveOn);
-		ZLog.log("asdf newAddress: " + newAddress);
-		
 		this.addressToReceiveOn = newAddress;
 		getAddressEditText().setText(this.addressToReceiveOn);
 	}

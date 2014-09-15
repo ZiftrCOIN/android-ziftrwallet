@@ -681,9 +681,14 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public List<OWTransaction> getPendingTransactions(OWCoin coinId) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
 		// method is called. 
+		// TODO this method is doing to much, should just be a db read. Need to 
+		// get sync working.
 		List<OWTransaction> pendingTransactions = new ArrayList<OWTransaction>();
 		for (Transaction tx : this.walletMap.get(coinId).getPendingTransactions()) {
-			pendingTransactions.add(bitcoinjTransactionToOWTransaction(coinId, tx));
+			OWTransaction owTx = bitcoinjTransactionToOWTransaction(coinId, tx);
+			this.updateOrInsertTransaction(owTx);
+			ZLog.log("pending id: " + owTx.getId());
+			pendingTransactions.add(owTx);
 		}
 		return pendingTransactions;
 	}
@@ -694,6 +699,8 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		// method is called. 
 		// Unfortunately, bitcoinj doesn't make it easy to just get confirmed. 
 		// For now, we have to make sure we 
+		// TODO this method is doing to much, should just be a db read. Need to 
+		// get sync working.
 		List<OWTransaction> confirmedTransactions = new ArrayList<OWTransaction>();
 		List<OWTransaction> pendingTransactions = getPendingTransactions(coinId);
 
@@ -709,7 +716,10 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		for (Transaction tx : this.walletMap.get(coinId).getTransactionsByTime()) {
 			if (pendingTxHashes == null || (pendingTxHashes != null && 
 					!pendingTxHashes.contains(tx.getHashAsString()))) {
-				confirmedTransactions.add(bitcoinjTransactionToOWTransaction(coinId, tx));
+				OWTransaction owTx = bitcoinjTransactionToOWTransaction(coinId, tx);
+				this.updateOrInsertTransaction(owTx);
+				ZLog.log("pending id: " + owTx.getId());
+				confirmedTransactions.add(owTx);
 			}
 		}
 
