@@ -254,8 +254,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		ContentValues values = txToContentValues(tx);
 		db.update(getTableName(tx.getCoinId()), values, COLUMN_ID + " = " + tx.getId(), null);
 	}
-
-
+	
 	protected void deleteTransaction(OWTransaction tx, SQLiteDatabase db) {
 		if (tx.getId() == -1) {
 			// Shouldn't happen

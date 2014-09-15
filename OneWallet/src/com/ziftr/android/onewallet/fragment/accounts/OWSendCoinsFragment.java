@@ -87,6 +87,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		ZLog.log("peach");
 		if (data != null && data.hasExtra("SCAN_RESULT") && 
 				requestCode == OWRequestCodes.SCAN_QR_CODE) {
 			EditText addressToSendCoinsToEditText = this.getSendToAddressEditText();
@@ -114,6 +115,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 				intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
 				intent.putExtra("SAVE_HISTORY", false);
 				startActivityForResult(intent, OWRequestCodes.SCAN_QR_CODE);
+				ZLog.log("Bowser");
 			}
 		});
 
