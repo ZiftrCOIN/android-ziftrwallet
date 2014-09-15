@@ -255,6 +255,16 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		db.update(getTableName(tx.getCoinId()), values, COLUMN_ID + " = " + tx.getId(), null);
 	}
 	
+	protected void updateTransactionNote(OWTransaction tx, SQLiteDatabase db) {
+		if (tx.getId() == -1) {
+			// Shouldn't happen
+			throw new RuntimeException("Error: id has not been set.");
+		}
+		ContentValues values = new ContentValues();
+		values.put(COLUMN_NOTE, tx.getTxNote());
+		db.update(getTableName(tx.getCoinId()), values, COLUMN_ID + " = " + tx.getId(), null);
+	}
+	
 	protected void deleteTransaction(OWTransaction tx, SQLiteDatabase db) {
 		if (tx.getId() == -1) {
 			// Shouldn't happen
