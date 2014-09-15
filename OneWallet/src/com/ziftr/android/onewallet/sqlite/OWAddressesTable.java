@@ -152,5 +152,15 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		ContentValues values = addressToContentValues(address);
 		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
 	}
+	
+	protected void updateAddressNote(OWAddress address, SQLiteDatabase db) {
+		if (address.getId() == -1) {
+			// Shouldn't happen
+			throw new RuntimeException("Error: id has not been set.");
+		}
+		ContentValues values = new ContentValues();
+		values.put(COLUMN_NOTE, address.getNote());
+		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
+	}
 
 }
