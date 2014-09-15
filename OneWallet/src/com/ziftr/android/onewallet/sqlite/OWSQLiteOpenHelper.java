@@ -546,5 +546,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	private void updateSendingAddressNote(OWAddress address) {
 		this.sendingAddressesTable.updateAddressNote(address, getWritableDatabase());
 	}
+	
+	public void updateTransactionNote(OWTransaction tx) {
+		this.transactionsTable.updateTransactionNote(tx, getWritableDatabase());
+	}
 
 }
