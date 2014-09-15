@@ -6,7 +6,9 @@ import java.util.List;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
@@ -80,15 +82,20 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		sb.append(COLUMN_AMOUNT).append(" INTEGER NOT NULL, ");
 		sb.append(COLUMN_FEE).append(" INTEGER, ");
 		sb.append(COLUMN_NOTE).append(" TEXT, ");
+		sb.append(COLUMN_NUM_CONFIRMATIONS).append(" INTEGER, ");
 		sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
 		sb.append(COLUMN_DISPLAY_ADDRESSES).append(" TEXT ); ");
 		return sb.toString();
 	}
 
-	protected void insert(OWTransaction tx, SQLiteDatabase db) {
-		long insertId = db.insert(getTableName(tx.getCoinId()), 
-				null, txToContentValues(tx));
-		tx.setId(insertId);
+	protected void updateOrInsert(OWTransaction tx, SQLiteDatabase db) {
+		try {
+			updateTransaction(tx, db);
+		} catch(OWNoTransactionFoundException ntfe) {
+			long insertId = db.insert(getTableName(tx.getCoinId()), 
+					null, txToContentValues(tx));
+			tx.setId(insertId);
+		}
 	}
 
 	protected OWTransaction readTransactionByHash(OWCoin coinId, String hash, SQLiteDatabase db) {
@@ -246,23 +253,38 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return this.readTransactions(coinId, null, db);
 	}
 
-	protected void updateTransaction(OWTransaction tx, SQLiteDatabase db) {
-		if (tx.getId() == -1) {
-			// Shouldn't happen
-			throw new RuntimeException("Error: id has not been set.");
+	protected void updateTransaction(OWTransaction tx, SQLiteDatabase db) throws OWNoTransactionFoundException {
+		try {
+			ContentValues values = txToContentValues(tx);
+			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
+					getWhereClaus(tx), null);
+			if (numUpdated == 0) {
+				// Will happen when we try to do an update but not in there. 
+				// In this case an insert should be called. 
+				throw new OWNoTransactionFoundException("Error: No such entry.");
+			}
+		} catch (SQLiteException sqle) {
+			throw new OWNoTransactionFoundException("Error: No such entry.");
 		}
-		ContentValues values = txToContentValues(tx);
-		db.update(getTableName(tx.getCoinId()), values, COLUMN_ID + " = " + tx.getId(), null);
 	}
 	
-	protected void updateTransactionNote(OWTransaction tx, SQLiteDatabase db) {
-		if (tx.getId() == -1) {
-			// Shouldn't happen
-			throw new RuntimeException("Error: id has not been set.");
+	protected void updateTransactionNote(OWTransaction tx, SQLiteDatabase db) throws OWNoTransactionFoundException {
+		try {
+			ContentValues values = new ContentValues();
+			values.put(COLUMN_NOTE, tx.getTxNote());
+			ZLog.log(getWhereClaus(tx));
+			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
+					getWhereClaus(tx), null);
+			
+			if (numUpdated == 0) {
+				// Will happen when we try to do an update but not in there. 
+				// In this case an insert should be called. 
+				throw new OWNoTransactionFoundException("Error: No such entry.");
+			}
+		} catch (SQLiteException sqle) {
+			ZLog.log("Exception,,1,1,,11,!!!");
+			// throw new OWNoTransactionFoundException("Error: No such entry.");
 		}
-		ContentValues values = new ContentValues();
-		values.put(COLUMN_NOTE, tx.getTxNote());
-		db.update(getTableName(tx.getCoinId()), values, COLUMN_ID + " = " + tx.getId(), null);
 	}
 	
 	protected void deleteTransaction(OWTransaction tx, SQLiteDatabase db) {
@@ -271,13 +293,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 			throw new RuntimeException("Error: id has not been set.");
 		}
 
-		StringBuilder where = new StringBuilder();
-		where.append(" WHERE ");
-		where.append(COLUMN_ID);
-		where.append(" = ");
-		where.append(tx.getId());
-
-		db.delete(getTableName(tx.getCoinId()), where.toString(), null);
+		db.delete(getTableName(tx.getCoinId()), getWhereClaus(tx), null);
 	}
 
 	private OWTransaction cursorToTransaction(OWCoin coinId, Cursor c,
@@ -312,7 +328,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	private ContentValues txToContentValues(OWTransaction tx) {
 		ContentValues values = new ContentValues();
 
-		values.put(COLUMN_ID, tx.getId());
+//		values.put(COLUMN_ID, tx.getId());
 		values.put(COLUMN_HASH, tx.getSha256Hash().toString());
 		values.put(COLUMN_AMOUNT, tx.getTxAmount().toString());
 		values.put(COLUMN_FEE, tx.getTxFee().toString());
@@ -344,6 +360,22 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 			return addressTable.readAddresses(coinId, displayAddresses, db);
 		}
 
+	}
+	
+	private String getWhereClaus(OWTransaction tx) {
+		StringBuilder sb = new StringBuilder();
+		if (tx.getId() != -1) {
+			sb.append(COLUMN_ID);
+			sb.append(" = ");
+			sb.append(tx.getId());
+			sb.append(" ");
+		} else {
+			sb.append(COLUMN_HASH);
+			sb.append(" = ");
+			sb.append(DatabaseUtils.sqlEscapeString(tx.getSha256Hash().toString()));
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 
 }
