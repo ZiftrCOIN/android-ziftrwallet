@@ -2,77 +2,77 @@
 Activation table
 -------------------------
 _id
-..* Primary Key
-..* INT
-..* AutoInc
+- Primary Key
+- INT
+- AutoInc
 coin_type
-..* Text
-..* Not NUll
+- Text
+- Not NUll
 status (Activated?)
-..* INT
+- INT
 
 Per Coin
 -------------------------
 Receive table
 -------------------------
 _id
-..* INT
-..* Autoinc
+- INT
+- Autoinc
 priv_key
-..* Text
-..* Unique
-..* Not NUll
+- Text
+- Unique
+- Not NUll
 pub_key
-..* Text
-..* Unique
-..* Not Null
+- Text
+- Unique
+- Not Null
 address
-..* Text
-..* Unique
-..* Not Null
+- Text
+- Unique
+- Not Null
 note
-..* Text
+- Text
 balance (last known)
-..* INT
+- INT
 creation_timestamp
-..* INT
+- INT
 modified_timestamp
-..* INT
+- INT
 -------------------------
 Transaction table
 -------------------------
 _id
-..* Primary Key
-..* INT
-..* Autoinc
+- Primary Key
+- INT
+- Autoinc
 hash
-..* Text
-..* Unique
-..* Not Null
+- Text
+- Unique
+- Not Null
 amount
-..* INT
+- INT
 fee
-..* INT
+- INT
 note
-..* Text
+- Text
 time
-..* INT
+- INT
 num_Confirmations
-..* INT
+- INT
 -------------------------
 Send table
 -------------------------
 _id
-..* Primary Key
-..* INT
-..* Autoinc
+- Primary Key
+- INT
+- Autoinc
 address
-..* Text
-..* Unique
-..* Not Null
+- Text
+- Unique
+- Not Null
 note
-..* Text
+- Text
 balance
-..* INT
+- INT
 modified_timestamp (Last known time address used in txn)
-..* INT
+- INT

@@ -69,39 +69,20 @@
             android:layout_weight="1"
             android:minHeight="10dp" />
 
-        <TextView
-            android:id="@+id/io"
-            style="@style/txn_values"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Placeholder" />
-
-        <TextView
-            style="@style/txn_labels"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ow_tx_details_io_label" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:minHeight="10dp" />
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
 
             <EditText
-                android:id="@+id/routing_address_label"
+                android:id="@+id/txn_note"
                 style="@style/txn_values"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/ow_edit_text_height"
                 android:enabled="true"
                 android:focusableInTouchMode="false"
                 android:focusable="false"
-                android:layout_toLeftOf="@+id/edit_routing_address_label"
+                android:layout_toLeftOf="@+id/edit_txn_note"
                 android:background="@android:color/transparent"
                 android:inputType="text"
                 android:text="@string/Placeholder" />
@@ -110,20 +91,19 @@
                 style="@style/txn_labels"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/routing_address_label"
-                android:text="@string/ow_tx_details_routing_address_name" />
+                android:layout_below="@+id/txn_note"
+                android:text="@string/ow_tx_label" />
             
             <ImageView
-                android:id="@+id/edit_routing_address_label"
-                android:layout_width="@dimen/ow_txt_large"
-                android:layout_height="@dimen/ow_txt_large"
+                android:id="@+id/edit_txn_note"
+                android:layout_width="@dimen/ow_txt_largest"
+                android:layout_height="@dimen/ow_txt_largest"
                 android:layout_alignParentRight="true"
-                android:layout_alignTop="@+id/routing_address_label"
+                android:layout_alignTop="@+id/txn_note"
                 android:layout_marginTop="@dimen/ow_bordered_icon_margin"
                 android:clickable="true"
                 android:padding="@dimen/ow_bordered_icon_margin"
                 android:src="@drawable/edit_enabled" />
-
 
         </RelativeLayout>
 
@@ -144,7 +124,7 @@
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_tx_details_routing_address_label" />
+            android:text="@string/ow_tx_routing_address" />
 
         <View
             android:layout_width="match_parent"

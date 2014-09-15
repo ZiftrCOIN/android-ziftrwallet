@@ -31,7 +31,6 @@
 
     <!-- ow default text sizes -->
     <dimen name="ow_txt_largest">40sp</dimen>
-    <dimen name="ow_txt_large">30sp</dimen>
     <dimen name="ow_txt_medium">20sp</dimen>
     <dimen name="ow_txt_mediumsmall">16sp</dimen>
     <dimen name="ow_txt_small">14sp</dimen>

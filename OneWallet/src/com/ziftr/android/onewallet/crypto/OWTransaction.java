@@ -110,7 +110,7 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 		this.setTxViewType(txViewType);
 		this.setResId(resId);
 	}
-
+	
 	/**
 	 * @return the coinId
 	 */
@@ -358,6 +358,7 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 
 		@Override
 		public OWTransaction createFromParcel(Parcel source) {
+			source.setDataPosition(0);
 			OWTransaction txn = new OWTransaction( OWCoin.valueOf(source.readString()), 
 					OWFiat.valueOf(source.readString()), 
 					source.readString(), 
@@ -375,4 +376,5 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 		}
 
 	};
+
 }

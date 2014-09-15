@@ -9,19 +9,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/ow_welcome"
-        android:textSize="@dimen/ow_txt_large" />
+        android:textSize="@dimen/ow_txt_medium" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/ow_txt_mediumsmall"
-        android:text="@string/ow_welcome_message" />
+        android:text="@string/ow_welcome_message"
+        android:textSize="@dimen/ow_txt_small" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set Passphrase"
-        android:textSize="@dimen/ow_txt_large" />
+        android:text="Create Passphrase"
+        android:textSize="@dimen/ow_txt_small" />
 
     <EditText
         android:id="@+id/new_password"
@@ -30,34 +30,25 @@
         android:inputType="textPassword"
         android:maxLines="1" />
 
-    <CheckBox
-        android:id="@+id/checked_password"
-        android:padding="15dp"
+    <EditText
+        android:id="@+id/new_confirm_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="I have saved my passphrase" />
+        android:inputType="textPassword"
+        android:maxLines="1" />
 
-    <LinearLayout
+    <Button
+        android:id="@+id/set_password"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal" >
+        android:layout_height="50dp"
+        android:text="Save Password"
+        android:textSize="@dimen/ow_txt_small" />
 
-        <Button
-            android:id="@+id/skip_password"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="I&apos;m feeling reckless"
-            android:textSize="@dimen/ow_txt_small" />
-
-        <Button
-            android:id="@+id/set_password"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Save Password"
-            android:textSize="@dimen/ow_txt_small" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/skip_password"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="I&apos;m feeling reckless"
+        android:textSize="@dimen/ow_txt_small" />
 
 </LinearLayout>

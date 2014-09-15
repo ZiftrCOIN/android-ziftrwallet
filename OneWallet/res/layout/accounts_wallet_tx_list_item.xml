@@ -18,7 +18,6 @@
         android:layout_marginLeft="@dimen/ow_half_icon_size"
         android:layout_marginRight="@dimen/ow_bordered_icon_margin"
         android:layout_marginTop="@dimen/ow_bordered_icon_margin"
-        android:contentDescription="@string/ow_tx_list_io_icon_description"
         android:gravity="center_vertical"
         android:src="@drawable/received_enabled" />
 

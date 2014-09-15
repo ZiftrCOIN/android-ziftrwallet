@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -21,19 +20,16 @@ public class OWWelcomeActivity extends FragmentActivity{
 		this.setContentView(R.layout.welcome);
 		Button setPassword = (Button) this.findViewById(R.id.set_password);
 		Button skipPassword = (Button) this.findViewById(R.id.skip_password);
-		final CheckBox saved = (CheckBox) this.findViewById(R.id.checked_password);
 		final EditText passphrase = (EditText) this.findViewById(R.id.new_password);
 		setPassword.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (saved.isChecked()){
 				byte[] inputHash = OWUtils.Sha256Hash(passphrase.getText().toString().getBytes());
 		    	Intent main = new Intent(OWWelcomeActivity.this, 
 		    			OWMainFragmentActivity.class);
 		    	main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		    	main.putExtra("SET_PASSPHRASE", inputHash);
 		        startActivity(main);
-				}
 			}
 		});
 		

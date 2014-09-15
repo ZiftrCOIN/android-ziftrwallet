@@ -16,11 +16,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZLog;
 
 public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 
@@ -43,6 +45,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		if (savedInstanceState != null && savedInstanceState.containsKey("isEditing")){
 			this.isEditing = savedInstanceState.getBoolean("isEditing");
 		}
+		ZLog.log("OncReateView");
 		this.txItem = getArguments().getParcelable("txItem");
 		this.initFields();
 		return this.rootView;
@@ -100,33 +103,46 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		TextView time = (TextView) rootView.findViewById(R.id.date);
 		Date date = new Date(this.txItem.getTxTime() * 1000);
 		time.setText(OWUtils.formatterNoTimeZone.format(date));
-
+		
+		TextView routing_address = (TextView) rootView.findViewById(R.id.routing_address);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {
+			OWAddress a = txItem.getDisplayAddresses().get(i);
+			sb.append(a.toString());
+			if (i != txItem.getDisplayAddresses().size()-1) {
+				sb.append("\n");
+			}
+		}
+		routing_address.setText(sb.toString());
 		//TODO add confirmation fee field for OWWalletTransactionListItem
 		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
 		
-		final ImageView editLabel = (ImageView) rootView.findViewById(R.id.edit_routing_address_label);
-		final EditText routingAddressLabel = (EditText) rootView.findViewById(R.id.routing_address_label);
+		TextView status = (TextView) rootView.findViewById(R.id.status);
+		status.setText("Confirmed (" + txItem.getNumConfirmations() + " of " + txItem.getCoinId().getNumRecommendedConfirmations() + ")");
+		
+		final ImageView editLabel = (ImageView) rootView.findViewById(R.id.edit_txn_note);
+		final EditText txnNote = (EditText) rootView.findViewById(R.id.txn_note);
 		editLabel.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				if (!isEditing){
-					routingAddressLabel.setBackgroundResource(android.R.drawable.editbox_background_normal);
-					routingAddressLabel.setFocusable(true);
-					routingAddressLabel.setFocusableInTouchMode(true);
-					routingAddressLabel.requestFocus();
+					txnNote.setBackgroundResource(android.R.drawable.editbox_background_normal);
+					txnNote.setFocusable(true);
+					txnNote.setFocusableInTouchMode(true);
+					txnNote.requestFocus();
 					editLabel.setImageResource(R.drawable.close_enabled);
 					isEditing = true;
 				} else {
-					routingAddressLabel.setFocusable(false);
-					routingAddressLabel.setFocusableInTouchMode(false);
-					routingAddressLabel.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-					routingAddressLabel.setPadding(0, 0, 0, 0);
+					txnNote.setFocusable(false);
+					txnNote.setFocusableInTouchMode(false);
+					txnNote.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+					txnNote.setPadding(0, 0, 0, 0);
 					editLabel.setImageResource(R.drawable.edit_enabled);
 					isEditing = false;
-
-					txItem.setTxNote(routingAddressLabel.getText().toString());
+					txItem.setTxNote(txnNote.getText().toString());
 					getWalletManager().updateTransactionNote(txItem);
+
 				}
 			}
 		});
