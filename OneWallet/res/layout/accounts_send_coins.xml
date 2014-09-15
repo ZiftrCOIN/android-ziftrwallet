@@ -24,7 +24,7 @@
                 android:orientation="vertical" >
 
                 <RelativeLayout
-                    style="@style/send_receive_block_containers"
+                    style="@style/send_receive_block_container_with_background"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
@@ -99,7 +99,7 @@
                 </RelativeLayout>
 
                 <RelativeLayout
-                    style="@style/send_receive_block_containers"
+                    style="@style/send_receive_block_container_with_background"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
@@ -127,7 +127,7 @@
                 </RelativeLayout>
 
                 <LinearLayout
-                    style="@style/send_receive_block_containers"
+                    style="@style/send_receive_block_container_with_background"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
@@ -190,7 +190,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    style="@style/send_receive_block_containers"
+                    style="@style/send_receive_block_container_with_background"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
@@ -262,7 +262,7 @@
                 </LinearLayout>
 
                 <RelativeLayout
-                    style="@style/send_receive_block_containers"
+                    style="@style/send_receive_block_container_with_background"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"

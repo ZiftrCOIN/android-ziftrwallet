@@ -447,7 +447,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.insert(tx, this.getWritableDatabase());
 		return tx;
 	}
-	
+
 	public OWTransaction readTransactionByHash(OWCoin coinId, String hash) {
 		if (hash == null) {
 			return null;
@@ -493,11 +493,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 			List<String> hashes) {
 		return transactionsTable.readTransactionsByHash(coinId, hashes, getReadableDatabase());
 	}
-	
+
 	public List<OWTransaction> readAllTransactions(OWCoin coinId) {
 		return this.transactionsTable.readAllTransactions(coinId, getReadableDatabase());
 	}
-	
+
 	public void updateTransaction(OWTransaction tx) {
 		this.transactionsTable.updateTransaction(tx, getWritableDatabase());
 	}
@@ -510,7 +510,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public BigInteger getWalletBalance(OWCoin coinId, BalanceType bType) {
 		BigInteger balance = BigInteger.ZERO;
 		List<OWTransaction> txs = this.readAllTransactions(coinId);
-		
+
 		for (OWTransaction tx : txs) {
 			if (bType == BalanceType.AVAILABLE) {
 				if (!tx.isPending()) {
@@ -529,6 +529,22 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	public List<OWTransaction> getConfirmedTransactions(OWCoin coinId) {
 		return transactionsTable.readConfirmedTransactions(coinId, getReadableDatabase());
+	}
+
+	public void updateAddressNote(OWAddress address) {
+		if (address.isPersonalAddress()) {
+			this.updateReceivingAddressNote(address);
+		} else {
+			this.updateSendingAddressNote(address);
+		}
+	}
+
+	private void updateReceivingAddressNote(OWAddress address) {
+		this.receivingAddressesTable.updateAddressNote(address, getWritableDatabase());
+	}
+
+	private void updateSendingAddressNote(OWAddress address) {
+		this.sendingAddressesTable.updateAddressNote(address, getWritableDatabase());
 	}
 
 }

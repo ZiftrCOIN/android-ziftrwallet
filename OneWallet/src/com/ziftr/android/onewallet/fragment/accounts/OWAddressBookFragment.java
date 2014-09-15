@@ -1,5 +1,7 @@
 package com.ziftr.android.onewallet.fragment.accounts;
 
+import java.util.List;
+
 import android.os.Bundle;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -10,6 +12,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.util.ZLog;
 
 public abstract class OWAddressBookFragment extends OWWalletUserFragment implements TextWatcher {
@@ -22,12 +25,19 @@ public abstract class OWAddressBookFragment extends OWWalletUserFragment impleme
 	private OWAddressListAdapter addressAdapter;
 
 	public static final String INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY = "include_receiving";
+	
 	boolean includeReceivingNotSending;
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, this, this.addressAdapter);
+	}
+	
+	@Override
+	public void onPause() {
+		this.getOWMainActivity().unregisterSearchBarTextWatcher(this);
+		super.onPause();
 	}
 
 	@Override
@@ -45,10 +55,14 @@ public abstract class OWAddressBookFragment extends OWWalletUserFragment impleme
 
 	public void initializeAddressList() {
 
-		this.addressAdapter = new OWAddressListAdapter(getActivity());
+		List<OWAddress> addresses;
+		if (this.includeReceivingNotSending) {
+			addresses = this.getWalletManager().readAllReceivingAddresses(getCurSelectedCoinType());
+		} else {
+			addresses = this.getWalletManager().readAllSendingAddresses(getCurSelectedCoinType());
+		}
+		this.addressAdapter = new OWAddressListAdapter(this.getActivity(), addresses);
 		
-//		this.getWalletManager().readAll
-
 		this.addressListView = (ListView) this.rootView.findViewById(R.id.addressBookListView);
 		this.addressListView.setAdapter(this.addressAdapter);
 		this.addressListView.setOnItemClickListener(new OnItemClickListener() {

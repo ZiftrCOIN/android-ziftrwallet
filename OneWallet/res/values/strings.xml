@@ -73,7 +73,7 @@
     <!-- Description here -->
     <string name="ow_tx_list_io_icon_description">Send/Receive</string>
     <!-- Description here -->
-    <string name="ow_receive_coins_address_note_box_title">ADDRESS NOTE</string>
+    <string name="ow_receive_coins_address_label_box_title">ADDRESS LABEL</string>
     <!-- Description here -->
     <string name="ow_receive_coins_address_value_box_title">ADDRESS</string>
     <!-- Description here -->
