@@ -61,6 +61,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	protected void insert(OWAddress address, SQLiteDatabase db) {
 		long insertId = db.insert(getTableName(address.getCoinId()), 
 				null, addressToContentValues(address));
+		ZLog.log("insertId: " + insertId); 
 		address.setId(insertId);
 	}
 

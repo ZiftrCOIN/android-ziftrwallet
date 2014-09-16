@@ -44,9 +44,9 @@ import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHan
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
 import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
+import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
-import com.ziftr.android.onewallet.fragment.accounts.OWAddressBookFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWNewCurrencyFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
@@ -185,7 +185,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * sections of the app. Each enum also holds specific information related
 	 * to each of fragment types.
 	 */
-	private enum FragmentType {
+	public enum FragmentType {
 		/** The enum to identify the accounts fragment of the app. */
 		ACCOUNT_FRAGMENT_TYPE {
 			@Override
@@ -331,17 +331,29 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	@Override
 	public void onBackPressed() {
+		
+		if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+
+			String tag = getSupportFragmentManager().getBackStackEntryAt(
+					getSupportFragmentManager().getBackStackEntryCount() - 1).getName();
+			OWFragment topFragment = (OWFragment) this.getSupportFragmentManager().findFragmentByTag(tag);
+
+			if (topFragment.handleBackPress()) {
+				return;
+			}
+		}
+		
+		
 		String curSelected = getCurrentlySelectedDrawerMenuOption();
 		if (curSelected == null) {
 			ZLog.log("No selected section... Why did this happen?");
 			super.onBackPressed();
 		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
-			ZLog.log(this.getSupportFragmentManager().getBackStackEntryCount());
 			super.onBackPressed();
 		} else {
 			//Select accounts in drawer since anywhere you hit back, you will end up in accounts
 			selectSingleDrawerMenuOption(findViewById(R.id.menuDrawerAccountsLayout));
-			if (!getSupportFragmentManager().popBackStackImmediate(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER", 0)) {
+			if (!getSupportFragmentManager().popBackStackImmediate(OWTags.ACCOUNTS_INNER, 0)) {
 				OWMainFragmentActivity.this.showFragmentFromType(
 						FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
 				//clear back stack
@@ -411,7 +423,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		transaction.replace(resId, fragToShow, tag);
 		if (addToBackStack) {
-			ZLog.log(backStackTag);
 			transaction.addToBackStack(backStackTag);
 		}
 		transaction.commit();
@@ -500,7 +511,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 						//Else accounts is not selected so resume previous accounts activity
 					} else if (!getSupportFragmentManager().popBackStackImmediate(
-							FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER", 0)) {
+							OWTags.ACCOUNTS_INNER, 0)) {
 						OWMainFragmentActivity.this.showFragmentFromType(
 								FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
 						OWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -869,7 +880,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, OWTags.WALLET_FRAGMENT, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+		this.showFragment(fragToShow, OWTags.WALLET_FRAGMENT, 
+				R.id.oneWalletBaseFragmentHolder, true, OWTags.ACCOUNTS_INNER);
 	}
 
 	/**
@@ -897,7 +909,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, OWTags.RECIEVE_FRAGMENT, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+		this.showFragment(fragToShow, OWTags.RECIEVE_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
+				true, OWTags.ACCOUNTS_INNER);
 	}
 
 	/**
@@ -912,7 +925,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, true, FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
+				true, OWTags.ACCOUNTS_INNER);
 	}
 
 	/**
@@ -920,13 +934,14 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	public void openTxnDetails(OWTransaction txItem) {
 
-		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) this.getSupportFragmentManager().findFragmentByTag(OWTags.TXN_DETAILS);
+		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) 
+				this.getSupportFragmentManager().findFragmentByTag(OWTags.TXN_DETAILS);
 		if (fragToShow == null) {
 			fragToShow = new OWTransactionDetailsFragment();
 		}
 		fragToShow.setTxItem(txItem);
 		this.showFragment(fragToShow, OWTags.TXN_DETAILS, R.id.oneWalletBaseFragmentHolder, true, 
-				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+				OWTags.ACCOUNTS_INNER);
 	}
 
 	/**
@@ -950,26 +965,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		fragToShow.setArguments(b);
 
 		this.showFragment(fragToShow, OWTags.ADD_CURRENCY, R.id.oneWalletBaseFragmentHolder, true, 
-				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
-
-	}
-
-	/**
-	 * Open view for add new currency
-	 */
-	public void openAddressBook(boolean includeReceivingNotSending) {
-		OWAddressBookFragment fragToShow = (OWAddressBookFragment) 
-				this.getSupportFragmentManager().findFragmentByTag(OWTags.ADDRESS_BOOK);
-		if (fragToShow == null) {
-			fragToShow = new OWAddressBookFragment();
-		}
-
-		Bundle b = new Bundle();
-		b.putBoolean(OWAddressBookFragment.INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY, includeReceivingNotSending);
-		fragToShow.setArguments(b);
-
-		this.showFragment(fragToShow, OWTags.ADDRESS_BOOK, R.id.oneWalletBaseFragmentHolder, true, 
-				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+				OWTags.ACCOUNTS_INNER);
 
 	}
 
@@ -1172,7 +1168,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Customize actionbar
 	 * @param title - text in middle of actionbar
-	 * @param menu - boolean determine if menu button to open drawer is visible, if false, the back button will be visible
+	 * @param menu - boolean determine if menu button to open drawer is visible, if false, 
+	 * then the back button will be visible.
 	 * @param home - boolean to display home button
 	 * @param search - boolean to display search button
 	 */
@@ -1183,7 +1180,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * Customize actionbar
 	 * @param title - text in middle of actionbar
-	 * @param menu - boolean determine if menu button to open drawer is visible, if false, the back button will be visible
+	 * @param menu - boolean determine if menu button to open drawer is visible, if false, 
+	 * then the back button will be visible.
 	 * @param home - boolean to display home button
 	 * @param search - boolean to display search button
 	 */
@@ -1231,7 +1229,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 						toggleDrawerPosition();
 					}					
 					//clear backstack
-					OWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+					OWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(
+							null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 					//show home
 					OWMainFragmentActivity.this.showFragmentFromType(
 							FragmentType.ACCOUNT_FRAGMENT_TYPE, false);

@@ -3,6 +3,7 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import java.util.List;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -14,7 +15,6 @@ import android.widget.ListView;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
-import com.ziftr.android.onewallet.util.ZLog;
 
 public class OWAddressBookFragment extends OWWalletUserFragment implements TextWatcher {
 
@@ -46,7 +46,7 @@ public class OWAddressBookFragment extends OWWalletUserFragment implements TextW
 			ViewGroup container, Bundle savedInstanceState) {
 
 		rootView = inflater.inflate(R.layout.accounts_address_book, container, false);
-		
+
 		this.showWalletHeader();
 
 		initializeFromBundle(this.getArguments());
@@ -57,7 +57,6 @@ public class OWAddressBookFragment extends OWWalletUserFragment implements TextW
 	}
 
 	public void initializeAddressList() {
-
 		// TODO do this in a non UI blocking way
 		List<OWAddress> addresses;
 		if (this.includeReceivingNotSending) {
@@ -73,10 +72,24 @@ public class OWAddressBookFragment extends OWWalletUserFragment implements TextW
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, 
 					int position, long id) {
-				//TODO Open the send/receive screen
-				ZLog.log("Address clicked.");
+				OWAddress address = (OWAddress) addressListView.getItemAtPosition(position);
+				returnToParentFragment(address.toString());
 			}
 		});
+
+	}
+
+	private void returnToParentFragment(String addressStr) {
+		OWAddressBookParentFragment parentFragment = (OWAddressBookParentFragment) getParentFragment();
+		parentFragment.acceptAddress(addressStr);
+		
+		// The transaction that will take place to show the new fragment
+		FragmentTransaction transaction = this.getChildFragmentManager().beginTransaction();
+
+		// TODO maybe add animation to transaciton here?
+
+		transaction.remove(this);
+		transaction.commit();
 	}
 
 	/**

@@ -52,6 +52,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		OWAddress newAddress = new OWAddress(coinId, newKey);
 
 		// Reset all the address' parameters for use elsewhere
+		newAddress.setId(c.getLong(c.getColumnIndex(COLUMN_ID)));
 		newAddress.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
 		newAddress.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
 		newAddress.getKey().setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));

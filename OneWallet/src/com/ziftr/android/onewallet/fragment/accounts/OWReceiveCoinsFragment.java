@@ -31,7 +31,7 @@ import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 
-public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnClickListener, TextWatcher {
+public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implements OnClickListener, TextWatcher {
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
@@ -48,12 +48,9 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 	private ImageView qrCodeImageView;
 	private View qrCodeContainer;
 
-
-	/** The address that will be displayed in the QR code and where others can send coins to us at. */
-	//private String addressToReceiveOn;
-
-
 	private boolean qrCodeGenerated = false;
+
+	private OWAddress mAddress;
 
 	/**
 	 * @return the qrCodeGenerated
@@ -147,9 +144,9 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 				}
 			}
 		} else if (v == this.addressBookImageView) {
-			getOWMainActivity().openAddressBook(true);
+			this.openAddressBook(true, R.id.receiveCoinBaseFrameLayout);
 		}
-		
+
 	}
 
 	private void generateQrCode(boolean withAnimation) {
@@ -189,8 +186,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 	 * @param newAddress
 	 */
 	private void initializeQrCodeFromBundle(Bundle savedInstanceState) {
-		String addressString = this.addressEditText.getText().toString();
-		if (addressString.length() > 0) {
+		if (this.fragmentHasAddress()) {
 			// We have to set it to be invisible temporarily to not have a blue flash,
 			// will be drawn correctly once we can get the measurement of the qr code
 			this.qrCodeContainer.setBackgroundColor(getResources().getColor(R.color.transparent));
@@ -233,9 +229,10 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						String newAddress = address.toString();
-						addressEditText.setText(newAddress);
+						mAddress = address;
+						addressEditText.setText(mAddress.toString());
 						generateQrCode(true);
+						syncNoteToDb();
 					}
 				});
 			}
@@ -254,8 +251,30 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 
 	@Override
 	public void afterTextChanged(Editable s) {
-
+		syncNoteToDb();
 	}
 
+	private void syncNoteToDb() {
+		if (mAddress == null) {
+			// Get the address from the database
+			if (this.fragmentHasAddress()) {
+				mAddress = this.getWalletManager().readReceivingAddress(
+						getCurSelectedCoinType(), addressEditText.getText().toString());
+			} else {
+				return;
+			}
+		}
+
+		mAddress.setNote(labelEditText.getText().toString());
+		this.getWalletManager().updateAddressNote(mAddress);
+	}
+
+	@Override
+	protected void acceptAddress(String address) {
+		mAddress = null;
+		addressEditText.setText(address);
+		syncNoteToDb();
+		this.qrCodeGenerated = false;
+	}
 
 }
