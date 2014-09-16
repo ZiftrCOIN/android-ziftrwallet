@@ -23,7 +23,6 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWUtils;
-import com.ziftr.android.onewallet.util.ZLog;
 
 public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 
@@ -127,8 +126,6 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 			}
 		}
 		routing_address.setText(sb.toString());
-		//TODO add confirmation fee field for OWWalletTransactionListItem
-		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
 		
 		final ImageView editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
 		final EditText txNote = (EditText) rootView.findViewById(R.id.txn_note);
@@ -150,7 +147,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		
 		TextView timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		int estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
-		timeLeft.setText("Estimate: " + estimatedTime + " Seconds");
+		timeLeft.setText(formatEstimatedTime(estimatedTime));
 		
 		ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 		progressBar.setMax(totalConfirmations);
@@ -186,5 +183,21 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 
 		}
 	}
-
+	
+	public String formatEstimatedTime(int seconds){
+		StringBuilder sb = new StringBuilder();
+		if (seconds > 3600){
+			int hours = seconds / 3600;
+			seconds = seconds % 3600;
+			sb.append(hours + " hours, ");
+		}
+		int minutes = seconds/60;
+		seconds = seconds % 60;
+		sb.append (minutes + " minutes, ");
+		if (seconds != 0){
+			sb.append(seconds + " seconds");
+		}
+		return sb.toString();
+	}
+	
 }
