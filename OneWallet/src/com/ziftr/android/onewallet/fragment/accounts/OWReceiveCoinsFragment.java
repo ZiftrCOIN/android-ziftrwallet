@@ -151,6 +151,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 				}
 			}
 		}
+		
 	}
 
 
@@ -258,7 +259,12 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 
 	@Override
 	public void afterTextChanged(Editable s) {
+		String address = this.addressEditText.getText().toString();
 		
+		if(address.length() > 0) {
+			String label = this.labelEditText.getText().toString();
+			getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
+		}
 	}
 
 

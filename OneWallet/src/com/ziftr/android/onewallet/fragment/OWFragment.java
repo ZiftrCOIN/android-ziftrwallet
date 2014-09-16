@@ -11,4 +11,8 @@ public class OWFragment extends Fragment {
 		return ((OWMainFragmentActivity) this.getActivity());
 	}
 	
+	public boolean handleBackPress() {
+		return false;
+	}
+	
 }

@@ -70,7 +70,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 				address.getCoinId().getPrivKeyPrefix(), address.getKey().getPrivKeyBytesForAddressEncoding()));
 		values.put(COLUMN_PUB_KEY, OWUtils.bytesToHexString(address.getKey().getPubKey()));
 		values.put(COLUMN_ADDRESS, Base58.encode(address.getCoinId().getPubKeyHashPrefix(), address.getHash160()));
-		values.put(COLUMN_NOTE, address.getNote());
+		values.put(COLUMN_NOTE, address.getLabel());
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getKey().getCreationTimeSeconds());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());

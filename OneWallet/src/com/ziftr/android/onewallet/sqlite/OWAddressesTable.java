@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.onewallet.crypto.OWAddress;
@@ -145,22 +146,18 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	}
 	
 	protected void updateAddress(OWAddress address, SQLiteDatabase db) {
-		if (address.getId() == -1) {
-			// Shouldn't happen
-			throw new RuntimeException("Error: id has not been set.");
-		}
 		ContentValues values = addressToContentValues(address);
-		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
+		String whereClause = COLUMN_ID + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
+		
+		db.update(getTableName(address.getCoinId()), values, whereClause, null);
 	}
 	
-	protected void updateAddressNote(OWAddress address, SQLiteDatabase db) {
-		if (address.getId() == -1) {
-			// Shouldn't happen
-			throw new RuntimeException("Error: id has not been set.");
-		}
+	protected void updateAddressLabel(OWCoin coin, String address, String newLabel, SQLiteDatabase db) {
+		
 		ContentValues values = new ContentValues();
-		values.put(COLUMN_NOTE, address.getNote());
-		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
+		values.put(COLUMN_NOTE, newLabel);
+		String whereClause = COLUMN_ID + " = " + DatabaseUtils.sqlEscapeString(address);
+		db.update(getTableName(coin), values, whereClause, null);
 	}
 
 }

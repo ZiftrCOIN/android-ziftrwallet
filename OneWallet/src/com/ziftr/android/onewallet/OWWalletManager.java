@@ -769,8 +769,8 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			String note = null;
 			for (OWAddress a : addresses) {
-				if (a.getNote() != null && !a.getNote().trim().isEmpty()) {
-					note = a.getNote();
+				if (a.getLabel() != null && !a.getLabel().trim().isEmpty()) {
+					note = a.getLabel();
 					break;
 				}
 			}

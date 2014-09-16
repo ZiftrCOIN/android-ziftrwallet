@@ -243,7 +243,7 @@ public class OWAddress implements OWSearchableListItem {
 
 	@Override
 	public String toString() {
-		return Base58.encode(this.versionByte, this.hash160);
+		return this.getAddress();
 	}
 
 	///////////////////////////////////////////
@@ -253,9 +253,9 @@ public class OWAddress implements OWSearchableListItem {
 	/**
 	 * @return the id
 	 */
-	public long getId() {
-		return id;
-	}
+	//public long getId() {
+	//	return id;
+	//}
 
 	/**
 	 * @param id the id to set
@@ -267,8 +267,16 @@ public class OWAddress implements OWSearchableListItem {
 	/**
 	 * @return the note
 	 */
-	public String getNote() {
+	public String getLabel() {
 		return note;
+	}
+	
+	/**
+	 * Gets the publicly displayed base58 encoded version of this address
+	 * @return the public address as a String
+	 */
+	public String getAddress() {
+		return Base58.encode(this.versionByte, this.hash160);
 	}
 
 	/**
