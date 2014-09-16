@@ -21,7 +21,7 @@ import com.ziftr.android.onewallet.crypto.OWAddress;
 public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 
 	public OWAddressListAdapter(Context ctx, List<OWAddress> txList) {
-		super(ctx, R.layout._dual_icon_coin_view, txList);
+		super(ctx, R.layout.accounts_address_book_list_item, txList);
 	}
 
 	public OWAddressListAdapter(Context context) {
@@ -36,7 +36,7 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 		OWAddress address = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-			convertView = this.getInflater().inflate(R.layout._dual_icon_coin_view, null);
+			convertView = this.getInflater().inflate(R.layout.accounts_address_book_list_item, null);
 		}
 
 		// Set the edit button
@@ -46,12 +46,6 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 		// Set the in/out icon
 		ImageView inOutImage = (ImageView) convertView.findViewById(R.id.rightIcon);
 		inOutImage.setImageDrawable(this.getContext().getResources().getDrawable(this.getImgResIdForItem(address)));
-
-		// Set top/bottom right text boxes to empty
-		TextView topRight = (TextView) convertView.findViewById(R.id.topRightTextView);
-		topRight.setText("");
-		TextView bottomRight = (TextView) convertView.findViewById(R.id.bottomRightTextView);
-		bottomRight.setText("");
 
 		// Set top/bottom right text boxes to empty
 		TextView topLeft = (TextView) convertView.findViewById(R.id.topLeftTextView);

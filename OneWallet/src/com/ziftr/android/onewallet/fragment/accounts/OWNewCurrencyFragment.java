@@ -47,7 +47,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 
 	public void initializeCurrencyList() {
 		generateCurrencyListFrom(this.coinsToShow);
-		this.currencyAdapter = new OWNewCurrencyListAdapter(this.getActivity(), R.layout._dual_icon_coin_view, 
+		this.currencyAdapter = new OWNewCurrencyListAdapter(this.getActivity(), R.layout.accounts_new_currency_list_item,
 				this.currencyList);
 		
 		ListView listView = (ListView) this.rootView.findViewById(R.id.currencyListView);

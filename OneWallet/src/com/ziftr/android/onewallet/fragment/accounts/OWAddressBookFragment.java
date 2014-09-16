@@ -58,6 +58,7 @@ public class OWAddressBookFragment extends OWWalletUserFragment implements TextW
 
 	public void initializeAddressList() {
 
+		// TODO do this in a non UI blocking way
 		List<OWAddress> addresses;
 		if (this.includeReceivingNotSending) {
 			addresses = this.getWalletManager().readAllReceivingAddresses(getCurSelectedCoinType());
