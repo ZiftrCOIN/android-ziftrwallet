@@ -24,27 +24,29 @@ import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWUtils;
 
-public class OWTransactionDetailsFragment extends OWWalletUserFragment {
+public class OWTransactionDetailsFragment extends OWWalletUserFragment implements OnClickListener {
 
 	private static final String TX_ITEM_HASH_KEY = "txItemHash";
 
 	private static final String IS_EDITING_KEY = "isEditing";
 
 	private View rootView;
+	private ImageView editLabelButton;
+	private EditText labelEditText;
 	
 	private OWTransaction txItem;
-	
+
 	private boolean isEditing;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		
+
 		//resize view when keyboard pops up instead of just default pan so user can see field more clearly
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-		
-		this.getOWMainActivity().hideWalletHeader();
-		
+
+		this.hideWalletHeader();
+
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
 		if (savedInstanceState != null){
 				if (savedInstanceState.containsKey(IS_EDITING_KEY)){
@@ -58,14 +60,14 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		this.initFields();
 		return this.rootView;
 	}
-	
+
 	@Override
 	public void onSaveInstanceState(Bundle outState){
 		outState.putBoolean(IS_EDITING_KEY, this.isEditing);
 		outState.putString(TX_ITEM_HASH_KEY, this.txItem.getSha256Hash().toString());
 		super.onSaveInstanceState(outState);
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -80,6 +82,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 	 */
 	@SuppressLint("NewApi")
 	public void initFields() {
+		// TODO 
 		TextView amount = (TextView) rootView.findViewById(R.id.amount);
 		BigInteger baseAmount = this.txItem.getTxAmount();
 		BigDecimal amountValue = OWUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
@@ -116,7 +119,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		Date date = new Date(this.txItem.getTxTime() * 1000);
 		time.setText(OWUtils.formatterNoTimeZone.format(date));
 		
-		TextView routing_address = (TextView) rootView.findViewById(R.id.routing_address);
+		TextView routingAddress = (TextView) rootView.findViewById(R.id.routing_address);
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {
 			OWAddress a = txItem.getDisplayAddresses().get(i);
@@ -125,19 +128,13 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 				sb.append("\n");
 			}
 		}
-		routing_address.setText(sb.toString());
+		routingAddress.setText(sb.toString());
 		
-		final ImageView editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
-		final EditText txNote = (EditText) rootView.findViewById(R.id.txn_note);
-		txNote.setText(txItem.getTxNote());
-		toggleEditNote(txNote, editLabelButton, !isEditing);
-		editLabelButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				toggleEditNote(txNote, editLabelButton, isEditing);
-			}
-		});
+		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
+		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);
+		this.labelEditText.setText(txItem.getTxNote());
+		toggleEditNote(!isEditing);
+		editLabelButton.setOnClickListener(this);
 		
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
 		int confirmed = txItem.getNumConfirmations();
@@ -163,24 +160,23 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 	 * @param editLabelButton - ImageView for edit button
 	 * @param toggleOff - boolean to determine how to toggle
 	 */
-	public void toggleEditNote(EditText txNote, ImageView editLabelButton, boolean toggleOff){
-		if (!toggleOff){
-			txNote.setBackgroundResource(android.R.drawable.editbox_background_normal);
-			txNote.setFocusable(true);
-			txNote.setFocusableInTouchMode(true);
-			txNote.requestFocus();
+	public void toggleEditNote(boolean toggleOff){
+		if (!toggleOff) {
+			this.labelEditText.setBackgroundResource(android.R.drawable.editbox_background_normal);
+			this.labelEditText.setFocusable(true);
+			this.labelEditText.setFocusableInTouchMode(true);
+			this.labelEditText.requestFocus();
 			editLabelButton.setImageResource(R.drawable.close_enabled);
 			isEditing = true;
 		} else {
-			txNote.setFocusable(false);
-			txNote.setFocusableInTouchMode(false);
-			txNote.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-			txNote.setPadding(0, 0, 0, 0);
+			this.labelEditText.setFocusable(false);
+			this.labelEditText.setFocusableInTouchMode(false);
+			this.labelEditText.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+			this.labelEditText.setPadding(0, 0, 0, 0);
 			editLabelButton.setImageResource(R.drawable.edit_enabled);
 			isEditing = false;
-			txItem.setTxNote(txNote.getText().toString());
+			txItem.setTxNote(this.labelEditText.getText().toString());
 			getWalletManager().updateTransactionNote(txItem);
-
 		}
 	}
 	
@@ -198,6 +194,13 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 			sb.append(seconds + " seconds");
 		}
 		return sb.toString();
+	}
+
+	@Override
+	public void onClick(View v) {
+		if (v == this.editLabelButton) {
+			toggleEditNote(isEditing);
+		}
 	}
 	
 }

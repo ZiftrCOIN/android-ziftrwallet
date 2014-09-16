@@ -30,22 +30,6 @@
         android:src="@drawable/next_down_2" />
 
     <TextView
-        android:id="@+id/topRightTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/rightIcon"
-        android:layout_toLeftOf="@id/rightIcon"
-        android:text="@string/ow_empty_string" />
-
-    <TextView
-        android:id="@+id/bottomRightTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/rightIcon"
-        android:layout_toLeftOf="@id/rightIcon"
-        android:text="@string/ow_empty_string" />
-
-    <TextView
         android:id="@+id/topLeftTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,6 +45,11 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/leftIcon"
         android:layout_toRightOf="@id/leftIcon"
+        android:layout_toLeftOf="@id/bottomRightTextView"
+        android:clickable="false"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:singleLine="true"
         android:text="@string/ow_empty_string" />
 
 </RelativeLayout>

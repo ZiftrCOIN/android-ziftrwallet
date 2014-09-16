@@ -40,6 +40,8 @@ import com.ziftr.android.onewallet.util.ZLog;
  * valid (see {@link OWCoin}), and also to indicate how the bytes inside the address
  * should be interpreted. Whilst almost all addresses today are hashes of public keys, 
  * another (currently not fully supported type) can contain a hash of a script instead.</p>
+ * 
+ * TODO delete the id field, just use hash
  */
 public class OWAddress implements OWSearchableListItem {
 

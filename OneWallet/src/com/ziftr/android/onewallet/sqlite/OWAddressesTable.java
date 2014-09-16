@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.onewallet.crypto.OWAddress;
@@ -12,6 +13,8 @@ import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.ZLog;
 
+// TODO add a column for isChangeAddress. Many times we want to filter change addresses
+// out so they are never revealed to the user
 public abstract class OWAddressesTable extends OWCoinRelativeTable {
 
 	/** 
@@ -32,7 +35,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * that the address was used. 
 	 */
 	public static final String COLUMN_MODIFIED_TIMESTAMP = "modified_timestamp";
-	
+
 	/**
 	 * A useful method to convert a cursor (pointer to a row in a table) to an address.
 	 * This has to be done differently for the table of receiving addresses and the table 
@@ -44,7 +47,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * @throws OWAddressFormatException
 	 */
 	protected abstract OWAddress cursorToAddress(OWCoin coinId, Cursor c) throws OWAddressFormatException;
-	
+
 	/**
 	 * For updating and insertion with android SQLite helper methods, we need to make a 
 	 * {@link ContentValues} object. This also has to be done differently for the table of 
@@ -54,13 +57,13 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * @return
 	 */
 	protected abstract ContentValues addressToContentValues(OWAddress address);
-	
+
 	protected void insert(OWAddress address, SQLiteDatabase db) {
 		long insertId = db.insert(getTableName(address.getCoinId()), 
 				null, addressToContentValues(address));
 		address.setId(insertId);
 	}
-	
+
 	protected OWAddress readAddress(OWCoin coinId, String address, SQLiteDatabase db) {
 		if (address == null) {
 			return null;
@@ -68,7 +71,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 
 		List<String> addresses = new ArrayList<String>();
 		addresses.add(address);
-		
+
 		List<OWAddress> readAddresses = readAddresses(coinId, addresses, db);
 		if (readAddresses.size() == 0) {
 			return null;
@@ -76,7 +79,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 			return readAddresses.get(0);
 		}
 	}
-	
+
 	/**
 	 * Gets a list of addresses from the database. If addresses is null 
 	 * then it gets all addresses from the database. 
@@ -94,16 +97,14 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coinId));
-		
+
 		// If null, we take that to mean that they want all addresses
 		if (addresses != null) {
 			sb.append(" WHERE ");
 			sb.append(COLUMN_ADDRESS);
 			sb.append(" IN (");
 			for (int i = 0; i < addresses.size(); i++) {
-				sb.append("'");
-				sb.append(addresses.get(i));
-				sb.append("'");
+				sb.append(DatabaseUtils.sqlEscapeString(addresses.get(i)));
 				if (i != (addresses.size() - 1)) {
 					sb.append(",");
 				} else {
@@ -111,7 +112,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 				}
 			}
 		}
-		
+
 		sb.append(";");
 		String toQuery = sb.toString();
 		ZLog.log("Query: " + toQuery);
@@ -139,11 +140,11 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 
 		return newAddresses;
 	}
-	
+
 	protected List<OWAddress> readAllAddresses(OWCoin coinId, SQLiteDatabase db) {
 		return this.readAddresses(coinId, null, db);
 	}
-	
+
 	protected void updateAddress(OWAddress address, SQLiteDatabase db) {
 		if (address.getId() == -1) {
 			// Shouldn't happen
@@ -152,7 +153,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		ContentValues values = addressToContentValues(address);
 		db.update(getTableName(address.getCoinId()), values, COLUMN_ID + " = " + address.getId(), null);
 	}
-	
+
 	protected void updateAddressNote(OWAddress address, SQLiteDatabase db) {
 		if (address.getId() == -1) {
 			// Shouldn't happen

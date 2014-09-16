@@ -71,13 +71,11 @@ public class OWAccountsFragment extends OWFragment {
 	 * open up different coin-type wallets.
 	 */
 	@Override
-	public View onCreateView(LayoutInflater inflater, 
-			ViewGroup container, Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		this.getOWMainActivity().hideWalletHeader();
+		this.hideWalletHeader();
 		
-		this.rootView = inflater.inflate(
-				R.layout.section_accounts_layout, container, false);
+		this.rootView = inflater.inflate(R.layout.section_accounts_layout, container, false);
 
 		this.walletManager = this.getOWMainActivity().getWalletManager();
 

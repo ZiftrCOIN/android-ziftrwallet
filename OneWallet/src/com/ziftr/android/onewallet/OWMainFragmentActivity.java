@@ -1,5 +1,6 @@
 package com.ziftr.android.onewallet;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -44,6 +46,7 @@ import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
+import com.ziftr.android.onewallet.fragment.accounts.OWAddressBookFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWNewCurrencyFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWReceiveCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListAdapter;
@@ -51,7 +54,10 @@ import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWConverter;
+import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.OWUtils;
@@ -153,6 +159,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** Use this key to save which section of the drawer menu is open. */
 	private final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
 
+	/** Use this key to save whether or not the header is visible (vs gone). */
+	private final String WALLET_HEADER_VISIBILITY_KEY = "WALLET_HEADER_VISIBILITY_KEY";
+
 	/** The main view that all of the fragments will be stored in. */
 	private View baseFragmentContainer;
 
@@ -246,20 +255,23 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		// Everything is held within this main activity layout
+		this.setContentView(R.layout.activity_main);
+
 		//Get passphrase from welcome screen if exists
 		Bundle info = getIntent().getExtras();
 		if (info != null && info.getByteArray("SET_PASSPHRASE") != null){
 			setPassphraseHash(info.getByteArray("SET_PASSPHRASE"));
 		}
 
-		// Everything is held within this main activity layout
-		this.setContentView(R.layout.activity_main);
+		// Recreate wallet manager
+		this.walletManager = OWWalletManager.getInstance(this);
 
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
 
-		// Recreate wallet manager
-		this.walletManager = OWWalletManager.getInstance(this);
+		// Set up header and visibility of header
+		this.initializeWalletHeaderVisibility(savedInstanceState);
 
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
@@ -306,6 +318,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Save which part of the app is currently open.
 		outState.putString(this.SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
+		outState.putInt(this.WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
 		if (this.getCurSelectedCoinType() != null) {
 			outState.putString(OWCoin.TYPE_KEY, this.getCurSelectedCoinType().toString());
 		}
@@ -567,7 +580,15 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	private void initializeCoinType(Bundle args) {
 		if (args != null) {
 			if (args.getString(OWCoin.TYPE_KEY) != null) {
-				this.curSelectedCoinType = OWCoin.valueOf(args.getString(OWCoin.TYPE_KEY));
+				this.setCurSelectedCoinType(OWCoin.valueOf(args.getString(OWCoin.TYPE_KEY)));
+			}
+		}
+	}
+
+	private void initializeWalletHeaderVisibility(Bundle args) {
+		if (args != null) {
+			if (args.getInt(WALLET_HEADER_VISIBILITY_KEY, -1) != -1) {
+				this.getWalletHeaderBar().setVisibility(args.getInt(WALLET_HEADER_VISIBILITY_KEY));
 			}
 		}
 	}
@@ -912,7 +933,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * Open view for add new currency
 	 */
 	public void openAddCurrency(List<OWCoin> userCurWallets) {
-		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) this.getSupportFragmentManager().findFragmentByTag(OWTags.ADD_CURRENCY);
+		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) 
+				this.getSupportFragmentManager().findFragmentByTag(OWTags.ADD_CURRENCY);
 		if (fragToShow == null) {
 			fragToShow = new OWNewCurrencyFragment();
 		}
@@ -926,7 +948,27 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			b.putBoolean(type.toString(), true);
 		}
 		fragToShow.setArguments(b);
+
 		this.showFragment(fragToShow, OWTags.ADD_CURRENCY, R.id.oneWalletBaseFragmentHolder, true, 
+				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
+
+	}
+
+	/**
+	 * Open view for add new currency
+	 */
+	public void openAddressBook(boolean includeReceivingNotSending) {
+		OWAddressBookFragment fragToShow = (OWAddressBookFragment) 
+				this.getSupportFragmentManager().findFragmentByTag(OWTags.ADDRESS_BOOK);
+		if (fragToShow == null) {
+			fragToShow = new OWAddressBookFragment();
+		}
+
+		Bundle b = new Bundle();
+		b.putBoolean(OWAddressBookFragment.INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY, includeReceivingNotSending);
+		fragToShow.setArguments(b);
+
+		this.showFragment(fragToShow, OWTags.ADDRESS_BOOK, R.id.oneWalletBaseFragmentHolder, true, 
 				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 
 	}
@@ -936,6 +978,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	public OWWalletManager getWalletManager() {
 		return walletManager;
+	}
+
+	/**
+	 * @return the headerBar
+	 */
+	public View getWalletHeaderBar() {
+		return this.findViewById(R.id.walletHeader);
 	}
 
 	@Override
@@ -1117,6 +1166,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	public void setCurSelectedCoinType(OWCoin curSelectedCoinType) {
 		this.curSelectedCoinType = curSelectedCoinType;
+		this.populateWalletHeaderView();
 	}
 
 	/**
@@ -1265,9 +1315,43 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		return search.getVisibility() == View.VISIBLE;
 	}
 
-	public void hideWalletHeader() {
-		View walletHeader = findViewById(R.id.walletHeader);
-		walletHeader.setVisibility(View.GONE);
+	public void populateWalletHeaderView() {
+		OWCoin coinId = this.getCurSelectedCoinType();
+
+		View headerView = this.findViewById(R.id.walletHeader);
+		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
+		Drawable coinImage = this.getResources().getDrawable(
+				coinId.getLogoResId());
+		coinLogo.setImageDrawable(coinImage);
+
+		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
+		coinTitle.setText(coinId.getLongTitle());
+
+		TextView coinUnitPriceInFiatTextView = (TextView) 
+				headerView.findViewById(R.id.bottomLeftTextView);
+		BigDecimal unitPriceInFiat = OWConverter.convert(
+				BigDecimal.ONE, coinId, OWFiat.USD);
+		coinUnitPriceInFiatTextView.setText(OWFiat.USD.getSymbol() + 
+				OWFiat.formatFiatAmount(OWFiat.USD, unitPriceInFiat).toPlainString());
+
+		TextView walletBalanceTextView = (TextView) 
+				headerView.findViewById(R.id.topRightTextView);
+		BigDecimal walletBallance = OWUtils.bigIntToBigDec(coinId, 
+				getWalletManager().getWalletBalance(coinId, OWSQLiteOpenHelper.BalanceType.ESTIMATED));
+		walletBalanceTextView.setText(
+				OWCoin.formatCoinAmount(coinId, walletBallance).toPlainString());
+
+		TextView walletBalanceFiatEquivTextView = (TextView) 
+				headerView.findViewById(R.id.bottomRightTextView);
+		BigDecimal walletBalanceFiatEquiv = OWConverter.convert(
+				walletBallance, coinId, OWFiat.USD);
+		walletBalanceFiatEquivTextView.setText(OWFiat.USD.getSymbol() + 
+				walletBalanceFiatEquiv.toPlainString());
+
+		ImageView marketIcon = (ImageView) (headerView.findViewById(R.id.rightIcon));
+		Drawable marketImage = this.getResources().getDrawable(
+				R.drawable.stats_enabled);
+		marketIcon.setImageDrawable(marketImage);
 	}
 
 }

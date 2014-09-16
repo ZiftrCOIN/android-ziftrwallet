@@ -38,19 +38,17 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 
 	private static final int FADE_DURATION = 500;
 
-	
-	
-	
 	/** The view container for this fragment. */
 	private View rootView;
-	
+
 	private EditText labelEditText;
 	private EditText addressEditText;
 	private View copyButton;
+	private ImageView addressBookImageView;
 	private ImageView qrCodeImageView;
 	private View qrCodeContainer;
-	
-	
+
+
 	/** The address that will be displayed in the QR code and where others can send coins to us at. */
 	//private String addressToReceiveOn;
 
@@ -78,25 +76,36 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.setQrCodeGenerated(false);
 
+		this.initializeViewFields(inflater, container);
+
+		this.initializeQrCodeFromBundle(savedInstanceState);
+
+		this.showWalletHeader();
+
+		return this.rootView;
+	}
+
+	/**
+	 * @param inflater
+	 * @param container
+	 */
+	private void initializeViewFields(LayoutInflater inflater,
+			ViewGroup container) {
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressNameEditText);
 		this.labelEditText.addTextChangedListener(this);
-		
-		
+
 		this.copyButton = this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
 
 		this.qrCodeImageView = (ImageView) this.rootView.findViewById(R.id.generateAddressQrCodeImageView);
 		this.qrCodeImageView.setOnClickListener(this);
-		
+
+		this.addressBookImageView = (ImageView) this.rootView.findViewById(R.id.recallAddressFromHistoryIcon);
+		this.addressBookImageView.setOnClickListener(this);
+
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
-		
-		this.initializeQrCodeFromBundle(savedInstanceState);
-
-		this.initializeWalletHeaderView();
-
-		return this.rootView;
 	}
 
 	@Override
@@ -106,17 +115,10 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
 	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
 	}
-	
 
 	@Override
 	public void onClick(View v) {
@@ -126,14 +128,13 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 				// Gets a handle to the clipboard service.
 				ClipboardManager clipboard = (ClipboardManager)
 						getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-	
+
 				ClipData clip = ClipData.newPlainText(KEY_ADDRESS, addressEditText.getText().toString());
 				clipboard.setPrimaryClip(clip);
-	
+
 				Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
 			}
-		}
-		else if(v == this.qrCodeImageView) {
+		} else if (v == this.qrCodeImageView) {
 			if(this.addressEditText.getText().toString().length() == 0) {
 				if (getOWMainActivity().userHasPassphrase()) {
 					Bundle b = new Bundle();
@@ -145,13 +146,15 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 					loadAddressFromDatabase();
 				}
 			}
+		} else if (v == this.addressBookImageView) {
+			getOWMainActivity().openAddressBook(true);
 		}
+		
 	}
-
 
 	private void generateQrCode(boolean withAnimation) {
 		String addressString = this.addressEditText.getText().toString();
-		
+
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setPadding(0, 0, 0, 0);
 
@@ -209,7 +212,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 	public boolean fragmentHasAddress() {
 		return addressEditText.getText().toString().length() > 0;
 	}
-	
+
 	/**
 	 * This method gets the database from the activity on the UI thread,
 	 * gets a new key from the database helper on an extra thread, and
@@ -223,7 +226,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 			@Override
 			public void run() {
 				String addressLabel = addressEditText.getText().toString();
-				
+
 				final OWAddress address = database.createReceivingAddress(getCurSelectedCoinType(), addressLabel);
 
 				// Run the updating of the UI on the UI thread
@@ -251,7 +254,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		
+
 	}
 
 
