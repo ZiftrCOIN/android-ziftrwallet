@@ -88,16 +88,20 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		return sb.toString();
 	}
 
-	protected void updateOrInsert(OWTransaction tx, SQLiteDatabase db) {
-		try {
-			updateTransaction(tx, db);
-		} catch(OWNoTransactionFoundException ntfe) {
-			long insertId = db.insert(getTableName(tx.getCoinId()), 
-					null, txToContentValues(tx));
-			tx.setId(insertId);
-		}
+	protected void insertTx(OWTransaction tx, SQLiteDatabase db) {
+		long insertId = db.insert(getTableName(tx.getCoinId()), 
+				null, txToContentValues(tx));
+		tx.setId(insertId);
 	}
-
+	
+//	protected void updateNumConfirmationsOrInsert(OWTransaction tx, SQLiteDatabase db) {
+//		try {
+//			updateTransactionNumConfirmations(tx, db);
+//		} catch(OWNoTransactionFoundException ntfe) {
+//			this.insertTx(tx, db);
+//		}
+//	}
+	
 	protected OWTransaction readTransactionByHash(OWCoin coinId, String hash, SQLiteDatabase db) {
 		if (hash == null) {
 			return null;
@@ -268,6 +272,25 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		}
 	}
 	
+	protected void updateTransactionNumConfirmations(OWTransaction tx, SQLiteDatabase db) throws OWNoTransactionFoundException {
+		try {
+			ContentValues values = new ContentValues();
+			values.put(COLUMN_NUM_CONFIRMATIONS, tx.getNumConfirmations());
+			ZLog.log(getWhereClaus(tx));
+			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
+					getWhereClaus(tx), null);
+			
+			if (numUpdated == 0) {
+				// Will happen when we try to do an update but not in there. 
+				// In this case an insert should be called. 
+				throw new OWNoTransactionFoundException("Error: No such entry.");
+			}
+		} catch (SQLiteException sqle) {
+			ZLog.log("Exception,,1,1,,11,!!!");
+			// throw new OWNoTransactionFoundException("Error: No such entry.");
+		}
+	}
+	
 	protected void updateTransactionNote(OWTransaction tx, SQLiteDatabase db) throws OWNoTransactionFoundException {
 		try {
 			ContentValues values = new ContentValues();
@@ -320,7 +343,9 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 		tx.setDisplayAddresses(this.parseDisplayAddresses(coinId, 
 				c.getString(c.getColumnIndex(COLUMN_DISPLAY_ADDRESSES)), db, correctTable));
-
+		
+		tx.setNumConfirmations(c.getInt(c.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
+		
 		return tx;
 
 	}

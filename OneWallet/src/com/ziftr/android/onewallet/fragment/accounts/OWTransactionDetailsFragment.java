@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
@@ -25,6 +26,10 @@ import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 public class OWTransactionDetailsFragment extends OWWalletUserFragment {
+
+	private static final String TX_ITEM_HASH_KEY = "txItemHash";
+
+	private static final String IS_EDITING_KEY = "isEditing";
 
 	private View rootView;
 	
@@ -42,18 +47,23 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		this.getOWMainActivity().hideWalletHeader();
 		
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
-		if (savedInstanceState != null && savedInstanceState.containsKey("isEditing")){
-			this.isEditing = savedInstanceState.getBoolean("isEditing");
+		if (savedInstanceState != null){
+				if (savedInstanceState.containsKey(IS_EDITING_KEY)){
+					this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
+				}
+				if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)){
+					this.txItem = getWalletManager().readTransactionByHash(this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+				}
 		}
-		ZLog.log("OncReateView");
-		this.txItem = getArguments().getParcelable("txItem");
+
 		this.initFields();
 		return this.rootView;
 	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState){
-		outState.putBoolean("isEditing", this.isEditing);
+		outState.putBoolean(IS_EDITING_KEY, this.isEditing);
+		outState.putString(TX_ITEM_HASH_KEY, this.txItem.getSha256Hash().toString());
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -96,7 +106,10 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
 				txItem.getFiatType(), OWUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt));
 		currency.setText(formattedfiatAmt.toPlainString());
-
+		
+		TextView confirmationFee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
+		confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
+		
 		TextView currencyType = (TextView) rootView.findViewById(R.id.currencyType);
 		currencyType.setText(this.txItem.getFiatType().getName());
 
@@ -117,36 +130,61 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		//TODO add confirmation fee field for OWWalletTransactionListItem
 		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
 		
-		TextView status = (TextView) rootView.findViewById(R.id.status);
-		status.setText("Confirmed (" + txItem.getNumConfirmations() + " of " + txItem.getCoinId().getNumRecommendedConfirmations() + ")");
-		
-		final ImageView editLabel = (ImageView) rootView.findViewById(R.id.edit_txn_note);
-		final EditText txnNote = (EditText) rootView.findViewById(R.id.txn_note);
-		editLabel.setOnClickListener(new OnClickListener() {
+		final ImageView editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
+		final EditText txNote = (EditText) rootView.findViewById(R.id.txn_note);
+		txNote.setText(txItem.getTxNote());
+		toggleEditNote(txNote, editLabelButton, !isEditing);
+		editLabelButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				if (!isEditing){
-					txnNote.setBackgroundResource(android.R.drawable.editbox_background_normal);
-					txnNote.setFocusable(true);
-					txnNote.setFocusableInTouchMode(true);
-					txnNote.requestFocus();
-					editLabel.setImageResource(R.drawable.close_enabled);
-					isEditing = true;
-				} else {
-					txnNote.setFocusable(false);
-					txnNote.setFocusableInTouchMode(false);
-					txnNote.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-					txnNote.setPadding(0, 0, 0, 0);
-					editLabel.setImageResource(R.drawable.edit_enabled);
-					isEditing = false;
-					txItem.setTxNote(txnNote.getText().toString());
-					getWalletManager().updateTransactionNote(txItem);
-
-				}
+				toggleEditNote(txNote, editLabelButton, isEditing);
 			}
 		});
+		
+		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
+		int confirmed = txItem.getNumConfirmations();
+		
+		TextView status = (TextView) rootView.findViewById(R.id.status);
+		status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
+		
+		TextView timeLeft = (TextView) rootView.findViewById(R.id.time_left);
+		int estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
+		timeLeft.setText("Estimate: " + estimatedTime + " Seconds");
+		
+		ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
+		progressBar.setMax(totalConfirmations);
+		progressBar.setProgress(confirmed);
+	}
+	
+	public void setTxItem(OWTransaction txItem){
+		this.txItem = txItem;
+	}
+	/**
+	 * 
+	 * @param txNote - EditText for note view
+	 * @param editLabelButton - ImageView for edit button
+	 * @param toggleOff - boolean to determine how to toggle
+	 */
+	public void toggleEditNote(EditText txNote, ImageView editLabelButton, boolean toggleOff){
+		if (!toggleOff){
+			txNote.setBackgroundResource(android.R.drawable.editbox_background_normal);
+			txNote.setFocusable(true);
+			txNote.setFocusableInTouchMode(true);
+			txNote.requestFocus();
+			editLabelButton.setImageResource(R.drawable.close_enabled);
+			isEditing = true;
+		} else {
+			txNote.setFocusable(false);
+			txNote.setFocusableInTouchMode(false);
+			txNote.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+			txNote.setPadding(0, 0, 0, 0);
+			editLabelButton.setImageResource(R.drawable.edit_enabled);
+			isEditing = false;
+			txItem.setTxNote(txNote.getText().toString());
+			getWalletManager().updateTransactionNote(txItem);
 
+		}
 	}
 
 }

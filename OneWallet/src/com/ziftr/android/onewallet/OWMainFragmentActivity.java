@@ -903,9 +903,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		if (fragToShow == null) {
 			fragToShow = new OWTransactionDetailsFragment();
 		}
-		Bundle b = new Bundle();
-		b.putParcelable("txItem", txItem);
-		fragToShow.setArguments(b);
+		fragToShow.setTxItem(txItem);
 		this.showFragment(fragToShow, OWTags.TXN_DETAILS, R.id.oneWalletBaseFragmentHolder, true, 
 				FragmentType.ACCOUNT_FRAGMENT_TYPE.toString() + "_INNER");
 	}

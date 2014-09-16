@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Locale;
 
 import android.annotation.SuppressLint;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
@@ -20,7 +18,7 @@ import com.ziftr.android.onewallet.util.OWFiat;
  * 
  * TODO do we need to add any of the functionality from Bitcoinj's TransactionOutput or TransactionInput?
  */
-public class OWTransaction implements OWSearchableListItem, Parcelable {
+public class OWTransaction implements OWSearchableListItem {
 
 	// Database stuff
 	
@@ -336,45 +334,4 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 		}
 	}
 	
-	@Override
-	public int describeContents() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(coinId.toString());
-		dest.writeString(fiatType.toString());
-		dest.writeString(txNote);
-		dest.writeLong(txTime);
-		dest.writeString(txAmount.toString());
-		dest.writeString(this.getTxViewType().toString());
-		dest.writeInt(resId);
-		dest.writeLong(getId());
-	}
-	
-	public static final Parcelable.Creator<OWTransaction> CREATOR = new Parcelable.Creator<OWTransaction>() {
-
-		@Override
-		public OWTransaction createFromParcel(Parcel source) {
-			source.setDataPosition(0);
-			OWTransaction txn = new OWTransaction( OWCoin.valueOf(source.readString()), 
-					OWFiat.valueOf(source.readString()), 
-					source.readString(), 
-					source.readLong(), 
-					new BigInteger(source.readString()), 
-					OWWalletTransactionListAdapter.Type.valueOf(source.readString()),
-					source.readInt());
-			txn.setId(source.readLong());
-			return txn;
-		}
-
-		@Override
-		public OWTransaction[] newArray(int size) {
-			return new OWTransaction[size];
-		}
-
-	};
-
 }

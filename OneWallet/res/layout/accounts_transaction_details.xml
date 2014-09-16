@@ -8,10 +8,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp" >
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/amount"
+            android:layout_marginLeft="@dimen/ow_txn_details_horizontal_margin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="1"
@@ -72,6 +73,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/ow_txn_details_horizontal_margin"
             android:orientation="horizontal" >
 
             <EditText
@@ -79,28 +81,26 @@
                 style="@style/txn_values"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/ow_edit_text_height"
-                android:enabled="true"
-                android:focusableInTouchMode="false"
-                android:focusable="false"
-                android:layout_toLeftOf="@+id/edit_txn_note"
                 android:background="@android:color/transparent"
+                android:enabled="true"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:inputType="text"
                 android:text="@string/Placeholder" />
-            
+
             <TextView
                 style="@style/txn_labels"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/txn_note"
                 android:text="@string/ow_tx_label" />
-            
+
             <ImageView
                 android:id="@+id/edit_txn_note"
                 android:layout_width="@dimen/ow_txt_largest"
                 android:layout_height="@dimen/ow_txt_largest"
-                android:layout_alignParentRight="true"
-                android:layout_alignTop="@+id/txn_note"
-                android:layout_marginTop="@dimen/ow_bordered_icon_margin"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
                 android:clickable="true"
                 android:padding="@dimen/ow_bordered_icon_margin"
                 android:src="@drawable/edit_enabled" />

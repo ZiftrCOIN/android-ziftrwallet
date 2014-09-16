@@ -403,23 +403,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	///////////////////////////////////////////////////////////
 	//////////  Interface for CRUDing transactions  ///////////
 	///////////////////////////////////////////////////////////
-	
-	/**
-	 * As part of the C in CRUD, this method adds a new transaction
-	 * to the correct table within our database.
-	 * 
-	 * Default values will be used in this method for the hahs, note, time, 
-	 * and numConfirmations.
-	 * 
-	 * @param coinId - The coin type to determine which table we use.
-	 * @param txAmount - See {@link OWTransaction}
-	 * @param txFee- See {@link OWTransaction}
-	 * @param displayAddress - See {@link OWTransaction}
-	 */
-	public void updateOrInsertTransaction(OWTransaction tx) {
-		this.transactionsTable.updateOrInsert(tx, this.getWritableDatabase());
-		
-	}
 
 	/**
 	 * As part of the C in CRUD, this method adds a new transaction
@@ -461,7 +444,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);
-		this.transactionsTable.updateOrInsert(tx, this.getWritableDatabase());
+		this.transactionsTable.insertTx(tx, getWritableDatabase());
 		return tx;
 	}
 
@@ -517,6 +500,10 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	public void updateTransaction(OWTransaction tx) {
 		this.transactionsTable.updateTransaction(tx, getWritableDatabase());
+	}
+	
+	public void updateTransactionNumConfirmations(OWTransaction tx) {
+		this.transactionsTable.updateTransactionNumConfirmations(tx, getReadableDatabase());
 	}
 
 

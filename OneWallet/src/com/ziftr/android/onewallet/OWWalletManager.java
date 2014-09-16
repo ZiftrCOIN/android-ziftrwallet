@@ -686,7 +686,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		List<OWTransaction> pendingTransactions = new ArrayList<OWTransaction>();
 		for (Transaction tx : this.walletMap.get(coinId).getPendingTransactions()) {
 			OWTransaction owTx = bitcoinjTransactionToOWTransaction(coinId, tx);
-			this.updateOrInsertTransaction(owTx);
 			ZLog.log("pending id: " + owTx.getId());
 			pendingTransactions.add(owTx);
 		}
@@ -717,7 +716,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			if (pendingTxHashes == null || (pendingTxHashes != null && 
 					!pendingTxHashes.contains(tx.getHashAsString()))) {
 				OWTransaction owTx = bitcoinjTransactionToOWTransaction(coinId, tx);
-				this.updateOrInsertTransaction(owTx);
 				ZLog.log("pending id: " + owTx.getId());
 				confirmedTransactions.add(owTx);
 			}
@@ -737,7 +735,15 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @return
 	 */
 	private OWTransaction bitcoinjTransactionToOWTransaction(OWCoin coinId, Transaction tx) {
-		OWTransaction owTx = new OWTransaction(
+
+		OWTransaction owTx = this.readTransactionByHash(coinId, tx.getHashAsString());
+
+		if (owTx != null) {
+			this.updateTransactionNumConfirmations(owTx);
+			return owTx;
+		}
+
+		owTx = new OWTransaction(
 				coinId, 
 				OWFiat.USD, 
 				tx.getHashAsString().substring(0, 6), 
