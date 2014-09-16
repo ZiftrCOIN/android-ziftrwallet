@@ -16,5 +16,7 @@ public class OWRequestCodes {
 	
 	public static final int VALIDATE_PASSPHRASE_DIALOG_NEW_KEY = 7;
 	
+	public static final int DEACTIVATE_WALLET = 8;
+	
 	
 }

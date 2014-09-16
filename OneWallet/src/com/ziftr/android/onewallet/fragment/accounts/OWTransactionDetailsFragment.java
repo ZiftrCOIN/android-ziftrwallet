@@ -33,7 +33,18 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	private View rootView;
 	private ImageView editLabelButton;
 	private EditText labelEditText;
-	
+	private TextView amount;
+	private TextView amountLabel;
+	private TextView timeLabel;
+	private TextView currency;
+	private TextView confirmationFee;
+	private TextView currencyType;
+	private TextView time;
+	private TextView routingAddress;
+	private TextView status;
+	private TextView timeLeft;
+	private ProgressBar progressBar;
+
 	private OWTransaction txItem;
 
 	private boolean isEditing;
@@ -56,6 +67,20 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 					this.txItem = getWalletManager().readTransactionByHash(this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
 				}
 		}
+		
+		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
+		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);
+		this.amount = (TextView) rootView.findViewById(R.id.amount);
+		this.amountLabel = (TextView) rootView.findViewById(R.id.amountLabel);
+		this.timeLabel = (TextView) rootView.findViewById(R.id.date_label);
+		this.currency = (TextView) rootView.findViewById(R.id.currencyValue);
+		this.confirmationFee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
+		this.currencyType = (TextView) rootView.findViewById(R.id.currencyType);
+		this.time = (TextView) rootView.findViewById(R.id.date);
+		this.routingAddress = (TextView) rootView.findViewById(R.id.routing_address);
+		this.status = (TextView) rootView.findViewById(R.id.status);
+		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
+		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 
 		this.initFields();
 		return this.rootView;
@@ -82,44 +107,53 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	 */
 	@SuppressLint("NewApi")
 	public void initFields() {
-		// TODO 
-		TextView amount = (TextView) rootView.findViewById(R.id.amount);
+		this.populateAmount();
+		this.populateCurrency();
+		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
+		this.currencyType.setText(this.txItem.getFiatType().getName());
+
+		Date date = new Date(this.txItem.getTxTime() * 1000);
+		this.time.setText(OWUtils.formatterNoTimeZone.format(date));
+		
+		this.populateRoutingAddress();
+		
+		this.labelEditText.setText(this.txItem.getTxNote());
+		this.editLabelButton.setOnClickListener(this);
+		
+		this.populatePendingInformation();
+		toggleEditNote(!isEditing);
+	}
+	
+	private void populateAmount(){
 		BigInteger baseAmount = this.txItem.getTxAmount();
 		BigDecimal amountValue = OWUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
-		amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
-		TextView amountLabel = (TextView) rootView.findViewById(R.id.amountLabel);
-		TextView timeLabel = (TextView) rootView.findViewById(R.id.date_label);
+		this.amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
+		
 		if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
 			// This means the tx is sent (relative to user)
-			amountLabel.setText("Amount Sent");
-			timeLabel.setText("Sent");
+			this.amountLabel.setText("Amount Sent");
+			this.timeLabel.setText("Sent");
 		} else {
 			// This means the tx is received (relative to user)
-			amountLabel.setText("Amount Received");
-			timeLabel.setText("Received");
+			this.amountLabel.setText("Amount Received");
+			this.timeLabel.setText("Received");
 		}
+		
 		if (txItem.isPending()) {
-			amount.setTextColor(getResources().getColor(R.color.Crimson));
-			amountLabel.append(" (pending)");
+			this.amount.setTextColor(getResources().getColor(R.color.Crimson));
+			this.amountLabel.append(" (pending)");
 		}
-		TextView currency = (TextView) rootView.findViewById(R.id.currencyValue);
+	}
+	
+	private void populateCurrency(){
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
 		BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
 				txItem.getFiatType(), OWUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt));
-		currency.setText(formattedfiatAmt.toPlainString());
-		
-		TextView confirmationFee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
-		confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
-		
-		TextView currencyType = (TextView) rootView.findViewById(R.id.currencyType);
-		currencyType.setText(this.txItem.getFiatType().getName());
-
-		TextView time = (TextView) rootView.findViewById(R.id.date);
-		Date date = new Date(this.txItem.getTxTime() * 1000);
-		time.setText(OWUtils.formatterNoTimeZone.format(date));
-		
-		TextView routingAddress = (TextView) rootView.findViewById(R.id.routing_address);
+		this.currency.setText(formattedfiatAmt.toPlainString());
+	}
+	
+	private void populateRoutingAddress(){
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {
 			OWAddress a = txItem.getDisplayAddresses().get(i);
@@ -129,26 +163,20 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 			}
 		}
 		routingAddress.setText(sb.toString());
-		
-		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
-		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);
-		this.labelEditText.setText(txItem.getTxNote());
-		toggleEditNote(!isEditing);
-		editLabelButton.setOnClickListener(this);
-		
+
+	}
+	
+	private void populatePendingInformation(){
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
 		int confirmed = txItem.getNumConfirmations();
 		
-		TextView status = (TextView) rootView.findViewById(R.id.status);
-		status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
+		this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
 		
-		TextView timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		int estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
-		timeLeft.setText(formatEstimatedTime(estimatedTime));
+		this.timeLeft.setText(formatEstimatedTime(estimatedTime));
 		
-		ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-		progressBar.setMax(totalConfirmations);
-		progressBar.setProgress(confirmed);
+		this.progressBar.setMax(totalConfirmations);
+		this.progressBar.setProgress(confirmed);
 	}
 	
 	public void setTxItem(OWTransaction txItem){
@@ -189,9 +217,9 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		}
 		int minutes = seconds/60;
 		seconds = seconds % 60;
-		sb.append (minutes + " minutes, ");
+		sb.append (minutes + " minutes");
 		if (seconds != 0){
-			sb.append(seconds + " seconds");
+			sb.append(seconds + ", seconds");
 		}
 		return sb.toString();
 	}

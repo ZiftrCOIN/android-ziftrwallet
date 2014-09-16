@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -20,7 +21,10 @@ import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
+import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 
@@ -151,7 +155,7 @@ public class OWAccountsFragment extends OWFragment {
 	 * of wallets on this accounts page. 
 	 */
 	@SuppressWarnings("unchecked")
-	protected void refreshListOfUserWallets() {
+	public void refreshListOfUserWallets() {
 		((ArrayAdapter<OWCurrencyListItem>) 
 				this.currencyListView.getAdapter()).notifyDataSetChanged();
 	}
@@ -164,7 +168,7 @@ public class OWAccountsFragment extends OWFragment {
 	private void initializeCurrencyListView() {
 		// Get the values from the manager and initialize the list view from them
 		this.userWallets = new ArrayList<OWCurrencyListItem>();
-		for (OWCoin type : this.walletManager.getAllUsersWalletTypes()) {
+		for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
 			this.userWallets.add(this.getItemForCoinType(type));
 		}
 		// The bar at the bottom
@@ -174,7 +178,7 @@ public class OWAccountsFragment extends OWFragment {
 		this.currencyListView = (ListView) 
 				this.rootView.findViewById(R.id.listOfUserWallets);
 		this.currencyListView.setAdapter(
-				new OWCurrencyListAdapter(this.mContext, userWallets));
+				new OWCurrencyListAdapter(this.mContext, this.userWallets));
 
 		this.currencyListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -205,6 +209,7 @@ public class OWAccountsFragment extends OWFragment {
 					return;
 				}
 
+
 				OWCurrencyListItem item = (OWCurrencyListItem) 
 						parent.getItemAtPosition(position);
 				// If we are using the test net network then we make sure the
@@ -214,8 +219,34 @@ public class OWAccountsFragment extends OWFragment {
 				}
 			}
 		});
+		
+		//Long click to deactivate wallet
+		this.currencyListView.setOnItemLongClickListener(new OnItemLongClickListener(){
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				//ignore if long click add new currency bar
+				if (currencyListView.getAdapter().getItemViewType(
+						position) == OWCurrencyListAdapter.footerType){
+					return false;
+				}
+				OWCurrencyListItem item = (OWCurrencyListItem) parent.getItemAtPosition(position);
+				Bundle b = new Bundle();
+				b.putString(OWCoin.TYPE_KEY, item.getCoinId().toString());
+				b.putInt("ITEM_LOCATION", position);
+				getOWMainActivity().alertConfirmation(OWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to de-activate this wallet?", 
+						OWTags.DEACTIVATE_WALLET, b);
+				return false;
+			}
+			
+		});
 
 	}
-
+	
+	public void removeFromView(int pos){
+		this.userWallets.remove(pos);
+		this.refreshListOfUserWallets();
+	}
 
 }

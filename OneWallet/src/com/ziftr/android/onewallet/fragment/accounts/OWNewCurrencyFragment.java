@@ -15,6 +15,7 @@ import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWTags;
 
 public class OWNewCurrencyFragment extends OWFragment {
 
@@ -63,7 +64,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
 				if (getOWMainActivity().userHasPassphrase()){
 					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY, b, 
-						"validate_passphrase_dialog_new_currency");
+						OWTags.VALIDATE_PASS_NEW_COIN);
 				} else {
 					getOWMainActivity().addNewCurrency(b);
 				}

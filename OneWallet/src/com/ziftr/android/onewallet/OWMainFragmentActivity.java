@@ -35,9 +35,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ziftr.android.onewallet.crypto.OWTransaction;
+import com.ziftr.android.onewallet.dialog.OWConfirmationDialog;
 import com.ziftr.android.onewallet.dialog.OWDialogFragment;
 import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.dialog.OWValidatePassphraseDialog;
+import com.ziftr.android.onewallet.dialog.handlers.OWConfirmationDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHandler;
@@ -68,7 +70,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler {
+public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler, OWConfirmationDialogHandler {
 
 	/*
 	--- TODO list for the OneWallet project ---
@@ -823,7 +825,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
 		// Make sure that this view only has wallets
 		// in it which the user do
-		for (OWCoin type : this.walletManager.getAllUsersWalletTypes()) {
+		for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
 			if (type == newItem) {
 				// Already in list, shouldn't ever get here though because
 				// we only show currencies in the dialog which we don't have
@@ -835,9 +837,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			// We can assume the wallet hasn't been set up yet
 			// or we wouldn't have gotten here 
 
-			if (walletManager.setUpWallet(newItem)) {
-				Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
-				this.onBackPressed();
+			if (!walletManager.walletHasBeenSetUp(newItem)) {
+				if (walletManager.setUpWallet(newItem)) {
+					Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
+					this.onBackPressed();
+				}
 			}
 		}
 	}
@@ -1032,6 +1036,21 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		alertUserDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
 		alertUserDialog.show(this.getSupportFragmentManager(), tag);
 	}
+	
+	public void alertConfirmation(int requestcode, String message, String tag, Bundle args){
+		OWConfirmationDialog confirmDialog = new OWConfirmationDialog();
+		
+		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
+		confirmDialog.setTargetFragment(null, requestcode);
+		confirmDialog.setArguments(args);
+		confirmDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
+		
+		if (!isShowingDialog()) {
+			confirmDialog.show(this.getSupportFragmentManager(), 
+					tag);
+		}
+	}
+	
 	/**
 	 * generate dialog to ask for passphrase
 	 * 
@@ -1070,6 +1089,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 			break;
 		case OWRequestCodes.RESET_PASSPHRASE_DIALOG:
 			// Nothing to do
+			break;
+		case OWRequestCodes.DEACTIVATE_WALLET:
+			//Nada
 			break;
 		}
 	}
@@ -1137,6 +1159,21 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 					+ "passphrase is still in place.", "wrong_re-enter_passphrase");
 		}
 	}
+	
+	@Override
+	public void handleConfirmationPositive(int requestCode, Bundle info){
+		switch(requestCode){
+		case OWRequestCodes.DEACTIVATE_WALLET:
+			OWCoin coinId = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
+			this.walletManager.updateTableActivitedStatus(coinId, OWSQLiteOpenHelper.DEACTIVATED);
+			this.walletManager.closeWallet(coinId);
+			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
+					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
+			frag.removeFromView(info.getInt("ITEM_LOCATION"));
+			break;
+		}
+	}
+	
 
 	@Override
 	public void handleNeutral(int requestCode) {

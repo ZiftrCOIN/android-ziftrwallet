@@ -28,6 +28,7 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -237,7 +238,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 						Bundle b = new Bundle();
 						b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
 						getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
-								"validate_passphrase_dialog_send");
+								OWTags.VALIDATE_PASS_SEND);
 					} else {
 						onClickSendCoins();
 					}

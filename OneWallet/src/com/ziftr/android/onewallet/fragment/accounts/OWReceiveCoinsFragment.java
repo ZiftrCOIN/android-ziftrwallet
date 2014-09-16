@@ -28,6 +28,7 @@ import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
+import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 
@@ -141,7 +142,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
 					getOWMainActivity().showGetPassphraseDialog(
 							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
-							"validate_passphrase_dialog_new_key");
+							OWTags.VALIDATE_PASS_RECEIVE);
 				} else {
 					loadAddressFromDatabase();
 				}

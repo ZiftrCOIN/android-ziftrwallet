@@ -173,12 +173,9 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		super(activity, databasePath);
 		this.activity = activity;
 
-		for (OWCoin enabledType : enabledCoinTypes) {
-			if (this.userHasCreatedWalletBefore(enabledType)) {
-				// TODO see java docs for this method. Is it okay to 
-				// have this called here? 
-				this.setUpWallet(enabledType);
-			}
+		List<OWCoin> list = readAllActivatedTypes();
+		for (OWCoin enabledType : list) {
+			this.setUpWallet(enabledType);
 		}
 	}
 
@@ -194,42 +191,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public boolean walletHasBeenSetUp(OWCoin id) {
 		// There is no add wallet method, so the only way
 		// a wallet can be added to the map is by setupWallet.
-		return walletMap.get(id) != null;
-	}
-
-	/** 
-	 * Returns a boolean describing whether the user has created a wallet
-	 * of the specified type before. This is not session specific as wallet.dat 
-	 * files (per bitcoinj) are saved on the device when wallets are created and
-	 * these files will still exist whether the wallet has been set up yet or not.
-	 *  
-	 * @param id - The type of coin wallet to test for
-	 * @return as above
-	 */
-	public boolean userHasCreatedWalletBefore(OWCoin id) {
-		if (this.walletHasBeenSetUp(id)) {
-			return true;
-		}
-
-		File externalDirectory = this.activity.getExternalFilesDir(null);
-		return (new File(externalDirectory, id.getShortTitle() + "_wallet.dat")).exists();
-	}
-
-	/**
-	 * Gives a list of all the coin types for which the user has created
-	 * a wallet before. i.e. all wallet types for which userHasCreatedWalletBefore()
-	 * will return true.
-	 * 
-	 * @return as above
-	 */
-	public List<OWCoin> getAllUsersWalletTypes() {
-		ArrayList<OWCoin> list = new ArrayList<OWCoin>();
-		for (OWCoin type : OWCoin.values()) {
-			if (this.userHasCreatedWalletBefore(type)) {
-				list.add(type);
-			}
-		}
-		return list;
+		return this.typeIsActivated(id) && walletMap.get(id) != null;
 	}
 
 	/**

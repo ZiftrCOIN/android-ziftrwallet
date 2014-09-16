@@ -85,7 +85,7 @@
                 android:enabled="true"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:inputType="text"
+                android:inputType="textNoSuggestions"
                 android:text="@string/Placeholder" />
 
             <TextView
@@ -178,7 +178,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignRight="@id/progress_bar"
                 android:layout_below="@id/progress_bar"
-                android:text="@string/ow_tx_details_sent" />
+                android:layout_marginRight="@dimen/ow_txn_details_horizontal_margin"
+                android:text="@string/ow_empty_string" />
         </RelativeLayout>
     </LinearLayout>
 
