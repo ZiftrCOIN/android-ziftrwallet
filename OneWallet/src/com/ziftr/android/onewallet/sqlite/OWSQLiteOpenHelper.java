@@ -535,11 +535,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return transactionsTable.readConfirmedTransactions(coinId, getReadableDatabase());
 	}
 
-	public void updateAddressNote(OWAddress address) {
-		if (address.isPersonalAddress()) {
-			this.receivingAddressesTable.updateAddressNote(address, getWritableDatabase());
+	public void updateAddressLabel(OWCoin coin, String address, String newLabel, boolean isReceiving) {
+		if (isReceiving) {
+			this.receivingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
 		} else {
-			this.sendingAddressesTable.updateAddressNote(address, getWritableDatabase());
+			this.sendingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
 		}
 	}
 

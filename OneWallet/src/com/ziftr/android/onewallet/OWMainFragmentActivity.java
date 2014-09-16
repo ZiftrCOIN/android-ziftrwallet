@@ -44,6 +44,7 @@ import com.ziftr.android.onewallet.dialog.handlers.OWValidatePassphraseDialogHan
 import com.ziftr.android.onewallet.fragment.OWAboutFragment;
 import com.ziftr.android.onewallet.fragment.OWContactFragment;
 import com.ziftr.android.onewallet.fragment.OWExchangeFragment;
+import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.fragment.OWSettingsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWAddressBookFragment;
@@ -331,6 +332,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 */
 	@Override
 	public void onBackPressed() {
+
+		OWFragment topFragment = (OWFragment) this.getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);	
+		if (topFragment != null && topFragment.handleBackPress()) {
+			return;
+		}
+
+
 		String curSelected = getCurrentlySelectedDrawerMenuOption();
 		if (curSelected == null) {
 			ZLog.log("No selected section... Why did this happen?");

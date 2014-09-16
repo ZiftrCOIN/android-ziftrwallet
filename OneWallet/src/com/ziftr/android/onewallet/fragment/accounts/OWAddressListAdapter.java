@@ -49,7 +49,7 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 
 		// Set top/bottom right text boxes to empty
 		TextView topLeft = (TextView) convertView.findViewById(R.id.topLeftTextView);
-		topLeft.setText(address.getNote());
+		topLeft.setText(address.getLabel());
 
 		// Set top/bottom right text boxes to empty
 		TextView bottomLeft = (TextView) convertView.findViewById(R.id.bottomLeftTextView);

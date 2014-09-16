@@ -15,4 +15,9 @@ public class OWFragment extends Fragment {
 	protected void hideWalletHeader() {
 		this.getOWMainActivity().getWalletHeaderBar().setVisibility(View.GONE);
 	}
+	
+	public boolean handleBackPress() {
+		return false;
+	}
+	
 }
