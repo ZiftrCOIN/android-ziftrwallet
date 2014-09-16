@@ -8,6 +8,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,7 +32,7 @@ import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 import com.ziftr.android.onewallet.util.ZLog;
 
-public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnClickListener {
+public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnClickListener, TextWatcher {
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
@@ -78,8 +80,10 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 		this.setQrCodeGenerated(false);
 
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
-		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressNameEditText);
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
+		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressNameEditText);
+		this.labelEditText.addTextChangedListener(this);
+		
 		
 		this.copyButton = this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
@@ -207,10 +211,6 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 					generateQrCode(false);
 					ZLog.log("onGlobalLayout");
 				}
-				
-//				if (!getAddressEditText().getText().toString().equals(addressToReceiveOn)) {
-//					getAddressEditText().setText(addressToReceiveOn);
-//				}
 			}
 		});
 	}
@@ -244,6 +244,21 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 				});
 			}
 		});
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		
 	}
 
 
