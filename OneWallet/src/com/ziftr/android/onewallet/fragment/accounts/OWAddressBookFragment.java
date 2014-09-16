@@ -3,6 +3,7 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import java.util.List;
 
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +16,7 @@ import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.util.ZLog;
 
-public abstract class OWAddressBookFragment extends OWWalletUserFragment implements TextWatcher {
+public class OWAddressBookFragment extends OWWalletUserFragment implements TextWatcher {
 
 	/** The root view for this application. */
 	private View rootView; 
@@ -25,7 +26,7 @@ public abstract class OWAddressBookFragment extends OWWalletUserFragment impleme
 	private OWAddressListAdapter addressAdapter;
 
 	public static final String INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY = "include_receiving";
-	
+
 	boolean includeReceivingNotSending;
 
 	@Override
@@ -33,7 +34,7 @@ public abstract class OWAddressBookFragment extends OWWalletUserFragment impleme
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, this, this.addressAdapter);
 	}
-	
+
 	@Override
 	public void onPause() {
 		this.getOWMainActivity().unregisterSearchBarTextWatcher(this);
@@ -44,7 +45,9 @@ public abstract class OWAddressBookFragment extends OWWalletUserFragment impleme
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		rootView = inflater.inflate(R.layout.currency_get_new_list, container, false);
+		rootView = inflater.inflate(R.layout.accounts_address_book, container, false);
+		
+		this.showWalletHeader();
 
 		initializeFromBundle(this.getArguments());
 
@@ -62,7 +65,7 @@ public abstract class OWAddressBookFragment extends OWWalletUserFragment impleme
 			addresses = this.getWalletManager().readAllSendingAddresses(getCurSelectedCoinType());
 		}
 		this.addressAdapter = new OWAddressListAdapter(this.getActivity(), addresses);
-		
+
 		this.addressListView = (ListView) this.rootView.findViewById(R.id.addressBookListView);
 		this.addressListView.setAdapter(this.addressAdapter);
 		this.addressListView.setOnItemClickListener(new OnItemClickListener() {
@@ -87,6 +90,25 @@ public abstract class OWAddressBookFragment extends OWWalletUserFragment impleme
 		if (args != null) {
 			this.includeReceivingNotSending = args.getBoolean(INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY);
 		}
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+			int arg3) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		// TODO Auto-generated method stub
+		this.addressAdapter.getFilter().filter(s);
 	}
 
 }

@@ -16,7 +16,6 @@ import android.widget.ListView;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
-import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -93,11 +92,6 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		ZLog.log("wallet manager: " + getWalletManager());
-		ZLog.log("coin: " + getCurSelectedCoinType());
-		if (getWalletManager() != null) {
-			ZLog.log("wallet: " + getWalletManager().getWallet(getCurSelectedCoinType()));
-		}
 		if (getWalletManager() == null || getWalletManager().getWallet(getCurSelectedCoinType()) == null) {
 			throw new IllegalArgumentException(
 					"Shouldn't happen, this is just a safety check because we "
@@ -106,7 +100,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 
 		rootView = inflater.inflate(R.layout.accounts_wallet, container, false);
 
-		this.initializeWalletHeaderView();
+		this.showWalletHeader();
 
 		this.initializeTxListView();
 

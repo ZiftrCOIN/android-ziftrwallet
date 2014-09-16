@@ -14,11 +14,14 @@ import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdap
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter.Type;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
+import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * This class is just a data holder for the {@link OWWalletTransactionListAdapter}.
  * 
  * TODO do we need to add any of the functionality from Bitcoinj's TransactionOutput or TransactionInput?
+ * 
+ * TODO delete the id field, just use hash
  */
 public class OWTransaction implements OWSearchableListItem, Parcelable {
 
@@ -263,6 +266,7 @@ public class OWTransaction implements OWSearchableListItem, Parcelable {
 	 */
 	public Boolean isPending() {
 		// TODO should this be -1 or 0?
+		ZLog.log("numConfs: " + this.numConfirmations);
 		return -1 <= this.numConfirmations && 
 				this.numConfirmations < this.coinId.getNumRecommendedConfirmations();
 	}

@@ -22,7 +22,7 @@ public class OWWelcomeFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.getOWMainActivity().hideWalletHeader();
+		this.hideWalletHeader();
 		
 		
 		View rootView = inflater.inflate(R.layout.welcome, container, false);

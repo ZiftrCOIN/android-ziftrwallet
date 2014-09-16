@@ -11,6 +11,30 @@
         android:duplicateParentState="true"
         android:orientation="vertical" >
 
+        <LinearLayout
+            android:id="@+id/addressNameLayout"
+            style="@style/send_receive_block_container_with_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/addressNameTitleTextView"
+                style="@style/send_receive_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ow_receive_coins_address_label_box_title" />
+
+            <EditText
+                android:id="@+id/addressNameEditText"
+                style="@style/send_receive_edit_text"
+                android:layout_width="match_parent"
+                android:inputType="textPersonName" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+
         <RelativeLayout
             android:id="@+id/addressValueLayout"
             style="@style/send_receive_block_container_with_background"
@@ -78,30 +102,6 @@
                 </EditText>
             </RelativeLayout>
         </RelativeLayout>
-
-        <LinearLayout
-            android:id="@+id/addressNameLayout"
-            style="@style/send_receive_block_container_with_background"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/addressNameTitleTextView"
-                style="@style/send_receive_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ow_receive_coins_address_label_box_title" />
-
-            <EditText
-                android:id="@+id/addressNameEditText"
-                style="@style/send_receive_edit_text"
-                android:layout_width="match_parent"
-                android:inputType="textPersonName" >
-
-                <requestFocus />
-            </EditText>
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/generateAddressQrCodeContainer"

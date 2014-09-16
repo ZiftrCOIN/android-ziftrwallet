@@ -72,7 +72,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 		// Initialize the icons so they do the correct things onClick
 		this.initializeAddressUtilityIcons();
 
-		this.initializeWalletHeaderView();
+		this.showWalletHeader();
 
 		return this.rootView;
 	}
@@ -142,6 +142,16 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment {
 
 					Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
 				}
+			}
+		});
+
+		// For the 'copy' button
+		View addressBookButton = this.rootView.findViewById(R.id.recallAddressFromHistoryIcon);
+		// Set the listener for the clicks
+		addressBookButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				getOWMainActivity().openAddressBook(true);
 			}
 		});
 	}

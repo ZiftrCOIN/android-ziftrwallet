@@ -21,7 +21,7 @@ public class OWSettingsFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.getOWMainActivity().hideWalletHeader();
+		this.hideWalletHeader();
 		
 		View rootView = inflater.inflate(R.layout.section_settings_layout, container, false);
 		Button resetPassword = (Button) rootView.findViewById(R.id.reset_password_button);

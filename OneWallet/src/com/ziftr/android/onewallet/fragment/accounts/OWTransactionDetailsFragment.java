@@ -25,20 +25,20 @@ import com.ziftr.android.onewallet.util.OWUtils;
 public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 
 	private View rootView;
-	
+
 	private OWTransaction txItem;
-	
+
 	private boolean isEditing;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		
+
 		//resize view when keyboard pops up instead of just default pan so user can see field more clearly
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-		
-		this.getOWMainActivity().hideWalletHeader();
-		
+
+		this.hideWalletHeader();
+
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
 		if (savedInstanceState != null && savedInstanceState.containsKey("isEditing")){
 			this.isEditing = savedInstanceState.getBoolean("isEditing");
@@ -47,13 +47,13 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 		this.initFields();
 		return this.rootView;
 	}
-	
+
 	@Override
 	public void onSaveInstanceState(Bundle outState){
 		outState.putBoolean("isEditing", this.isEditing);
 		super.onSaveInstanceState(outState);
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -103,11 +103,11 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment {
 
 		//TODO add confirmation fee field for OWWalletTransactionListItem
 		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
-		
+
 		final ImageView editLabel = (ImageView) rootView.findViewById(R.id.edit_routing_address_label);
 		final EditText routingAddressLabel = (EditText) rootView.findViewById(R.id.routing_address_label);
 		editLabel.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				if (!isEditing){

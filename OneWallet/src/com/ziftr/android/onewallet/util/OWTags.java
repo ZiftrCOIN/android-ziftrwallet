@@ -12,5 +12,7 @@ public class OWTags {
 	
 	public static final String ADD_CURRENCY = "add_new_currency";
 	
+	public static final String ADDRESS_BOOK = "address_book";
+	
 	
 }

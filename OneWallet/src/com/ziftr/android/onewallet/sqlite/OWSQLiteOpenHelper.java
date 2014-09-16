@@ -418,7 +418,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public void updateOrInsertTransaction(OWTransaction tx) {
 		this.transactionsTable.updateOrInsert(tx, this.getWritableDatabase());
-		
 	}
 
 	/**

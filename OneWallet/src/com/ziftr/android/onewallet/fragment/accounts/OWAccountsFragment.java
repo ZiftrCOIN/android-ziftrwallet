@@ -74,7 +74,7 @@ public class OWAccountsFragment extends OWFragment {
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		this.getOWMainActivity().hideWalletHeader();
+		this.hideWalletHeader();
 		
 		this.rootView = inflater.inflate(
 				R.layout.section_accounts_layout, container, false);

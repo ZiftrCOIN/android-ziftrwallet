@@ -190,7 +190,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 		return this.readTransactions(coinId, where.toString(), db);
 	}
-	
+
 	protected List<OWTransaction> readConfirmedTransactions(OWCoin coinId, SQLiteDatabase db) {
 
 		StringBuilder where = new StringBuilder("");
@@ -267,7 +267,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 			throw new OWNoTransactionFoundException("Error: No such entry.");
 		}
 	}
-	
+
 	protected void updateTransactionNote(OWTransaction tx, SQLiteDatabase db) throws OWNoTransactionFoundException {
 		try {
 			ContentValues values = new ContentValues();
@@ -275,18 +275,17 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 			ZLog.log(getWhereClaus(tx));
 			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
 					getWhereClaus(tx), null);
-			
+
 			if (numUpdated == 0) {
 				// Will happen when we try to do an update but not in there. 
 				// In this case an insert should be called. 
 				throw new OWNoTransactionFoundException("Error: No such entry.");
 			}
 		} catch (SQLiteException sqle) {
-			ZLog.log("Exception,,1,1,,11,!!!");
-			// throw new OWNoTransactionFoundException("Error: No such entry.");
+			throw new OWNoTransactionFoundException("Error: No such entry.");
 		}
 	}
-	
+
 	protected void deleteTransaction(OWTransaction tx, SQLiteDatabase db) {
 		if (tx.getId() == -1) {
 			// Shouldn't happen
@@ -328,7 +327,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	private ContentValues txToContentValues(OWTransaction tx) {
 		ContentValues values = new ContentValues();
 
-//		values.put(COLUMN_ID, tx.getId());
+		//		values.put(COLUMN_ID, tx.getId());
 		values.put(COLUMN_HASH, tx.getSha256Hash().toString());
 		values.put(COLUMN_AMOUNT, tx.getTxAmount().toString());
 		values.put(COLUMN_FEE, tx.getTxFee().toString());
@@ -361,7 +360,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		}
 
 	}
-	
+
 	private String getWhereClaus(OWTransaction tx) {
 		StringBuilder sb = new StringBuilder();
 		if (tx.getId() != -1) {
