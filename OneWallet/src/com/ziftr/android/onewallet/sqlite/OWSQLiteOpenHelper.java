@@ -537,19 +537,12 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	public void updateAddressNote(OWAddress address) {
 		if (address.isPersonalAddress()) {
-			this.updateReceivingAddressNote(address);
+			this.receivingAddressesTable.updateAddressNote(address, getWritableDatabase());
 		} else {
-			this.updateSendingAddressNote(address);
+			this.sendingAddressesTable.updateAddressNote(address, getWritableDatabase());
 		}
 	}
 
-	private void updateReceivingAddressNote(OWAddress address) {
-		this.receivingAddressesTable.updateAddressNote(address, getWritableDatabase());
-	}
-
-	private void updateSendingAddressNote(OWAddress address) {
-		this.sendingAddressesTable.updateAddressNote(address, getWritableDatabase());
-	}
 	
 	public void updateTransactionNote(OWTransaction tx) {
 		this.transactionsTable.updateTransactionNote(tx, getWritableDatabase());
