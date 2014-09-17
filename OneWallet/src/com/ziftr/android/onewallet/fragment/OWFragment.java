@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 
 import com.ziftr.android.onewallet.OWMainFragmentActivity;
-import com.ziftr.android.onewallet.util.ZLog;
 
 
 public class OWFragment extends Fragment {

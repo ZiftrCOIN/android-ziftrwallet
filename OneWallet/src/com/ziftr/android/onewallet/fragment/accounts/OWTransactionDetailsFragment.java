@@ -98,6 +98,8 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
 	}
 
+	
+	
 	/**
 	 * Get the arguments passed from the activity and set the text fields on the view
 	 * 

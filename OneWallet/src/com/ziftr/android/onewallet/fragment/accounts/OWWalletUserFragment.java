@@ -23,9 +23,14 @@ public abstract class OWWalletUserFragment extends OWFragment {
 	protected OWCoin getCurSelectedCoinType() {
 		return this.getOWMainActivity().getCurSelectedCoinType();
 	}
+	
 
-	protected void showWalletHeader() {
-		this.getOWMainActivity().getWalletHeaderBar().setVisibility(View.VISIBLE);
+	public View getHeaderView() {
+		return this.getOWMainActivity().findViewById(R.id.walletHeader);
 	}
 	
+	public void showWalletHeader() {
+		this.getOWMainActivity().showWalletHeader();
+	}
+		
 }

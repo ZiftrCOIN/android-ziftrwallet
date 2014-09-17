@@ -307,7 +307,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 					changeFiatStartedFromProgram = true;
 					fiatValEditText.setText(OWFiat.formatFiatAmount(
-							OWFiat.USD, newFiatVal).toPlainString());
+							OWFiat.USD, newFiatVal, false));
 					changeFiatStartedFromProgram = false;
 				}
 			}
@@ -388,7 +388,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
 		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCurSelectedCoinType());
-		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal).toPlainString() + ")");
+		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal, false) + ")");
 	}
 
 	/**
