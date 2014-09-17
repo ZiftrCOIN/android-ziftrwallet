@@ -106,7 +106,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 
 		rootView = inflater.inflate(R.layout.accounts_wallet, container, false);
 
-		this.initializeWalletHeaderView();
+		this.showWalletHeader();
 
 		this.initializeTxListView();
 

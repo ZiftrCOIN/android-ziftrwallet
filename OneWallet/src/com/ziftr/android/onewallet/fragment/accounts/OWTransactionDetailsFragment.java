@@ -48,7 +48,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 			this.isEditing = savedInstanceState.getBoolean("isEditing");
 		}
 		this.txItem = getArguments().getParcelable("txItem");
-		this.init_fields();
+		this.initFields();
 		return this.rootView;
 	}
 	
@@ -64,14 +64,15 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
 	}
 
+	
+	
 	/**
 	 * Get the arguments passed from the activity and set the text fields on the view
 	 * 
 	 * TODO the string constants should be public static final fields in this class. 
 	 *  
 	 */
-	@SuppressLint("NewApi")
-	public void init_fields() {
+	public void initFields() {
 
 		TextView amount = (TextView) rootView.findViewById(R.id.amount);
 		BigInteger baseAmount = this.txItem.getTxAmount();
@@ -95,9 +96,9 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		TextView currency = (TextView) rootView.findViewById(R.id.currencyValue);
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
-		BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
-				txItem.getFiatType(), OWUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt));
-		currency.setText(formattedfiatAmt.toPlainString());
+		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), OWUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
+		
+		currency.setText(formattedfiatAmt);
 
 		TextView currencyType = (TextView) rootView.findViewById(R.id.currencyType);
 		currencyType.setText(this.txItem.getFiatType().getName());

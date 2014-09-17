@@ -97,7 +97,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 		this.initializeQrCodeFromBundle(savedInstanceState);
 		ZLog.log("oncreate 2");
 
-		this.initializeWalletHeaderView();
+		this.showWalletHeader();
 
 		return this.rootView;
 	}

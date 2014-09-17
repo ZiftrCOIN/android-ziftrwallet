@@ -34,44 +34,13 @@ public abstract class OWWalletUserFragment extends OWFragment {
 		return this.getOWMainActivity().getCurSelectedCoinType();
 	}
 	
-	protected void initializeWalletHeaderView() {
-		OWCoin coinId = this.getOWMainActivity().getCurSelectedCoinType();
-		
-		View headerView = this.getOWMainActivity().findViewById(R.id.walletHeader);
-		headerView.setVisibility(View.VISIBLE);
-		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
-		Drawable coinImage = this.getActivity().getResources().getDrawable(
-				coinId.getLogoResId());
-		coinLogo.setImageDrawable(coinImage);
 
-		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
-		coinTitle.setText(coinId.getLongTitle());
-
-		TextView coinUnitPriceInFiatTextView = (TextView) 
-				headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = OWConverter.convert(
-				BigDecimal.ONE, coinId, OWFiat.USD);
-		coinUnitPriceInFiatTextView.setText(OWFiat.USD.getSymbol() + 
-				OWFiat.formatFiatAmount(OWFiat.USD, unitPriceInFiat).toPlainString());
-
-		TextView walletBalanceTextView = (TextView) 
-				headerView.findViewById(R.id.topRightTextView);
-		BigDecimal walletBallance = OWUtils.bigIntToBigDec(coinId, 
-				getWalletManager().getWalletBalance(coinId, OWSQLiteOpenHelper.BalanceType.ESTIMATED));
-		walletBalanceTextView.setText(
-				OWCoin.formatCoinAmount(coinId, walletBallance).toPlainString());
-
-		TextView walletBalanceFiatEquivTextView = (TextView) 
-				headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceFiatEquiv = OWConverter.convert(
-				walletBallance, coinId, OWFiat.USD);
-		walletBalanceFiatEquivTextView.setText(OWFiat.USD.getSymbol() + 
-				walletBalanceFiatEquiv.toPlainString());
-
-		ImageView marketIcon = (ImageView) (headerView.findViewById(R.id.rightIcon));
-		Drawable marketImage = this.getActivity().getResources().getDrawable(
-				R.drawable.stats_enabled);
-		marketIcon.setImageDrawable(marketImage);
+	public View getHeaderView() {
+		return this.getOWMainActivity().findViewById(R.id.walletHeader);
 	}
 	
+	public void showWalletHeader() {
+		this.getOWMainActivity().showWalletHeader();
+	}
+		
 }
