@@ -721,6 +721,10 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			addressStrings.add(to.getScriptPubKey().getToAddress(coinId.getNetworkParameters()).toString());
 		}
 
+		// Here we take the addresses that were used in the tx and only get the ones
+		// that were stored in the db. We need to do this because, for example, 
+		// if a tx is sent to us but has a change address (that isn't in our db) then we
+		// don't need that change address to be shown/saved.
 		boolean receiving = tx.getValue(this.getWallet(coinId)).compareTo(BigInteger.ZERO) > 0;
 		List<OWAddress> addresses = null;
 		if (receiving) {
@@ -728,8 +732,10 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			addresses = this.readSendingAddresses(coinId, addressStrings);
 		}
-
-		owTx.setDisplayAddresses(addresses);
+		
+		for (OWAddress a : addresses) {
+			owTx.addDisplayAddress(a.toString());
+		}
 
 		// TODO get this from settings
 		owTx.setFiatType(OWFiat.USD);
@@ -747,8 +753,8 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			String note = null;
 			for (OWAddress a : addresses) {
-				if (a.getNote() != null && !a.getNote().trim().isEmpty()) {
-					note = a.getNote();
+				if (a.getLabel() != null && !a.getLabel().trim().isEmpty()) {
+					note = a.getLabel();
 					break;
 				}
 			}
@@ -761,9 +767,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		// Get the tx's time
 		owTx.setTxTime(tx.getUpdateTime().getTime() / 1000);
-
-		log("Addresses!!: " + owTx.getAddressAsCommaListString());
-		log(owTx.getTxNote());
 
 		return owTx;
 	}

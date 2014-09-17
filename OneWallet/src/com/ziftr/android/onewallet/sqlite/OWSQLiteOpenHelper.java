@@ -417,7 +417,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param displayAddress - See {@link OWTransaction}
 	 */
 	public OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
-			BigInteger txFee, List<OWAddress> displayAddress) {
+			BigInteger txFee, List<String> displayAddress) {
 		return createTransaction(coinId, txAmount, txFee, 
 				displayAddress, new OWSha256Hash(""), "", -1);
 	}
@@ -435,7 +435,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param displayAddress - See {@link OWTransaction}
 	 */
 	public OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
-			BigInteger txFee, List<OWAddress> displayAddresses, OWSha256Hash hash, 
+			BigInteger txFee, List<String> displayAddresses, OWSha256Hash hash, 
 			String note, int numConfirmations) {
 		OWTransaction tx = new OWTransaction(coinId, OWFiat.USD, 
 				note, System.currentTimeMillis() / 100, txAmount, 
@@ -535,11 +535,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return transactionsTable.readConfirmedTransactions(coinId, getReadableDatabase());
 	}
 
-	public void updateAddressNote(OWAddress address) {
-		if (address.isPersonalAddress()) {
-			this.receivingAddressesTable.updateAddressNote(address, getWritableDatabase());
+	public void updateAddressLabel(OWCoin coin, String address, String newLabel, boolean isReceiving) {
+		if (isReceiving) {
+			this.receivingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
 		} else {
-			this.sendingAddressesTable.updateAddressNote(address, getWritableDatabase());
+			this.sendingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
 		}
 	}
 

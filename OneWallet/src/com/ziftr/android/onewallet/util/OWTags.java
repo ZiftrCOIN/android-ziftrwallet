@@ -1,5 +1,7 @@
 package com.ziftr.android.onewallet.util;
 
+import com.ziftr.android.onewallet.OWMainFragmentActivity.FragmentType;
+
 public class OWTags {
 	
 	//FRAGMENT TAGS
@@ -15,6 +17,12 @@ public class OWTags {
 	public static final String ADD_CURRENCY = "add_new_currency";
 	
 	public static final String ADDRESS_BOOK = "address_book";
+
+	public static final String ACCOUNTS_TAG = FragmentType.ACCOUNT_FRAGMENT_TYPE.toString();
+	
+	public static final String ACCOUNTS_INNER =  ACCOUNTS_TAG + "_INNER";
+	
+	public static final String DEACTIVATE_WALLET = "confirmation_dialog_deactivate";
 	
 	//DIALOG TAGS
 	public static final String VALIDATE_PASS_RECEIVE = "validate_passphrase_dialog_new_key";
@@ -22,6 +30,5 @@ public class OWTags {
 	public static final String VALIDATE_PASS_SEND = "validate_passphrase_dialog_send";
 	
 	public static final String VALIDATE_PASS_NEW_COIN = "validate_passphrase_dialog_new_currency";
-	
-	public static final String DEACTIVATE_WALLET = "confirmation_dialog_deactivate";
+
 }

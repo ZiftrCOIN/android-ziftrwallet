@@ -17,7 +17,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
@@ -156,8 +155,8 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	private void populateRoutingAddress(){
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {
-			OWAddress a = txItem.getDisplayAddresses().get(i);
-			sb.append(a.toString());
+			String a = txItem.getDisplayAddresses().get(i);
+			sb.append(a);
 			if (i != txItem.getDisplayAddresses().size()-1) {
 				sb.append("\n");
 			}

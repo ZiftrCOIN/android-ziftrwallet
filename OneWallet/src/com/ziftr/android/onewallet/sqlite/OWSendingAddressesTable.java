@@ -44,7 +44,7 @@ public class OWSendingAddressesTable extends OWAddressesTable {
 	protected ContentValues addressToContentValues(OWAddress address) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ADDRESS, address.toString());
-		values.put(COLUMN_NOTE, address.getNote());
+		values.put(COLUMN_NOTE, address.getLabel());
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());
 		//values.put(COLUMN_CREATION_TIMESTAMP, address.getCreationTimeSeconds());

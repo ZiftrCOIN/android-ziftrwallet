@@ -41,7 +41,6 @@ import com.ziftr.android.onewallet.util.ZLog;
  * should be interpreted. Whilst almost all addresses today are hashes of public keys, 
  * another (currently not fully supported type) can contain a hash of a script instead.</p>
  * 
- * TODO delete the id field, just use hash
  */
 public class OWAddress implements OWSearchableListItem {
 
@@ -245,7 +244,7 @@ public class OWAddress implements OWSearchableListItem {
 
 	@Override
 	public String toString() {
-		return Base58.encode(this.versionByte, this.hash160);
+		return this.getAddress();
 	}
 
 	///////////////////////////////////////////
@@ -269,8 +268,16 @@ public class OWAddress implements OWSearchableListItem {
 	/**
 	 * @return the note
 	 */
-	public String getNote() {
+	public String getLabel() {
 		return note;
+	}
+	
+	/**
+	 * Gets the publicly displayed base58 encoded version of this address
+	 * @return the public address as a String
+	 */
+	public String getAddress() {
+		return Base58.encode(this.versionByte, this.hash160);
 	}
 
 	/**
@@ -341,7 +348,11 @@ public class OWAddress implements OWSearchableListItem {
 	@SuppressLint("DefaultLocale")
 	@Override
 	public boolean matches(CharSequence constraint, OWSearchableListItem nextItem) {
-		return this.toString().toLowerCase(Locale.ENGLISH).contains(constraint.toString().toLowerCase());
+		boolean addressMatches = this.toString().toLowerCase(
+				Locale.ENGLISH).contains(constraint.toString().toLowerCase());
+		boolean labelMatches = this.getLabel().toLowerCase(
+				Locale.ENGLISH).contains(constraint.toString().toLowerCase());
+		return addressMatches || labelMatches;
 	}
 
 }

@@ -31,8 +31,9 @@ import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
+import com.ziftr.android.onewallet.util.ZLog;
 
-public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnClickListener, TextWatcher {
+public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implements OnClickListener, TextWatcher {
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
@@ -44,15 +45,11 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 
 	private EditText labelEditText;
 	private EditText addressEditText;
-	private View copyButton;
+	private ImageView copyButton;
 	private ImageView addressBookImageView;
 	private ImageView qrCodeImageView;
 	private View qrCodeContainer;
-
-
-	/** The address that will be displayed in the QR code and where others can send coins to us at. */
-	//private String addressToReceiveOn;
-
+	private View scrollView;
 
 	private boolean qrCodeGenerated = false;
 
@@ -75,6 +72,8 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		ZLog.log("receive on creat called");
+
 		this.setQrCodeGenerated(false);
 
 		this.initializeViewFields(inflater, container);
@@ -97,7 +96,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressNameEditText);
 		this.labelEditText.addTextChangedListener(this);
 
-		this.copyButton = this.rootView.findViewById(R.id.receiveCopyIcon);
+		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
 
 		this.qrCodeImageView = (ImageView) this.rootView.findViewById(R.id.generateAddressQrCodeImageView);
@@ -107,6 +106,8 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 		this.addressBookImageView.setOnClickListener(this);
 
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
+		
+		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 	}
 
 	@Override
@@ -148,9 +149,9 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 				}
 			}
 		} else if (v == this.addressBookImageView) {
-			getOWMainActivity().openAddressBook(true);
+			this.openAddressBook(true, R.id.receiveCoinBaseFrameLayout);
 		}
-		
+
 	}
 
 	private void generateQrCode(boolean withAnimation) {
@@ -190,8 +191,7 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 	 * @param newAddress
 	 */
 	private void initializeQrCodeFromBundle(Bundle savedInstanceState) {
-		String addressString = this.addressEditText.getText().toString();
-		if (addressString.length() > 0) {
+		if (this.fragmentHasAddress()) {
 			// We have to set it to be invisible temporarily to not have a blue flash,
 			// will be drawn correctly once we can get the measurement of the qr code
 			this.qrCodeContainer.setBackgroundColor(getResources().getColor(R.color.transparent));
@@ -255,8 +255,34 @@ public class OWReceiveCoinsFragment extends OWWalletUserFragment implements OnCl
 
 	@Override
 	public void afterTextChanged(Editable s) {
-
+		String address = this.addressEditText.getText().toString();
+		
+		ZLog.log("texted changed");
+		
+		if (address.length() > 0) {
+			ZLog.log("updated db");
+			String label = this.labelEditText.getText().toString();
+			getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
+		}
 	}
 
+	@Override
+	public void acceptAddress(String address, String label) {
+		// The order that the next two steps are done is actually important because the 
+		// label text box has this as a textwatcher which updates the database, and the 
+		// address has to be set before we know which address to update in the db.
+		// If the order were reversed here then we might changed the note on an 
+		// address that doesn't correspond.
+		addressEditText.setText(address);
+		labelEditText.setText(label);
+		this.setQrCodeGenerated(false);
+	}
+	
+	@Override
+	public void setVisibility(int visibility) {
+		this.scrollView.setVisibility(visibility);
+	}
 
 }
+
+
