@@ -2,6 +2,7 @@ package com.ziftr.android.onewallet.crypto;
 
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -74,13 +75,10 @@ public class OWTransaction implements OWSearchableListItem {
 	private int numConfirmations;
 	
 	/** 
-	 * The one address of all the output addresses that is most representative 
-	 * of this transaction. For sending txs, this will just be the address we 
-	 * sent coins to. For receiving txs, this will likely be the first in the list
-	 * of outputs that is an address that belongs to us.
+	 * The list of addresses that were used in this transaction. 
 	 * Should always be included in all creates.
 	 */
-	private List<OWAddress> displayAddresses;
+	private List<String> displayAddresses;
 	
 	// Viewing stuff
 
@@ -286,21 +284,22 @@ public class OWTransaction implements OWSearchableListItem {
 	/**
 	 * @return the displayAddress
 	 */
-	public List<OWAddress> getDisplayAddresses() {
+	public List<String> getDisplayAddresses() {
 		return displayAddresses;
 	}
 
 	/**
 	 * @param displayAddresses the displayAddress to set
 	 */
-	public void setDisplayAddresses(List<OWAddress> displayAddresses) {
+	public void setDisplayAddresses(List<String> displayAddresses) {
 		this.displayAddresses = displayAddresses;
 	}
 	
-	public void addDisplayAddress(OWAddress address) {
-		if (this.displayAddresses != null) {
-			this.displayAddresses.add(address);
+	public void addDisplayAddress(String address) {
+		if (this.displayAddresses == null) {
+			this.displayAddresses = new ArrayList<String>();
 		}
+		this.displayAddresses.add(address);
 	}
 	
 	public String getAddressAsCommaListString() {
@@ -309,8 +308,8 @@ public class OWTransaction implements OWSearchableListItem {
 		} else {
 			StringBuilder sb = new StringBuilder();
 			sb.append(",");
-			for (OWAddress address : this.getDisplayAddresses()) {
-				sb.append(address.toString()).append(",");
+			for (String address : this.getDisplayAddresses()) {
+				sb.append(address).append(",");
 			}
 			return sb.toString();
 		}

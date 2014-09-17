@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
 import com.ziftr.android.onewallet.R;
-import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
@@ -370,7 +369,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * 
 	 * @param displayAddressesStr
 	 */
-	private List<OWAddress> parseDisplayAddresses(OWCoin coinId, 
+	private List<String> parseDisplayAddresses(OWCoin coinId, 
 			String displayAddressesStr, SQLiteDatabase db, OWAddressesTable addressTable) {
 		if (displayAddressesStr == null || displayAddressesStr.trim().isEmpty()) {
 			return null;
@@ -380,7 +379,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 			for (String a : addressArr) {
 				displayAddresses.add(a);
 			}
-			return addressTable.readAddresses(coinId, displayAddresses, db);
+			return displayAddresses;
 		}
 
 	}

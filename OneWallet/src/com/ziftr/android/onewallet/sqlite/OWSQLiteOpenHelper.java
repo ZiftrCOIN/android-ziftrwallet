@@ -417,7 +417,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param displayAddress - See {@link OWTransaction}
 	 */
 	public OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
-			BigInteger txFee, List<OWAddress> displayAddress) {
+			BigInteger txFee, List<String> displayAddress) {
 		return createTransaction(coinId, txAmount, txFee, 
 				displayAddress, new OWSha256Hash(""), "", -1);
 	}
@@ -435,7 +435,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param displayAddress - See {@link OWTransaction}
 	 */
 	public OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
-			BigInteger txFee, List<OWAddress> displayAddresses, OWSha256Hash hash, 
+			BigInteger txFee, List<String> displayAddresses, OWSha256Hash hash, 
 			String note, int numConfirmations) {
 		OWTransaction tx = new OWTransaction(coinId, OWFiat.USD, 
 				note, System.currentTimeMillis() / 100, txAmount, 
