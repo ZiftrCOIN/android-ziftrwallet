@@ -59,7 +59,9 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment {
 	@Override
 	public boolean handleBackPress() {
 		boolean willSucceed = this.showingChildFragment();
-		this.returnToParentFragment();
+		if (willSucceed) {
+			this.returnToParentFragment();
+		}
 		return willSucceed;
 	}
 

@@ -119,6 +119,13 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	@Override
 	public void onResume() {
 		super.onResume();
+		this.setActionBar();
+	}
+
+	/**
+	 * Updates the action bar for this fragment.
+	 */
+	private void setActionBar() {
 		this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
 	}
 
@@ -198,8 +205,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 			this.qrCodeContainer.setVisibility(View.INVISIBLE);
 		} 
 
-		final ImageView imageLayout = this.qrCodeImageView;
-		final ViewTreeObserver viewObserver = imageLayout.getViewTreeObserver();
+		ViewTreeObserver viewObserver = qrCodeImageView.getViewTreeObserver();
 		viewObserver.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
@@ -236,6 +242,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 					public void run() {
 						String newAddress = address.toString();
 						addressEditText.setText(newAddress);
+						updateAddressLabelInDatabase();
 						generateQrCode(true);
 					}
 				});
@@ -255,13 +262,16 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		String address = this.addressEditText.getText().toString();
-		
-		ZLog.log("texted changed");
-		
-		if (address.length() > 0) {
-			ZLog.log("updated db");
+		updateAddressLabelInDatabase();
+	}
+
+	/**
+	 * A convenience method to update the database from this class.
+	 */
+	private void updateAddressLabelInDatabase() {
+		if (fragmentHasAddress()) {
 			String label = this.labelEditText.getText().toString();
+			String address = this.addressEditText.getText().toString();
 			getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
 		}
 	}
@@ -281,6 +291,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	@Override
 	public void setVisibility(int visibility) {
 		this.scrollView.setVisibility(visibility);
+		this.setActionBar();
 	}
 
 }

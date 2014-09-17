@@ -72,16 +72,24 @@ public abstract class OWSearchableListAdapter<T extends OWSearchableListItem> ex
 					}
 				}
 
-				workingList.clear();
+				List<T> searchResults = new ArrayList<T>();
+				searchResults.clear();
 				for (int i = (reversedSearchResult.size() - 1); i >= 0; i--) {
-					workingList.add(reversedSearchResult.get(i));
+					searchResults.add(reversedSearchResult.get(i));
 				}
-				return null;
+				
+				FilterResults fr = new FilterResults();
+				fr.count = searchResults.size();
+				fr.values = searchResults;
+				return fr;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			protected void publishResults(CharSequence constraint,
 					FilterResults results) {
+				workingList.clear();
+				workingList.addAll((List<T>) results.values); 
 				notifyDataSetChanged();
 			}
 
