@@ -8,16 +8,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:background="@color/White"
+        android:padding="10dp" >
 
-        <TextView
-            android:id="@+id/amount"
-            android:layout_marginLeft="@dimen/ow_txn_details_horizontal_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@color/DarkGray"
-            android:textSize="@dimen/ow_txt_largest" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+            
+            <ImageView
+                android:id="@+id/coin_logo"
+                android:layout_width="@dimen/ow_txt_largest"
+                android:layout_height="@dimen/ow_txt_largest"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:clickable="true"
+                android:padding="@dimen/ow_bordered_icon_margin"/>
+            
+            <TextView
+                android:id="@+id/amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/ow_txn_details_horizontal_margin"
+                android:maxLines="1"
+                android:textColor="@color/DarkGray"
+                android:textSize="@dimen/ow_txt_largest" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/amountLabel"
@@ -100,11 +115,10 @@
                 android:layout_width="@dimen/ow_txt_largest"
                 android:layout_height="@dimen/ow_txt_largest"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
+                android:layout_alignTop="@id/txn_note"
                 android:clickable="true"
                 android:padding="@dimen/ow_bordered_icon_margin"
                 android:src="@drawable/edit_enabled" />
-
         </RelativeLayout>
 
         <View

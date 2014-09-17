@@ -57,7 +57,7 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		
 		//Set the add button image
 		ImageView addImage = (ImageView) convertView.findViewById(R.id.rightIcon);
-		addImage.setImageDrawable(context.getResources().getDrawable(R.drawable.add_white_enabled));
+		addImage.setImageDrawable(context.getResources().getDrawable(R.drawable.next_down_2));
 
 		return convertView;
 	}

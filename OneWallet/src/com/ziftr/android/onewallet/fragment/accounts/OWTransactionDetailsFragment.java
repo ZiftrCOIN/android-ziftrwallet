@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import android.annotation.SuppressLint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +44,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	private TextView status;
 	private TextView timeLeft;
 	private ProgressBar progressBar;
+	private ImageView coinLogo;
 
 	private OWTransaction txItem;
 
@@ -80,7 +82,8 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.status = (TextView) rootView.findViewById(R.id.status);
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-
+		this.coinLogo = (ImageView) rootView.findViewById(R.id.coin_logo);
+		
 		this.initFields();
 		return this.rootView;
 	}
@@ -106,6 +109,12 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	 */
 	@SuppressLint("NewApi")
 	public void initFields() {
+		
+		Drawable coinImage = this.getResources().getDrawable(
+				this.getCurSelectedCoinType().getLogoResId());
+		this.coinLogo.setImageDrawable(coinImage);
+
+		
 		this.populateAmount();
 		this.populateCurrency();
 		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());

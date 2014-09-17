@@ -23,7 +23,8 @@
         android:id="@+id/headerBarDivider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/subActionBarDividerHeight"
-        android:background="@color/ow_ziftrWALLETBlue" />
+        android:alpha=".2"
+        android:background="@color/Black" />
 
     <!-- The drawer layout that contains the main fragment frame. -->
 

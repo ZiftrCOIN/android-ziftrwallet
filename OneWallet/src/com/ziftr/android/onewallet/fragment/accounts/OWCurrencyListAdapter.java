@@ -71,7 +71,7 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 			convertView = this.inflater.inflate(currencyListItem.getResId(), null);
 		}
 
-		if (getItemViewType(position) == OWCurrencyListAdapter.coinType) {
+//		if (getItemViewType(position) == OWCurrencyListAdapter.coinType) {
 			String fiatSymbol = currencyListItem.getFiatType().getSymbol();
 
 			// Whether or not we just created one, we reset all the resources
@@ -97,16 +97,12 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 			Drawable image = context.getResources().getDrawable(
 					currencyListItem.getCoinId().getLogoResId());
 			coinLogo.setImageDrawable(image);
-			
+
 			ImageView nextArrow = (ImageView) convertView.findViewById(R.id.rightIcon);
 			Drawable image2 = context.getResources().getDrawable(R.drawable.next_down_2);
 			nextArrow.setImageDrawable(image2);
-
-			return convertView;
-		} else {
-			// No changes necessary for footers, return the same view
-			return convertView;
-		}
+//		}
+		return convertView;
 
 	}
 }

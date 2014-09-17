@@ -52,6 +52,8 @@ public class OWNewCurrencyFragment extends OWFragment {
 				this.currencyList);
 		
 		ListView listView = (ListView) this.rootView.findViewById(R.id.currencyListView);
+		listView.addFooterView(this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null), null, false);
+		listView.setFooterDividersEnabled(false);
 		listView.setAdapter(this.currencyAdapter);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
