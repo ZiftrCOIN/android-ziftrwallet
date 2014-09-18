@@ -122,18 +122,11 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		this.setActionBar();
 	}
 
-	/**
-	 * Updates the action bar for this fragment.
-	 */
-	private void setActionBar() {
-		this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
-	}
-
 	@Override
 	public void onClick(View v) {
 
 		if(v == this.copyButton) {
-			if(this.addressEditText.getText().toString().length() > 0) {
+			if(this.fragmentHasAddress()) {
 				// Gets a handle to the clipboard service.
 				ClipboardManager clipboard = (ClipboardManager)
 						getActivity().getSystemService(Context.CLIPBOARD_SERVICE);

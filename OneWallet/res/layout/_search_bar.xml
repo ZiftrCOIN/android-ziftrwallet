@@ -4,27 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/ow_search_background"
+    android:gravity="right"
     android:orientation="horizontal"
-    android:visibility="gone"
-    android:padding="12dp" >
+    android:padding="12dp"
+    android:visibility="visible" >
 
     <EditText
         android:id="@+id/searchBarEditText"
+        style="@style/send_receive_edit_text"
         android:layout_width="0dp"
-        android:layout_height="@dimen/ow_searchBarEditText"
         android:layout_weight="1"
-        android:padding="9dp"
-        android:background="@color/White"
         android:inputType="text" />
 
     <ImageView
         android:id="@+id/clearSearchBarTextIcon"
-        android:layout_width="@dimen/ow_searchBarEditText"
-        android:layout_height="@dimen/ow_searchBarEditText"
+        android:layout_width="@dimen/ow_edit_text_height"
+        android:layout_height="@dimen/ow_edit_text_height"
         android:background="@drawable/clickable_menu_color"
         android:clickable="true"
         android:contentDescription="@string/ow_empty_string"
         android:padding="@dimen/ow_bordered_icon_margin"
+        android:scaleType="centerInside"
         android:src="@drawable/close_enabled" />
 
 </LinearLayout>
