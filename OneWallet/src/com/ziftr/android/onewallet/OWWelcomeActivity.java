@@ -25,8 +25,7 @@ public class OWWelcomeActivity extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase.getText().toString().getBytes());
-				Intent main = new Intent(OWWelcomeActivity.this, 
-						OWMainFragmentActivity.class);
+				Intent main = new Intent(OWWelcomeActivity.this, OWMainFragmentActivity.class);
 				main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 				main.putExtra("SET_PASSPHRASE", inputHash);
 				startActivity(main);
