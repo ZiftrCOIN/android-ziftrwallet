@@ -127,9 +127,10 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	
 	private void populateAmount(){
 		BigInteger baseAmount = this.txItem.getTxAmount();
-		BigDecimal amountValue = OWUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
-		this.amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
-		
+		BigDecimal amountValue = ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
+		amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
+		TextView amountLabel = (TextView) rootView.findViewById(R.id.amountLabel);
+		TextView timeLabel = (TextView) rootView.findViewById(R.id.date_label);
 		if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
 			// This means the tx is sent (relative to user)
 			this.amountLabel.setText("Amount Sent");
@@ -153,7 +154,12 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		
 		currency.setText(formattedfiatAmt);
 
-	}
+		TextView currencyType = (TextView) rootView.findViewById(R.id.currencyType);
+		currencyType.setText(this.txItem.getFiatType().getName());
+
+		TextView time = (TextView) rootView.findViewById(R.id.date);
+		Date date = new Date(this.txItem.getTxTime() * 1000);
+		time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 
 	private void populateRoutingAddress(){
 		StringBuilder sb = new StringBuilder();
