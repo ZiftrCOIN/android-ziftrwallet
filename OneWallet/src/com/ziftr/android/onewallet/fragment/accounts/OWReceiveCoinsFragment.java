@@ -116,12 +116,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		this.setActionBar();
-	}
-
-	@Override
 	public void onClick(View v) {
 
 		if(v == this.copyButton) {
@@ -283,6 +277,14 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	@Override
 	public void setVisibility(int visibility) {
 		this.scrollView.setVisibility(visibility);
+		if (visibility == View.VISIBLE) {
+			this.setActionBar();
+		}
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
 		this.setActionBar();
 	}
 

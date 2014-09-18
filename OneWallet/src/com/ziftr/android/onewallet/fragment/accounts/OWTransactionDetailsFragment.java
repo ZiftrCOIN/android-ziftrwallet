@@ -58,11 +58,11 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.hideWalletHeader();
 
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
-		if (savedInstanceState != null){
-			if (savedInstanceState.containsKey(IS_EDITING_KEY)){
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
 				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
 			}
-			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)){
+			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
 				this.txItem = getWalletManager().readTransactionByHash(this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
 			}
 		}
@@ -86,7 +86,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState){
+	public void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(IS_EDITING_KEY, this.isEditing);
 		outState.putString(TX_ITEM_HASH_KEY, this.txItem.getSha256Hash().toString());
 		super.onSaveInstanceState(outState);
@@ -145,7 +145,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		}
 	}
 
-	private void populateCurrency(){
+	private void populateCurrency() {
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
 		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
@@ -173,7 +173,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 
 	}
 
-	private void populatePendingInformation(){
+	private void populatePendingInformation() {
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
 		int confirmed = txItem.getNumConfirmations();
 
@@ -186,7 +186,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.progressBar.setProgress(confirmed);
 	}
 
-	public void setTxItem(OWTransaction txItem){
+	public void setTxItem(OWTransaction txItem) {
 		this.txItem = txItem;
 	}
 	/**
@@ -195,7 +195,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	 * @param editLabelButton - ImageView for edit button
 	 * @param toggleOff - boolean to determine how to toggle
 	 */
-	public void toggleEditNote(boolean toggleOff){
+	public void toggleEditNote(boolean toggleOff) {
 		if (!toggleOff) {
 			this.labelEditText.setBackgroundResource(android.R.drawable.editbox_background_normal);
 			this.labelEditText.setFocusable(true);
@@ -215,9 +215,9 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		}
 	}
 
-	public String formatEstimatedTime(int seconds){
+	public String formatEstimatedTime(int seconds) {
 		StringBuilder sb = new StringBuilder();
-		if (seconds > 3600){
+		if (seconds > 3600) {
 			int hours = seconds / 3600;
 			seconds = seconds % 3600;
 			sb.append(hours + " hours, ");
@@ -225,7 +225,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		int minutes = seconds/60;
 		seconds = seconds % 60;
 		sb.append (minutes + " minutes");
-		if (seconds != 0){
+		if (seconds != 0) {
 			sb.append(seconds + ", seconds");
 		}
 		return sb.toString();

@@ -164,10 +164,13 @@ ZiftrNetworkHandler {
 	private DrawerLayout menuDrawer;
 
 	/** Use this key to save which section of the drawer menu is open. */
-	private final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
+	private static final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
 
 	/** Use this key to save whether or not the header is visible (vs gone). */
-	private final String WALLET_HEADER_VISIBILITY_KEY = "WALLET_HEADER_VISIBILITY_KEY";
+	private static final String WALLET_HEADER_VISIBILITY_KEY = "WALLET_HEADER_VISIBILITY_KEY";
+	
+	/** Use this key to save whether or not the search bar is visible (vs gone). */
+	private static final String SEARCH_BAR_VISIBILITY_KEY = "SEARCH_BAR_VISIBILITY_KEY";
 
 	/** The main view that all of the fragments will be stored in. */
 	private View baseFragmentContainer;
@@ -284,7 +287,7 @@ ZiftrNetworkHandler {
 		this.initializeCoinType(savedInstanceState);
 
 		// Set up header and visibility of header
-		this.initializeWalletHeaderVisibility(savedInstanceState);
+		this.initializeHeaderViewsVisibility(savedInstanceState);
 
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
@@ -297,7 +300,6 @@ ZiftrNetworkHandler {
 
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
-		
 		
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
@@ -333,8 +335,9 @@ ZiftrNetworkHandler {
 		super.onSaveInstanceState(outState);
 
 		// Save which part of the app is currently open.
-		outState.putString(this.SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
-		outState.putInt(this.WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
+		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
+		outState.putInt(WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
+		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
 		if (this.getCurSelectedCoinType() != null) {
 			outState.putString(OWCoin.TYPE_KEY, this.getCurSelectedCoinType().toString());
 		}
@@ -613,19 +616,24 @@ ZiftrNetworkHandler {
 	private void initializeCoinType(Bundle args) {
 		if (args != null) {
 			if (args.getString(OWCoin.TYPE_KEY) != null) {
-				this.selectedCoin = OWCoin.valueOf(args.getString(OWCoin.TYPE_KEY));
+				// Need to do this so that we populate the wallet header view as well
+				this.setSelectedCoin(OWCoin.valueOf(args.getString(OWCoin.TYPE_KEY)));
 			}
 		}
 	}
 
-	private void initializeWalletHeaderVisibility(Bundle args) {
+	private void initializeHeaderViewsVisibility(Bundle args) {
 		if (args != null) {
 			if (args.getInt(WALLET_HEADER_VISIBILITY_KEY, -1) != -1) {
 				this.getWalletHeaderBar().setVisibility(args.getInt(WALLET_HEADER_VISIBILITY_KEY));
 			}
+			
+			if (args.getInt(SEARCH_BAR_VISIBILITY_KEY, -1) != -1) {
+				this.getSearchBar().setVisibility(args.getInt(SEARCH_BAR_VISIBILITY_KEY));
+			}
 		}
 	}
-
+	
 	private void initializeBaseFragmentContainer(Bundle savedInstanceState) {
 		// Set the base fragment container
 		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseHolder);
@@ -655,7 +663,7 @@ ZiftrNetworkHandler {
 		} else {
 			// Here we must make sure that the drawer menu is still
 			// showing which section of the app is currently open.
-			String prevSelectedSectionString = savedInstanceState.getString(this.SELECTED_SECTION_KEY);
+			String prevSelectedSectionString = savedInstanceState.getString(SELECTED_SECTION_KEY);
 			if (prevSelectedSectionString != null) {
 				FragmentType fragmentType = FragmentType.valueOf(prevSelectedSectionString);
 				if (fragmentType.getDrawerMenuView() != null) {
@@ -673,11 +681,10 @@ ZiftrNetworkHandler {
 		ActionBar actionbar = this.getActionBar();
 		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 		actionbar.setCustomView(R.layout._app_header_bar);
-
 	}
 
 	private void initializeSearchBarText() {
-		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
+		// Listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
 		final EditText searchEditText = (EditText) findViewById(R.id.searchBarEditText);
 		searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
@@ -1003,6 +1010,13 @@ ZiftrNetworkHandler {
 	public View getWalletHeaderBar() {
 		return this.findViewById(R.id.walletHeader);
 	}
+	
+	/**
+	 * @return the headerBar
+	 */
+	public View getSearchBar() {
+		return this.findViewById(R.id.searchBar);
+	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1217,6 +1231,15 @@ ZiftrNetworkHandler {
 	public void setSelectedCoin(OWCoin selectedCoin) {
 		this.selectedCoin = selectedCoin;
 	
+		this.populateWalletHeaderView();
+		
+	}
+
+	/**
+	 * Making this a separate method to increase abstraction and just in
+	 * case we ever need to call this by itself. 
+	 */
+	private void populateWalletHeaderView() {
 		//now that a coin type is set, setup the header view for it
 		//headerView.setVisibility(View.VISIBLE); //let fragments do this when they're displayed
 		
@@ -1243,7 +1266,6 @@ ZiftrNetworkHandler {
 		ImageView syncButton = (ImageView)headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button);
 		syncButton.setOnClickListener(this);
-		
 	}
 	
 
@@ -1327,7 +1349,7 @@ ZiftrNetworkHandler {
 		if (textWatcher != null) {
 			filterAccordingToVisibility(adapter);
 
-			this.specifySearchBarTextWatcher(textWatcher);
+			this.registerSearchBarTextWatcher(textWatcher);
 
 			final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
 
@@ -1378,7 +1400,7 @@ ZiftrNetworkHandler {
 		}
 	}
 
-	public void specifySearchBarTextWatcher(TextWatcher textWatcher) {
+	public void registerSearchBarTextWatcher(TextWatcher textWatcher) {
 		// called in onResume of all fragments that use the search bar
 		// Can, instead, also be called by calling the change action bar method
 		EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
