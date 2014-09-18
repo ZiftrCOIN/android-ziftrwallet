@@ -7,7 +7,7 @@
     android:gravity="right"
     android:orientation="horizontal"
     android:padding="12dp"
-    android:visibility="visible" >
+    android:visibility="gone" >
 
     <EditText
         android:id="@+id/searchBarEditText"

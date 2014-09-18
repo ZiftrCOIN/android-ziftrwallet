@@ -268,7 +268,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		if (this.walletMap.get(id) == null) {
 			this.walletMap.put(id, new Wallet(id.getNetworkParameters()));
 			try {
-				this.walletMap.get(id).addKey(new ECKey());
 				this.walletMap.get(id).saveToFile(this.walletFiles.get(id));
 			} catch (IOException e) {
 				log("Exception trying to save new wallet file: ", e);
@@ -732,7 +731,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			addresses = this.readSendingAddresses(coinId, addressStrings);
 		}
-		
+
 		for (OWAddress a : addresses) {
 			owTx.addDisplayAddress(a.toString());
 		}
