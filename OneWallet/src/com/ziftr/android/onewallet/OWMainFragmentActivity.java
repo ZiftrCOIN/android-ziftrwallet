@@ -181,6 +181,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	/** When the user navigates to different sections of the app, this */
 	private OWCoin curSelectedCoinType;
+	
+	/** reference to searchBarEditText */
+	private EditText searchEditText;
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -652,8 +655,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	private void initializeSearchBarText() {
 		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
-		final EditText searchEditText = (EditText) findViewById(R.id.searchBarEditText);
-		searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
+		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewById(R.id.ow_editText);
+		this.searchEditText.clearFocus();
+		this.searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1278,13 +1282,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 			this.specifySearchBarTextWatcher(textWatcher);
 
-			final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
-
 			View clearbutton = findViewById(R.id.clearSearchBarTextIcon);
 			clearbutton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					searchText.setText("");
+					searchEditText.setText("");
 				}
 
 			});
@@ -1300,7 +1302,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 					if (!searchBarIsVisible()) {
 						searchBar.setVisibility(View.VISIBLE);
-						searchText.requestFocus();
+						searchEditText.requestFocus();
 					} else {
 						searchBar.setVisibility(View.GONE);
 					}
@@ -1317,27 +1319,24 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 	private void filterAccordingToVisibility(
 			final OWSearchableListAdapter<? extends OWSearchableListItem> adapter) {
-		final EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
 		if (!searchBarIsVisible()) {
 			// Filter
 			adapter.getFilter().filter("");
 		} else {
 			// Stop filtering
-			adapter.getFilter().filter(searchText.getText());			
+			adapter.getFilter().filter(this.searchEditText.getText());			
 		}
 	}
 
 	public void specifySearchBarTextWatcher(TextWatcher textWatcher) {
 		// called in onResume of all fragments that use the search bar
 		// Can, instead, also be called by calling the change action bar method
-		EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
-		searchText.addTextChangedListener(textWatcher);
+		this.searchEditText.addTextChangedListener(textWatcher);
 	}
 
 	public void unregisterSearchBarTextWatcher(TextWatcher textWatcher) {
 		// TODO Called in onPause of all fragments that use the search bar
-		EditText searchText = (EditText) findViewById(R.id.searchBarEditText);
-		searchText.removeTextChangedListener(textWatcher);
+		this.searchEditText.removeTextChangedListener(textWatcher);
 	}
 
 	public boolean searchBarIsVisible() {

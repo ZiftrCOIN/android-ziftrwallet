@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/receiveCoinBaseFrameLayout"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <ScrollView
         android:id="@+id/receiveCoinsContainingScrollView"
@@ -18,10 +18,10 @@
             android:orientation="vertical" >
 
             <LinearLayout
-                android:id="@+id/addressNameLayout"
-                style="@style/send_receive_block_container_with_background"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/ow_horizontal_margin"
+                android:paddingRight="@dimen/ow_horizontal_margin"
                 android:orientation="vertical" >
 
                 <TextView
@@ -31,14 +31,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/ow_receive_coins_address_label_box_title" />
 
-                <EditText
-                    android:id="@+id/addressNameEditText"
-                    style="@style/send_receive_edit_text"
-                    android:layout_width="match_parent"
-                    android:inputType="textPersonName" >
-
-                    <requestFocus />
-                </EditText>
+                <include layout="@layout/_edit_text_shadow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/addressName"
+                     />
+                
             </LinearLayout>
 
             <RelativeLayout

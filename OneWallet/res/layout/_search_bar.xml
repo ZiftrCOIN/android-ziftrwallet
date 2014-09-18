@@ -1,30 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/searchBarContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/ow_search_background"
     android:orientation="horizontal"
-    android:visibility="gone"
-    android:padding="12dp" >
+    android:padding="12dp"
+    android:visibility="gone" >
 
-    <EditText
-        android:id="@+id/searchBarEditText"
+    <include
+        android:id="@+id/searchBarContainer"
         android:layout_width="0dp"
-        android:layout_height="@dimen/ow_searchBarEditText"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:padding="9dp"
-        android:background="@color/White"
-        android:inputType="text" />
+        layout="@layout/_edit_text_shadow" />
 
     <ImageView
         android:id="@+id/clearSearchBarTextIcon"
-        android:layout_width="@dimen/ow_searchBarEditText"
-        android:layout_height="@dimen/ow_searchBarEditText"
-        android:background="@drawable/clickable_menu_color"
+        android:layout_width="@dimen/ow_total_icon_side_length"
+        android:layout_height="@dimen/ow_total_icon_side_length"
+        android:layout_marginLeft="@dimen/ow_quarter_icon_size"
         android:clickable="true"
         android:contentDescription="@string/ow_empty_string"
-        android:padding="@dimen/ow_bordered_icon_margin"
-        android:src="@drawable/close_enabled" />
+        android:padding="@dimen/ow_borderless_icon_margin"
+        android:src="@drawable/button_cancel" />
 
 </LinearLayout>

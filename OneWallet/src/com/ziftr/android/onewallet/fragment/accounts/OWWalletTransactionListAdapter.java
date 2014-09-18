@@ -144,4 +144,14 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 		return imgResId;
 	}
 	
+	//we don't want the dividers to be enabled
+	@Override
+	public boolean isEnabled(int position){
+		if (getItemViewType(position) == Type.PENDING_DIVIDER.ordinal() || getItemViewType(position) == Type.HISTORY_DIVIDER.ordinal() ){
+			return false;
+		} else {
+			return super.isEnabled(position);
+		}
+	}
+	
 }

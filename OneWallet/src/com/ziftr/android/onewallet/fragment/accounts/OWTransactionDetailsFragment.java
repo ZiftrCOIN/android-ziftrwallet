@@ -202,14 +202,14 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 			this.labelEditText.setFocusable(true);
 			this.labelEditText.setFocusableInTouchMode(true);
 			this.labelEditText.requestFocus();
-			editLabelButton.setImageResource(R.drawable.close_enabled);
+			editLabelButton.setImageResource(R.drawable.button_cancel);
 			isEditing = true;
 		} else {
 			this.labelEditText.setFocusable(false);
 			this.labelEditText.setFocusableInTouchMode(false);
 			this.labelEditText.setBackgroundColor(getResources().getColor(android.R.color.transparent));
 			this.labelEditText.setPadding(0, 0, 0, 0);
-			editLabelButton.setImageResource(R.drawable.edit_enabled);
+			editLabelButton.setImageResource(R.drawable.button_edit_pencil);
 			isEditing = false;
 			txItem.setTxNote(this.labelEditText.getText().toString());
 			getWalletManager().updateTransactionNote(txItem);
