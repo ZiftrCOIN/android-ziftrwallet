@@ -44,7 +44,7 @@ import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdap
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /** 
@@ -394,7 +394,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * 
 	 */
 	private void beginSyncWithNetwork(final OWCoin id) {
-		OWUtils.runOnNewThread(new Runnable() {
+		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 

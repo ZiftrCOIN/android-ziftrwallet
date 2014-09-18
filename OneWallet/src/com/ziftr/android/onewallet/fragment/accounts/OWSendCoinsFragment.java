@@ -28,7 +28,7 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -248,9 +248,9 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	public void onClickSendCoins() {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = OWUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
 				getAmountToSendFromEditText());
-		BigInteger feeSending = OWUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
 				getFeeFromEditText());
 		try {
 			getWalletManager().sendCoins(getCurSelectedCoinType(), getSendToAddressEditText().getText().toString(), 

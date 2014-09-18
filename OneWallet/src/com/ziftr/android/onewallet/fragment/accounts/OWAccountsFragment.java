@@ -20,7 +20,7 @@ import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 
@@ -116,7 +116,7 @@ public class OWAccountsFragment extends OWFragment {
 			return new OWCurrencyListItem(OWCoin.BTC, OWFiat.USD, 
 					"620.00", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.BTC_TEST) {
-			String balance = OWUtils.bitcoinValueToFriendlyString(
+			String balance = ZiftrUtils.bitcoinValueToFriendlyString(
 					this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
 			return new OWCurrencyListItem(OWCoin.BTC_TEST, OWFiat.USD, 
 					"0.00", balance, "0.00", resId);

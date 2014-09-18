@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWWelcomeActivity extends FragmentActivity{
 	@Override
@@ -27,7 +27,7 @@ public class OWWelcomeActivity extends FragmentActivity{
 			@Override
 			public void onClick(View v) {
 				if (saved.isChecked()){
-				byte[] inputHash = OWUtils.Sha256Hash(passphrase.getText().toString().getBytes());
+				byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase.getText().toString().getBytes());
 		    	Intent main = new Intent(OWWelcomeActivity.this, 
 		    			OWMainFragmentActivity.class);
 		    	main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

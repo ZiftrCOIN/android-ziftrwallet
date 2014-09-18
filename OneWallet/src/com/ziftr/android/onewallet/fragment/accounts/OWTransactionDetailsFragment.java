@@ -23,7 +23,7 @@ import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWTransactionDetailsFragment extends OWFragment {
 
@@ -76,7 +76,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 
 		TextView amount = (TextView) rootView.findViewById(R.id.amount);
 		BigInteger baseAmount = this.txItem.getTxAmount();
-		BigDecimal amountValue = OWUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
+		BigDecimal amountValue = ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
 		amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
 		TextView amountLabel = (TextView) rootView.findViewById(R.id.amountLabel);
 		TextView timeLabel = (TextView) rootView.findViewById(R.id.date_label);
@@ -96,7 +96,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 		TextView currency = (TextView) rootView.findViewById(R.id.currencyValue);
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
-		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), OWUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
+		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
 		
 		currency.setText(formattedfiatAmt);
 
@@ -105,7 +105,7 @@ public class OWTransactionDetailsFragment extends OWFragment {
 
 		TextView time = (TextView) rootView.findViewById(R.id.date);
 		Date date = new Date(this.txItem.getTxTime() * 1000);
-		time.setText(OWUtils.formatterNoTimeZone.format(date));
+		time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 
 		//TODO add confirmation fee field for OWWalletTransactionListItem
 		//TextView fee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);

@@ -33,7 +33,7 @@ import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedLongs;
 import com.ziftr.android.onewallet.crypto.OWVarInt;
 
-public class OWUtils {
+public class ZiftrUtils {
 
 	private static final ExecutorService threadService = Executors.newCachedThreadPool();
 

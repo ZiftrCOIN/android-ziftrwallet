@@ -10,7 +10,7 @@ import com.ziftr.android.onewallet.crypto.OWECKey;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWReceivingAddressesTable extends OWAddressesTable {
 
@@ -48,7 +48,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		String encodedPrivKey = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
 		// TODO deal with encryption
 		byte[] wifPrivKeyBytes = Base58.decodeChecked(encodedPrivKey);
-		OWECKey newKey = new OWECKey(new BigInteger(1, OWUtils.stripVersionAndChecksum(wifPrivKeyBytes)));
+		OWECKey newKey = new OWECKey(new BigInteger(1, ZiftrUtils.stripVersionAndChecksum(wifPrivKeyBytes)));
 		OWAddress newAddress = new OWAddress(coinId, newKey);
 
 		// Reset all the address' parameters for use elsewhere
@@ -68,7 +68,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		// TODO deal with encryption
 		values.put(COLUMN_PRIV_KEY, Base58.encode(
 				address.getCoinId().getPrivKeyPrefix(), address.getKey().getPrivKeyBytesForAddressEncoding()));
-		values.put(COLUMN_PUB_KEY, OWUtils.bytesToHexString(address.getKey().getPubKey()));
+		values.put(COLUMN_PUB_KEY, ZiftrUtils.bytesToHexString(address.getKey().getPubKey()));
 		values.put(COLUMN_ADDRESS, Base58.encode(address.getCoinId().getPubKeyHashPrefix(), address.getHash160()));
 		values.put(COLUMN_NOTE, address.getLabel());
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
