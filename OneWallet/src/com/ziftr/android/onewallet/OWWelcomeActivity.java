@@ -25,14 +25,12 @@ public class OWWelcomeActivity extends FragmentActivity{
 		setPassword.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (saved.isChecked()){
 				byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase.getText().toString().getBytes());
 		    	Intent main = new Intent(OWWelcomeActivity.this, 
 		    			OWMainFragmentActivity.class);
 		    	main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		    	main.putExtra("SET_PASSPHRASE", inputHash);
 		        startActivity(main);
-				}
 			}
 		});
 		

@@ -108,15 +108,8 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
-			
-
-		ZLog.log("oncreate 1");
-		this.initializeQrCodeFromBundle(savedInstanceState);
-		ZLog.log("oncreate 2");
 
 		this.showWalletHeader();
-
-		return this.rootView;
 	}
 
 	@Override

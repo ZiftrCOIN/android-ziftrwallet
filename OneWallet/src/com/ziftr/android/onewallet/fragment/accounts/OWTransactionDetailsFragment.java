@@ -114,7 +114,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.currencyType.setText(this.txItem.getFiatType().getName());
 
 		Date date = new Date(this.txItem.getTxTime() * 1000);
-		this.time.setText(OWUtils.formatterNoTimeZone.format(date));
+		this.time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 		
 		this.populateRoutingAddress();
 		
@@ -160,6 +160,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		TextView time = (TextView) rootView.findViewById(R.id.date);
 		Date date = new Date(this.txItem.getTxTime() * 1000);
 		time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
+	}
 
 	private void populateRoutingAddress(){
 		StringBuilder sb = new StringBuilder();

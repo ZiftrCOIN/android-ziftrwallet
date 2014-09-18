@@ -73,7 +73,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler, OWConfirmationDialogerHandler, OnClickListener, ZiftrNetworkHandler {
+public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler, OWConfirmationDialogHandler, OnClickListener, ZiftrNetworkHandler {
 
 	/*
 	--- TODO list for the OneWallet project ---

@@ -3,6 +3,7 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import android.view.View;
 
 import com.ziftr.android.onewallet.OWWalletManager;
+import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
