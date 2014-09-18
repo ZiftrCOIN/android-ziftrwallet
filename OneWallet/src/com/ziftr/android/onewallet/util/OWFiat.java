@@ -66,9 +66,17 @@ public class OWFiat implements OWCurrency {
 	 * @param toFormat - The BigDecimal to format.
 	 * @return as above
 	 */
-	public static BigDecimal formatFiatAmount(OWFiat type, BigDecimal toFormat) {
-		return OWUtils.formatToNDecimalPlaces(
-				type.getNumberOfDigitsOfPrecision(), toFormat);
+	public static String formatFiatAmount(OWFiat fiat, BigDecimal toFormat, boolean includeSymbols) {
+
+		String formattedString = "";
+		
+		if(includeSymbols) {
+			formattedString += fiat.getSymbol();
+		}
+		
+		formattedString += ZiftrUtils.formatToNDecimalPlaces(fiat.getNumberOfDigitsOfPrecision(), toFormat).toPlainString();
+
+		return formattedString;
 	}
 
 }

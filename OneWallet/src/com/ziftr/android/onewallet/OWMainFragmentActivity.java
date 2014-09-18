@@ -1,6 +1,7 @@
 package com.ziftr.android.onewallet;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,7 +15,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -56,21 +56,26 @@ import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.onewallet.network.ZiftrNetworkHandler;
+import com.ziftr.android.onewallet.network.ZiftrNetworkManager;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
-import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * This is the main activity of the OneWallet application. It handles
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler, OWConfirmationDialogHandler {
+public class OWMainFragmentActivity extends ActionBarActivity 
+implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, 
+OWResetPassphraseDialogHandler, OWConfirmationDialogHandler, OnClickListener, 
+ZiftrNetworkHandler {
 
 	/*
 	--- TODO list for the OneWallet project ---
@@ -159,10 +164,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	private DrawerLayout menuDrawer;
 
 	/** Use this key to save which section of the drawer menu is open. */
-	private final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
+	private static final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
 
 	/** Use this key to save whether or not the header is visible (vs gone). */
-	private final String WALLET_HEADER_VISIBILITY_KEY = "WALLET_HEADER_VISIBILITY_KEY";
+	private static final String WALLET_HEADER_VISIBILITY_KEY = "WALLET_HEADER_VISIBILITY_KEY";
+	
+	/** Use this key to save whether or not the search bar is visible (vs gone). */
+	private static final String SEARCH_BAR_VISIBILITY_KEY = "SEARCH_BAR_VISIBILITY_KEY";
 
 	/** The main view that all of the fragments will be stored in. */
 	private View baseFragmentContainer;
@@ -179,11 +187,16 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
-	/** When the user navigates to different sections of the app, this */
-	private OWCoin curSelectedCoinType;
 	
 	/** reference to searchBarEditText */
 	private EditText searchEditText;
+	
+	private OWCoin selectedCoin;
+	
+	/**
+	 * The view that contains all the info for the currently selected coin
+	 */
+	private View headerView;
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -262,6 +275,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
+		this.headerView = this.findViewById(R.id.walletHeader);
 
 		//Get passphrase from welcome screen if exists
 		Bundle info = getIntent().getExtras();
@@ -276,7 +290,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		this.initializeCoinType(savedInstanceState);
 
 		// Set up header and visibility of header
-		this.initializeWalletHeaderVisibility(savedInstanceState);
+		this.initializeHeaderViewsVisibility(savedInstanceState);
 
 		// Set up the drawer and the menu button
 		this.initializeDrawerLayout();
@@ -289,6 +303,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
+		
+		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
 	/**
@@ -322,8 +338,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		super.onSaveInstanceState(outState);
 
 		// Save which part of the app is currently open.
-		outState.putString(this.SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
-		outState.putInt(this.WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
+		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
+		outState.putInt(WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
+		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
 		if (this.getCurSelectedCoinType() != null) {
 			outState.putString(OWCoin.TYPE_KEY, this.getCurSelectedCoinType().toString());
 		}
@@ -372,6 +389,18 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		OWWalletManager.closeInstance();
 		super.onDestroy();
 	}
+	
+	
+
+	@Override
+	public void onClick(View v) {
+		if(v.getId() == R.id.rightIcon) {
+			//start sync
+		}
+	}
+	
+	
+	
 
 	/**
 	 * Starts a new fragment in the main layout space depending
@@ -590,19 +619,24 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	private void initializeCoinType(Bundle args) {
 		if (args != null) {
 			if (args.getString(OWCoin.TYPE_KEY) != null) {
-				this.setCurSelectedCoinType(OWCoin.valueOf(args.getString(OWCoin.TYPE_KEY)));
+				// Need to do this so that we populate the wallet header view as well
+				this.setSelectedCoin(OWCoin.valueOf(args.getString(OWCoin.TYPE_KEY)));
 			}
 		}
 	}
 
-	private void initializeWalletHeaderVisibility(Bundle args) {
+	private void initializeHeaderViewsVisibility(Bundle args) {
 		if (args != null) {
 			if (args.getInt(WALLET_HEADER_VISIBILITY_KEY, -1) != -1) {
 				this.getWalletHeaderBar().setVisibility(args.getInt(WALLET_HEADER_VISIBILITY_KEY));
 			}
+			
+			if (args.getInt(SEARCH_BAR_VISIBILITY_KEY, -1) != -1) {
+				this.getSearchBar().setVisibility(args.getInt(SEARCH_BAR_VISIBILITY_KEY));
+			}
 		}
 	}
-
+	
 	private void initializeBaseFragmentContainer(Bundle savedInstanceState) {
 		// Set the base fragment container
 		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseHolder);
@@ -632,7 +666,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		} else {
 			// Here we must make sure that the drawer menu is still
 			// showing which section of the app is currently open.
-			String prevSelectedSectionString = savedInstanceState.getString(this.SELECTED_SECTION_KEY);
+			String prevSelectedSectionString = savedInstanceState.getString(SELECTED_SECTION_KEY);
 			if (prevSelectedSectionString != null) {
 				FragmentType fragmentType = FragmentType.valueOf(prevSelectedSectionString);
 				if (fragmentType.getDrawerMenuView() != null) {
@@ -650,7 +684,6 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		ActionBar actionbar = this.getActionBar();
 		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 		actionbar.setCustomView(R.layout._app_header_bar);
-
 	}
 
 	private void initializeSearchBarText() {
@@ -768,12 +801,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param inputHash - The new passphrase's Sha256 hash
 	 */
 	public void setPassphraseHash(byte[] inputHash) {
-		SharedPreferences prefs = this.getSharedPreferences(
-				PASSPHRASE_KEY, Context.MODE_PRIVATE);
+		SharedPreferences prefs = this.getSharedPreferences(PASSPHRASE_KEY, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
-		editor.putString(
-				PASSPHRASE_KEY, 
-				OWUtils.bytesToHexString(inputHash));
+		editor.putString(PASSPHRASE_KEY, ZiftrUtils.bytesToHexString(inputHash));
 		editor.commit();
 	}
 
@@ -790,7 +820,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		String storedPassphrase = prefs.getString(PASSPHRASE_KEY, null);
 		// If it's not null, convert it back to a byte array
 		byte[] storedHash = (storedPassphrase == null) ?
-				null : OWUtils.hexStringToBytes(storedPassphrase);
+				null : ZiftrUtils.hexStringToBytes(storedPassphrase);
 		// Return the result
 		return storedHash;
 	}
@@ -861,7 +891,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param typeOfWalletToStart
 	 */
 	public void openWalletView(OWCoin typeOfWalletToStart) {
-		this.setCurSelectedCoinType(typeOfWalletToStart);
+		this.setSelectedCoin(typeOfWalletToStart);
 
 		// Temporarily need to just work for enabled types only
 		OWCoin t = null;
@@ -984,6 +1014,13 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	public View getWalletHeaderBar() {
 		return this.findViewById(R.id.walletHeader);
 	}
+	
+	/**
+	 * @return the headerBar
+	 */
+	public View getSearchBar() {
+		return this.findViewById(R.id.searchBar);
+	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1093,7 +1130,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	public void handlePassphrasePositive(int requestCode, 
 			byte[] passphrase, Bundle info) {
-		byte[] inputHash = OWUtils.Sha256Hash(passphrase);
+		byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase);
 		switch(requestCode) {
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
@@ -1138,10 +1175,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Can assume that there was a previously entered passphrase because 
 		// of the way the dialog was set up. 
 		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
-			byte[] inputHash = OWUtils.Sha256Hash(oldPassphrase);
+			byte[] inputHash = ZiftrUtils.Sha256Hash(oldPassphrase);
 			if (this.inputHashMatchesStoredHash(inputHash)) {
 				// If the old matches, set the new passphrase hash
-				this.setPassphraseHash(OWUtils.Sha256Hash(newPassphrase));
+				this.setPassphraseHash(ZiftrUtils.Sha256Hash(newPassphrase));
 			} else {
 				// If don't match, tell user. 
 				this.alertUser("The passphrase you entered doesn't match your "
@@ -1189,16 +1226,52 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @return the curSelectedCoinType
 	 */
 	public OWCoin getCurSelectedCoinType() {
-		return curSelectedCoinType;
+		return selectedCoin;
 	}
 
 	/**
-	 * @param curSelectedCoinType the curSelectedCoinType to set
+	 * @param selectedCoin the curSelectedCoinType to set
 	 */
-	public void setCurSelectedCoinType(OWCoin curSelectedCoinType) {
-		this.curSelectedCoinType = curSelectedCoinType;
+	public void setSelectedCoin(OWCoin selectedCoin) {
+		this.selectedCoin = selectedCoin;
+	
 		this.populateWalletHeaderView();
+		
 	}
+
+	/**
+	 * Making this a separate method to increase abstraction and just in
+	 * case we ever need to call this by itself. 
+	 */
+	private void populateWalletHeaderView() {
+		//now that a coin type is set, setup the header view for it
+		//headerView.setVisibility(View.VISIBLE); //let fragments do this when they're displayed
+		
+		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
+		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
+
+		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
+		coinTitle.setText(this.selectedCoin.getLongTitle());
+
+		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
+		BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, this.selectedCoin, OWFiat.USD);
+		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(OWFiat.USD, unitPriceInFiat, true));
+
+		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
+		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.ESTIMATED);
+		BigDecimal walletBallance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
+		
+		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBallance).toPlainString());
+
+		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
+		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBallance, this.selectedCoin, OWFiat.USD);
+		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(OWFiat.USD, walletBalanceInFiat, true));
+
+		ImageView syncButton = (ImageView)headerView.findViewById(R.id.rightIcon);
+		syncButton.setImageResource(R.drawable.icon_sync_button);
+		syncButton.setOnClickListener(this);
+	}
+	
 
 	/**
 	 * Customize actionbar
@@ -1280,7 +1353,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		if (textWatcher != null) {
 			filterAccordingToVisibility(adapter);
 
-			this.specifySearchBarTextWatcher(textWatcher);
+			this.registerSearchBarTextWatcher(textWatcher);
 
 			View clearbutton = findViewById(R.id.clearSearchBarTextIcon);
 			clearbutton.setOnClickListener(new OnClickListener() {
@@ -1328,7 +1401,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		}
 	}
 
-	public void specifySearchBarTextWatcher(TextWatcher textWatcher) {
+	public void registerSearchBarTextWatcher(TextWatcher textWatcher) {
 		// called in onResume of all fragments that use the search bar
 		// Can, instead, also be called by calling the change action bar method
 		this.searchEditText.addTextChangedListener(textWatcher);
@@ -1344,43 +1417,44 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		return search.getVisibility() == View.VISIBLE;
 	}
 
-	public void populateWalletHeaderView() {
-		OWCoin coinId = this.getCurSelectedCoinType();
-
-		View headerView = this.findViewById(R.id.walletHeader);
-		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
-		Drawable coinImage = this.getResources().getDrawable(
-				coinId.getLogoResId());
-		coinLogo.setImageDrawable(coinImage);
-
-		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
-		coinTitle.setText(coinId.getLongTitle());
-
-		TextView coinUnitPriceInFiatTextView = (TextView) 
-				headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = OWConverter.convert(
-				BigDecimal.ONE, coinId, OWFiat.USD);
-		coinUnitPriceInFiatTextView.setText(OWFiat.USD.getSymbol() + 
-				OWFiat.formatFiatAmount(OWFiat.USD, unitPriceInFiat).toPlainString());
-
-		TextView walletBalanceTextView = (TextView) 
-				headerView.findViewById(R.id.topRightTextView);
-		BigDecimal walletBallance = OWUtils.bigIntToBigDec(coinId, 
-				getWalletManager().getWalletBalance(coinId, OWSQLiteOpenHelper.BalanceType.ESTIMATED));
-		walletBalanceTextView.setText(
-				OWCoin.formatCoinAmount(coinId, walletBallance).toPlainString());
-
-		TextView walletBalanceFiatEquivTextView = (TextView) 
-				headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceFiatEquiv = OWConverter.convert(
-				walletBallance, coinId, OWFiat.USD);
-		walletBalanceFiatEquivTextView.setText(OWFiat.USD.getSymbol() + 
-				walletBalanceFiatEquiv.toPlainString());
-
-		ImageView marketIcon = (ImageView) (headerView.findViewById(R.id.rightIcon));
-		Drawable marketImage = this.getResources().getDrawable(
-				R.drawable.stats_enabled);
-		marketIcon.setImageDrawable(marketImage);
+	
+	public void hideWalletHeader() {
+		this.headerView.setVisibility(View.GONE);
 	}
+	
+	public void showWalletHeader() {
+		this.headerView.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void handleExpiredLoginToken() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleGenericError(String errorMessage) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleDataUpdated() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void networkStarted() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void networkStopped() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

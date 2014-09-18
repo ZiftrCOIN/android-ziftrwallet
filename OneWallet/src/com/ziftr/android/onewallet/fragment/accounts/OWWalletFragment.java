@@ -59,22 +59,6 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);
-		outState.putBoolean("search_visible", searchBar.getVisibility() == View.VISIBLE);
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		if (savedInstanceState != null && savedInstanceState.getBoolean("search_visible")) {
-			View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);
-			searchBar.setVisibility(View.VISIBLE);
-		}		
-		super.onActivityCreated(savedInstanceState);
-	}
-
-	@Override
 	public void onStop() {
 		//detoggle search bar if user navigates away
 		View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);

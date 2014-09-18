@@ -95,13 +95,11 @@
                         android:layout_below="@id/addressValueTitleTextView"
                         android:clickable="false"
                         android:cursorVisible="false"
-                        android:ellipsize="end"
                         android:focusable="false"
                         android:focusableInTouchMode="true"
                         android:inputType="text"
-                        android:maxLines="1"
+                        android:maxLines="2"
                         android:scrollHorizontally="true"
-                        android:singleLine="true"
                         android:text="@string/ow_empty_string" >
                     </EditText>
                 </RelativeLayout>

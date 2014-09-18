@@ -27,8 +27,8 @@ import com.ziftr.android.onewallet.exceptions.OWWrongNetworkException;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * <p>An address looks like 1MsScoe2fTJoq4ZPdQgqyhgWeoNamYPevy and is derived from an 
@@ -146,7 +146,7 @@ public class OWAddress implements OWSearchableListItem {
 	public OWAddress(OWCoin coinId, String address) throws OWAddressFormatException {
 		// Checksum is validated in the decoding
 		byte[] allData = Base58.decodeChecked(address);
-		byte[] hash160 = OWUtils.stripVersionAndChecksum(allData);
+		byte[] hash160 = ZiftrUtils.stripVersionAndChecksum(allData);
 
 		this.initialize(coinId, allData[0], hash160);
 	}

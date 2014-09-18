@@ -224,7 +224,7 @@ public class OWCoin implements OWCurrency {
 	 * @return as above
 	 */
 	public static BigDecimal formatCoinAmount(OWCoin coinType, BigDecimal toFormat) {
-		return OWUtils.formatToNDecimalPlaces(
+		return ZiftrUtils.formatToNDecimalPlaces(
 				coinType.getNumberOfDigitsOfPrecision(), toFormat);
 	}
 
@@ -237,7 +237,7 @@ public class OWCoin implements OWCurrency {
 	 * @return as above
 	 */
 	public static BigDecimal formatCoinAmount(OWCoin coinType, BigInteger toFormat) {
-		return OWUtils.formatToNDecimalPlaces(
+		return ZiftrUtils.formatToNDecimalPlaces(
 				coinType.getNumberOfDigitsOfPrecision(), new BigDecimal(toFormat, coinType.getNumberOfDigitsOfPrecision()));
 	}
 

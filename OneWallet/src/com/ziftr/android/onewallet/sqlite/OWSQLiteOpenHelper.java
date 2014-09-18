@@ -542,7 +542,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 			this.sendingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
 		}
 	}
-
 	
 	public void updateTransactionNote(OWTransaction tx) {
 		this.transactionsTable.updateTransactionNote(tx, getWritableDatabase());

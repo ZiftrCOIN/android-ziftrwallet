@@ -17,7 +17,7 @@
 package com.ziftr.android.onewallet.crypto;
 
 import com.google.common.primitives.UnsignedInteger;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * A variable-length encoded integer using Satoshis encoding.
@@ -45,11 +45,11 @@ public class OWVarInt {
             originallyEncodedSize = 3;
         } else if (first == 254) {
             // 32 bits.
-            val = OWUtils.readUint32(buf, offset + 1);
+            val = ZiftrUtils.readUint32(buf, offset + 1);
             originallyEncodedSize = 5;
         } else {
             // 64 bits.
-            val = OWUtils.readUint32(buf, offset + 1) | (OWUtils.readUint32(buf, offset + 5) << 32);
+            val = ZiftrUtils.readUint32(buf, offset + 1) | (ZiftrUtils.readUint32(buf, offset + 5) << 32);
             originallyEncodedSize = 9;
         }
         this.value = val;
@@ -85,31 +85,31 @@ public class OWVarInt {
      * Gets the minimum encoded size of the given value.
      */
     public static int sizeOf(long value) {
-        if (OWUtils.isLessThanUnsigned(value, 253))
+        if (ZiftrUtils.isLessThanUnsigned(value, 253))
             return 1;
-        else if (OWUtils.isLessThanUnsigned(value, 65536))
+        else if (ZiftrUtils.isLessThanUnsigned(value, 65536))
             return 3;  // 1 marker + 2 data bytes
-        else if (OWUtils.isLessThanUnsigned(value, UnsignedInteger.MAX_VALUE.longValue()))
+        else if (ZiftrUtils.isLessThanUnsigned(value, UnsignedInteger.MAX_VALUE.longValue()))
             return 5;  // 1 marker + 4 data bytes
         else
             return 9;  // 1 marker + 8 data bytes
     }
 
     public byte[] encode() {
-        if (OWUtils.isLessThanUnsigned(value, 253)) {
+        if (ZiftrUtils.isLessThanUnsigned(value, 253)) {
             return new byte[]{(byte) value};
-        } else if (OWUtils.isLessThanUnsigned(value, 65536)) {
+        } else if (ZiftrUtils.isLessThanUnsigned(value, 65536)) {
             return new byte[]{(byte) 253, (byte) (value), (byte) (value >> 8)};
-        } else if (OWUtils.isLessThanUnsigned(value, UnsignedInteger.MAX_VALUE.longValue())) {
+        } else if (ZiftrUtils.isLessThanUnsigned(value, UnsignedInteger.MAX_VALUE.longValue())) {
             byte[] bytes = new byte[5];
             bytes[0] = (byte) 254;
-            OWUtils.uint32ToByteArrayLE(value, bytes, 1);
+            ZiftrUtils.uint32ToByteArrayLE(value, bytes, 1);
             return bytes;
         } else {
             byte[] bytes = new byte[9];
             bytes[0] = (byte) 255;
-            OWUtils.uint32ToByteArrayLE(value, bytes, 1);
-            OWUtils.uint32ToByteArrayLE(value >>> 32, bytes, 5);
+            ZiftrUtils.uint32ToByteArrayLE(value, bytes, 1);
+            ZiftrUtils.uint32ToByteArrayLE(value >>> 32, bytes, 5);
             return bytes;
         }
     }

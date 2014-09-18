@@ -18,7 +18,7 @@ import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * An adapter class for transactions.
@@ -78,8 +78,6 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 
 		if (getItemViewType(position) == Type.TRANSACTION.ordinal()) {
 
-			String fiatSymbol = txListItem.getFiatType().getSymbol();
-
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView txTitleTextView = (TextView) convertView.findViewById(R.id.txTitle);
@@ -88,7 +86,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 			TextView txTimeTextView = (TextView) convertView.findViewById(R.id.txTime);
 			// TODO we will continue using the seconds value for now. Is this right, though?
 			Date date = new Date(txListItem.getTxTime() * 1000);
-			txTimeTextView.setText(OWUtils.formatterNoTimeZone.format(date));
+			txTimeTextView.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 
 			TextView txAmount = (TextView) convertView.findViewById(R.id.txAmount);
 			BigDecimal amt = OWCoin.formatCoinAmount(
@@ -99,9 +97,8 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 					convertView.findViewById(R.id.txAmountFiatEquiv);
 			BigInteger fiatAmt = OWConverter.convert(txListItem.getTxAmount(), 
 					txListItem.getCoinId(), txListItem.getFiatType());
-			BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
-					txListItem.getFiatType(), OWUtils.bigIntToBigDec(txListItem.getCoinId(), fiatAmt));
-			txAmountFiatEquiv.setText(fiatSymbol + formattedfiatAmt.toPlainString());
+			
+			txAmountFiatEquiv.setText(OWFiat.formatFiatAmount(txListItem.getFiatType(), ZiftrUtils.bigIntToBigDec(txListItem.getCoinId(), fiatAmt), true));
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
 			Drawable image = this.getContext().getResources().getDrawable(

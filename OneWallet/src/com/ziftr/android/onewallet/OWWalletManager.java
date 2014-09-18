@@ -44,8 +44,8 @@ import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdap
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /** 
  * This class controls all of the wallets and is responsible
@@ -268,7 +268,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		if (this.walletMap.get(id) == null) {
 			this.walletMap.put(id, new Wallet(id.getNetworkParameters()));
 			try {
-				this.walletMap.get(id).addKey(new ECKey());
 				this.walletMap.get(id).saveToFile(this.walletFiles.get(id));
 			} catch (IOException e) {
 				log("Exception trying to save new wallet file: ", e);
@@ -356,7 +355,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * 
 	 */
 	private void beginSyncWithNetwork(final OWCoin id) {
-		OWUtils.runOnNewThread(new Runnable() {
+		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 
@@ -732,7 +731,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		} else {
 			addresses = this.readSendingAddresses(coinId, addressStrings);
 		}
-		
+
 		for (OWAddress a : addresses) {
 			owTx.addDisplayAddress(a.toString());
 		}

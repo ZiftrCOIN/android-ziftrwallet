@@ -22,7 +22,7 @@ import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWTransactionDetailsFragment extends OWWalletUserFragment implements OnClickListener {
 
@@ -40,7 +40,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	private TextView confirmationFee;
 	private TextView currencyType;
 	private TextView time;
-	private TextView routingAddress;
+	private TextView addressTextView;
 	private TextView status;
 	private TextView timeLeft;
 	private ProgressBar progressBar;
@@ -60,15 +60,15 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.hideWalletHeader();
 
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
-		if (savedInstanceState != null){
-				if (savedInstanceState.containsKey(IS_EDITING_KEY)){
-					this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
-				}
-				if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)){
-					this.txItem = getWalletManager().readTransactionByHash(this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
-				}
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
+				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
+			}
+			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
+				this.txItem = getWalletManager().readTransactionByHash(this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+			}
 		}
-		
+
 		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
 		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);
 		this.amount = (TextView) rootView.findViewById(R.id.amount);
@@ -78,7 +78,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.confirmationFee = (TextView) rootView.findViewById(R.id.confirmation_fee_amount);
 		this.currencyType = (TextView) rootView.findViewById(R.id.currencyType);
 		this.time = (TextView) rootView.findViewById(R.id.date);
-		this.routingAddress = (TextView) rootView.findViewById(R.id.routing_address);
+		this.addressTextView = (TextView) rootView.findViewById(R.id.routing_address);
 		this.status = (TextView) rootView.findViewById(R.id.status);
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
@@ -89,7 +89,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState){
+	public void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(IS_EDITING_KEY, this.isEditing);
 		outState.putString(TX_ITEM_HASH_KEY, this.txItem.getSha256Hash().toString());
 		super.onSaveInstanceState(outState);
@@ -100,6 +100,8 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
 	}
+
+
 
 	/**
 	 * Get the arguments passed from the activity and set the text fields on the view
@@ -121,22 +123,21 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.currencyType.setText(this.txItem.getFiatType().getName());
 
 		Date date = new Date(this.txItem.getTxTime() * 1000);
-		this.time.setText(OWUtils.formatterNoTimeZone.format(date));
-		
-		this.populateRoutingAddress();
-		
+		this.time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
+
+		this.populateAddress();
+
 		this.labelEditText.setText(this.txItem.getTxNote());
 		this.editLabelButton.setOnClickListener(this);
-		
+
 		this.populatePendingInformation();
 		toggleEditNote(!isEditing);
 	}
-	
-	private void populateAmount(){
+
+	private void populateAmount() {
 		BigInteger baseAmount = this.txItem.getTxAmount();
-		BigDecimal amountValue = OWUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
-		this.amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
-		
+		BigDecimal amountValue = ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
+		amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
 		if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
 			// This means the tx is sent (relative to user)
 			this.amountLabel.setText("Amount Sent");
@@ -146,22 +147,29 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 			this.amountLabel.setText("Amount Received");
 			this.timeLabel.setText("Received");
 		}
-		
+
 		if (txItem.isPending()) {
 			this.amount.setTextColor(getResources().getColor(R.color.Crimson));
 			this.amountLabel.append(" (pending)");
 		}
 	}
-	
-	private void populateCurrency(){
+
+	private void populateCurrency() {
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
-		BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
-				txItem.getFiatType(), OWUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt));
-		this.currency.setText(formattedfiatAmt.toPlainString());
+		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
+
+		currency.setText(formattedfiatAmt);
+
+		TextView currencyType = (TextView) rootView.findViewById(R.id.currencyType);
+		currencyType.setText(this.txItem.getFiatType().getName());
+
+		TextView time = (TextView) rootView.findViewById(R.id.date);
+		Date date = new Date(this.txItem.getTxTime() * 1000);
+		time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 	}
-	
-	private void populateRoutingAddress(){
+
+	private void populateAddress() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {
 			String a = txItem.getDisplayAddresses().get(i);
@@ -170,24 +178,24 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 				sb.append("\n");
 			}
 		}
-		routingAddress.setText(sb.toString());
+		addressTextView.setText(sb.toString());
 
 	}
-	
-	private void populatePendingInformation(){
+
+	private void populatePendingInformation() {
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
 		int confirmed = txItem.getNumConfirmations();
-		
+
 		this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
-		
+
 		int estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
 		this.timeLeft.setText(formatEstimatedTime(estimatedTime));
-		
+
 		this.progressBar.setMax(totalConfirmations);
 		this.progressBar.setProgress(confirmed);
 	}
-	
-	public void setTxItem(OWTransaction txItem){
+
+	public void setTxItem(OWTransaction txItem) {
 		this.txItem = txItem;
 	}
 	/**
@@ -196,7 +204,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	 * @param editLabelButton - ImageView for edit button
 	 * @param toggleOff - boolean to determine how to toggle
 	 */
-	public void toggleEditNote(boolean toggleOff){
+	public void toggleEditNote(boolean toggleOff) {
 		if (!toggleOff) {
 			this.labelEditText.setBackgroundResource(android.R.drawable.editbox_background_normal);
 			this.labelEditText.setFocusable(true);
@@ -215,10 +223,10 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 			getWalletManager().updateTransactionNote(txItem);
 		}
 	}
-	
-	public String formatEstimatedTime(int seconds){
+
+	public String formatEstimatedTime(int seconds) {
 		StringBuilder sb = new StringBuilder();
-		if (seconds > 3600){
+		if (seconds > 3600) {
 			int hours = seconds / 3600;
 			seconds = seconds % 3600;
 			sb.append(hours + " hours, ");
@@ -226,7 +234,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		int minutes = seconds/60;
 		seconds = seconds % 60;
 		sb.append (minutes + " minutes");
-		if (seconds != 0){
+		if (seconds != 0) {
 			sb.append(seconds + ", seconds");
 		}
 		return sb.toString();
@@ -238,5 +246,5 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 			toggleEditNote(isEditing);
 		}
 	}
-	
+
 }

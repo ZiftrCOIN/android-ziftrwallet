@@ -29,8 +29,8 @@ import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
-import com.ziftr.android.onewallet.util.OWUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * The section of the app where users fill out a form and click send 
@@ -249,9 +249,9 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	public void onClickSendCoins() {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = OWUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
 				getAmountToSendFromEditText());
-		BigInteger feeSending = OWUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
 				getFeeFromEditText());
 		try {
 			getWalletManager().sendCoins(getCurSelectedCoinType(), getSendToAddressEditText().getText().toString(), 
@@ -307,7 +307,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 					changeFiatStartedFromProgram = true;
 					fiatValEditText.setText(OWFiat.formatFiatAmount(
-							OWFiat.USD, newFiatVal).toPlainString());
+							OWFiat.USD, newFiatVal, false));
 					changeFiatStartedFromProgram = false;
 				}
 			}
@@ -388,7 +388,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
 		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCurSelectedCoinType());
-		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal).toPlainString() + ")");
+		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal, false) + ")");
 	}
 
 	/**

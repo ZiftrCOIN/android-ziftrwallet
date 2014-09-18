@@ -3,10 +3,10 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import android.view.View;
 
 import com.ziftr.android.onewallet.OWWalletManager;
+import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
 
-// TODO refactor to OWWalletManagerFragment
 public abstract class OWWalletUserFragment extends OWFragment {
 
 	/**
@@ -23,9 +23,14 @@ public abstract class OWWalletUserFragment extends OWFragment {
 	protected OWCoin getCurSelectedCoinType() {
 		return this.getOWMainActivity().getCurSelectedCoinType();
 	}
+	
 
-	protected void showWalletHeader() {
-		this.getOWMainActivity().getWalletHeaderBar().setVisibility(View.VISIBLE);
+	public View getHeaderView() {
+		return this.getOWMainActivity().findViewById(R.id.walletHeader);
 	}
 	
+	public void showWalletHeader() {
+		this.getOWMainActivity().showWalletHeader();
+	}
+		
 }

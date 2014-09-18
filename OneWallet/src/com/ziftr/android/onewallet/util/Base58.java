@@ -61,7 +61,7 @@ public class Base58 {
         byte[] addressBytes = new byte[1 + data.length + 4];
         addressBytes[0] = version;
         System.arraycopy(data, 0, addressBytes, 1, data.length);
-        byte[] check = OWUtils.doubleDigest(addressBytes, 0, data.length + 1);
+        byte[] check = ZiftrUtils.doubleDigest(addressBytes, 0, data.length + 1);
         System.arraycopy(check, 0, addressBytes, data.length + 1, 4);
         return encode(addressBytes);
     }
@@ -171,7 +171,7 @@ public class Base58 {
         byte[] bytes = copyOfRange(tmp, 0, tmp.length - 4);
         byte[] checksum = copyOfRange(tmp, tmp.length - 4, tmp.length);
         
-        tmp = OWUtils.doubleDigest(bytes);
+        tmp = ZiftrUtils.doubleDigest(bytes);
         byte[] hash = copyOfRange(tmp, 0, 4);
         if (!Arrays.equals(checksum, hash)) 
             throw new OWAddressFormatException("Checksum does not validate");
@@ -222,16 +222,16 @@ public class Base58 {
     
     public static void main(String[] args) {
     	try {
-    		BigInteger bi = new BigInteger(1, OWUtils.hexStringToBytes("9e4cc0c2243c26fa5821583a471df80ba98695f47d9c1018e215d9ab21f8d672"));
+    		BigInteger bi = new BigInteger(1, ZiftrUtils.hexStringToBytes("9e4cc0c2243c26fa5821583a471df80ba98695f47d9c1018e215d9ab21f8d672"));
     		System.out.println(bi.toString());
-    		System.out.println(OWUtils.bytesToHexString(bi.toByteArray()));
-    		System.out.println(OWUtils.bytesToHexString(OWUtils.bigIntegerToBytes(bi, 32)));
+    		System.out.println(ZiftrUtils.bytesToHexString(bi.toByteArray()));
+    		System.out.println(ZiftrUtils.bytesToHexString(ZiftrUtils.bigIntegerToBytes(bi, 32)));
     		OWECKey key = new OWECKey(bi);
     		String encoded = encode((byte) 128, key.getPrivKeyBytesForAddressEncoding());
-    		System.out.println("priv: " + OWUtils.bytesToHexString(key.getPrivKeyBytes()));
+    		System.out.println("priv: " + ZiftrUtils.bytesToHexString(key.getPrivKeyBytes()));
 			System.out.println("encoded: " + encoded);
-			byte[] x = OWUtils.stripVersionAndChecksum(decodeChecked(encoded));
-			System.out.println("decoded: " + (x.length) + "  " + OWUtils.bytesToHexString(x));
+			byte[] x = ZiftrUtils.stripVersionAndChecksum(decodeChecked(encoded));
+			System.out.println("decoded: " + (x.length) + "  " + ZiftrUtils.bytesToHexString(x));
 			
 		} catch (OWAddressFormatException e) {
 			e.printStackTrace();
