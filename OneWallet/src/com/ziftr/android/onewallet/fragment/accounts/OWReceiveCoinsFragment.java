@@ -29,9 +29,9 @@ import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
-import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implements OnClickListener, TextWatcher {
 
@@ -89,8 +89,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	 * @param inflater
 	 * @param container
 	 */
-	private void initializeViewFields(LayoutInflater inflater,
-			ViewGroup container) {
+	private void initializeViewFields(LayoutInflater inflater, ViewGroup container) {
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressNameEditText);
@@ -108,15 +107,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
-			
-
-		ZLog.log("oncreate 1");
-		this.initializeQrCodeFromBundle(savedInstanceState);
-		ZLog.log("oncreate 2");
-
-		this.showWalletHeader();
-
-		return this.rootView;
 	}
 
 	@Override
@@ -128,14 +118,14 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
+		this.setActionBar();
 	}
 
 	@Override
 	public void onClick(View v) {
 
 		if(v == this.copyButton) {
-			if(this.addressEditText.getText().toString().length() > 0) {
+			if(this.fragmentHasAddress()) {
 				// Gets a handle to the clipboard service.
 				ClipboardManager clipboard = (ClipboardManager)
 						getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
@@ -207,8 +197,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 			this.qrCodeContainer.setVisibility(View.INVISIBLE);
 		} 
 
-		final ImageView imageLayout = this.qrCodeImageView;
-		final ViewTreeObserver viewObserver = imageLayout.getViewTreeObserver();
+		ViewTreeObserver viewObserver = qrCodeImageView.getViewTreeObserver();
 		viewObserver.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
@@ -245,6 +234,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 					public void run() {
 						String newAddress = address.toString();
 						addressEditText.setText(newAddress);
+						updateAddressLabelInDatabase();
 						generateQrCode(true);
 					}
 				});
@@ -264,13 +254,16 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		String address = this.addressEditText.getText().toString();
-		
-		ZLog.log("texted changed");
-		
-		if (address.length() > 0) {
-			ZLog.log("updated db");
+		updateAddressLabelInDatabase();
+	}
+
+	/**
+	 * A convenience method to update the database from this class.
+	 */
+	private void updateAddressLabelInDatabase() {
+		if (fragmentHasAddress()) {
 			String label = this.labelEditText.getText().toString();
+			String address = this.addressEditText.getText().toString();
 			getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
 		}
 	}
@@ -290,6 +283,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	@Override
 	public void setVisibility(int visibility) {
 		this.scrollView.setVisibility(visibility);
+		this.setActionBar();
 	}
 
 }

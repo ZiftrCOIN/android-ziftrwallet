@@ -14,7 +14,6 @@ import android.widget.ListView;
 
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
-import com.ziftr.android.onewallet.util.ZLog;
 
 public class OWAddressBookFragment extends OWWalletUserFragment implements TextWatcher {
 
@@ -44,7 +43,7 @@ public class OWAddressBookFragment extends OWWalletUserFragment implements TextW
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		
+
 		// So that on screen rotates the background view stays invisible
 		getAddressBookParentFragment().setVisibility(View.INVISIBLE);
 
@@ -83,7 +82,7 @@ public class OWAddressBookFragment extends OWWalletUserFragment implements TextW
 		});
 
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -123,19 +122,11 @@ public class OWAddressBookFragment extends OWWalletUserFragment implements TextW
 		// TODO Auto-generated method stub
 		this.addressAdapter.getFilter().filter(s);
 	}
-	
+
 	@Override
-	public void onDetach() {
-		ZLog.log("detatched!!!!   :"); 
+	public void onDestroyView() {
+		super.onDestroyView();
 		getAddressBookParentFragment().setVisibility(View.VISIBLE);
-		super.onDetach();
 	}
-	
-	@Override
-	public void onDestroy() {
-		ZLog.log("destroyed!!!!   :"); 
-		getAddressBookParentFragment().setVisibility(View.VISIBLE);
-		super.onDestroy();
-	}
-	
+
 }

@@ -8,8 +8,8 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 
 import com.google.bitcoin.utils.BriefLogFormatter;
-import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * This activity is responsible for loading the splash screen and then,

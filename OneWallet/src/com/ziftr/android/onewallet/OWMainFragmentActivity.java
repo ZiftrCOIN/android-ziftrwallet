@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -65,15 +64,18 @@ import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
-import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * This is the main activity of the OneWallet application. It handles
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler, OWConfirmationDialogerHandler, OnClickListener, ZiftrNetworkHandler {
+public class OWMainFragmentActivity extends ActionBarActivity 
+implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, 
+OWResetPassphraseDialogHandler, OWConfirmationDialogHandler, OnClickListener, 
+ZiftrNetworkHandler {
 
 	/*
 	--- TODO list for the OneWallet project ---
@@ -788,12 +790,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param inputHash - The new passphrase's Sha256 hash
 	 */
 	public void setPassphraseHash(byte[] inputHash) {
-		SharedPreferences prefs = this.getSharedPreferences(
-				PASSPHRASE_KEY, Context.MODE_PRIVATE);
+		SharedPreferences prefs = this.getSharedPreferences(PASSPHRASE_KEY, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
-		editor.putString(
-				this.PASSPHRASE_KEY, 
-				ZiftrUtils.bytesToHexString(inputHash));
+		editor.putString(PASSPHRASE_KEY, ZiftrUtils.bytesToHexString(inputHash));
 		editor.commit();
 	}
 

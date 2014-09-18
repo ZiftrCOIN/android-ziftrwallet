@@ -16,10 +16,8 @@ import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
 
 import com.ziftr.android.onewallet.util.ZLog;
-import com.ziftr.android.onewallet.util.ZiftrUser;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 
@@ -38,13 +36,20 @@ public class ZiftrNetRequest {
 	InputStream uploadDataStream = null;
 	String responseData = null;
 	Exception error = null;
-	HttpURLConnection lastConnection; //hold on to the most recent connection
+	
+	// Hold on to the most recent connection
+	HttpURLConnection lastConnection; 
+	
 	ZiftrParamList queryParameters = null;
 	Map<String,String> sentHeaders = null;
 	
 	private String forcedRequestMethod = null;
-	private boolean useAutoAuthorization = true; //if the network call should attempt to use the user info for authorization automatically
-	private boolean refreshLoop = false; //make sure no matter what wacky stuff the server might send we never have an endless refresh loop
+	
+	// If the network call should attempt to use the user info for authorization automatically
+	private boolean useAutoAuthorization = true;
+	
+	// Make sure no matter what wacky stuff the server might send we never have an endless refresh loop
+	// private boolean refreshLoop = false; 
  
 	
 	public static ZiftrNetRequest createRequest(String url) {
@@ -95,7 +100,7 @@ public class ZiftrNetRequest {
 	
 	public void setUploadData(String data) {
 		
-		if(data != null) {
+		if (data != null) {
 			try {
 				this.uploadDataStream = new ByteArrayInputStream(data.getBytes("UTF-8"));
 			} 
@@ -107,7 +112,7 @@ public class ZiftrNetRequest {
 	
 	public void setUploadData(Map<String, String> data) {
 		
-		if(data != null) {
+		if (data != null) {
 			ArrayList<NameValuePair> postParams = new ArrayList<NameValuePair>(data.size());
 			for(Map.Entry<String, String> entry : data.entrySet()) {
 				postParams.add( new BasicNameValuePair(entry.getKey(), entry.getValue()));
@@ -120,7 +125,7 @@ public class ZiftrNetRequest {
 	
 	public void setUploadData(NameValuePair data) {
 		
-		if(data != null) {
+		if (data != null) {
 			ArrayList<NameValuePair> arrayList = new ArrayList<NameValuePair>(1);
 			arrayList.add(data);
 			
@@ -129,7 +134,7 @@ public class ZiftrNetRequest {
 	}
 	
 	public void setUploadData(List<NameValuePair> data) {
-		if(data != null) {
+		if (data != null) {
 			UrlEncodedFormEntity entityData;
 			try {
 				entityData = new UrlEncodedFormEntity(data);
@@ -152,8 +157,13 @@ public class ZiftrNetRequest {
 		this.uploadDataStream = data;
 	}
 	
+	
 	public void setUseAutoAuthorization(boolean useAutoAuthorization) {
 		this.useAutoAuthorization = useAutoAuthorization;
+	}
+	
+	public boolean getUseAutoAuthorization() {
+		return this.useAutoAuthorization;
 	}
 	
 	public String sendAndWait() {
@@ -202,17 +212,17 @@ public class ZiftrNetRequest {
 		
 		try {
 			
-			boolean tokenSet = false;
+			//boolean tokenSet = false;
 			
 			String fullUrl = urlString;
 			
-			if(queryParameters != null) {
+			if (queryParameters != null) {
 				//create arguments string
 				StringBuilder args = new StringBuilder("?");
 				for(int x = 0; x < queryParameters.size(); x++) {
 					args.append(queryParameters.getName(x));
 					String value = queryParameters.getValue(x);
-					if(value != null) {
+					if (value != null) {
 						args.append("=").append(URLEncoder.encode(value, "UTF-8"));
 					}
 					args.append("&");
@@ -237,9 +247,9 @@ public class ZiftrNetRequest {
 			//setup authorization if the user is currently logged in
 			//TODO -code for handling using login auth here, we don't need this, yet...
 			/**********
-			if(useAutoAuthorization && ZiftrUser.isLoggedIn()) {
+			if (useAutoAuthorization && ZiftrUser.isLoggedIn()) {
 				//only auto-include authorization on secure calls, this way basic calls won't fail due to expired login credentials
-				if(fullUrl.startsWith("https")) {
+				if (fullUrl.startsWith("https")) {
 					tokenSet = true;
 					String token = ZiftrUser.getUserToken();
 					connection.setRequestProperty("Authorization", "Bearer " + token);
@@ -247,20 +257,20 @@ public class ZiftrNetRequest {
 			}
 			********/
 			
-			if(sentHeaders != null) {
+			if (sentHeaders != null) {
 				for(String key : sentHeaders.keySet()) {
 					connection.setRequestProperty(key, sentHeaders.get(key));
 				}
 			}
 			
-			if(forcedRequestMethod != null) {
+			if (forcedRequestMethod != null) {
 				connection.setRequestMethod(forcedRequestMethod);
 			}
 			
 			
-			if(this.uploadDataStream != null) {
+			if (this.uploadDataStream != null) {
 				//if we're sending data, make sure we're a post (if need be)
-				if(forcedRequestMethod == null) {
+				if (forcedRequestMethod == null) {
 					connection.setRequestMethod("POST");
 				}
 				
@@ -281,23 +291,21 @@ public class ZiftrNetRequest {
 			try {
 				InputStream stream = connection.getInputStream();
 				response = ZiftrUtils.streamToString(stream);
-			}
-			catch(Exception e) {
+			} catch(Exception e) {
 				ZLog.log("Exception getting response from server: ", e);
 				try {
 					response = ZiftrUtils.streamToString(connection.getErrorStream());
-				}
-				catch(Exception e2) {
+				} catch(Exception e2) {
 					//don't care much about this, just trying to see if we can extra response info
 				}
 				
 				//TODO -code for handling expired login here, we don't need this, yet...
 				/***
-				if(tokenSet && ZiftrUser.isLoggedIn() && connection.getResponseCode() == 403 && !refreshLoop) {
+				if (tokenSet && ZiftrUser.isLoggedIn() && connection.getResponseCode() == 403 && !refreshLoop) {
 					//if this happened, our token probably expired, let's take a minute to try and get a new one
 					ZLog.log("Current user token has expired. Attempting automatic refresh...");
 					boolean refreshed = refreshUserToken();
-					if(!refreshed) {
+					if (!refreshed) {
 						ZiftrUser.deleteUser();
 						ZiftrNetworkManager.showLoginExpired();
 					}
@@ -310,8 +318,7 @@ public class ZiftrNetRequest {
 			}
 		
 			this.responseData = response;
-		}
-		finally {
+		} finally {
 			try {
 				this.lastConnection = connection;
 				connection.disconnect();
@@ -320,12 +327,11 @@ public class ZiftrNetRequest {
 				//just don't explode, it's ok if disconnecting failed
 			}
 			
-			if(needsRefresh) {
+			if (needsRefresh) {
 				doNetworkRequest(); //recursively try again, but just once due to refreshLoop lock
-			}
-			else {
+			} else {
 				//unlock
-				refreshLoop = false;
+				//refreshLoop = false;
 			}
 		}
 	
@@ -349,14 +355,14 @@ public class ZiftrNetRequest {
 			ZLog.log("Excpetion parsing token refresh response: ", e);
 		}
 		
-		if(tokenJson != null) {
+		if (tokenJson != null) {
 			String accessToken = tokenJson.optString("access_token");
 			String refreshToken = tokenJson.optString("refresh_token");
 			long expirationTime = tokenJson.optLong("expires_in");
 			expirationTime = expirationTime * 1000; //we want ms, server gives us seconds
 			expirationTime += System.currentTimeMillis(); //server sends us back a duration, not an exact time
 			
-			if(accessToken !=  null) {
+			if (accessToken !=  null) {
 				//verify the token and get the rest of the user's login data
 				ZiftrNetRequest verifyRequest = ZiftrApi.buildVerifyRequest(accessToken);
 				String verifyResponse = verifyRequest.sendAndWait();
@@ -370,10 +376,10 @@ public class ZiftrNetRequest {
 					ZLog.log("Excpetion parsing token refresh response: ", e);
 				}
 				
-				if(verificationJson != null) {
+				if (verificationJson != null) {
 					
 					JSONObject user = verificationJson.optJSONObject("User");
-					if(user != null) {
+					if (user != null) {
 						String id = user.optString("id");
 						String email = user.optString("mail");
 						String displayName = user.optString("display_name");
@@ -397,7 +403,7 @@ public class ZiftrNetRequest {
 	
 	
 	public int getResponseCode() {
-		if(this.lastConnection != null) {
+		if (this.lastConnection != null) {
 			try {
 				return this.lastConnection.getResponseCode();
 			} 
@@ -412,7 +418,7 @@ public class ZiftrNetRequest {
 	
 	
 	public String getResponseMessage() {
-		if(this.lastConnection != null) {
+		if (this.lastConnection != null) {
 			try {
 				return this.lastConnection.getResponseMessage();
 			} 
@@ -426,16 +432,12 @@ public class ZiftrNetRequest {
 	}
 	
 	public Map<String, List<String>> getResponseHeaders() {
-		if(this.lastConnection != null) {
+		if (this.lastConnection != null) {
 			return this.lastConnection.getHeaderFields();
 		}
 		
 		ZLog.log("Trying to get response headers before a connection was made, or when connection failed.");
 		return null;
 	}
-	
-	
-	
-	
 	
 }

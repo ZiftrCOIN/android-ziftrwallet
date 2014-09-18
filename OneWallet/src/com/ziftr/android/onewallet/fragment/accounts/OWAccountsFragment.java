@@ -24,7 +24,6 @@ import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
-import com.ziftr.android.onewallet.util.ZLog;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 

@@ -27,8 +27,8 @@ import com.ziftr.android.onewallet.exceptions.OWWrongNetworkException;
 import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.util.Base58;
 import com.ziftr.android.onewallet.util.OWCoin;
-import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * <p>An address looks like 1MsScoe2fTJoq4ZPdQgqyhgWeoNamYPevy and is derived from an 

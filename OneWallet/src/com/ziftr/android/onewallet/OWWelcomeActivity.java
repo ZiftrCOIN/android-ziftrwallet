@@ -6,12 +6,11 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
-public class OWWelcomeActivity extends FragmentActivity{
+public class OWWelcomeActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// Here we just load the splash screen and then start the app one
@@ -25,28 +24,24 @@ public class OWWelcomeActivity extends FragmentActivity{
 		setPassword.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (saved.isChecked()){
 				byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase.getText().toString().getBytes());
-		    	Intent main = new Intent(OWWelcomeActivity.this, 
-		    			OWMainFragmentActivity.class);
-		    	main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-		    	main.putExtra("SET_PASSPHRASE", inputHash);
-		        startActivity(main);
-				}
+				Intent main = new Intent(OWWelcomeActivity.this, 
+						OWMainFragmentActivity.class);
+				main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+				main.putExtra("SET_PASSPHRASE", inputHash);
+				startActivity(main);
 			}
 		});
-		
+
 		skipPassword.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-		    	Intent main = new Intent(OWWelcomeActivity.this, 
-		    			OWMainFragmentActivity.class);
-		    	main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-		        startActivity(main);
-				}
+				Intent main = new Intent(OWWelcomeActivity.this, 
+						OWMainFragmentActivity.class);
+				main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+				startActivity(main);
+			}
 		});
-
-
 
 	}
 }

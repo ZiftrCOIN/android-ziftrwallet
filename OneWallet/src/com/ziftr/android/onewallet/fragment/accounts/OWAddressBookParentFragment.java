@@ -29,6 +29,17 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment {
 	public abstract void setVisibility(int visibility);
 
 	public abstract void acceptAddress(String address, String label);
+	
+	/**
+	 * Updates the action bar for this fragment.
+	 */
+	protected void setActionBar() {
+		ZLog.log("showing child fragment: " + this.showingChildFragment());
+		
+		if (!this.showingChildFragment()) {
+			this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
+		}
+	}
 
 	/**
 	 * @return a boolean describing whether or not the fragment transaction
@@ -59,7 +70,9 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment {
 	@Override
 	public boolean handleBackPress() {
 		boolean willSucceed = this.showingChildFragment();
-		this.returnToParentFragment();
+		if (willSucceed) {
+			this.returnToParentFragment();
+		}
 		return willSucceed;
 	}
 

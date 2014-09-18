@@ -56,8 +56,8 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.encoders.Base64;
 
 import com.google.common.base.Preconditions;
-import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 // TODO: This class is quite a mess by now. Once users are migrated away from Java serialization for the wallets,
 // refactor this to have better internal layout and a more consistent API.
