@@ -41,8 +41,8 @@ public class OWConverter {
 
 	public static BigInteger convert(BigInteger amount, 
 			OWCurrency convertFrom, OWCurrency convertTo) {
-		return OWUtils.bigDecToBigInt(convertTo, 
-				convert(OWUtils.bigIntToBigDec(convertFrom, amount), 
+		return ZiftrUtils.bigDecToBigInt(convertTo, 
+				convert(ZiftrUtils.bigIntToBigDec(convertFrom, amount), 
 						convertFrom, convertTo));
 	}
 

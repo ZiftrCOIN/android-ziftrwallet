@@ -5,6 +5,9 @@ import android.view.View;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.fragment.OWFragment;
 import com.ziftr.android.onewallet.util.OWCoin;
+import com.ziftr.android.onewallet.util.OWConverter;
+import com.ziftr.android.onewallet.util.OWFiat;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 // TODO refactor to OWWalletManagerFragment
 public abstract class OWWalletUserFragment extends OWFragment {

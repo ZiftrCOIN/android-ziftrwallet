@@ -29,7 +29,7 @@ import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
 import com.ziftr.android.onewallet.util.ZLog;
 
@@ -223,7 +223,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		// Get the database from the activity on the UI thread
 		final OWSQLiteOpenHelper database = this.getWalletManager();
 		// Run database IO on new thread
-		OWUtils.runOnNewThread(new Runnable() {
+		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 				String addressLabel = addressEditText.getText().toString();

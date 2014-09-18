@@ -74,7 +74,7 @@ public class OWFiat implements OWCurrency {
 			formattedString += fiat.getSymbol();
 		}
 		
-		formattedString += OWUtils.formatToNDecimalPlaces(fiat.getNumberOfDigitsOfPrecision(), toFormat).toPlainString();
+		formattedString += ZiftrUtils.formatToNDecimalPlaces(fiat.getNumberOfDigitsOfPrecision(), toFormat).toPlainString();
 
 		return formattedString;
 	}

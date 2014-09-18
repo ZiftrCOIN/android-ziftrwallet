@@ -56,7 +56,7 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.encoders.Base64;
 
 import com.google.common.base.Preconditions;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 // TODO: This class is quite a mess by now. Once users are migrated away from Java serialization for the wallets,
@@ -171,7 +171,7 @@ public class OWECKey {
 
 	/** A constructor variant with BigInteger pubkey. See {@link OWECKey#ECKey(BigInteger, byte[])}. */
 	public OWECKey(BigInteger privKey, BigInteger pubKey) {
-		this(privKey, OWUtils.bigIntegerToBytes(pubKey, 65));
+		this(privKey, ZiftrUtils.bigIntegerToBytes(pubKey, 65));
 	}
 
 	/**
@@ -280,7 +280,7 @@ public class OWECKey {
 	/** Gets the hash160 form of the public key (as seen in addresses). */
 	public byte[] getPubKeyHash() {
 		if (pubKeyHash == null)
-			pubKeyHash = OWUtils.sha256hash160(this.pub);
+			pubKeyHash = ZiftrUtils.sha256hash160(this.pub);
 		return pubKeyHash;
 	}
 
@@ -301,7 +301,7 @@ public class OWECKey {
 
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append("pub:").append(OWUtils.bytesToHexString(pub));
+		b.append("pub:").append(ZiftrUtils.bytesToHexString(pub));
 		if (isEncrypted()) {
 			b.append(" encrypted");
 		}
@@ -316,7 +316,7 @@ public class OWECKey {
 		StringBuilder b = new StringBuilder();
 		b.append(toString());
 		if (priv != null) {
-			b.append(" priv:").append(OWUtils.bytesToHexString(priv.toByteArray()));
+			b.append(" priv:").append(ZiftrUtils.bytesToHexString(priv.toByteArray()));
 		}
 		return b.toString();
 	}
@@ -533,7 +533,7 @@ public class OWECKey {
 	public String signMessage(String message, @Nullable KeyParameter aesKey) throws OWKeyCrypterException {
 		if (priv == null)
 			throw new IllegalStateException("This ECKey does not have the private key necessary for signing.");
-		byte[] data = OWUtils.formatMessageForSigning(message);
+		byte[] data = ZiftrUtils.formatMessageForSigning(message);
 		OWSha256Hash hash = OWSha256Hash.createDouble(data);
 		OWECDSASignature sig = sign(hash, aesKey);
 		// Now we have to work backwards to figure out the recId needed to recover the signature.
@@ -550,8 +550,8 @@ public class OWECKey {
 		int headerByte = recId + 27 + (isCompressed() ? 4 : 0);
 		byte[] sigData = new byte[65];  // 1 header + 32 bytes for R + 32 bytes for S
 		sigData[0] = (byte)headerByte;
-		System.arraycopy(OWUtils.bigIntegerToBytes(sig.r, 32), 0, sigData, 1, 32);
-		System.arraycopy(OWUtils.bigIntegerToBytes(sig.s, 32), 0, sigData, 33, 32);
+		System.arraycopy(ZiftrUtils.bigIntegerToBytes(sig.r, 32), 0, sigData, 1, 32);
+		System.arraycopy(ZiftrUtils.bigIntegerToBytes(sig.s, 32), 0, sigData, 33, 32);
 		return new String(Base64.encode(sigData), Charset.forName("UTF-8"));
 	}
 
@@ -585,7 +585,7 @@ public class OWECKey {
 		BigInteger r = new BigInteger(1, Arrays.copyOfRange(signatureEncoded, 1, 33));
 		BigInteger s = new BigInteger(1, Arrays.copyOfRange(signatureEncoded, 33, 65));
 		OWECDSASignature sig = new OWECDSASignature(r, s);
-		byte[] messageBytes = OWUtils.formatMessageForSigning(message);
+		byte[] messageBytes = ZiftrUtils.formatMessageForSigning(message);
 		// Note that the C++ code doesn't actually seem to specify any character encoding. Presumably it's whatever
 		// JSON-SPIRIT hands back. Assume UTF-8 for now.
 		OWSha256Hash messageHash = OWSha256Hash.createDouble(messageBytes);
@@ -699,7 +699,7 @@ public class OWECKey {
 	 */
 	@Nullable
 	public byte[] getPrivKeyBytes() {
-		return OWUtils.bigIntegerToBytes(priv, 32);
+		return ZiftrUtils.bigIntegerToBytes(priv, 32);
 	}
 
 	/**
@@ -707,7 +707,7 @@ public class OWECKey {
 	 */
 	@Nullable
 	public byte[] getPrivKeyBytesForAddressEncoding() {
-		byte[] privBytes = OWUtils.bigIntegerToBytes(priv, 32);
+		byte[] privBytes = ZiftrUtils.bigIntegerToBytes(priv, 32);
 		if (this.isCompressed()) {
 			byte[] privBytesForAddressEncoding = new byte[33];
 			System.arraycopy(privBytes, 0, privBytesForAddressEncoding, 0, 32);

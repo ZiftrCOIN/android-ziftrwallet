@@ -57,13 +57,15 @@ import com.ziftr.android.onewallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.onewallet.fragment.accounts.OWSendCoinsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.onewallet.network.ZiftrNetworkHandler;
+import com.ziftr.android.onewallet.network.ZiftrNetworkManager;
 import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 import com.ziftr.android.onewallet.util.ZLog;
 
 /**
@@ -71,7 +73,7 @@ import com.ziftr.android.onewallet.util.ZLog;
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
-public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler, OWConfirmationDialogerHandler, OnClickListener {
+public class OWMainFragmentActivity extends ActionBarActivity implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, OWResetPassphraseDialogHandler, OWConfirmationDialogerHandler, OnClickListener, ZiftrNetworkHandler {
 
 	/*
 	--- TODO list for the OneWallet project ---
@@ -293,6 +295,9 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
+		
+		
+		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
 	/**
@@ -787,8 +792,8 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 				PASSPHRASE_KEY, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
 		editor.putString(
-				PASSPHRASE_KEY, 
-				OWUtils.bytesToHexString(inputHash));
+				this.PASSPHRASE_KEY, 
+				ZiftrUtils.bytesToHexString(inputHash));
 		editor.commit();
 	}
 
@@ -805,7 +810,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		String storedPassphrase = prefs.getString(PASSPHRASE_KEY, null);
 		// If it's not null, convert it back to a byte array
 		byte[] storedHash = (storedPassphrase == null) ?
-				null : OWUtils.hexStringToBytes(storedPassphrase);
+				null : ZiftrUtils.hexStringToBytes(storedPassphrase);
 		// Return the result
 		return storedHash;
 	}
@@ -876,7 +881,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	 * @param typeOfWalletToStart
 	 */
 	public void openWalletView(OWCoin typeOfWalletToStart) {
-		this.setCurSelectedCoinType(typeOfWalletToStart);
+		this.setSelectedCoin(typeOfWalletToStart);
 
 		// Temporarily need to just work for enabled types only
 		OWCoin t = null;
@@ -1108,7 +1113,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	@Override
 	public void handlePassphrasePositive(int requestCode, 
 			byte[] passphrase, Bundle info) {
-		byte[] inputHash = OWUtils.Sha256Hash(passphrase);
+		byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase);
 		switch(requestCode) {
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
@@ -1153,10 +1158,10 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 		// Can assume that there was a previously entered passphrase because 
 		// of the way the dialog was set up. 
 		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
-			byte[] inputHash = OWUtils.Sha256Hash(oldPassphrase);
+			byte[] inputHash = ZiftrUtils.Sha256Hash(oldPassphrase);
 			if (this.inputHashMatchesStoredHash(inputHash)) {
 				// If the old matches, set the new passphrase hash
-				this.setPassphraseHash(OWUtils.Sha256Hash(newPassphrase));
+				this.setPassphraseHash(ZiftrUtils.Sha256Hash(newPassphrase));
 			} else {
 				// If don't match, tell user. 
 				this.alertUser("The passphrase you entered doesn't match your "
@@ -1210,11 +1215,11 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	/**
 	 * @param selectedCoin the curSelectedCoinType to set
 	 */
-	public void setCurSelectedCoinType(OWCoin selectedCoinType) {
-		this.selectedCoin = selectedCoinType;
+	public void setSelectedCoin(OWCoin selectedCoin) {
+		this.selectedCoin = selectedCoin;
 	
 		//now that a coin type is set, setup the header view for it
-		headerView.setVisibility(View.VISIBLE);
+		//headerView.setVisibility(View.VISIBLE); //let fragments do this when they're displayed
 		
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
@@ -1228,7 +1233,7 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.ESTIMATED);
-		BigDecimal walletBallance = OWUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
+		BigDecimal walletBallance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
 		
 		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBallance).toPlainString());
 
@@ -1399,6 +1404,36 @@ public class OWMainFragmentActivity extends ActionBarActivity implements DrawerL
 	
 	public void showWalletHeader() {
 		this.headerView.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void handleExpiredLoginToken() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleGenericError(String errorMessage) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleDataUpdated() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void networkStarted() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void networkStopped() {
+		// TODO Auto-generated method stub
+		
 	}
 
 

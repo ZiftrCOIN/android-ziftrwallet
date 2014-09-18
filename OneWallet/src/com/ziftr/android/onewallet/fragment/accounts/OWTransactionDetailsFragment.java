@@ -21,7 +21,7 @@ import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWTransactionDetailsFragment extends OWWalletUserFragment implements OnClickListener {
 
@@ -149,11 +149,12 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	private void populateCurrency(){
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
-		BigDecimal formattedfiatAmt = OWFiat.formatFiatAmount(
-				txItem.getFiatType(), OWUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt));
-		this.currency.setText(formattedfiatAmt.toPlainString());
+		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
+		
+		currency.setText(formattedfiatAmt);
+
 	}
-	
+
 	private void populateRoutingAddress(){
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {

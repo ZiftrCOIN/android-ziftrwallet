@@ -27,7 +27,7 @@ import java.util.Arrays;
 import org.spongycastle.crypto.RuntimeCryptoException;
 
 import com.google.common.io.ByteStreams;
-import com.ziftr.android.onewallet.util.OWUtils;
+import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 /**
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be used as keys in a
@@ -51,7 +51,7 @@ public class OWSha256Hash implements Comparable<OWSha256Hash> {
      */
     public OWSha256Hash(String hexString) {
         checkArgument(hexString.length() == 64, "Must only be exactly 64 hex chars");
-        this.bytes = OWUtils.hexStringToBytes(hexString);
+        this.bytes = ZiftrUtils.hexStringToBytes(hexString);
     }
 
     /**
@@ -70,7 +70,7 @@ public class OWSha256Hash implements Comparable<OWSha256Hash> {
      * Calculates the hash of the hash of the contents. This is a standard operation in Bitcoin.
      */
     public static OWSha256Hash createDouble(byte[] contents) {
-        return new OWSha256Hash(OWUtils.doubleDigest(contents));
+        return new OWSha256Hash(ZiftrUtils.doubleDigest(contents));
     }
 
     /**
@@ -109,7 +109,7 @@ public class OWSha256Hash implements Comparable<OWSha256Hash> {
 
     @Override
     public String toString() {
-        return OWUtils.bytesToHexString(bytes);
+        return ZiftrUtils.bytesToHexString(bytes);
     }
 
     /**
