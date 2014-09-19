@@ -61,6 +61,9 @@
                 android:text="@string/ow_create_new_address"
                 android:textColor="@color/White" />
 
+            <View style="@style/white_divider" 
+                android:layout_marginTop="8dp"/>
+
             <TextView
                 android:id="@+id/addressValueTitleTextView"
                 style="@style/send_receive_label"
@@ -117,18 +120,17 @@
                     android:contentDescription="@string/ow_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
                     android:src="@drawable/copy_icon_clickable" />
-
             </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/generateAddressQrCodeContainer"
-				android:background="@color/White"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
                 android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                android:layout_marginRight="@dimen/ow_horizontal_margin" >
+                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                android:background="@color/White"
+                android:orientation="vertical" >
 
                 <ImageView
                     android:id="@+id/generateAddressQrCodeImageView"

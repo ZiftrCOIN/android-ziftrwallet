@@ -101,6 +101,8 @@
                         android:src="@drawable/qrcode_enabled" />
                 </RelativeLayout>
 
+                <View style="@style/white_divider" />
+
                 <TextView
                     android:id="@+id/sendToNameTitle"
                     style="@style/send_receive_label"
@@ -116,6 +118,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     layout="@layout/_edit_text_shadow" />
+
+                <View style="@style/white_divider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -175,6 +179,8 @@
                             layout="@layout/_edit_text_shadow" />
                     </LinearLayout>
                 </LinearLayout>
+
+                <View style="@style/white_divider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -265,6 +271,8 @@
                         </LinearLayout>
                     </LinearLayout>
                 </RelativeLayout>
+
+                <View style="@style/white_divider" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
