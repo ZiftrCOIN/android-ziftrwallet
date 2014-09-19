@@ -215,7 +215,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	/**
 	 * As part of the R in CRUD, this method gets an address from the 
-	 * database for the given coin type and table boolean.
+	 * database for the given coin type and table boolean. Returns null if
+	 * no such address is found
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param address - The list of 1xyz... (Base58) encoded address in the database.

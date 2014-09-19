@@ -3,11 +3,25 @@ package com.ziftr.android.onewallet.fragment.accounts;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 
 import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.ZLog;
 
-public abstract class OWAddressBookParentFragment extends OWWalletUserFragment {
+public abstract class OWAddressBookParentFragment extends OWWalletUserFragment implements OnClickListener {
+
+	private ImageView addressBookImageView;
+
+	public abstract void acceptAddress(String address, String label);
+	public abstract View getContainerView();
+	public abstract String getActionBarTitle();
+
+	protected void initializeViewFields(View rootView, int addressBookId) {
+		this.addressBookImageView = (ImageView) rootView.findViewById(addressBookId);
+		this.addressBookImageView.setOnClickListener(this);
+	}
 
 	public void openAddressBook(boolean includeReceivingNotSending, int baseLayout) {
 		// The transaction that will take place to show the new fragment
@@ -26,16 +40,19 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment {
 		transaction.commit();
 	}
 
-	public abstract void setVisibility(int visibility);
+	public void setVisibility(int visibility) {
+		getContainerView().setVisibility(visibility);
+		if (visibility == View.VISIBLE) {
+			this.setActionBar();
+		}
+	}
 
-	public abstract void acceptAddress(String address, String label);
-	
 	/**
 	 * Updates the action bar for this fragment.
 	 */
 	protected void setActionBar() {
 		if (!this.showingChildFragment()) {
-			this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
+			this.getOWMainActivity().changeActionBar(getActionBarTitle(), false, true);
 		}
 	}
 
@@ -72,6 +89,13 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment {
 			this.returnToParentFragment();
 		}
 		return willSucceed;
+	}
+
+	/**
+	 * @return the addressBookImageView
+	 */
+	public ImageView getAddressBookImageView() {
+		return addressBookImageView;
 	}
 
 }

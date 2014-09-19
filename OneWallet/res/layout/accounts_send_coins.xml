@@ -1,244 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sendCoinBaseFrameLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="0dp" >
+    android:layout_height="match_parent" >
 
     <LinearLayout
+        android:id="@+id/sendCoinsContainingView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_vertical" >
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="0dp" >
 
-        <ScrollView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:orientation="vertical"
-            android:padding="0dp" >
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical" >
 
-            <LinearLayout
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="vertical" >
+                android:layout_height="fill_parent"
+                android:orientation="vertical"
+                android:padding="0dp" >
 
-                <TextView
-                    android:id="@+id/sendToAddressTitleView"
-                    style="@style/send_receive_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:text="@string/ow_send_to_address" >
-                </TextView>
-
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical" >
 
-                    <EditText
-                        android:id="@+id/sendEditTextReceiverAddress"
+                    <TextView
+                        android:id="@+id/sendToAddressTitleView"
+                        style="@style/send_receive_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                        android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                        android:text="@string/ow_send_to_address" >
+                    </TextView>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" >
+
+                        <EditText
+                            android:id="@+id/sendEditTextReceiverAddress"
+                            style="@style/send_receive_block"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top|left"
+                            android:inputType="textMultiLine"
+                            android:minHeight="@dimen/ow_edit_text_heightx2"
+                            android:paddingBottom="@dimen/ow_edit_text_padding"
+                            android:paddingLeft="@dimen/ow_edit_text_padding"
+                            android:paddingRight="@dimen/ow_total_icon_side_length"
+                            android:paddingTop="@dimen/ow_edit_text_padding" >
+                        </EditText>
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignLeft="@id/sendEditTextReceiverAddress"
+                            android:layout_below="@id/sendEditTextReceiverAddress"
+                            android:contentDescription="@string/ow_empty_string"
+                            android:src="@drawable/shadow_paper_left" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignRight="@id/sendEditTextReceiverAddress"
+                            android:layout_below="@id/sendEditTextReceiverAddress"
+                            android:contentDescription="@string/ow_empty_string"
+                            android:src="@drawable/shadow_paper_right" />
+
+                        <ImageView
+                            android:id="@+id/sendGetAddressFromHistoryIcon"
+                            android:layout_width="@dimen/ow_total_icon_side_length"
+                            android:layout_height="@dimen/ow_total_icon_side_length"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
+                            android:contentDescription="@string/ow_old_passphrase_hint"
+                            android:padding="@dimen/ow_borderless_icon_margin"
+                            android:src="@drawable/address_book_icon_clickable" />
+
+                        <ImageView
+                            android:id="@+id/send_paste_icon"
+                            android:layout_width="@dimen/ow_total_icon_side_length"
+                            android:layout_height="@dimen/ow_total_icon_side_length"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="@dimen/ow_borderless_icon_margin"
+                            android:clickable="true"
+                            android:contentDescription="@string/ow_old_passphrase_hint"
+                            android:padding="@dimen/ow_bordered_icon_margin"
+                            android:src="@drawable/copy_icon_clickable" />
+
+                        <ImageView
+                            android:id="@+id/send_qr_icon"
+                            android:layout_width="@dimen/ow_total_icon_side_length"
+                            android:layout_height="@dimen/ow_total_icon_side_length"
+                            android:layout_alignRight="@+id/sendEditTextReceiverAddress"
+                            android:layout_centerVertical="true"
+                            android:contentDescription="@string/ow_old_passphrase_hint"
+                            android:padding="@dimen/ow_bordered_icon_margin"
+                            android:src="@drawable/qrcode_enabled" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:id="@+id/sendToNameTitle"
+                        style="@style/send_receive_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                        android:text="@string/ow_send_to_address_name" >
+                    </TextView>
+
+                    <include
+                        android:id="@+id/send_edit_text_reciever_name"
                         style="@style/send_receive_block"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="top|left"
-                        android:inputType="textMultiLine"
-                        android:minHeight="@dimen/ow_edit_text_heightx2"
-                        android:paddingBottom="@dimen/ow_edit_text_padding"
-                        android:paddingLeft="@dimen/ow_edit_text_padding"
-                        android:paddingRight="@dimen/ow_total_icon_side_length"
-                        android:paddingTop="@dimen/ow_edit_text_padding" >
-                    </EditText>
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignLeft="@id/sendEditTextReceiverAddress"
-                        android:layout_below="@id/sendEditTextReceiverAddress"
-                        android:contentDescription="@string/ow_empty_string"
-                        android:src="@drawable/shadow_paper_left" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignRight="@id/sendEditTextReceiverAddress"
-                        android:layout_below="@id/sendEditTextReceiverAddress"
-                        android:contentDescription="@string/ow_empty_string"
-                        android:src="@drawable/shadow_paper_right" />
-
-                    <ImageView
-                        android:id="@+id/sendGetAddressFromHistoryIcon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
-                        android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_borderless_icon_margin"
-                        android:src="@drawable/address_book_icon_clickable" />
-
-                    <ImageView
-                        android:id="@+id/send_paste_icon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="@dimen/ow_borderless_icon_margin"
-                        android:clickable="true"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_bordered_icon_margin"
-                        android:src="@drawable/copy_icon_clickable" />
-
-                    <ImageView
-                        android:id="@+id/send_qr_icon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
-                        android:layout_alignRight="@+id/sendEditTextReceiverAddress"
-                        android:layout_centerVertical="true"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_bordered_icon_margin"
-                        android:src="@drawable/qrcode_enabled" />
-                </RelativeLayout>
-
-                <TextView
-                    android:id="@+id/sendToNameTitle"
-                    style="@style/send_receive_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:text="@string/ow_send_to_address_name" >
-                </TextView>
-
-                <include
-                    android:id="@+id/send_edit_text_reciever_name"
-                    style="@style/send_receive_block"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    layout="@layout/_edit_text_shadow" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:layout_marginRight="@dimen/ow_horizontal_margin"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal" >
+                        layout="@layout/_edit_text_shadow" />
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            style="@style/send_receive_label"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:gravity="left"
-                            android:text="@string/ow_send_amount" >
-                        </TextView>
-
-                        <include
-                            android:id="@+id/sendEditTextAmount"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            layout="@layout/_edit_text_shadow" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight=".1" >
-                    </View>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            style="@style/send_receive_label"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="left"
-                            android:text="@string/ow_send_amount_equivalent" >
-                        </TextView>
-
-                        <include
-                            android:id="@+id/sendEditTextAmountFiatEquiv"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            layout="@layout/_edit_text_shadow" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:orientation="horizontal" >
-
-                    <TextView
-                        style="@style/send_receive_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
                         android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                        android:layout_weight="1"
-                        android:gravity="left"
-                        android:text="@string/ow_send_transaction_fee" >
-                    </TextView>
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight=".1" >
-                    </View>
-
-                    <TextView
-                        style="@style/send_receive_label"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        android:gravity="left"
-                        android:text="@string/ow_send_amount_equivalent" >
-                    </TextView>
-                </LinearLayout>
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false" >
-
-                    <ImageView
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
-                        android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
-                        android:clickable="true"
-                        android:padding="@dimen/ow_borderless_icon_margin"
-                        android:src="@drawable/button_help" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/ow_horizontal_margin"
+                        android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                        android:baselineAligned="false"
                         android:orientation="horizontal" >
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/ow_horizontal_margin"
                             android:layout_weight="1"
                             android:orientation="vertical" >
 
+                            <TextView
+                                style="@style/send_receive_label"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="left"
+                                android:text="@string/ow_send_amount" >
+                            </TextView>
+
                             <include
-                                android:id="@+id/sendEditTextTransactionFee"
+                                android:id="@+id/sendEditTextAmount"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 layout="@layout/_edit_text_shadow" />
@@ -253,72 +163,169 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/ow_horizontal_margin"
                             android:layout_weight="1"
                             android:orientation="vertical" >
 
+                            <TextView
+                                style="@style/send_receive_label"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="left"
+                                android:text="@string/ow_send_amount_equivalent" >
+                            </TextView>
+
                             <include
-                                android:id="@+id/sendEditTextTransactionFeeFiatEquiv"
+                                android:id="@+id/sendEditTextAmountFiatEquiv"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 layout="@layout/_edit_text_shadow" />
                         </LinearLayout>
                     </LinearLayout>
-                </RelativeLayout>
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:orientation="vertical" >
-
-                    <TextView
-                        android:id="@+id/sendTotalTitleTextView"
-                        style="@style/send_receive_label"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_gravity="center"
-                        android:gravity="left"
-                        android:text="@string/ow_send_total" >
-                    </TextView>
+                        android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                        android:orientation="horizontal" >
 
-                    <TextView
-                        android:id="@+id/sendTotalTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_below="@id/sendTotalTitleTextView"
-                        android:layout_gravity="bottom"
-                        android:gravity="bottom"
-                        android:text="@string/ow_send_default_total"
-                        android:textColor="@color/White"
-                        android:textSize="40sp" >
-                    </TextView>
+                        <TextView
+                            style="@style/send_receive_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                            android:layout_weight="1"
+                            android:gravity="left"
+                            android:text="@string/ow_send_transaction_fee" >
+                        </TextView>
 
-                    <TextView
-                        android:id="@+id/sendTotalFiatEquivTextView"
-                        android:layout_width="wrap_content"
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight=".1" >
+                        </View>
+
+                        <TextView
+                            style="@style/send_receive_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:gravity="left"
+                            android:text="@string/ow_send_amount_equivalent" >
+                        </TextView>
+                    </LinearLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_alignBottom="@id/sendTotalTextView"
-                        android:layout_margin="5dp"
-                        android:layout_toRightOf="@id/sendTotalTextView"
-                        android:gravity="bottom"
-                        android:text="@string/ow_send_default_total_fiat_equiv"
-                        android:textColor="@color/White" >
-                    </TextView>
-                </RelativeLayout>
-            </LinearLayout>
-        </ScrollView>
+                        android:baselineAligned="false" >
+
+                        <ImageView
+                            android:layout_width="@dimen/ow_total_icon_side_length"
+                            android:layout_height="@dimen/ow_total_icon_side_length"
+                            android:layout_alignParentLeft="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
+                            android:clickable="true"
+                            android:padding="@dimen/ow_borderless_icon_margin"
+                            android:src="@drawable/button_help" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" >
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                                android:layout_weight="1"
+                                android:orientation="vertical" >
+
+                                <include
+                                    android:id="@+id/sendEditTextTransactionFee"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    layout="@layout/_edit_text_shadow" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight=".1" >
+                            </View>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                                android:layout_weight="1"
+                                android:orientation="vertical" >
+
+                                <include
+                                    android:id="@+id/sendEditTextTransactionFeeFiatEquiv"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    layout="@layout/_edit_text_shadow" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                        android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/sendTotalTitleTextView"
+                            style="@style/send_receive_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_gravity="center"
+                            android:gravity="left"
+                            android:text="@string/ow_send_total" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/sendTotalTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_below="@id/sendTotalTitleTextView"
+                            android:layout_gravity="bottom"
+                            android:gravity="bottom"
+                            android:text="@string/ow_send_default_total"
+                            android:textColor="@color/White"
+                            android:textSize="40sp" >
+                        </TextView>
+
+                        <TextView
+                            android:id="@+id/sendTotalFiatEquivTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBottom="@id/sendTotalTextView"
+                            android:layout_margin="5dp"
+                            android:layout_toRightOf="@id/sendTotalTextView"
+                            android:gravity="bottom"
+                            android:text="@string/ow_send_default_total_fiat_equiv"
+                            android:textColor="@color/White" >
+                        </TextView>
+                    </RelativeLayout>
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_margin="0dp"
+            layout="@layout/_dual_button_footer"
+            android:padding="0dp" />
     </LinearLayout>
 
-    <include
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_margin="0dp"
-        layout="@layout/_dual_button_footer"
-        android:padding="0dp" />
-
-</LinearLayout>
+</FrameLayout>
