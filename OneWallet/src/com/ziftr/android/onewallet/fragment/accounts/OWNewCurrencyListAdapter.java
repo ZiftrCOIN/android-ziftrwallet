@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
@@ -40,7 +40,7 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		OWNewCurrencyListItem newCurrencyListItem = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-        	convertView = (RelativeLayout) this.inflater.inflate(this.resourceId, null);
+        	convertView = (LinearLayout) this.inflater.inflate(this.resourceId, null);
         }
 		
 		// Whether or not we just created one, we reset all the resources

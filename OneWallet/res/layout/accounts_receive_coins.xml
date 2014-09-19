@@ -17,112 +17,129 @@
             android:duplicateParentState="true"
             android:orientation="vertical" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/addressNameTitleTextView"
+                style="@style/send_receive_label"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/ow_horizontal_margin"
-                android:paddingRight="@dimen/ow_horizontal_margin"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/addressNameTitleTextView"
-                    style="@style/send_receive_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ow_receive_coins_address_label_box_title" />
-
-                <include layout="@layout/_edit_text_shadow"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/addressName"
-                     />
-                
-            </LinearLayout>
+                android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                android:text="@string/ow_receive_coins_address_label_box_title" />
 
             <RelativeLayout
-                android:id="@+id/addressValueLayout"
-                style="@style/send_receive_block_container_with_background"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingLeft="0dp"
-                android:paddingRight="0dp" >
+                android:paddingBottom="@dimen/ow_send_receive_list_block_padding_vertical" >
+
+                <include
+                    android:id="@+id/addressName"
+                    style="@style/send_receive_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/_edit_text_shadow" />
 
                 <ImageView
                     android:id="@+id/recallAddressFromHistoryIcon"
                     android:layout_width="@dimen/ow_total_icon_side_length"
                     android:layout_height="@dimen/ow_total_icon_side_length"
-                    android:layout_alignParentBottom="true"
                     android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
                     android:clickable="true"
                     android:contentDescription="@string/ow_empty_string"
                     android:padding="@dimen/ow_borderless_icon_margin"
-                    android:src="@drawable/from_history" />
+                    android:src="@drawable/address_book_icon_clickable" />
+            </RelativeLayout>
+
+            <TextView
+                style="@style/send_receive_block"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/ow_edit_text_height"
+                android:alpha=".7"
+                android:background="#65000000"
+                android:gravity="center|center_vertical"
+                android:text="@string/ow_create_new_address"
+                android:textColor="@color/White" />
+
+            <TextView
+                android:id="@+id/addressValueTitleTextView"
+                style="@style/send_receive_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                android:text="@string/ow_receive_coins_address_value_box_title" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <EditText
+                    android:id="@+id/addressValueTextView"
+                    style="@style/send_receive_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/ow_edit_text_background_color"
+                    android:clickable="false"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="true"
+                    android:minHeight="@dimen/ow_edit_text_height"
+                    android:paddingLeft="@dimen/ow_edit_text_padding"
+                    android:paddingRight="@dimen/ow_edit_text_padding"
+                    android:text="@string/ow_empty_string" >
+                </EditText>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/addressValueTextView"
+                    android:layout_below="@id/addressValueTextView"
+                    android:contentDescription="@string/ow_empty_string"
+                    android:src="@drawable/shadow_paper_left" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignRight="@id/addressValueTextView"
+                    android:layout_below="@id/addressValueTextView"
+                    android:contentDescription="@string/ow_empty_string"
+                    android:src="@drawable/shadow_paper_right" />
 
                 <ImageView
                     android:id="@+id/receiveCopyIcon"
                     android:layout_width="@dimen/ow_total_icon_side_length"
                     android:layout_height="@dimen/ow_total_icon_side_length"
-                    android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="@dimen/ow_borderless_icon_margin"
                     android:clickable="true"
                     android:contentDescription="@string/ow_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
                     android:src="@drawable/copy_icon_clickable" />
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_toLeftOf="@id/receiveCopyIcon"
-                    android:layout_toRightOf="@id/recallAddressFromHistoryIcon"
-                    android:orientation="vertical" >
-
-                    <TextView
-                        android:id="@+id/addressValueTitleTextView"
-                        style="@style/send_receive_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentTop="true"
-                        android:text="@string/ow_receive_coins_address_value_box_title" />
-
-                    <EditText
-                        android:id="@+id/addressValueTextView"
-                        style="@style/send_receive_edit_text"
-                        android:layout_width="match_parent"
-                        android:layout_alignLeft="@id/addressValueTitleTextView"
-                        android:layout_below="@id/addressValueTitleTextView"
-                        android:clickable="false"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="true"
-                        android:inputType="text"
-                        android:maxLines="2"
-                        android:scrollHorizontally="true"
-                        android:text="@string/ow_empty_string" >
-                    </EditText>
-                </RelativeLayout>
             </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/generateAddressQrCodeContainer"
-                style="@style/send_receive_block_container"
+				android:background="@color/White"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical" >
+                android:orientation="vertical"
+                android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                android:layout_marginRight="@dimen/ow_horizontal_margin" >
 
                 <ImageView
                     android:id="@+id/generateAddressQrCodeImageView"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:adjustViewBounds="true"
-                    android:background="@color/ow_new_receiving_address_icon_color"
                     android:contentDescription="@string/ow_empty_string"
-                    android:padding="50dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/add_white_icon_clickable" />
+                    android:padding="30dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/add_address" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

@@ -60,30 +60,17 @@
 
     <!-- send_receive page styles -->
     <style name="send_receive_label">
-        <item name="android:paddingRight">4dp</item>
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:textColor">@color/White</item>
         <item name="android:textSize">@dimen/ow_send_receive_label_text_size</item>
     </style>
 
-    <style name="send_receive_edit_text">
-        <item name="android:layout_height">@dimen/ow_edit_text_height</item>
+    <style name="send_receive_block">
         <item name="android:background">@color/ow_edit_text_background_color</item>
-        <item name="android:padding">@dimen/ow_edit_text_padding</item>
-        <item name="android:textSize">14sp</item>
-    </style>
-
-    <style name="send_receive_block_container">
-        <item name="android:paddingBottom">@dimen/ow_send_receive_list_block_padding_bottom</item>
-        <item name="android:paddingLeft">@dimen/ow_total_icon_side_length</item>
-        <item name="android:paddingRight">@dimen/ow_total_icon_side_length</item>
-        <item name="android:paddingTop">@dimen/ow_send_receive_list_block_padding_top</item>
-        <item name="android:layout_marginTop">@dimen/ow_send_receive_list_spacing_top_margin</item>
-    </style>
-
-    <style name="send_receive_block_container_with_background" parent="@style/send_receive_block_container">
-        <item name="android:background">@color/ow_send_receive_list_background</item>
+        <item name="android:layout_marginLeft">@dimen/ow_horizontal_margin</item>
+        <item name="android:layout_marginRight">@dimen/ow_horizontal_margin</item>
+        
     </style>
 
 </resources>

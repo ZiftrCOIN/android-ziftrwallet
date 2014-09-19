@@ -51,6 +51,8 @@ public class OWAccountsFragment extends OWFragment {
 	private ArrayAdapter walletAdapter;
 	
 	private ImageView addButton;
+	
+	private View footer;
 
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
@@ -89,7 +91,11 @@ public class OWAccountsFragment extends OWFragment {
 		this.walletManager = this.getOWMainActivity().getWalletManager();
 
 		this.addButton = (ImageView) this.rootView.findViewById(R.id.addNewCurrencyButton);
+		//dropshadow under listview
+		this.footer = this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null);
+
 		this.setAddCurrency();
+		
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
 
@@ -161,9 +167,11 @@ public class OWAccountsFragment extends OWFragment {
 	 * May save this for later to refresh when deleting a wallet from the list
 	 * of wallets on this accounts page. 
 	 */
-	@SuppressWarnings("unchecked")
 	public void refreshListOfUserWallets() {
 			this.walletAdapter.notifyDataSetChanged();
+			if (this.userWallets.size() == 0){
+				this.currencyListView.removeFooterView(this.footer);
+			}
 	}
 
 	/**
@@ -181,9 +189,9 @@ public class OWAccountsFragment extends OWFragment {
 				this.rootView.findViewById(R.id.listOfUserWallets);
 
 		// The dropshadow at the bottom
-		//this.userWallets.add(new OWCurrencyListItem(null, null, null, null, null, R.layout.dropshadowlayout));
-		this.currencyListView.addFooterView(this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null),null, false);
-
+		if (this.userWallets.size() > 0){
+			this.currencyListView.addFooterView(this.footer, null ,false);
+		}
 		this.currencyListView.setFooterDividersEnabled(false);
 		
 		this.walletAdapter = new OWCurrencyListAdapter(this.mContext, this.userWallets);
