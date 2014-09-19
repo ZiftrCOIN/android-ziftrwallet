@@ -20,8 +20,8 @@ public abstract class OWWalletUserFragment extends OWFragment {
 		return this.getOWMainActivity().getWalletManager();
 	}
 
-	protected OWCoin getCurSelectedCoinType() {
-		return this.getOWMainActivity().getCurSelectedCoinType();
+	protected OWCoin getSelectedCoin() {
+		return this.getOWMainActivity().getSelectedCoin();
 	}
 	
 

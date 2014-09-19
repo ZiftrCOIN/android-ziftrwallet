@@ -78,6 +78,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		this.initializeQrCodeFromBundle(savedInstanceState);
 
 		this.showWalletHeader();
+		
 
 		return this.rootView;
 	}
@@ -130,7 +131,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 			if(this.addressEditText.getText().toString().length() == 0) {
 				if (getOWMainActivity().userHasPassphrase()) {
 					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 					getOWMainActivity().showGetPassphraseDialog(
 							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 							OWTags.VALIDATE_PASS_RECEIVE);
@@ -217,7 +218,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 			public void run() {
 				String addressLabel = addressEditText.getText().toString();
 
-				final OWAddress address = database.createReceivingAddress(getCurSelectedCoinType(), addressLabel);
+				final OWAddress address = database.createReceivingAddress(getSelectedCoin(), addressLabel);
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
@@ -254,9 +255,11 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	 * A convenience method to update the database from this class.
 	 */
 	private void updateAddressLabelInDatabase() {
-		String label = this.labelEditText.getText().toString();
-		String address = this.addressEditText.getText().toString();
-		getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
+		if (fragmentHasAddress()) {
+			String label = this.labelEditText.getText().toString();
+			String address = this.addressEditText.getText().toString();
+			getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, true);
+		}
 	}
 
 	@Override

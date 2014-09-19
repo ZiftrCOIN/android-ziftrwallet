@@ -284,7 +284,7 @@ ZiftrNetworkHandler {
 		}
 
 		// Recreate wallet manager
-		this.walletManager = OWWalletManager.getInstance(this);
+		this.walletManager = OWWalletManager.getInstance(this.getApplicationContext());
 
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
@@ -341,8 +341,8 @@ ZiftrNetworkHandler {
 		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
 		outState.putInt(WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
 		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
-		if (this.getCurSelectedCoinType() != null) {
-			outState.putString(OWCoin.TYPE_KEY, this.getCurSelectedCoinType().toString());
+		if (this.getSelectedCoin() != null) {
+			outState.putString(OWCoin.TYPE_KEY, this.getSelectedCoin().toString());
 		}
 	}
 
@@ -1225,7 +1225,7 @@ ZiftrNetworkHandler {
 	/**
 	 * @return the curSelectedCoinType
 	 */
-	public OWCoin getCurSelectedCoinType() {
+	public OWCoin getSelectedCoin() {
 		return selectedCoin;
 	}
 

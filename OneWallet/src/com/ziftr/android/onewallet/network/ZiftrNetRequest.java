@@ -52,12 +52,23 @@ public class ZiftrNetRequest {
 	// private boolean refreshLoop = false; 
  
 	
+	/**
+	 * Create a network request for a given url
+	 * @param url the url this network request is for
+	 * @return a network request object with default settings pointing to the url
+	 */
 	public static ZiftrNetRequest createRequest(String url) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		return request;
 	}
 	
 	
+	/**
+	 * Create a network request for a given url with a string of post data
+	 * @param url the url to send the data to
+	 * @param postData post data as a String
+	 * @return a network request for sending the data, request will be a POST
+	 */
 	public static ZiftrNetRequest createRequest(String url, String postData) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		request.setUploadData(postData);
@@ -65,12 +76,27 @@ public class ZiftrNetRequest {
 	}
 	
 	
+	/**
+	 * Create a network request for a given url with a list of query parameters
+	 * @param url the url for this network request
+	 * @param queryParams a {@link ZiftrParamList} of query parameters
+	 * @return a network request for the url with the query parameters added
+	 */
 	public static ZiftrNetRequest createRequest(String url, ZiftrParamList queryParams) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		request.queryParameters = queryParams;
 		return request;
 	}
 	
+	
+	/**
+	 * Create a network request for a given url with headers query parameters and post data.
+	 * @param url the url for this network request
+	 * @param headers a map of headers to use, can be null for no additional headers
+	 * @param queryParams a {@link ZiftrParamList} of query parameters to add to the request
+	 * @param postData post data to send, can be null, request will be a GET with null post data, pass an empty string for a POST with no data
+	 * @return a network request setup with the passed in parameters
+	 */
 	public static ZiftrNetRequest createRequest(String url, Map<String,String> headers, ZiftrParamList queryParams, String postData) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		request.queryParameters = queryParams;
@@ -79,6 +105,15 @@ public class ZiftrNetRequest {
 		return request;
 	}
 	
+	/**
+	 * Create a network request for a given url with headers query parameters and post data. 
+	 * Takes a map of post data which will be formatted properly instead of a String
+	 * @param url the url for this network request
+	 * @param headers a map of headers to use, can be null for no additional headers
+	 * @param queryParams a {@link ZiftrParamList} of query parameters to add to the request
+	 * @param postData post data to send, can be null, request will be a GET with null post data
+	 * @return a network request setup with the passed in parameters
+	 */
 	public static ZiftrNetRequest createRequest(String url, Map<String,String> headers, ZiftrParamList queryParams, Map<String,String> postData) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		request.queryParameters = queryParams;
@@ -93,6 +128,11 @@ public class ZiftrNetRequest {
 		this.urlString = url;
 	}
 	
+	
+	/**
+	 * forces this request to use a different request method eg POST or GET
+	 * @param requestMethod the request type as a String
+	 */
 	public void forceRequestMethod(String requestMethod) {
 		this.forcedRequestMethod = requestMethod;
 	}

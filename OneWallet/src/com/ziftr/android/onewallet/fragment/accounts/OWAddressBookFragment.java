@@ -70,7 +70,14 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 	}
 
 	public void initializeAddressList() {
-		this.addressAdapter = new OWAddressListAdapter(this, this.getActivity());
+		// TODO do this in a non UI blocking way
+		List<OWAddress> addresses;
+		if (this.includeReceivingNotSending) {
+			addresses = this.getWalletManager().readAllReceivingAddresses(getSelectedCoin());
+		} else {
+			addresses = this.getWalletManager().readAllSendingAddresses(getSelectedCoin());
+		}
+		this.addressAdapter = new OWAddressListAdapter(this.getActivity(), addresses);
 
 		this.addressListView = (ListView) this.rootView.findViewById(R.id.addressBookListView);
 		this.addressListView.setAdapter(this.addressAdapter);

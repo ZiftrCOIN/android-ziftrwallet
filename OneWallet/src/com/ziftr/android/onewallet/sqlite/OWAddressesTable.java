@@ -1,5 +1,6 @@
 package com.ziftr.android.onewallet.sqlite;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,5 +158,18 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address);
 		db.update(getTableName(coin), values, whereClause, null);
 	}
+	
+	
+	
+	protected ArrayList<String> getAddressesList(OWCoin coin) {
+		
+		ArrayList<String> addresses = new ArrayList<String>();
+		
+		//TODO -read sqlite table for address and add to list
+		
+		return addresses;
+	}
+	
+	
 
 }
