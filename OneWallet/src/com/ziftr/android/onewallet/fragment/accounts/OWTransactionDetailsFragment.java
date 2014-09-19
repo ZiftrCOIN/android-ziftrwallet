@@ -63,7 +63,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
 			}
 			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
-				this.txItem = getWalletManager().readTransactionByHash(this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+				this.txItem = getWalletManager().readTransactionByHash(this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
 			}
 		}
 

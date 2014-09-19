@@ -76,7 +76,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		if (getWalletManager() == null || getWalletManager().getWallet(getCurSelectedCoinType()) == null) {
+		if (getWalletManager() == null || getWalletManager().getWallet(getSelectedCoin()) == null) {
 			throw new IllegalArgumentException(
 					"Shouldn't happen, this is just a safety check because we "
 							+ "need a wallet to send coins.");
@@ -99,7 +99,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 		this.txAdapter = new OWWalletTransactionListAdapter(this.getActivity());
 
 		Collection<OWTransaction> pendingTxs = 
-				this.getWalletManager().getPendingTransactions(getCurSelectedCoinType());
+				this.getWalletManager().getPendingTransactions(getSelectedCoin());
 
 		if (pendingTxs.size() > 0) {
 			// Add the Pending Divider
@@ -120,7 +120,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 				OWWalletTransactionListAdapter.Type.HISTORY_DIVIDER,
 				R.layout.accounts_wallet_tx_list_divider));
 		// Add all the pending transactions
-		for (OWTransaction tx : this.getWalletManager().getConfirmedTransactions(getCurSelectedCoinType())) {
+		for (OWTransaction tx : this.getWalletManager().getConfirmedTransactions(getSelectedCoin())) {
 			this.txAdapter.getFullList().add(tx);
 		}
 

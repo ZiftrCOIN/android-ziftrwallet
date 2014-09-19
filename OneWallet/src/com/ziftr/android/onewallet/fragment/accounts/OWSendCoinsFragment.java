@@ -199,7 +199,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 		// Set the fee to the default and set send amount to 0 initially 
 		changeFiatStartedFromProgram = true;
-		feeTextView.setText(this.getCurSelectedCoinType().getDefaultFeePerKb());
+		feeTextView.setText(this.getSelectedCoin().getDefaultFeePerKb());
 		changeFiatStartedFromProgram = false;
 
 		changeCoinStartedFromProgram = true;
@@ -233,10 +233,10 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (getCurSelectedCoinType().addressIsValid(getSendToAddressEditText().getText().toString())) {
+				if (getSelectedCoin().addressIsValid(getSendToAddressEditText().getText().toString())) {
 					if (getOWMainActivity().userHasPassphrase()){
 						Bundle b = new Bundle();
-						b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+						b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 						getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
 								OWTags.VALIDATE_PASS_SEND);
 					} else {
@@ -249,12 +249,12 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	public void onClickSendCoins() {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
 				getAmountToSendFromEditText());
-		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
 				getFeeFromEditText());
 		try {
-			getWalletManager().sendCoins(getCurSelectedCoinType(), getSendToAddressEditText().getText().toString(), 
+			getWalletManager().sendCoins(getSelectedCoin(), getSendToAddressEditText().getText().toString(), 
 					amountSending, feeSending);
 		} catch(OWAddressFormatException afe) {
 			// TODO alert user if address has errors
@@ -294,7 +294,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 						newCoinVal = new BigDecimal(newVal);
 						// TODO make this not only be USD
 						newFiatVal = OWConverter.convert(
-								newCoinVal, getCurSelectedCoinType(), OWFiat.USD); 
+								newCoinVal, getSelectedCoin(), OWFiat.USD); 
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -336,7 +336,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 					try {
 						newFiatVal = new BigDecimal(newVal);
 						newCoinVal =  OWConverter.convert(
-								newFiatVal, OWFiat.USD, getCurSelectedCoinType());
+								newFiatVal, OWFiat.USD, getSelectedCoin());
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -349,7 +349,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 					changeCoinStartedFromProgram = true;
 					coinValEditText.setText(OWCoin.formatCoinAmount(
-							getCurSelectedCoinType(), newCoinVal).toPlainString());
+							getSelectedCoin(), newCoinVal).toPlainString());
 					changeCoinStartedFromProgram = false;
 				}
 			}
@@ -382,12 +382,12 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 		TextView totalTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalTextView);
 		totalTextView.setText(OWCoin.formatCoinAmount(
-				getCurSelectedCoinType(), total).toPlainString());
+				getSelectedCoin(), total).toPlainString());
 
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCurSelectedCoinType());
+		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getSelectedCoin());
 		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal, false) + ")");
 	}
 
