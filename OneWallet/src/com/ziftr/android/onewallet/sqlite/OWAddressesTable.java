@@ -61,7 +61,6 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	protected void insert(OWAddress address, SQLiteDatabase db) {
 		long insertId = db.insert(getTableName(address.getCoinId()), 
 				null, addressToContentValues(address));
-		ZLog.log("insertId: " + insertId); 
 		address.setId(insertId);
 	}
 
@@ -116,9 +115,8 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 
 		sb.append(";");
 		String toQuery = sb.toString();
-		ZLog.log("Query: " + toQuery);
 		Cursor c = db.rawQuery(toQuery, null);
-
+		
 		List<OWAddress> newAddresses = new ArrayList<OWAddress>();
 
 		// Move to first returns false if cursor is empty
@@ -135,7 +133,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 				afe.printStackTrace();
 			}
 		}
-
+		
 		// Make sure we close the cursor
 		c.close();
 

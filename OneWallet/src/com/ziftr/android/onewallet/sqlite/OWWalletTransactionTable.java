@@ -215,7 +215,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	 * @param db
 	 * @return
 	 */
-	private List<OWTransaction> readTransactions(OWCoin coinId, String where, SQLiteDatabase db) {
+	public List<OWTransaction> readTransactions(OWCoin coinId, String where, SQLiteDatabase db) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coinId));
@@ -250,10 +250,6 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		c.close();
 
 		return newTxs;
-	}
-
-	protected List<OWTransaction> readAllTransactions(OWCoin coinId, SQLiteDatabase db) {
-		return this.readTransactions(coinId, null, db);
 	}
 
 	protected void updateTransaction(OWTransaction tx, SQLiteDatabase db) throws OWNoTransactionFoundException {
@@ -350,7 +346,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	private ContentValues txToContentValues(OWTransaction tx) {
 		ContentValues values = new ContentValues();
 
-		//		values.put(COLUMN_ID, tx.getId());
+		// values.put(COLUMN_ID, tx.getId());
 		values.put(COLUMN_HASH, tx.getSha256Hash().toString());
 		values.put(COLUMN_AMOUNT, tx.getTxAmount().toString());
 		values.put(COLUMN_FEE, tx.getTxFee().toString());

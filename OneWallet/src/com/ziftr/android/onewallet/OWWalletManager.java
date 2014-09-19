@@ -108,7 +108,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	/** The single instance of the database helper that we use. */
 	private static OWWalletManager instance;
 
-	private static boolean logging = false;
+	private static boolean logging = true;
 
 	private static void log(Object... messages) {
 		if (logging) {
@@ -173,9 +173,11 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		super(activity, databasePath);
 		this.activity = activity;
 
-		List<OWCoin> list = readAllActivatedTypes();
-		for (OWCoin enabledType : list) {
-			this.setUpWallet(enabledType);
+		for (OWCoin activatedType : readAllActivatedTypes()) {
+			this.setUpWallet(activatedType);
+			for (ECKey key : this.walletMap.get(activatedType).getKeys()) {
+				ZLog.log("Bitcoinj key: " + key.toAddress(activatedType.getNetworkParameters()));
+			}
 		}
 	}
 
@@ -647,7 +649,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		List<OWTransaction> pendingTransactions = new ArrayList<OWTransaction>();
 		for (Transaction tx : this.walletMap.get(coinId).getPendingTransactions()) {
 			OWTransaction owTx = bitcoinjTransactionToOWTransaction(coinId, tx);
-			ZLog.log("pending id: " + owTx.getId());
 			pendingTransactions.add(owTx);
 		}
 		return pendingTransactions;
@@ -677,7 +678,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			if (pendingTxHashes == null || (pendingTxHashes != null && 
 					!pendingTxHashes.contains(tx.getHashAsString()))) {
 				OWTransaction owTx = bitcoinjTransactionToOWTransaction(coinId, tx);
-				ZLog.log("pending id: " + owTx.getId());
 				confirmedTransactions.add(owTx);
 			}
 		}
@@ -725,12 +725,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		// if a tx is sent to us but has a change address (that isn't in our db) then we
 		// don't need that change address to be shown/saved.
 		boolean receiving = tx.getValue(this.getWallet(coinId)).compareTo(BigInteger.ZERO) > 0;
-		List<OWAddress> addresses = null;
-		if (receiving) {
-			addresses = this.readReceivingAddresses(coinId, addressStrings);
-		} else {
-			addresses = this.readSendingAddresses(coinId, addressStrings);
-		}
+		List<OWAddress> addresses = this.readAddresses(coinId, addressStrings, receiving);
 
 		for (OWAddress a : addresses) {
 			owTx.addDisplayAddress(a.toString());

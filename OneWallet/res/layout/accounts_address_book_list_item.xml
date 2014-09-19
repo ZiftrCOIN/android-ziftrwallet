@@ -16,6 +16,7 @@
         android:layout_alignParentLeft="true"
         android:contentDescription="@string/ow_empty_string"
         android:gravity="center_vertical"
+        android:clickable="true"
         android:padding="@dimen/ow_bordered_icon_margin"
         android:src="@drawable/logo_bitcoin" />
 

@@ -4,11 +4,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -21,9 +19,10 @@ import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
+import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
-public class OWTransactionDetailsFragment extends OWWalletUserFragment implements OnClickListener {
+public class OWTransactionDetailsFragment extends OWWalletUserFragment implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 
 	private static final String TX_ITEM_HASH_KEY = "txItemHash";
 
@@ -47,25 +46,19 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	private OWTransaction txItem;
 
 	private boolean isEditing;
+	private OWEditableTextBoxController<OWTransaction> controller;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		//resize view when keyboard pops up instead of just default pan so user can see field more clearly
+		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
+
+		// Resize view when keyboard pops up instead of just default pan so user 
+		// can see field more clearly
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
 		this.hideWalletHeader();
-
-		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
-		if (savedInstanceState != null) {
-			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
-				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
-			}
-			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
-				this.txItem = getWalletManager().readTransactionByHash(this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
-			}
-		}
 
 		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
 		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);
@@ -81,7 +74,8 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 
-		this.initFields();
+		this.initFields(savedInstanceState);
+
 		return this.rootView;
 	}
 
@@ -98,16 +92,21 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
 	}
 
-
-
 	/**
-	 * Get the arguments passed from the activity and set the text fields on the view
-	 * 
-	 * TODO the string constants should be public static final fields in this class. 
-	 *  
+	 * Get the arguments passed from the activity and set the text fields 
+	 * on the view
 	 */
-	@SuppressLint("NewApi")
-	public void initFields() {
+	public void initFields(Bundle savedInstanceState) {
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
+				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
+			}
+			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
+				this.txItem = getWalletManager().readTransactionByHash(
+						this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+			}
+		}
+
 		this.populateAmount();
 		this.populateCurrency();
 		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
@@ -118,11 +117,11 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 
 		this.populateAddress();
 
-		this.labelEditText.setText(this.txItem.getTxNote());
-		this.editLabelButton.setOnClickListener(this);
-
 		this.populatePendingInformation();
-		toggleEditNote(!isEditing);
+
+		this.controller = new OWEditableTextBoxController<OWTransaction>(
+				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
+		editLabelButton.setOnClickListener(this.controller);
 	}
 
 	private void populateAmount() {
@@ -148,7 +147,8 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	private void populateCurrency() {
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), txItem.getFiatType());
-		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
+		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), 
+				ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
 
 		currency.setText(formattedfiatAmt);
 
@@ -189,31 +189,6 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	public void setTxItem(OWTransaction txItem) {
 		this.txItem = txItem;
 	}
-	/**
-	 * 
-	 * @param txNote - EditText for note view
-	 * @param editLabelButton - ImageView for edit button
-	 * @param toggleOff - boolean to determine how to toggle
-	 */
-	public void toggleEditNote(boolean toggleOff) {
-		if (!toggleOff) {
-			this.labelEditText.setBackgroundResource(android.R.drawable.editbox_background_normal);
-			this.labelEditText.setFocusable(true);
-			this.labelEditText.setFocusableInTouchMode(true);
-			this.labelEditText.requestFocus();
-			editLabelButton.setImageResource(R.drawable.close_enabled);
-			isEditing = true;
-		} else {
-			this.labelEditText.setFocusable(false);
-			this.labelEditText.setFocusableInTouchMode(false);
-			this.labelEditText.setBackgroundColor(getResources().getColor(android.R.color.transparent));
-			this.labelEditText.setPadding(0, 0, 0, 0);
-			editLabelButton.setImageResource(R.drawable.edit_enabled);
-			isEditing = false;
-			txItem.setTxNote(this.labelEditText.getText().toString());
-			getWalletManager().updateTransactionNote(txItem);
-		}
-	}
 
 	public String formatEstimatedTime(int seconds) {
 		StringBuilder sb = new StringBuilder();
@@ -231,11 +206,41 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		return sb.toString();
 	}
 
+	//////////////////////////////////////////////////////
+	////////// Methods for being an EditHandler //////////
+	//////////////////////////////////////////////////////
+
 	@Override
-	public void onClick(View v) {
-		if (v == this.editLabelButton) {
-			toggleEditNote(isEditing);
+	public void onEditStart(OWTransaction t) {
+		if (t != this.txItem) {
+			ZLog.log("Should have gotten the same object, something went wrong. ");
+			return;
 		}
+		this.isEditing = true;
+	}
+
+	@Override
+	public void onEditEnd(String newText, OWTransaction t) {
+		if (t != this.txItem) {
+			ZLog.log("Should have gotten the same object, something went wrong. ");
+			return;
+		}
+
+		txItem.setTxNote(newText);
+		getWalletManager().updateTransactionNote(txItem);
+		
+		// Now that we are done editing 
+		this.isEditing = false;
+	}
+
+	@Override
+	public boolean isInEditingMode() {
+		return this.isEditing;
+	}
+
+	@Override
+	public boolean isEditing(OWTransaction t) {
+		return this.isEditing && t == this.txItem; 
 	}
 
 }

@@ -165,6 +165,10 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	//////////  Interface for CRUDing receiving addresses  ///////////
 	//////////////////////////////////////////////////////////////////
 
+	private OWAddressesTable getTable(boolean receivingNotSending) {
+		return receivingNotSending ? this.receivingAddressesTable : this.sendingAddressesTable;
+	}
+
 	/**
 	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
 	 * address to the correct table within our database.
@@ -210,71 +214,86 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * As part of the R in CRUD, this method gets a receiving address from the 
-	 * database for the given coin type.
+	 * As part of the R in CRUD, this method gets an address from the 
+	 * database for the given coin type and table boolean.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
-	 * @param address - The list of 1xyz... (Base58) encoded address in the database. 
+	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public OWAddress readReceivingAddress(OWCoin coinId, String address) {
-		return this.receivingAddressesTable.readAddress(coinId, address, getReadableDatabase());
+	public OWAddress readAddress(OWCoin coinId, String address, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readAddress(coinId, address, getReadableDatabase());
 	}
 
 	/**
-	 * As part of the R in CRUD, this method gets a receiving address from the 
-	 * database for the given coin type.
+	 * As part of the R in CRUD, this method gets an address from the 
+	 * database for the given coin type and table boolean.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
-	 * @param address - The 1xyz... (Base58) encoded address in the database. 
+	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public List<OWAddress> readReceivingAddresses(OWCoin coinId, List<String> addresses) {
-		return this.receivingAddressesTable.readAddresses(coinId, addresses, getReadableDatabase());
+	public List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readAddresses(coinId, addresses, getReadableDatabase());
 	}
 
 	/**
-	 * As part of the R in CRUD, this method gets all the receiving addresses from the 
-	 * database for the given coin type.
+	 * As part of the R in CRUD, this method gets all the addresses from the 
+	 * database for the given coin type and table boolean.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public List<OWAddress> readAllReceivingAddresses(OWCoin coinId) {
-		return this.receivingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
+	public List<OWAddress> readAllAddresses(OWCoin coinId, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readAllAddresses(coinId, getReadableDatabase());
 	}
 
 	/**
 	 * As part of the R in CRUD, this method gives the number of entries
-	 * in the receiving addresses table for the coin type specified. 
+	 * in the addresses table for the coin type specified and table boolean. 
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
 	 */
-	public int readNumReceivingAddresses(OWCoin coinId) {
-		return this.receivingAddressesTable.numEntries(coinId, getReadableDatabase());
+	public int readNumAddresses(OWCoin coinId, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).numEntries(coinId, getReadableDatabase());
 	}
 
 	/**
-	 * As part of the U in CRUD, this method updates the  addresses table in 
-	 * the database for the given coin type and key. Doesn't update any pub/address 
-	 * related data, just the private key (if encryption phrase changes) and the other 
-	 * data associated with this key, such as timestamp, note, etc.
+	 * As part of the U in CRUD, this method updates the addresses table in 
+	 * the database for the given coin type and key and table boolean.
 	 * 
 	 * TODO is there a way to make sure that the new private key matches the old,
 	 * even on encryption state changes?
 	 * 
-	 * @param coinId - The coin type to determine which table we use. 
+	 * @param addess - the address to fully update 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
 	 */
-	public void updateReceivingAddress(OWAddress address) {
-		this.receivingAddressesTable.updateAddress(address, getWritableDatabase());
+	public void updateAddress(OWAddress address) {
+		this.getTable(address.isPersonalAddress()).updateAddress(address, getWritableDatabase());
+	}
+
+	/**
+	 * As part of the U in CRUD, this method updates the label for the given address.
+	 * 
+	 * @param coin - The coin type
+	 * @param address - The address to update
+	 * @param newLabel - the label to change the address to
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
+	 */
+	public void updateAddressLabel(OWCoin coin, String address, String newLabel, boolean receivingNotSending) {
+		this.getTable(receivingNotSending).updateAddressLabel(coin, address, newLabel, getWritableDatabase());
 	}
 
 	/* 
 	 * NOTE:
-	 * Note that we don't give the option to delete an address, shouldn't ever
+	 * Note that we don't give the method to delete an address, shouldn't ever
 	 * delete an address just in case someone sends coins to an old address.
 	 */
 
-	////////////////////////////////////////////////////////////////
-	//////////  Interface for CRUDing sending addresses  ///////////
-	////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
+	//////////  Interface for creating sending addresses  ///////////
+	/////////////////////////////////////////////////////////////////
 
 	/**
 	 * As part of the C in CRUD, this method adds a sending (not owned by the user)
@@ -324,66 +343,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return address;
 	}
 
-	/**
-	 * As part of the R in CRUD, this method gets a receiving address from the 
-	 * database for the given coin type.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param address - The 1xyz... (Base58) encoded address in the database. 
-	 */
-	public OWAddress readSendingAddress(OWCoin coinId, String address) {
-		return this.sendingAddressesTable.readAddress(coinId, address, getReadableDatabase());
-	}
-
-	/**
-	 * As part of the R in CRUD, this method gets a sending address from the 
-	 * database for the given coin type.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param address - The list of 1xyz... (Base58) encoded address in the database. 
-	 */
-	public List<OWAddress> readSendingAddresses(OWCoin coinId, List<String> addresses) {
-		return this.sendingAddressesTable.readAddresses(coinId, addresses, getReadableDatabase());
-	}
-
-	/**
-	 * As part of the R in CRUD, this method gets all the known external (not 
-	 * owned) addresses from the database for the given coin type.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 */
-	public List<OWAddress> readAllSendingAddresses(OWCoin coinId) {
-		return this.sendingAddressesTable.readAllAddresses(coinId, getReadableDatabase());
-	}
-
-	/**
-	 * As part of the R in CRUD, this method gives the number of entries
-	 * in the sending addresses table for the coin type specified. 
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 */
-	public int readNumSendingAddresses(OWCoin coinId) {
-		return this.sendingAddressesTable.numEntries(coinId, getReadableDatabase());
-	}
-
-	/**
-	 * As part of the U in CRUD, this method updates the sending addresses table in 
-	 * the database for the given address. Doesn't the actual address, just the data 
-	 * associated with this key, such as timestamp, note, etc. We don't update the
-	 * actual address string because addresses should not be deleted, only added.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 */
-	public void updateSendingAddress(OWAddress address) {
-		this.sendingAddressesTable.updateAddress(address, getWritableDatabase());
-	}
-
-	/* 
-	 * NOTE:
-	 * Note that we don't currently give the option to delete a sending address. Might 
-	 * want to add this feature? Maybe a long click in the address list?
-	 */
-
 	//////////////////////////////////////////////////////////
 	//////////  Helpful method for combining lists  //////////
 	//////////////////////////////////////////////////////////
@@ -395,8 +354,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	public List<OWAddress> readAllAddresses(OWCoin coinId) {
-		List<OWAddress> addresses = this.readAllReceivingAddresses(coinId);
-		addresses.addAll(this.readAllSendingAddresses(coinId));
+		List<OWAddress> addresses = this.readAllAddresses(coinId, false);
+		addresses.addAll(this.readAllAddresses(coinId, true));
 		return addresses;
 	}
 
@@ -489,19 +448,18 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param db
 	 * @return
 	 */
-	public List<OWTransaction> readTransactionsByHash(OWCoin coinId, 
-			List<String> hashes) {
+	public List<OWTransaction> readTransactionsByHash(OWCoin coinId, List<String> hashes) {
 		return transactionsTable.readTransactionsByHash(coinId, hashes, getReadableDatabase());
 	}
 
 	public List<OWTransaction> readAllTransactions(OWCoin coinId) {
-		return this.transactionsTable.readAllTransactions(coinId, getReadableDatabase());
+		return this.transactionsTable.readTransactions(coinId, null, getReadableDatabase());
 	}
 
 	public void updateTransaction(OWTransaction tx) {
 		this.transactionsTable.updateTransaction(tx, getWritableDatabase());
 	}
-	
+
 	public void updateTransactionNumConfirmations(OWTransaction tx) {
 		this.transactionsTable.updateTransactionNumConfirmations(tx, getReadableDatabase());
 	}
@@ -535,14 +493,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return transactionsTable.readConfirmedTransactions(coinId, getReadableDatabase());
 	}
 
-	public void updateAddressLabel(OWCoin coin, String address, String newLabel, boolean isReceiving) {
-		if (isReceiving) {
-			this.receivingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
-		} else {
-			this.sendingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
-		}
-	}
-	
 	public void updateTransactionNote(OWTransaction tx) {
 		this.transactionsTable.updateTransactionNote(tx, getWritableDatabase());
 	}

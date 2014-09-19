@@ -30,7 +30,6 @@ import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
-import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implements OnClickListener, TextWatcher {
@@ -72,8 +71,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		ZLog.log("receive on creat called");
-
 		this.setQrCodeGenerated(false);
 
 		this.initializeViewFields(inflater, container);
@@ -248,18 +245,18 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		updateAddressLabelInDatabase();
+		if (fragmentHasAddress()) {
+			updateAddressLabelInDatabase();
+		}
 	}
 
 	/**
 	 * A convenience method to update the database from this class.
 	 */
 	private void updateAddressLabelInDatabase() {
-		if (fragmentHasAddress()) {
-			String label = this.labelEditText.getText().toString();
-			String address = this.addressEditText.getText().toString();
-			getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
-		}
+		String label = this.labelEditText.getText().toString();
+		String address = this.addressEditText.getText().toString();
+		getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
 	}
 
 	@Override
@@ -273,7 +270,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		labelEditText.setText(label);
 		this.setQrCodeGenerated(false);
 	}
-	
+
 	@Override
 	public void setVisibility(int visibility) {
 		this.scrollView.setVisibility(visibility);
@@ -281,7 +278,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 			this.setActionBar();
 		}
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();

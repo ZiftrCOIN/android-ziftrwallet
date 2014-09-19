@@ -35,10 +35,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment {
 	 */
 	protected void setActionBar() {
 		if (!this.showingChildFragment()) {
-			ZLog.log("Showing child frag");
 			this.getOWMainActivity().changeActionBar("RECEIVE", false, true);
-		} else {
-			ZLog.log("Not showing child frag");
 		}
 	}
 
