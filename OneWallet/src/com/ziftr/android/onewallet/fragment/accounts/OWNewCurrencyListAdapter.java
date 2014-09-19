@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ziftr.android.onewallet.R;
@@ -40,7 +40,7 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		OWNewCurrencyListItem newCurrencyListItem = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-        	convertView = (RelativeLayout) this.inflater.inflate(this.resourceId, null);
+        	convertView = (LinearLayout) this.inflater.inflate(this.resourceId, null);
         }
 		
 		// Whether or not we just created one, we reset all the resources
@@ -57,7 +57,7 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		
 		//Set the add button image
 		ImageView addImage = (ImageView) convertView.findViewById(R.id.rightIcon);
-		addImage.setImageDrawable(context.getResources().getDrawable(R.drawable.add_white_enabled));
+		addImage.setImageDrawable(context.getResources().getDrawable(R.drawable.next_down_2));
 
 		return convertView;
 	}

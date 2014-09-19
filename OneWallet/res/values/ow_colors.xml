@@ -4,8 +4,14 @@
     <color name="ow_ziftrWALLETBlue">#32828c</color>
     <color name="ow_ziftrWALLETDarkBlue">#286870</color>
 	<color name="ow_ziftrWALLETBluelight">#D3E5E9</color>
+	
+	<!-- light orange color of icons -->
+	<color name="sunnyD">#ffc75a</color>
+	<!-- darker orange -->
+	<color name="orangeSoda">#f89d2a</color>
+	<color name="ziftrDarkGray">#666f71</color>
     
-    <color name="ow_menu_default">@color/LightGray</color>
+    <color name="ow_menu_default">@color/White</color>
     <color name="ow_menu_clicked">@color/LimeGreen</color>
     <color name="ow_menu_button_clicked">@color/LimeGreen</color>
     <color name="ow_unpressed_button">@color/ow_ziftrWALLETBlue</color>
@@ -19,7 +25,7 @@
     <color name="ow_disabled_menu_icon">@color/MediumGray</color>
     
     <color name="ow_menu_divider">@color/DarkGray</color>
-    <color name="ow_action_bar_color">#64676C</color>
+    <color name="ow_action_bar_color">@color/transparent</color>
     
     <color name="ow_send_receive_list_background">@color/MediumGray</color>
     
@@ -32,5 +38,7 @@
     <color name="ow_new_receiving_address_icon_color">@color/ow_ziftrWALLETBlue</color>
     
     <color name="ow_search_background">#32353A</color>
+    
+    <color name="ow_default_text">@color/White</color>
 
 </resources>

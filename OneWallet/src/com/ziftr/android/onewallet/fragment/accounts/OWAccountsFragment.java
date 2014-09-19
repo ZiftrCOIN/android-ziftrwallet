@@ -8,11 +8,13 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.ziftr.android.onewallet.OWWalletManager;
@@ -46,6 +48,12 @@ public class OWAccountsFragment extends OWFragment {
 	/** The wallet manager. This fragment works with */
 	private OWWalletManager walletManager;
 
+	private ArrayAdapter<OWCurrencyListItem> walletAdapter;
+	
+	private ImageView addButton;
+	
+	private View footer;
+
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
 	 * what parent method does right now.
@@ -55,19 +63,19 @@ public class OWAccountsFragment extends OWFragment {
 		super.onCreate(savedInstanceState);
 
 	}
-	
+
 	@Override
 	public void onSaveInstanceState(Bundle outState) { 
 		super.onSaveInstanceState(outState);
 	}
-	
-	
+
+
 	@Override
 	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("ziftrWALLET", true, false);
 	}
-	
+
 	/**
 	 * To create the view for this fragment, we start with the 
 	 * basic fragment_home view which just has a few buttons that
@@ -77,11 +85,17 @@ public class OWAccountsFragment extends OWFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		this.hideWalletHeader();
-		
+
 		this.rootView = inflater.inflate(R.layout.section_accounts_layout, container, false);
 
 		this.walletManager = this.getOWMainActivity().getWalletManager();
 
+		this.addButton = (ImageView) this.rootView.findViewById(R.id.addNewCurrencyButton);
+		//dropshadow under listview
+		this.footer = this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null);
+
+		this.setAddCurrency();
+		
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
 
@@ -153,10 +167,11 @@ public class OWAccountsFragment extends OWFragment {
 	 * May save this for later to refresh when deleting a wallet from the list
 	 * of wallets on this accounts page. 
 	 */
-	@SuppressWarnings("unchecked")
 	public void refreshListOfUserWallets() {
-		((ArrayAdapter<OWCurrencyListItem>) 
-				this.currencyListView.getAdapter()).notifyDataSetChanged();
+			this.walletAdapter.notifyDataSetChanged();
+			if (this.userWallets.size() == 0){
+				this.currencyListView.removeFooterView(this.footer);
+			}
 	}
 
 	/**
@@ -170,82 +185,79 @@ public class OWAccountsFragment extends OWFragment {
 		for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
 			this.userWallets.add(this.getItemForCoinType(type));
 		}
-		// The bar at the bottom
-		this.userWallets.add(new OWCurrencyListItem(
-				null, null, null, null, null, R.layout.accounts_currency_list_add_new));
-
 		this.currencyListView = (ListView) 
 				this.rootView.findViewById(R.id.listOfUserWallets);
-		this.currencyListView.setAdapter(
-				new OWCurrencyListAdapter(this.mContext, this.userWallets));
+
+		// The dropshadow at the bottom
+		if (this.userWallets.size() > 0){
+			this.currencyListView.addFooterView(this.footer, null ,false);
+		}
+		this.currencyListView.setFooterDividersEnabled(false);
+		
+		this.walletAdapter = new OWCurrencyListAdapter(this.mContext, this.userWallets);
+		this.currencyListView.setAdapter(this.walletAdapter);
 
 		this.currencyListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, 
 					int position, long id) {
-				if (currencyListView.getAdapter().getItemViewType(
-						position) == OWCurrencyListAdapter.footerType) {
-					// If we have clicked the add new currency bar then
-					// make the choose new currency dialog (as long as there are new
-					// currencies to add
-
-					// The minus one is because the list contains the add new 
-					// currency bar
-					if (userWallets.size()-1 < OWCoin.values().length) {
-						// TODO may want to change the list to just be
-						// walletManager.getAllUsersWalletTypes(); but since
-						// that wouldn't include temporarily added wallets we will
-						// do this for now.
-						List<OWCoin> usersCurWallets = new ArrayList<OWCoin>();
-						for (OWCurrencyListItem newItem : userWallets) {
-							usersCurWallets.add(newItem.getCoinId());
-						}
-						getOWMainActivity().openAddCurrency(usersCurWallets);
-					}
-
-					// Return because in this case we don't need to 
-					// actually start a wallet.  
-					return;
-				}
-
-
+				//ignore click on footer
+				//				if (currencyListView.getAdapter().getItemViewType(
+				//						position) == OWCurrencyListAdapter.footerType){
+				//					return;
+				//				}
 				OWCurrencyListItem item = (OWCurrencyListItem) 
 						parent.getItemAtPosition(position);
-				// If we are using the test net network then we make sure the
-				// user has a passphrase and 
-				if (!getOWMainActivity().isShowingDialog()) {
-					getOWMainActivity().openWalletView(item.getCoinId());
-				}
+
+				getOWMainActivity().openWalletView(item.getCoinId());
+
 			}
 		});
-		
+
 		//Long click to deactivate wallet
 		this.currencyListView.setOnItemLongClickListener(new OnItemLongClickListener(){
 
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				//ignore if long click add new currency bar
-				if (currencyListView.getAdapter().getItemViewType(
-						position) == OWCurrencyListAdapter.footerType){
-					return false;
-				}
+				//ignore long click on footer
+				//				if (currencyListView.getAdapter().getItemViewType(
+				//						position) == OWCurrencyListAdapter.footerType){
+				//					return false;
+				//				}
+
 				OWCurrencyListItem item = (OWCurrencyListItem) parent.getItemAtPosition(position);
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, item.getCoinId().toString());
 				b.putInt("ITEM_LOCATION", position);
 				getOWMainActivity().alertConfirmation(OWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to de-activate this wallet?", 
 						OWTags.DEACTIVATE_WALLET, b);
-				return false;
+				return true;
 			}
-			
+
 		});
 
 	}
-	
+	//set onclicklistener for addnewcurrency button
+	private void setAddCurrency(){
+		addButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				List<OWCoin> usersCurWallets = new ArrayList<OWCoin>();
+				for (OWCurrencyListItem newItem : userWallets) {
+					usersCurWallets.add(newItem.getCoinId());
+				}
+				getOWMainActivity().openAddCurrency(usersCurWallets);
+			}
+		});
+	}
+
 	public void removeFromView(int pos){
 		this.userWallets.remove(pos);
+
 		this.refreshListOfUserWallets();
 	}
+
 
 }

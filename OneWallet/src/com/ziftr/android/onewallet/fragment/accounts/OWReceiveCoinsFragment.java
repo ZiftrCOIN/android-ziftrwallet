@@ -89,7 +89,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	private void initializeViewFields(LayoutInflater inflater, ViewGroup container) {
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
-		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressNameEditText);
+		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
 		this.labelEditText.addTextChangedListener(this);
 
 		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);

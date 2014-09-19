@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +50,13 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	/** The view container for this fragment. */
 	private View rootView;
-
+	
+	private EditText coinAmountEditText;
+	private EditText fiatAmountEditText;
+	private EditText fiatFeeEditText;
+	private EditText coinFeeEditText;
+	private EditText sendToAddressEditText;
+	
 	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
@@ -62,6 +69,19 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 		this.rootView = inflater.inflate(
 				R.layout.accounts_send_coins, container, false);
 
+		this.coinAmountEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextAmount).findViewById(R.id.ow_editText);
+		this.fiatAmountEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextAmountFiatEquiv).findViewById(R.id.ow_editText);
+		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextTransactionFeeFiatEquiv).findViewById(R.id.ow_editText);
+		this.coinFeeEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextTransactionFee).findViewById(R.id.ow_editText);
+		this.sendToAddressEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextReceiverAddress);
+		
+		this.initializeEditText();
+		
 		// Sets the onclicks for qr code icon, paste icon, any help icons.
 		this.initializeIcons();
 
@@ -71,6 +91,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 		// Set up the cancel and send buttons
 		this.initializeButtons();
+
 
 		return this.rootView;
 	}
@@ -270,6 +291,16 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 			a.onBackPressed();
 		}
 	}
+	
+	public void initializeEditText(){
+		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.fiatFeeEditText.setFocusable(false);
+		this.fiatFeeEditText.setClickable(false);
+		this.fiatFeeEditText.setCursorVisible(false);
+		this.fiatFeeEditText.setFocusableInTouchMode(false);
+	}
 
 	/**
 	 * This is a useful method that binds two textviews together with
@@ -450,40 +481,35 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 	 * @return as above
 	 */
 	private EditText getSendToAddressEditText() {
-		return (EditText) this.rootView.findViewById(
-				R.id.sendEditTextReceiverAddress);
+		return this.sendToAddressEditText;
 	}
 
 	/**
 	 * @return
 	 */
 	private EditText getFiatFeeEditText() {
-		return (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFeeFiatEquiv);
+		return this.fiatFeeEditText;
 	}
 
 	/**
 	 * @return
 	 */
 	private EditText getCoinFeeEditText() {
-		return (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFee);
+		return this.coinFeeEditText;
 	}
 
 	/**
 	 * @return
 	 */
 	private EditText getFiatAmountEditText() {
-		return (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmountFiatEquiv);
+		return this.fiatAmountEditText;
 	}
 
 	/**
 	 * @return
 	 */
 	private EditText getCoinAmountEditText() {
-		return (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmount);
+		return this.coinAmountEditText;
 	}
 
 }

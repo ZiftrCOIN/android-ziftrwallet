@@ -7,17 +7,30 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/White"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="10dp" >
 
-        <TextView
-            android:id="@+id/amount"
-            android:layout_marginLeft="@dimen/ow_txn_details_horizontal_margin"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textColor="@color/DarkGray"
-            android:textSize="@dimen/ow_txt_largest" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                android:textColor="@color/DarkGray"
+                android:textSize="@dimen/ow_txt_largest" />
+
+            <ImageView
+                android:id="@+id/coin_logo"
+                android:layout_width="@dimen/ow_txt_largest"
+                android:layout_height="@dimen/ow_txt_largest"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:padding="@dimen/ow_bordered_icon_margin" />
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/amountLabel"
@@ -73,14 +86,13 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/ow_txn_details_horizontal_margin"
-            android:orientation="horizontal" >
+            android:layout_marginRight="@dimen/ow_horizontal_margin" >
 
             <EditText
                 android:id="@+id/txn_note"
                 style="@style/txn_values"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/ow_edit_text_height"
+                android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:enabled="true"
                 android:focusable="false"
@@ -100,11 +112,10 @@
                 android:layout_width="@dimen/ow_txt_largest"
                 android:layout_height="@dimen/ow_txt_largest"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
                 android:clickable="true"
                 android:padding="@dimen/ow_bordered_icon_margin"
-                android:src="@drawable/edit_enabled" />
-
+                android:src="@drawable/button_edit_pencil" />
         </RelativeLayout>
 
         <View
@@ -154,13 +165,16 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/ow_horizontal_margin"
+            android:layout_marginRight="@dimen/ow_horizontal_margin" >
 
             <ProgressBar
                 android:id="@+id/progress_bar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:progressDrawable="@drawable/orange_progressbar" />
 
             <TextView
                 android:id="@+id/status"
@@ -178,7 +192,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignRight="@id/progress_bar"
                 android:layout_below="@id/progress_bar"
-                android:layout_marginRight="@dimen/ow_txn_details_horizontal_margin"
+                android:layout_marginRight="@dimen/ow_horizontal_margin"
                 android:text="@string/ow_empty_string" />
         </RelativeLayout>
     </LinearLayout>

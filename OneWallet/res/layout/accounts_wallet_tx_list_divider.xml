@@ -3,16 +3,23 @@
     android:id="@+id/walletTxListDivider"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/ow_tx_list_divider"
-    android:orientation="horizontal"
-    android:padding="@dimen/ow_tx_list_divider_padding" 
-    android:layout_marginBottom="@dimen/ow_tx_list_divider_bottom_margin" >
+    android:layout_marginBottom="@dimen/ow_tx_list_divider_bottom_margin"
+    android:orientation="vertical" >
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/ow_quarter_icon_size"
+        android:background="@drawable/dropshadow" />
 
     <TextView
         android:id="@+id/walletTxListDividerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="left"
-        android:text="@string/ow_tx_list_divider_default" />
+        android:paddingLeft="@dimen/ow_tx_list_divider_padding"
+        android:paddingBottom="@dimen/ow_tx_list_divider_padding"
+        android:paddingRight="@dimen/ow_tx_list_divider_padding"
+        android:text="@string/ow_tx_list_divider_default"
+        android:textColor="@color/ow_default_text" />
 
 </LinearLayout>

@@ -20,11 +20,10 @@
     <!-- A small divider to make the bar look nicer. -->
 
     <View
-        android:id="@+id/headerBarDivider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/subActionBarDividerHeight"
-        android:background="@color/ow_ziftrWALLETBlue" />
-
+        android:alpha=".2"
+        android:background="@color/Black" />
     <!-- The drawer layout that contains the main fragment frame. -->
 
     <android.support.v4.widget.DrawerLayout
@@ -49,8 +48,8 @@
                 android:id="@+id/walletHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                layout="@layout/_dual_icon_coin_view" />
+                layout="@layout/_dual_icon_coin_view"
+                android:visibility="gone" />
 
             <FrameLayout
                 android:id="@+id/oneWalletBaseFragmentHolder"

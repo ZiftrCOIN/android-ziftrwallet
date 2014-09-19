@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/addNewWalletBar"
+    android:layout_width="match_parent"
+    android:minHeight="@dimen/ow_quarter_icon_size"
+    android:layout_height="@dimen/ow_total_icon_side_length"
+    android:background="@drawable/dropshadow"
+    android:orientation="horizontal" >
+    
+</LinearLayout>

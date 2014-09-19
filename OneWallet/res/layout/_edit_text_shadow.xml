@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <EditText
+        android:id="@+id/ow_editText"
+        android:paddingLeft="@dimen/ow_edit_text_padding"
+        android:paddingRight="@dimen/ow_edit_text_padding"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/ow_edit_text_height"
+        android:background="@color/White"
+        android:inputType="textPersonName" >
+
+        <requestFocus />
+    </EditText>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/ow_editText"
+        android:layout_below="@id/ow_editText"
+        android:contentDescription="@string/ow_empty_string"
+        android:src="@drawable/shadow_paper_left" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/ow_editText"
+        android:layout_below="@id/ow_editText"
+        android:contentDescription="@string/ow_empty_string"
+        android:src="@drawable/shadow_paper_right" />
+
+</RelativeLayout>

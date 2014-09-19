@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="0dp" >
 
-    <ListView
-        android:id="@+id/listOfUserWallets"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </ListView>
+
+        <ListView
+            android:id="@+id/listOfUserWallets"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" >
+        </ListView>
+
+    <ImageView
+        android:id="@+id/addNewCurrencyButton"
+        android:padding="@dimen/ow_large_icon_margin"
+        android:layout_width="@dimen/ow_large_icon_size"
+        android:layout_height="@dimen/ow_large_icon_size"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:contentDescription="@string/ow_empty_string"
+        android:src="@drawable/button_add_currency_clickable" >
+    </ImageView>
 
 </LinearLayout>
