@@ -820,5 +820,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public File getWalletFile(OWCoin id) {
 		return this.walletFiles.get(id);
 	}
+	
+	
 
 }

@@ -86,7 +86,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 
-		this.initFields();
+		this.initFields(savedInstanceState);
 		return this.rootView;
 	}
 
@@ -114,12 +114,12 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 			}
 			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
 				this.txItem = getWalletManager().readTransactionByHash(
-						this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+						this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
 			}
 		}
 		
 		Drawable coinImage = this.getResources().getDrawable(
-				this.getCurSelectedCoinType().getLogoResId());
+				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
 
 		this.populateAmount();
