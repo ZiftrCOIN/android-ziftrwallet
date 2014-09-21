@@ -41,8 +41,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 	/** The view container for this fragment. */
 	private View rootView;
 
-	private EditText labelEditText;
-	private EditText addressEditText;
 	private ImageView copyButton;
 	private ImageView qrCodeImageView;
 	private View qrCodeContainer;
@@ -58,12 +56,12 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 		this.setQrCodeGenerated(false);
 		
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
+		
+		this.showWalletHeader();
 
 		this.initializeViewFields(inflater, container);
 
 		this.initializeQrCodeFromBundle(savedInstanceState);
-
-		this.showWalletHeader();
 
 		return this.rootView;
 	}
@@ -74,12 +72,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 		super.onStop();
 	}
 	
-	@Override
-	public void onResume() {
-		super.onResume();
-		this.setActionBar();
-	}
-
 	@Override
 	public void onClick(View v) {
 
@@ -103,7 +95,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 							OWTags.VALIDATE_PASS_RECEIVE);
 				} else {
-					loadAddressFromDatabase();
+					loadNewAddressFromDatabase();
 				}
 			}
 		} else if (v == this.getAddressBookImageView()) {
@@ -197,24 +189,11 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 	}
 
 	/**
-	 * A convenience method to update the database from this class.
-	 */
-	private void updateAddressLabelInDatabase() {
-		String label = this.labelEditText.getText().toString();
-		String address = this.addressEditText.getText().toString();
-		getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
-	}
-
-	public boolean fragmentHasAddress() {
-		return addressEditText.getText().toString().length() > 0;
-	}
-
-	/**
 	 * This method gets the database from the activity on the UI thread,
 	 * gets a new key from the database helper on an extra thread, and
 	 * then updates the UI with the new address on the UI thread. 
 	 */
-	public void loadAddressFromDatabase() {
+	public void loadNewAddressFromDatabase() {
 		// Get the database from the activity on the UI thread
 		final OWSQLiteOpenHelper database = this.getWalletManager();
 		// Run database IO on new thread
@@ -255,13 +234,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 
 	@Override
 	public void acceptAddress(String address, String label) {
-		// The order that the next two steps are done is actually important because the 
-		// label text box has this as a textwatcher which updates the database, and the 
-		// address has to be set before we know which address to update in the db.
-		// If the order were reversed here then we might changed the note on an 
-		// address that doesn't correspond.
-		addressEditText.setText(address);
-		labelEditText.setText(label);
+		super.acceptAddress(address, label);
 		this.setQrCodeGenerated(false);
 	}
 

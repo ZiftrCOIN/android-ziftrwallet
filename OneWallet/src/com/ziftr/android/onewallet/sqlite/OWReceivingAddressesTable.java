@@ -44,6 +44,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	@Override
 	protected OWAddress cursorToAddress(OWCoin coinId, Cursor c) throws OWAddressFormatException {
 		// TODO deal with encryption
+		// TODO make this not use WIF but just use hex
 		byte[] wifPrivKeyBytes = Base58.decodeChecked(c.getString(c.getColumnIndex(COLUMN_PRIV_KEY)));
 		byte[] privKeyBytes = ZiftrUtils.stripVersionAndChecksum(wifPrivKeyBytes);
 		byte[] pubKeyBytes = ZiftrUtils.hexStringToBytes(c.getString(c.getColumnIndex(COLUMN_PUB_KEY)));

@@ -15,7 +15,6 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
@@ -55,19 +54,16 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 	private EditText coinAmountEditText;
 	private EditText fiatAmountEditText;
-	
+
 	private EditText fiatFeeEditText;
 	private EditText coinFeeEditText;
-	
-	private EditText labelEditText;
-	private EditText addressEditText;
-	
+
 	private View getQRCodeButton;
 	private View pasteButton;
-	
+
 	private Button cancelButton;
 	private Button sendButton;
-	
+
 	private View sendCoinsContainingView;
 
 	/**
@@ -77,9 +73,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		this.showWalletHeader();
-
 		this.rootView = inflater.inflate(R.layout.accounts_send_coins, container, false);
+
+		this.showWalletHeader();
 
 		this.initializeViewFields();
 
@@ -88,9 +84,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		// Whenever one of the amount views changes, all the other views should
 		// change to constant show an updated version of what the user will send.
 		this.initializeTextViewDependencies();
-
-		// Set up the cancel and send buttons
-		this.initializeButtons();
 
 		return this.rootView;
 	}
@@ -110,12 +103,91 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	@Override
+	public void onClick(View v) {
+		if (v == getQRCodeButton) {
+			Intent intent = new Intent(
+					OWSendCoinsFragment.this.getActivity(), CaptureActivity.class);
+			intent.setAction("com.google.zxing.client.android.SCAN");
+			// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
+			intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+			intent.putExtra("SAVE_HISTORY", false);
+			startActivityForResult(intent, OWRequestCodes.SCAN_QR_CODE);
+		} else if (v == pasteButton) {
+			// Gets a handle to the clipboard service.
+			ClipboardManager clipboard = (ClipboardManager)
+					getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+	
+			String textToPaste = null;
+			if (clipboard.hasPrimaryClip()) {
+				ClipData clip = clipboard.getPrimaryClip();
+	
+				// if you need text data only, use:
+				if (clip.getDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+					// The item could cantain URI that points to the text data.
+					// In this case the getText() returns null
+					CharSequence text = clip.getItemAt(0).getText();
+					if (text != null) {
+						textToPaste = text.toString();
+					}
+				}
+			}
+	
+			if (textToPaste != null && !textToPaste.isEmpty()) {
+				addressEditText.setText(textToPaste);
+			}
+		} else if (v == cancelButton) {
+			Activity a = getActivity();
+			if (a != null) {
+				a.onBackPressed();
+			}
+		} else if (v == sendButton) {
+			if (getCurSelectedCoinType().addressIsValid(addressEditText.getText().toString())) {
+				if (getOWMainActivity().userHasPassphrase()) {
+					Bundle b = new Bundle();
+					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+					getOWMainActivity().showGetPassphraseDialog(
+							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, OWTags.VALIDATE_PASS_SEND);
+				} else {
+					this.onClickSendCoins();
+				}
+			}
+		} else if (v == this.getAddressBookImageView()) {
+			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
+		}
+	
+	}
+
+	public void onClickSendCoins() {
+		// Need to make sure amount to send is less than balance
+		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+				getAmountToSendFromEditText());
+		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+				getFeeFromEditText());
+		try {
+			getWalletManager().sendCoins(getCurSelectedCoinType(), this.addressEditText.getText().toString(), 
+					amountSending, feeSending);
+		} catch(OWAddressFormatException afe) {
+			// TODO alert user if address has errors
+			ZLog.log("There was a problem with the address.");
+		} catch(OWInsufficientMoneyException ime) {
+			// TODO alert user if not enough money in wallet.
+			ZLog.log("There was not enough money in the wallet.");
+		}
+	
+		// To exit out of the send coins fragment
+		Activity a = getActivity();
+		if (a != null) {
+			a.onBackPressed();
+		}
+	}
+
 	/**
 	 * Gets all the important views for use in the fragment.
 	 */
 	private void initializeViewFields() {
 		super.initializeViewFields(this.rootView, R.id.sendGetAddressFromHistoryIcon);
-		
+
 		this.sendCoinsContainingView = this.rootView.findViewById(R.id.sendCoinsContainingView);
 
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(
@@ -126,6 +198,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				R.id.sendEditTextTransactionFeeFiatEquiv).findViewById(R.id.ow_editText);
 		this.coinFeeEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextTransactionFee).findViewById(R.id.ow_editText);
+		this.labelEditText = (EditText) this.rootView.findViewById(
+						R.id.send_edit_text_reciever_name).findViewById(R.id.ow_editText);
 		this.addressEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextReceiverAddress);
 
@@ -134,11 +208,11 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.pasteButton = this.rootView.findViewById(R.id.send_paste_icon);
 		this.pasteButton.setOnClickListener(this);
-		
+
 		this.cancelButton = (Button) this.rootView.findViewById(R.id.leftButton);
 		cancelButton.setText("CANCEL");
 		this.cancelButton.setOnClickListener(this);
-		
+
 		this.sendButton = (Button) this.rootView.findViewById(R.id.rightButton);
 		sendButton.setText("SEND");
 		this.sendButton.setOnClickListener(this);
@@ -180,24 +254,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		changeCoinStartedFromProgram = true;
 		coinAmountEditText.setText("0");
 		changeCoinStartedFromProgram = false;
-	}
-
-	/**
-	 * Sets up the cancel and the send buttons with their appropriate actions.
-	 * The cancel buttons quits the send coins fragment and goes back to wherever
-	 * the user was before. The send button validates the values in the form and
-	 * initizializes the sending of the coins if everything is correct.
-	 */
-	private void initializeButtons() {
-		
-		
-		sendButton.setText("SEND");
-		sendButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				
-			}
-		});
 	}
 
 	/**
@@ -344,7 +400,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		return fee;
 	}
 
-	public void initializeEditText() {
+	private void initializeEditText() {
+		// TODO why wasn't all of this stuff done in XML?
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -354,93 +411,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.fiatFeeEditText.setFocusableInTouchMode(false);
 	}
 
-	public void onClickSendCoins() {
-		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
-				getAmountToSendFromEditText());
-		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
-				getFeeFromEditText());
-		try {
-			getWalletManager().sendCoins(getCurSelectedCoinType(), this.addressEditText.getText().toString(), 
-					amountSending, feeSending);
-		} catch(OWAddressFormatException afe) {
-			// TODO alert user if address has errors
-			ZLog.log("There was a problem with the address.");
-		} catch(OWInsufficientMoneyException ime) {
-			// TODO alert user if not enough money in wallet.
-			ZLog.log("There was not enough money in the wallet.");
-		}
-
-		// To exit out of the send coins fragment
-		Activity a = getActivity();
-		if (a != null) {
-			a.onBackPressed();
-		}
-	}
-
-	@Override
-	public void acceptAddress(String address, String label) {
-		// TODO Auto-generated method stub
-		this.addressEditText.setText(address);
-	}
-
 	@Override
 	public String getActionBarTitle() {
 		return "SEND";
-	}
-
-	@Override
-	public void onClick(View v) {
-		if (v == getQRCodeButton) {
-			Intent intent = new Intent(
-					OWSendCoinsFragment.this.getActivity(), CaptureActivity.class);
-			intent.setAction("com.google.zxing.client.android.SCAN");
-			// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
-			intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-			intent.putExtra("SAVE_HISTORY", false);
-			startActivityForResult(intent, OWRequestCodes.SCAN_QR_CODE);
-		} else if (v == pasteButton) {
-			// Gets a handle to the clipboard service.
-			ClipboardManager clipboard = (ClipboardManager)
-					getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-
-			String textToPaste = null;
-			if (clipboard.hasPrimaryClip()) {
-				ClipData clip = clipboard.getPrimaryClip();
-
-				// if you need text data only, use:
-				if (clip.getDescription().hasMimeType(
-						ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-					// The item could cantain URI that points to the text data.
-					// In this case the getText() returns null
-					CharSequence text = clip.getItemAt(0).getText();
-					if (text != null) {
-						textToPaste = text.toString();
-					}
-				}
-			}
-
-			if (textToPaste != null && !textToPaste.isEmpty()) {
-				addressEditText.setText(textToPaste);
-			}
-		} else if (v == cancelButton) {
-			Activity a = getActivity();
-			if (a != null) {
-				a.onBackPressed();
-			}
-		} else if (v == sendButton) {
-			if (getCurSelectedCoinType().addressIsValid(addressEditText.getText().toString())) {
-				if (getOWMainActivity().userHasPassphrase()) {
-					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
-					getOWMainActivity().showGetPassphraseDialog(
-							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, OWTags.VALIDATE_PASS_SEND);
-				} else {
-					onClickSendCoins();
-				}
-			}
-		}
-		
 	}
 
 	@Override

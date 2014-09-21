@@ -16,6 +16,7 @@ import android.widget.ListView;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
+import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
 public class OWAddressBookFragment extends OWWalletUserFragment 
@@ -55,10 +56,10 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+		rootView = inflater.inflate(R.layout.accounts_address_book, container, false);
+
 		// So that on screen rotates the background view stays invisible
 		getAddressBookParentFragment().setVisibility(View.INVISIBLE);
-
-		rootView = inflater.inflate(R.layout.accounts_address_book, container, false);
 
 		this.showWalletHeader();
 
@@ -109,6 +110,8 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 							addressAdapter.getFullList().addAll(addresses);
 							addressAdapter.refreshWorkingList();
 							addressAdapter.notifyDataSetChanged();
+							ZLog.log("size: " + addresses.size());
+							ZLog.log("Just notified that the data set changed.");
 						}
 					});
 				}
@@ -161,6 +164,12 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 		// TODO Auto-generated method stub
 		this.addressAdapter.getFilter().filter(s);
 	}
+	
+	
+
+	//////////////////////////////////////////////////////
+	////////// Methods for being an EditHandler //////////
+	//////////////////////////////////////////////////////
 
 	/**
 	 * This makes it so that when this address book fragment is destroyed
@@ -168,13 +177,9 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 	 */
 	@Override
 	public void onDestroyView() {
-		super.onDestroyView();
 		getAddressBookParentFragment().setVisibility(View.VISIBLE);
+		super.onDestroyView();
 	}
-
-	//////////////////////////////////////////////////////
-	////////// Methods for being an EditHandler //////////
-	//////////////////////////////////////////////////////
 
 	@Override
 	public void onEditStart(OWAddress address) {
