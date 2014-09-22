@@ -244,6 +244,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 * @return List of {@link OWAddress} objects. See {@link #getAddressList(OWCoin, boolean)} for list of Address strings.
 	 */
 	public List<OWAddress> readAllAddresses(OWCoin coinId, boolean receivingNotSending) {
 		return this.getTable(receivingNotSending).readAllAddresses(coinId, getReadableDatabase());
