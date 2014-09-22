@@ -4,13 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp" >
-    
+
     <Button
         android:id="@+id/reset_password_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ow_reset_password"
-        />
+        android:text="@string/ow_reset_password" />
 
     <TextView
         android:id="@+id/settingsPlaceholderText"

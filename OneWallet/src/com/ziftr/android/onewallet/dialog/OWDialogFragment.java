@@ -210,7 +210,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	}
 
 	/**
-	 * Given a resource id, this method finds the correpsonding
+	 * Given a resource id, this method finds the corresponding
 	 * view and then gets the text from from that view, returning 
 	 * the value in bytes.
 	 * Will throw a null pointer if no such view with id.
@@ -225,13 +225,17 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 
 	@Override
 	public void onStart() {
-		((OWMainFragmentActivity) this.getActivity()).setShowingDialog(true);
+		//ignore this if showing dialog in welcome activity
+		if (this.getActivity().getClass().getSimpleName().equals("OWMainFragmentActivity"))
+			((OWMainFragmentActivity) this.getActivity()).setShowingDialog(true);
 		super.onStart();
 	}
 
 	@Override
 	public void onDetach() {
-		((OWMainFragmentActivity) this.getActivity()).setShowingDialog(false);
+		//ignore this if showing dialog in welcome activity
+		if (this.getActivity().getClass().getSimpleName().equals("OWMainFragmentActivity"))
+			((OWMainFragmentActivity) this.getActivity()).setShowingDialog(false);
 		super.onDetach();
 	}
 	

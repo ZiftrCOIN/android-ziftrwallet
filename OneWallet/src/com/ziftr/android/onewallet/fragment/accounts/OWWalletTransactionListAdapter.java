@@ -77,7 +77,6 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 		}
 
 		if (getItemViewType(position) == Type.TRANSACTION.ordinal()) {
-
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView txTitleTextView = (TextView) convertView.findViewById(R.id.txTitle);
@@ -104,7 +103,16 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 			Drawable image = this.getContext().getResources().getDrawable(
 					getImgResIdForItem(txListItem));
 			txIOIcon.setImageDrawable(image);
+			if (txListItem.isPending()){
+				txTitleTextView.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
+				txTimeTextView.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
+				txAmount.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
+				txAmountFiatEquiv.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
+			} else if (txListItem.getTxAmount().compareTo(BigInteger.ZERO) >= 0){
+				txAmount.setTextColor(this.getContext().getResources().getColor(R.color.Green));
+				txAmountFiatEquiv.setTextColor(this.getContext().getResources().getColor(R.color.Green));
 
+			}
 			return convertView;
 
 		} else {
