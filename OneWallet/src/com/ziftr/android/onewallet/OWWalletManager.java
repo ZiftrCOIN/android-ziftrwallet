@@ -117,14 +117,12 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		}
 	}
 
-	/** 
-	 * Gets the singleton instance of the database helper, making it if necessary. 
-	 * 
-	 * TODO what if context passed in isn't the context of instance's?
-	 */
-	public static synchronized OWWalletManager getInstance(Context context) {
+	
+	public static synchronized OWWalletManager getInstance() {
 
 		if (instance == null) {
+			
+			Context context = OWApplication.getApplication();
 
 			// Here we build the path for the first time if have not yet already
 			if (databasePath == null) {

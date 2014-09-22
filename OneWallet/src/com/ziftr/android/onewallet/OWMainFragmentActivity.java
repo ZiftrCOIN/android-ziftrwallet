@@ -284,7 +284,7 @@ ZiftrNetworkHandler {
 		}
 
 		// Recreate wallet manager
-		this.walletManager = OWWalletManager.getInstance(this.getApplicationContext());
+		this.walletManager = OWWalletManager.getInstance();
 
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
