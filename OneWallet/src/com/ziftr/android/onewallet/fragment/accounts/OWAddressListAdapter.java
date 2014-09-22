@@ -19,14 +19,22 @@ import com.ziftr.android.onewallet.crypto.OWAddress;
  * a view for each currency, reusing old views to improve efficiency. 
  */
 public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
+	
+	OWAddressBookFragment addressBookFragment;
 
-	public OWAddressListAdapter(Context ctx, List<OWAddress> txList) {
+	// Make this take a factory finalizable something or other
+	public OWAddressListAdapter(OWAddressBookFragment addressBookFragment, Context ctx, List<OWAddress> txList) {
 		super(ctx, R.layout.accounts_address_book_list_item, txList);
+		this.addressBookFragment = addressBookFragment;
+	}
+	
+	public OWAddressListAdapter(OWAddressBookFragment addressBookFragment, Context context) {
+		this(addressBookFragment, context, new ArrayList<OWAddress>());
 	}
 
 	public OWAddressListAdapter(Context context) {
 		// Had to add this constructor to get rid of warnings, for some reason.
-		this(context, new ArrayList<OWAddress>());
+		this(null, context, new ArrayList<OWAddress>());
 	}
 
 	@Override
@@ -38,10 +46,10 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 			// If it doesn't have an old view then we make a new one 
 			convertView = this.getInflater().inflate(R.layout.accounts_address_book_list_item, null);
 		}
-
+		
 		// Set the edit button
-		ImageView addImage = (ImageView) convertView.findViewById(R.id.leftIcon);
-		addImage.setImageDrawable(this.getContext().getResources().getDrawable(R.drawable.edit_clickable));
+		ImageView editImage = (ImageView) convertView.findViewById(R.id.leftIcon);
+		editImage.setImageDrawable(this.getContext().getResources().getDrawable(R.drawable.edit_clickable));
 
 		// Set the in/out icon
 		ImageView inOutImage = (ImageView) convertView.findViewById(R.id.rightIcon);
@@ -54,7 +62,11 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 		// Set top/bottom right text boxes to empty
 		TextView bottomLeft = (TextView) convertView.findViewById(R.id.bottomLeftTextView);
 		bottomLeft.setText(address.toString());
-
+		
+		// Set the onclick listener to be a controller for the label text box 
+		editImage.setOnClickListener(new OWEditableTextBoxController<OWAddress>(
+				addressBookFragment, topLeft, editImage, address.getLabel(), address));
+		
 		return convertView;
 	}
 

@@ -14,6 +14,7 @@
         android:layout_width="@dimen/ow_total_icon_side_length"
         android:layout_height="@dimen/ow_total_icon_side_length"
         android:layout_alignParentLeft="true"
+        android:clickable="true"
         android:contentDescription="@string/ow_empty_string"
         android:gravity="center_vertical"
         android:padding="@dimen/ow_bordered_icon_margin"
@@ -29,12 +30,15 @@
         android:padding="@dimen/ow_bordered_icon_margin"
         android:src="@drawable/next_down_2" />
 
-    <TextView
+    <EditText
         android:id="@+id/topLeftTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/leftIcon"
+        android:layout_toLeftOf="@id/rightIcon"
         android:layout_toRightOf="@+id/leftIcon"
+        android:inputType="textCapWords"
+        android:paddingLeft="0dp"
         android:text="@string/ow_empty_string"
         android:textSize="15sp"
         android:textStyle="bold" />
@@ -44,8 +48,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/leftIcon"
-        android:layout_toRightOf="@id/leftIcon"
         android:layout_toLeftOf="@id/rightIcon"
+        android:layout_toRightOf="@id/leftIcon"
         android:clickable="false"
         android:ellipsize="end"
         android:maxLines="1"

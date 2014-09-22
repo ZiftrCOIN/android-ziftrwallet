@@ -9,10 +9,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -29,11 +27,11 @@ import com.ziftr.android.onewallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
+import com.ziftr.android.onewallet.util.OWTextWatcher;
 import com.ziftr.android.onewallet.util.QRCodeEncoder;
-import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
-public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implements OnClickListener, TextWatcher {
+public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
@@ -43,10 +41,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	/** The view container for this fragment. */
 	private View rootView;
 
-	private EditText labelEditText;
-	private EditText addressEditText;
 	private ImageView copyButton;
-	private ImageView addressBookImageView;
 	private ImageView qrCodeImageView;
 	private View qrCodeContainer;
 	private View scrollView;
@@ -54,59 +49,21 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 	private boolean qrCodeGenerated = false;
 
 	/**
-	 * @return the qrCodeGenerated
-	 */
-	public boolean isQrCodeGenerated() {
-		return qrCodeGenerated;
-	}
-
-	/**
-	 * @param qrCodeGenerated the qrCodeGenerated to set
-	 */
-	public void setQrCodeGenerated(boolean qrCodeGenerated) {
-		this.qrCodeGenerated = qrCodeGenerated;
-	}
-
-	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		ZLog.log("receive on creat called");
-
 		this.setQrCodeGenerated(false);
+
+		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
+
+		this.showWalletHeader();
 
 		this.initializeViewFields(inflater, container);
 
 		this.initializeQrCodeFromBundle(savedInstanceState);
 
-		this.showWalletHeader();
-
 		return this.rootView;
-	}
-
-	/**
-	 * @param inflater
-	 * @param container
-	 */
-	private void initializeViewFields(LayoutInflater inflater, ViewGroup container) {
-		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
-		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
-		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
-		this.labelEditText.addTextChangedListener(this);
-
-		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
-		this.copyButton.setOnClickListener(this);
-
-		this.qrCodeImageView = (ImageView) this.rootView.findViewById(R.id.generateAddressQrCodeImageView);
-		this.qrCodeImageView.setOnClickListener(this);
-
-		this.addressBookImageView = (ImageView) this.rootView.findViewById(R.id.recallAddressFromHistoryIcon);
-		this.addressBookImageView.setOnClickListener(this);
-
-		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
-
-		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 	}
 
 	@Override
@@ -130,21 +87,50 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 				Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
 			}
 		} else if (v == this.qrCodeImageView) {
-			if(this.addressEditText.getText().toString().length() == 0) {
+			if(!this.fragmentHasAddress()) {
 				if (getOWMainActivity().userHasPassphrase()) {
 					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 					getOWMainActivity().showGetPassphraseDialog(
 							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 							OWTags.VALIDATE_PASS_RECEIVE);
 				} else {
-					loadAddressFromDatabase();
+					loadNewAddressFromDatabase();
 				}
 			}
-		} else if (v == this.addressBookImageView) {
+		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(true, R.id.receiveCoinBaseFrameLayout);
 		}
 
+	}
+
+	/**
+	 * @param inflater
+	 * @param container
+	 */
+	private void initializeViewFields(LayoutInflater inflater, ViewGroup container) {
+		super.initializeViewFields(this.rootView, R.id.recallAddressFromHistoryIcon);
+
+		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
+		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
+		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable s) {
+				if (fragmentHasAddress()) {
+					updateAddressLabelInDatabase();
+				}
+			}
+		});
+
+		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
+		this.copyButton.setOnClickListener(this);
+
+		this.qrCodeImageView = (ImageView) this.rootView.findViewById(R.id.generateAddressQrCodeImageView);
+		this.qrCodeImageView.setOnClickListener(this);
+
+		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
+
+		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 	}
 
 	private void generateQrCode(boolean withAnimation) {
@@ -202,16 +188,12 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		});
 	}
 
-	public boolean fragmentHasAddress() {
-		return addressEditText.getText().toString().length() > 0;
-	}
-
 	/**
 	 * This method gets the database from the activity on the UI thread,
 	 * gets a new key from the database helper on an extra thread, and
 	 * then updates the UI with the new address on the UI thread. 
 	 */
-	public void loadAddressFromDatabase() {
+	public void loadNewAddressFromDatabase() {
 		// Get the database from the activity on the UI thread
 		final OWSQLiteOpenHelper database = this.getWalletManager();
 		// Run database IO on new thread
@@ -220,7 +202,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 			public void run() {
 				String addressLabel = addressEditText.getText().toString();
 
-				final OWAddress address = database.createReceivingAddress(getCurSelectedCoinType(), addressLabel);
+				final OWAddress address = database.createReceivingAddress(getSelectedCoin(), addressLabel);
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
@@ -236,58 +218,34 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment implemen
 		});
 	}
 
-	@Override
-	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void afterTextChanged(Editable s) {
-		updateAddressLabelInDatabase();
+	/**
+	 * @return the qrCodeGenerated
+	 */
+	public boolean isQrCodeGenerated() {
+		return qrCodeGenerated;
 	}
 
 	/**
-	 * A convenience method to update the database from this class.
+	 * @param qrCodeGenerated the qrCodeGenerated to set
 	 */
-	private void updateAddressLabelInDatabase() {
-		if (fragmentHasAddress()) {
-			String label = this.labelEditText.getText().toString();
-			String address = this.addressEditText.getText().toString();
-			getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
-		}
+	public void setQrCodeGenerated(boolean qrCodeGenerated) {
+		this.qrCodeGenerated = qrCodeGenerated;
 	}
 
 	@Override
 	public void acceptAddress(String address, String label) {
-		// The order that the next two steps are done is actually important because the 
-		// label text box has this as a textwatcher which updates the database, and the 
-		// address has to be set before we know which address to update in the db.
-		// If the order were reversed here then we might changed the note on an 
-		// address that doesn't correspond.
-		addressEditText.setText(address);
-		labelEditText.setText(label);
+		super.acceptAddress(address, label);
 		this.setQrCodeGenerated(false);
 	}
-	
-	@Override
-	public void setVisibility(int visibility) {
-		this.scrollView.setVisibility(visibility);
-		if (visibility == View.VISIBLE) {
-			this.setActionBar();
-		}
+
+	public String getActionBarTitle() {
+		return "RECEIVE"; 
 	}
-	
+
 	@Override
-	public void onResume() {
-		super.onResume();
-		this.setActionBar();
+	public View getContainerView() {
+		return this.scrollView;
 	}
 
 }
-
 

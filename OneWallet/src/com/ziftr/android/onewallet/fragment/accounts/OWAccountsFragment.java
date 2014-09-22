@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -48,10 +48,10 @@ public class OWAccountsFragment extends OWFragment {
 	/** The wallet manager. This fragment works with */
 	private OWWalletManager walletManager;
 
-	private ArrayAdapter walletAdapter;
-	
+	private ArrayAdapter<OWCurrencyListItem> walletAdapter;
+
 	private ImageView addButton;
-	
+
 	private View footer;
 
 	/** 
@@ -95,7 +95,7 @@ public class OWAccountsFragment extends OWFragment {
 		this.footer = this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null);
 
 		this.setAddCurrency();
-		
+
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
 
@@ -168,10 +168,10 @@ public class OWAccountsFragment extends OWFragment {
 	 * of wallets on this accounts page. 
 	 */
 	public void refreshListOfUserWallets() {
-			this.walletAdapter.notifyDataSetChanged();
-			if (this.userWallets.size() == 0){
-				this.currencyListView.removeFooterView(this.footer);
-			}
+		this.walletAdapter.notifyDataSetChanged();
+		if (this.userWallets.size() == 0){
+			this.currencyListView.removeFooterView(this.footer);
+		}
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class OWAccountsFragment extends OWFragment {
 			this.currencyListView.addFooterView(this.footer, null ,false);
 		}
 		this.currencyListView.setFooterDividersEnabled(false);
-		
+
 		this.walletAdapter = new OWCurrencyListAdapter(this.mContext, this.userWallets);
 		this.currencyListView.setAdapter(this.walletAdapter);
 

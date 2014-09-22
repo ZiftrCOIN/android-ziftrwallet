@@ -15,7 +15,6 @@ import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +22,7 @@ import android.widget.TextView;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.onewallet.R;
+import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.onewallet.util.OWCoin;
@@ -30,6 +30,7 @@ import com.ziftr.android.onewallet.util.OWConverter;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.OWRequestCodes;
 import com.ziftr.android.onewallet.util.OWTags;
+import com.ziftr.android.onewallet.util.OWTextWatcher;
 import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
@@ -40,7 +41,7 @@ import com.ziftr.android.onewallet.util.ZiftrUtils;
  * TODO make sure that we stop correctly when the user
  * enters non-sensical values in fields.
  */
-public class OWSendCoinsFragment extends OWWalletUserFragment {
+public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 	/** A boolean to keep track of changes to disallow infinite changes. */
 	private boolean changeCoinStartedFromProgram = false;
@@ -50,13 +51,21 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 	/** The view container for this fragment. */
 	private View rootView;
-	
+
 	private EditText coinAmountEditText;
 	private EditText fiatAmountEditText;
+
 	private EditText fiatFeeEditText;
 	private EditText coinFeeEditText;
-	private EditText sendToAddressEditText;
-	
+
+	private View getQRCodeButton;
+	private View pasteButton;
+
+	private Button cancelButton;
+	private Button sendButton;
+
+	private View sendCoinsContainingView;
+
 	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
@@ -64,44 +73,20 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
+		this.rootView = inflater.inflate(R.layout.accounts_send_coins, container, false);
+
 		this.showWalletHeader();
 
-		this.rootView = inflater.inflate(
-				R.layout.accounts_send_coins, container, false);
+		this.initializeViewFields();
 
-		this.coinAmountEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmount).findViewById(R.id.ow_editText);
-		this.fiatAmountEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmountFiatEquiv).findViewById(R.id.ow_editText);
-		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFeeFiatEquiv).findViewById(R.id.ow_editText);
-		this.coinFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFee).findViewById(R.id.ow_editText);
-		this.sendToAddressEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextReceiverAddress);
-		
 		this.initializeEditText();
-		
-		// Sets the onclicks for qr code icon, paste icon, any help icons.
-		this.initializeIcons();
 
 		// Whenever one of the amount views changes, all the other views should
 		// change to constant show an updated version of what the user will send.
 		this.initializeTextViewDependencies();
 
-		// Set up the cancel and send buttons
-		this.initializeButtons();
-
-
 		return this.rootView;
 	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		this.getOWMainActivity().changeActionBar("SEND", false, true);
-	}
-
 
 	/** 
 	 * When a barcode is scanned we change the text of the 
@@ -109,173 +94,75 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		ZLog.log("peach");
-		if (data != null && data.hasExtra("SCAN_RESULT") && 
-				requestCode == OWRequestCodes.SCAN_QR_CODE) {
-			EditText addressToSendCoinsToEditText = this.getSendToAddressEditText();
-			addressToSendCoinsToEditText.setText(
-					data.getExtras().getCharSequence("SCAN_RESULT"));
+		if (data != null && data.hasExtra("SCAN_RESULT") && requestCode == OWRequestCodes.SCAN_QR_CODE) {
+			OWAddress a = this.getWalletManager().readAddress(
+					this.getSelectedCoin(), data.getExtras().getCharSequence("SCAN_RESULT").toString(), false);
+			String label = a == null ? "" : a.getLabel();
+			this.acceptAddress(a.toString(), label);
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	/**
-	 * Sets up all the useful icons in the form. Currently sets up the paste
-	 * icon and the 'get qr code' icon. 
-	 */
-	private void initializeIcons() {
-		// For the 'get QR code' button
-		View getQRCodeButton = this.rootView.findViewById(R.id.send_qr_icon);
-		// Set the listener for the clicks
-		getQRCodeButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(
-						OWSendCoinsFragment.this.getActivity(), CaptureActivity.class);
-				intent.setAction("com.google.zxing.client.android.SCAN");
-				// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
-				intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-				intent.putExtra("SAVE_HISTORY", false);
-				startActivityForResult(intent, OWRequestCodes.SCAN_QR_CODE);
-				ZLog.log("Bowser");
-			}
-		});
+	@Override
+	public void onClick(View v) {
+		if (v == getQRCodeButton) {
+			Intent intent = new Intent(
+					OWSendCoinsFragment.this.getActivity(), CaptureActivity.class);
+			intent.setAction("com.google.zxing.client.android.SCAN");
+			// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
+			intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+			intent.putExtra("SAVE_HISTORY", false);
+			startActivityForResult(intent, OWRequestCodes.SCAN_QR_CODE);
+		} else if (v == pasteButton) {
+			// Gets a handle to the clipboard service.
+			ClipboardManager clipboard = (ClipboardManager)
+					getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
 
-		// For the 'paste' button
-		View pasteButton = this.rootView.findViewById(R.id.send_paste_icon);
-		// Set the listener for the clicks
-		pasteButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// Gets a handle to the clipboard service.
-				ClipboardManager clipboard = (ClipboardManager)
-						getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-
-				String textToPaste = null;
-				if (clipboard.hasPrimaryClip()) {
-					ClipData clip = clipboard.getPrimaryClip();
-
-					// if you need text data only, use:
-					if (clip.getDescription().hasMimeType(
-							ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-						// The item could cantain URI that points to the text data.
-						// In this case the getText() returns null
-						CharSequence text = clip.getItemAt(0).getText();
-						if (text != null) {
-							textToPaste = text.toString();
-						}
+			String textToPaste = null;
+			if (clipboard.hasPrimaryClip()) {
+				ClipData clip = clipboard.getPrimaryClip();
+				// if you need text data only, use:
+				if (clip.getDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+					// The item could cantain URI that points to the text data.
+					// In this case the getText() returns null
+					CharSequence text = clip.getItemAt(0).getText();
+					if (text != null) {
+						textToPaste = text.toString();
 					}
 				}
-
-				if (textToPaste != null && !textToPaste.isEmpty()) {
-					getSendToAddressEditText().setText(textToPaste);
+			}
+			if (textToPaste != null && !textToPaste.isEmpty()) {
+				addressEditText.setText(textToPaste);
+			}
+		} else if (v == cancelButton) {
+			Activity a = getActivity();
+			if (a != null) {
+				a.onBackPressed();
+			}
+		} else if (v == sendButton) {
+			if (this.getSelectedCoin().addressIsValid(addressEditText.getText().toString())) {
+				if (getOWMainActivity().userHasPassphrase()) {
+					Bundle b = new Bundle();
+					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
+					getOWMainActivity().showGetPassphraseDialog(
+							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, OWTags.VALIDATE_PASS_SEND);
 				} else {
-					ZLog.log("Text to paste: '", textToPaste, "'");
-				}
-
-			}
-		});
-	}
-
-	/**
-	 * The form needs to add the totals and update the total text view and
-	 * ensure that the coin and fiat equivalents are always in sync. This method
-	 * sets up all the text views to do that. 
-	 */
-	private void initializeTextViewDependencies() {
-		// Bind the amount values so that when one changes the other changes
-		// according to the current exchange rate.
-		EditText amountTextView = this.getCoinAmountEditText();
-		this.bindEditTextValues(amountTextView, this.getFiatAmountEditText());
-
-		// Bind the fee values so that when one changes the other changes
-		// according to the current exchange rate.
-		EditText feeTextView = this.getCoinFeeEditText();
-		this.bindEditTextValues(feeTextView, this.getFiatFeeEditText());
-
-		TextWatcher refreshTotalTextWatcher = new TextWatcher() {
-			@Override
-			public void onTextChanged(CharSequence text, int start, 
-					int before, int count) {
-				refreshTotal();
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence text, int start, 
-					int count, int after) {
-				// Nothing to do 
-			}
-
-			@Override
-			public void afterTextChanged(Editable text) {
-				// Nothing to do 
-			}
-		};
-
-		// Add the listener to the amount text view
-		amountTextView.addTextChangedListener(refreshTotalTextWatcher);
-
-		// Add the listener to the fee text view
-		feeTextView.addTextChangedListener(refreshTotalTextWatcher);
-
-		// Set the fee to the default and set send amount to 0 initially 
-		changeFiatStartedFromProgram = true;
-		feeTextView.setText(this.getCurSelectedCoinType().getDefaultFeePerKb());
-		changeFiatStartedFromProgram = false;
-
-		changeCoinStartedFromProgram = true;
-		amountTextView.setText("0");
-		changeCoinStartedFromProgram = false;
-	}
-
-	/**
-	 * Sets up the cancel and the send buttons with their appropriate actions.
-	 * The cancel buttons quits the send coins fragment and goes back to wherever
-	 * the user was before. The send button validates the values in the form and
-	 * initizializes the sending of the coins if everything is correct.
-	 */
-	private void initializeButtons() {
-		Button cancelButton = (Button) 
-				this.rootView.findViewById(R.id.leftButton);
-		cancelButton.setText("CANCEL");
-		cancelButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Activity a = getActivity();
-				if (a != null) {
-					a.onBackPressed();
+					this.onClickSendCoins();
 				}
 			}
-		});
-
-		Button sendButton = (Button) 
-				this.rootView.findViewById(R.id.rightButton);
-		sendButton.setText("SEND");
-		sendButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (getCurSelectedCoinType().addressIsValid(getSendToAddressEditText().getText().toString())) {
-					if (getOWMainActivity().userHasPassphrase()){
-						Bundle b = new Bundle();
-						b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
-						getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, 
-								OWTags.VALIDATE_PASS_SEND);
-					} else {
-						onClickSendCoins();
-					}
-				}
-			}
-		});
+		} else if (v == this.getAddressBookImageView()) {
+			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
+		}
 	}
 
 	public void onClickSendCoins() {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
 				getAmountToSendFromEditText());
-		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
 				getFeeFromEditText());
 		try {
-			getWalletManager().sendCoins(getCurSelectedCoinType(), getSendToAddressEditText().getText().toString(), 
+			getWalletManager().sendCoins(getSelectedCoin(), this.addressEditText.getText().toString(), 
 					amountSending, feeSending);
 		} catch(OWAddressFormatException afe) {
 			// TODO alert user if address has errors
@@ -291,8 +178,83 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 			a.onBackPressed();
 		}
 	}
-	
-	public void initializeEditText(){
+
+	/**
+	 * Gets all the important views for use in the fragment.
+	 */
+	private void initializeViewFields() {
+		super.initializeViewFields(this.rootView, R.id.sendGetAddressFromHistoryIcon);
+
+		this.sendCoinsContainingView = this.rootView.findViewById(R.id.sendCoinsContainingView);
+
+		this.coinAmountEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextAmount).findViewById(R.id.ow_editText);
+		this.fiatAmountEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextAmountFiatEquiv).findViewById(R.id.ow_editText);
+		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextTransactionFeeFiatEquiv).findViewById(R.id.ow_editText);
+		this.coinFeeEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextTransactionFee).findViewById(R.id.ow_editText);
+		this.labelEditText = (EditText) this.rootView.findViewById(
+				R.id.send_edit_text_reciever_name).findViewById(R.id.ow_editText);
+		this.addressEditText = (EditText) this.rootView.findViewById(
+				R.id.sendEditTextReceiverAddress);
+
+		this.getQRCodeButton = this.rootView.findViewById(R.id.send_qr_icon);
+		this.getQRCodeButton.setOnClickListener(this);
+
+		this.pasteButton = this.rootView.findViewById(R.id.send_paste_icon);
+		this.pasteButton.setOnClickListener(this);
+
+		this.cancelButton = (Button) this.rootView.findViewById(R.id.leftButton);
+		cancelButton.setText("CANCEL");
+		this.cancelButton.setOnClickListener(this);
+
+		this.sendButton = (Button) this.rootView.findViewById(R.id.rightButton);
+		sendButton.setText("SEND");
+		this.sendButton.setOnClickListener(this);
+	}
+
+	/**
+	 * The form needs to add the totals and update the total text view and
+	 * ensure that the coin and fiat equivalents are always in sync. This method
+	 * sets up all the text views to do that. 
+	 */
+	private void initializeTextViewDependencies() {
+		// Bind the amount values so that when one changes the other changes
+		// according to the current exchange rate.
+		this.bindEditTextValues(coinAmountEditText, this.fiatAmountEditText);
+
+		// Bind the fee values so that when one changes the other changes
+		// according to the current exchange rate.
+		EditText feeTextView = this.coinFeeEditText;
+		this.bindEditTextValues(feeTextView, this.fiatFeeEditText);
+
+		TextWatcher refreshTotalTextWatcher = new OWTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable s) {
+				refreshTotal();
+			}
+		};
+
+		// Add the listener to the amount text view
+		coinAmountEditText.addTextChangedListener(refreshTotalTextWatcher);
+
+		// Add the listener to the fee text view
+		feeTextView.addTextChangedListener(refreshTotalTextWatcher);
+
+		// Set the fee to the default and set send amount to 0 initially 
+		changeFiatStartedFromProgram = true;
+		feeTextView.setText(this.getSelectedCoin().getDefaultFeePerKb());
+		changeFiatStartedFromProgram = false;
+
+		changeCoinStartedFromProgram = true;
+		coinAmountEditText.setText("0");
+		changeCoinStartedFromProgram = false;
+	}
+
+	private void initializeEditText() {
+		// TODO why wasn't all of this stuff done in XML?
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -313,10 +275,9 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 	 */
 	private void bindEditTextValues(final EditText coinValEditText, 
 			final EditText fiatValEditText) {
-		TextWatcher updateFiat = new TextWatcher() {
+		TextWatcher updateFiat = new OWTextWatcher() {
 			@Override
-			public void onTextChanged(CharSequence text, int start, 
-					int before, int count) {
+			public void afterTextChanged(Editable text) {
 				if (!changeCoinStartedFromProgram) {
 					String newVal = text.toString();
 					BigDecimal newCoinVal = null;
@@ -325,7 +286,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 						newCoinVal = new BigDecimal(newVal);
 						// TODO make this not only be USD
 						newFiatVal = OWConverter.convert(
-								newCoinVal, getCurSelectedCoinType(), OWFiat.USD); 
+								newCoinVal, getSelectedCoin(), OWFiat.USD); 
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -342,24 +303,12 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 					changeFiatStartedFromProgram = false;
 				}
 			}
-
-			@Override
-			public void beforeTextChanged(CharSequence text, int start, 
-					int count, int after) {
-				// Nothing to do 
-			}
-
-			@Override
-			public void afterTextChanged(Editable text) {
-				// Nothing to do 
-			}
 		};
 		coinValEditText.addTextChangedListener(updateFiat);
 
-		TextWatcher updateCoin = new TextWatcher() {
+		TextWatcher updateCoin = new OWTextWatcher() {
 			@Override
-			public void onTextChanged(CharSequence text, int start, 
-					int before, int count) {
+			public void afterTextChanged(Editable text) {
 				if (!changeFiatStartedFromProgram) {
 					String newVal = text.toString();
 					BigDecimal newFiatVal = null;
@@ -367,7 +316,7 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 					try {
 						newFiatVal = new BigDecimal(newVal);
 						newCoinVal =  OWConverter.convert(
-								newFiatVal, OWFiat.USD, getCurSelectedCoinType());
+								newFiatVal, OWFiat.USD, getSelectedCoin());
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -380,20 +329,9 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 
 					changeCoinStartedFromProgram = true;
 					coinValEditText.setText(OWCoin.formatCoinAmount(
-							getCurSelectedCoinType(), newCoinVal).toPlainString());
+							getSelectedCoin(), newCoinVal).toPlainString());
 					changeCoinStartedFromProgram = false;
 				}
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence text, int start, 
-					int count, int after) {
-				// Nothing to do 
-			}
-
-			@Override
-			public void afterTextChanged(Editable text) {
-				// Nothing to do 
 			}
 		};
 		fiatValEditText.addTextChangedListener(updateCoin);
@@ -413,12 +351,12 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 		TextView totalTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalTextView);
 		totalTextView.setText(OWCoin.formatCoinAmount(
-				getCurSelectedCoinType(), total).toPlainString());
+				getSelectedCoin(), total).toPlainString());
 
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCurSelectedCoinType());
+		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getSelectedCoin());
 		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal, false) + ")");
 	}
 
@@ -440,11 +378,9 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 	 * @return A {@link BigDecimal} with the amount the user would like to send.
 	 */
 	private BigDecimal getAmountToSendFromEditText() {
-		EditText basicAmountTextBox = getCoinAmountEditText();
-
 		BigDecimal basicAmount = null;
 		try {
-			basicAmount = new BigDecimal(basicAmountTextBox.getText().toString());
+			basicAmount = new BigDecimal(coinAmountEditText.getText().toString());
 		} catch (NumberFormatException nfe) {
 			// If any of the textboxes contain values that can't be parsed
 			// then just return 0
@@ -461,11 +397,9 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 	 * @return A {@link BigDecimal} with the fee the user would like to send.
 	 */
 	private BigDecimal getFeeFromEditText() {
-		EditText feeTextBox = getCoinFeeEditText();
-
 		BigDecimal fee = null;
 		try {
-			fee = new BigDecimal(feeTextBox.getText().toString());
+			fee = new BigDecimal(coinFeeEditText.getText().toString());
 		} catch (NumberFormatException nfe) {
 			// If any of the textboxes contain values that can't be parsed
 			// then just return 0
@@ -474,42 +408,14 @@ public class OWSendCoinsFragment extends OWWalletUserFragment {
 		return fee;
 	}
 
-	/**
-	 * A convenience method to get the edit text which contains the address
-	 * that the user is about to send coins to. 
-	 * 
-	 * @return as above
-	 */
-	private EditText getSendToAddressEditText() {
-		return this.sendToAddressEditText;
+	@Override
+	public String getActionBarTitle() {
+		return "SEND";
 	}
 
-	/**
-	 * @return
-	 */
-	private EditText getFiatFeeEditText() {
-		return this.fiatFeeEditText;
-	}
-
-	/**
-	 * @return
-	 */
-	private EditText getCoinFeeEditText() {
-		return this.coinFeeEditText;
-	}
-
-	/**
-	 * @return
-	 */
-	private EditText getFiatAmountEditText() {
-		return this.fiatAmountEditText;
-	}
-
-	/**
-	 * @return
-	 */
-	private EditText getCoinAmountEditText() {
-		return this.coinAmountEditText;
+	@Override
+	public View getContainerView() {
+		return this.sendCoinsContainingView;
 	}
 
 }
