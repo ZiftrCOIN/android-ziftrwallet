@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -39,7 +40,7 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		// The convertView is an oldView that android is recycling.
+		// The convertView is an oldView that android is recycling, which may be null.
 
 		OWAddress address = getItem(position);
 		if (convertView == null) {
@@ -56,16 +57,27 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 		inOutImage.setImageDrawable(this.getContext().getResources().getDrawable(this.getImgResIdForItem(address)));
 
 		// Set top/bottom right text boxes to empty
-		TextView topLeft = (TextView) convertView.findViewById(R.id.topLeftTextView);
-		topLeft.setText(address.getLabel());
+		EditText addressLabelTextView = (EditText) convertView.findViewById(R.id.topLeftTextView);
+		Object tag = addressLabelTextView.getTag();
+		if (tag instanceof OWEditableTextBoxController<?>) {
+			// Need to remove the textwatcher before changing the text so that 
+			// we don't have a bug where the label for an address is changed incorrectly
+			OWEditableTextBoxController<?> oldController = 
+					(OWEditableTextBoxController<?>) addressLabelTextView.getTag();
+			addressLabelTextView.removeTextChangedListener(oldController);
+		}
+		addressLabelTextView.setText(address.getLabel());
 
 		// Set top/bottom right text boxes to empty
-		TextView bottomLeft = (TextView) convertView.findViewById(R.id.bottomLeftTextView);
-		bottomLeft.setText(address.toString());
+		TextView formattedAddressTextView = (TextView) convertView.findViewById(R.id.bottomLeftTextView);
+		formattedAddressTextView.setText(address.toString());
 		
-		// Set the onclick listener to be a controller for the label text box 
-		editImage.setOnClickListener(new OWEditableTextBoxController<OWAddress>(
-				addressBookFragment, topLeft, editImage, address.getLabel(), address));
+		// Set the onclick listener to be a controller for the label text box
+		OWEditableTextBoxController<OWAddress> controller = new OWEditableTextBoxController<OWAddress>(
+				addressBookFragment, addressLabelTextView, editImage, address.getLabel(), address);
+		editImage.setOnClickListener(controller);
+		addressLabelTextView.addTextChangedListener(controller);
+		addressLabelTextView.setTag(controller);
 		
 		return convertView;
 	}

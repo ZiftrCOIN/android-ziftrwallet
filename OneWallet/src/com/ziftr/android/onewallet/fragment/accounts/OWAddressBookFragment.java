@@ -16,6 +16,7 @@ import android.widget.ListView;
 import com.ziftr.android.onewallet.OWWalletManager;
 import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWAddress;
+import com.ziftr.android.onewallet.util.OWEditState;
 import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
@@ -34,6 +35,7 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 
 	public static final String CUR_EDITING_ADDRESS_KEY = "CUR_EDITING_ADDRESS_KEY";
 	private String curEditingAddress = null;
+	private OWEditState curEditState = null;
 
 	@Override
 	public void onResume() {
@@ -49,7 +51,10 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putString(CUR_EDITING_ADDRESS_KEY, curEditingAddress);
+		if (this.curEditingAddress != null) {
+			outState.putString(CUR_EDITING_ADDRESS_KEY, this.curEditingAddress);
+			OWEditState.saveIntoBundle(curEditState, outState);
+		}
 		super.onSaveInstanceState(outState);
 	}
 
@@ -110,8 +115,6 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 							addressAdapter.getFullList().addAll(addresses);
 							addressAdapter.refreshWorkingList();
 							addressAdapter.notifyDataSetChanged();
-							ZLog.log("size: " + addresses.size());
-							ZLog.log("Just notified that the data set changed.");
 						}
 					});
 				}
@@ -138,6 +141,9 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 	private void initializeFromArguments(Bundle savedInstanceState) {
 		if (savedInstanceState != null) {
 			this.curEditingAddress = savedInstanceState.getString(CUR_EDITING_ADDRESS_KEY);
+			if (this.curEditingAddress != null) {
+				this.curEditState = OWEditState.loadFromBundle(savedInstanceState);
+			}
 		}
 
 		Bundle args = this.getArguments();
@@ -182,25 +188,39 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 	}
 
 	@Override
-	public void onEditStart(OWAddress address) {
+	public void onEditStart(OWEditState state, OWAddress address) {
+		ZLog.log("onEditStart called");
+		this.curEditState = state;
 		this.curEditingAddress = address.toString();
 	}
 
 	@Override
-	public void onEditEnd(String newText, OWAddress address) {
+	public void onEdit(OWEditState state, OWAddress address) {
+		if (address.toString().equals(this.curEditingAddress)) {
+			ZLog.log("onEdit called");
+			this.curEditState = state;
+			
+			// Make sure view stays up to date
+			address.setNote(this.curEditState.text);
+
+			// Get address and update 
+			getWalletManager().updateAddressLabel(getSelectedCoin(), 
+					address.toString(), this.curEditState.text, includeReceivingNotSending);
+		}
+	}
+
+	@Override
+	public void onEditEnd(OWAddress address) {
 		// Only want to do anything if the data passed in is the same
 		// as the data given. If we don't do this then the views 
 		// don't initialize correctly, as this method is called as part
 		// of the initialization process (in the adapter, the img view gets
 		// a new listener every time).
 		if (address.toString().equals(this.curEditingAddress)) {
-			// Get address and update 
-			getWalletManager().updateAddressLabel(getSelectedCoin(), 
-					address.toString(), newText, includeReceivingNotSending);
-
-			// Need to set this back to null to indicate that we are done editing.
-
+			ZLog.log("onEditEnd called");
+			// Need to set these back to null to indicate that we are done editing.
 			this.curEditingAddress = null;
+			this.curEditState = null;
 		}
 	}
 
@@ -214,4 +234,10 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 		return this.curEditingAddress != null;
 	}
 
+	@Override
+	public OWEditState getCurEditState() {
+		return this.curEditState;
+	}
+
+	
 }

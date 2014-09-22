@@ -19,11 +19,13 @@ import com.ziftr.android.onewallet.R;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
 import com.ziftr.android.onewallet.util.OWCoin;
 import com.ziftr.android.onewallet.util.OWConverter;
+import com.ziftr.android.onewallet.util.OWEditState;
 import com.ziftr.android.onewallet.util.OWFiat;
 import com.ziftr.android.onewallet.util.ZLog;
 import com.ziftr.android.onewallet.util.ZiftrUtils;
 
-public class OWTransactionDetailsFragment extends OWWalletUserFragment implements OWEditableTextBoxController.EditHandler<OWTransaction> {
+public class OWTransactionDetailsFragment extends OWWalletUserFragment 
+implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 
 	private static final String TX_ITEM_HASH_KEY = "txItemHash";
 
@@ -47,8 +49,9 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 
 	private OWTransaction txItem;
 
+	private OWEditState curEditState;
+
 	private boolean isEditing;
-	private OWEditableTextBoxController<OWTransaction> controller;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
@@ -66,6 +69,9 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		if (savedInstanceState != null) {
 			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
 				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
+				if (this.isEditing) {
+					this.curEditState = OWEditState.loadFromBundle(savedInstanceState);
+				}
 			}
 			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
 				this.txItem = getWalletManager().readTransactionByHash(this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
@@ -95,6 +101,9 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(IS_EDITING_KEY, this.isEditing);
+		if (this.isEditing) {
+			OWEditState.saveIntoBundle(curEditState, outState);
+		}
 		outState.putString(TX_ITEM_HASH_KEY, this.txItem.getSha256Hash().toString());
 		super.onSaveInstanceState(outState);
 	}
@@ -136,9 +145,10 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 
 		this.populatePendingInformation();
 
-		this.controller = new OWEditableTextBoxController<OWTransaction>(
+		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
-		editLabelButton.setOnClickListener(this.controller);
+		editLabelButton.setOnClickListener(controller);
+		this.addressTextView.addTextChangedListener(controller);
 	}
 
 	private void populateAmount() {
@@ -228,23 +238,34 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	//////////////////////////////////////////////////////
 
 	@Override
-	public void onEditStart(OWTransaction t) {
+	public void onEditStart(OWEditState state, OWTransaction t) {
 		if (t != this.txItem) {
 			ZLog.log("Should have gotten the same object, something went wrong. ");
 			return;
 		}
+		this.curEditState = state;
 		this.isEditing = true;
+	}
+	
+	@Override
+	public void onEdit(OWEditState state, OWTransaction t) {
+		if (t != this.txItem) {
+			ZLog.log("Should have gotten the same object, something went wrong. ");
+			return;
+		}
+		this.curEditState = state;
+		
+		// TODO Auto-generated method stub
+		txItem.setTxNote(state.text);
+		getWalletManager().updateTransactionNote(txItem);
 	}
 
 	@Override
-	public void onEditEnd(String newText, OWTransaction t) {
+	public void onEditEnd(OWTransaction t) {
 		if (t != this.txItem) {
 			ZLog.log("Should have gotten the same object, something went wrong. ");
 			return;
 		}
-
-		txItem.setTxNote(newText);
-		getWalletManager().updateTransactionNote(txItem);
 
 		// Now that we are done editing 
 		this.isEditing = false;
@@ -258,6 +279,14 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 	@Override
 	public boolean isEditing(OWTransaction t) {
 		return this.isEditing && t == this.txItem; 
+	}
+	
+	/**
+	 * @return the curEditState
+	 */
+	@Override
+	public OWEditState getCurEditState() {
+		return this.curEditState;
 	}
 
 }
