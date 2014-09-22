@@ -42,8 +42,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:minHeight="10dp" />
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/currencyValue"
@@ -61,8 +60,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:minHeight="10dp" />
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/confirmation_fee_amount"
@@ -80,19 +78,18 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:minHeight="10dp" />
+            android:layout_weight="1" />
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/ow_horizontal_margin" >
+            android:layout_height="wrap_content" >
 
             <EditText
                 android:id="@+id/txn_note"
                 style="@style/txn_values"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/ow_horizontal_margin"
                 android:background="@android:color/transparent"
                 android:enabled="true"
                 android:focusable="false"
@@ -112,17 +109,18 @@
                 android:layout_width="@dimen/ow_txt_largest"
                 android:layout_height="@dimen/ow_txt_largest"
                 android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
+				android:layout_alignTop="@id/txn_note"
                 android:clickable="true"
-                android:padding="@dimen/ow_bordered_icon_margin"
+                android:scaleType="fitXY"
+                android:adjustViewBounds="true"
+                android:padding="@dimen/ow_borderless_icon_margin"
                 android:src="@drawable/button_edit_pencil" />
         </RelativeLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:minHeight="10dp" />
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/routing_address"
@@ -140,8 +138,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:minHeight="10dp" />
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/date"
@@ -160,8 +157,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:minHeight="10dp" />
+            android:layout_weight="1" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -178,7 +174,6 @@
 
             <TextView
                 android:id="@+id/status"
-                style="@style/txn_labels"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@id/progress_bar"
@@ -187,12 +182,10 @@
 
             <TextView
                 android:id="@+id/time_left"
-                style="@style/txn_labels"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignRight="@id/progress_bar"
                 android:layout_below="@id/progress_bar"
-                android:layout_marginRight="@dimen/ow_horizontal_margin"
                 android:text="@string/ow_empty_string" />
         </RelativeLayout>
     </LinearLayout>

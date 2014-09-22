@@ -7,9 +7,9 @@
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:scaleType="fitStart"
-        android:src="@drawable/ziftrwallet_logo_temp" >
+        android:src="@drawable/logo_ziftrwallet" >
     </ImageView>
 
     <TextView

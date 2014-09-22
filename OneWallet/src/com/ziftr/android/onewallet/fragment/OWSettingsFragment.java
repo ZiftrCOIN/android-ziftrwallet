@@ -29,7 +29,6 @@ public class OWSettingsFragment extends OWFragment {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				if (OWSettingsFragment.this.getOWMainActivity().userHasPassphrase()) {
 					OWResetPassphraseDialog passphraseDialog = 
 							new OWResetPassphraseDialog();

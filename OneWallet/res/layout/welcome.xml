@@ -1,54 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="30dp" >
+    android:background="@drawable/background" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/ow_welcome"
-        android:textSize="@dimen/ow_txt_medium" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/ow_welcome_message"
-        android:textSize="@dimen/ow_txt_small" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create Passphrase"
-        android:textSize="@dimen/ow_txt_small" />
-
-    <EditText
-        android:id="@+id/new_password"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:maxLines="1" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="30dp"
+        android:paddingLeft="@dimen/ow_horizontal_margin"
+        android:paddingRight="@dimen/ow_horizontal_margin"
+        android:paddingTop="30dp" >
 
-    <EditText
-        android:id="@+id/new_confirm_password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:maxLines="1" />
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/ow_empty_string"
+            android:paddingTop="50dp"
+            android:src="@drawable/logo_ziftrwallet" />
 
-    <Button
-        android:id="@+id/set_password"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Save Password"
-        android:textSize="@dimen/ow_txt_small" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/ow_large_icon_margin"
+            android:text="@string/ow_welcome"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_medium" />
 
-    <Button
-        android:id="@+id/skip_password"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="I&apos;m feeling reckless"
-        android:textSize="@dimen/ow_txt_small" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_welcome_message"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_small" />
 
-</LinearLayout>
+        <View
+            style="@style/white_divider"
+            android:layout_marginBottom="@dimen/ow_txt_mediumsmall"
+            android:layout_marginTop="@dimen/ow_txt_medium" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Passphrase"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_small" />
+
+        <include
+            android:id="@+id/new_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            layout="@layout/_edit_text_shadow" />
+
+        <include
+            android:id="@+id/new_confirm_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            layout="@layout/_edit_text_shadow" />
+
+        <Button
+            android:id="@+id/set_password"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:background="#60000000"
+            android:text="Save Password"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_small" />
+
+        <View
+            style="@style/white_divider"
+            android:layout_marginBottom="@dimen/ow_txt_mediumsmall"
+            android:layout_marginTop="@dimen/ow_txt_medium" />
+
+        <Button
+            android:id="@+id/skip_password"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#60000000"
+            android:text="I&apos;m feeling reckless"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_small" />
+    </LinearLayout>
+
+</ScrollView>
