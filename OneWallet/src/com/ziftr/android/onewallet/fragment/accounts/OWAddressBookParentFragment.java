@@ -25,7 +25,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 		this.addressBookImageView = (ImageView) rootView.findViewById(addressBookId);
 		this.addressBookImageView.setOnClickListener(this);
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -133,7 +133,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 	protected void updateAddressLabelInDatabase() {
 		String label = this.labelEditText.getText().toString();
 		String address = this.addressEditText.getText().toString();
-		getWalletManager().updateAddressLabel(getCurSelectedCoinType(), address, label, true);
+		getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, true);
 	}
 
 }

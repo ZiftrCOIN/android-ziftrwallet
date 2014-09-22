@@ -54,9 +54,9 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.setQrCodeGenerated(false);
-		
+
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
-		
+
 		this.showWalletHeader();
 
 		this.initializeViewFields(inflater, container);
@@ -71,7 +71,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 		this.setQrCodeGenerated(false);
 		super.onStop();
 	}
-	
+
 	@Override
 	public void onClick(View v) {
 
@@ -90,7 +90,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 			if(!this.fragmentHasAddress()) {
 				if (getOWMainActivity().userHasPassphrase()) {
 					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 					getOWMainActivity().showGetPassphraseDialog(
 							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 							OWTags.VALIDATE_PASS_RECEIVE);
@@ -110,7 +110,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 	 */
 	private void initializeViewFields(LayoutInflater inflater, ViewGroup container) {
 		super.initializeViewFields(this.rootView, R.id.recallAddressFromHistoryIcon);
-		
+
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
 		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
@@ -121,15 +121,15 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 				}
 			}
 		});
-	
+
 		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
-	
+
 		this.qrCodeImageView = (ImageView) this.rootView.findViewById(R.id.generateAddressQrCodeImageView);
 		this.qrCodeImageView.setOnClickListener(this);
-	
+
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
-	
+
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 	}
 
@@ -202,7 +202,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 			public void run() {
 				String addressLabel = addressEditText.getText().toString();
 
-				final OWAddress address = database.createReceivingAddress(getCurSelectedCoinType(), addressLabel);
+				final OWAddress address = database.createReceivingAddress(getSelectedCoin(), addressLabel);
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
@@ -248,5 +248,4 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 	}
 
 }
-
 

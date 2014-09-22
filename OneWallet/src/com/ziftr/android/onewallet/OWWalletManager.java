@@ -13,6 +13,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import android.content.Context;
+
 import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.AddressFormatException;
@@ -37,7 +39,6 @@ import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWECKey;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
-import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;
@@ -96,7 +97,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * TODO maybe we want to get this everytime?
 	 * or maybe a weak reference? 
 	 */
-	private OWMainFragmentActivity activity;
+	private Context activity;
 
 	///////////////////////////////////////////////////////
 	//////////  Static Singleton Access Members ///////////
@@ -121,7 +122,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * 
 	 * TODO what if context passed in isn't the context of instance's?
 	 */
-	public static synchronized OWWalletManager getInstance(OWMainFragmentActivity context) {
+	public static synchronized OWWalletManager getInstance(Context context) {
 
 		if (instance == null) {
 
@@ -167,11 +168,11 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * Make a new manager. This context should be cleared and then re-added when
 	 * saving and bringing back the wallet manager. 
 	 */
-	private OWWalletManager(OWMainFragmentActivity activity) {
+	private OWWalletManager(Context context) {
 		// Making the wallet manager opens up a connection with the database.
 
-		super(activity, databasePath);
-		this.activity = activity;
+		super(context, databasePath);
+		this.activity = context;
 
 		for (OWCoin activatedType : readAllActivatedTypes()) {
 			this.setUpWallet(activatedType);
@@ -249,9 +250,11 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 					externalDirectory, id.getShortTitle() + "_wallet.dat"));
 		} else {
 			log("null NULL EXTERNAL DIR");
+			/***
 			OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 			alertUserDialog.setupDialog("OneWallet", "Error: No external storage detected.", null, "OK", null);
 			alertUserDialog.show(this.activity.getSupportFragmentManager(), "null_externalDirectory");
+			**/
 			return false;
 		}
 
@@ -789,13 +792,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	}
 
 	/**
-	 * @return the activity
-	 */
-	public OWMainFragmentActivity getActivity() {
-		return activity;
-	}
-
-	/**
 	 * @param activity the context to set
 	 */
 	public void setActivity(OWMainFragmentActivity activity) {
@@ -823,5 +819,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public File getWalletFile(OWCoin id) {
 		return this.walletFiles.get(id);
 	}
+	
+	
 
 }

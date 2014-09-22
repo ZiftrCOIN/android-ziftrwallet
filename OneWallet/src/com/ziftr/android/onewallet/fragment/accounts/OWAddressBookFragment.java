@@ -99,7 +99,7 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 			@Override
 			public void run() {
 				final List<OWAddress> addresses = 
-						manager.readAllAddresses(getCurSelectedCoinType(), includeReceivingNotSending);
+						manager.readAllAddresses(getSelectedCoin(), includeReceivingNotSending);
 
 				Activity a = OWAddressBookFragment.this.getOWMainActivity();
 				// It it's null then the app is dying and we do it on the next round
@@ -195,7 +195,7 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 		// a new listener every time).
 		if (address.toString().equals(this.curEditingAddress)) {
 			// Get address and update 
-			getWalletManager().updateAddressLabel(getCurSelectedCoinType(), 
+			getWalletManager().updateAddressLabel(getSelectedCoin(), 
 					address.toString(), newText, includeReceivingNotSending);
 
 			// Need to set this back to null to indicate that we are done editing.

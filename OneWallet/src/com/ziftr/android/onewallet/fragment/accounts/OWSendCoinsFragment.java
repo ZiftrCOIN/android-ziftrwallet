@@ -96,7 +96,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data != null && data.hasExtra("SCAN_RESULT") && requestCode == OWRequestCodes.SCAN_QR_CODE) {
 			OWAddress a = this.getWalletManager().readAddress(
-					getCurSelectedCoinType(), data.getExtras().getCharSequence("SCAN_RESULT").toString(), false);
+					this.getSelectedCoin(), data.getExtras().getCharSequence("SCAN_RESULT").toString(), false);
 			String label = a == null ? "" : a.getLabel();
 			this.acceptAddress(a.toString(), label);
 		}
@@ -117,11 +117,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			// Gets a handle to the clipboard service.
 			ClipboardManager clipboard = (ClipboardManager)
 					getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-	
+
 			String textToPaste = null;
 			if (clipboard.hasPrimaryClip()) {
 				ClipData clip = clipboard.getPrimaryClip();
-	
 				// if you need text data only, use:
 				if (clip.getDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
 					// The item could cantain URI that points to the text data.
@@ -132,7 +131,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 					}
 				}
 			}
-	
 			if (textToPaste != null && !textToPaste.isEmpty()) {
 				addressEditText.setText(textToPaste);
 			}
@@ -142,10 +140,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				a.onBackPressed();
 			}
 		} else if (v == sendButton) {
-			if (getCurSelectedCoinType().addressIsValid(addressEditText.getText().toString())) {
+			if (this.getSelectedCoin().addressIsValid(addressEditText.getText().toString())) {
 				if (getOWMainActivity().userHasPassphrase()) {
 					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getCurSelectedCoinType().toString());
+					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 					getOWMainActivity().showGetPassphraseDialog(
 							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, OWTags.VALIDATE_PASS_SEND);
 				} else {
@@ -155,17 +153,16 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
 		}
-	
 	}
 
 	public void onClickSendCoins() {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
 				getAmountToSendFromEditText());
-		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getCurSelectedCoinType(), 
+		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
 				getFeeFromEditText());
 		try {
-			getWalletManager().sendCoins(getCurSelectedCoinType(), this.addressEditText.getText().toString(), 
+			getWalletManager().sendCoins(getSelectedCoin(), this.addressEditText.getText().toString(), 
 					amountSending, feeSending);
 		} catch(OWAddressFormatException afe) {
 			// TODO alert user if address has errors
@@ -174,7 +171,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			// TODO alert user if not enough money in wallet.
 			ZLog.log("There was not enough money in the wallet.");
 		}
-	
+
 		// To exit out of the send coins fragment
 		Activity a = getActivity();
 		if (a != null) {
@@ -199,7 +196,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.coinFeeEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextTransactionFee).findViewById(R.id.ow_editText);
 		this.labelEditText = (EditText) this.rootView.findViewById(
-						R.id.send_edit_text_reciever_name).findViewById(R.id.ow_editText);
+				R.id.send_edit_text_reciever_name).findViewById(R.id.ow_editText);
 		this.addressEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextReceiverAddress);
 
@@ -248,12 +245,23 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		// Set the fee to the default and set send amount to 0 initially 
 		changeFiatStartedFromProgram = true;
-		feeTextView.setText(this.getCurSelectedCoinType().getDefaultFeePerKb());
+		feeTextView.setText(this.getSelectedCoin().getDefaultFeePerKb());
 		changeFiatStartedFromProgram = false;
 
 		changeCoinStartedFromProgram = true;
 		coinAmountEditText.setText("0");
 		changeCoinStartedFromProgram = false;
+	}
+
+	private void initializeEditText() {
+		// TODO why wasn't all of this stuff done in XML?
+		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.fiatFeeEditText.setFocusable(false);
+		this.fiatFeeEditText.setClickable(false);
+		this.fiatFeeEditText.setCursorVisible(false);
+		this.fiatFeeEditText.setFocusableInTouchMode(false);
 	}
 
 	/**
@@ -278,7 +286,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 						newCoinVal = new BigDecimal(newVal);
 						// TODO make this not only be USD
 						newFiatVal = OWConverter.convert(
-								newCoinVal, getCurSelectedCoinType(), OWFiat.USD); 
+								newCoinVal, getSelectedCoin(), OWFiat.USD); 
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -308,7 +316,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 					try {
 						newFiatVal = new BigDecimal(newVal);
 						newCoinVal =  OWConverter.convert(
-								newFiatVal, OWFiat.USD, getCurSelectedCoinType());
+								newFiatVal, OWFiat.USD, getSelectedCoin());
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -321,7 +329,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 					changeCoinStartedFromProgram = true;
 					coinValEditText.setText(OWCoin.formatCoinAmount(
-							getCurSelectedCoinType(), newCoinVal).toPlainString());
+							getSelectedCoin(), newCoinVal).toPlainString());
 					changeCoinStartedFromProgram = false;
 				}
 			}
@@ -343,12 +351,12 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		TextView totalTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalTextView);
 		totalTextView.setText(OWCoin.formatCoinAmount(
-				getCurSelectedCoinType(), total).toPlainString());
+				getSelectedCoin(), total).toPlainString());
 
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getCurSelectedCoinType());
+		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getSelectedCoin());
 		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal, false) + ")");
 	}
 
@@ -398,17 +406,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			return new BigDecimal(0);
 		}
 		return fee;
-	}
-
-	private void initializeEditText() {
-		// TODO why wasn't all of this stuff done in XML?
-		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-		this.fiatFeeEditText.setFocusable(false);
-		this.fiatFeeEditText.setClickable(false);
-		this.fiatFeeEditText.setCursorVisible(false);
-		this.fiatFeeEditText.setFocusableInTouchMode(false);
 	}
 
 	@Override

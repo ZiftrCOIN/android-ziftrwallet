@@ -62,6 +62,16 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 
 		this.hideWalletHeader();
 
+		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
+		if (savedInstanceState != null) {
+			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
+				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
+			}
+			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
+				this.txItem = getWalletManager().readTransactionByHash(this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+			}
+		}
+
 		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
 		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);
 		this.amount = (TextView) rootView.findViewById(R.id.amount);
@@ -75,10 +85,8 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.status = (TextView) rootView.findViewById(R.id.status);
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-		this.coinLogo = (ImageView) rootView.findViewById(R.id.coin_logo);
-		
-		this.initFields(savedInstanceState);
 
+		this.initFields(savedInstanceState);
 		return this.rootView;
 	}
 
@@ -106,12 +114,12 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 			}
 			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
 				this.txItem = getWalletManager().readTransactionByHash(
-						this.getCurSelectedCoinType(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+						this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
 			}
 		}
 		
 		Drawable coinImage = this.getResources().getDrawable(
-				this.getCurSelectedCoinType().getLogoResId());
+				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
 
 		this.populateAmount();
