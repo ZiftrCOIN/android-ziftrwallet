@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ziftr.android.onewallet"
+    package="com.ziftr.android.ziftrwallet"
     android:versionCode="2"
     android:versionName="0.0.9 (alpha)" >
 
@@ -42,13 +42,13 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name="com.ziftr.android.onewallet.OWApplication"
+        android:name="com.ziftr.android.ziftrwallet.OWApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/ow_app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.ziftr.android.onewallet.OWSplashScreenActivity"
+            android:name="com.ziftr.android.ziftrwallet.OWSplashScreenActivity"
             android:label="@string/ow_app_name"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
             <intent-filter>
@@ -58,10 +58,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.ziftr.android.onewallet.OWWelcomeActivity">
-        </activity>
+            android:name="com.ziftr.android.ziftrwallet.OWWelcomeActivity" >
+            ></activity>
         <activity
-            android:name="com.ziftr.android.onewallet.OWMainFragmentActivity"
+            android:name="com.ziftr.android.ziftrwallet.OWMainFragmentActivity"
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
