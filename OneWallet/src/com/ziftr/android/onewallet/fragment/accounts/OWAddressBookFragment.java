@@ -164,8 +164,8 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 		// TODO Auto-generated method stub
 		this.addressAdapter.getFilter().filter(s);
 	}
-	
-	
+
+
 
 	//////////////////////////////////////////////////////
 	////////// Methods for being an EditHandler //////////

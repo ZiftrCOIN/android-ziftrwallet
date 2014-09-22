@@ -49,9 +49,9 @@ public class OWAccountsFragment extends OWFragment {
 	private OWWalletManager walletManager;
 
 	private ArrayAdapter<OWCurrencyListItem> walletAdapter;
-	
+
 	private ImageView addButton;
-	
+
 	private View footer;
 
 	/** 
@@ -95,7 +95,7 @@ public class OWAccountsFragment extends OWFragment {
 		this.footer = this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null);
 
 		this.setAddCurrency();
-		
+
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
 
@@ -168,10 +168,10 @@ public class OWAccountsFragment extends OWFragment {
 	 * of wallets on this accounts page. 
 	 */
 	public void refreshListOfUserWallets() {
-			this.walletAdapter.notifyDataSetChanged();
-			if (this.userWallets.size() == 0){
-				this.currencyListView.removeFooterView(this.footer);
-			}
+		this.walletAdapter.notifyDataSetChanged();
+		if (this.userWallets.size() == 0){
+			this.currencyListView.removeFooterView(this.footer);
+		}
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class OWAccountsFragment extends OWFragment {
 			this.currencyListView.addFooterView(this.footer, null ,false);
 		}
 		this.currencyListView.setFooterDividersEnabled(false);
-		
+
 		this.walletAdapter = new OWCurrencyListAdapter(this.mContext, this.userWallets);
 		this.currencyListView.setAdapter(this.walletAdapter);
 

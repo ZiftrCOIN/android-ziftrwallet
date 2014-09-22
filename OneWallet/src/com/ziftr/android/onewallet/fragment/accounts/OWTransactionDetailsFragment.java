@@ -85,8 +85,10 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 		this.status = (TextView) rootView.findViewById(R.id.status);
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
+		this.coinLogo = (ImageView) rootView.findViewById(R.id.coin_logo);
 
 		this.initFields(savedInstanceState);
+
 		return this.rootView;
 	}
 
@@ -117,7 +119,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 						this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
 			}
 		}
-		
+
 		Drawable coinImage = this.getResources().getDrawable(
 				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
@@ -243,7 +245,7 @@ public class OWTransactionDetailsFragment extends OWWalletUserFragment implement
 
 		txItem.setTxNote(newText);
 		getWalletManager().updateTransactionNote(txItem);
-		
+
 		// Now that we are done editing 
 		this.isEditing = false;
 	}
