@@ -1,7 +1,5 @@
 package com.ziftr.android.onewallet.sqlite;
 
-import java.math.BigInteger;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 
@@ -45,10 +43,14 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 
 	@Override
 	protected OWAddress cursorToAddress(OWCoin coinId, Cursor c) throws OWAddressFormatException {
-		String encodedPrivKey = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
 		// TODO deal with encryption
-		byte[] wifPrivKeyBytes = Base58.decodeChecked(encodedPrivKey);
-		OWECKey newKey = new OWECKey(new BigInteger(1, ZiftrUtils.stripVersionAndChecksum(wifPrivKeyBytes)));
+		// TODO make this not use WIF but just use hex
+		byte[] wifPrivKeyBytes = Base58.decodeChecked(c.getString(c.getColumnIndex(COLUMN_PRIV_KEY)));
+		byte[] privKeyBytes = ZiftrUtils.stripVersionAndChecksum(wifPrivKeyBytes);
+		byte[] pubKeyBytes = ZiftrUtils.hexStringToBytes(c.getString(c.getColumnIndex(COLUMN_PUB_KEY)));
+		// If a constructor is used that doesn't pass the pubKeyBytes it recalculates them
+		// here and that is pretty slow
+		OWECKey newKey = new OWECKey(privKeyBytes, pubKeyBytes);
 		OWAddress newAddress = new OWAddress(coinId, newKey);
 
 		// Reset all the address' parameters for use elsewhere

@@ -51,6 +51,7 @@ public class OWEditableTextBoxController<T> implements OnClickListener {
 			this.textView.setFocusableInTouchMode(false);
 			this.textView.setBackgroundColor(handler.getResources().getColor(R.color.transparent));
 			this.textView.setPadding(0, 0, 0, 0);
+			this.textView.setClickable(false);
 			imgView.setImageResource(R.drawable.edit_enabled);
 			
 			handler.onEditEnd(this.textView.getText().toString(), this.returnData);
@@ -59,6 +60,7 @@ public class OWEditableTextBoxController<T> implements OnClickListener {
 			this.textView.setFocusable(true);
 			this.textView.setFocusableInTouchMode(true);
 			this.textView.requestFocus();
+			this.textView.setClickable(true);
 			imgView.setImageResource(R.drawable.close_enabled);
 			
 			handler.onEditStart(this.returnData);

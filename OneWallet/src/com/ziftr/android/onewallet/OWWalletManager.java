@@ -39,7 +39,6 @@ import com.ziftr.android.onewallet.crypto.OWAddress;
 import com.ziftr.android.onewallet.crypto.OWECKey;
 import com.ziftr.android.onewallet.crypto.OWSha256Hash;
 import com.ziftr.android.onewallet.crypto.OWTransaction;
-import com.ziftr.android.onewallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.onewallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.onewallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.onewallet.fragment.accounts.OWWalletTransactionListAdapter;

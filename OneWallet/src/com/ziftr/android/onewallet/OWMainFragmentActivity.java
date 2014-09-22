@@ -1144,7 +1144,7 @@ ZiftrNetworkHandler {
 			if (this.inputHashMatchesStoredHash(inputHash)) {
 				OWReceiveCoinsFragment frag = (OWReceiveCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
-				frag.loadAddressFromDatabase();
+				frag.loadNewAddressFromDatabase();
 			} else {
 				this.alertUser(
 						"Error: Passphrases don't match. ", "wrong_passphrase");
