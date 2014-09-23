@@ -285,6 +285,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/ow_horizontal_margin"
                         android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                        android:layout_marginBottom="@dimen/ow_send_receive_list_spacing_top_margin"
                         android:orientation="vertical" >
 
                         <TextView
@@ -316,10 +317,9 @@
                             android:id="@+id/sendTotalFiatEquivTextView"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignBottom="@id/sendTotalTextView"
                             android:layout_margin="5dp"
-                            android:layout_toRightOf="@id/sendTotalTextView"
-                            android:gravity="bottom"
+                            android:layout_below="@id/sendTotalTextView"
+                            android:textSize="@dimen/ow_txt_medium"
                             android:text="@string/ow_send_default_total_fiat_equiv"
                             android:textColor="@color/White" >
                         </TextView>

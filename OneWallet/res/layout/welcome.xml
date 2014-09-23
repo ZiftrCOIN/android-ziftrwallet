@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="30dp"
         android:paddingLeft="@dimen/ow_horizontal_margin"
@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:contentDescription="@string/ow_empty_string"
-            android:paddingTop="50dp"
+            android:paddingTop="30dp"
             android:src="@drawable/logo_ziftrwallet" />
 
         <TextView
@@ -66,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="5dp"
-            android:background="#60000000"
+            android:background="@drawable/clickable_button_color"
             android:text="Save Password"
             android:textColor="@color/White"
             android:textSize="@dimen/ow_txt_small" />
@@ -80,7 +80,7 @@
             android:id="@+id/skip_password"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="#60000000"
+            android:background="@drawable/clickable_button_color"
             android:text="I&apos;m feeling reckless"
             android:textColor="@color/White"
             android:textSize="@dimen/ow_txt_small" />

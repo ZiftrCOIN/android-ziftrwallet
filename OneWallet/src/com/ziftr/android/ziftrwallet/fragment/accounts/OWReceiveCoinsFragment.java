@@ -31,7 +31,7 @@ import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
+public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
@@ -60,7 +60,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 		this.showWalletHeader();
 
 		this.initializeViewFields(inflater, container);
-
+		
 		this.initializeQrCodeFromBundle(savedInstanceState);
 
 		return this.rootView;
@@ -87,7 +87,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 				Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
 			}
 		} else if (v == this.qrCodeImageView) {
-			if(!this.fragmentHasAddress()) {
+			if(!this.fragmentHasAddress() && !this.labelEditText.getText().toString().equals("")) {
 				if (getOWMainActivity().userHasPassphrase()) {
 					Bundle b = new Bundle();
 					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
@@ -112,15 +112,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 		super.initializeViewFields(this.rootView, R.id.recallAddressFromHistoryIcon);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
-		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
-		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
-			@Override
-			public void afterTextChanged(Editable s) {
-				if (fragmentHasAddress()) {
-					updateAddressLabelInDatabase();
-				}
-			}
-		});
+		
 
 		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
@@ -131,6 +123,26 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
+		
+		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
+		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable s) {
+				if (fragmentHasAddress()) {
+					updateAddressLabelInDatabase();
+				}
+			}
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				toggleAddressCreation();
+			}
+		});
+		toggleAddressCreation();
 	}
 
 	private void generateQrCode(boolean withAnimation) {
@@ -246,6 +258,16 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 	public View getContainerView() {
 		return this.scrollView;
 	}
-
+	
+	public void toggleAddressCreation(){
+		if (!labelEditText.getText().toString().equals("")){
+			qrCodeContainer.setAlpha(1);
+			addressEditText.setAlpha(1);
+		} else {
+			qrCodeContainer.setAlpha((float) .5);
+			addressEditText.setAlpha((float) .5);
+		}
+	}
+	
 }
 

@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.ziftr.android.ziftrwallet.R;
 
 
-public class OWExchangeFragment extends OWFragment {
+public class OWTermsFragment extends OWFragment {
 	
 	/**
 	 * Load the view.
@@ -17,11 +17,11 @@ public class OWExchangeFragment extends OWFragment {
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 		this.hideWalletHeader();
-		return inflater.inflate(R.layout.section_exchange_layout, container, false);
+		return inflater.inflate(R.layout.section_terms_layout, container, false);
 	}
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("EXCHANGE", true, true);
+		this.getOWMainActivity().changeActionBar("TERMS", true, true);
 	}
 
 	

@@ -59,13 +59,15 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 			this.textView.setFocusable(false);
 			this.textView.setFocusableInTouchMode(false);
 			this.textView.setBackgroundColor(handler.getResources().getColor(R.color.transparent));
-			this.textView.setPadding(0, 0, 0, 0);
+			//this is the same padding as the editbox_background_normal
+			this.textView.setPadding(5, 8, 13, 8);
 			this.textView.setClickable(false);
 			imgView.setImageResource(R.drawable.edit_enabled);
 			
 			handler.onEditEnd(this.returnData);
 		} else {
 			this.textView.setBackgroundResource(android.R.drawable.editbox_background_normal);
+			this.textView.setPadding(5, 8, 13, 8);
 			this.textView.setFocusable(true);
 			this.textView.setFocusableInTouchMode(true);
 			this.textView.requestFocus();

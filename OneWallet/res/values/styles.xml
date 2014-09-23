@@ -39,6 +39,7 @@
         <item name="android:textColor">@color/Gray</item>
         <item name="android:textSize">@dimen/ow_txt_mediumsmall</item>
         <item name="android:layout_marginLeft">@dimen/ow_horizontal_margin</item>
+        <item name="android:paddingBottom">@dimen/ow_tx_details_vertical_margin</item>
     </style>
 
     <style name="txn_values">

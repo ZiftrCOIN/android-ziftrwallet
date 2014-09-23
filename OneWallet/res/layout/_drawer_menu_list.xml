@@ -72,15 +72,15 @@
                 android:background="@color/ow_menu_divider" />
         </TableRow>
 
-        <!-- The Exchange Section -->
+        <!-- The Terms Section -->
 
         <TableRow
-            android:id="@+id/menuDrawerExchangeRow"
+            android:id="@+id/menuDrawerTermsRow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <LinearLayout
-                android:id="@+id/menuDrawerExchangeLayout"
+                android:id="@+id/menuDrawerTermsLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
@@ -96,7 +96,7 @@
                     android:duplicateParentState="true" />
 
                 <ImageView
-                    android:id="@+id/menuDrawerExchangeIcon"
+                    android:id="@+id/menuDrawerTermsIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
@@ -105,12 +105,12 @@
                     android:src="@drawable/icon_menu_about" />
 
                 <TextView
-                    android:id="@+id/menuDrawerExchangeText"
+                    android:id="@+id/menuDrawerTermsText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
-                    android:text="@string/ow_menu_text_exchange"
+                    android:text="@string/ow_menu_text_terms"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/Black" />
             </LinearLayout>

@@ -408,6 +408,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.insertTx(tx, getWritableDatabase());
 		return tx;
 	}
+	
+	protected OWTransaction createTransaction(OWTransaction tx) {
+		this.transactionsTable.insertTx(tx, getWritableDatabase());
+		return tx;
+	}
 
 	public OWTransaction readTransactionByHash(OWCoin coinId, String hash) {
 		if (hash == null) {

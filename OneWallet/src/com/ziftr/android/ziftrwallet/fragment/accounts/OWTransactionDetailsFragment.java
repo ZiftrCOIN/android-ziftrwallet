@@ -92,7 +92,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 		this.coinLogo = (ImageView) rootView.findViewById(R.id.coin_logo);
-
 		this.initFields(savedInstanceState);
 
 		return this.rootView;
@@ -126,6 +125,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
 				this.txItem = getWalletManager().readTransactionByHash(
 						this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
+				ZLog.log("Charmander: " + txItem);
 			}
 		}
 
@@ -148,7 +148,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
 		editLabelButton.setOnClickListener(controller);
-		this.addressTextView.addTextChangedListener(controller);
+		this.labelEditText.addTextChangedListener(controller);
 	}
 
 	private void populateAmount() {
@@ -196,6 +196,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 				sb.append("\n");
 			}
 		}
+		ZLog.log(sb.toString());
 		addressTextView.setText(sb.toString());
 
 	}
@@ -254,7 +255,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 			return;
 		}
 		this.curEditState = state;
-		
+		ZLog.log("pika");
 		// TODO Auto-generated method stub
 		txItem.setTxNote(state.text);
 		getWalletManager().updateTransactionNote(txItem);

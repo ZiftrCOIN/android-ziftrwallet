@@ -18,22 +18,31 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class OWSplashScreenActivity extends FragmentActivity {
 	
-	
+	private boolean started = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	// Here we just load the splash screen and then start the app one
     	// second later.
-    	
+        if (savedInstanceState !=null && savedInstanceState.containsKey("started")){
+        	this.started=savedInstanceState.getBoolean("started");
+        }
         super.onCreate(savedInstanceState);
-
         // First just set view to splash screen
         this.setContentView(R.layout.splash_layout);
         
         // Temporary Bitcoinj logging
         BriefLogFormatter.initVerbose();
 
-        loadAppOneSecondLater();
+        if (!this.started){
+        	this.started=true;
+        	loadAppOneSecondLater();
+        }
         
+    }
+    
+    public void onSaveInstanceState(Bundle outState){
+    	outState.putBoolean("started", this.started);
+    	super.onSaveInstanceState(outState);
     }
     
     /**
