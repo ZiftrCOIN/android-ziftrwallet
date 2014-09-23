@@ -504,10 +504,10 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		ArrayList<String> addresses;
 		
 		if(receivingAddresses) {
-			addresses = this.receivingAddressesTable.getAddressesList(coin);
+			addresses = this.receivingAddressesTable.getAddressesList(coin, getWritableDatabase());
 		}
 		else {
-			addresses = this.sendingAddressesTable.getAddressesList(coin);
+			addresses = this.sendingAddressesTable.getAddressesList(coin, getWritableDatabase());
 		}
 		
 		return addresses;

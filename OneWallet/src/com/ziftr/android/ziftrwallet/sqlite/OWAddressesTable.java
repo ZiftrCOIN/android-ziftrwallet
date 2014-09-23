@@ -3,6 +3,8 @@ package com.ziftr.android.ziftrwallet.sqlite;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.h2.server.web.DbContents;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -160,11 +162,19 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	
 	
 	
-	protected ArrayList<String> getAddressesList(OWCoin coin) {
+	protected ArrayList<String> getAddressesList(OWCoin coin, SQLiteDatabase db) {
 		
 		ArrayList<String> addresses = new ArrayList<String>();
 		
-		//TODO -read sqlite table for address and add to list
+		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin);
+		
+		Cursor cursor = db.rawQuery(sql, null);
+		if(cursor.moveToFirst()) {
+			do {
+				addresses.add(cursor.getString(0));
+			}
+			while (cursor.moveToNext());
+		}
 		
 		return addresses;
 	}

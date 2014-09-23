@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * In the accounts section of the app there is a list of currencies that opens
@@ -41,6 +42,8 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// The convertView is an oldView that android is recycling, which may be null.
+		
+		ZLog.log("Getting view at position: ", String.valueOf(position));
 
 		OWAddress address = getItem(position);
 		if (convertView == null) {
@@ -93,5 +96,6 @@ public class OWAddressListAdapter extends OWSearchableListAdapter<OWAddress> {
 			return R.drawable.sent_enabled;
 		}
 	}
+	
 
 }
