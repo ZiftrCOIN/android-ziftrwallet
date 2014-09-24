@@ -9,7 +9,7 @@ import com.ziftr.android.ziftrwallet.OWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
-public class OWFragment extends Fragment {
+public abstract class OWFragment extends Fragment {
 
 	public OWMainFragmentActivity getOWMainActivity() {
 		return ((OWMainFragmentActivity) this.getActivity());
@@ -21,6 +21,13 @@ public class OWFragment extends Fragment {
 
 	public boolean handleBackPress() {
 		return false;
+	}
+	
+	/**
+	 * To be called by the main activity whenever the underlying data changes
+	 */
+	public void onDataUpdated() {
+		
 	}
 
 	@Override

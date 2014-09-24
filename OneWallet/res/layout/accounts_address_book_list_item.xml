@@ -17,8 +17,8 @@
         android:clickable="true"
         android:contentDescription="@string/ow_empty_string"
         android:gravity="center_vertical"
-        android:padding="@dimen/ow_bordered_icon_margin"
-        android:src="@drawable/logo_bitcoin" />
+        android:padding="@dimen/ow_borderless_icon_margin"
+        android:src="@drawable/button_edit_pencil" />
 
     <ImageView
         android:id="@+id/rightIcon"
@@ -30,18 +30,18 @@
         android:padding="@dimen/ow_bordered_icon_margin"
         android:src="@drawable/next_down_2" />
 
-    <EditText
+    <TextView
         android:id="@+id/topLeftTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/leftIcon"
         android:layout_toLeftOf="@id/rightIcon"
-        android:layout_toRightOf="@+id/leftIcon"
-        android:inputType="textCapWords"
-        android:paddingLeft="0dp"
-        android:text="@string/ow_empty_string"
-        android:textSize="15sp"
-        android:textStyle="bold" />
+        android:layout_toRightOf="@id/leftIcon"
+        android:clickable="false"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:text="@string/ow_empty_string" />
 
     <TextView
         android:id="@+id/bottomLeftTextView"

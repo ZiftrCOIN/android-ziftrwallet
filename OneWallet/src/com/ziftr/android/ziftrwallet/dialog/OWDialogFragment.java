@@ -3,10 +3,11 @@ package com.ziftr.android.ziftrwallet.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
-import android.widget.EditText;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.OWMainFragmentActivity;
@@ -70,7 +71,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 		return builder.create();
 	}
-	
+
 
 
 	/**
@@ -101,7 +102,7 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 						NEGATIVE_BUTTON_TEXT_KEY);
 			}
 		}
-		
+
 		AlertDialog.Builder builder = 
 				new AlertDialog.Builder(this.getActivity());
 
@@ -189,8 +190,8 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	 * @param setVal - The value to set it to.
 	 * @return as above.
 	 */
-	protected void setStringInEditText(int id, String setVal) {
-		EditText textBox = (EditText) this.getDialogView().findViewById(id);
+	protected void setStringInTextView(int id, String setVal) {
+		TextView textBox = (TextView) this.getDialogView().findViewById(id);
 		textBox.setText(setVal);
 	}
 
@@ -204,8 +205,8 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	 * @param id - The id of the view to find.
 	 * @return as above
 	 */
-	protected String getStringFromEditText(int id) {
-		EditText textBox = (EditText) this.getDialogView().findViewById(id);
+	protected String getStringFromTextView(int id) {
+		TextView textBox = (TextView) this.getDialogView().findViewById(id);
 		return textBox.getText().toString();
 	}
 
@@ -220,13 +221,13 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	 * @return as above
 	 */
 	protected byte[] getBytesFromEditText(int id) {
-		return this.getStringFromEditText(id).getBytes();
+		return this.getStringFromTextView(id).getBytes();
 	}
 
 	@Override
 	public void onStart() {
 		//ignore this if showing dialog in welcome activity
-		if (this.getActivity().getClass().getSimpleName().equals("OWMainFragmentActivity"))
+		if (this.getActivity().getClass().getSimpleName().equals(OWMainFragmentActivity.class.getSimpleName()))
 			((OWMainFragmentActivity) this.getActivity()).setShowingDialog(true);
 		super.onStart();
 	}
@@ -234,11 +235,11 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 	@Override
 	public void onDetach() {
 		//ignore this if showing dialog in welcome activity
-		if (this.getActivity().getClass().getSimpleName().equals("OWMainFragmentActivity"))
+		if (this.getActivity().getClass().getSimpleName().equals(OWMainFragmentActivity.class.getSimpleName()))
 			((OWMainFragmentActivity) this.getActivity()).setShowingDialog(false);
 		super.onDetach();
 	}
-	
+
 	/**
 	 * @return the requestCode
 	 */
@@ -249,6 +250,12 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		}
 		ZLog.log("No request code set, that's a problem!");
 		return 0;
+	}
+
+	protected void closeKeyboard(int curFocusId) {
+		//close keyboard
+		InputMethodManager inputMan = (InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		inputMan.hideSoftInputFromWindow(this.getDialogView().findViewById(curFocusId).getWindowToken(), 0);
 	}
 
 }

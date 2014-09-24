@@ -8,38 +8,41 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
-import com.ziftr.android.ziftrwallet.util.OWEditState;
+import com.ziftr.android.ziftrwallet.fragment.accounts.OWAddressListAdapter.SortState;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWAddressBookFragment extends OWWalletUserFragment 
-implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
+implements TextWatcher, OnClickListener {
 
 	/** The root view for this application. */
 	private View rootView; 
 
 	private ListView addressListView;
-
 	private OWAddressListAdapter addressAdapter;
 
-	public static final String INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY = "include_receiving";
-	boolean includeReceivingNotSending;
+	private ImageView sortByTimeIcon;
+	private ImageView sortAlphabeticallyIcon;
 
-	public static final String CUR_EDITING_ADDRESS_KEY = "CUR_EDITING_ADDRESS_KEY";
-	private String curEditingAddress = null;
-	private OWEditState curEditState = null;
+	public static final String INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY = "include_receiving";
+	private boolean includeReceivingNotSending;
+
+	public static final String SORT_STATE_KEY = "sort_state";
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		ZLog.log("changing action bar for child");
 		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, this, this.addressAdapter);
 	}
 
@@ -51,9 +54,8 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		if (this.curEditingAddress != null) {
-			outState.putString(CUR_EDITING_ADDRESS_KEY, this.curEditingAddress);
-			OWEditState.saveIntoBundle(curEditState, outState);
+		if (addressAdapter != null && addressAdapter.getSortState() != null) {
+			outState.putString(SORT_STATE_KEY, addressAdapter.getSortState().toString());
 		}
 		super.onSaveInstanceState(outState);
 	}
@@ -68,17 +70,43 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 
 		this.showWalletHeader();
 
-		this.initializeFromArguments(savedInstanceState);
+		this.initializeFromArguments();
 
-		this.initializeAddressList();
+		this.initializeSortingIcons();
+
+		// Needs the bundle because the bundle has the sort state stored in it
+		this.initializeAddressList(savedInstanceState);
 
 		return this.rootView;
 	}
 
-	public void initializeAddressList() {
-		this.addressAdapter = new OWAddressListAdapter(this, this.getActivity());
+	@Override
+	public void onClick(View v) {
+		if (v == this.sortByTimeIcon) {
+			this.addressAdapter.toggleSortByTime();
+		} else if (v == this.sortAlphabeticallyIcon) {
+			this.addressAdapter.toggleSortAlphabetically();
+		}
+	}
+
+	private void initializeSortingIcons() {
+		this.sortByTimeIcon = (ImageView) this.rootView.findViewById(R.id.sortByTimeIcon);
+		this.sortByTimeIcon.setOnClickListener(this);
+
+		this.sortAlphabeticallyIcon = (ImageView) this.rootView.findViewById(R.id.sortAlphabeticallyIcon);
+		this.sortAlphabeticallyIcon.setOnClickListener(this);
+	}
+
+	private void initializeAddressList(Bundle savedInstanceState) {
+		this.addressAdapter = new OWAddressListAdapter(this.getOWMainActivity());
+		if (savedInstanceState != null) {
+			if (savedInstanceState.getString(SORT_STATE_KEY) != null) {
+				this.addressAdapter.setSortState(SortState.valueOf(savedInstanceState.getString(SORT_STATE_KEY)));
+			}
+		}
 
 		this.addressListView = (ListView) this.rootView.findViewById(R.id.addressBookListView);
+		this.addressListView.setItemsCanFocus(true);
 		this.addressListView.setAdapter(this.addressAdapter);
 		this.addressListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -112,8 +140,9 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 					a.runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
+							addressAdapter.getFullList().clear();
 							addressAdapter.getFullList().addAll(addresses);
-							addressAdapter.refreshWorkingList();
+							addressAdapter.refreshWorkingList(true);
 							addressAdapter.notifyDataSetChanged();
 						}
 					});
@@ -138,14 +167,7 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 	 * @param args - The bundle with the booleans put into it. The keys are 
 	 * the toString()s of the different OWCoin possible values.
 	 */
-	private void initializeFromArguments(Bundle savedInstanceState) {
-		if (savedInstanceState != null) {
-			this.curEditingAddress = savedInstanceState.getString(CUR_EDITING_ADDRESS_KEY);
-			if (this.curEditingAddress != null) {
-				this.curEditState = OWEditState.loadFromBundle(savedInstanceState);
-			}
-		}
-
+	private void initializeFromArguments() {
 		Bundle args = this.getArguments();
 		if (args != null) {
 			this.includeReceivingNotSending = args.getBoolean(INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY);
@@ -171,11 +193,11 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 		this.addressAdapter.getFilter().filter(s);
 	}
 
-
-
-	//////////////////////////////////////////////////////
-	////////// Methods for being an EditHandler //////////
-	//////////////////////////////////////////////////////
+	@Override
+	public void onDataUpdated() {
+		this.loadAddressesFromDatabase();
+		super.onDataUpdated();
+	}
 
 	/**
 	 * This makes it so that when this address book fragment is destroyed
@@ -187,57 +209,4 @@ implements TextWatcher, OWEditableTextBoxController.EditHandler<OWAddress> {
 		super.onDestroyView();
 	}
 
-	@Override
-	public void onEditStart(OWEditState state, OWAddress address) {
-		ZLog.log("onEditStart called");
-		this.curEditState = state;
-		this.curEditingAddress = address.toString();
-	}
-
-	@Override
-	public void onEdit(OWEditState state, OWAddress address) {
-		if (address.toString().equals(this.curEditingAddress)) {
-			ZLog.log("onEdit called");
-			this.curEditState = state;
-			
-			// Make sure view stays up to date
-			address.setNote(this.curEditState.text);
-
-			// Get address and update 
-			getWalletManager().updateAddressLabel(getSelectedCoin(), 
-					address.toString(), this.curEditState.text, includeReceivingNotSending);
-		}
-	}
-
-	@Override
-	public void onEditEnd(OWAddress address) {
-		// Only want to do anything if the data passed in is the same
-		// as the data given. If we don't do this then the views 
-		// don't initialize correctly, as this method is called as part
-		// of the initialization process (in the adapter, the img view gets
-		// a new listener every time).
-		if (address.toString().equals(this.curEditingAddress)) {
-			ZLog.log("onEditEnd called");
-			// Need to set these back to null to indicate that we are done editing.
-			this.curEditingAddress = null;
-			this.curEditState = null;
-		}
-	}
-
-	@Override
-	public boolean isEditing(OWAddress address) {
-		return this.isInEditingMode() && this.curEditingAddress.equals(address.toString());
-	}
-
-	@Override
-	public boolean isInEditingMode() {
-		return this.curEditingAddress != null;
-	}
-
-	@Override
-	public OWEditState getCurEditState() {
-		return this.curEditState;
-	}
-
-	
 }

@@ -8,20 +8,27 @@ import android.view.View;
 import android.widget.Button;
 
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.dialog.handlers.OWEditAddressLabelDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * Dialogs where the app requests to get the passphrase
  * from the user.
  */
-public class OWValidatePassphraseDialog extends OWDialogFragment {
+public class OWEditAddressLabelDialog extends OWDialogFragment {
 	/** The key to save the text in the box. */
-	private static final String CURRENT_ENTERED_TEXT_KEY = "entered_text";
+	public static final String CURRENT_ENTERED_TEXT_KEY = "entered_text";
+	
+	/** The key to save the address.  */
+	public static final String ADDRESS_KEY = "address_key";
+	
+	public static final String IS_RECEIVING_NOT_SENDING_KEY = "receiving_not_sending";
 	
 	/**
 	 * Whenever this is fragment is attached to an activity 
 	 * we must make sure that it is able to handle accepting 
-	 * and cancelling from passphrase dialogs.
+	 * and cancelling.
 	 * 
 	 * This method throws an exception if neither the newly attached activity nor 
 	 * the target fragment are instances of {@link OWValidatePassphraseDialogHandler}.
@@ -29,7 +36,7 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		this.validateHandler(OWValidatePassphraseDialogHandler.class);
+		this.validateHandler(OWEditAddressLabelDialogHandler.class);
 	}
 
 	/**
@@ -42,7 +49,7 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
-				R.layout.dialog_new_passphrase, null));
+				R.layout.dialog_edit_address_label, null));
 		this.initDialogFields();
 
 		builder.setView(this.getDialogView());
@@ -52,19 +59,21 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		
 		Button next = (Button) this.getDialogView().findViewById(R.id.right_dialog_button);
 		next.setOnClickListener(this);
-
+		
+		this.setStringInTextView(R.id.addressLabelEditText, this.getArguments().getString(CURRENT_ENTERED_TEXT_KEY));
+		
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
-				this.setStringInTextView(R.id.textbox_passphrase, 
+				this.setStringInTextView(R.id.addressLabelEditText, 
 						savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY));
 			}
 		}
+
 		return builder.create();
 	}
 
 	public void onClick(View view) {
-		OWValidatePassphraseDialogHandler handler = 
-				(OWValidatePassphraseDialogHandler) this.getHandler();
+		OWEditAddressLabelDialogHandler handler = (OWEditAddressLabelDialogHandler) this.getHandler();
 		
 		switch(view.getId()) {
 		case R.id.left_dialog_button:
@@ -74,14 +83,22 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 			break;
 		case R.id.right_dialog_button:
 			//CONTINUE
-			handler.handlePassphrasePositive(this.getRequestCode(), 
-					this.getBytesFromEditText(R.id.textbox_passphrase), 
-					this.getArguments());
+			String address = this.getArguments().getString(ADDRESS_KEY);
+			String label = this.getStringFromTextView(R.id.addressLabelEditText);
+			handler.handleAddressLabelChange(this.getRequestCode(), address, label, getIsReceiving());
 			this.dismiss();
 			break;
 		}
 	}
-
+	
+	public boolean getIsReceiving() {
+		Bundle args = this.getArguments();
+		if (args != null) {
+			return args.getBoolean(IS_RECEIVING_NOT_SENDING_KEY);
+		}
+		ZLog.log("No boolean set, it should have been set. ");
+		return false;
+	}
 	/**
 	 * When we save the instance, in addition to doing everything that
 	 * all dialogs must do, we also have to store the current entered 
@@ -93,7 +110,7 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 
 		// Save all of the important strings in the dialog
 		outState.putString(CURRENT_ENTERED_TEXT_KEY, 
-				this.getStringFromTextView(R.id.textbox_passphrase));
+				this.getStringFromTextView(R.id.addressLabelEditText));
 	}
 
 	@Override
@@ -103,8 +120,8 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 	
 	@Override
 	public void dismiss() {
-		this.closeKeyboard(R.id.textbox_passphrase);
+		this.closeKeyboard(R.id.addressLabelEditText);
 		super.dismiss();
 	}
-
+	
 }

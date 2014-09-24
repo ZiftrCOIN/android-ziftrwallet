@@ -55,6 +55,10 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 	 * @param toggleOff - boolean to determine how to toggle
 	 */
 	public void toggleEditNote(boolean toggleOff) {
+		if (this.returnData.toString().startsWith("m3xDh")) {
+			ZLog.log("toggle edit note called: " + toggleOff);
+		}
+
 		if (toggleOff) {
 			this.textView.setFocusable(false);
 			this.textView.setFocusableInTouchMode(false);
@@ -63,27 +67,18 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 			this.textView.setPadding(5, 8, 13, 8);
 			this.textView.setClickable(false);
 			imgView.setImageResource(R.drawable.edit_enabled);
-			
+
 			handler.onEditEnd(this.returnData);
 		} else {
 			this.textView.setBackgroundResource(android.R.drawable.editbox_background_normal);
 			this.textView.setPadding(5, 8, 13, 8);
 			this.textView.setFocusable(true);
 			this.textView.setFocusableInTouchMode(true);
-			this.textView.requestFocus();
 			this.textView.setClickable(true);
-			ZLog.log("state: " + handler.getCurEditState());
-			if (handler.getCurEditState() != null) {
-				OWEditState state = handler.getCurEditState();
-				ZLog.log("cursor start: " + state.cursorStart);
-				ZLog.log("cursor end: " + state.cursorEnd);
-				this.textView.setSelection(state.cursorStart, state.cursorEnd);
-			} else {
-				this.textView.setSelection(this.textView.getText().length());
-			}
-			this.textView.requestFocus();
+			this.textView.setSelection(this.textView.getText().length());
 			imgView.setImageResource(R.drawable.close_enabled);
-			
+			this.textView.requestFocus();
+
 			handler.onEditStart(getNewEditState(), this.returnData);
 		}
 	}
@@ -102,16 +97,74 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 	public void afterTextChanged(Editable text) {
 		this.handler.onEdit(getNewEditState(), returnData);
 	}
-	
+
 	/**
 	 * @return
 	 */
 	private OWEditState getNewEditState() {
 		OWEditState state = new OWEditState();
 		state.text = this.textView.getText().toString();
-		state.cursorStart = this.textView.getSelectionStart();
-		state.cursorEnd = this.textView.getSelectionEnd();
 		return state;
+	}
+
+	///////////////////////////////////////////
+	//////////  Getters and Setters  //////////
+	///////////////////////////////////////////
+
+	/**
+	 * @return the handler
+	 */
+	public EditHandler<T> getHandler() {
+		return handler;
+	}
+
+	/**
+	 * @param handler the handler to set
+	 */
+	public void setHandler(EditHandler<T> handler) {
+		this.handler = handler;
+	}
+
+	/**
+	 * @return the textView
+	 */
+	public EditText getTextView() {
+		return textView;
+	}
+
+	/**
+	 * @param textView the textView to set
+	 */
+	public void setTextView(EditText textView) {
+		this.textView = textView;
+	}
+
+	/**
+	 * @return the imgView
+	 */
+	public ImageView getImgView() {
+		return imgView;
+	}
+
+	/**
+	 * @param imgView the imgView to set
+	 */
+	public void setImgView(ImageView imgView) {
+		this.imgView = imgView;
+	}
+
+	/**
+	 * @return the returnData
+	 */
+	public T getReturnData() {
+		return returnData;
+	}
+
+	/**
+	 * @param returnData the returnData to set
+	 */
+	public void setReturnData(T returnData) {
+		this.returnData = returnData;
 	}
 
 }

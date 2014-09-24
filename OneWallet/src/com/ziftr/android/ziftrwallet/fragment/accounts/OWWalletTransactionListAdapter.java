@@ -158,5 +158,10 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 			return super.isEnabled(position);
 		}
 	}
+
+	@Override
+	public void applySortToFullList() {
+		// Nothing to do, no sorting done here
+	}
 	
 }

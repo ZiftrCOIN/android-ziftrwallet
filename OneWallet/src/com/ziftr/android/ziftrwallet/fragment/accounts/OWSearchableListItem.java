@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
+
 public interface OWSearchableListItem {
 
 	/**
@@ -12,5 +13,4 @@ public interface OWSearchableListItem {
 	 * @return
 	 */
 	public boolean matches(CharSequence constraint, OWSearchableListItem nextItem);
-
 }
