@@ -2,26 +2,58 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp" >
+    android:orientation="vertical" >
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scaleType="fitStart"
-        android:src="@drawable/logo_ziftrwallet" >
-    </ImageView>
+        android:background="@color/White"
+        android:padding="@dimen/ow_large_icon_margin"
+        android:src="@drawable/logo_ziftrwallet_orange" />
 
-    <TextView
-        android:id="@+id/aboutPlaceholderText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Placeholder for about section layout. asduhfuidh saasdf" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/ow_quarter_icon_size"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/dropshadow" />
 
-    <TextView
-        android:id="@+id/about_website_link"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ow_ziftr_site_link" />
+        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+        android:layout_marginRight="@dimen/ow_horizontal_margin"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_about"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_mediumlarge" />
+
+        <TextView
+            android:id="@+id/aboutPlaceholderText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Placeholder for about section layout. asduhfuidh saasdf. Lorem Ipsum."
+            android:textColor="@color/White" />
+
+        <TextView
+            android:id="@+id/about_website_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_ziftr_site_link"
+            android:textColor="@color/White" />
+
+        <Button
+            android:id="@+id/send_feedback"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/clickable_button_color"
+            android:text="SEND US FEEDBACK"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_small" />
+    </LinearLayout>
 
 </LinearLayout>

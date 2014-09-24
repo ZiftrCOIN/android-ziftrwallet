@@ -212,7 +212,7 @@ public class OWTransaction implements OWSearchableListItem {
 	 * @return the txAmount
 	 */
 	public BigInteger getTxAmount() {
-		return txAmount;
+		return this.txAmount;
 	}
 
 	/**

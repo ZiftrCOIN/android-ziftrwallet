@@ -762,7 +762,9 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		// Get the tx's time
 		owTx.setTxTime(tx.getUpdateTime().getTime() / 1000);
-
+		
+		this.createTransaction(owTx);
+		
 		return owTx;
 	}
 

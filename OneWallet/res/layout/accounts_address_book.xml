@@ -22,7 +22,7 @@
             android:clickable="true"
             android:contentDescription="@string/ow_empty_string"
             android:padding="@dimen/ow_borderless_icon_margin"
-            android:src="@drawable/txn_history_by_time" />
+            android:src="@drawable/txn_history_time_clickable" />
 
         <ImageView
             android:id="@+id/sortAlphabeticallyIcon"
@@ -31,7 +31,7 @@
             android:clickable="true"
             android:contentDescription="@string/ow_empty_string"
             android:padding="@dimen/ow_borderless_icon_margin"
-            android:src="@drawable/txn_history_by_az" />
+            android:src="@drawable/txn_history_az_clickable" />
     </LinearLayout>
 
     <ListView

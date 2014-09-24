@@ -47,9 +47,9 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.OWResetPassphraseDialogHand
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.OWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWContactFragment;
-import com.ziftr.android.ziftrwallet.fragment.OWExchangeFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWSettingsFragment;
+import com.ziftr.android.ziftrwallet.fragment.OWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWNewCurrencyFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWReceiveCoinsFragment;
@@ -213,11 +213,11 @@ ZiftrNetworkHandler {
 				return new OWAccountsFragment();
 			}
 		}, 
-		/** The enum to identify the exchange fragment of the app. */
-		EXCHANGE_FRAGMENT_TYPE {
+		/** The enum to identify the terms fragment of the app. */
+		TERMS_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
-				return new OWExchangeFragment();
+				return new OWTermsFragment();
 			}
 		}, 
 		/** The enum to identify the settings fragment of the app. */
@@ -500,7 +500,7 @@ ZiftrNetworkHandler {
 
 		// Add all the selection views to it
 		selectionItems.add(this.findViewById(R.id.menuDrawerAccountsLayout));
-		selectionItems.add(this.findViewById(R.id.menuDrawerExchangeLayout));
+		selectionItems.add(this.findViewById(R.id.menuDrawerTermsLayout));
 		selectionItems.add(this.findViewById(R.id.menuDrawerSettingsLayout));
 		selectionItems.add(this.findViewById(R.id.menuDrawerAboutLayout));
 		selectionItems.add(this.findViewById(R.id.menuDrawerContactLayout));
@@ -551,17 +551,17 @@ ZiftrNetworkHandler {
 				}
 			});
 
-			// Set up for exchange section
-			View exchangeMenuButton = 
-					this.findViewById(R.id.menuDrawerExchangeLayout);
-			FragmentType.EXCHANGE_FRAGMENT_TYPE.setDrawerMenuView(
-					exchangeMenuButton);
-			exchangeMenuButton.setOnClickListener(new OnClickListener() {
+			// Set up for terms section
+			View termsMenuButton = 
+					this.findViewById(R.id.menuDrawerTermsLayout);
+			FragmentType.TERMS_FRAGMENT_TYPE.setDrawerMenuView(
+					termsMenuButton);
+			termsMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 					OWMainFragmentActivity.this.showFragmentFromType(
-							FragmentType.EXCHANGE_FRAGMENT_TYPE, true);
+							FragmentType.TERMS_FRAGMENT_TYPE, true);
 				}
 			});
 

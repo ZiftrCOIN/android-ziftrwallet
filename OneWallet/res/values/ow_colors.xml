@@ -13,7 +13,7 @@
     
     <color name="ow_menu_default">@color/White</color>
     <color name="ow_unpressed_button">#30000000</color>
-    <color name="ow_pressed_button">#20FFFFFF</color>
+    <color name="ow_pressed_button">#28FFFFFF</color>
     <color name="ow_selected_button">@color/ow_pressed_button</color>
     <color name="ow_disabled_button">@color/LightGray</color>
     
