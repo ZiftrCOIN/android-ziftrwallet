@@ -444,7 +444,9 @@ ZiftrNetworkHandler {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = 
 				this.getSupportFragmentManager().beginTransaction();
+		
 		// TODO add animation to transaciton here
+		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
 
 		if (fragToShow.isVisible()) {
 			// If the fragment is already visible, no need to do anything

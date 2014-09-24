@@ -44,7 +44,7 @@
     <application
         android:name="com.ziftr.android.ziftrwallet.OWApplication"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/logoziftr96"
         android:label="@string/ow_app_name"
         android:theme="@style/AppTheme" >
         <activity
