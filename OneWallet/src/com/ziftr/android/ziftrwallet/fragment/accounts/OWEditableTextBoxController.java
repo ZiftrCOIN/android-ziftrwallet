@@ -55,10 +55,10 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 	 * @param toggleOff - boolean to determine how to toggle
 	 */
 	public void toggleEditNote(boolean toggleOff) {
-		if (this.returnData.toString().startsWith("mmM2d9")) {
+		if (this.returnData.toString().startsWith("m3xDh")) {
 			ZLog.log("toggle edit note called: " + toggleOff);
 		}
-		
+
 		if (toggleOff) {
 			this.textView.setFocusable(false);
 			this.textView.setFocusableInTouchMode(false);
@@ -72,11 +72,10 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 			this.textView.setBackgroundResource(android.R.drawable.editbox_background_normal);
 			this.textView.setFocusable(true);
 			this.textView.setFocusableInTouchMode(true);
-			this.textView.requestFocus();
 			this.textView.setClickable(true);
 			this.textView.setSelection(this.textView.getText().length());
-			this.textView.requestFocus();
 			imgView.setImageResource(R.drawable.close_enabled);
+			this.textView.requestFocus();
 
 			handler.onEditStart(getNewEditState(), this.returnData);
 		}

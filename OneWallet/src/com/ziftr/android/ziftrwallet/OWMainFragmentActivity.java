@@ -37,9 +37,11 @@ import android.widget.Toast;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.dialog.OWConfirmationDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.OWEditAddressLabelDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWValidatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWConfirmationDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.handlers.OWEditAddressLabelDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
@@ -74,7 +76,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class OWMainFragmentActivity extends ActionBarActivity 
 implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, 
-OWResetPassphraseDialogHandler, OWConfirmationDialogHandler, OnClickListener, 
+OWResetPassphraseDialogHandler, OWConfirmationDialogHandler, OWEditAddressLabelDialogHandler, OnClickListener, 
 ZiftrNetworkHandler {
 
 	/*
@@ -168,7 +170,7 @@ ZiftrNetworkHandler {
 
 	/** Use this key to save whether or not the header is visible (vs gone). */
 	private static final String WALLET_HEADER_VISIBILITY_KEY = "WALLET_HEADER_VISIBILITY_KEY";
-	
+
 	/** Use this key to save whether or not the search bar is visible (vs gone). */
 	private static final String SEARCH_BAR_VISIBILITY_KEY = "SEARCH_BAR_VISIBILITY_KEY";
 
@@ -187,12 +189,12 @@ ZiftrNetworkHandler {
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
-	
+
 	/** reference to searchBarEditText */
 	private EditText searchEditText;
-	
+
 	private OWCoin selectedCoin;
-	
+
 	/**
 	 * The view that contains all the info for the currently selected coin
 	 */
@@ -279,7 +281,7 @@ ZiftrNetworkHandler {
 
 		//Get passphrase from welcome screen if exists
 		Bundle info = getIntent().getExtras();
-		if (info != null && info.getByteArray("SET_PASSPHRASE") != null){
+		if (info != null && info.getByteArray("SET_PASSPHRASE") != null) {
 			setPassphraseHash(info.getByteArray("SET_PASSPHRASE"));
 		}
 
@@ -303,7 +305,7 @@ ZiftrNetworkHandler {
 
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
-		
+
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
@@ -389,8 +391,8 @@ ZiftrNetworkHandler {
 		OWWalletManager.closeInstance();
 		super.onDestroy();
 	}
-	
-	
+
+
 
 	@Override
 	public void onClick(View v) {
@@ -398,9 +400,9 @@ ZiftrNetworkHandler {
 			//start sync
 		}
 	}
-	
-	
-	
+
+
+
 
 	/**
 	 * Starts a new fragment in the main layout space depending
@@ -630,13 +632,13 @@ ZiftrNetworkHandler {
 			if (args.getInt(WALLET_HEADER_VISIBILITY_KEY, -1) != -1) {
 				this.getWalletHeaderBar().setVisibility(args.getInt(WALLET_HEADER_VISIBILITY_KEY));
 			}
-			
+
 			if (args.getInt(SEARCH_BAR_VISIBILITY_KEY, -1) != -1) {
 				this.getSearchBar().setVisibility(args.getInt(SEARCH_BAR_VISIBILITY_KEY));
 			}
 		}
 	}
-	
+
 	private void initializeBaseFragmentContainer(Bundle savedInstanceState) {
 		// Set the base fragment container
 		this.baseFragmentContainer = this.findViewById(R.id.oneWalletBaseHolder);
@@ -1014,7 +1016,7 @@ ZiftrNetworkHandler {
 	public View getWalletHeaderBar() {
 		return this.findViewById(R.id.walletHeader);
 	}
-	
+
 	/**
 	 * @return the headerBar
 	 */
@@ -1067,21 +1069,42 @@ ZiftrNetworkHandler {
 		alertUserDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
 		alertUserDialog.show(this.getSupportFragmentManager(), tag);
 	}
-	
-	public void alertConfirmation(int requestcode, String message, String tag, Bundle args){
+
+	public void alertConfirmation(int requestcode, String message, String tag, Bundle args) {
 		OWConfirmationDialog confirmDialog = new OWConfirmationDialog();
-		
+
 		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
 		confirmDialog.setTargetFragment(null, requestcode);
 		confirmDialog.setArguments(args);
 		confirmDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
-		
+
 		if (!isShowingDialog()) {
 			confirmDialog.show(this.getSupportFragmentManager(), 
 					tag);
 		}
 	}
-	
+
+	/**
+	 * generate dialog to ask for passphrase
+	 * 
+	 * @param requestcode = OWRequestcodes parameter to differentiate where the password dialog is
+	 * @param args = bundle with OWCoinType of currency to add if user is adding currency
+	 */
+	public void showEditAddressLabelDialog(int requestcode, boolean isReceiving, Bundle args, String tag) {
+		if (!isShowingDialog()) {
+			OWEditAddressLabelDialog dialog = new OWEditAddressLabelDialog();
+
+			args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
+			args.putBoolean(OWEditAddressLabelDialog.IS_RECEIVING_NOT_SENDING_KEY, isReceiving);
+			dialog.setArguments(args);
+
+			String message = "Edit the below address' label. ";
+			dialog.setupDialog("ziftrWALLET", message, "Done", null, "Cancel");
+
+			dialog.show(this.getSupportFragmentManager(), tag);
+		}
+	}
+
 	/**
 	 * generate dialog to ask for passphrase
 	 * 
@@ -1089,25 +1112,21 @@ ZiftrNetworkHandler {
 	 * @param args = bundle with OWCoinType of currency to add if user is adding currency
 	 */
 	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag) {
-		OWValidatePassphraseDialog passphraseDialog = 
-				new OWValidatePassphraseDialog();
-
-		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
-
-		String message = "Please input your passphrase. ";
-
-		passphraseDialog.setArguments(args);
-
-		passphraseDialog.setupDialog("ziftrWALLET", message, 
-				"Continue", null, "Cancel");
-
 		if (!isShowingDialog()) {
-			passphraseDialog.show(this.getSupportFragmentManager(), 
-					tag);
+			OWValidatePassphraseDialog passphraseDialog = new OWValidatePassphraseDialog();
+
+			args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
+			passphraseDialog.setArguments(args);
+
+			String message = "Please input your passphrase. ";
+			passphraseDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
+
+
+			passphraseDialog.show(this.getSupportFragmentManager(), tag);
 		}
 	}
 
-	///////////// Passer methods /////////////
+	///////////// Handler methods /////////////
 
 	@Override
 	public void handleNegative(int requestCode) {
@@ -1122,7 +1141,7 @@ ZiftrNetworkHandler {
 			// Nothing to do
 			break;
 		case OWRequestCodes.DEACTIVATE_WALLET:
-			//Nada
+			// Nothing to do
 			break;
 		}
 	}
@@ -1190,10 +1209,10 @@ ZiftrNetworkHandler {
 					+ "passphrase is still in place.", "wrong_re-enter_passphrase");
 		}
 	}
-	
+
 	@Override
-	public void handleConfirmationPositive(int requestCode, Bundle info){
-		switch(requestCode){
+	public void handleConfirmationPositive(int requestCode, Bundle info) {
+		switch (requestCode) {
 		case OWRequestCodes.DEACTIVATE_WALLET:
 			OWCoin coinId = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
 			this.walletManager.updateTableActivitedStatus(coinId, OWSQLiteOpenHelper.DEACTIVATED);
@@ -1204,11 +1223,44 @@ ZiftrNetworkHandler {
 			break;
 		}
 	}
+
+	@Override
+	public void handleAddressLabelChange(int requestCode, final String address, 
+			final String label, final boolean isReceiving) {
+		ZLog.log("update address: ", address);
+		ZLog.log("update label: ", label);
+		ZLog.log("update isReceive: " + isReceiving);
+
+		switch (requestCode) {
+		case OWRequestCodes.EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK:
+			ZiftrUtils.runOnNewThread(new Runnable() {
+				@Override
+				public void run() {
+					getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, isReceiving);
+					updateTopFragmentView();
+				}
+			});
+			break;
+		}
+	}
 	
+	public void updateTopFragmentView() {
+		// If already on the UI thread, then it just does this right now
+		this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				OWFragment topFragment = (OWFragment) 
+						getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
+				if (topFragment != null) {
+					topFragment.onDataUpdated();
+				}
+			}
+		});
+	}
 
 	@Override
 	public void handleNeutral(int requestCode) {
-		switch(requestCode) {
+		switch (requestCode) {
 		case OWRequestCodes.ALERT_USER_DIALOG:
 			break;
 		}
@@ -1234,9 +1286,9 @@ ZiftrNetworkHandler {
 	 */
 	public void setSelectedCoin(OWCoin selectedCoin) {
 		this.selectedCoin = selectedCoin;
-	
+
 		this.populateWalletHeaderView();
-		
+
 	}
 
 	/**
@@ -1246,7 +1298,7 @@ ZiftrNetworkHandler {
 	private void populateWalletHeaderView() {
 		//now that a coin type is set, setup the header view for it
 		//headerView.setVisibility(View.VISIBLE); //let fragments do this when they're displayed
-		
+
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
 
@@ -1260,7 +1312,7 @@ ZiftrNetworkHandler {
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.ESTIMATED);
 		BigDecimal walletBallance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
-		
+
 		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBallance).toPlainString());
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
@@ -1271,7 +1323,7 @@ ZiftrNetworkHandler {
 		syncButton.setImageResource(R.drawable.icon_sync_button);
 		syncButton.setOnClickListener(this);
 	}
-	
+
 
 	/**
 	 * Customize actionbar
@@ -1417,11 +1469,11 @@ ZiftrNetworkHandler {
 		return search.getVisibility() == View.VISIBLE;
 	}
 
-	
+
 	public void hideWalletHeader() {
 		this.headerView.setVisibility(View.GONE);
 	}
-	
+
 	public void showWalletHeader() {
 		this.headerView.setVisibility(View.VISIBLE);
 	}
@@ -1429,32 +1481,31 @@ ZiftrNetworkHandler {
 	@Override
 	public void handleExpiredLoginToken() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void handleGenericError(String errorMessage) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void handleDataUpdated() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void networkStarted() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void networkStopped() {
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 }

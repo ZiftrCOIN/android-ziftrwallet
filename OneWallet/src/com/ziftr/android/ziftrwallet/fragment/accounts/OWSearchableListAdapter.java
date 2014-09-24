@@ -53,12 +53,17 @@ public abstract class OWSearchableListAdapter<T extends OWSearchableListItem> ex
 		return this.fullList;
 	}
 
-	public void refreshWorkingList() {
+	public void refreshWorkingList(boolean applySort) {
 		this.workingList.clear();
+		if (applySort) {
+			this.applySortToFullList();
+		}
 		this.workingList.addAll(this.fullList);
 		getFilter().filter(filterConstraints);
 	}
-
+	
+	public abstract void applySortToFullList();
+	
 	@Override
 	public Filter getFilter() {
 		if (this.filter == null) {

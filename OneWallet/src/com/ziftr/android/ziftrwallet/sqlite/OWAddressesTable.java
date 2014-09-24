@@ -3,8 +3,6 @@ package com.ziftr.android.ziftrwallet.sqlite;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.h2.server.web.DbContents;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;

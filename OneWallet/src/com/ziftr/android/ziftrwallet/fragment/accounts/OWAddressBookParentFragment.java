@@ -8,6 +8,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
@@ -63,6 +64,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 	 */
 	protected void setActionBar() {
 		if (!this.showingChildFragment()) {
+			ZLog.log("changeing action bar for parent");
 			this.getOWMainActivity().changeActionBar(getActionBarTitle(), false, true);
 		}
 	}
@@ -72,7 +74,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 	 * was successful.
 	 */
 	public void returnToParentFragment() {
-		Fragment childFragment = this.getChildFragmentManager().findFragmentByTag(OWTags.ADDRESS_BOOK);
+		Fragment childFragment = getChildFragment();
 
 		if (childFragment != null) {
 			// The transaction that will take place to show the new fragment
@@ -87,10 +89,18 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 			ZLog.log("Child fragment was null...");
 		}
 	}
+	/**
+	 * @return
+	 */
+	private OWFragment getChildFragment() {
+		return (OWFragment) this.getChildFragmentManager().findFragmentByTag(OWTags.ADDRESS_BOOK);
+	}
 
 	public boolean showingChildFragment() {
-		Fragment childFragment = this.getChildFragmentManager().findFragmentByTag(OWTags.ADDRESS_BOOK);
-		return childFragment != null && !childFragment.isDetached() && childFragment.isVisible();  
+		Fragment childFragment = getChildFragment();
+		// Don't want to add isVisible because then action bar doesn't work right
+		// on rotation changes, as this method is used in setActionBar
+		return childFragment != null && !childFragment.isDetached();  
 	}
 
 	@Override
@@ -134,6 +144,14 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 		String label = this.labelEditText.getText().toString();
 		String address = this.addressEditText.getText().toString();
 		getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, true);
+	}
+	
+	@Override
+	public void onDataUpdated() {
+		if (this.showingChildFragment()) {
+			this.getChildFragment().onDataUpdated();
+		}
+		super.onDataUpdated();
 	}
 
 }

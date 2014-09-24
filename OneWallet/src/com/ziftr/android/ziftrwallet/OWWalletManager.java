@@ -262,7 +262,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		try {
 			this.walletMap.put(id, Wallet.loadFromFile(this.walletFiles.get(id)));
 		} catch (UnreadableWalletException e) {
-			log("Exception trying to load wallet file: ", e);
+			log("Exception trying to load wallet file: ");
 		}
 
 		// If the load was unsucecssful (presumably only if this is the first 

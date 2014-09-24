@@ -18,5 +18,6 @@ public class OWRequestCodes {
 	
 	public static final int DEACTIVATE_WALLET = 8;
 	
+	public static final int EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK = 9;
 	
 }

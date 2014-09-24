@@ -148,7 +148,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
 		editLabelButton.setOnClickListener(controller);
-		this.addressTextView.addTextChangedListener(controller);
 	}
 
 	private void populateAmount() {

@@ -124,7 +124,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 			this.txAdapter.getFullList().add(tx);
 		}
 
-		this.txAdapter.refreshWorkingList();
+		this.txAdapter.refreshWorkingList(true);
 		this.txAdapter.notifyDataSetChanged();
 
 		this.txListView = (ListView) this.rootView.findViewById(R.id.txListView);

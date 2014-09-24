@@ -62,15 +62,15 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 		// Do this after the view has been inflated so views with ids exist
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(OLD_PASSPHRASE_KEY) != null) {
-				this.setStringInEditText(R.id.textbox_old_passphrase, 
+				this.setStringInTextView(R.id.textbox_old_passphrase, 
 						savedInstanceState.getString(OLD_PASSPHRASE_KEY));
 			}
 			if (savedInstanceState.getString(NEW_PASSPHRASE_KEY) != null) {
-				this.setStringInEditText(R.id.textbox_new_passphrase, 
+				this.setStringInTextView(R.id.textbox_new_passphrase, 
 						savedInstanceState.getString(NEW_PASSPHRASE_KEY));
 			}
 			if (savedInstanceState.getString(CONFIRM_PASSPHRASE_KEY) != null) {
-				this.setStringInEditText(R.id.textbox_confirm_passphrase, 
+				this.setStringInTextView(R.id.textbox_confirm_passphrase, 
 						savedInstanceState.getString(CONFIRM_PASSPHRASE_KEY));
 			}
 		}
@@ -115,11 +115,11 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 		
 		// Save all of the important strings in the dialog
 		outState.putString(OLD_PASSPHRASE_KEY, 
-				this.getStringFromEditText(R.id.textbox_old_passphrase));
+				this.getStringFromTextView(R.id.textbox_old_passphrase));
 		outState.putString(NEW_PASSPHRASE_KEY, 
-				this.getStringFromEditText(R.id.textbox_new_passphrase));
+				this.getStringFromTextView(R.id.textbox_new_passphrase));
 		outState.putString(CONFIRM_PASSPHRASE_KEY, 
-				this.getStringFromEditText(R.id.textbox_confirm_passphrase));
+				this.getStringFromTextView(R.id.textbox_confirm_passphrase));
 	}
 	
 	@Override
