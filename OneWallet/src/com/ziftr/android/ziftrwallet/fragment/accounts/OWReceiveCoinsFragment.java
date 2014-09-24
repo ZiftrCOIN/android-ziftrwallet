@@ -260,7 +260,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	}
 	
 	public void toggleAddressCreation(){
-		if (!labelEditText.getText().toString().equals("")){
+		if (!labelEditText.getText().toString().equals("") || fragmentHasAddress()){
 			qrCodeContainer.setAlpha(1);
 			addressEditText.setAlpha(1);
 		} else {

@@ -93,7 +93,7 @@
                             android:layout_marginRight="@dimen/ow_borderless_icon_margin"
                             android:clickable="true"
                             android:contentDescription="@string/ow_old_passphrase_hint"
-                            android:padding="@dimen/ow_bordered_icon_margin"
+                            android:padding="@dimen/ow_borderless_icon_margin"
                             android:src="@drawable/copy_icon_clickable" />
 
                         <ImageView

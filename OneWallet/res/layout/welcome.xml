@@ -8,10 +8,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="30dp"
+        android:paddingBottom="20dp"
         android:paddingLeft="@dimen/ow_horizontal_margin"
         android:paddingRight="@dimen/ow_horizontal_margin"
-        android:paddingTop="30dp" >
+        android:paddingTop="20dp" >
 
         <ImageView
             android:layout_width="match_parent"
@@ -37,8 +37,8 @@
 
         <View
             style="@style/white_divider"
-            android:layout_marginBottom="@dimen/ow_txt_mediumsmall"
-            android:layout_marginTop="@dimen/ow_txt_medium" />
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -73,8 +73,8 @@
 
         <View
             style="@style/white_divider"
-            android:layout_marginBottom="@dimen/ow_txt_mediumsmall"
-            android:layout_marginTop="@dimen/ow_txt_medium" />
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp" />
 
         <Button
             android:id="@+id/skip_password"

@@ -973,7 +973,9 @@ ZiftrNetworkHandler {
 		if (fragToShow == null) {
 			fragToShow = new OWTransactionDetailsFragment();
 		}
-		fragToShow.setTxItem(txItem);
+		Bundle b= new Bundle();
+		b.putString(OWTransactionDetailsFragment.TX_ITEM_HASH_KEY, txItem.getSha256Hash().toString());
+		fragToShow.setArguments(b);
 		this.showFragment(fragToShow, OWTags.TXN_DETAILS, R.id.oneWalletBaseFragmentHolder, true, 
 				OWTags.ACCOUNTS_INNER);
 	}
