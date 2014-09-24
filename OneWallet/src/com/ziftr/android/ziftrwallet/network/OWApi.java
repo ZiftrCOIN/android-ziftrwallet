@@ -33,6 +33,12 @@ public class OWApi {
 		return request;
 	}
 
+	
+	
+	public static ZiftrNetRequest buildGenericApiRequest(String url) {
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(BASE_URL + url);
+		return request;
+	}
 
 
 
