@@ -28,25 +28,25 @@ public class OWCoin implements OWCurrency {
 	/** When using bundles, this can be used to store a specific coin type. */
 	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
 
-	public static final OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "BITCOIN", 8, R.drawable.logo_bitcoin, MainNetParams.get(), false,
+	public static final OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "btc", "main", 8, R.drawable.logo_bitcoin, MainNetParams.get(),
 			(byte) 0, (byte) 5, (byte) 128, 6, 600);
 
-	public static final OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "LITECOIN", 8, R.drawable.logo_litecoin, null, false,
+	public static final OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "ltc", "main", 8, R.drawable.logo_litecoin, null,
 			(byte) 0, (byte) 0, (byte) 0, 12, 150);
 
-	public static final OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "PEERCOIN", 8, R.drawable.logo_peercoin, null, false,
+	public static final OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "ppc", "main", 8, R.drawable.logo_peercoin, null,
 			(byte) 0, (byte) 0, (byte) 0, 520, 0);
-	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, false,
+	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "doge", "main", 8, R.drawable.logo_dogecoin, null,
 			(byte) 0, (byte) 0, (byte) 0, 20, 0);
 
-	public static final OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "BITCOIN", 8, R.drawable.logo_bitcoin, TestNet3Params.get(), true,
+	public static final OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", 8, R.drawable.logo_bitcoin, TestNet3Params.get(),
 			// (byte) 0, (byte) 5, (byte) 128, 6);
 			(byte) 111, (byte) 196, (byte) 239, 6, 600);
-	public static final OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "LITECOIN", 8, R.drawable.logo_litecoin, null, true,
+	public static final OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", 8, R.drawable.logo_litecoin, null,
 			(byte) 0, (byte) 0, (byte) 0, 12, 150);
-	public static final OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "PEERCOIN", 8, R.drawable.logo_peercoin, null, true,
+	public static final OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", 8, R.drawable.logo_peercoin, null,
 			(byte) 0, (byte) 0, (byte) 0, 520, 0);
-	public static final OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "DOGECOIN", 8, R.drawable.logo_dogecoin, null, true,
+	public static final OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", 8, R.drawable.logo_dogecoin, null,
 			(byte) 0, (byte) 0, (byte) 0, 20, 0);
 
 	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE, BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
@@ -67,42 +67,38 @@ public class OWCoin implements OWCurrency {
 	private String defaultFeePerKb;
 	private String shortTitle;
 	private String longTitle;
-	private String capsTitle;
+	private String type;
+	private String chain;
 	private int numberOfDigitsOfPrecision;
 	private int logoResId;
 	private NetworkParameters networkParameters;
-	private boolean isTestNet;
 	private byte pubKeyHashPrefix;
 	private byte scriptHashPrefix;
 	private byte privKeyPrefix;
 	private int numRecommendedConfirmations;
 	private int secondsPerAverageBlockSolve;
 
-	private OWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String capsTitle,
-			int numberOfDigitsOfPrecision, int logoResId, NetworkParameters networkParameters, 
-			boolean isTestNet, byte pubKeyHashPrefix, byte scriptHashPrefix, 
+	private OWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type,
+			String chain, int numberOfDigitsOfPrecision, int logoResId, 
+			NetworkParameters networkParameters, byte pubKeyHashPrefix, byte scriptHashPrefix, 
 			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve) {
 		this.defaultFeePerKb = defaultFeePerKb;
 		this.shortTitle = shortTitle;
 		this.longTitle = longTitle;
-		this.capsTitle = capsTitle;
+		this.type = type;
+		this.chain = chain;
 		this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
 		this.logoResId = logoResId;
 		this.networkParameters = networkParameters;
-		this.isTestNet = isTestNet;
 		this.pubKeyHashPrefix = pubKeyHashPrefix;
 		this.scriptHashPrefix = scriptHashPrefix;
 		this.privKeyPrefix = privKeyPrefix;
 		this.numRecommendedConfirmations = numRecommendedConfirmations;
 		this.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
+		
 	}
 
-	/**
-	 * @return whether or not this coin is a testnet coin
-	 */
-	public boolean isTestNet() {
-		return isTestNet;
-	}
+	
 
 	/**
 	 * As the name describes, this gets the default fee per kb for the
@@ -130,19 +126,32 @@ public class OWCoin implements OWCurrency {
 		return longTitle;
 	}
 
-	/**
-	 * @return the capsTitle
-	 */
-	public String getCapsTitle() {
-		return capsTitle;
-	}
-
+	
 	/**
 	 * Gives the title of the coin. e.g. "Bitcoin" for OWCoin.BTC, etc. 
 	 * 
 	 * @return as above
 	 */
 
+	
+	/**
+	 * gets which type of coin this is for sending to api/database, eg "btc"
+	 * @return a String used to identify a coin
+	 */
+	public String getType() {
+		return type;
+	}
+	
+	
+	/**
+	 * gets which chain this coin is on eg testnet3 vs main
+	 * @return the chain this coin is using as a String
+	 */
+	public String getChain() {
+		return chain;
+	}
+	
+	
 	/**
 	 * This is an okay place to get this information for now, but will likely 
 	 * want to get this info somewhere else eventually. This gets the number of 
