@@ -32,7 +32,7 @@
             android:contentDescription="@string/ow_ab_back_description"
             android:gravity="start"
             android:padding="10dp"
-            android:src="@drawable/previous_enabled_white"
+            android:src="@drawable/previous_white_clickable"
             android:visibility="visible" />
 
         <ImageView

@@ -33,7 +33,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("CURRENCY", true, true);
+		this.getOWMainActivity().changeActionBar("CURRENCY", false, true);
 	}
 
 	@Override
