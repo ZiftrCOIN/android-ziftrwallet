@@ -3,7 +3,7 @@
     android:id="@+id/splashBaseLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/LightGray"
+    android:background="@color/White"
     android:gravity="center"
     android:orientation="vertical" >
 
@@ -13,6 +13,6 @@
         android:layout_height="wrap_content"
         android:scaleType="centerInside"
         android:contentDescription="@string/ow_splash_screen_description"
-        android:src="@drawable/logo_ziftrwallet" />
+        android:src="@drawable/logo_ziftrwallet_orange" />
 
 </LinearLayout>

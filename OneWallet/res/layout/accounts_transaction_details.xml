@@ -13,8 +13,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/ow_tx_details_vertical_margin" >
+            android:layout_height="wrap_content" >
 
             <TextView
                 android:id="@+id/amount"
@@ -103,14 +102,14 @@
                 android:paddingRight="@dimen/ow_borderless_icon_margin"
                 android:paddingTop="@dimen/ow_borderless_icon_margin"
                 android:src="@drawable/button_edit_pencil" />
-
         </RelativeLayout>
 
         <TextView
-            style="@style/txn_values"
             android:id="@+id/routing_address"
+            style="@style/txn_values"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/ow_horizontal_margin"
             android:text="@string/Placeholder" />
 
         <TextView

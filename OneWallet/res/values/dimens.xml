@@ -20,6 +20,7 @@
     <dimen name="ow_searchBarEditText">35dp</dimen>
     <dimen name="ow_large_icon_size">130dp</dimen>
     <dimen name="ow_large_icon_margin">20dp</dimen>
+    <dimen name="ow_medium_icon_size">80dp</dimen>
     <!-- Half of the icon size -->
     <dimen name="ow_half_icon_size">20dp</dimen>
     <!-- Quarter of the icon size -->

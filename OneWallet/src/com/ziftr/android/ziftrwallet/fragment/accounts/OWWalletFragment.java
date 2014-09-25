@@ -87,7 +87,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 		this.showWalletHeader();
 
 		this.initializeTxListView();
-
+		
 		this.initializeButtons();
 
 		return this.rootView;

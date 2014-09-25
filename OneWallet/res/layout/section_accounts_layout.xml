@@ -5,7 +5,29 @@
     android:orientation="vertical"
     android:padding="0dp" >
 
-     <ListView
+    <LinearLayout
+        android:id="@+id/add_currency_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/ow_horizontal_margin" >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_add_a_currency"
+            android:textColor="@color/ow_default_text"
+            android:textSize="@dimen/ow_txt_mediumlarge" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Looks like you are either too poor and have no need for wallets or just getting started!"
+            android:textColor="@color/ow_default_text"
+            android:textSize="@dimen/ow_txt_mediumsmall" />
+    </LinearLayout>
+
+    <ListView
         android:id="@+id/listOfUserWallets"
         android:layout_width="match_parent"
         android:layout_height="0dp"

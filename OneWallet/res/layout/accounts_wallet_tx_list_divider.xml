@@ -15,11 +15,6 @@
         android:id="@+id/walletTxListDividerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:paddingLeft="@dimen/ow_tx_list_divider_padding"
-        android:paddingBottom="@dimen/ow_tx_list_divider_padding"
-        android:paddingRight="@dimen/ow_tx_list_divider_padding"
-        android:text="@string/ow_tx_list_divider_default"
-        android:textColor="@color/ow_default_text" />
+		style="@style/divider_label"/>
 
 </LinearLayout>

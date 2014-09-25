@@ -47,9 +47,9 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.OWResetPassphraseDialogHand
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.OWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWContactFragment;
-import com.ziftr.android.ziftrwallet.fragment.OWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWSettingsFragment;
+import com.ziftr.android.ziftrwallet.fragment.OWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWNewCurrencyFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWReceiveCoinsFragment;
@@ -188,6 +188,9 @@ ZiftrNetworkHandler {
 
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
+	
+	//probably won't need this when its added to the preferences
+	private boolean feesAreEditable;
 
 
 	/** reference to searchBarEditText */
@@ -355,7 +358,10 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public void onBackPressed() {
-
+		if (drawerMenuIsOpen()){
+			this.menuDrawer.closeDrawer(Gravity.LEFT);
+			return;
+		}
 		OWFragment topFragment = (OWFragment) 
 				this.getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
 		if (topFragment != null && topFragment.handleBackPress()) {
@@ -364,7 +370,6 @@ ZiftrNetworkHandler {
 
 		String curSelected = getCurrentlySelectedDrawerMenuOption();
 		if (curSelected == null) {
-			ZLog.log("No selected section... Why did this happen?");
 			super.onBackPressed();
 		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
 			super.onBackPressed();
@@ -1181,7 +1186,6 @@ ZiftrNetworkHandler {
 				this.alertUser(
 						"Error: Passphrases don't match. ", "wrong_passphrase");
 			}
-			break;
 		}
 	}
 
@@ -1196,15 +1200,19 @@ ZiftrNetworkHandler {
 		// Can assume that there was a previously entered passphrase because 
 		// of the way the dialog was set up. 
 		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
-			byte[] inputHash = ZiftrUtils.Sha256Hash(oldPassphrase);
-			if (this.inputHashMatchesStoredHash(inputHash)) {
-				// If the old matches, set the new passphrase hash
+			if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG){
 				this.setPassphraseHash(ZiftrUtils.Sha256Hash(newPassphrase));
 			} else {
-				// If don't match, tell user. 
-				this.alertUser("The passphrase you entered doesn't match your "
-						+ "previous passphrase. Your previous passphrase is "
-						+ "still in place.", "passphrases_dont_match");
+				byte[] inputHash = ZiftrUtils.Sha256Hash(oldPassphrase);
+				if (this.inputHashMatchesStoredHash(inputHash)) {
+					// If the old matches, set the new passphrase hash
+					this.setPassphraseHash(ZiftrUtils.Sha256Hash(newPassphrase));
+				} else {
+					// If don't match, tell user. 
+					this.alertUser("The passphrase you entered doesn't match your "
+							+ "previous passphrase. Your previous passphrase is "
+							+ "still in place.", "passphrases_dont_match");
+				}
 			}
 		} else {
 			this.alertUser("The passphrases you entered don't match. Your previous "
@@ -1245,7 +1253,7 @@ ZiftrNetworkHandler {
 			break;
 		}
 	}
-	
+
 	public void updateTopFragmentView() {
 		// If already on the UI thread, then it just does this right now
 		this.runOnUiThread(new Runnable() {
@@ -1508,6 +1516,14 @@ ZiftrNetworkHandler {
 	public void networkStopped() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public boolean getFeesAreEditable() {
+		return feesAreEditable;
+	}
+
+	public void setFeesAreEditable(boolean feesAreEditable) {
+		this.feesAreEditable = feesAreEditable;
 	}
 
 }
