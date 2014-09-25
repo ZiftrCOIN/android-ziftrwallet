@@ -14,17 +14,24 @@ public class ZiftrNetworkManager {
 	private static long stopTime = 0;
 	
 	
-	public static void registerNetworkHandler(ZiftrNetworkHandler errorHandler) {
-		currentHandler = new WeakReference<ZiftrNetworkHandler>(errorHandler);
+	/**
+	 * registers the passed in object as the network handler, which will be notified of important network events
+	 * note only one object can be the registered handler so setting this will clear any existing ones
+	 * also a weak reference to the network handler is kept (to prevent leaking since the network manager lives for
+	 * the entire lifetime of the app), so avoid using anonymous inner classes as the handler
+	 * @param networkHandler
+	 */
+	public static void registerNetworkHandler(ZiftrNetworkHandler networkHandler) {
+		currentHandler = new WeakReference<ZiftrNetworkHandler>(networkHandler);
 		
 		if(pendingExpiredLoginError) {
 			showLoginExpired();
 		}
 		if(networkActive) {
-			errorHandler.networkStarted();
+			networkHandler.networkStarted();
 		}
 		else {
-			errorHandler.networkStopped();
+			networkHandler.networkStopped();
 		}
 	}
 	

@@ -29,7 +29,15 @@ public abstract class OWFragment extends Fragment {
 	public void onDataUpdated() {
 		
 	}
-
+	
+	/**
+	 * tells the fragment that any data it's showing needs to be refreshed (likely at the request of a user)
+	 * fragments are responsible for initiating the network connections for the api
+	 */
+	public /*abstract*/ void refreshData() {
+		//TODO -this should be abstract, but don't want to blow up the wholoe project while it's slowly added
+	}
+	
 	@Override
 	public void onDetach() {
 		super.onDetach();

@@ -139,11 +139,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 
 			instance = new OWWalletManager(context);
-		} else {
-			// If used right shouldn't happen because close should always
-			// be called after every get instance call.
-			log("instance wasn't null and we called getInstance...");
-		}
+		} 
 		return instance;
 	}
 

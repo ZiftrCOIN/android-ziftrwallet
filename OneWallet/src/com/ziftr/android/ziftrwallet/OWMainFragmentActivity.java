@@ -278,7 +278,7 @@ ZiftrNetworkHandler {
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
 		this.headerView = this.findViewById(R.id.walletHeader);
-
+		
 		//Get passphrase from welcome screen if exists
 		Bundle info = getIntent().getExtras();
 		if (info != null && info.getByteArray("SET_PASSPHRASE") != null) {
@@ -356,8 +356,7 @@ ZiftrNetworkHandler {
 	@Override
 	public void onBackPressed() {
 
-		OWFragment topFragment = (OWFragment) 
-				this.getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
+		OWFragment topFragment = this.getTopDisplayedFragment();
 		if (topFragment != null && topFragment.handleBackPress()) {
 			return;
 		}
@@ -380,6 +379,13 @@ ZiftrNetworkHandler {
 		}
 	}
 
+	
+	
+	private OWFragment getTopDisplayedFragment() {
+		return (OWFragment) this.getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
+	}
+	
+	
 
 	/**
 	 * Here we need to close all the wallets. 
@@ -397,7 +403,10 @@ ZiftrNetworkHandler {
 	@Override
 	public void onClick(View v) {
 		if(v.getId() == R.id.rightIcon) {
-			//start sync
+			OWFragment top = this.getTopDisplayedFragment();
+			if(top != null) {
+				top.refreshData();
+			}
 		}
 	}
 
@@ -1249,8 +1258,7 @@ ZiftrNetworkHandler {
 		this.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				OWFragment topFragment = (OWFragment) 
-						getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
+				OWFragment topFragment = getTopDisplayedFragment();
 				if (topFragment != null) {
 					topFragment.onDataUpdated();
 				}
@@ -1320,7 +1328,7 @@ ZiftrNetworkHandler {
 		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(OWFiat.USD, walletBalanceInFiat, true));
 
 		ImageView syncButton = (ImageView)headerView.findViewById(R.id.rightIcon);
-		syncButton.setImageResource(R.drawable.icon_sync_button);
+		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
 		syncButton.setOnClickListener(this);
 	}
 
