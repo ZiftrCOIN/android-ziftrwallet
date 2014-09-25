@@ -21,6 +21,7 @@ import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWEditState;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.TempPreferencesUtil;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -133,10 +134,11 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
 
+		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
 		this.populateAmount();
 		this.populateCurrency();
 		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
-		this.currencyType.setText(this.txItem.getFiatType().getName());
+		this.currencyType.setText(fiat.getName());
 
 		Date date = new Date(this.txItem.getTxTime() * 1000);
 		this.time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
@@ -172,15 +174,17 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 	}
 
 	private void populateCurrency() {
+		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+		
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
-				txItem.getCoinId(), txItem.getFiatType());
-		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), 
+				txItem.getCoinId(), fiat);
+		String formattedfiatAmt = OWFiat.formatFiatAmount(fiat, 
 				ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
 
 		currency.setText(formattedfiatAmt);
 
 		TextView currencyType = (TextView) rootView.findViewById(R.id.currencyType);
-		currencyType.setText(this.txItem.getFiatType().getName());
+		currencyType.setText(fiat.getName());
 
 		TextView time = (TextView) rootView.findViewById(R.id.date);
 		Date date = new Date(this.txItem.getTxTime() * 1000);

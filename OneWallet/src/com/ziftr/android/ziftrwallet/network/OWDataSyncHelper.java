@@ -34,7 +34,7 @@ public class OWDataSyncHelper {
 				for(int x = 0; x < transactions.length(); x++) {
 					JSONObject transactionJson = transactions.getJSONObject(x);
 					
-					OWTransaction transaction = new OWTransaction(coin, OWFiat.USD, txNote, txTime, txAmount, txViewType, resId)
+					//OWTransaction transaction = new OWTransaction(coin, OWFiat.USD, txNote, txTime, txAmount, txViewType, resId)
 				}
 			}
 			catch(Exception e) {

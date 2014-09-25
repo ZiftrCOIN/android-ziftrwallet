@@ -27,7 +27,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * TODO in the evenListener for the search bar, make a call to notifyDatasetChanged
  * so that all the transactions that don't match are filtered out. 
  */
-public class OWWalletFragment extends OWWalletUserFragment implements TextWatcher {
+public class OWWalletFragment extends OWWalletUserFragment implements TextWatcher, OnItemClickListener {
 
 	/** The root view for this application. */
 	private View rootView;
@@ -105,22 +105,48 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 
 		if (pendingTxs.size() > 0) {
 			// Add the Pending Divider
-			this.txAdapter.getFullList().add(
-					new OWTransaction(
-							null, null, "PENDING", -1, null, 
-							OWWalletTransactionListAdapter.Type.PENDING_DIVIDER,
-							R.layout.accounts_wallet_tx_list_divider));
-			// Add all the pending transactions
+			
+			//TODO -super fugly hack to keep divider bars in the array of objects, this should be changed inside the adapter to handle groups better
+			OWSearchableListItem pendingDivider = new OWSearchableListItem() {
+				
+				@Override
+				public boolean matches(CharSequence constraint,
+						OWSearchableListItem nextItem) {
+					if(nextItem instanceof OWTransaction) {
+						return true;
+					}
+					return false;
+				}
+				
+				@Override
+				public String toString() {
+					return "PENDING";
+				}
+			};
+			this.txAdapter.getFullList().add(pendingDivider);
+
+			//now add pending transactions
 			for (OWTransaction tx : pendingTxs) {
 				this.txAdapter.getFullList().add(tx);
 			}
 		}
 
 		// Add the History Divider
-		this.txAdapter.getFullList().add(new OWTransaction(
-				null, null, "HISTORY", -1, null, 
-				OWWalletTransactionListAdapter.Type.HISTORY_DIVIDER,
-				R.layout.accounts_wallet_tx_list_divider));
+		OWSearchableListItem hisotryDivider = new OWSearchableListItem() {
+			
+			@Override
+			public boolean matches(CharSequence constraint,
+					OWSearchableListItem nextItem) {
+				return true;
+			}
+			
+			@Override
+			public String toString() {
+				return "HISTORY";
+			}
+		};
+		this.txAdapter.getFullList().add(hisotryDivider);
+
 		// Add all the pending transactions
 		for (OWTransaction tx : this.getWalletManager().getConfirmedTransactions(getSelectedCoin())) {
 			this.txAdapter.getFullList().add(tx);
@@ -134,18 +160,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 
 		// Opens transactions details fragment by calling openTxnDetails in MainActivity, passing
 		// the txnItem when user clicks a txn list item.
-		this.txListView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				if (!txAdapter.getItem(position).isDivider()) {
-					OWTransaction txItem = (OWTransaction) 
-							txListView.getItemAtPosition(position);
-					getOWMainActivity().openTxnDetails(txItem);
-				}
-			}
-		});
-
+		this.txListView.setOnItemClickListener(this);
 	}
 
 	private void initializeButtons() {
@@ -200,5 +215,15 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 				OWDataSyncHelper.updateTransactionHistory(getOWMainActivity().getSelectedCoin());
 			}
 		});
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	
+		if(parent.getAdapter().getItemViewType(position) == OWWalletTransactionListAdapter.TYPE_TRANSACTION) {
+			OWTransaction txItem = (OWTransaction) 
+					txListView.getItemAtPosition(position);
+			getOWMainActivity().openTxnDetails(txItem);
+		}
 	}
 }

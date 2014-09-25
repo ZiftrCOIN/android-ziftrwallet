@@ -315,15 +315,10 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	private OWTransaction cursorToTransaction(OWCoin coinId, Cursor c,
 			SQLiteDatabase db) {
 
-		// TODO get from settings
-		OWFiat fiatType = OWFiat.USD;
-
-		OWTransaction tx = new OWTransaction(coinId, fiatType, 
+		OWTransaction tx = new OWTransaction(coinId,
 				c.getString(c.getColumnIndex(COLUMN_NOTE)), 
 				c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)), 
-				new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))), 
-				OWWalletTransactionListAdapter.Type.TRANSACTION,
-				R.layout.accounts_wallet_tx_list_item);
+				new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))) );
 
 		tx.setId(c.getLong(c.getColumnIndex(COLUMN_ID)));
 

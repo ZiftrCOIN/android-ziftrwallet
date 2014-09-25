@@ -398,10 +398,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
 			BigInteger txFee, List<String> displayAddresses, OWSha256Hash hash, 
 			String note, int numConfirmations) {
-		OWTransaction tx = new OWTransaction(coinId, OWFiat.USD, 
-				note, System.currentTimeMillis() / 100, txAmount, 
-				OWWalletTransactionListAdapter.Type.TRANSACTION, 
-				R.layout.accounts_wallet_tx_list_item);
+		OWTransaction tx = new OWTransaction(coinId, note, System.currentTimeMillis() / 100, txAmount);
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);
