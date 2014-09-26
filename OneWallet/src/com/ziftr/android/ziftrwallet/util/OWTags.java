@@ -29,8 +29,6 @@ public class OWTags {
 	
 	public static final String VALIDATE_PASS_SEND = "validate_passphrase_dialog_send";
 	
-	public static final String VALIDATE_PASS_NEW_COIN = "validate_passphrase_dialog_new_currency";
-	
 	public static final String EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK = "edit_address_label_address_book";
 
 }

@@ -10,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/ow_horizontal_margin" >
+        android:paddingTop="@dimen/ow_half_icon_size"
+        android:paddingLeft="@dimen/ow_horizontal_margin"
+        android:paddingRight="@dimen/ow_horizontal_margin" >
 
         <TextView
             android:layout_width="match_parent"

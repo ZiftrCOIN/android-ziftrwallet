@@ -64,8 +64,10 @@
 
             <CheckBox
                 android:id="@+id/editable_confirmation_fees"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/ow_checkbox_size"
+                android:layout_height="@dimen/ow_checkbox_size"
+                android:button="@null"
+                android:background="@drawable/orange_checkbox"
                 android:layout_alignParentRight="true"
                 android:paddingBottom="@dimen/ow_quarter_icon_size"
                 android:paddingTop="@dimen/ow_quarter_icon_size"

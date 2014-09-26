@@ -11,26 +11,26 @@
         android:orientation="vertical"
         android:padding="10dp" >
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/coin_logo"
+                android:layout_gravity="center_vertical"
+                android:layout_width="@dimen/ow_txt_largest"
+                android:layout_height="@dimen/ow_txt_largest"
+                android:padding="@dimen/ow_bordered_icon_margin" />
 
             <TextView
                 android:id="@+id/amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                android:layout_marginLeft="@dimen/ow_txn_field_with_icon_margin"
                 android:textColor="@color/DarkGray"
                 android:textSize="@dimen/ow_txt_largest" />
-
-            <ImageView
-                android:id="@+id/coin_logo"
-                android:layout_width="@dimen/ow_txt_largest"
-                android:layout_height="@dimen/ow_txt_largest"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:padding="@dimen/ow_bordered_icon_margin" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/amountLabel"
@@ -65,52 +65,68 @@
             android:layout_height="wrap_content"
             android:text="@string/ow_tx_details_confirmation_fee_label" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/edit_txn_note"
+                android:layout_width="@dimen/ow_txt_largest"
+                android:layout_height="@dimen/ow_txt_largest"
+                android:adjustViewBounds="true"
+                android:clickable="true"
+                android:padding="@dimen/ow_borderless_icon_margin"
+                android:src="@drawable/button_edit_pencil" />
 
             <EditText
                 android:id="@+id/txn_note"
-                style="@style/txn_values"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/ow_txn_field_with_icon_margin"
                 android:layout_marginRight="@dimen/ow_horizontal_margin"
                 android:background="@android:color/transparent"
                 android:enabled="true"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="textNoSuggestions"
-                android:text="@string/Placeholder" />
-
-            <TextView
-                style="@style/txn_labels"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/txn_note"
-                android:text="@string/ow_tx_label" />
-
-            <ImageView
-                android:id="@+id/edit_txn_note"
-                android:layout_width="@dimen/ow_txt_largest"
-                android:layout_height="@dimen/ow_txt_largest"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginLeft="16dp"
-                android:adjustViewBounds="true"
-                android:clickable="true"
-                android:paddingLeft="@dimen/ow_borderless_icon_margin"
-                android:paddingRight="@dimen/ow_borderless_icon_margin"
-                android:paddingTop="@dimen/ow_borderless_icon_margin"
-                android:src="@drawable/button_edit_pencil" />
-        </RelativeLayout>
+                android:text="@string/Placeholder"
+                android:textColor="@color/DarkGray"
+                android:textSize="@dimen/ow_txt_medium" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/routing_address"
-            style="@style/txn_values"
+            style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/ow_horizontal_margin"
-            android:text="@string/Placeholder" />
+            android:text="@string/ow_tx_label" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/sendTo"
+                android:layout_width="@dimen/ow_txt_largest"
+                android:layout_height="@dimen/ow_txt_largest"
+                android:adjustViewBounds="true"
+                android:clickable="true"
+                android:padding="@dimen/ow_bordered_icon_margin"
+                android:src="@drawable/received_yellow" />
+
+            <TextView
+                android:id="@+id/routing_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/ow_txn_field_with_icon_margin"
+                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                android:text="@string/Placeholder"
+                android:textColor="@color/DarkGray"
+                android:textSize="@dimen/ow_txt_medium" />
+        </LinearLayout>
 
         <TextView
             style="@style/txn_labels"

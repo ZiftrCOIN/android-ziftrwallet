@@ -43,5 +43,8 @@
 
     <!-- ow screen margin -->
     <dimen name="ow_horizontal_margin">55dp</dimen>
+    <dimen name="ow_txn_field_with_icon_margin">9dp</dimen>
+    
+    <dimen name="ow_checkbox_size">36dp</dimen>
 
 </resources>

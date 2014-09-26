@@ -867,29 +867,38 @@ ZiftrNetworkHandler {
 	 * @param bundle with OWCoin of wallet to add
 	 */
 	public void addNewCurrency(Bundle info) {
-		OWCoin newItem = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
-		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
-		// Make sure that this view only has wallets
-		// in it which the user do
-		for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
-			if (type == newItem) {
-				// Already in list, shouldn't ever get here though because
-				// we only show currencies in the dialog which we don't have
-				this.onBackPressed();
-				return;
-			}
-		}
-		if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
-			// We can assume the wallet hasn't been set up yet
-			// or we wouldn't have gotten here 
-
-			if (!walletManager.walletHasBeenSetUp(newItem)) {
-				if (walletManager.setUpWallet(newItem)) {
-					Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
-					this.onBackPressed();
+		ArrayList<String> toAdd = info.getStringArrayList(OWCoin.TYPE_KEY);
+		if (toAdd.size() > 0){
+			for (String itemToAdd : toAdd){
+				OWCoin newItem = OWCoin.valueOf(itemToAdd);
+				// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
+				// Make sure that this view only has wallets
+				// in it which the user do
+				for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
+					if (type == newItem) {
+						// Already in list, shouldn't ever get here though because
+						// we only show currencies in the dialog which we don't have
+						this.onBackPressed();
+						return;
+					}
+				}
+				if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
+					// We can assume the wallet hasn't been set up yet
+					// or we wouldn't have gotten here 
+	
+					if (!walletManager.walletHasBeenSetUp(newItem)) {
+						if (walletManager.setUpWallet(newItem)) {
+						} else {
+							Toast.makeText(this, "Error a wallet could not be set up!", Toast.LENGTH_LONG).show();
+							return;
+						}
+					}
 				}
 			}
+			Toast.makeText(this, "Wallet(s) Created!", Toast.LENGTH_LONG).show();
+			this.onBackPressed();
 		}
+
 	}
 
 	/**
@@ -1158,14 +1167,6 @@ ZiftrNetworkHandler {
 			byte[] passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase);
 		switch(requestCode) {
-		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
-			if (this.inputHashMatchesStoredHash(inputHash)) {
-				addNewCurrency(info);
-			} else {
-				this.alertUser(
-						"Error: Passphrases don't match. ", "wrong_passphrase");
-			}
-			break;
 		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 			if (this.inputHashMatchesStoredHash(inputHash)) {
 				OWReceiveCoinsFragment frag = (OWReceiveCoinsFragment) getSupportFragmentManager(
