@@ -159,7 +159,6 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	}
 	
 	
-	
 	protected ArrayList<String> getAddressesList(OWCoin coin, SQLiteDatabase db) {
 		
 		ArrayList<String> addresses = new ArrayList<String>();

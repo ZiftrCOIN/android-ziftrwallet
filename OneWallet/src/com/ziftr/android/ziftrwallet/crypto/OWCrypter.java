@@ -18,19 +18,24 @@ import android.annotation.SuppressLint;
 
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-@SuppressLint("TrulyRandom")
-public class AdvancedCrypto {
+public class OWCrypter {
 
-	// 128 is in default android, to get 256 AES encryption you have to use 
+	// 128 is in default android, to get 256 AES encryption you have to use the JCE 
 	public static final int KEY_LENGTH = 128;
 	public static final int SALT_LENGTH = KEY_LENGTH / 8;
+	
+	// 100 is pretty low but we want this to be fast on mobile phones
 	public static final int PBE_ITERATION_COUNT = 100;
 
-	private static final String HASH_ALGORITHM = "SHA-256";
-	private static final String PBE_ALGORITHM = "PBKDF2WithHmacSHA1"; //"PBEWithSHA256And256BitAES";
-	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
-	private static final String SECRET_KEY_ALGORITHM = "AES";
+	public static final String HASH_ALGORITHM = "SHA-256";
+	public static final String PBE_ALGORITHM = "PBKDF2WithHmacSHA256"; //"PBEWithSHA256And256BitAES";
+	
+	// TODO use this in the case that the phone doesn't come with 
+	public static final String SECONDARY_PBE_ALGORITHM = "PBKDF2WithHmacSHA1";
+	public static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
+	public static final String SECRET_KEY_ALGORITHM = "AES";
 
+	@SuppressLint("TrulyRandom")
 	public static String encrypt(SecretKey secret, String clearText) throws CryptoException {
 		try {
 			Cipher encryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM);

@@ -46,26 +46,27 @@ public class OWCoinActivationStatusTable extends OWTable {
 		db.insert(getTableName(), null, values);
 	}
 
-	protected List<OWCoin> getAllActivatedTypes(SQLiteDatabase db) {
-		List<OWCoin> activatedCoinTypes = new ArrayList<OWCoin>();
+	protected List<OWCoin> getTypes(SQLiteDatabase db, String specifier) {
+		List<OWCoin> coinTypes = new ArrayList<OWCoin>();
 
-		String selectQuery = "SELECT * FROM " + getTableName() + " WHERE " + 
-				COLUMN_ACTIVATED_STATUS + " = " + OWSQLiteOpenHelper.ACTIVATED + ";";
-		Cursor c = db.rawQuery(selectQuery, null);
+		StringBuilder selectQuery = new StringBuilder();
+		selectQuery.append("SELECT ").append(COLUMN_COIN_ID).append(" FROM ").append(getTableName()).append(" WHERE ");
+		selectQuery.append(specifier);
+		selectQuery.append(";");
+		Cursor c = db.rawQuery(selectQuery.toString(), null);
 
 		// Move to first returns false if cursor is empty
 		if (c.moveToFirst()) {
 			do {
 				// Add the coin type to the list
-				activatedCoinTypes.add(OWCoin.valueOf(
-						c.getString(c.getColumnIndex(COLUMN_COIN_ID))));
+				coinTypes.add(OWCoin.valueOf(c.getString(c.getColumnIndex(COLUMN_COIN_ID))));
 			} while (c.moveToNext());
 		}
 
 		// Make sure we close the cursor
 		c.close();
 
-		return activatedCoinTypes;
+		return coinTypes;
 	}
 
 	protected int getActivatedStatus(OWCoin coinId, SQLiteDatabase db) {

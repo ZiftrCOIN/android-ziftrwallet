@@ -323,49 +323,6 @@ public class ZiftrUtils {
 	}
 
 	/**
-	 * Based on the coin type, this method converts back the number of atomic
-	 * units to a double.
-	 * 
-	 * @param coinType - "BTC" for bitcoin, etc.
-	 * @param numAtomicUnits - The number of atomic units to convert. 
-	 * @return The integer converted back to a double.
-	 */
-	public static double atomicUnitsToDouble(String coinType, int numAtomicUnits) {
-		if ("BTC".equals(coinType)) {
-			double d = (double) numAtomicUnits;
-			d /= Math.pow(10, 8);
-			return d;
-		}
-		return 0;
-	}
-
-	/**
-	 * Based on the coin type, this method converts back the number of atomic
-	 * units to a double and gives back a string containing that double.
-	 * 
-	 * @param coinType - "BTC" for bitcoin, etc.
-	 * @param numAtomicUnits - The number of atomic units to convert. 
-	 * @return The integer converted back to a double, represented as a string.
-	 */
-	public static String atomicUnitsToString(String coinType, int numAtomicUnits) {
-		BigDecimal basic = 
-				(new BigDecimal(atomicUnitsToDouble(coinType, numAtomicUnits)));
-		return trimZeroes(formatTo8DecimalPlaces(basic));
-	}
-
-	/**
-	 * This makes it so that the BigDecimal returned has a string value with
-	 * exactly 8 decimal places. If it is desirable to have the zeroes trimmed,
-	 * call trimZeroes on the result.
-	 * 
-	 * @param toFormat - The big decimal to format
-	 * @return a new big decimal formatted correctly as above.
-	 */
-	public static BigDecimal formatTo8DecimalPlaces(BigDecimal toFormat) {
-		return formatToNDecimalPlaces(8, toFormat);
-	}
-
-	/**
 	 * This makes it so that the BigDecimal returned has a string value with
 	 * exactly numDecimalPlaces decimal places. If it is desirable to have 
 	 * the zeroes trimmed, call trimZeroes on the result.
@@ -388,30 +345,8 @@ public class ZiftrUtils {
 	}
 	
 	/**
-	 * Returns the given value in nanocoins as a 0.12 type string. More digits after the decimal place will be used
-	 * if necessary, but two will always be present.
-	 */
-	public static String bitcoinValueToFriendlyString(BigInteger value) {
-		// TODO: This API is crap. This method should go away when we encapsulate money values.
-		boolean negative = value.compareTo(BigInteger.ZERO) < 0;
-		if (negative)
-			value = value.negate();
-		BigDecimal bd = new BigDecimal(value, 8);
-		String formatted = bd.toPlainString();   // Don't use scientific notation.
-		int decimalPoint = formatted.indexOf(".");
-		// Drop unnecessary zeros from the end.
-		int toDelete = 0;
-		for (int i = formatted.length() - 1; i > decimalPoint + 2; i--) {
-			if (formatted.charAt(i) == '0')
-				toDelete++;
-			else
-				break;
-		}
-		return (negative ? "-" : "") + formatted.substring(0, formatted.length() - toDelete);
-	}
-
-	/**
 	 * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
+	 * TODO change name order, as it is confusing
 	 */
 	public static byte[] sha256hash160(byte[] input) {
 		try {

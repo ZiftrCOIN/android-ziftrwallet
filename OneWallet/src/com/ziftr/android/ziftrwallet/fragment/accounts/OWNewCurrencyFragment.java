@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
@@ -64,7 +65,7 @@ public class OWNewCurrencyFragment extends OWFragment {
 				
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, newItem.getCoinId().toString());
-				if (getOWMainActivity().userHasPassphrase()){
+				if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())){
 					getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY, b, 
 						OWTags.VALIDATE_PASS_NEW_COIN);
 				} else {

@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
+import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
@@ -88,7 +89,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 			}
 		} else if (v == this.qrCodeImageView) {
 			if(!this.fragmentHasAddress() && !this.labelEditText.getText().toString().equals("")) {
-				if (getOWMainActivity().userHasPassphrase()) {
+				if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
 					Bundle b = new Bundle();
 					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 					getOWMainActivity().showGetPassphraseDialog(

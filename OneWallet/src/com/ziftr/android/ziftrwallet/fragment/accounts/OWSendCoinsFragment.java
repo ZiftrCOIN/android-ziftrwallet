@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.zxing.client.android.CaptureActivity;
+import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -141,7 +142,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 		} else if (v == sendButton) {
 			if (this.getSelectedCoin().addressIsValid(addressEditText.getText().toString())) {
-				if (getOWMainActivity().userHasPassphrase()) {
+				if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
 					Bundle b = new Bundle();
 					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 					getOWMainActivity().showGetPassphraseDialog(

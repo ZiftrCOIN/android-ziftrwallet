@@ -1,9 +1,19 @@
 package com.ziftr.android.ziftrwallet.sqlite;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.crypto.SecretKey;
+
+import org.spongycastle.crypto.CryptoException;
+
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
+import com.ziftr.android.ziftrwallet.crypto.OWCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
@@ -80,6 +90,48 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 
 		// The id will be generated upon insertion.
 		return values;
+	}
+
+	protected void recryptAllAddresses(OWCoin coin, SecretKey oldKey, SecretKey newKey, SQLiteDatabase db) throws CryptoException {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT ");
+		sb.append(COLUMN_ID);
+		sb.append(", ");
+		sb.append(COLUMN_PRIV_KEY);
+		sb.append(" FROM ");
+		sb.append(getTableName(coin));
+		sb.append(";");
+		Cursor c = db.rawQuery(sb.toString(), null);
+
+		List<String> oldPrivKeys = new ArrayList<String>();
+		if (c.moveToFirst()) {
+			do {
+				oldPrivKeys.add(c.getString(c.getColumnIndex(COLUMN_PRIV_KEY)));
+			} while (c.moveToNext());
+		}
+		c.close();
+
+		for (String oldPrivKey : oldPrivKeys) {
+			String decrypted = oldPrivKey;
+			if (oldKey != null) {
+				decrypted = OWCrypter.decrypt(oldKey, oldPrivKey);
+			}
+			String newlyEncryptedPrivateKey = OWCrypter.encrypt(newKey, decrypted);
+
+			ContentValues cv = new ContentValues();
+			cv.put(COLUMN_PRIV_KEY, newlyEncryptedPrivateKey);
+
+			StringBuilder where = new StringBuilder();
+			where.append(COLUMN_PRIV_KEY).append(" = ").append(DatabaseUtils.sqlEscapeString(oldPrivKey));
+
+			int numUpdated = db.update(getTableName(coin), cv, where.toString(), null);
+			
+			if (numUpdated != 1) {
+				throw new CryptoException("Tables were not updated properly");
+			}
+		}
+
 	}
 
 }

@@ -183,9 +183,6 @@ ZiftrNetworkHandler {
 	/** This object is responsible for all the wallets. */
 	private OWWalletManager walletManager;
 
-	/** The key for getting the passphrase hash from the preferences. */
-	public final static String PASSPHRASE_KEY = "ow_passphrase_key_1";
-
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
@@ -279,10 +276,12 @@ ZiftrNetworkHandler {
 		this.setContentView(R.layout.activity_main);
 		this.headerView = this.findViewById(R.id.walletHeader);
 
-		//Get passphrase from welcome screen if exists
+		// Get passphrase from welcome screen if exists
+		// TODO is this using the hash?
 		Bundle info = getIntent().getExtras();
 		if (info != null && info.getByteArray("SET_PASSPHRASE") != null) {
-			setPassphraseHash(info.getByteArray("SET_PASSPHRASE"));
+			// We can only get here if there is no previous passphrase, so we put in null
+			setPassphraseHash(null, info.getByteArray("SET_PASSPHRASE"));
 		}
 
 		// Recreate wallet manager
@@ -802,61 +801,19 @@ ZiftrNetworkHandler {
 	 * Sets the stored passphrase hash to be the specified
 	 * hash.
 	 * 
-	 * @param inputHash - The new passphrase's Sha256 hash
+	 * @param oldPassphrase - Used to decrypt old keys, if not null
+	 * @param newPassphrase - Used to encrypt all keys, should not be null
 	 */
-	public void setPassphraseHash(byte[] inputHash) {
-		SharedPreferences prefs = this.getSharedPreferences(PASSPHRASE_KEY, Context.MODE_PRIVATE);
+	private void setPassphraseHash(byte[] oldPassphrase, byte[] newPassphrase) {
+		// TODO do db stuff to actually change the encryption of all the private keys
+		
+		
+		SharedPreferences prefs = this.getSharedPreferences(OWPreferencesUtils.PREFERENCES_NAME, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
-		editor.putString(PASSPHRASE_KEY, ZiftrUtils.bytesToHexString(inputHash));
+		editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, 
+				ZiftrUtils.bytesToHexString(ZiftrUtils.Sha256Hash(newPassphrase)));
 		editor.commit();
 	}
-
-	/**
-	 * Gets the stored hash of the users passphrase, if there is one.
-	 * 
-	 * @return the stored hash of the users passphrase, if there is one.
-	 */
-	private byte[] getStoredPassphraseHash() {
-		// Get the preferences
-		SharedPreferences prefs = this.getSharedPreferences(
-				PASSPHRASE_KEY, Context.MODE_PRIVATE);
-		// Get the passphrase hash
-		String storedPassphrase = prefs.getString(PASSPHRASE_KEY, null);
-		// If it's not null, convert it back to a byte array
-		byte[] storedHash = (storedPassphrase == null) ?
-				null : ZiftrUtils.hexStringToBytes(storedPassphrase);
-		// Return the result
-		return storedHash;
-	}
-
-	/**
-	 * Get a boolean describing whether or not the user 
-	 * has entered a passphrase before.
-	 * 
-	 * @return a boolean describing whether or not the user 
-	 * has entered a passphrase before.
-	 */
-	public boolean userHasPassphrase() {
-		return this.getStoredPassphraseHash() != null;
-	}
-
-	/**
-	 * Tells if the given hash matches the stored passphrase
-	 * hash.
-	 * 
-	 * @param inputHash - the hash to check agains
-	 * @return as above
-	 */
-	private boolean inputHashMatchesStoredHash(byte[] inputHash) {
-		byte[] storedHash = this.getStoredPassphraseHash();
-		if (storedHash != null && inputHash != null) {
-			return Arrays.equals(storedHash, inputHash); 
-		} else {
-			ZLog.log("Error, something was null that shouldn't have been.");
-			return false;
-		}
-	}
-
 
 	/**
 	 * called after user enters password for creating new wallet 
@@ -1125,7 +1082,6 @@ ZiftrNetworkHandler {
 			String message = "Please input your passphrase. ";
 			passphraseDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
 
-
 			passphraseDialog.show(this.getSupportFragmentManager(), tag);
 		}
 	}
@@ -1154,37 +1110,26 @@ ZiftrNetworkHandler {
 	public void handlePassphrasePositive(int requestCode, 
 			byte[] passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase);
-		switch(requestCode) {
-		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
-			if (this.inputHashMatchesStoredHash(inputHash)) {
+		if (OWPreferencesUtils.inputHashMatchesStoredHash(this, inputHash)) {
+			switch(requestCode) {
+			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
 				addNewCurrency(info);
-			} else {
-				this.alertUser(
-						"Error: Passphrases don't match. ", "wrong_passphrase");
-			}
-			break;
-		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
-			if (this.inputHashMatchesStoredHash(inputHash)) {
-				OWReceiveCoinsFragment frag = (OWReceiveCoinsFragment) getSupportFragmentManager(
+				break;
+			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
+				OWReceiveCoinsFragment receiveFrag = (OWReceiveCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
-				frag.loadNewAddressFromDatabase();
-			} else {
-				this.alertUser(
-						"Error: Passphrases don't match. ", "wrong_passphrase");
-			}
-			break;
-		case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
-			if (this.inputHashMatchesStoredHash(inputHash)) {
-				OWSendCoinsFragment frag = (OWSendCoinsFragment) getSupportFragmentManager(
+				receiveFrag.loadNewAddressFromDatabase();
+				break;
+			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
+				OWSendCoinsFragment sendFrag = (OWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.SEND_FRAGMENT);
-				frag.onClickSendCoins();
-
-			} else {
-				this.alertUser(
-						"Error: Passphrases don't match. ", "wrong_passphrase");
+				sendFrag.onClickSendCoins();
+				break;
 			}
-			break;
+		} else {
+			this.alertUser("Error: Passphrases don't match. ", "wrong_passphrase");
 		}
+		
 	}
 
 	/**
@@ -1198,10 +1143,10 @@ ZiftrNetworkHandler {
 		// Can assume that there was a previously entered passphrase because 
 		// of the way the dialog was set up. 
 		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
-			byte[] inputHash = ZiftrUtils.Sha256Hash(oldPassphrase);
-			if (this.inputHashMatchesStoredHash(inputHash)) {
+			byte[] oldPassphraseHash = ZiftrUtils.Sha256Hash(oldPassphrase);
+			if (OWPreferencesUtils.inputHashMatchesStoredHash(this, oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
-				this.setPassphraseHash(ZiftrUtils.Sha256Hash(newPassphrase));
+				this.setPassphraseHash(oldPassphrase, newPassphrase);
 			} else {
 				// If don't match, tell user. 
 				this.alertUser("The passphrase you entered doesn't match your "
