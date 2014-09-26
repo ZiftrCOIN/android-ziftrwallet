@@ -18,9 +18,9 @@
 
             <ImageView
                 android:id="@+id/coin_logo"
-                android:layout_gravity="center_vertical"
                 android:layout_width="@dimen/ow_txt_largest"
                 android:layout_height="@dimen/ow_txt_largest"
+                android:layout_gravity="center_vertical"
                 android:padding="@dimen/ow_bordered_icon_margin" />
 
             <TextView
@@ -167,7 +167,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@id/progress_bar"
                 android:layout_below="@id/progress_bar"
-                android:text="@string/ow_tx_details_sent" />
+                android:text="@string/ow_tx_details_sent"
+                android:textColor="@color/Gray"
+                android:textSize="@dimen/ow_txt_mediumsmall" />
 
             <TextView
                 android:id="@+id/time_left"
@@ -175,7 +177,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignRight="@id/progress_bar"
                 android:layout_below="@id/progress_bar"
-                android:text="@string/ow_empty_string" />
+                android:text="@string/ow_empty_string"
+                android:textColor="@color/Gray"
+                android:textSize="@dimen/ow_txt_mediumsmall" />
         </RelativeLayout>
     </LinearLayout>
 

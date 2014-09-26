@@ -188,7 +188,7 @@ ZiftrNetworkHandler {
 
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
-	
+
 	//probably won't need this when its added to the preferences
 	private boolean feesAreEditable;
 
@@ -885,7 +885,7 @@ ZiftrNetworkHandler {
 				if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
 					// We can assume the wallet hasn't been set up yet
 					// or we wouldn't have gotten here 
-	
+
 					if (!walletManager.walletHasBeenSetUp(newItem)) {
 						if (walletManager.setUpWallet(newItem)) {
 						} else {
@@ -966,7 +966,7 @@ ZiftrNetworkHandler {
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openSendCoinsView() {
+	public void openSendCoinsView(String address) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.SEND_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWSendCoinsFragment();
@@ -975,6 +975,10 @@ ZiftrNetworkHandler {
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, OWTags.ACCOUNTS_INNER);
+
+		if (address!=null){
+			((OWSendCoinsFragment) fragToShow).setSendToAddress(address);		
+		}
 	}
 
 	/**
@@ -1231,6 +1235,9 @@ ZiftrNetworkHandler {
 			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));
+			if (this.selectedCoin == coinId){
+				this.selectedCoin = null;
+			}
 			break;
 		}
 	}

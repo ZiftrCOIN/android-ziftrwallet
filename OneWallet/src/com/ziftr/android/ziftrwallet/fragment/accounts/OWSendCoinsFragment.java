@@ -65,6 +65,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private ImageView sendButton;
 
 	private View sendCoinsContainingView;
+	
+	private String prefilledAddress;
 
 	/**
 	 * Inflate, initialize, and return the send coins layout.
@@ -211,6 +213,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.sendButton = (ImageView) this.rootView.findViewById(R.id.send_button);
 		this.sendButton.setOnClickListener(this);
+		
+		if (this.prefilledAddress != null){
+			addressEditText.setText(this.prefilledAddress);
+		}
 		
 		if (this.getOWMainActivity().getFeesAreEditable()){
 			this.coinFeeEditText.setFocusable(true);
@@ -432,6 +438,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	@Override
 	public View getContainerView() {
 		return this.sendCoinsContainingView;
+	}
+	
+	public void setSendToAddress(String address){
+		this.prefilledAddress = address;
 	}
 
 }

@@ -39,15 +39,6 @@
                     android:background="@drawable/clickable_menu_color"
                     android:duplicateParentState="true" />
 
-                <ImageView
-                    android:id="@+id/menuDrawerAccountsIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="60dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/icon_menu_about" />
-
                 <TextView
                     android:id="@+id/menuDrawerAccountsText"
                     android:layout_width="wrap_content"
@@ -55,8 +46,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
                     android:text="@string/ow_menu_text_accounts"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/Black" />
+                    android:textSize="@dimen/ow_txt_mediumsmall"
+                    android:textColor="@color/ow_menu_text_color"  />
             </LinearLayout>
         </TableRow>
 
@@ -95,15 +86,6 @@
                     android:background="@drawable/clickable_menu_color"
                     android:duplicateParentState="true" />
 
-                <ImageView
-                    android:id="@+id/menuDrawerTermsIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="60dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/icon_menu_about" />
-
                 <TextView
                     android:id="@+id/menuDrawerTermsText"
                     android:layout_width="wrap_content"
@@ -111,8 +93,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
                     android:text="@string/ow_menu_text_terms"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/Black" />
+                    android:textSize="@dimen/ow_txt_mediumsmall"
+                    android:textColor="@color/ow_menu_text_color"  />
             </LinearLayout>
         </TableRow>
 
@@ -151,15 +133,6 @@
                     android:background="@drawable/clickable_menu_color"
                     android:duplicateParentState="true" />
 
-                <ImageView
-                    android:id="@+id/menuDrawerSettingsIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="60dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/icon_menu_settings" />
-
                 <TextView
                     android:id="@+id/menuDrawerSettingsText"
                     android:layout_width="wrap_content"
@@ -167,8 +140,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
                     android:text="@string/ow_menu_text_settings"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/Black" />
+                    android:textSize="@dimen/ow_txt_mediumsmall"
+                    android:textColor="@color/ow_menu_text_color" />
             </LinearLayout>
         </TableRow>
 
@@ -207,15 +180,6 @@
                     android:background="@drawable/clickable_menu_color"
                     android:duplicateParentState="true" />
 
-                <ImageView
-                    android:id="@+id/menuDrawerAboutIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="60dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/icon_menu_about" />
-
                 <TextView
                     android:id="@+id/menuDrawerAboutText"
                     android:layout_width="wrap_content"
@@ -223,8 +187,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
                     android:text="@string/ow_menu_text_about"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/Black" />
+                    android:textSize="@dimen/ow_txt_mediumsmall"
+                    android:textColor="@color/ow_menu_text_color"  />
             </LinearLayout>
         </TableRow>
 
@@ -263,15 +227,6 @@
                     android:background="@drawable/clickable_menu_color"
                     android:duplicateParentState="true" />
 
-                <ImageView
-                    android:id="@+id/menuDrawerContactIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="60dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/icon_menu_about" />
-
                 <TextView
                     android:id="@+id/menuDrawerContactText"
                     android:layout_width="wrap_content"
@@ -279,8 +234,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
                     android:text="@string/ow_menu_text_contact"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/Black" />
+                    android:textSize="@dimen/ow_txt_mediumsmall"
+                    android:textColor="@color/ow_menu_text_color" />
             </LinearLayout>
         </TableRow>
 

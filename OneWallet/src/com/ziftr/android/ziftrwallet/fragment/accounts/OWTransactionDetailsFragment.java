@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -25,7 +26,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWTransactionDetailsFragment extends OWWalletUserFragment 
-implements OWEditableTextBoxController.EditHandler<OWTransaction> {
+implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListener {
 
 	public static final String TX_ITEM_HASH_KEY = "txItemHash";
 
@@ -46,6 +47,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 	private TextView timeLeft;
 	private ProgressBar progressBar;
 	private ImageView coinLogo;
+	private ImageView sendToAddress;
 
 	private OWTransaction txItem;
 
@@ -83,6 +85,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 		this.coinLogo = (ImageView) rootView.findViewById(R.id.coin_logo);
+		this.sendToAddress = (ImageView) rootView.findViewById(R.id.sendTo);
 		this.initFields(savedInstanceState);
 
 		return this.rootView;
@@ -131,6 +134,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 
 		this.populatePendingInformation();
 
+		this.sendToAddress.setOnClickListener(this);
 		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
 		editLabelButton.setOnClickListener(controller);
@@ -271,6 +275,13 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 	@Override
 	public OWEditState getCurEditState() {
 		return this.curEditState;
+	}
+
+	@Override
+	public void onClick(View v) {
+		if (v==this.sendToAddress){
+			getOWMainActivity().openSendCoinsView(this.addressTextView.getText().toString());
+		}
 	}
 
 }
