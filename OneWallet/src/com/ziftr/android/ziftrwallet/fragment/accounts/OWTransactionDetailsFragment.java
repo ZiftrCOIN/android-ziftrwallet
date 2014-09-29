@@ -219,7 +219,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		this.txItem = txItem;
 	}
 
-	public String formatEstimatedTime(int seconds) {
+	public String formatEstimatedTime(long estimatedTime) {
 		StringBuilder sb = new StringBuilder();
 		if (estimatedTime > 3600) {
 			long hours = estimatedTime / 3600;
