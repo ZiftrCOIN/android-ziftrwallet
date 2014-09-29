@@ -28,7 +28,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class OWTransactionDetailsFragment extends OWWalletUserFragment 
 implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 
-	private static final String TX_ITEM_HASH_KEY = "txItemHash";
+	public static final String TX_ITEM_HASH_KEY = "txItemHash";
 
 	private static final String IS_EDITING_KEY = "isEditing";
 
@@ -67,17 +67,8 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		this.hideWalletHeader();
 
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
-		if (savedInstanceState != null) {
-			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
-				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
-				if (this.isEditing) {
-					this.curEditState = OWEditState.loadFromBundle(savedInstanceState);
-				}
-			}
-			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
-				this.txItem = getWalletManager().readTransactionByHash(this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
-			}
-		}
+
+		this.txItem = getWalletManager().readTransactionByHash(this.getSelectedCoin(), this.getArguments().getString(TX_ITEM_HASH_KEY));
 
 		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
 		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);
@@ -104,7 +95,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		if (this.isEditing) {
 			OWEditState.saveIntoBundle(curEditState, outState);
 		}
-		outState.putString(TX_ITEM_HASH_KEY, this.txItem.getSha256Hash().toString());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -122,14 +112,10 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		if (savedInstanceState != null) {
 			if (savedInstanceState.containsKey(IS_EDITING_KEY)) {
 				this.isEditing = savedInstanceState.getBoolean(IS_EDITING_KEY);
-			}
-			if (savedInstanceState.containsKey(TX_ITEM_HASH_KEY)) {
-				this.txItem = getWalletManager().readTransactionByHash(
-						this.getSelectedCoin(), savedInstanceState.getString(TX_ITEM_HASH_KEY));
-				ZLog.log("Charmander: " + txItem);
+				this.curEditState = OWEditState.loadFromBundle(savedInstanceState);
+
 			}
 		}
-
 		Drawable coinImage = this.getResources().getDrawable(
 				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
@@ -200,7 +186,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 				sb.append("\n");
 			}
 		}
-		ZLog.log(sb.toString());
 		addressTextView.setText(sb.toString());
 
 	}
@@ -234,7 +219,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		this.txItem = txItem;
 	}
 
-	public String formatEstimatedTime(long estimatedTime) {
+	public String formatEstimatedTime(int seconds) {
 		StringBuilder sb = new StringBuilder();
 		if (estimatedTime > 3600) {
 			long hours = estimatedTime / 3600;
@@ -263,7 +248,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		this.curEditState = state;
 		this.isEditing = true;
 	}
-	
+
 	@Override
 	public void onEdit(OWEditState state, OWTransaction t) {
 		if (t != this.txItem) {
@@ -271,7 +256,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 			return;
 		}
 		this.curEditState = state;
-		ZLog.log("pika");
 		// TODO Auto-generated method stub
 		txItem.setTxNote(state.text);
 		getWalletManager().updateTransactionNote(txItem);
@@ -297,7 +281,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 	public boolean isEditing(OWTransaction t) {
 		return this.isEditing && t == this.txItem; 
 	}
-	
+
 	/**
 	 * @return the curEditState
 	 */

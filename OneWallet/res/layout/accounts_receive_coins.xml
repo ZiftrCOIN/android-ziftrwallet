@@ -47,7 +47,7 @@
                     android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
                     android:clickable="true"
                     android:contentDescription="@string/ow_empty_string"
-                    android:padding="@dimen/ow_borderless_icon_margin"
+                    android:padding="@dimen/ow_bordered_icon_margin"
                     android:src="@drawable/address_book_icon_clickable" />
             </RelativeLayout>
 
