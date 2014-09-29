@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet.network;
 import java.util.List;
 
 import com.google.common.base.Joiner;
-import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
@@ -34,7 +33,7 @@ public class OWApi {
 		String addressesList = Joiner.on(',').join(addresses);
 		
 		ZiftrParamList query = new ZiftrParamList();
-		query.add("addresses", "mocktest");
+		query.add("addresses", addressesList);
 		
 		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions";
 		ZLog.log("Transaction request url: ", url);

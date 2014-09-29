@@ -11,7 +11,6 @@ import android.annotation.SuppressLint;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
@@ -24,13 +23,8 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class OWTransaction implements OWSearchableListItem {
 
 	// Database stuff
-	
-	/** 
-	 * The id of this transaction in the database.
-	 * This will be put in on created. 
-	 */
-	private long _id = -1;
 
+	
 	/** 
 	 * The identifier of this transaciton in the network. 
 	 * This should be given after creation, in an update.
@@ -71,7 +65,7 @@ public class OWTransaction implements OWSearchableListItem {
 	 * Default create has no num confs, calls other create with -1 confs. 
 	 * 0 confs means has been seen by netowrk. -1 confs means is local only.  
 	 */
-	private int numConfirmations;
+	private long numConfirmations;
 	
 	/** 
 	 * The list of addresses that were used in this transaction. 
@@ -124,19 +118,6 @@ public class OWTransaction implements OWSearchableListItem {
 		this.txNote = txNote;
 	}
 
-	/**
-	 * @return the _id
-	 */
-	public long getId() {
-		return _id;
-	}
-
-	/**
-	 * @param _id the _id to set
-	 */
-	public void setId(long _id) {
-		this._id = _id;
-	}
 
 	/**
 	 * @return the sha256Hash
@@ -215,14 +196,14 @@ public class OWTransaction implements OWSearchableListItem {
 	/**
 	 * @return the numConfirmations
 	 */
-	public int getNumConfirmations() {
+	public long getNumConfirmations() {
 		return numConfirmations;
 	}
 
 	/**
 	 * @param numConfirmations the numConfirmations to set
 	 */
-	public void setNumConfirmations(int numConfirmations) {
+	public void setNumConfirmations(long numConfirmations) {
 		this.numConfirmations = numConfirmations;
 	}
 

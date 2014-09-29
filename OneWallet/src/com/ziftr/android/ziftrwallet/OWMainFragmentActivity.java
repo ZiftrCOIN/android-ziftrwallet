@@ -1488,8 +1488,7 @@ ZiftrNetworkHandler {
 
 	@Override
 	public void handleExpiredLoginToken() {
-		// TODO Auto-generated method stub
-
+		//TODO -wallet app doesn't yet use login tokens
 	}
 
 	@Override
@@ -1500,20 +1499,17 @@ ZiftrNetworkHandler {
 
 	@Override
 	public void handleDataUpdated() {
-		// TODO Auto-generated method stub
-
+		this.updateTopFragmentView();
 	}
 
 	@Override
 	public void networkStarted() {
-		// TODO Auto-generated method stub
-
+		//TODO -start network sync'ing animationg here
 	}
 
 	@Override
 	public void networkStopped() {
-		// TODO Auto-generated method stub
-
+		//TODO -stop network sync'ing animationg here
 	}
 
 }

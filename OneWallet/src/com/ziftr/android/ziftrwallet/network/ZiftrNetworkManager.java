@@ -72,7 +72,10 @@ public class ZiftrNetworkManager {
 		
 	}
 
-	
+	/**
+	 * tell the registered network handler that network activity has started, note this is thread safe using a counter,
+	 * so this should be called by any thread whenever it uses the network (if it wants the the handler to know about it)
+	 */
 	public static synchronized void networkStarted() {
 		networkCounter++;
 		if(networkCounter > 0 && !networkActive) {
@@ -84,6 +87,12 @@ public class ZiftrNetworkManager {
 		}
 	}
 	
+	
+	/**
+	 * tell the registered network handler that network activity has finished, note the message is only delivered to the network handler when
+	 * all network activity (from all threads) has stopped, any call to {@link ZiftrNetworkManager}{@link #networkStarted()} should have a corresponding call
+	 * to this, otherwise the network handler may think network activity is constant
+	 */
 	public static synchronized void networkStopped() {
 		networkCounter--;
 		if(networkCounter <= 0 && networkActive) {

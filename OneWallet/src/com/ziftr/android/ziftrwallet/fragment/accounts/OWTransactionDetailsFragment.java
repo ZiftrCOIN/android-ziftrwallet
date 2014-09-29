@@ -207,33 +207,45 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 
 	private void populatePendingInformation() {
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
-		int confirmed = txItem.getNumConfirmations();
+		long confirmed = txItem.getNumConfirmations();
 
 		this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
 
-		int estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
+		long estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
 		this.timeLeft.setText(formatEstimatedTime(estimatedTime));
 
+		//in theory a really old network, or a network with fast enough blocks, could have more blocks than an int can hold
+		//however even in this case it's needed confirmations would still be a smaller number
+		//this just checks it so that if we're for some reason checking the progress of a really old transactions 
+		//it won't have usses due to converting a long to an int
+		int progress;
+		if(confirmed > totalConfirmations) {
+			progress = (int) confirmed;
+		}
+		else {
+			progress = totalConfirmations;
+		}
+		
 		this.progressBar.setMax(totalConfirmations);
-		this.progressBar.setProgress(confirmed);
+		this.progressBar.setProgress(progress);
 	}
 
 	public void setTxItem(OWTransaction txItem) {
 		this.txItem = txItem;
 	}
 
-	public String formatEstimatedTime(int seconds) {
+	public String formatEstimatedTime(long estimatedTime) {
 		StringBuilder sb = new StringBuilder();
-		if (seconds > 3600) {
-			int hours = seconds / 3600;
-			seconds = seconds % 3600;
+		if (estimatedTime > 3600) {
+			long hours = estimatedTime / 3600;
+			estimatedTime = estimatedTime % 3600;
 			sb.append(hours + " hours, ");
 		}
-		int minutes = seconds/60;
-		seconds = seconds % 60;
+		long minutes = estimatedTime/60;
+		estimatedTime = estimatedTime % 60;
 		sb.append (minutes + " minutes");
-		if (seconds != 0) {
-			sb.append(seconds + ", seconds");
+		if (estimatedTime != 0) {
+			sb.append(estimatedTime + ", seconds");
 		}
 		return sb.toString();
 	}
