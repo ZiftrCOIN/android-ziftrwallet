@@ -10,9 +10,7 @@ import android.annotation.SuppressLint;
 
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletTransactionListAdapter;
-import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletTransactionListAdapter.Type;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
@@ -25,13 +23,8 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class OWTransaction implements OWSearchableListItem {
 
 	// Database stuff
-	
-	/** 
-	 * The id of this transaction in the database.
-	 * This will be put in on created. 
-	 */
-	private long _id = -1;
 
+	
 	/** 
 	 * The identifier of this transaciton in the network. 
 	 * This should be given after creation, in an update.
@@ -72,7 +65,7 @@ public class OWTransaction implements OWSearchableListItem {
 	 * Default create has no num confs, calls other create with -1 confs. 
 	 * 0 confs means has been seen by netowrk. -1 confs means is local only.  
 	 */
-	private int numConfirmations;
+	private long numConfirmations;
 	
 	/** 
 	 * The list of addresses that were used in this transaction. 
@@ -85,29 +78,15 @@ public class OWTransaction implements OWSearchableListItem {
 	/** The currency's title. e.g. "Bitcoin". */
 	private OWCoin coinId;
 
-	/** They type of fiat. e.g. Fiat.Type.USD. */
-	private OWFiat fiatType;
-	
-	private OWWalletTransactionListAdapter.Type txViewType;
-
-	/** The resources id to draw the view for this list item. */
-	private int resId;
-
 	// TODO figure out what really needs to be in this constructor.
-	public OWTransaction(OWCoin coinId, 
-			OWFiat fiatType, 
+	public OWTransaction(OWCoin coinId,
 			String txNote, 
 			long txTime, 
-			BigInteger txAmount, 
-			OWWalletTransactionListAdapter.Type txViewType,
-			int resId) {
+			BigInteger txAmount) {
 		this.setCoinId(coinId);
-		this.setFiatType(fiatType);
 		this.setTxNote(txNote);
 		this.setTxTime(txTime);
 		this.setTxAmount(txAmount);
-		this.setTxViewType(txViewType);
-		this.setResId(resId);
 	}
 	
 	/**
@@ -124,19 +103,6 @@ public class OWTransaction implements OWSearchableListItem {
 		this.coinId = coinId;
 	}
 
-	/**
-	 * @return the fiatType
-	 */
-	public OWFiat getFiatType() {
-		return fiatType;
-	}
-
-	/**
-	 * @param fiatType the fiatType to set
-	 */
-	public void setFiatType(OWFiat fiatType) {
-		this.fiatType = fiatType;
-	}
 
 	/**
 	 * @return the txNote
@@ -152,19 +118,6 @@ public class OWTransaction implements OWSearchableListItem {
 		this.txNote = txNote;
 	}
 
-	/**
-	 * @return the _id
-	 */
-	public long getId() {
-		return _id;
-	}
-
-	/**
-	 * @param _id the _id to set
-	 */
-	public void setId(long _id) {
-		this._id = _id;
-	}
 
 	/**
 	 * @return the sha256Hash
@@ -221,34 +174,7 @@ public class OWTransaction implements OWSearchableListItem {
 	public void setTxAmount(BigInteger txAmount) {
 		this.txAmount = txAmount;
 	}
-	
-	/**
-	 * @return the txViewType
-	 */
-	public OWWalletTransactionListAdapter.Type getTxViewType() {
-		return txViewType;
-	}
 
-	/**
-	 * @param txViewType the txViewType to set
-	 */
-	public void setTxViewType(OWWalletTransactionListAdapter.Type txViewType) {
-		this.txViewType = txViewType;
-	}
-
-	/**
-	 * @return the resId
-	 */
-	public int getResId() {
-		return resId;
-	}
-
-	/**
-	 * @param resId the resId to set
-	 */
-	public void setResId(int resId) {
-		this.resId = resId;
-	}
 	
 	/**
 	 * @return True if this transaction is seen by the network.
@@ -270,14 +196,14 @@ public class OWTransaction implements OWSearchableListItem {
 	/**
 	 * @return the numConfirmations
 	 */
-	public int getNumConfirmations() {
+	public long getNumConfirmations() {
 		return numConfirmations;
 	}
 
 	/**
 	 * @param numConfirmations the numConfirmations to set
 	 */
-	public void setNumConfirmations(int numConfirmations) {
+	public void setNumConfirmations(long numConfirmations) {
 		this.numConfirmations = numConfirmations;
 	}
 
@@ -314,11 +240,7 @@ public class OWTransaction implements OWSearchableListItem {
 			return sb.toString();
 		}
 	}
-	
-	public boolean isDivider() {
-		return this.getTxViewType() == Type.PENDING_DIVIDER ||
-				this.getTxViewType() == Type.HISTORY_DIVIDER;
-	}
+
 	
 	@SuppressLint("DefaultLocale")
 	@Override
@@ -326,15 +248,19 @@ public class OWTransaction implements OWSearchableListItem {
 		// TODO This isn't quite right because the next item in this list doesn't necessarily 
 		// also meet the search criteria...
 		
+		/**
 		OWTransaction owNextTransaction = (OWTransaction) nextItem;
-		if (this.isDivider() && owNextTransaction != null && owNextTransaction.isDivider()) {
+		if (owNextTransaction != null && owNextTransaction.isDivider()) {
 			// The pending bar shouldn't show if it the only bar
 			return false;
-		} else if (this.isDivider()) {
-			return true;
-		} else {
+		} 
+		**/
+		//else if (this.isDivider()) {
+		//	return true;
+		//} 
+		//else {
 			return this.getTxNote().toLowerCase(Locale.ENGLISH).contains(constraint.toString().toLowerCase());
-		}
+		//}
 	}
 	
 }

@@ -14,17 +14,24 @@ public class ZiftrNetworkManager {
 	private static long stopTime = 0;
 	
 	
-	public static void registerNetworkHandler(ZiftrNetworkHandler errorHandler) {
-		currentHandler = new WeakReference<ZiftrNetworkHandler>(errorHandler);
+	/**
+	 * registers the passed in object as the network handler, which will be notified of important network events
+	 * note only one object can be the registered handler so setting this will clear any existing ones
+	 * also a weak reference to the network handler is kept (to prevent leaking since the network manager lives for
+	 * the entire lifetime of the app), so avoid using anonymous inner classes as the handler
+	 * @param networkHandler
+	 */
+	public static void registerNetworkHandler(ZiftrNetworkHandler networkHandler) {
+		currentHandler = new WeakReference<ZiftrNetworkHandler>(networkHandler);
 		
 		if(pendingExpiredLoginError) {
 			showLoginExpired();
 		}
 		if(networkActive) {
-			errorHandler.networkStarted();
+			networkHandler.networkStarted();
 		}
 		else {
-			errorHandler.networkStopped();
+			networkHandler.networkStopped();
 		}
 	}
 	
@@ -65,7 +72,10 @@ public class ZiftrNetworkManager {
 		
 	}
 
-	
+	/**
+	 * tell the registered network handler that network activity has started, note this is thread safe using a counter,
+	 * so this should be called by any thread whenever it uses the network (if it wants the the handler to know about it)
+	 */
 	public static synchronized void networkStarted() {
 		networkCounter++;
 		if(networkCounter > 0 && !networkActive) {
@@ -77,6 +87,12 @@ public class ZiftrNetworkManager {
 		}
 	}
 	
+	
+	/**
+	 * tell the registered network handler that network activity has finished, note the message is only delivered to the network handler when
+	 * all network activity (from all threads) has stopped, any call to {@link ZiftrNetworkManager}{@link #networkStarted()} should have a corresponding call
+	 * to this, otherwise the network handler may think network activity is constant
+	 */
 	public static synchronized void networkStopped() {
 		networkCounter--;
 		if(networkCounter <= 0 && networkActive) {

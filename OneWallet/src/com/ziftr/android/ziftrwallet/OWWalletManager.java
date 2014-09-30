@@ -41,10 +41,8 @@ import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
-import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -139,11 +137,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 
 			instance = new OWWalletManager(context);
-		} else {
-			// If used right shouldn't happen because close should always
-			// be called after every get instance call.
-			log("instance wasn't null and we called getInstance...");
-		}
+		} 
 		return instance;
 	}
 
@@ -707,12 +701,9 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		owTx = new OWTransaction(
 				coinId, 
-				OWFiat.USD, 
 				tx.getHashAsString().substring(0, 6), 
 				tx.getUpdateTime().getTime() / 1000,
-				tx.getValue(this.walletMap.get(coinId)),
-				OWWalletTransactionListAdapter.Type.TRANSACTION,
-				R.layout.accounts_wallet_tx_list_item);
+				tx.getValue(this.walletMap.get(coinId)));
 		owTx.setSha256Hash(new OWSha256Hash(tx.getHash().toString()));
 
 		List<String> addressStrings = new ArrayList<String>();;
@@ -731,9 +722,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		for (OWAddress a : addresses) {
 			owTx.addDisplayAddress(a.toString());
 		}
-
-		// TODO get this from settings
-		owTx.setFiatType(OWFiat.USD);
 
 		// The number of confirmations from bitcoin j.
 		owTx.setNumConfirmations(tx.getConfidence().getDepthInBlocks());
