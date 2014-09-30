@@ -66,8 +66,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		// can see field more clearly
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-		this.hideWalletHeader();
-
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
 
 		this.txItem = getWalletManager().readTransactionByHash(this.getSelectedCoin(), this.getArguments().getString(TX_ITEM_HASH_KEY));
@@ -135,7 +133,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		this.populateAddress();
 
 		this.populatePendingInformation();
-
 		this.sendToAddress.setOnClickListener(this);
 		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);

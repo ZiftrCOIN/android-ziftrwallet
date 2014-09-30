@@ -66,7 +66,7 @@ implements TextWatcher, OnClickListener {
 		// So that on screen rotates the background view stays invisible
 		getAddressBookParentFragment().setVisibility(View.INVISIBLE);
 
-		this.showWalletHeader();
+		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
 
 		this.initializeFromArguments();
 

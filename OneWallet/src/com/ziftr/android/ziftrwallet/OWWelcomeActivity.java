@@ -63,16 +63,28 @@ implements OnClickListener, OWNeutralDialogHandler {
 			Intent main = new Intent(OWWelcomeActivity.this, OWMainFragmentActivity.class);
 			main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			startActivity(main);
+			OWWelcomeActivity.this.finish();
 		} else if (v == setPassphraseButton) {
 			String passphrase = passphraseEditText.getText().toString();
 			String confirmPassphrase = confirmPassphraseEditText.getText().toString();
 
 			if (passphrase.equals(confirmPassphrase)) {
-				Intent main = new Intent(OWWelcomeActivity.this, OWMainFragmentActivity.class);
-				main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-				main.putExtra(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
-				startActivity(main);
-				OWWelcomeActivity.this.finish();
+				if (passphrase.length() > 0){
+					Intent main = new Intent(OWWelcomeActivity.this, OWMainFragmentActivity.class);
+					main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+					main.putExtra(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
+					startActivity(main);
+					OWWelcomeActivity.this.finish();
+				} else {
+					OWSimpleAlertDialog alertDialog = new OWSimpleAlertDialog();
+					Bundle b = new Bundle();
+					b.putInt(OWDialogFragment.REQUEST_CODE_KEY, OWRequestCodes.ALERT_USER_DIALOG);
+
+					// Set negative text to null to not have negative button
+					alertDialog.setupDialog("ziftrWALLET", "An empty passphrase is the same as no passphrase!", null, "OK", null);
+					alertDialog.show(getSupportFragmentManager(), "passphrase_is_empty_string");
+
+				}
 			} else {
 				OWSimpleAlertDialog alertDialog = new OWSimpleAlertDialog();
 				Bundle b = new Bundle();

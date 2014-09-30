@@ -78,7 +78,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.rootView = inflater.inflate(R.layout.accounts_send_coins, container, false);
 
-		this.showWalletHeader();
+		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
 
 		this.initializeViewFields();
 

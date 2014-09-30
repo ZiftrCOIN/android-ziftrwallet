@@ -29,8 +29,8 @@ public abstract class OWWalletUserFragment extends OWFragment {
 		return this.getOWMainActivity().findViewById(R.id.walletHeader);
 	}
 	
-	public void showWalletHeader() {
-		this.getOWMainActivity().showWalletHeader();
+	public void populateWalletHeader(View v) {
+		this.getOWMainActivity().populateWalletHeaderView(v);
 	}
 		
 }

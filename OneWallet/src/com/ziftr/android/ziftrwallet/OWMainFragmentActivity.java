@@ -192,11 +192,6 @@ ZiftrNetworkHandler {
 	private OWCoin selectedCoin;
 
 	/**
-	 * The view that contains all the info for the currently selected coin
-	 */
-	private View headerView;
-
-	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
 	 * to each of fragment types.
@@ -273,7 +268,6 @@ ZiftrNetworkHandler {
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
-		this.headerView = this.findViewById(R.id.walletHeader);
 
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance();
@@ -343,7 +337,6 @@ ZiftrNetworkHandler {
 
 		// Save which part of the app is currently open.
 		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
-		outState.putInt(WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
 		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
 		if (this.getSelectedCoin() != null) {
 			outState.putString(OWCoin.TYPE_KEY, this.getSelectedCoin().toString());
@@ -650,10 +643,6 @@ ZiftrNetworkHandler {
 
 	private void initializeHeaderViewsVisibility(Bundle args) {
 		if (args != null) {
-			if (args.getInt(WALLET_HEADER_VISIBILITY_KEY, -1) != -1) {
-				this.getWalletHeaderBar().setVisibility(args.getInt(WALLET_HEADER_VISIBILITY_KEY));
-			}
-
 			if (args.getInt(SEARCH_BAR_VISIBILITY_KEY, -1) != -1) {
 				this.getSearchBar().setVisibility(args.getInt(SEARCH_BAR_VISIBILITY_KEY));
 			}
@@ -824,8 +813,12 @@ ZiftrNetworkHandler {
 	 * @param oldPassphrase - Used to decrypt old keys, if not null
 	 * @param newPassphrase - Used to encrypt all keys, should not be null
 	 */
-	private void changePassphrase(String oldPassphrase, String newPassphrase) {
+	private boolean changePassphrase(String oldPassphrase, String newPassphrase) {
 		// TODO put up a blocking dialog while this is happening
+		if (newPassphrase.length() <=0){
+			this.alertUser("A password with no text is no password at all!", "passphrase_is_empty_string");
+			return false;
+		}
 		this.walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
 		
 		SharedPreferences prefs = this.getSharedPreferences(OWPreferencesUtils.PREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -833,6 +826,7 @@ ZiftrNetworkHandler {
 		String saltedHash = ZiftrUtils.saltedHashString(this, newPassphrase);
 		editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
 		editor.commit();
+		return true;
 	}
 
 	/**
@@ -945,7 +939,6 @@ ZiftrNetworkHandler {
 		if (fragToShow == null) {
 			fragToShow = new OWSendCoinsFragment();
 		}
-
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, OWTags.ACCOUNTS_INNER);
@@ -1002,13 +995,6 @@ ZiftrNetworkHandler {
 	 */
 	public OWWalletManager getWalletManager() {
 		return walletManager;
-	}
-
-	/**
-	 * @return the headerBar
-	 */
-	public View getWalletHeaderBar() {
-		return this.findViewById(R.id.walletHeader);
 	}
 
 	/**
@@ -1168,23 +1154,25 @@ ZiftrNetworkHandler {
 	public void handleResetPassphrasePositive(int requestCode,
 			String oldPassphrase, String newPassphrase, String confirmPassphrase) {
 		// Can assume that there was a previously entered passphrase because 
-		// of the way the dialog was set up. 
+		// of the way the dialog was set up.
 		if (newPassphrase.equals(confirmPassphrase)) {
-			if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG) {
-				if (OWPreferencesUtils.getPassphraseDisabled(this)) {
-					OWPreferencesUtils.setPassphraseDisabled(this, false);
-				}
-				((OWSettingsFragment)this.getSupportFragmentManager(
-						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
-			}
-			
 			byte[] oldPassphraseHash = ZiftrUtils.saltedHash(this, oldPassphrase);
 			// It is possible that oldPassphraseHash and the value stored in prefs are both null
 			// if the user didn't have a passphrase when this was called. 
 			// In that case, input hash matches the stored hash because they are both null
 			if (OWPreferencesUtils.inputHashMatchesStoredHash(this, oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
-				this.changePassphrase(oldPassphrase, newPassphrase);
+				if (this.changePassphrase(oldPassphrase, newPassphrase)){ 
+					//if the password was changed
+					if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG) { 
+						//if we were setting the passphrase, turn disabled passphrase off
+						if (OWPreferencesUtils.getPassphraseDisabled(this)) {
+							OWPreferencesUtils.setPassphraseDisabled(this, false);
+						}
+						((OWSettingsFragment)this.getSupportFragmentManager(
+								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
+					}
+				}
 			} else {
 				// If don't match, tell user. 
 				this.alertUser("The passphrase you entered doesn't match your "
@@ -1281,16 +1269,13 @@ ZiftrNetworkHandler {
 	 */
 	public void setSelectedCoin(OWCoin selectedCoin) {
 		this.selectedCoin = selectedCoin;
-
-		this.populateWalletHeaderView();
-
 	}
 
 	/**
 	 * Making this a separate method to increase abstraction and just in
 	 * case we ever need to call this by itself. 
 	 */
-	private void populateWalletHeaderView() {
+	public void populateWalletHeaderView(View headerView) {
 		//now that a coin type is set, setup the header view for it
 		//headerView.setVisibility(View.VISIBLE); //let fragments do this when they're displayed
 
@@ -1462,15 +1447,6 @@ ZiftrNetworkHandler {
 	public boolean searchBarIsVisible() {
 		View search = findViewById(R.id.searchBar);
 		return search.getVisibility() == View.VISIBLE;
-	}
-
-
-	public void hideWalletHeader() {
-		this.headerView.setVisibility(View.GONE);
-	}
-
-	public void showWalletHeader() {
-		this.headerView.setVisibility(View.VISIBLE);
 	}
 
 	@Override

@@ -44,13 +44,6 @@
                 android:layout_height="wrap_content"
                 layout="@layout/_search_bar" />
 
-            <include
-                android:id="@+id/walletHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                layout="@layout/_dual_icon_coin_view"
-                android:visibility="gone" />
-
             <FrameLayout
                 android:id="@+id/oneWalletBaseFragmentHolder"
                 android:layout_width="match_parent"

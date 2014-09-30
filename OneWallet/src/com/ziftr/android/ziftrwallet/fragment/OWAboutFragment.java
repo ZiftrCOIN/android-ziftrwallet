@@ -18,7 +18,6 @@ public class OWAboutFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.hideWalletHeader();
 		View rootView = inflater.inflate(R.layout.section_about_layout, container, false);
 		TextView websiteLink = (TextView) rootView.findViewById(R.id.about_website_link);
 		websiteLink.setMovementMethod(LinkMovementMethod.getInstance());

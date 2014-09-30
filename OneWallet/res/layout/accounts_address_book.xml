@@ -4,6 +4,12 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
+    <include
+        android:id="@+id/walletHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/_dual_icon_coin_view" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/ow_quarter_icon_size"

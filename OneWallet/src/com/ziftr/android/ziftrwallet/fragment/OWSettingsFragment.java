@@ -35,7 +35,6 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.hideWalletHeader();
 
 		View rootView = inflater.inflate(R.layout.section_settings_layout, container, false);
 
