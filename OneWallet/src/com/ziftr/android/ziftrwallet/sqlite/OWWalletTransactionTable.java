@@ -10,12 +10,9 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
-import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
-import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class OWWalletTransactionTable extends OWCoinRelativeTable {
@@ -91,9 +88,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	}
 
 	protected void insertTx(OWTransaction tx, SQLiteDatabase db) {
-		long insertId = db.insert(getTableName(tx.getCoinId()), 
-				null, txToContentValues(tx));
-		tx.setId(insertId);
+		db.insert(getTableName(tx.getCoinId()), null, txToContentValues(tx));
 	}
 
 	//	protected void updateNumConfirmationsOrInsert(OWTransaction tx, SQLiteDatabase db) {
@@ -307,10 +302,6 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	}
 
 	protected void deleteTransaction(OWTransaction tx, SQLiteDatabase db) {
-		if (tx.getId() == -1) {
-			// Shouldn't happen
-			throw new RuntimeException("Error: id has not been set.");
-		}
 
 		db.delete(getTableName(tx.getCoinId()), getWhereClaus(tx), null);
 	}
@@ -318,17 +309,10 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 	private OWTransaction cursorToTransaction(OWCoin coinId, Cursor c,
 			SQLiteDatabase db) {
 
-		// TODO get from settings
-		OWFiat fiatType = OWFiat.USD;
-
-		OWTransaction tx = new OWTransaction(coinId, fiatType, 
+		OWTransaction tx = new OWTransaction(coinId,
 				c.getString(c.getColumnIndex(COLUMN_NOTE)), 
 				c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)), 
-				new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))), 
-				OWWalletTransactionListAdapter.Type.TRANSACTION,
-				R.layout.accounts_wallet_tx_list_item);
-
-		tx.setId(c.getLong(c.getColumnIndex(COLUMN_ID)));
+				new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))) );
 
 		tx.setSha256Hash(new OWSha256Hash(c.getString(c.getColumnIndex(COLUMN_HASH))));
 
@@ -385,18 +369,22 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 	private String getWhereClaus(OWTransaction tx) {
 		StringBuilder sb = new StringBuilder();
-		if (tx.getId() != -1) {
-			sb.append(COLUMN_ID);
-			sb.append(" = ");
-			sb.append(tx.getId());
-			sb.append(" ");
-		} else {
-			sb.append(COLUMN_HASH);
-			sb.append(" = ");
-			sb.append(DatabaseUtils.sqlEscapeString(tx.getSha256Hash().toString()));
-			sb.append(" ");
-		}
+
+		sb.append(COLUMN_HASH);
+		sb.append(" = ");
+		sb.append(DatabaseUtils.sqlEscapeString(tx.getSha256Hash().toString()));
+		sb.append(" ");
+		
 		return sb.toString();
 	}
 
+	
+	
+	
 }
+
+
+
+
+
+

@@ -369,6 +369,10 @@ public class ZiftrUtils {
 	}
 	
 	public static byte[] saltedHash(String salt, String newPassphrase) {
+		if (newPassphrase == null) {
+			return null;
+		}
+		
 		byte[] newPassphraseBytes = newPassphrase.getBytes();
 		byte[] concat = new byte[32 + newPassphrase.getBytes().length];
 		System.arraycopy(ZiftrUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);

@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypterException;
+import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -24,6 +24,12 @@ public abstract class OWPreferencesUtils {
 
 	/** The key to get and save the salt as used by the specific user of the application. */
 	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
+
+	/** So we can skip the welcome screen and save the boolean. */
+	public final static String PASSPHRASE_DISABLED_KEY = "ow_disabled_passphrase_key";
+
+	/** So we can save the boolean from settings, whether fees are edititable or not. */
+	public final static String EDITABLE_FEES_KEY = "ow_editable_fees_key";
 
 	/**
 	 * Gets the stored hash of the users passphrase, if there is one.
@@ -64,6 +70,8 @@ public abstract class OWPreferencesUtils {
 		byte[] storedHash = getStoredPassphraseHash(a);
 		if (storedHash != null && inputHash != null) {
 			return Arrays.equals(storedHash, inputHash); 
+		} else if (storedHash == null && inputHash == null) {
+			return true;
 		} else {
 			ZLog.log("Error, An hash value was null that shouldn't have been.");
 			return false;
@@ -89,6 +97,30 @@ public abstract class OWPreferencesUtils {
 		editor.commit();
 
 		return salt;
+	}
+
+	public static boolean getFeesAreEditable(Context a) {
+		SharedPreferences prefs = getPrefs(a);
+		return prefs.getBoolean(EDITABLE_FEES_KEY, false);
+	}
+
+	public static void setFeesAreEditable(Context a, boolean feesAreEditable) {
+		SharedPreferences prefs = getPrefs(a);
+		Editor editor = prefs.edit();
+		editor.putBoolean(EDITABLE_FEES_KEY, feesAreEditable);
+		editor.commit();
+	}
+
+	public static boolean getPassphraseDisabled(Context a) {
+		SharedPreferences prefs = getPrefs(a);
+		return prefs.getBoolean(PASSPHRASE_DISABLED_KEY, false);
+	}
+
+	public static void setPassphraseDisabled(Context a, boolean isDisabled) {
+		SharedPreferences prefs = getPrefs(a);
+		Editor editor = prefs.edit();
+		editor.putBoolean(PASSPHRASE_DISABLED_KEY, isDisabled);
+		editor.commit();
 	}
 
 	/**

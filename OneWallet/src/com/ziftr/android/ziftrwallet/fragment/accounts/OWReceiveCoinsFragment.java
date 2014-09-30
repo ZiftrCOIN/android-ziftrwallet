@@ -30,6 +30,7 @@ import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
@@ -46,6 +47,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	private ImageView qrCodeImageView;
 	private View qrCodeContainer;
 	private View scrollView;
+	private ImageView generateAddressForLabel;
 
 	private boolean qrCodeGenerated = false;
 
@@ -61,7 +63,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.showWalletHeader();
 
 		this.initializeViewFields(inflater, container);
-		
+
 		this.initializeQrCodeFromBundle(savedInstanceState);
 
 		return this.rootView;
@@ -88,25 +90,31 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
 			}
 		} else if (v == this.qrCodeImageView) {
-			if(!this.fragmentHasAddress() && !this.labelEditText.getText().toString().isEmpty()) {
-				// TODO make the passphrase diaog have extra information about how they 
-				// won't be able to delete the address they are about to make
-				if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
-					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
-					getOWMainActivity().showGetPassphraseDialog(
-							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
-							OWTags.VALIDATE_PASS_RECEIVE);
-				} else {
-					getOWMainActivity().alertConfirmation(OWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
-							"Addresses cannot be deleted once they are created. Are you sure?", 
-							OWTags.CONFIRM_NEW_ADDRESS, new Bundle());
-				}
-			}
+			this.conditionallyGenerateNewAddress(true);
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(true, R.id.receiveCoinBaseFrameLayout);
+		} else if (v == this.generateAddressForLabel){
+			this.conditionallyGenerateNewAddress(false);
 		}
 
+	}
+
+	private void conditionallyGenerateNewAddress(boolean requireFragHasAddress) {
+		if(!(requireFragHasAddress && this.fragmentHasAddress()) && !this.labelEditText.getText().toString().isEmpty()) {
+			// TODO make the passphrase diaog have extra information about how they 
+			// won't be able to delete the address they are about to make
+			if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
+				Bundle b = new Bundle();
+				b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
+				getOWMainActivity().showGetPassphraseDialog(
+						OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
+						OWTags.VALIDATE_PASS_RECEIVE);
+			} else {
+				getOWMainActivity().alertConfirmation(OWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
+						"Addresses cannot be deleted once they are created. Are you sure?", 
+						OWTags.CONFIRM_NEW_ADDRESS, new Bundle());
+			}
+		}
 	}
 
 	/**
@@ -117,7 +125,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		super.initializeViewFields(this.rootView, R.id.recallAddressFromHistoryIcon);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
-		
+
 
 		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
@@ -128,7 +136,8 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
-		
+		this.generateAddressForLabel = (ImageView) this.rootView.findViewById(R.id.generateNewAddressForLabel);
+		this.generateAddressForLabel.setOnClickListener(this);
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
 		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
 			@Override
@@ -155,14 +164,17 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setPadding(0, 0, 0, 0);
-
-		int qrCodeDimention = this.qrCodeImageView.getWidth();
+		int qrCodeDimension = this.qrCodeImageView.getWidth();
+		qrCodeDimension = Math.min(qrCodeDimension, rootView.getWidth());
+		qrCodeDimension = Math.min(qrCodeDimension, rootView.getHeight());
 		QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(addressString, null,
-				Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), qrCodeDimention);
+				Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), qrCodeDimension/2);
+		this.qrCodeImageView.getLayoutParams().width = qrCodeDimension;
+		this.qrCodeImageView.getLayoutParams().height = qrCodeDimension;
+
 
 		try {
 			Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
-
 			if (withAnimation) {
 				Drawable[] layers = new Drawable[2];
 				layers[0] = this.qrCodeImageView.getDrawable();
@@ -171,6 +183,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				this.qrCodeImageView.setImageDrawable(transitionDrawable);
 				transitionDrawable.startTransition(FADE_DURATION);
 			} else {
+				ZLog.log("Lost Souls.");
 				this.qrCodeImageView.setImageBitmap(bitmap);
 			}
 		} catch (WriterException e) {
@@ -262,16 +275,18 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	public View getContainerView() {
 		return this.scrollView;
 	}
-	
+
 	public void toggleAddressCreation(){
 		if (!labelEditText.getText().toString().equals("") || fragmentHasAddress()){
 			qrCodeContainer.setAlpha(1);
 			addressEditText.setAlpha(1);
+			generateAddressForLabel.setClickable(true);
 		} else {
 			qrCodeContainer.setAlpha((float) .5);
 			addressEditText.setAlpha((float) .5);
+			generateAddressForLabel.setClickable(false);
 		}
 	}
-	
+
 }
 

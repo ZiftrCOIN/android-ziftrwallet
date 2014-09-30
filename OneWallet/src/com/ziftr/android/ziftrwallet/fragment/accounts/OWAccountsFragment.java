@@ -97,6 +97,9 @@ public class OWAccountsFragment extends OWFragment {
 
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
+		
+		//show Add Currency Message if user has no wallets
+		this.toggleAddCurrencyMessage();
 
 		// Return the view which was inflated
 		return rootView;
@@ -200,11 +203,6 @@ public class OWAccountsFragment extends OWFragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, 
 					int position, long id) {
-				//ignore click on footer
-				//				if (currencyListView.getAdapter().getItemViewType(
-				//						position) == OWCurrencyListAdapter.footerType){
-				//					return;
-				//				}
 				OWCurrencyListItem item = (OWCurrencyListItem) 
 						parent.getItemAtPosition(position);
 
@@ -219,12 +217,6 @@ public class OWAccountsFragment extends OWFragment {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				//ignore long click on footer
-				//				if (currencyListView.getAdapter().getItemViewType(
-				//						position) == OWCurrencyListAdapter.footerType){
-				//					return false;
-				//				}
-
 				OWCurrencyListItem item = (OWCurrencyListItem) parent.getItemAtPosition(position);
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, item.getCoinId().toString());
@@ -254,9 +246,24 @@ public class OWAccountsFragment extends OWFragment {
 
 	public void removeFromView(int pos){
 		this.userWallets.remove(pos);
-
 		this.refreshListOfUserWallets();
+		this.toggleAddCurrencyMessage();
+	}
+	
+	public void toggleAddCurrencyMessage(){
+		if (this.userWallets.size() <=0){
+			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.VISIBLE);
+		} else {
+			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.GONE);
+		}
+
 	}
 
-
 }
+
+
+
+
+
+
+

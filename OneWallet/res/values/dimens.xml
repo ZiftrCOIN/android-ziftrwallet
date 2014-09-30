@@ -16,10 +16,12 @@
 
     <!-- 2*margin + size == empty_space_padding -->
     <dimen name="ow_total_icon_side_length">45dp</dimen>
+    <dimen name="ow_medium_icon_side_length">38dp</dimen>
     <!-- SearchBar edit text height -->
     <dimen name="ow_searchBarEditText">35dp</dimen>
     <dimen name="ow_large_icon_size">130dp</dimen>
     <dimen name="ow_large_icon_margin">20dp</dimen>
+    <dimen name="ow_medium_icon_size">80dp</dimen>
     <!-- Half of the icon size -->
     <dimen name="ow_half_icon_size">20dp</dimen>
     <!-- Quarter of the icon size -->
@@ -42,5 +44,8 @@
 
     <!-- ow screen margin -->
     <dimen name="ow_horizontal_margin">55dp</dimen>
+    <dimen name="ow_txn_field_with_icon_margin">9dp</dimen>
+    
+    <dimen name="ow_checkbox_size">36dp</dimen>
 
 </resources>

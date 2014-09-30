@@ -11,6 +11,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
@@ -27,7 +28,7 @@ implements OnClickListener, OWNeutralDialogHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		// To make activity fullscreen
 		// Have to do this before setContentView so that we don't get a AndroidRuntimeException
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -71,10 +72,11 @@ implements OnClickListener, OWNeutralDialogHandler {
 				main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 				main.putExtra(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
 				startActivity(main);
+				OWWelcomeActivity.this.finish();
 			} else {
 				OWSimpleAlertDialog alertDialog = new OWSimpleAlertDialog();
-
-				alertDialog.setTargetFragment(null, OWRequestCodes.ALERT_USER_DIALOG);
+				Bundle b = new Bundle();
+				b.putInt(OWDialogFragment.REQUEST_CODE_KEY, OWRequestCodes.ALERT_USER_DIALOG);
 
 				// Set negative text to null to not have negative button
 				alertDialog.setupDialog("ziftrWALLET", "Your passphrases do not match!", null, "OK", null);

@@ -18,26 +18,27 @@ import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.TempPreferencesUtil;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * An adapter class for transactions.
  */
-public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTransaction> {
+public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWSearchableListItem> {
 	
-	public enum Type {
-		TRANSACTION,
-		PENDING_DIVIDER,
-		HISTORY_DIVIDER
-	}
+	//different types for the views in the list
+	public static final int TYPE_TRANSACTION = 0;
+	public static final int TYPE_DIVIDER = 1;
+	
+	private static final int TYPE_MAX_TYPES = 2;
 
-	public OWWalletTransactionListAdapter(Context ctx, List<OWTransaction> txList) {
+	public OWWalletTransactionListAdapter(Context ctx, List<OWSearchableListItem> txList) {
 		super(ctx, 0, txList);
 	}
 	
 	public OWWalletTransactionListAdapter(Context context) {
 		// Had to add this constructor to get rid of warnings, for some reason.
-	    this(context, new ArrayList<OWTransaction>());
+	    this(context, new ArrayList<OWSearchableListItem>());
 	}
 	
 	/**
@@ -46,19 +47,22 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 	 */
 	@Override
 	public int getItemViewType(int position) {
-		return getItemViewType(getItem(position));
-	}
 	
-	private int getItemViewType(OWTransaction item) {
-		return item.getTxViewType().ordinal();
+		if(this.getItem(position) instanceof OWTransaction) {
+			return TYPE_TRANSACTION;
+		}
+		else {
+			return TYPE_DIVIDER;
+		}
 	}
 
+	
 	/**
 	 * We have two types, dividerType and transactionType. 
 	 */
 	@Override
 	public int getViewTypeCount() {
-		return OWWalletTransactionListAdapter.Type.values().length;
+		return TYPE_MAX_TYPES;
 	}
 
 	/**
@@ -68,15 +72,24 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 	 */
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		// The convertView is an oldView that android is recycling.
 
-		OWTransaction txListItem = getItem(position);
+		int viewType = getItemViewType(position);
+		
+		//OWTransaction txListItem = getItem(position);
 		if (convertView == null) {
-			// If it doesn't have an old view then we make a new one 
-			convertView = this.getInflater().inflate(txListItem.getResId(), null);
+			// If it doesn't have an old view then we make a new one
+			if(viewType == TYPE_TRANSACTION) {
+				convertView = this.getInflater().inflate(R.layout.accounts_wallet_tx_list_item, null);
+			}
+			else {
+				convertView = this.getInflater().inflate(R.layout.accounts_wallet_tx_list_divider, null);
+			}
 		}
 
-		if (getItemViewType(position) == Type.TRANSACTION.ordinal()) {
+		if (viewType == TYPE_TRANSACTION) {
+			
+			OWTransaction txListItem = (OWTransaction) getItem(position);
+			
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView txTitleTextView = (TextView) convertView.findViewById(R.id.txTitle);
@@ -92,12 +105,14 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 					txListItem.getCoinId(), txListItem.getTxAmount());
 			txAmount.setText(amt.toPlainString());
 
+			OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+			
 			TextView txAmountFiatEquiv = (TextView) 
 					convertView.findViewById(R.id.txAmountFiatEquiv);
 			BigInteger fiatAmt = OWConverter.convert(txListItem.getTxAmount(), 
-					txListItem.getCoinId(), txListItem.getFiatType());
+					txListItem.getCoinId(), fiat);
 			
-			txAmountFiatEquiv.setText(OWFiat.formatFiatAmount(txListItem.getFiatType(), ZiftrUtils.bigIntToBigDec(txListItem.getCoinId(), fiatAmt), true));
+			txAmountFiatEquiv.setText(OWFiat.formatFiatAmount(fiat, ZiftrUtils.bigIntToBigDec(txListItem.getCoinId(), fiatAmt), true));
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
 			Drawable image = this.getContext().getResources().getDrawable(
@@ -113,15 +128,18 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 				txAmountFiatEquiv.setTextColor(this.getContext().getResources().getColor(R.color.Green));
 
 			}
-			return convertView;
 
-		} else {
+		} 
+		else {
 			// Just have to make sure the text is set for the appropriate divider
 			TextView walletTxListTextView = (TextView) 
 					convertView.findViewById(R.id.walletTxListDividerTextView);
-			walletTxListTextView.setText(txListItem.getTxNote());
-			return convertView;
+			
+			String dividerText = this.getItem(position).toString();
+			walletTxListTextView.setText(dividerText);
 		}
+		
+		return convertView;
 
 	}
 
@@ -148,16 +166,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWTr
 		}
 		return imgResId;
 	}
-	
-	//we don't want the dividers to be enabled
-	@Override
-	public boolean isEnabled(int position){
-		if (getItemViewType(position) == Type.PENDING_DIVIDER.ordinal() || getItemViewType(position) == Type.HISTORY_DIVIDER.ordinal() ){
-			return false;
-		} else {
-			return super.isEnabled(position);
-		}
-	}
+
 
 	@Override
 	public void applySortToFullList() {

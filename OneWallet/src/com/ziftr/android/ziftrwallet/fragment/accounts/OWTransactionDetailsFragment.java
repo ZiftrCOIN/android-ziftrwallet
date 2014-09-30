@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -21,11 +22,12 @@ import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWEditState;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.TempPreferencesUtil;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWTransactionDetailsFragment extends OWWalletUserFragment 
-implements OWEditableTextBoxController.EditHandler<OWTransaction> {
+implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListener {
 
 	public static final String TX_ITEM_HASH_KEY = "txItemHash";
 
@@ -46,6 +48,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 	private TextView timeLeft;
 	private ProgressBar progressBar;
 	private ImageView coinLogo;
+	private ImageView sendToAddress;
 
 	private OWTransaction txItem;
 
@@ -83,6 +86,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 		this.coinLogo = (ImageView) rootView.findViewById(R.id.coin_logo);
+		this.sendToAddress = (ImageView) rootView.findViewById(R.id.sendTo);
 		this.initFields(savedInstanceState);
 
 		return this.rootView;
@@ -119,10 +123,11 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
 
+		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
 		this.populateAmount();
 		this.populateCurrency();
 		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
-		this.currencyType.setText(this.txItem.getFiatType().getName());
+		this.currencyType.setText(fiat.getName());
 
 		Date date = new Date(this.txItem.getTxTime() * 1000);
 		this.time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
@@ -131,6 +136,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 
 		this.populatePendingInformation();
 
+		this.sendToAddress.setOnClickListener(this);
 		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
 		editLabelButton.setOnClickListener(controller);
@@ -158,15 +164,17 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 	}
 
 	private void populateCurrency() {
+		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+		
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
-				txItem.getCoinId(), txItem.getFiatType());
-		String formattedfiatAmt = OWFiat.formatFiatAmount(txItem.getFiatType(), 
+				txItem.getCoinId(), fiat);
+		String formattedfiatAmt = OWFiat.formatFiatAmount(fiat, 
 				ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
 
 		currency.setText(formattedfiatAmt);
 
 		TextView currencyType = (TextView) rootView.findViewById(R.id.currencyType);
-		currencyType.setText(this.txItem.getFiatType().getName());
+		currencyType.setText(fiat.getName());
 
 		TextView time = (TextView) rootView.findViewById(R.id.date);
 		Date date = new Date(this.txItem.getTxTime() * 1000);
@@ -177,9 +185,12 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {
 			String a = txItem.getDisplayAddresses().get(i);
+			ZLog.log("ABCEEEEE" + a);
 			sb.append(a);
 			if (i != txItem.getDisplayAddresses().size()-1) {
 				sb.append("\n");
+				ZLog.log("ABCDEF"+i);
+				ZLog.log("ABCGHE" + txItem.getDisplayAddresses().size());
 			}
 		}
 		addressTextView.setText(sb.toString());
@@ -188,29 +199,45 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 
 	private void populatePendingInformation() {
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
-		int confirmed = txItem.getNumConfirmations();
+		long confirmed = txItem.getNumConfirmations();
 
 		this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
 
-		int estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
+		long estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
 		this.timeLeft.setText(formatEstimatedTime(estimatedTime));
 
+		//in theory a really old network, or a network with fast enough blocks, could have more blocks than an int can hold
+		//however even in this case it's needed confirmations would still be a smaller number
+		//this just checks it so that if we're for some reason checking the progress of a really old transactions 
+		//it won't have usses due to converting a long to an int
+		int progress;
+		if(confirmed > totalConfirmations) {
+			progress = (int) confirmed;
+		}
+		else {
+			progress = totalConfirmations;
+		}
+		
 		this.progressBar.setMax(totalConfirmations);
-		this.progressBar.setProgress(confirmed);
+		this.progressBar.setProgress(progress);
 	}
 
-	public String formatEstimatedTime(int seconds) {
+	public void setTxItem(OWTransaction txItem) {
+		this.txItem = txItem;
+	}
+
+	public String formatEstimatedTime(long estimatedTime) {
 		StringBuilder sb = new StringBuilder();
-		if (seconds > 3600) {
-			int hours = seconds / 3600;
-			seconds = seconds % 3600;
+		if (estimatedTime > 3600) {
+			long hours = estimatedTime / 3600;
+			estimatedTime = estimatedTime % 3600;
 			sb.append(hours + " hours, ");
 		}
-		int minutes = seconds/60;
-		seconds = seconds % 60;
+		long minutes = estimatedTime/60;
+		estimatedTime = estimatedTime % 60;
 		sb.append (minutes + " minutes");
-		if (seconds != 0) {
-			sb.append(seconds + ", seconds");
+		if (estimatedTime != 0) {
+			sb.append(estimatedTime + ", seconds");
 		}
 		return sb.toString();
 	}
@@ -268,6 +295,13 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction> {
 	@Override
 	public OWEditState getCurEditState() {
 		return this.curEditState;
+	}
+
+	@Override
+	public void onClick(View v) {
+		if (v==this.sendToAddress){
+			getOWMainActivity().openSendCoinsView(this.addressTextView.getText().toString());
+		}
 	}
 
 }

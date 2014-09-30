@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-    
+
     <ListView
         android:id="@+id/currencyListView"
         android:layout_width="match_parent"
@@ -12,5 +12,21 @@
         android:divider="@null"
         android:padding="0dp" >
     </ListView>
-    
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/ow_quarter_icon_size"
+        android:background="@drawable/dropshadow" />
+
+    <ImageView
+        android:id="@+id/addAllCheckedCurrencies"
+        android:layout_width="@dimen/ow_large_icon_size"
+        android:layout_height="@dimen/ow_large_icon_size"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:contentDescription="@string/ow_empty_string"
+        android:padding="@dimen/ow_large_icon_margin"
+        android:src="@drawable/button_add_currency_clickable" >
+    </ImageView>
+
 </LinearLayout>

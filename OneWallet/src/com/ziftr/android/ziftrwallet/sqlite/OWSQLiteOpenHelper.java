@@ -10,15 +10,12 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
-import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
@@ -443,11 +440,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public synchronized OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
 			BigInteger txFee, List<String> displayAddresses, OWSha256Hash hash, 
-			String note, int numConfirmations) {
-		OWTransaction tx = new OWTransaction(coinId, OWFiat.USD, 
-				note, System.currentTimeMillis() / 100, txAmount, 
-				OWWalletTransactionListAdapter.Type.TRANSACTION, 
-				R.layout.accounts_wallet_tx_list_item);
+			String note, long numConfirmations) {
+		OWTransaction tx = new OWTransaction(coinId, note, System.currentTimeMillis() / 100, txAmount);
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);

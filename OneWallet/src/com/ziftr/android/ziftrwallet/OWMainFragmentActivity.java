@@ -186,7 +186,6 @@ ZiftrNetworkHandler {
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
 
-
 	/** reference to searchBarEditText */
 	private EditText searchEditText;
 
@@ -278,10 +277,10 @@ ZiftrNetworkHandler {
 
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance();
-		
+
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
-		
+
 		// Get passphrase from welcome screen if exists
 		// TODO is this using the hash?
 		Bundle info = getIntent().getExtras();
@@ -358,16 +357,17 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public void onBackPressed() {
-
-		OWFragment topFragment = (OWFragment) 
-				this.getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
+		if (drawerMenuIsOpen()){
+			this.menuDrawer.closeDrawer(Gravity.LEFT);
+			return;
+		}
+		OWFragment topFragment = this.getTopDisplayedFragment();
 		if (topFragment != null && topFragment.handleBackPress()) {
 			return;
 		}
 
 		String curSelected = getCurrentlySelectedDrawerMenuOption();
 		if (curSelected == null) {
-			ZLog.log("No selected section... Why did this happen?");
 			super.onBackPressed();
 		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
 			super.onBackPressed();
@@ -384,6 +384,13 @@ ZiftrNetworkHandler {
 	}
 
 
+
+	private OWFragment getTopDisplayedFragment() {
+		return (OWFragment) this.getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
+	}
+
+
+
 	/**
 	 * Here we need to close all the wallets. 
 	 */
@@ -397,10 +404,19 @@ ZiftrNetworkHandler {
 
 
 
+	/**
+	 * When the user hits the sync button, we get the top fragment
+	 * and refresh it's data.
+	 * 
+	 * @param v
+	 */
 	@Override
 	public void onClick(View v) {
-		if(v.getId() == R.id.rightIcon) {
-			//start sync
+		if (v.getId() == R.id.rightIcon) {
+			OWFragment top = this.getTopDisplayedFragment();
+			if (top != null) {
+				top.refreshData();
+			}
 		}
 	}
 
@@ -447,7 +463,7 @@ ZiftrNetworkHandler {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = 
 				this.getSupportFragmentManager().beginTransaction();
-		
+
 		// TODO add animation to transaciton here
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
 
@@ -811,7 +827,7 @@ ZiftrNetworkHandler {
 	private void changePassphrase(String oldPassphrase, String newPassphrase) {
 		// TODO put up a blocking dialog while this is happening
 		this.walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
-		
+
 		SharedPreferences prefs = this.getSharedPreferences(OWPreferencesUtils.PREFERENCES_NAME, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
 		String saltedHash = ZiftrUtils.saltedHashString(this, newPassphrase);
@@ -825,29 +841,38 @@ ZiftrNetworkHandler {
 	 * @param bundle with OWCoin of wallet to add
 	 */
 	public void addNewCurrency(Bundle info) {
-		OWCoin newItem = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
-		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
-		// Make sure that this view only has wallets
-		// in it which the user do
-		for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
-			if (type == newItem) {
-				// Already in list, shouldn't ever get here though because
-				// we only show currencies in the dialog which we don't have
-				this.onBackPressed();
-				return;
-			}
-		}
-		if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
-			// We can assume the wallet hasn't been set up yet
-			// or we wouldn't have gotten here 
+		ArrayList<String> toAdd = info.getStringArrayList(OWCoin.TYPE_KEY);
+		if (toAdd.size() > 0){
+			for (String itemToAdd : toAdd){
+				OWCoin newItem = OWCoin.valueOf(itemToAdd);
+				// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
+				// Make sure that this view only has wallets
+				// in it which the user do
+				for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
+					if (type == newItem) {
+						// Already in list, shouldn't ever get here though because
+						// we only show currencies in the dialog which we don't have
+						this.onBackPressed();
+						return;
+					}
+				}
+				if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
+					// We can assume the wallet hasn't been set up yet
+					// or we wouldn't have gotten here 
 
-			if (!walletManager.walletHasBeenSetUp(newItem)) {
-				if (walletManager.setUpWallet(newItem)) {
-					Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
-					this.onBackPressed();
+					if (!walletManager.walletHasBeenSetUp(newItem)) {
+						if (walletManager.setUpWallet(newItem)) {
+						} else {
+							Toast.makeText(this, "Error a wallet could not be set up!", Toast.LENGTH_LONG).show();
+							return;
+						}
+					}
 				}
 			}
+			Toast.makeText(this, "Wallet(s) Created!", Toast.LENGTH_LONG).show();
+			this.onBackPressed();
 		}
+
 	}
 
 	/**
@@ -915,7 +940,7 @@ ZiftrNetworkHandler {
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openSendCoinsView() {
+	public void openSendCoinsView(String address) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.SEND_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWSendCoinsFragment();
@@ -924,6 +949,10 @@ ZiftrNetworkHandler {
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, OWTags.ACCOUNTS_INNER);
+
+		if (address!=null){
+			((OWSendCoinsFragment) fragToShow).setSendToAddress(address);		
+		}
 	}
 
 	/**
@@ -1109,15 +1138,11 @@ ZiftrNetworkHandler {
 			break;
 		}
 	}
-
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(this, passphrase);
 		if (OWPreferencesUtils.inputHashMatchesStoredHash(this, inputHash)) {
 			switch(requestCode) {
-			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
-				addNewCurrency(info);
-				break;
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 				OWReceiveCoinsFragment receiveFrag = (OWReceiveCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
@@ -1132,7 +1157,7 @@ ZiftrNetworkHandler {
 		} else {
 			this.alertUser("Error: Passphrases don't match. ", "wrong_passphrase");
 		}
-		
+
 	}
 
 	/**
@@ -1146,7 +1171,18 @@ ZiftrNetworkHandler {
 		// Can assume that there was a previously entered passphrase because 
 		// of the way the dialog was set up. 
 		if (newPassphrase.equals(confirmPassphrase)) {
+			if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG) {
+				if (OWPreferencesUtils.getPassphraseDisabled(this)) {
+					OWPreferencesUtils.setPassphraseDisabled(this, false);
+				}
+				((OWSettingsFragment)this.getSupportFragmentManager(
+						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
+			}
+
 			byte[] oldPassphraseHash = ZiftrUtils.saltedHash(this, oldPassphrase);
+			// It is possible that oldPassphraseHash and the value stored in prefs are both null
+			// if the user didn't have a passphrase when this was called. 
+			// In that case, input hash matches the stored hash because they are both null
 			if (OWPreferencesUtils.inputHashMatchesStoredHash(this, oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
 				this.changePassphrase(oldPassphrase, newPassphrase);
@@ -1155,12 +1191,13 @@ ZiftrNetworkHandler {
 				this.alertUser("The passphrase you entered doesn't match your "
 						+ "previous passphrase. Your previous passphrase is "
 						+ "still in place.", "passphrases_dont_match");
-			}
+			} 
 		} else {
 			this.alertUser("The passphrases you entered don't match. Your previous "
 					+ "passphrase is still in place.", "wrong_re-enter_passphrase");
 		}
 	}
+
 
 	@Override
 	public void handleConfirmationPositive(int requestCode, Bundle info) {
@@ -1172,6 +1209,9 @@ ZiftrNetworkHandler {
 			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));
+			if (this.selectedCoin == coinId){
+				this.selectedCoin = null;
+			}
 			break;
 		case OWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
 			OWReceiveCoinsFragment receiveFrag = (OWReceiveCoinsFragment) getSupportFragmentManager(
@@ -1200,14 +1240,13 @@ ZiftrNetworkHandler {
 			break;
 		}
 	}
-	
+
 	public void updateTopFragmentView() {
 		// If already on the UI thread, then it just does this right now
 		this.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				OWFragment topFragment = (OWFragment) 
-						getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
+				OWFragment topFragment = getTopDisplayedFragment();
 				if (topFragment != null) {
 					topFragment.onDataUpdated();
 				}
@@ -1277,7 +1316,7 @@ ZiftrNetworkHandler {
 		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(OWFiat.USD, walletBalanceInFiat, true));
 
 		ImageView syncButton = (ImageView)headerView.findViewById(R.id.rightIcon);
-		syncButton.setImageResource(R.drawable.icon_sync_button);
+		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
 		syncButton.setOnClickListener(this);
 	}
 
@@ -1437,8 +1476,7 @@ ZiftrNetworkHandler {
 
 	@Override
 	public void handleExpiredLoginToken() {
-		// TODO Auto-generated method stub
-
+		//TODO -wallet app doesn't yet use login tokens
 	}
 
 	@Override
@@ -1449,20 +1487,17 @@ ZiftrNetworkHandler {
 
 	@Override
 	public void handleDataUpdated() {
-		// TODO Auto-generated method stub
-
+		this.updateTopFragmentView();
 	}
 
 	@Override
 	public void networkStarted() {
-		// TODO Auto-generated method stub
-
+		//TODO -start network sync'ing animationg here
 	}
 
 	@Override
 	public void networkStopped() {
-		// TODO Auto-generated method stub
-
+		//TODO -stop network sync'ing animationg here
 	}
 
 }

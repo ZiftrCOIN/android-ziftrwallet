@@ -16,8 +16,8 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.zxing.client.android.CaptureActivity;
@@ -62,10 +62,12 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private View getQRCodeButton;
 	private View pasteButton;
 
-	private Button cancelButton;
-	private Button sendButton;
+	private ImageView cancelButton;
+	private ImageView sendButton;
 
 	private View sendCoinsContainingView;
+	
+	private String prefilledAddress;
 
 	/**
 	 * Inflate, initialize, and return the send coins layout.
@@ -208,13 +210,35 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.pasteButton = this.rootView.findViewById(R.id.send_paste_icon);
 		this.pasteButton.setOnClickListener(this);
 
-		this.cancelButton = (Button) this.rootView.findViewById(R.id.leftButton);
-		cancelButton.setText("CANCEL");
+		this.cancelButton = (ImageView) this.rootView.findViewById(R.id.cancel_button);
 		this.cancelButton.setOnClickListener(this);
 
-		this.sendButton = (Button) this.rootView.findViewById(R.id.rightButton);
-		sendButton.setText("SEND");
+		this.sendButton = (ImageView) this.rootView.findViewById(R.id.send_button);
 		this.sendButton.setOnClickListener(this);
+		
+		if (this.prefilledAddress != null){
+			addressEditText.setText(this.prefilledAddress);
+		}
+		
+		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
+			this.coinFeeEditText.setFocusable(true);
+			this.coinFeeEditText.setFocusableInTouchMode(true);
+			this.coinFeeEditText.setClickable(true);
+			this.fiatFeeEditText.setFocusable(true);
+			this.fiatFeeEditText.setFocusableInTouchMode(true);
+			this.fiatFeeEditText.setClickable(true);
+		} else {
+			this.coinFeeEditText.clearFocus();
+			this.fiatFeeEditText.clearFocus();
+			
+			this.coinFeeEditText.setFocusable(false);
+			this.coinFeeEditText.setFocusableInTouchMode(false);
+			this.coinFeeEditText.setClickable(false);
+			this.fiatFeeEditText.setFocusable(false);
+			this.fiatFeeEditText.setFocusableInTouchMode(false);
+			this.fiatFeeEditText.setClickable(false);
+
+		}
 	}
 
 	/**
@@ -256,14 +280,12 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	}
 
 	private void initializeEditText() {
-		// TODO why wasn't all of this stuff done in XML?
+		// why wasn't all of this stuff done in XML? Because the most edittexts are using the same style so we are
+		// including the edittext layout so this has to be done programmatically in order to modify these  specific editTexts 
+		// and not the default styled edittext included all over the app
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-		this.fiatFeeEditText.setFocusable(false);
-		this.fiatFeeEditText.setClickable(false);
-		this.fiatFeeEditText.setCursorVisible(false);
-		this.fiatFeeEditText.setFocusableInTouchMode(false);
 	}
 
 	/**
@@ -418,6 +440,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	@Override
 	public View getContainerView() {
 		return this.sendCoinsContainingView;
+	}
+	
+	public void setSendToAddress(String address){
+		this.prefilledAddress = address;
 	}
 
 }

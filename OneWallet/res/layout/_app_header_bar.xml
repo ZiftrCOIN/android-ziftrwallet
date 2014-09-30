@@ -55,7 +55,7 @@
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
         android:text="@string/ow_app_name"
-        android:textColor="@color/ow_menu_default"
+        android:textColor="@color/ow_default_text"
         android:textSize="@dimen/ow_txt_medium" />
 
     <ImageView
