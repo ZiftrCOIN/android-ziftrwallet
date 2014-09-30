@@ -3,17 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <Button
+    <LinearLayout
         android:id="@+id/leftButton"
-        style="android:attr/buttonBarButtonStyle"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_margin="0dp"
         android:layout_weight="1"
-        android:background="@drawable/clickable_button_color"
+        android:background="@drawable/nav_footer_clickable"
         android:gravity="center"
-        android:textColor="@color/White"
-        android:text="@string/ow_cancel_button_text" />
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/ow_borderless_icon_margin"
+            android:src="@drawable/receive_button_icon" >
+        </ImageView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/ow_receive_button_text"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_mediumsmall" />
+    </LinearLayout>
 
     <View
         android:layout_width="1dp"
@@ -21,16 +36,31 @@
         android:background="@color/White" >
     </View>
 
-    <Button
+    <LinearLayout
         android:id="@+id/rightButton"
-        style="android:attr/buttonBarButtonStyle"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_margin="0dp"
         android:layout_weight="1"
-        android:background="@drawable/clickable_button_color"
+        android:background="@drawable/nav_footer_clickable"
         android:gravity="center"
-        android:textColor="@color/White"
-        android:text="@string/ow_send_button_text" />
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/ow_send_button_text"
+            android:textColor="@color/White"
+            android:textSize="@dimen/ow_txt_mediumsmall" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="@dimen/ow_borderless_icon_margin"
+            android:src="@drawable/send_button_icon" >
+        </ImageView>
+    </LinearLayout>
 
 </LinearLayout>

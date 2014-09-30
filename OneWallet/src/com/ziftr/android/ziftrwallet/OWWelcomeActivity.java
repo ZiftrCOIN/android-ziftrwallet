@@ -35,6 +35,7 @@ public class OWWelcomeActivity extends FragmentActivity implements OWNeutralDial
 		passphrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		final EditText confirmPassphrase = (EditText) this.findViewById(R.id.new_confirm_password).findViewById(R.id.ow_editText);
 		confirmPassphrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		passphrase.clearFocus();
 		confirmPassphrase.clearFocus();
 		setPassword.setOnClickListener(new OnClickListener() {
 			@Override
@@ -47,6 +48,7 @@ public class OWWelcomeActivity extends FragmentActivity implements OWNeutralDial
 					main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 					main.putExtra("SET_PASSPHRASE", inputHash);
 					startActivity(main);
+					OWWelcomeActivity.this.finish();
 				}else{
 					OWSimpleAlertDialog alertDialog = new OWSimpleAlertDialog();
 
@@ -67,6 +69,7 @@ public class OWWelcomeActivity extends FragmentActivity implements OWNeutralDial
 						OWMainFragmentActivity.class);
 				main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 				startActivity(main);
+				OWWelcomeActivity.this.finish();
 			}
 		});
 

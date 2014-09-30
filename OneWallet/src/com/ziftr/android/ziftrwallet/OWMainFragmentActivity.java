@@ -186,12 +186,12 @@ ZiftrNetworkHandler {
 	/** The key for getting the passphrase hash from the preferences. */
 	public final static String PASSPHRASE_KEY = "ow_passphrase_key_1";
 
+	public final static String PASSPHRASE_DISABLED_KEY = "ow_disabled_passphrase_key";
+
+	public final static String EDITABLE_FEES_KEY = "ow_editable_fees_key";
+
 	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
 	private boolean showingDialog = false;
-
-	//probably won't need this when its added to the preferences
-	private boolean feesAreEditable;
-
 
 	/** reference to searchBarEditText */
 	private EditText searchEditText;
@@ -1207,6 +1207,11 @@ ZiftrNetworkHandler {
 		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
 			if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG){
 				this.setPassphraseHash(ZiftrUtils.Sha256Hash(newPassphrase));
+				if (getPassphraseDisabled()){
+					this.setPassphraseDisabled(false);
+				}
+				((OWSettingsFragment)this.getSupportFragmentManager(
+						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
 			} else {
 				byte[] inputHash = ZiftrUtils.Sha256Hash(oldPassphrase);
 				if (this.inputHashMatchesStoredHash(inputHash)) {
@@ -1527,11 +1532,29 @@ ZiftrNetworkHandler {
 	}
 
 	public boolean getFeesAreEditable() {
-		return feesAreEditable;
+		SharedPreferences prefs = this.getSharedPreferences(
+				EDITABLE_FEES_KEY, Context.MODE_PRIVATE);
+		return prefs.getBoolean(EDITABLE_FEES_KEY, false);
 	}
 
 	public void setFeesAreEditable(boolean feesAreEditable) {
-		this.feesAreEditable = feesAreEditable;
+		SharedPreferences prefs = getSharedPreferences(EDITABLE_FEES_KEY, Context.MODE_PRIVATE);
+		Editor editor = prefs.edit();
+		editor.putBoolean(EDITABLE_FEES_KEY, feesAreEditable);
+		editor.commit();
+	}
+
+	public boolean getPassphraseDisabled() {
+		SharedPreferences prefs = this.getSharedPreferences(
+				PASSPHRASE_DISABLED_KEY, Context.MODE_PRIVATE);
+		return prefs.getBoolean(PASSPHRASE_DISABLED_KEY, false);
+	}
+
+	public void setPassphraseDisabled(boolean isDisabled) {
+		SharedPreferences prefs = getSharedPreferences(PASSPHRASE_DISABLED_KEY, Context.MODE_PRIVATE);
+		Editor editor = prefs.edit();
+		editor.putBoolean(PASSPHRASE_DISABLED_KEY, isDisabled);
+		editor.commit();
 	}
 
 }

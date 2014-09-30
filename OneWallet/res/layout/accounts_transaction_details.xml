@@ -18,8 +18,8 @@
 
             <ImageView
                 android:id="@+id/coin_logo"
-                android:layout_width="@dimen/ow_txt_largest"
-                android:layout_height="@dimen/ow_txt_largest"
+                android:layout_width="@dimen/ow_medium_icon_side_length"
+                android:layout_height="@dimen/ow_medium_icon_side_length"
                 android:layout_gravity="center_vertical"
                 android:padding="@dimen/ow_bordered_icon_margin" />
 
@@ -72,8 +72,8 @@
 
             <ImageView
                 android:id="@+id/edit_txn_note"
-                android:layout_width="@dimen/ow_txt_largest"
-                android:layout_height="@dimen/ow_txt_largest"
+                android:layout_width="@dimen/ow_medium_icon_side_length"
+                android:layout_height="@dimen/ow_medium_icon_side_length"
                 android:adjustViewBounds="true"
                 android:clickable="true"
                 android:padding="@dimen/ow_borderless_icon_margin"
@@ -109,8 +109,8 @@
 
             <ImageView
                 android:id="@+id/sendTo"
-                android:layout_width="@dimen/ow_txt_largest"
-                android:layout_height="@dimen/ow_txt_largest"
+                android:layout_width="@dimen/ow_medium_icon_side_length"
+                android:layout_height="@dimen/ow_medium_icon_side_length"
                 android:adjustViewBounds="true"
                 android:clickable="true"
                 android:padding="@dimen/ow_bordered_icon_margin"

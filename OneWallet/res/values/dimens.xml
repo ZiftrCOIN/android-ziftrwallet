@@ -16,6 +16,7 @@
 
     <!-- 2*margin + size == empty_space_padding -->
     <dimen name="ow_total_icon_side_length">45dp</dimen>
+    <dimen name="ow_medium_icon_side_length">38dp</dimen>
     <!-- SearchBar edit text height -->
     <dimen name="ow_searchBarEditText">35dp</dimen>
     <dimen name="ow_large_icon_size">130dp</dimen>

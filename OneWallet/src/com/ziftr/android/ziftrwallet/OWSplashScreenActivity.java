@@ -104,10 +104,12 @@ public class OWSplashScreenActivity extends FragmentActivity {
 				OWMainFragmentActivity.PASSPHRASE_KEY, Context.MODE_PRIVATE);
 		// Get the passphrase hash
 		String storedPassphrase = prefs.getString(OWMainFragmentActivity.PASSPHRASE_KEY, null);
-		if (storedPassphrase == null){
+		SharedPreferences disabledPassphraseprefs = getSharedPreferences(OWMainFragmentActivity.PASSPHRASE_DISABLED_KEY, Context.MODE_PRIVATE);
+		boolean passphraseDisabled = disabledPassphraseprefs.getBoolean(OWMainFragmentActivity.PASSPHRASE_DISABLED_KEY, false);
+		if (storedPassphrase == null && !passphraseDisabled){
 	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
 	    			OWWelcomeActivity.class);
-	    	noFragmentIntent.setFlags(noFragmentIntent.getFlags()|Intent.FLAG_ACTIVITY_NO_HISTORY);
+	    	noFragmentIntent.setFlags(noFragmentIntent.getFlags());
 	        startActivity(noFragmentIntent);
 		} else {
 	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 

@@ -61,8 +61,8 @@
             android:name="com.ziftr.android.ziftrwallet.OWWelcomeActivity" >
             ></activity>
         <activity
-            android:name="com.ziftr.android.ziftrwallet.OWMainFragmentActivity"
-            android:windowSoftInputMode="adjustPan" >
+            android:name="com.ziftr.android.ziftrwallet.OWMainFragmentActivity" 
+            android:windowSoftInputMode="adjustPan">
         </activity>
         <activity
             android:name="com.google.zxing.client.android.CaptureActivity"

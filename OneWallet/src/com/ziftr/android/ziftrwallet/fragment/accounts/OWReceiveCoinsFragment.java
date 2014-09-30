@@ -170,12 +170,13 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		qrCodeDimension = Math.min(qrCodeDimension, rootView.getWidth());
 		qrCodeDimension = Math.min(qrCodeDimension, rootView.getHeight());
 		QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(addressString, null,
-				Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), qrCodeDimension);
+				Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), qrCodeDimension/2);
 		this.qrCodeImageView.getLayoutParams().width = qrCodeDimension;
 		this.qrCodeImageView.getLayoutParams().height = qrCodeDimension;
+		
+		
 		try {
 			Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
-
 			if (withAnimation) {
 				Drawable[] layers = new Drawable[2];
 				layers[0] = this.qrCodeImageView.getDrawable();
@@ -184,6 +185,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				this.qrCodeImageView.setImageDrawable(transitionDrawable);
 				transitionDrawable.startTransition(FADE_DURATION);
 			} else {
+				ZLog.log("Lost Souls.");
 				this.qrCodeImageView.setImageBitmap(bitmap);
 			}
 		} catch (WriterException e) {

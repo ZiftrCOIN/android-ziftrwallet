@@ -133,5 +133,8 @@
         Your passphrase will not be shown again. Without it you will lose access to your ziftrWALLET
          and any digital currency inside. To prevent this screen from showing up, go to settings page or set a passphrase.</string>
     <string name="ow_create_new_address">CREATE NEW ADDRESS</string>
+        <!-- Description here -->
+    <string name="ow_receive_button_text">RECEIVE</string>
+    
 
 </resources>

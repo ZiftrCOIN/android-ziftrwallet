@@ -16,6 +16,7 @@
     </ListView>
 
     <include
+        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="@dimen/ow_button_footer_height"
         layout="@layout/_dual_button_footer" />

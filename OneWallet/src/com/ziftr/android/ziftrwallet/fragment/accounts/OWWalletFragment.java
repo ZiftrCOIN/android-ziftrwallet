@@ -11,7 +11,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
@@ -83,7 +83,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 		}
 
 		rootView = inflater.inflate(R.layout.accounts_wallet, container, false);
-
+		
 		this.showWalletHeader();
 
 		this.initializeTxListView();
@@ -147,9 +147,8 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	}
 
 	private void initializeButtons() {
-		Button receiveButton = (Button) 
+		LinearLayout receiveButton = (LinearLayout) 
 				this.rootView.findViewById(R.id.leftButton);
-		receiveButton.setText("RECEIVE");
 		receiveButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -157,9 +156,8 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 			}
 		});
 
-		Button sendButton = (Button) 
+		LinearLayout sendButton = (LinearLayout) 
 				this.rootView.findViewById(R.id.rightButton);
-		sendButton.setText("SEND");
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
