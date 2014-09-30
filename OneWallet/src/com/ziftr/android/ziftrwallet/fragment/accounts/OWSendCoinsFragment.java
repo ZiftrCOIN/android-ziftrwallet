@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.zxing.client.android.CaptureActivity;
+import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -97,9 +98,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data != null && data.hasExtra("SCAN_RESULT") && requestCode == OWRequestCodes.SCAN_QR_CODE) {
+			// If we have scanned this address before then we get the label for it here
 			OWAddress a = this.getWalletManager().readAddress(
 					this.getSelectedCoin(), data.getExtras().getCharSequence("SCAN_RESULT").toString(), false);
-			String label = a == null ? "" : a.getLabel();
+			String label = (a == null ? "" : a.getLabel());
 			this.acceptAddress(a.toString(), label);
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -143,7 +145,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 		} else if (v == sendButton) {
 			if (this.getSelectedCoin().addressIsValid(addressEditText.getText().toString())) {
-				if (getOWMainActivity().userHasPassphrase()) {
+				if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
 					Bundle b = new Bundle();
 					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 					getOWMainActivity().showGetPassphraseDialog(
@@ -218,7 +220,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			addressEditText.setText(this.prefilledAddress);
 		}
 		
-		if (this.getOWMainActivity().getFeesAreEditable()){
+		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
 			this.coinFeeEditText.setFocusable(true);
 			this.coinFeeEditText.setFocusableInTouchMode(true);
 			this.coinFeeEditText.setClickable(true);

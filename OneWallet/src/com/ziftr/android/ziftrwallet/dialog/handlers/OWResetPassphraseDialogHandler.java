@@ -20,7 +20,7 @@ public interface OWResetPassphraseDialogHandler {
 	 * @param confirmPassphrase - The (should be) matching new passphrase
 	 */
 	public void handleResetPassphrasePositive(int requestCode, 
-			byte[] oldPassphrase, byte[] newPassphrase, byte[] confirmPassphrase);
+			String oldPassphrase, String newPassphrase, String confirmPassphrase);
 	
 	/**
 	 * Implement this method to determine what the app does when

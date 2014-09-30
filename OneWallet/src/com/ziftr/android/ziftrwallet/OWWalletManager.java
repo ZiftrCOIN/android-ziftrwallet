@@ -13,6 +13,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.crypto.SecretKey;
+
 import android.content.Context;
 
 import com.google.bitcoin.core.AbstractWalletEventListener;
@@ -37,6 +39,8 @@ import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.Threading;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
+import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
+import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -95,7 +99,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * TODO maybe we want to get this everytime?
 	 * or maybe a weak reference? 
 	 */
-	private Context activity;
+	private Context context;
 
 	///////////////////////////////////////////////////////
 	//////////  Static Singleton Access Members ///////////
@@ -115,11 +119,11 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		}
 	}
 
-	
+
 	public static synchronized OWWalletManager getInstance() {
 
 		if (instance == null) {
-			
+
 			Context context = OWApplication.getApplication();
 
 			// Here we build the path for the first time if have not yet already
@@ -164,7 +168,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		// Making the wallet manager opens up a connection with the database.
 
 		super(context, databasePath);
-		this.activity = context;
+		this.context = context;
 
 		for (OWCoin activatedType : readAllActivatedTypes()) {
 			this.setUpWallet(activatedType);
@@ -236,7 +240,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		this.walletFiles.put(id, null);
 
 		// This is application specific storage, will be deleted when app is uninstalled.
-		File externalDirectory = this.activity.getExternalFilesDir(null);
+		File externalDirectory = this.context.getExternalFilesDir(null);
 		if (externalDirectory != null) {
 			this.walletFiles.put(id, new File(
 					externalDirectory, id.getShortTitle() + "_wallet.dat"));
@@ -246,7 +250,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 			alertUserDialog.setupDialog("OneWallet", "Error: No external storage detected.", null, "OK", null);
 			alertUserDialog.show(this.activity.getSupportFragmentManager(), "null_externalDirectory");
-			**/
+			 **/
 			return false;
 		}
 
@@ -361,7 +365,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 					// TODO do I have multiple of these running? 
 					// At one time we did, not sure about now...
-					File externalDirectory = activity.getExternalFilesDir(null);
+					File externalDirectory = context.getExternalFilesDir(null);
 
 					blockStoreFiles.put(id, new File(externalDirectory, 
 							id.getShortTitle() + "_blockchain.store"));
@@ -375,14 +379,14 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 					if (!blockStoreExists) {
 						// We're creating a new block store file here, so 
 						// use checkpoints to speed up network syncing
-						if (activity == null) {
+						if (context == null) {
 							// If this happens app is dying, so wait and 
 							// do this on the next run
 							log("activity was null and we returned early.");
 							return; 
 						}
 
-						InputStream inputSteam = activity.getResources(
+						InputStream inputSteam = context.getResources(
 								).openRawResource(R.raw.btc_checkpoints);
 						try {
 							CheckpointManager.checkpoint(
@@ -611,6 +615,15 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
 
 	}
+	
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId) {
+		return super.createReceivingAddress(this.passphraseToCrypter(passphrase), coinId);
+	}
+	
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note) {
+		return super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note);
+	}
+	
 	/**
 	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
 	 * address to the correct table within our database.
@@ -620,12 +633,39 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
 	 */
-	public OWAddress createReceivingAddress(OWCoin coinId, String note, 
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note, 
 			long balance, long creation, long modified) {
-		OWAddress addr = super.createReceivingAddress(coinId, note, 
-				balance, creation, modified);
+		OWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified);
 		this.getWallet(coinId).addKey(owKeytoBitcoinjKey(addr.getKey()));
 		return addr;
+	}
+
+	/**
+	 * @param passphrase
+	 * @return
+	 */
+	private OWKeyCrypter passphraseToCrypter(String passphrase) {
+		OWKeyCrypter crypter = null;
+		if (passphrase != null) {
+			SecretKey secretKey = OWPbeAesCrypter.generateSecretKey(passphrase, OWPreferencesUtils.getSalt(this.context));
+			crypter = new OWPbeAesCrypter(secretKey);
+		}
+		return crypter;
+	}
+
+	/**
+	 * Caution! Only use this method if you know that the oldPassphrase is the string
+	 * that has encrypted all of the private keys in the wallets and the salt is the correct
+	 * salt that was used in the encryption. In addition, ensure that null is passed in for 
+	 * the old passphrase if there was no previous encryption.
+	 * 
+	 * This could have very bad effects if the preconditions are not met!
+	 * 
+	 * @param curPassphrase - null if no encryption
+	 * @param salt
+	 */
+	public void changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
+		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
 	@Override
@@ -750,9 +790,9 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		// Get the tx's time
 		owTx.setTxTime(tx.getUpdateTime().getTime() / 1000);
-		
+
 		this.createTransaction(owTx);
-		
+
 		return owTx;
 	}
 
@@ -783,7 +823,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param activity the context to set
 	 */
 	public void setActivity(OWMainFragmentActivity activity) {
-		this.activity = activity;
+		this.context = activity;
 	}
 
 	/**
@@ -807,7 +847,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public File getWalletFile(OWCoin id) {
 		return this.walletFiles.get(id);
 	}
-	
-	
+
+
 
 }

@@ -210,20 +210,6 @@ public abstract class OWDialogFragment extends DialogFragment implements View.On
 		return textBox.getText().toString();
 	}
 
-	/**
-	 * Given a resource id, this method finds the corresponding
-	 * view and then gets the text from from that view, returning 
-	 * the value in bytes.
-	 * Will throw a null pointer if no such view with id.
-	 * Will thow a class cast if view is not an EditText.
-	 * 
-	 * @param id - The id of the view to find.
-	 * @return as above
-	 */
-	protected byte[] getBytesFromEditText(int id) {
-		return this.getStringFromTextView(id).getBytes();
-	}
-
 	@Override
 	public void onStart() {
 		//ignore this if showing dialog in welcome activity

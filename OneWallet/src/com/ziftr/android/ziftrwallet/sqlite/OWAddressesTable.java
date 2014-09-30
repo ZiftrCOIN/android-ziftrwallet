@@ -22,6 +22,9 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * byte and double hash checksum.
 	 */
 	public static final String COLUMN_ADDRESS = "address";
+	
+	/** The label column. This is for users to keep a string attached to an entry. */
+	public static final String COLUMN_LABEL = "label";
 
 	/** 
 	 * The balance column. Note that the table may not always be up to date 
@@ -153,11 +156,10 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 
 	protected void updateAddressLabel(OWCoin coin, String address, String newLabel, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
-		values.put(COLUMN_NOTE, newLabel);
+		values.put(COLUMN_LABEL, newLabel);
 		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address);
 		db.update(getTableName(coin), values, whereClause, null);
 	}
-	
 	
 	
 	protected ArrayList<String> getAddressesList(OWCoin coin, SQLiteDatabase db) {

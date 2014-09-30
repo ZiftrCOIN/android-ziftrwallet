@@ -125,8 +125,8 @@ public class OWNewCurrencyFragment extends OWFragment implements OnClickListener
 	public void onClick(View v) {
 		if (v == this.addAllCurrencies){
 			ArrayList<String> toAdd = new ArrayList<String>();
-			for (OWNewCurrencyListItem item : this.currencyList){
-				if (item.isChecked()){
+			for (OWNewCurrencyListItem item : this.currencyList) {
+				if (item.isChecked()) {
 					toAdd.add(item.getCoinId().toString());
 				}
 			}

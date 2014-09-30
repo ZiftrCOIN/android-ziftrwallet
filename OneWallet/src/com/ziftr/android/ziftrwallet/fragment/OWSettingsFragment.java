@@ -9,6 +9,7 @@ import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.dialog.OWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
@@ -26,7 +27,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		
+
 	}
 	/**
 	 * Load the view.
@@ -45,28 +46,26 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		this.resetPasswordLabel = ((TextView) resetPassword.findViewById(R.id.reset_password_text));
 		this.editableConfirmationFee = (CheckBox) rootView.findViewById(R.id.editable_confirmation_fees);
 		this.editableConfirmationFee.setOnClickListener(this);
-		if (this.getOWMainActivity().getFeesAreEditable()){
+		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
 			this.editableConfirmationFee.setChecked(true);
 		} else {
 			this.editableConfirmationFee.setChecked(false);
-
 		}
-		
-		
+
 		this.updateSettingsVisibility();
 		return rootView;
 	}
-	
+
 	public void onResume() {
 		super.onResume();
 		this.getOWMainActivity().changeActionBar("SETTINGS", true, true);
 	}
 
-	public void updateSettingsVisibility(){
-		if (this.getOWMainActivity().userHasPassphrase()){
+	public void updateSettingsVisibility() {
+		if (OWPreferencesUtils.userHasPassphrase(this.getActivity())) {
 			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Reset Passphrase");
-		} else if (!this.getOWMainActivity().getPassphraseDisabled()){
+		} else if (!OWPreferencesUtils.getPassphraseDisabled(this.getActivity())) {
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		} else {
@@ -75,11 +74,11 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		}
 
 	}
-	
+
 	@Override
 	public void onClick(View v) {
 		if (v==this.resetPassword){
-			if (this.getOWMainActivity().userHasPassphrase()) {
+			if (OWPreferencesUtils.userHasPassphrase(this.getActivity())) {
 				OWResetPassphraseDialog passphraseDialog = 
 						new OWResetPassphraseDialog();
 				// Set the target fragment
@@ -94,7 +93,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 					passphraseDialog.show(OWSettingsFragment.this.getFragmentManager(), 
 							"scan_qr");
 				}
-			} else{
+			} else {
 				OWCreatePassphraseDialog createPassphraseDialog = new OWCreatePassphraseDialog();
 				createPassphraseDialog.setTargetFragment(OWSettingsFragment.this, OWRequestCodes.CREATE_PASSPHRASE_DIALOG);
 				createPassphraseDialog.setupDialog("ziftrWALLET", "Create your passphrase", "Save", null, "Cancel");
@@ -109,13 +108,13 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			}
 		} else if (v==this.editableConfirmationFee){
 			if (this.editableConfirmationFee.isChecked()){
-				getOWMainActivity().setFeesAreEditable(true);
+				OWPreferencesUtils.setFeesAreEditable(this.getActivity(), true);
 			} else {
-				getOWMainActivity().setFeesAreEditable(false);
+				OWPreferencesUtils.setFeesAreEditable(this.getActivity(), false);
 
 			}
 		} else if (v == this.disablePassphrase){
-			getOWMainActivity().setPassphraseDisabled(true);
+			OWPreferencesUtils.setPassphraseDisabled(this.getActivity(), true);
 			updateSettingsVisibility();
 		}
 	}

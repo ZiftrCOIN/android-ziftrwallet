@@ -132,7 +132,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 		}
 
 		// Add the History Divider
-		OWSearchableListItem hisotryDivider = new OWSearchableListItem() {
+		OWSearchableListItem historyDivider = new OWSearchableListItem() {
 			
 			@Override
 			public boolean matches(CharSequence constraint,
@@ -145,7 +145,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 				return "HISTORY";
 			}
 		};
-		this.txAdapter.getFullList().add(hisotryDivider);
+		this.txAdapter.getFullList().add(historyDivider);
 
 		// Add all the pending transactions
 		for (OWTransaction tx : this.getWalletManager().getConfirmedTransactions(getSelectedCoin())) {

@@ -67,7 +67,7 @@ public class OWSha256Hash implements Comparable<OWSha256Hash> {
     }
 
     /**
-     * Calculates the hash of the hash of the contents. This is a standard operation in Bitcoin.
+     * Calculates the hash of the hash of the contents. This is a standard operation in digital currency.
      */
     public static OWSha256Hash createDouble(byte[] contents) {
         return new OWSha256Hash(ZiftrUtils.doubleDigest(contents));

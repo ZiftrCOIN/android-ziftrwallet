@@ -25,7 +25,6 @@ import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 
@@ -134,8 +133,8 @@ public class OWAccountsFragment extends OWFragment {
 			return new OWCurrencyListItem(OWCoin.BTC, OWFiat.USD, 
 					"620.00", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.BTC_TEST) {
-			String balance = ZiftrUtils.bitcoinValueToFriendlyString(
-					this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
+			String balance = OWCoin.formatCoinAmount(OWCoin.BTC_TEST, this.walletManager.getWalletBalance(
+					id, OWSQLiteOpenHelper.BalanceType.AVAILABLE)).toPlainString();
 			return new OWCurrencyListItem(OWCoin.BTC_TEST, OWFiat.USD, 
 					"0.00", balance, "0.00", resId);
 		} else if (id == OWCoin.LTC) {

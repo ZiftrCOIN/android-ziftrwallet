@@ -22,4 +22,6 @@ public class OWRequestCodes {
 	
 	public static final int CREATE_PASSPHRASE_DIALOG = 10;
 	
+	public static final int CONFIRM_CREATE_NEW_ADDRESS = 11;
+	
 }

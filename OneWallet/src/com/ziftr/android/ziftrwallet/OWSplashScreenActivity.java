@@ -1,8 +1,6 @@
 package com.ziftr.android.ziftrwallet;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -21,26 +19,28 @@ public class OWSplashScreenActivity extends FragmentActivity {
 	private boolean started = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
+    	
+    	// First just set view to splash screen
+    	this.setContentView(R.layout.splash_layout);
+    	
     	// Here we just load the splash screen and then start the app one
     	// second later.
-        if (savedInstanceState !=null && savedInstanceState.containsKey("started")){
-        	this.started=savedInstanceState.getBoolean("started");
+        if (savedInstanceState !=null && savedInstanceState.containsKey("started")) {
+        	this.started = savedInstanceState.getBoolean("started");
         }
-        super.onCreate(savedInstanceState);
-        // First just set view to splash screen
-        this.setContentView(R.layout.splash_layout);
         
         // Temporary Bitcoinj logging
         BriefLogFormatter.initVerbose();
 
-        if (!this.started){
-        	this.started=true;
+        if (!this.started) {
+        	this.started = true;
         	loadAppOneSecondLater();
         }
         
     }
     
-    public void onSaveInstanceState(Bundle outState){
+    public void onSaveInstanceState(Bundle outState) {
     	outState.putBoolean("started", this.started);
     	super.onSaveInstanceState(outState);
     }
@@ -100,23 +100,14 @@ public class OWSplashScreenActivity extends FragmentActivity {
 	
 	
     private void loadNoFragmentUi() {
-		SharedPreferences prefs = this.getSharedPreferences(
-				OWMainFragmentActivity.PASSPHRASE_KEY, Context.MODE_PRIVATE);
-		// Get the passphrase hash
-		String storedPassphrase = prefs.getString(OWMainFragmentActivity.PASSPHRASE_KEY, null);
-		SharedPreferences disabledPassphraseprefs = getSharedPreferences(OWMainFragmentActivity.PASSPHRASE_DISABLED_KEY, Context.MODE_PRIVATE);
-		boolean passphraseDisabled = disabledPassphraseprefs.getBoolean(OWMainFragmentActivity.PASSPHRASE_DISABLED_KEY, false);
-		if (storedPassphrase == null && !passphraseDisabled){
-	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
-	    			OWWelcomeActivity.class);
+		if (!OWPreferencesUtils.userHasPassphrase(this) && !OWPreferencesUtils.getPassphraseDisabled(this)) {
+	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, OWWelcomeActivity.class);
 	    	noFragmentIntent.setFlags(noFragmentIntent.getFlags());
 	        startActivity(noFragmentIntent);
 		} else {
-	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, 
-	    			OWMainFragmentActivity.class);
-	    	noFragmentIntent.setFlags(noFragmentIntent.getFlags()|Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+	    	Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, OWMainFragmentActivity.class);
+	    	noFragmentIntent.setFlags(noFragmentIntent.getFlags() | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 	        startActivity(noFragmentIntent);
-
 		}
     }
     

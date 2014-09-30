@@ -16,6 +16,9 @@ import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class OWWalletTransactionTable extends OWCoinRelativeTable {
+	
+	/** The note column. This is for users to keep a string attached to an entry. */
+	public static final String COLUMN_NOTE = "note";
 
 	/** The hash column. Contains the hash of a transaction. This is unique per transaction (row). */
 	public static final String COLUMN_HASH = "hash";

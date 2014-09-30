@@ -64,7 +64,6 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 	 */
 	protected void setActionBar() {
 		if (!this.showingChildFragment()) {
-			ZLog.log("changeing action bar for parent");
 			this.getOWMainActivity().changeActionBar(getActionBarTitle(), false, true);
 		}
 	}
@@ -86,7 +85,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 			transaction.remove(childFragment);
 			transaction.commit();
 		} else {
-			ZLog.log("Child fragment was null...");
+			ZLog.log("Child fragment was null... shouldn't ever happen");
 		}
 	}
 	/**

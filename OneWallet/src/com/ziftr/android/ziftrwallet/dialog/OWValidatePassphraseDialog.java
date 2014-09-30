@@ -75,7 +75,7 @@ public class OWValidatePassphraseDialog extends OWDialogFragment {
 		case R.id.right_dialog_button:
 			//CONTINUE
 			handler.handlePassphrasePositive(this.getRequestCode(), 
-					this.getBytesFromEditText(R.id.textbox_passphrase), 
+					this.getStringFromTextView(R.id.textbox_passphrase),
 					this.getArguments());
 			this.dismiss();
 			break;

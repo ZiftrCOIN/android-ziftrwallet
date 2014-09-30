@@ -67,8 +67,8 @@ public class OWCreatePassphraseDialog extends OWDialogFragment {
 		case R.id.right_dialog_button:
 			//CONTINUE
 			handler.handleResetPassphrasePositive(this.getRequestCode(), null,
-					this.getBytesFromEditText(R.id.new_passphrase_dialog), 
-					this.getBytesFromEditText(R.id.new_passphrase_dialog_confirm));
+					this.getStringFromTextView(R.id.new_passphrase_dialog),
+					this.getStringFromTextView(R.id.new_passphrase_dialog_confirm));
 			this.dismiss();
 			break;
 		}
