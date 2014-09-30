@@ -276,19 +276,23 @@ ZiftrNetworkHandler {
 		this.setContentView(R.layout.activity_main);
 		this.headerView = this.findViewById(R.id.walletHeader);
 
+		// Recreate wallet manager
+		this.walletManager = OWWalletManager.getInstance();
+		
+		// Get the saved cur selected coin type
+		this.initializeCoinType(savedInstanceState);
+		
 		// Get passphrase from welcome screen if exists
 		// TODO is this using the hash?
 		Bundle info = getIntent().getExtras();
-		if (info != null && info.getByteArray("SET_PASSPHRASE") != null) {
+		if (info != null && info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY) != null) {
 			// We can only get here if there is no previous passphrase, so we put in null
-			setPassphraseHash(null, info.getByteArray("SET_PASSPHRASE"));
+			if (OWPreferencesUtils.userHasPassphrase(this)) {
+				throw new IllegalArgumentException("Cannot have a passphrase and be setting in onCreate");
+			} else {
+				changePassphrase(null, info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY));
+			}
 		}
-
-		// Recreate wallet manager
-		this.walletManager = OWWalletManager.getInstance();
-
-		// Get the saved cur selected coin type
-		this.initializeCoinType(savedInstanceState);
 
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
@@ -804,14 +808,14 @@ ZiftrNetworkHandler {
 	 * @param oldPassphrase - Used to decrypt old keys, if not null
 	 * @param newPassphrase - Used to encrypt all keys, should not be null
 	 */
-	private void setPassphraseHash(byte[] oldPassphrase, byte[] newPassphrase) {
-		// TODO do db stuff to actually change the encryption of all the private keys
-		
+	private void changePassphrase(String oldPassphrase, String newPassphrase) {
+		// TODO put up a blocking dialog while this is happening
+		this.walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
 		
 		SharedPreferences prefs = this.getSharedPreferences(OWPreferencesUtils.PREFERENCES_NAME, Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
-		editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, 
-				ZiftrUtils.bytesToHexString(ZiftrUtils.Sha256Hash(newPassphrase)));
+		String saltedHash = ZiftrUtils.saltedHashString(this, newPassphrase);
+		editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
 		editor.commit();
 	}
 
@@ -1024,7 +1028,9 @@ ZiftrNetworkHandler {
 	public void alertUser(String message, String tag) {
 		OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
 
-		alertUserDialog.setTargetFragment(null, OWRequestCodes.ALERT_USER_DIALOG);
+		Bundle args = new Bundle();
+		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, OWRequestCodes.ALERT_USER_DIALOG);
+		alertUserDialog.setArguments(args);
 
 		// Set negative text to null to not have negative button
 		alertUserDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
@@ -1035,13 +1041,11 @@ ZiftrNetworkHandler {
 		OWConfirmationDialog confirmDialog = new OWConfirmationDialog();
 
 		args.putInt(OWDialogFragment.REQUEST_CODE_KEY, requestcode);
-		confirmDialog.setTargetFragment(null, requestcode);
 		confirmDialog.setArguments(args);
 		confirmDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
 
 		if (!isShowingDialog()) {
-			confirmDialog.show(this.getSupportFragmentManager(), 
-					tag);
+			confirmDialog.show(this.getSupportFragmentManager(), tag);
 		}
 	}
 
@@ -1107,9 +1111,8 @@ ZiftrNetworkHandler {
 	}
 
 	@Override
-	public void handlePassphrasePositive(int requestCode, 
-			byte[] passphrase, Bundle info) {
-		byte[] inputHash = ZiftrUtils.Sha256Hash(passphrase);
+	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
+		byte[] inputHash = ZiftrUtils.saltedHash(this, passphrase);
 		if (OWPreferencesUtils.inputHashMatchesStoredHash(this, inputHash)) {
 			switch(requestCode) {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY:
@@ -1118,7 +1121,7 @@ ZiftrNetworkHandler {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 				OWReceiveCoinsFragment receiveFrag = (OWReceiveCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
-				receiveFrag.loadNewAddressFromDatabase();
+				receiveFrag.loadNewAddressFromDatabase(passphrase);
 				break;
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
 				OWSendCoinsFragment sendFrag = (OWSendCoinsFragment) getSupportFragmentManager(
@@ -1139,14 +1142,14 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public void handleResetPassphrasePositive(int requestCode,
-			byte[] oldPassphrase, byte[] newPassphrase, byte[] confirmPassphrase) {
+			String oldPassphrase, String newPassphrase, String confirmPassphrase) {
 		// Can assume that there was a previously entered passphrase because 
 		// of the way the dialog was set up. 
-		if (Arrays.equals(newPassphrase, confirmPassphrase)) {
-			byte[] oldPassphraseHash = ZiftrUtils.Sha256Hash(oldPassphrase);
+		if (newPassphrase.equals(confirmPassphrase)) {
+			byte[] oldPassphraseHash = ZiftrUtils.saltedHash(this, oldPassphrase);
 			if (OWPreferencesUtils.inputHashMatchesStoredHash(this, oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
-				this.setPassphraseHash(oldPassphrase, newPassphrase);
+				this.changePassphrase(oldPassphrase, newPassphrase);
 			} else {
 				// If don't match, tell user. 
 				this.alertUser("The passphrase you entered doesn't match your "
@@ -1169,6 +1172,11 @@ ZiftrNetworkHandler {
 			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));
+			break;
+		case OWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
+			OWReceiveCoinsFragment receiveFrag = (OWReceiveCoinsFragment) getSupportFragmentManager(
+					).findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
+			receiveFrag.loadNewAddressFromDatabase(null);
 			break;
 		}
 	}

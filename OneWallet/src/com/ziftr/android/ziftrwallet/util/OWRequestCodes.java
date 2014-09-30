@@ -20,4 +20,6 @@ public class OWRequestCodes {
 	
 	public static final int EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK = 9;
 	
+	public static final int CONFIRM_CREATE_NEW_ADDRESS = 10;
+	
 }

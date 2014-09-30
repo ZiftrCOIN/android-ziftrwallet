@@ -31,6 +31,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedLongs;
+import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.crypto.OWVarInt;
 
 public class ZiftrUtils {
@@ -48,8 +49,6 @@ public class ZiftrUtils {
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); 
 
 	/** The string that prefixes all text messages signed using Bitcoin keys. */
-	public static final String BITCOIN_SIGNED_MESSAGE_HEADER = "Bitcoin Signed Message:\n";
-	public static final byte[] BITCOIN_SIGNED_MESSAGE_HEADER_BYTES = BITCOIN_SIGNED_MESSAGE_HEADER.getBytes(Charsets.UTF_8);
 
 	private static final MessageDigest digest;
 	static {
@@ -360,6 +359,30 @@ public class ZiftrUtils {
 			throw new RuntimeException(e);  // Cannot happen.
 		}
 	}
+	
+	/**
+	 * @param newPassphrase
+	 * @return
+	 */
+	public static byte[] saltedHash(Context c, String newPassphrase) {
+		return saltedHash(OWPreferencesUtils.getSalt(c), newPassphrase);
+	}
+	
+	public static byte[] saltedHash(String salt, String newPassphrase) {
+		byte[] newPassphraseBytes = newPassphrase.getBytes();
+		byte[] concat = new byte[32 + newPassphrase.getBytes().length];
+		System.arraycopy(ZiftrUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
+		System.arraycopy(newPassphraseBytes, 0, concat, 32, newPassphraseBytes.length);
+		return ZiftrUtils.Sha256Hash(concat);
+	}
+	
+	/**
+	 * @param newPassphrase
+	 * @return
+	 */
+	public static String saltedHashString(Context c, String newPassphrase) {
+		return ZiftrUtils.bytesToHexString(saltedHash(c, newPassphrase));
+	}
 
 	/**
 	 * See Utils#doubleDigest(byte[], int, int).
@@ -393,12 +416,15 @@ public class ZiftrUtils {
 	 * <p>Given a textual message, returns a byte buffer formatted as follows:</p>
 	 *
 	 * <tt><p>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
+	 * 
+	 * TODO this is only for bitcoin right now, need to make it general
 	 */
-	public static byte[] formatMessageForSigning(String message) {
+	public static byte[] formatMessageForSigning(OWCoin coinId, String message) {
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES.length);
-			bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES);
+			byte[] magicBytes = coinId.getSigningMessageMagic().getBytes(Charsets.UTF_8);
+			bos.write(magicBytes.length);
+			bos.write(magicBytes);
 			byte[] messageBytes = message.getBytes(Charsets.UTF_8);
 			OWVarInt size = new OWVarInt(messageBytes.length);
 			bos.write(size.encode());

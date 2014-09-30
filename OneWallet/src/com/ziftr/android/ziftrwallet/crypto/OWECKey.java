@@ -17,12 +17,10 @@
 package com.ziftr.android.ziftrwallet.crypto;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -48,14 +46,17 @@ import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.crypto.params.ECKeyGenerationParameters;
 import org.spongycastle.crypto.params.ECPrivateKeyParameters;
 import org.spongycastle.crypto.params.ECPublicKeyParameters;
-import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.crypto.signers.ECDSASigner;
 import org.spongycastle.math.ec.ECAlgorithms;
 import org.spongycastle.math.ec.ECCurve;
 import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.encoders.Base64;
 
+import android.annotation.SuppressLint;
+
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -76,6 +77,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * be reversed to find the public key used to calculate it. This can be convenient when you have a message and a
  * signature and want to find out who signed it, rather than requiring the user to provide the expected identity.</p>
  */
+@SuppressLint("TrulyRandom")
 public class OWECKey {
 
 	/** The parameters of the secp256k1 curve that Bitcoin uses. */
@@ -120,13 +122,14 @@ public class OWECKey {
 
 	/**
 	 * Instance of the KeyCrypter interface to use for encrypting and decrypting the key.
+	 * Used to be transient, but we are not serializing so no need for this.
 	 */
-	transient private OWKeyCrypter keyCrypter;
+	private OWKeyCrypter keyCrypter;
 
 	/**
 	 * The encrypted private key information.
 	 */
-	private OWEncryptedPrivateKey encryptedPrivateKey;
+	private OWEncryptedData encryptedPrivateKey;
 
 	// Transient because it's calculated on demand.
 	transient private byte[] pubKeyHash;
@@ -190,10 +193,10 @@ public class OWECKey {
 	 * @param pubKey The keys public key
 	 * @param keyCrypter The KeyCrypter that will be used, with an AES key, to encrypt and decrypt the private key
 	 */
-	public OWECKey(@Nullable OWEncryptedPrivateKey encryptedPrivateKey, @Nullable byte[] pubKey, OWKeyCrypter keyCrypter) {
+	public OWECKey(@Nullable OWEncryptedData encryptedPrivateKey, @Nullable byte[] pubKey, OWKeyCrypter keyCrypter) {
 		this((byte[])null, pubKey);
 
-		this.keyCrypter = Preconditions.checkNotNull(keyCrypter);
+		this.keyCrypter = keyCrypter;
 		this.encryptedPrivateKey = encryptedPrivateKey;
 	}
 
@@ -231,7 +234,7 @@ public class OWECKey {
 	}
 
 	public boolean isPubKeyOnly() {
-		return priv == null;
+		return priv == null && pub != null;
 	}
 
 	public boolean hasPrivKey() {
@@ -345,18 +348,6 @@ public class OWECKey {
 
 	/**
 	 * Signs the given hash and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
-	 * usually encoded using DER format, so you want ECDSASignature#toASN1()
-	 * instead. However sometimes the independent components can be useful, for instance, if you're doing to do
-	 * further EC maths on them.
-	 * @throws OWKeyCrypterException if this ECKey doesn't have a private part.
-	 */
-	public OWECDSASignature sign(OWSha256Hash input) throws OWKeyCrypterException {
-		return sign(input, null);
-	}
-
-
-	/**
-	 * Signs the given hash and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
 	 * usually encoded using DER format, so you want ECKey.ECDSASignature#encodeToDER()
 	 * instead. However sometimes the independent components can be useful, for instance, if you're doing to do further
 	 * EC math using the R and S components.
@@ -364,23 +355,20 @@ public class OWECKey {
 	 * @param aesKey The AES key to use for decryption of the private key. If null then no decryption is required.
 	 * @throws OWKeyCrypterException if this ECKey doesn't have a private part.
 	 */
-	public OWECDSASignature sign(OWSha256Hash input, @Nullable KeyParameter aesKey) throws OWKeyCrypterException {
+	public OWECDSASignature sign(OWSha256Hash input) throws OWKeyCrypterException {
 
 		// The private key bytes to use for signing.
 		BigInteger privateKeyForSigning;
 
 		if (isEncrypted()) {
 			// The private key needs decrypting before use.
-			if (aesKey == null) {
-				throw new OWKeyCrypterException("This ECKey is encrypted but no decryption key has been supplied.");
+			if (this.keyCrypter == null) {
+				throw new OWKeyCrypterException("There is no keyCrypter to decrypt the private key for signing.");
 			}
 
-			if (keyCrypter == null) {
-				throw new OWKeyCrypterException("There is no KeyCrypter to decrypt the private key for signing.");
-			}
+			privateKeyForSigning = new BigInteger(1, this.keyCrypter.decryptToBytes(encryptedPrivateKey));
 
-			privateKeyForSigning = new BigInteger(1, keyCrypter.decrypt(encryptedPrivateKey, aesKey));
-			// Check encryption was correct.
+			// Check encryption was correct. TODO maybe disable check if too slow?
 			if (!Arrays.equals(pub, publicKeyFromPrivate(privateKeyForSigning, isCompressed())))
 				throw new OWKeyCrypterException("Could not decrypt bytes");
 		} else {
@@ -519,24 +507,15 @@ public class OWECKey {
 	 * @throws IllegalStateException if this ECKey does not have the private part.
 	 * @throws OWKeyCrypterException if this ECKey is encrypted and no AESKey is provided or it does not decrypt the ECKey.
 	 */
-	public String signMessage(String message) throws OWKeyCrypterException {
-		return signMessage(message, null);
-	}
-
-	/**
-	 * Signs a text message using the standard Bitcoin messaging signing format and returns the signature as a base64
-	 * encoded string.
-	 *
-	 * @throws IllegalStateException if this ECKey does not have the private part.
-	 * @throws OWKeyCrypterException if this ECKey is encrypted and no AESKey is provided or it does not decrypt the ECKey.
-	 */
-	public String signMessage(String message, @Nullable KeyParameter aesKey) throws OWKeyCrypterException {
-		if (priv == null)
+	public String signMessage(OWCoin coinId, String message) throws OWKeyCrypterException {
+		if (priv == null) {
 			throw new IllegalStateException("This ECKey does not have the private key necessary for signing.");
-		byte[] data = ZiftrUtils.formatMessageForSigning(message);
+		}
+		byte[] data = ZiftrUtils.formatMessageForSigning(coinId, message);
 		OWSha256Hash hash = OWSha256Hash.createDouble(data);
-		OWECDSASignature sig = sign(hash, aesKey);
+		OWECDSASignature sig = sign(hash);
 		// Now we have to work backwards to figure out the recId needed to recover the signature.
+		// TODO is this necessary for what we are doing?
 		int recId = -1;
 		for (int i = 0; i < 4; i++) {
 			OWECKey k = OWECKey.recoverFromSignature(i, sig, hash, isCompressed());
@@ -545,14 +524,15 @@ public class OWECKey {
 				break;
 			}
 		}
-		if (recId == -1)
+		if (recId == -1) {
 			throw new RuntimeException("Could not construct a recoverable key. This should never happen.");
+		}
 		int headerByte = recId + 27 + (isCompressed() ? 4 : 0);
 		byte[] sigData = new byte[65];  // 1 header + 32 bytes for R + 32 bytes for S
 		sigData[0] = (byte)headerByte;
 		System.arraycopy(ZiftrUtils.bigIntegerToBytes(sig.r, 32), 0, sigData, 1, 32);
 		System.arraycopy(ZiftrUtils.bigIntegerToBytes(sig.s, 32), 0, sigData, 33, 32);
-		return new String(Base64.encode(sigData), Charset.forName("UTF-8"));
+		return new String(Base64.encode(sigData), Charsets.UTF_8);
 	}
 
 	/**
@@ -566,7 +546,7 @@ public class OWECKey {
 	 * @param signatureBase64 The Bitcoin-format message signature in base64
 	 * @throws SignatureException If the public key could not be recovered or if there was a signature format error.
 	 */
-	public static OWECKey signedMessageToKey(String message, String signatureBase64) throws SignatureException {
+	public static OWECKey signedMessageToKey(byte[] messageBytes, String signatureBase64) throws SignatureException {
 		byte[] signatureEncoded;
 		try {
 			signatureEncoded = Base64.decode(signatureBase64);
@@ -585,7 +565,6 @@ public class OWECKey {
 		BigInteger r = new BigInteger(1, Arrays.copyOfRange(signatureEncoded, 1, 33));
 		BigInteger s = new BigInteger(1, Arrays.copyOfRange(signatureEncoded, 33, 65));
 		OWECDSASignature sig = new OWECDSASignature(r, s);
-		byte[] messageBytes = ZiftrUtils.formatMessageForSigning(message);
 		// Note that the C++ code doesn't actually seem to specify any character encoding. Presumably it's whatever
 		// JSON-SPIRIT hands back. Assume UTF-8 for now.
 		OWSha256Hash messageHash = OWSha256Hash.createDouble(messageBytes);
@@ -604,9 +583,11 @@ public class OWECKey {
 	/**
 	 * Convenience wrapper around {@link OWECKey#signedMessageToKey(String, String)}. If the key derived from the
 	 * signature is not the same as this one, throws a SignatureException.
+	 * 
+	 * ZiftrUtils.formatMessageForSigning(coinId, message)
 	 */
-	public void verifyMessage(String message, String signatureBase64) throws SignatureException {
-		OWECKey key = OWECKey.signedMessageToKey(message, signatureBase64);
+	public void verifyMessage(byte[] messageBytes, String signatureBase64) throws SignatureException {
+		OWECKey key = OWECKey.signedMessageToKey(messageBytes, signatureBase64);
 		if (!Arrays.equals(key.getPubKey(), pub))
 			throw new SignatureException("Signature did not match for message");
 	}
@@ -637,7 +618,7 @@ public class OWECKey {
 		Preconditions.checkArgument(sig.r.compareTo(BigInteger.ZERO) >= 0, "r must be positive");
 		Preconditions.checkArgument(sig.s.compareTo(BigInteger.ZERO) >= 0, "s must be positive");
 		Preconditions.checkNotNull(message);
-		// 1.0 For j from 0 to h   (h == recId here and the loop is outside this function)
+		//   1.0 For j from 0 to h   (h == recId here and the loop is outside this function)
 		//   1.1 Let x = r + jn
 		BigInteger n = CURVE.getN();  // Curve order.
 		BigInteger i = BigInteger.valueOf((long) recId / 2);
@@ -704,6 +685,7 @@ public class OWECKey {
 
 	/**
 	 * Returns a 32 byte array containing the private key, or null if the key is encrypted or public only
+	 * Adds an extra 0x01 on the end if this is a compressed key
 	 */
 	@Nullable
 	public byte[] getPrivKeyBytesForAddressEncoding() {
@@ -762,14 +744,31 @@ public class OWECKey {
 	 * @param aesKey The KeyParameter with the AES encryption key (usually constructed with keyCrypter#deriveKey and cached as it is slow to create).
 	 * @return encryptedKey
 	 */
-	public OWECKey encrypt(OWKeyCrypter keyCrypter, KeyParameter aesKey) throws OWKeyCrypterException {
-		Preconditions.checkNotNull(keyCrypter);
-		final byte[] privKeyBytes = getPrivKeyBytes();
-		checkState(privKeyBytes != null, "Private key is not available");
-		OWEncryptedPrivateKey encryptedPrivateKey = keyCrypter.encrypt(privKeyBytes, aesKey);
+	public OWECKey encrypt(OWKeyCrypter keyCrypter) throws OWKeyCrypterException {
+		// Will throw an error if cannot decrypt using the key crypter field
+		OWECKey decrypted = this;
+		if (this.isEncrypted()) {
+			decrypted = this.decrypt();
+		}
+
+		if (keyCrypter == null) {
+			throw new OWKeyCrypterException("Cannot encrypt this key using a null keyCrypter");
+		}
+
+		final byte[] privKeyBytes = decrypted.getPrivKeyBytes();
+
+		if (privKeyBytes == null) {
+			throw new OWKeyCrypterException("Private key is not available");
+		}
+
+		OWEncryptedData encryptedPrivateKey = keyCrypter.encrypt(ZiftrUtils.bytesToHexString(privKeyBytes));
 		OWECKey result = new OWECKey(encryptedPrivateKey, getPubKey(), keyCrypter);
 		result.setCreationTimeSeconds(creationTimeSeconds);
 		return result;
+	}
+
+	public OWECKey encrypt() throws OWKeyCrypterException {
+		return this.encrypt(getKeyCrypter());
 	}
 
 	/**
@@ -781,16 +780,17 @@ public class OWECKey {
 	 * @param aesKey The KeyParameter with the AES encryption key (usually constructed with keyCrypter#deriveKey and cached).
 	 * @return unencryptedKey
 	 */
-	public OWECKey decrypt(OWKeyCrypter keyCrypter, KeyParameter aesKey) throws OWKeyCrypterException {
-		Preconditions.checkNotNull(keyCrypter);
+	public OWECKey decrypt() throws OWKeyCrypterException {
 		// Check that the keyCrypter matches the one used to encrypt the keys, if set.
-		if (this.keyCrypter != null && !this.keyCrypter.equals(keyCrypter)) {
-			throw new OWKeyCrypterException("The keyCrypter being used to decrypt the key is different to the one that was used to encrypt it");
+		if (this.keyCrypter == null) {
+			throw new OWKeyCrypterException("There is no secret key set to decrypt this OWKey.");
+		} else if (!this.isEncrypted()) {
+			throw new OWKeyCrypterException("This OWECKey is not encrypted.");
 		}
-		byte[] unencryptedPrivateKey = keyCrypter.decrypt(encryptedPrivateKey, aesKey);
+		byte[] unencryptedPrivateKey = this.keyCrypter.decryptToBytes(this.encryptedPrivateKey); 
 		OWECKey key = new OWECKey(new BigInteger(1, unencryptedPrivateKey), null, isCompressed());
 		if (!Arrays.equals(key.getPubKey(), getPubKey()))
-			throw new OWKeyCrypterException("Provided AES key is wrong");
+			throw new OWKeyCrypterException("Provided key crypter is wrong");
 		key.setCreationTimeSeconds(creationTimeSeconds);
 		return key;
 	}
@@ -804,10 +804,10 @@ public class OWECKey {
 	 *
 	 * @return true if the encrypted key can be decrypted back to the original key successfully.
 	 */
-	public static boolean encryptionIsReversible(OWECKey originalKey, OWECKey encryptedKey, OWKeyCrypter keyCrypter, KeyParameter aesKey) {
+	public static boolean encryptionIsReversible(OWECKey originalKey, OWECKey encryptedKey) {
 		String genericErrorText = "The check that encryption could be reversed failed for key " + originalKey.toString() + ". ";
 		try {
-			OWECKey rebornUnencryptedKey = encryptedKey.decrypt(keyCrypter, aesKey);
+			OWECKey rebornUnencryptedKey = encryptedKey.decrypt();
 			if (rebornUnencryptedKey == null) {
 				ZLog.log(genericErrorText + "The test decrypted key was missing.");
 				return false;
@@ -846,7 +846,8 @@ public class OWECKey {
 	 * A private key is deemed to be encrypted when there is both a KeyCrypter and the encryptedPrivateKey is non-zero.
 	 */
 	public boolean isEncrypted() {
-		return keyCrypter != null && encryptedPrivateKey != null && encryptedPrivateKey.getEncryptedBytes() != null &&  encryptedPrivateKey.getEncryptedBytes().length > 0;
+		return encryptedPrivateKey != null && 
+				encryptedPrivateKey.getEncryptedData() != null &&  !encryptedPrivateKey.getEncryptedData().isEmpty();
 	}
 
 	/**
@@ -854,7 +855,7 @@ public class OWECKey {
 	 *         or null if the ECKey is not encrypted.
 	 */
 	@Nullable
-	public OWEncryptedPrivateKey getEncryptedPrivateKey() {
+	public OWEncryptedData getEncryptedPrivateKey() {
 		if (encryptedPrivateKey == null) {
 			return null;
 		} else {
@@ -863,11 +864,20 @@ public class OWECKey {
 	}
 
 	/**
-	 * @return The KeyCrypter that was used to encrypt to encrypt this ECKey. You need this to decrypt the ECKey.
+	 * You need this to decrypt the ECKey.
+	 * 
+	 * @return The SecretKey that was used to encrypt to encrypt this ECKey. 
 	 */
 	public OWKeyCrypter getKeyCrypter() {
-		return keyCrypter;
+		return this.keyCrypter;
 	}
 
+	public void setKeyCrypter(OWKeyCrypter keyCrypter) {
+		this.keyCrypter = keyCrypter;
+		if (this.keyCrypter != null) {
+			OWECKey encrypted = this.encrypt();
+			this.encryptedPrivateKey = encrypted.getEncryptedPrivateKey();
+		}
+	}
 
 }

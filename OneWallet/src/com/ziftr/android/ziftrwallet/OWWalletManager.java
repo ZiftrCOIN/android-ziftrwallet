@@ -13,6 +13,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.crypto.SecretKey;
+
 import android.content.Context;
 
 import com.google.bitcoin.core.AbstractWalletEventListener;
@@ -37,6 +39,8 @@ import com.google.bitcoin.store.UnreadableWalletException;
 import com.google.bitcoin.utils.Threading;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
+import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
+import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -617,6 +621,15 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
 
 	}
+	
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId) {
+		return super.createReceivingAddress(this.passphraseToCrypter(passphrase), coinId);
+	}
+	
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note) {
+		return super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note);
+	}
+	
 	/**
 	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
 	 * address to the correct table within our database.
@@ -626,12 +639,24 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
 	 */
-	public OWAddress createReceivingAddress(OWCoin coinId, String note, 
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note, 
 			long balance, long creation, long modified) {
-		OWAddress addr = super.createReceivingAddress(coinId, note, 
-				balance, creation, modified);
+		OWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified);
 		this.getWallet(coinId).addKey(owKeytoBitcoinjKey(addr.getKey()));
 		return addr;
+	}
+
+	/**
+	 * @param passphrase
+	 * @return
+	 */
+	private OWKeyCrypter passphraseToCrypter(String passphrase) {
+		OWKeyCrypter crypter = null;
+		if (passphrase != null) {
+			SecretKey secretKey = OWPbeAesCrypter.generateSecretKey(passphrase, OWPreferencesUtils.getSalt(this.context));
+			crypter = new OWPbeAesCrypter(secretKey);
+		}
+		return crypter;
 	}
 
 	/**
@@ -646,8 +671,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param salt
 	 */
 	public void changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
-		String salt = OWPreferencesUtils.getSalt(context);
-		super.changeEncryptionOfReceiving(oldPassphrase, newPassphrase, salt);
+		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
 	@Override

@@ -27,13 +27,13 @@ implements OnClickListener, OWNeutralDialogHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		// To make activity fullscreen
+		// Have to do this before setContentView so that we don't get a AndroidRuntimeException
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		this.setContentView(R.layout.welcome);
-
-		// To make activity fullscreen
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		this.initializeViewFields();
 	}
@@ -49,7 +49,6 @@ implements OnClickListener, OWNeutralDialogHandler {
 		passphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		confirmPassphraseEditText = (EditText) this.findViewById(R.id.new_confirm_password).findViewById(R.id.ow_editText);
 
-		// TODO this should be in XML
 		confirmPassphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		confirmPassphraseEditText.clearFocus();
 
@@ -70,7 +69,7 @@ implements OnClickListener, OWNeutralDialogHandler {
 			if (passphrase.equals(confirmPassphrase)) {
 				Intent main = new Intent(OWWelcomeActivity.this, OWMainFragmentActivity.class);
 				main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-				main.putExtra("SET_PASSPHRASE", passphrase);
+				main.putExtra(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
 				startActivity(main);
 			} else {
 				OWSimpleAlertDialog alertDialog = new OWSimpleAlertDialog();

@@ -22,9 +22,9 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
-import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
@@ -88,7 +88,9 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
 			}
 		} else if (v == this.qrCodeImageView) {
-			if(!this.fragmentHasAddress() && !this.labelEditText.getText().toString().equals("")) {
+			if(!this.fragmentHasAddress() && !this.labelEditText.getText().toString().isEmpty()) {
+				// TODO make the passphrase diaog have extra information about how they 
+				// won't be able to delete the address they are about to make
 				if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
 					Bundle b = new Bundle();
 					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
@@ -96,7 +98,9 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 							OWTags.VALIDATE_PASS_RECEIVE);
 				} else {
-					loadNewAddressFromDatabase();
+					getOWMainActivity().alertConfirmation(OWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
+							"Addresses cannot be deleted once they are created. Are you sure?", 
+							OWTags.CONFIRM_NEW_ADDRESS, new Bundle());
 				}
 			}
 		} else if (v == this.getAddressBookImageView()) {
@@ -206,16 +210,15 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	 * gets a new key from the database helper on an extra thread, and
 	 * then updates the UI with the new address on the UI thread. 
 	 */
-	public void loadNewAddressFromDatabase() {
+	public void loadNewAddressFromDatabase(final String passphrase) {
 		// Get the database from the activity on the UI thread
-		final OWSQLiteOpenHelper database = this.getWalletManager();
+		final OWWalletManager database = this.getWalletManager();
+		final String addressLabel = addressEditText.getText().toString();
 		// Run database IO on new thread
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				String addressLabel = addressEditText.getText().toString();
-
-				final OWAddress address = database.createReceivingAddress(getSelectedCoin(), addressLabel);
+				final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel);
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {

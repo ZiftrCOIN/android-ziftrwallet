@@ -7,9 +7,6 @@ import com.ziftr.android.ziftrwallet.util.OWCoin;
 
 public abstract class OWCoinRelativeTable extends OWTable {
 	
-	/** The note column. This is for users to keep a string attached to an entry. */
-	public static final String COLUMN_NOTE = "note";
-	
 	/** The first time that this transaction was seen by the network (ziftr server). */
 	public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
 	

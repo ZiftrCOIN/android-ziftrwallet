@@ -239,7 +239,7 @@ public class OWAddress implements OWSearchableListItem {
 	}
 
 	public boolean isPersonalAddress() {
-		return key != null && key.getPrivKeyBytes() != null;
+		return key != null && (key.getPrivKeyBytes() != null || key.isEncrypted());
 	}
 
 	@Override
@@ -283,7 +283,7 @@ public class OWAddress implements OWSearchableListItem {
 	/**
 	 * @param note the note to set
 	 */
-	public void setNote(String note) {
+	public void setLabel(String note) {
 		this.note = note;
 	}
 

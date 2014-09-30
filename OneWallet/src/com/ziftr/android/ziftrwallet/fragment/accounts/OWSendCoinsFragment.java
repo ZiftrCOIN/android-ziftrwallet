@@ -96,9 +96,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data != null && data.hasExtra("SCAN_RESULT") && requestCode == OWRequestCodes.SCAN_QR_CODE) {
+			// If we have scanned this address before then we get the label for it here
 			OWAddress a = this.getWalletManager().readAddress(
 					this.getSelectedCoin(), data.getExtras().getCharSequence("SCAN_RESULT").toString(), false);
-			String label = a == null ? "" : a.getLabel();
+			String label = (a == null ? "" : a.getLabel());
 			this.acceptAddress(a.toString(), label);
 		}
 		super.onActivityResult(requestCode, resultCode, data);

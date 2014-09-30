@@ -4,8 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.crypto.SecretKey;
-
 import org.spongycastle.crypto.CryptoException;
 
 import android.content.Context;
@@ -14,7 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
-import com.ziftr.android.ziftrwallet.crypto.OWCrypter;
+import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -199,8 +197,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public OWAddress createReceivingAddress(OWCoin coinId) {
-		return createReceivingAddress(coinId, "");
+	protected OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId) {
+		return createReceivingAddress(crypter, coinId, "");
 	}
 
 	/**
@@ -212,9 +210,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param note - The note that the user associates with this address.
 	 */
-	public OWAddress createReceivingAddress(OWCoin coinId, String note) {
+	protected OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, String note) {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(coinId, note, 0, time, time);
+		return createReceivingAddress(crypter, coinId, note, 0, time, time);
 	}
 
 	/**
@@ -224,38 +222,41 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param key - The key to use.
 	 */
-	public synchronized OWAddress createReceivingAddress(OWCoin coinId, String note, 
+	protected synchronized OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, String note, 
 			long balance, long creation, long modified) {
 		OWAddress address = new OWAddress(coinId);
-		address.setNote(note);
+		address.getKey().setKeyCrypter(crypter);
+		address.setLabel(note);
 		address.setLastKnownBalance(balance);
 		address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
 		return address;
 	}
-	
-	public synchronized void changeEncryptionOfReceiving(String oldPassphrase, String newPassphrase, String salt) {
-		
-		SQLiteDatabase db = this.getWritableDatabase();		
+
+	protected synchronized void changeEncryptionOfReceivingAddresses(OWKeyCrypter oldCrypter, OWKeyCrypter newCrypter) {
+
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.beginTransaction();
 		try {
-			SecretKey oldSecretKey = OWCrypter.getSecretKey(oldPassphrase, salt);
-			SecretKey newSecretKey = OWCrypter.getSecretKey(newPassphrase, salt);
-			
 			OWReceivingAddressesTable receiveTable = (OWReceivingAddressesTable) this.getReceivingAddressesTable();
-			
-			db.beginTransaction();
+
 			for (OWCoin coin : this.readAllNonUnactivatedTypes()) {
-				receiveTable.recryptAllAddresses(coin, oldSecretKey, newSecretKey, db);
+				receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
 			}
 			db.setTransactionSuccessful();
 		} catch (CryptoException e) {
-			ZLog.log("Error trying to change the encryption of receiving address private keys. ");
+			ZLog.log("Error trying to change the encryption of receiving address private keys. ", e.getMessage());
 			e.printStackTrace();
+		} catch (Exception oe) {
+			ZLog.log("Some other exception: ", oe.getMessage());
+			oe.printStackTrace();
 		} finally {
+			// If setTransactionSuccessful is not called, then this will roll back to not do 
+			// any of the changes since there was. If it was called then it finalizes everything.
 			db.endTransaction();
 		}
-		
+
 	}
 
 	/**
@@ -382,7 +383,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized OWAddress createSendingAddress(OWCoin coinId, String addressString, String note, 
 			long balance, long modified) throws OWAddressFormatException {
 		OWAddress address = new OWAddress(coinId, addressString);
-		address.setNote(note);
+		address.setLabel(note);
 		address.setLastKnownBalance(balance);
 		//address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);

@@ -96,9 +96,9 @@ public class OWResetPassphraseDialog extends OWDialogFragment {
 			//CONTINUE
 			handler.handleResetPassphrasePositive(
 					this.getTargetRequestCode(), 
-					this.getBytesFromEditText(R.id.textbox_old_passphrase), 
-					this.getBytesFromEditText(R.id.textbox_new_passphrase), 
-					this.getBytesFromEditText(R.id.textbox_confirm_passphrase));
+					this.getStringFromTextView(R.id.textbox_old_passphrase), 
+					this.getStringFromTextView(R.id.textbox_new_passphrase), 
+					this.getStringFromTextView(R.id.textbox_confirm_passphrase));
 			this.dismiss();
 			break;
 		}

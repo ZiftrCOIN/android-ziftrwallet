@@ -29,25 +29,24 @@ public class OWCoin implements OWCurrency {
 	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
 
 	public static final OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "btc", "main", 8, R.drawable.logo_bitcoin, MainNetParams.get(),
-			(byte) 0, (byte) 5, (byte) 128, 6, 600);
-
+			(byte) 0, (byte) 5, (byte) 128, 6, 600, "Bitcoin Signed Message:\n");
 	public static final OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "ltc", "main", 8, R.drawable.logo_litecoin, null,
-			(byte) 0, (byte) 0, (byte) 0, 12, 150);
+			(byte) 0, (byte) 0, (byte) 0, 12, 150, "Litecoin Signed Message:\n");
 
 	public static final OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "ppc", "main", 8, R.drawable.logo_peercoin, null,
-			(byte) 0, (byte) 0, (byte) 0, 520, 0);
+			(byte) 0, (byte) 0, (byte) 0, 520, 0, "PPCoin Signed Message:\n");
 	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "doge", "main", 8, R.drawable.logo_dogecoin, null,
-			(byte) 0, (byte) 0, (byte) 0, 20, 0);
+			(byte) 0, (byte) 0, (byte) 0, 20, 0, "Dogecoin Signed Message:\n");
 
 	public static final OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", 8, R.drawable.logo_bitcoin, TestNet3Params.get(),
 			// (byte) 0, (byte) 5, (byte) 128, 6);
-			(byte) 111, (byte) 196, (byte) 239, 6, 600);
+			(byte) 111, (byte) 196, (byte) 239, 6, 600, "Bitcoin Signed Message:\n");
 	public static final OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", 8, R.drawable.logo_litecoin, null,
-			(byte) 0, (byte) 0, (byte) 0, 12, 150);
+			(byte) 0, (byte) 0, (byte) 0, 12, 150, "Litecoin Signed Message:\n");
 	public static final OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", 8, R.drawable.logo_peercoin, null,
-			(byte) 0, (byte) 0, (byte) 0, 520, 0);
+			(byte) 0, (byte) 0, (byte) 0, 520, 0, "PPCoin Signed Message:\n");
 	public static final OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", 8, R.drawable.logo_dogecoin, null,
-			(byte) 0, (byte) 0, (byte) 0, 20, 0);
+			(byte) 0, (byte) 0, (byte) 0, 20, 0, "Dogecoin Signed Message:\n");
 
 	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE, BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
 
@@ -77,11 +76,13 @@ public class OWCoin implements OWCurrency {
 	private byte privKeyPrefix;
 	private int numRecommendedConfirmations;
 	private int secondsPerAverageBlockSolve;
+	private String signingMessageMagic;
 
 	private OWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type,
 			String chain, int numberOfDigitsOfPrecision, int logoResId, 
 			NetworkParameters networkParameters, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve) {
+			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve,
+			String signingMessageMagic) {
 		this.defaultFeePerKb = defaultFeePerKb;
 		this.shortTitle = shortTitle;
 		this.longTitle = longTitle;
@@ -95,10 +96,10 @@ public class OWCoin implements OWCurrency {
 		this.privKeyPrefix = privKeyPrefix;
 		this.numRecommendedConfirmations = numRecommendedConfirmations;
 		this.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
-		
+		this.signingMessageMagic = signingMessageMagic;
 	}
 
-	
+
 
 	/**
 	 * As the name describes, this gets the default fee per kb for the
@@ -126,14 +127,14 @@ public class OWCoin implements OWCurrency {
 		return longTitle;
 	}
 
-	
+
 	/**
 	 * Gives the title of the coin. e.g. "Bitcoin" for OWCoin.BTC, etc. 
 	 * 
 	 * @return as above
 	 */
 
-	
+
 	/**
 	 * gets which type of coin this is for sending to api/database, eg "btc"
 	 * @return a String used to identify a coin
@@ -141,8 +142,8 @@ public class OWCoin implements OWCurrency {
 	public String getType() {
 		return type;
 	}
-	
-	
+
+
 	/**
 	 * gets which chain this coin is on eg testnet3 vs main
 	 * @return the chain this coin is using as a String
@@ -150,8 +151,8 @@ public class OWCoin implements OWCurrency {
 	public String getChain() {
 		return chain;
 	}
-	
-	
+
+
 	/**
 	 * This is an okay place to get this information for now, but will likely 
 	 * want to get this info somewhere else eventually. This gets the number of 
@@ -211,7 +212,7 @@ public class OWCoin implements OWCurrency {
 	public byte[] getAcceptableAddressCodes() {
 		return new byte[] {getPubKeyHashPrefix(), getScriptHashPrefix()};
 	}
-	
+
 	/**
 	 * @return the secondsPerAverageBlockSolve
 	 */
@@ -275,6 +276,13 @@ public class OWCoin implements OWCurrency {
 		} catch(OWAddressFormatException afe) {
 			return false;
 		}
+	}
+
+	/**
+	 * @return the signingMessageMagic
+	 */
+	public String getSigningMessageMagic() {
+		return signingMessageMagic;
 	}
 
 }

@@ -18,7 +18,7 @@ public interface OWValidatePassphraseDialogHandler {
 	 * @param passPhrase - The passphrase is given to the activity/fragment
 	 * so that they can use the result appropriately.
 	 */
-	public void handlePassphrasePositive(int requestCode, byte[] passphrase, Bundle info);
+	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info);
 	
 	/**
 	 * Implement this method to determine what the app does when

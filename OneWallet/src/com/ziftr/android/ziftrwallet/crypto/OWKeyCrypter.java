@@ -1,66 +1,48 @@
-/**
- * Copyright 2013 Jim Burton.
- *
- * Licensed under the MIT license (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://opensource.org/licenses/mit-license.php
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.ziftr.android.ziftrwallet.crypto;
 
-import java.io.Serializable;
-
-import org.bitcoinj.wallet.Protos.Wallet.EncryptionType;
-import org.spongycastle.crypto.params.KeyParameter;
+import javax.crypto.SecretKey;
 
 /**
- * <p>A KeyCrypter can be used to encrypt and decrypt a message. The sequence of events to encrypt and then decrypt
- * a message are as follows:</p>
- *
- *<p>(1) Ask the user for a password. deriveKey() is then called to create an KeyParameter. This contains the AES
- *key that will be used for encryption.</p>
- *<p>(2) Encrypt the message using encrypt(), providing the message bytes and the KeyParameter from (1). This returns
- *an EncryptedPrivateKey which contains the encryptedPrivateKey bytes and an initialisation vector.</p>
- *<p>(3) To decrypt an EncryptedPrivateKey, repeat step (1) to get a KeyParameter, then call decrypt().</p>
- *
- *<p>There can be different algorithms used for encryption/ decryption so the getUnderstoodEncryptionType is used
- *to determine whether any given KeyCrypter can understand the type of encrypted data you have.</p>
+ * An interface so that we can use different en/decryption methods.
  */
-public interface OWKeyCrypter extends Serializable {
-
+public interface OWKeyCrypter {
+	
+	// Make these out of the hex char range so it's not confusing when looking at contents
+	// of database
+	public static final char NO_ENCRYPTION = 'G';
+	public static final char PBE_AES_ENCRYPTION = 'H';
+	
+	/**
+	 * Use the key crypter to encrypt a given clear text message.
+	 * 
+	 * @param clearText - the message to encrypt
+	 * @return
+	 * @throws OWKeyCrypterException
+	 */
+	public OWEncryptedData encrypt(String clearText) throws OWKeyCrypterException;
+	
+	/**
+	 * Decrypt a
+	 * @param encryptedData
+	 * @return
+	 * @throws OWKeyCrypterException
+	 */
+    public String decrypt(OWEncryptedData encryptedData) throws OWKeyCrypterException;
+    
     /**
-     * Return the EncryptionType enum value which denotes the type of encryption/ decryption that this KeyCrypter
-     * can understand.
-     */
-    public EncryptionType getUnderstoodEncryptionType();
-
-    /**
-     * Create a KeyParameter (which typically contains an AES key)
-     * @param password
-     * @return KeyParameter The KeyParameter which typically contains the AES key to use for encrypting and decrypting
+     * It may not be clear if the decryption should use hex string to bytes,
+     * or the string.toBytes() method. We have a helper method here so implementing
+     * classes can decide. 
+     * 
+     * @param secret
+     * @param encrypted
+     * @return
      * @throws OWKeyCrypterException
      */
-    public KeyParameter deriveKey(CharSequence password) throws OWKeyCrypterException;
+    public byte[] decryptToBytes(OWEncryptedData encryptedData) throws OWKeyCrypterException;
 
-    /**
-     * Decrypt the provided encrypted bytes, converting them into unencrypted bytes.
-     *
-     * @throws OWKeyCrypterException if decryption was unsuccessful.
-     */
-    public byte[] decrypt(OWEncryptedPrivateKey encryptedBytesToDecode, KeyParameter aesKey) throws OWKeyCrypterException;
-
-    /**
-     * Encrypt the supplied bytes, converting them into ciphertext.
-     *
-     * @return encryptedPrivateKey An encryptedPrivateKey containing the encrypted bytes and an initialisation vector.
-     * @throws OWKeyCrypterException if encryption was unsuccessful
-     */
-    public OWEncryptedPrivateKey encrypt(byte[] plainBytes, KeyParameter aesKey) throws OWKeyCrypterException;
+    public void setSecretKey(SecretKey secretKey);
+    
+    public SecretKey getSecretKey();
+    
 }
