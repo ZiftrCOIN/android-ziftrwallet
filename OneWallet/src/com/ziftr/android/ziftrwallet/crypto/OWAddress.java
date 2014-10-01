@@ -56,7 +56,7 @@ public class OWAddress implements OWSearchableListItem {
 	/**
 	 * The note that the user has applied to this given address. 
 	 */
-	private String note;
+	private String note = "";
 
 	/**
 	 * The last known balance for this address. May not be up to date.

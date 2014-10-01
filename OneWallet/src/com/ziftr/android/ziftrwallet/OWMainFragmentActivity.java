@@ -280,7 +280,7 @@ ZiftrNetworkHandler {
 
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
-
+		
 		// Get passphrase from welcome screen if exists
 		// TODO is this using the hash?
 		Bundle info = getIntent().getExtras();
@@ -292,7 +292,7 @@ ZiftrNetworkHandler {
 				changePassphrase(null, info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY));
 			}
 		}
-
+		
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
 
@@ -824,15 +824,25 @@ ZiftrNetworkHandler {
 	 * @param oldPassphrase - Used to decrypt old keys, if not null
 	 * @param newPassphrase - Used to encrypt all keys, should not be null
 	 */
-	private void changePassphrase(String oldPassphrase, String newPassphrase) {
+	private void changePassphrase(final String oldPassphrase, final String newPassphrase) {
 		// TODO put up a blocking dialog while this is happening
-		this.walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			@Override
+			public void run() {
+				walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
 
-		SharedPreferences prefs = this.getSharedPreferences(OWPreferencesUtils.PREFERENCES_NAME, Context.MODE_PRIVATE);
-		Editor editor = prefs.edit();
-		String saltedHash = ZiftrUtils.saltedHashString(this, newPassphrase);
-		editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
-		editor.commit();
+				OWMainFragmentActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						SharedPreferences prefs = OWPreferencesUtils.getPrefs(OWMainFragmentActivity.this);
+						Editor editor = prefs.edit();
+						String saltedHash = ZiftrUtils.saltedHashString(OWMainFragmentActivity.this, newPassphrase);
+						editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
+						editor.commit();
+					}
+				});
+			}
+		});
 	}
 
 	/**
@@ -1315,7 +1325,7 @@ ZiftrNetworkHandler {
 		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBallance, this.selectedCoin, OWFiat.USD);
 		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(OWFiat.USD, walletBalanceInFiat, true));
 
-		ImageView syncButton = (ImageView)headerView.findViewById(R.id.rightIcon);
+		ImageView syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
 		syncButton.setOnClickListener(this);
 	}

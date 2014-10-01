@@ -27,6 +27,8 @@ import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
+import com.ziftr.android.ziftrwallet.util.OWCoinURI;
+import com.ziftr.android.ziftrwallet.util.OWCoinURIParseException;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
@@ -66,7 +68,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private ImageView sendButton;
 
 	private View sendCoinsContainingView;
-	
+
 	private String prefilledAddress;
 
 	/**
@@ -99,10 +101,54 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data != null && data.hasExtra("SCAN_RESULT") && requestCode == OWRequestCodes.SCAN_QR_CODE) {
 			// If we have scanned this address before then we get the label for it here
-			OWAddress a = this.getWalletManager().readAddress(
-					this.getSelectedCoin(), data.getExtras().getCharSequence("SCAN_RESULT").toString(), false);
-			String label = (a == null ? "" : a.getLabel());
-			this.acceptAddress(a.toString(), label);
+			String dataFromQRScan = data.getExtras().getCharSequence("SCAN_RESULT").toString();
+			String address = null;
+			String txNote = null; // (Not the address label)
+			String amount = null;
+			try {
+				OWCoinURI coinUri = new OWCoinURI(this.getSelectedCoin(), dataFromQRScan);
+				address = coinUri.getAddress();
+				txNote = coinUri.getLabel();
+				amount = coinUri.getAmount();
+
+				if (txNote == null) {
+					txNote = coinUri.getMessage();
+				} else if (txNote != null && coinUri.getMessage() != null) {
+					txNote += " - " + coinUri.getMessage();
+				}
+
+			} catch (OWCoinURIParseException e) {
+				// Maybe it's just a straight uri non-encoded address? 
+				if (this.getSelectedCoin().addressIsValid(dataFromQRScan)) {
+					address = dataFromQRScan;
+				}
+				ZLog.log("Error: ", e.getMessage());
+				e.printStackTrace();
+			} catch (OWAddressFormatException e) {
+				ZLog.log("Error: ", e.getMessage());
+				e.printStackTrace();
+			}
+
+			if (address != null) {
+				OWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false);
+				if (owAddress != null) {
+					// If there wasn't a note given in URI then we pre-fill from address
+					txNote = txNote == null ? owAddress.getLabel() : txNote;
+				}
+			}
+
+			if (amount != null) {
+				try {
+					// Just to check that it's formatted correctly
+					new BigDecimal(amount);
+					this.coinAmountEditText.setText(amount);
+				} catch(NumberFormatException nfe) {
+					// Just don't set the amount if not formatted correctly
+				}
+			}
+			this.acceptAddress(address, txNote);
+
+
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
@@ -144,15 +190,13 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				a.onBackPressed();
 			}
 		} else if (v == sendButton) {
-			if (this.getSelectedCoin().addressIsValid(addressEditText.getText().toString())) {
-				if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
-					Bundle b = new Bundle();
-					b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
-					getOWMainActivity().showGetPassphraseDialog(
-							OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, OWTags.VALIDATE_PASS_SEND);
-				} else {
-					this.onClickSendCoins();
-				}
+			if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
+				Bundle b = new Bundle();
+				b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
+				getOWMainActivity().showGetPassphraseDialog(
+						OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, OWTags.VALIDATE_PASS_SEND);
+			} else {
+				this.onClickSendCoins();
 			}
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
@@ -161,19 +205,31 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 	public void onClickSendCoins() {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
-				getAmountToSendFromEditText());
-		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), 
-				getFeeFromEditText());
+		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getAmountToSendFromEditText());
+		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getFeeFromEditText());
+		String addressToSendTo = this.addressEditText.getText().toString();
 		try {
-			getWalletManager().sendCoins(getSelectedCoin(), this.addressEditText.getText().toString(), 
+			getWalletManager().sendCoins(getSelectedCoin(), addressToSendTo, 
 					amountSending, feeSending);
 		} catch(OWAddressFormatException afe) {
-			// TODO alert user if address has errors
-			ZLog.log("There was a problem with the address.");
+			this.getOWMainActivity().alertUser(
+					"The address is not formatted correctly. Please try again. ", 
+					"address_format_error_dialog");
+			return;
 		} catch(OWInsufficientMoneyException ime) {
-			// TODO alert user if not enough money in wallet.
-			ZLog.log("There was not enough money in the wallet.");
+			this.getOWMainActivity().alertUser(
+					"The current wallet does not have enough coins to send the amount requested. ", 
+					"insufficient_funds_dialog");
+			return;
+		} catch(Exception e) {
+			// Shouldn't really happen, just helpful for debugging
+			this.getOWMainActivity().alertUser(
+					"There was an error with your request. \n" + (e.getMessage() == null ? "" : e.getMessage()) + 
+					"\nAmount: " + amountSending + 
+					". \nFee: " + feeSending + 
+					". \nAddress: " + addressToSendTo + ".",
+					"error_in_send_dialog");
+			return;
 		}
 
 		// To exit out of the send coins fragment
@@ -215,11 +271,11 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.sendButton = (ImageView) this.rootView.findViewById(R.id.send_button);
 		this.sendButton.setOnClickListener(this);
-		
+
 		if (this.prefilledAddress != null){
 			addressEditText.setText(this.prefilledAddress);
 		}
-		
+
 		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
 			this.coinFeeEditText.setFocusable(true);
 			this.coinFeeEditText.setFocusableInTouchMode(true);
@@ -230,7 +286,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		} else {
 			this.coinFeeEditText.clearFocus();
 			this.fiatFeeEditText.clearFocus();
-			
+
 			this.coinFeeEditText.setFocusable(false);
 			this.coinFeeEditText.setFocusableInTouchMode(false);
 			this.coinFeeEditText.setClickable(false);
@@ -249,7 +305,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private void initializeTextViewDependencies() {
 		// Bind the amount values so that when one changes the other changes
 		// according to the current exchange rate.
-		this.bindEditTextValues(coinAmountEditText, this.fiatAmountEditText);
+		this.bindEditTextValues(this.coinAmountEditText, this.fiatAmountEditText);
 
 		// Bind the fee values so that when one changes the other changes
 		// according to the current exchange rate.
@@ -280,7 +336,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	}
 
 	private void initializeEditText() {
-		// why wasn't all of this stuff done in XML? Because the most edittexts are using the same style so we are
+		// Why wasn't all of this stuff done in XML? Because the most edittexts are using the same style so we are
 		// including the edittext layout so this has to be done programmatically in order to modify these  specific editTexts 
 		// and not the default styled edittext included all over the app
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -404,7 +460,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private BigDecimal getAmountToSendFromEditText() {
 		BigDecimal basicAmount = null;
 		try {
-			basicAmount = new BigDecimal(coinAmountEditText.getText().toString());
+			String amt = coinAmountEditText.getText().toString();
+			basicAmount = new BigDecimal(amt);
 		} catch (NumberFormatException nfe) {
 			// If any of the textboxes contain values that can't be parsed
 			// then just return 0
@@ -423,7 +480,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private BigDecimal getFeeFromEditText() {
 		BigDecimal fee = null;
 		try {
-			fee = new BigDecimal(coinFeeEditText.getText().toString());
+			String amt = coinFeeEditText.getText().toString();
+			fee = new BigDecimal(amt);
 		} catch (NumberFormatException nfe) {
 			// If any of the textboxes contain values that can't be parsed
 			// then just return 0
@@ -441,7 +499,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	public View getContainerView() {
 		return this.sendCoinsContainingView;
 	}
-	
+
 	public void setSendToAddress(String address){
 		this.prefilledAddress = address;
 	}

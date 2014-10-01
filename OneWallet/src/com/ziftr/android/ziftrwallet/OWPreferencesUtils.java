@@ -127,7 +127,7 @@ public abstract class OWPreferencesUtils {
 	 * @param a
 	 * @return
 	 */
-	private static SharedPreferences getPrefs(Context a) {
+	public static SharedPreferences getPrefs(Context a) {
 		return a.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
 	}
 

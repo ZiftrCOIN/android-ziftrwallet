@@ -488,7 +488,7 @@ public class ZiftrUtils {
 	 */
 	public static BigInteger bigDecToBigInt(OWCurrency type, BigDecimal amount) {
 		return amount.multiply(new BigDecimal(BigInteger.TEN, 
-				type.getNumberOfDigitsOfPrecision())).toBigInteger();
+				-1*type.getNumberOfDigitsOfPrecision())).toBigInteger();
 	}
 	
 	/**

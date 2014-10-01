@@ -17,21 +17,17 @@
 
 package com.ziftr.android.ziftrwallet.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.Locale;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import com.google.bitcoin.uri.BitcoinURIParseException;
+import android.net.Uri;
+
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 
@@ -79,14 +75,21 @@ import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
  */
 public class OWCoinURI {
 
-	// Not worth turning into an enum
-	public static final String FIELD_MESSAGE = "message";
-	public static final String FIELD_LABEL = "label";
-	public static final String FIELD_AMOUNT = "amount";
-	public static final String FIELD_ADDRESS = "address";
-	public static final String FIELD_PAYMENT_REQUEST_URL = "r";
+	private String scheme;
 
-	public static final String BITCOIN_SCHEME = "bitcoin";
+	// Not worth turning into an enum
+	public static final String FIELD_AMOUNT = "amount";
+	public static final String FIELD_LABEL = "label";
+	public static final String FIELD_MESSAGE = "message";
+	public static final String FIELD_ADDRESS = "address";
+	public static final String[] RECOGNIZED_QUERY_FIELDS = new String[] {FIELD_AMOUNT, FIELD_LABEL, FIELD_MESSAGE};
+
+	// TODO see if we can figure out the network stuff for the payment request URL
+	// For now, URI parsing should be fine even if this isn't recognized
+	// public static final String FIELD_PAYMENT_REQUEST_URL = "r";
+
+	private static final String REQUIRED_INDICATOR = "req-";
+
 	private static final String ENCODED_SPACE_CHARACTER = "%20";
 	private static final String AMPERSAND_SEPARATOR = "&";
 	private static final String QUESTION_MARK_SEPARATOR = "?";
@@ -94,220 +97,142 @@ public class OWCoinURI {
 	/**
 	 * Contains all the parameters in the order in which they were processed
 	 */
-	private final Map<String, Object> parameterMap = new LinkedHashMap<String, Object>();
+	private final Map<String, String> parameterMap = new LinkedHashMap<String, String>();
 
 	/**
-	 * Constructs a new BitcoinURI from the given string. Can be for any network.
-	 *
-	 * @param uri The raw URI data to be parsed (see class comments for accepted formats)
-	 * @throws BitcoinURIParseException if the URI is not syntactically or semantically valid.
-	 */
-	public OWCoinURI(String uri) throws OWCoinURIParseException, OWAddressFormatException {
-		this(null, uri);
-	}
-
-	/**
-	 * Constructs a new object by trying to parse the input as a valid Bitcoin URI.
+	 * Constructs a new object by trying to parse the input as a valid Coin URI.
+	 * URI is formed as: coin:<address>?<query parameters>
 	 *
 	 * @param params The network parameters that determine which network the URI is from, or null if you don't have
 	 *               any expectation about what network the URI is for and wish to check yourself.
 	 * @param input The raw URI data to be parsed (see class comments for accepted formats)
-	 *
-	 * @throws BitcoinURIParseException If the input fails Bitcoin URI syntax and semantic checks.
 	 */
 	public OWCoinURI(OWCoin params, String input) throws OWCoinURIParseException, OWAddressFormatException {
-		if (input == null) {
-			throw new OWCoinURIParseException("input may not be null");
-		}
-
-		// Attempt to form the URI (fail fast syntax checking to official standards).
-		URI uri;
 		try {
-			uri = new URI(input);
-		} catch (URISyntaxException e) {
-			OWCoin x;
-			x = OWAddress.getCoinTypeFromAddress(input);
-			if (x != null) {
-
-			}
-			else {
-
-			}
-			throw new OWCoinURIParseException("Bad URI syntax", e);
+			this.scheme = params.getScheme();
+		} catch(NullPointerException npe) {
+			throw new OWCoinURIParseException("The coin id may not be null. ");
+		}
+		if (input == null || input.isEmpty()) {
+			throw new OWCoinURIParseException("Cannot have null or empty input. ");
 		}
 
-		// URI is formed as  bitcoin:<address>?<query parameters>
-		// blockchain.info generates URIs of non-BIP compliant form bitcoin://address?....
-		// We support both until Ben fixes his code.
-
-		// Remove the bitcoin scheme.
-		// (Note: getSchemeSpecificPart() is not used as it unescapes the label and parse then fails.
-		// For instance with : bitcoin:129mVqKUmJ9uwPxKJBnNdABbuaaNfho4Ha?amount=0.06&label=Tom%20%26%20Jerry
-		// the & (%26) in Tom and Jerry gets interpreted as a separator and the label then gets parsed
-		// as 'Tom ' instead of 'Tom & Jerry')
-		String schemeSpecificPart;
-		if (input.startsWith("bitcoin://")) {
-			schemeSpecificPart = input.substring("bitcoin://".length());
-		} else if (input.startsWith("bitcoin:")) {
-			schemeSpecificPart = input.substring("bitcoin:".length());
-		} else {
-			throw new OWCoinURIParseException("Unsupported URI scheme: " + uri.getScheme());
+		// Have to do this because of a bug in the android Uri parsing library.
+		// The bug is that if you don't have the "//" after the ":" then it won't be able
+		// to read any query parameters (throws UnsupportedOperationExceptions).
+		// Kind of a hack, but it's more error proof than parsing the URI ourselves
+		if (input.startsWith(this.scheme) && !input.startsWith(this.scheme + "://")) {
+			StringBuilder sb = new StringBuilder(input);
+			sb.insert(input.indexOf(":")+1, "//");
+			input = sb.toString();
 		}
 
-
-		// Split off the address from the rest of the query parameters.
-		String[] addressSplitTokens = schemeSpecificPart.split("\\?");
-		if (addressSplitTokens.length == 0) {
-			throw new OWCoinURIParseException("No data found after the bitcoin: prefix");
-		}
-		String addressToken = addressSplitTokens[0];  // may be empty!
-
-		String[] nameValuePairTokens;
-		if (addressSplitTokens.length == 1) {
-			// Only an address is specified - use an empty '<name>=<value>' token array.
-			nameValuePairTokens = new String[] {};
-		} else {
-			if (addressSplitTokens.length == 2) {
-				// Split into '<name>=<value>' tokens.
-				nameValuePairTokens = addressSplitTokens[1].split("&");
-			} else {
-				throw new OWCoinURIParseException("Too many question marks in URI '" + uri + "'");
-			}
+		if (!input.startsWith(this.scheme + "://")) {
+			throw new OWCoinURIParseException("Error parsing uri. Expected scheme: " + this.scheme + ". " + 
+					"Scheme received: " + input.substring(0, input.indexOf(":")));
 		}
 
-		// Attempt to parse the rest of the URI parameters.
-		parseParameters(params, addressToken, nameValuePairTokens);
-
-		if (!addressToken.isEmpty()) {
-			// Attempt to parse the addressToken as a Bitcoin address for this network
-			try {
-				OWAddress address = new OWAddress(params, addressToken);
-				putWithValidation(FIELD_ADDRESS, address);
-			} catch (OWAddressFormatException e) {
-				throw new OWCoinURIParseException("Bad address", e);
-			}
+		Uri uri;
+		try {
+			uri = Uri.parse(input);
+		} catch(NullPointerException npe) {
+			// Cannot happen
+			throw new OWCoinURIParseException("Error parsing input, input was null. ");
 		}
 
-		if (addressToken.isEmpty() && getPaymentRequestUrl() == null) {
-			throw new OWCoinURIParseException("No address and no r= parameter found");
+		if (params.addressIsValid(uri.getAuthority())) {
+			this.parameterMap.put(FIELD_ADDRESS, uri.getAuthority());
 		}
-	}
 
-	/**
-	 * @param params The network parameters or null
-	 * @param nameValuePairTokens The tokens representing the name value pairs (assumed to be
-	 *                            separated by '=' e.g. 'amount=0.2')
-	 */
-	private void parseParameters(OWCoin params, String addressToken, String[] nameValuePairTokens) throws OWCoinURIParseException {
-		// Attempt to decode the rest of the tokens into a parameter map.
-		for (String nameValuePairToken : nameValuePairTokens) {
-			final int sepIndex = nameValuePairToken.indexOf('=');
-			if (sepIndex == -1)
-				throw new OWCoinURIParseException("Malformed Bitcoin URI - no separator in '" +
-						nameValuePairToken + "'");
-			if (sepIndex == 0)
-				throw new OWCoinURIParseException("Malformed Bitcoin URI - empty name '" +
-						nameValuePairToken + "'");
-			final String nameToken = nameValuePairToken.substring(0, sepIndex).toLowerCase(Locale.ENGLISH);
-			final String valueToken = nameValuePairToken.substring(sepIndex + 1);
-
-			// Parse the amount.
-			if (FIELD_AMOUNT.equals(nameToken)) {
-				// Decode the amount (contains an optional decimal component to 8dp).
-				try {
-					BigInteger amount = ZiftrUtils.bigDecToBigInt(params, new BigDecimal(valueToken));
-					putWithValidation(FIELD_AMOUNT, amount);
-				} catch (NumberFormatException e) {
-					throw new OWOptionalFieldValidationException(String.format("'%s' is not a valid amount", valueToken), e);
-				} catch (ArithmeticException e) {
-					throw new OWOptionalFieldValidationException(String.format("'%s' has too many decimal places", valueToken), e);
-				}
-			} else {
-				if (nameToken.startsWith("req-")) {
-					// A required parameter that we do not know about.
-					throw new OWRequiredFieldValidationException("'" + nameToken + "' is required but not known, this URI is not valid");
-				} else {
-					// Known fields and unknown parameters that are optional.
-					try {
-						if (valueToken.length() > 0)
-							putWithValidation(nameToken, URLDecoder.decode(valueToken, "UTF-8"));
-					} catch (UnsupportedEncodingException e) {
-						// Unreachable.
-						throw new RuntimeException(e);
-					}
+		List<String> recognizedQueryParams = Arrays.asList(RECOGNIZED_QUERY_FIELDS);
+		for (String key : uri.getQueryParameterNames()) {
+			String parameterMapKey = key;
+			if (parameterMapKey.startsWith(REQUIRED_INDICATOR)) {
+				parameterMapKey = parameterMapKey.substring(REQUIRED_INDICATOR.length());
+				if (!recognizedQueryParams.contains(parameterMapKey)) {
+					throw new OWCoinURIParseException("There is a required field that is not recognized. ");
 				}
 			}
+
+			if (parameterMap.containsKey(parameterMapKey)) {
+				throw new OWCoinURIParseException(String.format("'%s' is duplicated, URI is invalid", key));
+			} else {
+				parameterMap.put(parameterMapKey, uri.getQueryParameter(key));
+			}
 		}
 
 	}
-
-	/**
-	 * Put the value against the key in the map checking for duplication. This avoids address field overwrite etc.
-	 * 
-	 * @param key The key for the map
-	 * @param value The value to store
-	 */
-	private void putWithValidation(String key, Object value) throws OWCoinURIParseException {
-		if (parameterMap.containsKey(key)) {
-			throw new OWCoinURIParseException(String.format("'%s' is duplicated, URI is invalid", key));
-		} else {
-			parameterMap.put(key, value);
-		}
-	}
-
+	
 	/**
 	 * The address from the URI, if one was present. It's possible to have Bitcoin URI's with no address if a
 	 * r= payment protocol parameter is specified, though this form is not recommended as older wallets can't understand
 	 * it.
 	 */
-	@Nullable
-	public OWAddress getAddress() {
-		return (OWAddress) parameterMap.get(FIELD_ADDRESS);
+	public String getAddress() {
+		return getParameterByName(FIELD_ADDRESS, null);
 	}
 
 	/**
 	 * @return The amount name encoded using a pure integer value based at
 	 *         10,000,000 units is 1 BTC. May be null if no amount is specified
 	 */
-	public BigInteger getAmount() {
-		return (BigInteger) parameterMap.get(FIELD_AMOUNT);
+	public String getAmount() {
+		return getParameterByName(FIELD_AMOUNT, null);
 	}
 
 	/**
 	 * @return The label from the URI.
 	 */
 	public String getLabel() {
-		return (String) parameterMap.get(FIELD_LABEL);
+		return getParameterByName(FIELD_LABEL, null);
 	}
 
 	/**
 	 * @return The message from the URI.
 	 */
 	public String getMessage() {
-		return (String) parameterMap.get(FIELD_MESSAGE);
+		return getParameterByName(FIELD_MESSAGE, null);
 	}
 
-	/**
-	 * @return The URL where a payment request (as specified in BIP 70) may
-	 *         be fetched.
-	 */
-	public String getPaymentRequestUrl() {
-		return (String) parameterMap.get(FIELD_PAYMENT_REQUEST_URL);
+	@Nullable
+	public String getAddress(String defaultValue) {
+		return getParameterByName(FIELD_ADDRESS, defaultValue);
 	}
+
+	public String getAmount(String defaultValue) {
+		return getParameterByName(FIELD_AMOUNT, defaultValue);
+	}
+
+	public String getLabel(String defaultValue) {
+		return getParameterByName(FIELD_LABEL, defaultValue);
+	}
+
+	public String getMessage(String defaultValue) {
+		return getParameterByName(FIELD_MESSAGE, defaultValue);
+	}
+
+	//	/**
+	//	 * @return The URL where a payment request (as specified in BIP 70) may
+	//	 *         be fetched.
+	//	 */
+	//	public String getPaymentRequestUrl() {
+	//		return (String) parameterMap.get(FIELD_PAYMENT_REQUEST_URL);
+	//	}
 
 	/**
 	 * @param name The name of the parameter
 	 * @return The parameter value, or null if not present
 	 */
-	public Object getParameterByName(String name) {
-		return parameterMap.get(name);
+	public String getParameterByName(String name, String defaultValue) {
+		String valInMap = parameterMap.get(name);
+		return valInMap == null ? defaultValue : valInMap;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder("BitcoinURI[");
+		StringBuilder builder = new StringBuilder(scheme).append(" URI[");
 		boolean first = true;
-		for (Map.Entry<String, Object> entry : parameterMap.entrySet()) {
+		for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
 			if (first) {
 				first = false;
 			} else {
@@ -319,8 +244,8 @@ public class OWCoinURI {
 		return builder.toString();
 	}
 
-	public static String convertToBitcoinURI(OWAddress address, BigInteger amount, String label, String message) {
-		return convertToBitcoinURI(address.getCoinId(), address.toString(), amount, label, message);
+	public static String convertToCoinURI(OWAddress address, BigInteger amount, String label, String message) {
+		return convertToCoinURI(address.getCoinId(), address.toString(), amount, label, message);
 	}
 
 	/**
@@ -332,15 +257,17 @@ public class OWCoinURI {
 	 * @param message A message
 	 * @return A String containing the Bitcoin URI
 	 */
-	public static String convertToBitcoinURI(OWCoin coinType, String address, BigInteger amount, String label,
-			String message) {
-		checkNotNull(address);
+	public static String convertToCoinURI(OWCoin coinType, String address, BigInteger amount, String label,String message) throws IllegalArgumentException {
+		if (address == null) {
+			throw new IllegalArgumentException("Address may not be null");
+		}
+
 		if (amount != null && amount.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Amount must be positive");
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(BITCOIN_SCHEME).append(":").append(address);
+		builder.append(coinType.getScheme()).append(":").append(address);
 
 		boolean questionMarkHasBeenOutput = false;
 
@@ -385,4 +312,33 @@ public class OWCoinURI {
 			throw new RuntimeException(e);
 		}
 	}
+
+	//	String input = "bitcoin://mqtBMfnRTpvxAzdGMiowWhLXMGR9uevuKM?r=https%3A%2F%2Fbitcoincore.org%2F%7Egavin%2Ff.php%3Fh%3Dc611e23a6f08bc0a0ac1a7fc38f02015&amount=10&dummy=false";
+	//	Uri uri = Uri.parse(input);
+	//
+	//	ZLog.log("scheme: \n" + uri.getScheme() + "\n");
+	//	ZLog.log("SchemeSpecificPart: \n" + uri.getSchemeSpecificPart() + "\n");
+	//	ZLog.log("authority: \n" + uri.getAuthority() + "\n");
+	//	ZLog.log("UserInfo: \n" + uri.getUserInfo() + "\n");
+	//	ZLog.log("fragment: \n" + uri.getFragment() + "\n");
+	//	ZLog.log("host: \n" + uri.getHost() + "\n");
+	//	ZLog.log("getLastPathSegment: \n" + uri.getLastPathSegment() + "\n");
+	//	ZLog.log("path: \n" + uri.getPath() + "\n");
+	//	ZLog.log("port: \n" + uri.getPort() + "\n");
+	//	ZLog.log("query: \n" + uri.getQuery() + "\n");
+	//
+	//	ZLog.log("query key strings:");
+	//	for (String s : uri.getQueryParameterNames()) {
+	//		ZLog.log(s + ": " + uri.getQueryParameter(s));
+	//	}
+
 }
+
+
+
+
+
+
+
+
+

@@ -26,6 +26,7 @@ import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
+import com.ziftr.android.ziftrwallet.util.OWCoinURI;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
@@ -161,13 +162,14 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 
 	private void generateQrCode(boolean withAnimation) {
 		String addressString = this.addressEditText.getText().toString();
+		String qrCodeData = OWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, null, null, null);
 
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setPadding(0, 0, 0, 0);
 		int qrCodeDimension = this.qrCodeImageView.getWidth();
 		qrCodeDimension = Math.min(qrCodeDimension, rootView.getWidth());
 		qrCodeDimension = Math.min(qrCodeDimension, rootView.getHeight());
-		QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(addressString, null,
+		QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(qrCodeData, null,
 				Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), qrCodeDimension/2);
 		this.qrCodeImageView.getLayoutParams().width = qrCodeDimension;
 		this.qrCodeImageView.getLayoutParams().height = qrCodeDimension;
@@ -211,8 +213,10 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		viewObserver.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
-				if (fragmentHasAddress() && !isQrCodeGenerated()) {
-					generateQrCode(false);
+				if (getActivity() != null) {
+					if (fragmentHasAddress() && !isQrCodeGenerated()) {
+						generateQrCode(false);
+					}
 				}
 			}
 		});
