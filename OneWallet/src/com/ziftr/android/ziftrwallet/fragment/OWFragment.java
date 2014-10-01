@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet.fragment;
 import java.lang.reflect.Field;
 
 import android.support.v4.app.Fragment;
-import android.view.View;
 
 import com.ziftr.android.ziftrwallet.OWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -15,9 +14,6 @@ public abstract class OWFragment extends Fragment {
 		return ((OWMainFragmentActivity) this.getActivity());
 	}
 
-	protected void hideWalletHeader() {
-		this.getOWMainActivity().getWalletHeaderBar().setVisibility(View.GONE);
-	}
 
 	public boolean handleBackPress() {
 		return false;

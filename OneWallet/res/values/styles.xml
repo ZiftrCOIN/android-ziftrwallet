@@ -81,16 +81,16 @@
         <item name="android:layout_marginLeft">@dimen/ow_horizontal_margin</item>
         <item name="android:layout_marginRight">@dimen/ow_horizontal_margin</item>
     </style>
-    
+
     <style name="divider_label">
         <item name="android:layout_gravity">left</item>
         <item name="android:paddingLeft">@dimen/ow_tx_list_divider_padding</item>
         <item name="android:paddingBottom">@dimen/ow_tx_list_divider_padding</item>
         <item name="android:paddingRight">@dimen/ow_tx_list_divider_padding</item>
         <item name="android:text">@string/ow_tx_list_divider_default</item>
-        <item name="android:textColor">@color/ow_default_text</item> 
+        <item name="android:textColor">@color/ow_default_text</item>
     </style>
-    
+
     <style name="settings_bar">
         <item name="android:minHeight">@dimen/ow_total_icon_side_length</item>
         <item name="android:orientation">horizontal</item>
@@ -98,11 +98,18 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
-    
+
     <style name="setting_bar_title">
-         <item name="android:paddingLeft">@dimen/ow_tx_list_divider_padding</item>
-         <item name="android:paddingRight">@dimen/ow_tx_list_divider_padding</item>
-         <item name="android:textSize">@dimen/ow_txt_small</item>
+        <item name="android:paddingLeft">@dimen/ow_tx_list_divider_padding</item>
+        <item name="android:paddingRight">@dimen/ow_tx_list_divider_padding</item>
+        <item name="android:textSize">@dimen/ow_txt_small</item>
+    </style>
+
+    <style name="drawer_menu_text">
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_margin">20dp</item>
+        <item name="android:textSize">@dimen/ow_txt_mediumsmall</item>
+        <item name="android:textColor">@color/ow_menu_text_color</item>
     </style>
 
 </resources>

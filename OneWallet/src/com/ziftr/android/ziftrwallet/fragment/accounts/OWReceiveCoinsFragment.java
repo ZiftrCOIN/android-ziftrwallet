@@ -16,17 +16,18 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
-import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWCoinURI;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
@@ -61,7 +62,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
 
-		this.showWalletHeader();
+		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
 
 		this.initializeViewFields(inflater, container);
 
@@ -133,7 +134,9 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 
 		this.qrCodeImageView = (ImageView) this.rootView.findViewById(R.id.generateAddressQrCodeImageView);
 		this.qrCodeImageView.setOnClickListener(this);
-
+		if (fragmentHasAddress()){
+			this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
+		}
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
@@ -165,6 +168,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		String qrCodeData = OWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, null, null, null);
 
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
+		this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
 		this.qrCodeImageView.setPadding(0, 0, 0, 0);
 		int qrCodeDimension = this.qrCodeImageView.getWidth();
 		qrCodeDimension = Math.min(qrCodeDimension, rootView.getWidth());

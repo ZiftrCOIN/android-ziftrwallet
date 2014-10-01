@@ -2,18 +2,11 @@ package com.ziftr.android.ziftrwallet.fragment.accounts;
 
 
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
 
 public class OWCurrencyListItem {
 
 	/** The currency's title. e.g. "Bitcoin". */
 	private OWCoin coinId;
-
-	/** They type of fiat. e.g. Fiat.Type.USD. */
-	private OWFiat fiatType;
-
-	/** The price of one unit, encoded as a string in the fiatType units. e.g. 620.18. */
-	private String unitFiatMarketValue;
 
 	/** The total amount of currency contained in the wallet (in coins, not fiatType). */
 	private String walletTotal;
@@ -34,12 +27,10 @@ public class OWCurrencyListItem {
 	 * @param walletTotalFiatEquiv
 	 * @param resId
 	 */
-	public OWCurrencyListItem(OWCoin coinId, OWFiat fiatType, 
+	public OWCurrencyListItem(OWCoin coinId, 
 			String unitFiatMarketValue, String walletTotal, 
 			String walletTotalFiatEquiv, int resId) {
 		this.setCoinId(coinId);
-		this.setFiatType(fiatType);
-		this.setUnitFiatMarketValue(unitFiatMarketValue);
 		this.setWalletTotal(walletTotal);
 		this.setWalletTotalFiatEquiv(walletTotalFiatEquiv);
 		this.setResId(resId);
@@ -60,39 +51,6 @@ public class OWCurrencyListItem {
 	public void setCoinId(OWCoin coinId) {
 		this.coinId = coinId;
 	}
-
-
-	/**
-	 * @return the fiatType
-	 */
-	public OWFiat getFiatType() {
-		return fiatType;
-	}
-
-
-	/**
-	 * @param fiatType the fiatType to set
-	 */
-	public void setFiatType(OWFiat fiatType) {
-		this.fiatType = fiatType;
-	}
-
-
-	/**
-	 * @return the unitFiatMarketValue
-	 */
-	public String getUnitFiatMarketValue() {
-		return unitFiatMarketValue;
-	}
-
-
-	/**
-	 * @param unitFiatMarketValue the unitFiatMarketValue to set
-	 */
-	public void setUnitFiatMarketValue(String unitFiatMarketValue) {
-		this.unitFiatMarketValue = unitFiatMarketValue;
-	}
-
 
 	/**
 	 * @return the walletTotal

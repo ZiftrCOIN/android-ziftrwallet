@@ -16,7 +16,6 @@ public class OWTermsFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.hideWalletHeader();
 		return inflater.inflate(R.layout.section_terms_layout, container, false);
 	}
 	public void onResume() {

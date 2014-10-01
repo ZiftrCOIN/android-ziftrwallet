@@ -31,7 +31,6 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedLongs;
-import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.crypto.OWVarInt;
 
 public class ZiftrUtils {

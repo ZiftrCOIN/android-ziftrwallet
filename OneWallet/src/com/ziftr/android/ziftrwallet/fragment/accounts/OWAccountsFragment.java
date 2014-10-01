@@ -22,7 +22,6 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 
@@ -83,8 +82,6 @@ public class OWAccountsFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		this.hideWalletHeader();
-
 		this.rootView = inflater.inflate(R.layout.section_accounts_layout, container, false);
 
 		this.walletManager = this.getOWMainActivity().getWalletManager();
@@ -130,30 +127,30 @@ public class OWAccountsFragment extends OWFragment {
 		// to take very few things
 		int resId = R.layout.accounts_currency_list_single_item;
 		if (id == OWCoin.BTC) {
-			return new OWCurrencyListItem(OWCoin.BTC, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.BTC, 
 					"620.00", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.BTC_TEST) {
 			String balance = OWCoin.formatCoinAmount(OWCoin.BTC_TEST, this.walletManager.getWalletBalance(
 					id, OWSQLiteOpenHelper.BalanceType.AVAILABLE)).toPlainString();
-			return new OWCurrencyListItem(OWCoin.BTC_TEST, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.BTC_TEST, 
 					"0.00", balance, "0.00", resId);
 		} else if (id == OWCoin.LTC) {
-			return new OWCurrencyListItem(OWCoin.LTC, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.LTC, 
 					"6.70", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.LTC_TEST) {
-			return new OWCurrencyListItem(OWCoin.LTC_TEST, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.LTC_TEST, 
 					"0.00", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.PPC) {
-			return new OWCurrencyListItem(OWCoin.PPC, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.PPC, 
 					"1.40", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.PPC_TEST) {
-			return new OWCurrencyListItem(OWCoin.PPC_TEST, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.PPC_TEST,
 					"0.00", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.DOGE) {
-			return new OWCurrencyListItem(OWCoin.DOGE, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.DOGE, 
 					"0.0023", "0.00000000", "0.00", resId);
 		} else if (id == OWCoin.DOGE_TEST) {
-			return new OWCurrencyListItem(OWCoin.DOGE_TEST, OWFiat.USD, 
+			return new OWCurrencyListItem(OWCoin.DOGE_TEST, 
 					"0.00", "0.00000000", "0.00", resId);
 		}  
 

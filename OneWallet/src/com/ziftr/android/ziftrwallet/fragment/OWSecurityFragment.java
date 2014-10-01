@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.ziftr.android.ziftrwallet.R;
 
 
-public class OWContactFragment extends OWFragment {
+public class OWSecurityFragment extends OWFragment {
 	
 	/**
 	 * Load the view.
@@ -16,12 +16,11 @@ public class OWContactFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.hideWalletHeader();
 		return inflater.inflate(R.layout.section_contact_layout, container, false);
 	}
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("CONTACT", true, true);
+		this.getOWMainActivity().changeActionBar("SECURITY", true, true);
 	}
 
 }

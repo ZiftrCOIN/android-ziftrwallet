@@ -17,6 +17,12 @@
             android:duplicateParentState="true"
             android:orientation="vertical" >
 
+            <include
+                android:id="@+id/walletHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/_dual_icon_coin_view" />
+
             <TextView
                 android:id="@+id/addressNameTitleTextView"
                 style="@style/send_receive_label"
@@ -118,7 +124,7 @@
                     android:clickable="true"
                     android:contentDescription="@string/ow_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
-                    android:src="@drawable/button_plus_address_clickable"/>
+                    android:src="@drawable/button_plus_address_clickable" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -141,9 +147,9 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:adjustViewBounds="true"
+                        android:scaleType="center"
                         android:contentDescription="@string/ow_empty_string"
-                        android:padding="30dp"
-                        android:scaleType="fitXY"
+                        android:padding="@dimen/ow_total_icon_side_length"
                         android:src="@drawable/add_address" />
                 </LinearLayout>
 

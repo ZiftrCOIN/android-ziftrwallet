@@ -46,8 +46,9 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.OWAboutFragment;
-import com.ziftr.android.ziftrwallet.fragment.OWContactFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
+import com.ziftr.android.ziftrwallet.fragment.OWSecurityFragment;
+import com.ziftr.android.ziftrwallet.fragment.OWSetFiatFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWSettingsFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWAccountsFragment;
@@ -64,6 +65,7 @@ import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -168,9 +170,6 @@ ZiftrNetworkHandler {
 	/** Use this key to save which section of the drawer menu is open. */
 	private static final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
 
-	/** Use this key to save whether or not the header is visible (vs gone). */
-	private static final String WALLET_HEADER_VISIBILITY_KEY = "WALLET_HEADER_VISIBILITY_KEY";
-
 	/** Use this key to save whether or not the search bar is visible (vs gone). */
 	private static final String SEARCH_BAR_VISIBILITY_KEY = "SEARCH_BAR_VISIBILITY_KEY";
 
@@ -190,11 +189,6 @@ ZiftrNetworkHandler {
 	private EditText searchEditText;
 
 	private OWCoin selectedCoin;
-
-	/**
-	 * The view that contains all the info for the currently selected coin
-	 */
-	private View headerView;
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -234,7 +228,7 @@ ZiftrNetworkHandler {
 		CONTACT_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
-				return new OWContactFragment();
+				return new OWSecurityFragment();
 			}
 		};
 
@@ -273,14 +267,13 @@ ZiftrNetworkHandler {
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
-		this.headerView = this.findViewById(R.id.walletHeader);
 
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance();
 
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
-		
+
 		// Get passphrase from welcome screen if exists
 		// TODO is this using the hash?
 		Bundle info = getIntent().getExtras();
@@ -292,7 +285,7 @@ ZiftrNetworkHandler {
 				changePassphrase(null, info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY));
 			}
 		}
-		
+
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
 
@@ -343,7 +336,6 @@ ZiftrNetworkHandler {
 
 		// Save which part of the app is currently open.
 		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
-		outState.putInt(WALLET_HEADER_VISIBILITY_KEY, getWalletHeaderBar().getVisibility());
 		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
 		if (this.getSelectedCoin() != null) {
 			outState.putString(OWCoin.TYPE_KEY, this.getSelectedCoin().toString());
@@ -370,6 +362,9 @@ ZiftrNetworkHandler {
 		if (curSelected == null) {
 			super.onBackPressed();
 		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
+			super.onBackPressed();
+			//if we are in set fiat screen, back should go back to settings
+		} else if (topFragment.getTag().equals(OWTags.SET_FIAT)){
 			super.onBackPressed();
 		} else {
 			//Select accounts in drawer since anywhere you hit back, you will end up in accounts
@@ -430,7 +425,7 @@ ZiftrNetworkHandler {
 	 * @param fragmentType - The identifier for which type of fragment to start.
 	 * @param addToBackStack - boolean determining if fragment should be added to backstack
 	 */
-	private void showFragmentFromType(FragmentType fragmentType, Boolean addToBackStack) {
+	public void showFragmentFromType(FragmentType fragmentType, Boolean addToBackStack) {
 		// Go through menu options and select the right one, note  
 		// that not all menu options can be selected
 		if (fragmentType.getDrawerMenuView() != null) {
@@ -650,10 +645,6 @@ ZiftrNetworkHandler {
 
 	private void initializeHeaderViewsVisibility(Bundle args) {
 		if (args != null) {
-			if (args.getInt(WALLET_HEADER_VISIBILITY_KEY, -1) != -1) {
-				this.getWalletHeaderBar().setVisibility(args.getInt(WALLET_HEADER_VISIBILITY_KEY));
-			}
-
 			if (args.getInt(SEARCH_BAR_VISIBILITY_KEY, -1) != -1) {
 				this.getSearchBar().setVisibility(args.getInt(SEARCH_BAR_VISIBILITY_KEY));
 			}
@@ -824,8 +815,13 @@ ZiftrNetworkHandler {
 	 * @param oldPassphrase - Used to decrypt old keys, if not null
 	 * @param newPassphrase - Used to encrypt all keys, should not be null
 	 */
-	private void changePassphrase(final String oldPassphrase, final String newPassphrase) {
+	private boolean changePassphrase(final String oldPassphrase, final String newPassphrase) {
 		// TODO put up a blocking dialog while this is happening
+		if (newPassphrase == null || newPassphrase.isEmpty()) {
+			this.alertUser("A password with no text is no password at all!", "passphrase_is_empty_string");
+			return false;
+		}
+
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
@@ -843,6 +839,7 @@ ZiftrNetworkHandler {
 				});
 			}
 		});
+		return true;
 	}
 
 	/**
@@ -955,7 +952,6 @@ ZiftrNetworkHandler {
 		if (fragToShow == null) {
 			fragToShow = new OWSendCoinsFragment();
 		}
-
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, OWTags.ACCOUNTS_INNER);
@@ -1006,19 +1002,23 @@ ZiftrNetworkHandler {
 				OWTags.ACCOUNTS_INNER);
 
 	}
+	/**
+	 * Open View for selecting fiat currency in settings
+	 */
+	public void openSetFiatCurrency(){
+		OWSetFiatFragment fragToShow = (OWSetFiatFragment) this.getSupportFragmentManager().findFragmentByTag(OWTags.SET_FIAT);
+		if (fragToShow == null){
+			fragToShow = new OWSetFiatFragment();
+		}
+		this.showFragment(fragToShow, OWTags.SET_FIAT, R.id.oneWalletBaseFragmentHolder, true, OWTags.SET_FIAT);
+
+	}
 
 	/**
 	 * @return the walletManager
 	 */
 	public OWWalletManager getWalletManager() {
 		return walletManager;
-	}
-
-	/**
-	 * @return the headerBar
-	 */
-	public View getWalletHeaderBar() {
-		return this.findViewById(R.id.walletHeader);
 	}
 
 	/**
@@ -1179,23 +1179,23 @@ ZiftrNetworkHandler {
 	public void handleResetPassphrasePositive(int requestCode,
 			String oldPassphrase, String newPassphrase, String confirmPassphrase) {
 		// Can assume that there was a previously entered passphrase because 
-		// of the way the dialog was set up. 
+		// of the way the dialog was set up.
 		if (newPassphrase.equals(confirmPassphrase)) {
-			if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG) {
-				if (OWPreferencesUtils.getPassphraseDisabled(this)) {
-					OWPreferencesUtils.setPassphraseDisabled(this, false);
-				}
-				((OWSettingsFragment)this.getSupportFragmentManager(
-						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
-			}
-
 			byte[] oldPassphraseHash = ZiftrUtils.saltedHash(this, oldPassphrase);
 			// It is possible that oldPassphraseHash and the value stored in prefs are both null
 			// if the user didn't have a passphrase when this was called. 
 			// In that case, input hash matches the stored hash because they are both null
 			if (OWPreferencesUtils.inputHashMatchesStoredHash(this, oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
-				this.changePassphrase(oldPassphrase, newPassphrase);
+				if (this.changePassphrase(oldPassphrase, newPassphrase)) { 
+					//if the password was changed
+					if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG) { 
+						//if we were setting the passphrase, turn disabled passphrase off
+						OWPreferencesUtils.setPassphraseDisabled(this, false);
+						((OWSettingsFragment)this.getSupportFragmentManager(
+								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
+					}
+				}
 			} else {
 				// If don't match, tell user. 
 				this.alertUser("The passphrase you entered doesn't match your "
@@ -1292,18 +1292,15 @@ ZiftrNetworkHandler {
 	 */
 	public void setSelectedCoin(OWCoin selectedCoin) {
 		this.selectedCoin = selectedCoin;
-
-		this.populateWalletHeaderView();
-
 	}
 
 	/**
 	 * Making this a separate method to increase abstraction and just in
 	 * case we ever need to call this by itself. 
 	 */
-	private void populateWalletHeaderView() {
+	public void populateWalletHeaderView(View headerView) {
 		//now that a coin type is set, setup the header view for it
-		//headerView.setVisibility(View.VISIBLE); //let fragments do this when they're displayed
+		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(this);
 
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
@@ -1312,18 +1309,18 @@ ZiftrNetworkHandler {
 		coinTitle.setText(this.selectedCoin.getLongTitle());
 
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, this.selectedCoin, OWFiat.USD);
-		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(OWFiat.USD, unitPriceInFiat, true));
+		BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, this.selectedCoin, selectedFiat);
+		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(selectedFiat, unitPriceInFiat, true));
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.ESTIMATED);
-		BigDecimal walletBallance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
+		BigDecimal walletBalance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
 
-		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBallance).toPlainString());
+		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBalance).toPlainString());
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBallance, this.selectedCoin, OWFiat.USD);
-		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(OWFiat.USD, walletBalanceInFiat, true));
+		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBalance, this.selectedCoin, selectedFiat);
+		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(selectedFiat, walletBalanceInFiat, true));
 
 		ImageView syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
@@ -1473,15 +1470,6 @@ ZiftrNetworkHandler {
 	public boolean searchBarIsVisible() {
 		View search = findViewById(R.id.searchBar);
 		return search.getVisibility() == View.VISIBLE;
-	}
-
-
-	public void hideWalletHeader() {
-		this.headerView.setVisibility(View.GONE);
-	}
-
-	public void showWalletHeader() {
-		this.headerView.setVisibility(View.VISIBLE);
 	}
 
 	@Override

@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.zxing.client.android.CaptureActivity;
-import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -31,6 +30,7 @@ import com.ziftr.android.ziftrwallet.util.OWCoinURI;
 import com.ziftr.android.ziftrwallet.util.OWCoinURIParseException;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
@@ -61,11 +61,16 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private EditText fiatFeeEditText;
 	private EditText coinFeeEditText;
 
+	private TextView fiatAmountLabel;
+	private TextView fiatFeeLabel;
+
 	private View getQRCodeButton;
 	private View pasteButton;
 
 	private ImageView cancelButton;
 	private ImageView sendButton;
+
+	private OWFiat selectedFiat; 
 
 	private View sendCoinsContainingView;
 
@@ -78,19 +83,23 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
+
 		this.rootView = inflater.inflate(R.layout.accounts_send_coins, container, false);
 
-		this.showWalletHeader();
+		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
 
 		this.initializeViewFields();
 
 		this.initializeEditText();
-
+		return this.rootView;
+	}
+	
+	public void onViewStateRestored(Bundle savedInstanceState){
 		// Whenever one of the amount views changes, all the other views should
 		// change to constant show an updated version of what the user will send.
+		super.onViewStateRestored(savedInstanceState);
 		this.initializeTextViewDependencies();
-
-		return this.rootView;
+		this.labelEditText.requestFocus();
 	}
 
 	/** 
@@ -275,6 +284,12 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		if (this.prefilledAddress != null){
 			addressEditText.setText(this.prefilledAddress);
 		}
+		this.selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+
+		this.fiatAmountLabel = (TextView) this.rootView.findViewById(R.id.amount_fiat_label);
+		this.fiatFeeLabel = (TextView) this.rootView.findViewById(R.id.fee_fiat_label);
+		this.fiatAmountLabel.setText(this.selectedFiat.getName());
+		this.fiatFeeLabel.setText(this.selectedFiat.getName());
 
 		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
 			this.coinFeeEditText.setFocusable(true);
@@ -293,9 +308,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			this.fiatFeeEditText.setFocusable(false);
 			this.fiatFeeEditText.setFocusableInTouchMode(false);
 			this.fiatFeeEditText.setClickable(false);
-
 		}
 	}
+
 
 	/**
 	 * The form needs to add the totals and update the total text view and
@@ -364,9 +379,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 					BigDecimal newFiatVal = null;
 					try {
 						newCoinVal = new BigDecimal(newVal);
-						// TODO make this not only be USD
 						newFiatVal = OWConverter.convert(
-								newCoinVal, getSelectedCoin(), OWFiat.USD); 
+								newCoinVal, getSelectedCoin(), selectedFiat); 
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -379,8 +393,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 					changeFiatStartedFromProgram = true;
 					fiatValEditText.setText(OWFiat.formatFiatAmount(
-							OWFiat.USD, newFiatVal, false));
+							selectedFiat, newFiatVal, false));
 					changeFiatStartedFromProgram = false;
+
 				}
 			}
 		};
@@ -396,7 +411,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 					try {
 						newFiatVal = new BigDecimal(newVal);
 						newCoinVal =  OWConverter.convert(
-								newFiatVal, OWFiat.USD, getSelectedCoin());
+								newFiatVal, selectedFiat, getSelectedCoin());
 					} catch(NumberFormatException nfe) {
 						// If a value can't be parsed then we just do nothing
 						// and leave the other box with what was already in it.
@@ -436,8 +451,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		BigDecimal fiatTotal = OWConverter.convert(total, OWFiat.USD, getSelectedCoin());
-		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(OWFiat.USD, fiatTotal, false) + ")");
+		BigDecimal fiatTotal = OWConverter.convert(total, getSelectedCoin(), this.selectedFiat);
+		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(this.selectedFiat, fiatTotal, false) + ")");
 	}
 
 	/**

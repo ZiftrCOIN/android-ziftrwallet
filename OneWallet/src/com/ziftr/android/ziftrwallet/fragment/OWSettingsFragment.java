@@ -9,11 +9,11 @@ import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.ziftr.android.ziftrwallet.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.dialog.OWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.OWResetPassphraseDialog;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 
 
@@ -23,6 +23,8 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	private RelativeLayout resetPassword;
 	private TextView resetPasswordLabel;
 	private CheckBox editableConfirmationFee;
+	private RelativeLayout setFiatCurrency;
+	private TextView chosenFiat;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -35,12 +37,16 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		this.hideWalletHeader();
 
 		View rootView = inflater.inflate(R.layout.section_settings_layout, container, false);
 
 		this.disablePassphrase = (RelativeLayout) rootView.findViewById(R.id.disable_passphrase);
-		disablePassphrase.setOnClickListener(this);
+		this.disablePassphrase.setOnClickListener(this);
+		this.setFiatCurrency = (RelativeLayout) rootView.findViewById(R.id.select_fiat_currency);
+		this.setFiatCurrency.setOnClickListener(this);
+		
+		this.chosenFiat = (TextView) rootView.findViewById(R.id.chosen_fiat);
+		this.chosenFiat.setText(OWPreferencesUtils.getFiatCurrency(getActivity()).getName());
 		this.resetPassword = (RelativeLayout) rootView.findViewById(R.id.reset_password_button);
 		this.resetPassword.setOnClickListener(this);
 		this.resetPasswordLabel = ((TextView) resetPassword.findViewById(R.id.reset_password_text));
@@ -116,6 +122,8 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		} else if (v == this.disablePassphrase){
 			OWPreferencesUtils.setPassphraseDisabled(this.getActivity(), true);
 			updateSettingsVisibility();
+		} else if (v == this.setFiatCurrency){
+			getOWMainActivity().openSetFiatCurrency();
 		}
 	}
 

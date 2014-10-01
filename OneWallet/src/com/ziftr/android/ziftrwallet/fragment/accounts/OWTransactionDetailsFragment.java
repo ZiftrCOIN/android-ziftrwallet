@@ -22,7 +22,7 @@ import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWEditState;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
-import com.ziftr.android.ziftrwallet.util.TempPreferencesUtil;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -65,8 +65,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		// Resize view when keyboard pops up instead of just default pan so user 
 		// can see field more clearly
 		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-		this.hideWalletHeader();
 
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
 
@@ -123,7 +121,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
 
-		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(getActivity());
 		this.populateAmount();
 		this.populateCurrency();
 		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
@@ -135,7 +133,6 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		this.populateAddress();
 
 		this.populatePendingInformation();
-
 		this.sendToAddress.setOnClickListener(this);
 		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
@@ -164,7 +161,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 	}
 
 	private void populateCurrency() {
-		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(getActivity());
 		
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), fiat);
