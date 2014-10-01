@@ -29,7 +29,7 @@
     <!-- Description here -->
     <string name="ow_menu_text_about">ABOUT</string>
     <!-- Description here -->
-    <string name="ow_menu_text_contact">CONTACT</string>
+    <string name="ow_menu_text_security">SECURITY</string>
     <!-- Description here -->
     <string name="ow_cancel_button_text">CANCEL</string>
     <!-- Description here -->
@@ -126,12 +126,16 @@
     <string name="ow_passphrase">PASSPHRASE</string>
     <!-- Description here -->
     <string name="ow_confirmation_fee">CONFIRMATION FEES</string>
+    <!-- ello -->
+    <string name="ow_hello">Hello!</string>
     <!-- welcome label -->
-    <string name="ow_welcome">Welcome!</string>
+    <string name="ow_welcome">Welcome to ziftrWALLET!</string>
     <!-- message in welcome screen -->
-    <string name="ow_welcome_message">Below is a passphrase that keeps your account secure. 
-        Your passphrase will not be shown again. Without it you will lose access to your ziftrWALLET
-         and any digital currency inside. To prevent this screen from showing up, go to settings page or set a passphrase.</string>
+    <string name="ow_welcome_message">Please take a moment to set your passphrase below. 
+        This will ensure that your coins are secure in the unfortunate event that someone steals or hacks your phone. 
+        We recommend using a few words that you are sure to remember and that only you will know.\n\nOnce you\'ve set your 
+        passphrase, DO NOT FORGET IT! You will not be able to spend your coins without it.
+    </string>
     <string name="ow_create_new_address">CREATE NEW ADDRESS</string>
         <!-- Description here -->
     <string name="ow_receive_button_text">RECEIVE</string>

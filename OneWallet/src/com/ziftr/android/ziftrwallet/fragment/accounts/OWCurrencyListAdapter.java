@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import android.content.Context;
@@ -12,6 +13,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.util.OWConverter;
+import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 
 /**
  * In the accounts section of the app there is a list of currencies/accounts
@@ -70,9 +74,9 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 			// If it doesn't have an old view then we make a new one 
 			convertView = this.inflater.inflate(currencyListItem.getResId(), null);
 		}
-
+			OWFiat fiatType =OWPreferencesUtils.getFiatCurrency(getContext());
 //		if (getItemViewType(position) == OWCurrencyListAdapter.coinType) {
-			String fiatSymbol = currencyListItem.getFiatType().getSymbol();
+			String fiatSymbol = fiatType.getSymbol();
 
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
@@ -82,7 +86,8 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 
 			TextView coinValue = (TextView) 
 					convertView.findViewById(R.id.bottomLeftTextView);
-			coinValue.setText(fiatSymbol + currencyListItem.getUnitFiatMarketValue());
+			BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
+			coinValue.setText(OWFiat.formatFiatAmount(fiatType, unitPriceInFiat, true));
 
 			TextView walletTotal = (TextView) 
 					convertView.findViewById(R.id.topRightTextView);

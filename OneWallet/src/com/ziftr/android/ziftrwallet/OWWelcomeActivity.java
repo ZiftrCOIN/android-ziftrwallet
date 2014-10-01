@@ -14,6 +14,7 @@ import android.widget.EditText;
 import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 
 public class OWWelcomeActivity extends FragmentActivity 

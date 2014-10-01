@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.ziftr.android.ziftrwallet.R;
 
 
-public class OWContactFragment extends OWFragment {
+public class OWSecurityFragment extends OWFragment {
 	
 	/**
 	 * Load the view.
@@ -20,7 +20,7 @@ public class OWContactFragment extends OWFragment {
 	}
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("CONTACT", true, true);
+		this.getOWMainActivity().changeActionBar("SECURITY", true, true);
 	}
 
 }

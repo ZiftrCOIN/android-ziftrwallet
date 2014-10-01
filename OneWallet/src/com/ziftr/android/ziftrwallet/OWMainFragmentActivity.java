@@ -46,8 +46,9 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.OWAboutFragment;
-import com.ziftr.android.ziftrwallet.fragment.OWContactFragment;
+import com.ziftr.android.ziftrwallet.fragment.OWSecurityFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
+import com.ziftr.android.ziftrwallet.fragment.OWSetFiatFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWSettingsFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWAccountsFragment;
@@ -64,6 +65,7 @@ import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -229,7 +231,7 @@ ZiftrNetworkHandler {
 		CONTACT_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
-				return new OWContactFragment();
+				return new OWSecurityFragment();
 			}
 		};
 
@@ -364,6 +366,9 @@ ZiftrNetworkHandler {
 			super.onBackPressed();
 		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
 			super.onBackPressed();
+		//if we are in set fiat screen, back should go back to settings
+		} else if (topFragment.getTag().equals(OWTags.SET_FIAT)){
+			super.onBackPressed();
 		} else {
 			//Select accounts in drawer since anywhere you hit back, you will end up in accounts
 			selectSingleDrawerMenuOption(findViewById(R.id.menuDrawerAccountsLayout));
@@ -423,7 +428,7 @@ ZiftrNetworkHandler {
 	 * @param fragmentType - The identifier for which type of fragment to start.
 	 * @param addToBackStack - boolean determining if fragment should be added to backstack
 	 */
-	private void showFragmentFromType(FragmentType fragmentType, Boolean addToBackStack) {
+	public void showFragmentFromType(FragmentType fragmentType, Boolean addToBackStack) {
 		// Go through menu options and select the right one, note  
 		// that not all menu options can be selected
 		if (fragmentType.getDrawerMenuView() != null) {
@@ -989,6 +994,17 @@ ZiftrNetworkHandler {
 				OWTags.ACCOUNTS_INNER);
 
 	}
+	/**
+	 * Open View for selecting fiat currency in settings
+	 */
+	public void openSetFiatCurrency(){
+		OWSetFiatFragment fragToShow = (OWSetFiatFragment) this.getSupportFragmentManager().findFragmentByTag(OWTags.SET_FIAT);
+		if (fragToShow == null){
+			fragToShow = new OWSetFiatFragment();
+		}
+		this.showFragment(fragToShow, OWTags.SET_FIAT, R.id.oneWalletBaseFragmentHolder, true, OWTags.SET_FIAT);
+
+	}
 
 	/**
 	 * @return the walletManager
@@ -1277,8 +1293,8 @@ ZiftrNetworkHandler {
 	 */
 	public void populateWalletHeaderView(View headerView) {
 		//now that a coin type is set, setup the header view for it
-		//headerView.setVisibility(View.VISIBLE); //let fragments do this when they're displayed
-
+		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(this);
+		
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
 
@@ -1286,18 +1302,18 @@ ZiftrNetworkHandler {
 		coinTitle.setText(this.selectedCoin.getLongTitle());
 
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, this.selectedCoin, OWFiat.USD);
-		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(OWFiat.USD, unitPriceInFiat, true));
+		BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, this.selectedCoin, selectedFiat);
+		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(selectedFiat, unitPriceInFiat, true));
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.ESTIMATED);
-		BigDecimal walletBallance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
+		BigDecimal walletBalance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
 
-		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBallance).toPlainString());
+		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBalance).toPlainString());
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBallance, this.selectedCoin, OWFiat.USD);
-		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(OWFiat.USD, walletBalanceInFiat, true));
+		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBalance, this.selectedCoin, selectedFiat);
+		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(selectedFiat, walletBalanceInFiat, true));
 
 		ImageView syncButton = (ImageView)headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);

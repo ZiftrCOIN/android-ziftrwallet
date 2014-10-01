@@ -18,7 +18,7 @@ import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
-import com.ziftr.android.ziftrwallet.util.TempPreferencesUtil;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -105,7 +105,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWSe
 					txListItem.getCoinId(), txListItem.getTxAmount());
 			txAmount.setText(amt.toPlainString());
 
-			OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+			OWFiat fiat = OWPreferencesUtils.getFiatCurrency(this.getContext());
 			
 			TextView txAmountFiatEquiv = (TextView) 
 					convertView.findViewById(R.id.txAmountFiatEquiv);

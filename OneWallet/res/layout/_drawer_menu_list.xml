@@ -220,7 +220,7 @@
                     style="@style/drawer_menu_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ow_menu_text_contact" />
+                    android:text="@string/ow_menu_text_security" />
             </LinearLayout>
         </TableRow>
 

@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 
 import com.google.bitcoin.utils.BriefLogFormatter;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 

@@ -23,7 +23,9 @@ public class OWTags {
 	public static final String ACCOUNTS_INNER =  ACCOUNTS_TAG + "_INNER";
 	
 	public static final String DEACTIVATE_WALLET = "confirmation_dialog_deactivate";
-	
+
+	public static final String SET_FIAT = "set_fiat_fragment";
+
 	//DIALOG TAGS
 	public static final String VALIDATE_PASS_RECEIVE = "validate_passphrase_dialog_new_key";
 	

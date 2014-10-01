@@ -1,4 +1,4 @@
-package com.ziftr.android.ziftrwallet;
+package com.ziftr.android.ziftrwallet.util;
 
 import java.util.Arrays;
 
@@ -8,28 +8,29 @@ import android.content.SharedPreferences.Editor;
 
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypterException;
-import com.ziftr.android.ziftrwallet.util.ZLog;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class OWPreferencesUtils {
 
 	/** For putting the passphrase into a bundle and/or intent extras. */
-	static final String BUNDLE_PASSPHRASE_KEY = "bundle_passphrase_key";
+	public static final String BUNDLE_PASSPHRASE_KEY = "bundle_passphrase_key";
 
 	/** Used for getting the preferences */
-	static final String PREFERENCES_NAME = "ziftrWALLET_Prefs";
+	public static final String PREFERENCES_NAME = "ziftrWALLET_Prefs";
 
 	/** The key for getting the passphrase hash from the preferences. */
-	static final String PREFS_PASSPHRASE_KEY = "ow_passphrase_key_1";
+	public static final String PREFS_PASSPHRASE_KEY = "ow_passphrase_key_1";
 
 	/** The key to get and save the salt as used by the specific user of the application. */
-	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
+	public static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
 	
 	/** So we can skip the welcome screen and save the boolean. */
 	public final static String PASSPHRASE_DISABLED_KEY = "ow_disabled_passphrase_key";
 
 	/** So we can save the boolean from settings, whether fees are edititable or not. */
 	public final static String EDITABLE_FEES_KEY = "ow_editable_fees_key";
+	
+	/** Save the selected Fiat Currency of user*/
+	public final static String FIAT_CURRENCY_KEY = "ow_fiat_currency_key";
 
 	/**
 	 * Gets the stored hash of the users passphrase, if there is one.
@@ -66,7 +67,7 @@ public abstract class OWPreferencesUtils {
 	 * @param inputHash - the hash to check agains
 	 * @return as above
 	 */
-	static boolean inputHashMatchesStoredHash(Context a, byte[] inputHash) {
+	public static boolean inputHashMatchesStoredHash(Context a, byte[] inputHash) {
 		byte[] storedHash = getStoredPassphraseHash(a);
 		if (storedHash != null && inputHash != null) {
 			return Arrays.equals(storedHash, inputHash); 
@@ -122,6 +123,21 @@ public abstract class OWPreferencesUtils {
 		editor.putBoolean(PASSPHRASE_DISABLED_KEY, isDisabled);
 		editor.commit();
 	}
+	
+	public static OWFiat getFiatCurrency(Context a){
+		SharedPreferences prefs = getPrefs(a);
+		return OWFiat.valueOf(prefs.getString(FIAT_CURRENCY_KEY, "US Dollars"));
+
+	}
+	
+	public static void setFiatCurrency(Context a, String fiatSelected){
+		SharedPreferences prefs = getPrefs(a);
+		Editor editor = prefs.edit();
+		editor.putString(FIAT_CURRENCY_KEY, fiatSelected);
+		editor.commit();
+
+	}
+	
 
 	/**
 	 * @param a

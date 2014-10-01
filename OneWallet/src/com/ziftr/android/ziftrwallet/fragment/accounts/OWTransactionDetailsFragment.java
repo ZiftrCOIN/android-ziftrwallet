@@ -8,9 +8,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -22,7 +22,7 @@ import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWEditState;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
-import com.ziftr.android.ziftrwallet.util.TempPreferencesUtil;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -121,7 +121,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
 
-		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(getActivity());
 		this.populateAmount();
 		this.populateCurrency();
 		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
@@ -161,7 +161,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 	}
 
 	private void populateCurrency() {
-		OWFiat fiat = TempPreferencesUtil.getSelectedFiat();
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(getActivity());
 		
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), fiat);

@@ -1,6 +1,8 @@
 package com.ziftr.android.ziftrwallet.util;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OWFiat implements OWCurrency {
 
@@ -12,10 +14,10 @@ public class OWFiat implements OWCurrency {
 	public static final OWFiat[] values() {
 		return TYPES;
 	}
-	
+
 	public static OWFiat valueOf(String fiatStr) {
 		for (OWFiat fiat : OWFiat.values()) {
-			if (fiat.toString().equals(fiatStr)) {
+			if (fiat.getName().equals(fiatStr)) {
 				return fiat;
 			}
 		}
@@ -58,6 +60,15 @@ public class OWFiat implements OWCurrency {
 		return numberOfDigitsOfPrecision;
 	}
 
+	public static List<OWFiat> getFiatTypesList(){
+		List<OWFiat> fiats = new ArrayList<OWFiat>();
+		for (OWFiat type: OWFiat.TYPES){
+			fiats.add(type);
+		}
+		return fiats;
+
+	}
+
 	/**
 	 * A convenience method to format a BigDecimal. In Standard use,
 	 * one can just use standard BigDecimal methods and use this
@@ -69,11 +80,11 @@ public class OWFiat implements OWCurrency {
 	public static String formatFiatAmount(OWFiat fiat, BigDecimal toFormat, boolean includeSymbols) {
 
 		String formattedString = "";
-		
+
 		if(includeSymbols) {
 			formattedString += fiat.getSymbol();
 		}
-		
+
 		formattedString += ZiftrUtils.formatToNDecimalPlaces(fiat.getNumberOfDigitsOfPrecision(), toFormat).toPlainString();
 
 		return formattedString;
