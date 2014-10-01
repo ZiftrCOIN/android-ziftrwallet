@@ -32,7 +32,6 @@ import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
@@ -189,7 +188,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				this.qrCodeImageView.setImageDrawable(transitionDrawable);
 				transitionDrawable.startTransition(FADE_DURATION);
 			} else {
-				ZLog.log("Lost Souls.");
 				this.qrCodeImageView.setImageBitmap(bitmap);
 			}
 		} catch (WriterException e) {

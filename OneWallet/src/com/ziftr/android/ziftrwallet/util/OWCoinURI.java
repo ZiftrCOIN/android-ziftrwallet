@@ -140,8 +140,12 @@ public class OWCoinURI {
 			throw new OWCoinURIParseException("Error parsing input, input was null. ");
 		}
 
-		if (params.addressIsValid(uri.getAuthority())) {
-			this.parameterMap.put(FIELD_ADDRESS, uri.getAuthority());
+		if (uri.getAuthority() != null && !uri.getAuthority().isEmpty()) {
+			if (params.addressIsValid(uri.getAuthority())) {
+				this.parameterMap.put(FIELD_ADDRESS, uri.getAuthority());
+			} else {
+				throw new OWAddressFormatException("The address does not validate. ");
+			}
 		}
 
 		List<String> recognizedQueryParams = Arrays.asList(RECOGNIZED_QUERY_FIELDS);

@@ -127,15 +127,14 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				}
 
 			} catch (OWCoinURIParseException e) {
-				// Maybe it's just a straight uri non-encoded address? 
+				// Maybe it's just a straight non-encoded address? 
 				if (this.getSelectedCoin().addressIsValid(dataFromQRScan)) {
 					address = dataFromQRScan;
+				} else {
+					this.getOWMainActivity().alertUser("There was an error in the scanned data.", "error_in_request");
 				}
-				ZLog.log("Error: ", e.getMessage());
-				e.printStackTrace();
 			} catch (OWAddressFormatException e) {
-				ZLog.log("Error: ", e.getMessage());
-				e.printStackTrace();
+				this.getOWMainActivity().alertUser("The scanned address is not valid.", "invalid_scanned_address_dialog");
 			}
 
 			if (address != null) {
@@ -156,7 +155,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				}
 			}
 			this.acceptAddress(address, txNote);
-
 
 		}
 		super.onActivityResult(requestCode, resultCode, data);
