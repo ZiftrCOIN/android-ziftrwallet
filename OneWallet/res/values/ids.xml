@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="save_user_name_edit_text" type="id"/>
-</resources> 
+    <item name="ow_save_user_name_edit_text" type="id"/>
+    <item name="ow_send_name" type="id"/>
+    <item name="ow_send_coin_amount" type="id"/>
+    <item name="ow_send_fiat_amount" type="id"/>
+    <item name="ow_send_coin_fee" type="id"/>
+    <item name="ow_send_fiat_fee" type="id"/>
+    <item name="ow_receive_address_label" type="id"/>
+    <item name="ow_welcome_passphrase_1" type="id"/>
+    <item name="ow_welcome_passphrase_2" type="id"/>
+</resources>

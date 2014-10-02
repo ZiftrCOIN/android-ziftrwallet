@@ -11,17 +11,18 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.util.OWTags;
 
 public class OWWelcomePassphraseFragment extends Fragment implements OnClickListener {
-	
+
 	private View rootView;
 	private EditText passphraseEditText;
 	private EditText confirmPassphraseEditText;
 
 	private Button setPassphraseButton;
 	private Button skipPassphraseButton;
-	
-	
+
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
 		this.rootView = inflater.inflate(R.layout.welcome_passphrase, container, false);
@@ -44,10 +45,12 @@ public class OWWelcomePassphraseFragment extends Fragment implements OnClickList
 		setPassphraseButton = (Button) rootView.findViewById(R.id.set_password);
 		skipPassphraseButton = (Button) rootView.findViewById(R.id.skip_password);
 
-		passphraseEditText = (EditText) rootView.findViewById(R.id.new_password).findViewById(R.id.ow_editText);
+		passphraseEditText = (EditText) rootView.findViewById(R.id.new_password).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		passphraseEditText.setId(R.id.ow_welcome_passphrase_1);
 		passphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-		confirmPassphraseEditText = (EditText) rootView.findViewById(R.id.new_confirm_password).findViewById(R.id.ow_editText);
 
+		confirmPassphraseEditText = (EditText) rootView.findViewById(R.id.new_confirm_password).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		confirmPassphraseEditText.setId(R.id.ow_welcome_passphrase_2);
 		confirmPassphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		confirmPassphraseEditText.clearFocus();
 
@@ -57,13 +60,13 @@ public class OWWelcomePassphraseFragment extends Fragment implements OnClickList
 
 	@Override
 	public void onClick(View v) {
-		
+
 		OWWelcomeActivity welcomeActivity = (OWWelcomeActivity) this.getActivity();
 		// Need an activity to do pretty much everything below
 		if (welcomeActivity == null) {
 			return;
 		}
-		
+
 		if (v == skipPassphraseButton) {
 			this.startNextScreen(null);
 		} else if (v == setPassphraseButton) {
@@ -83,14 +86,14 @@ public class OWWelcomePassphraseFragment extends Fragment implements OnClickList
 			}
 		}
 	}
-	
+
 	private void startNextScreen(String passphrase) {
 		Bundle b = null;
 		if (passphrase != null) {
 			b = new Bundle();
 			b.putString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
 		}
-		
+
 		OWWelcomeActivity welcomeActivity = (OWWelcomeActivity) this.getActivity();
 		if (OWPreferencesUtils.userHasSetName(welcomeActivity)) {
 			welcomeActivity.startOWMainActivity(b);

@@ -57,16 +57,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.ziftr.android.ziftrwallet.OWWelcomeActivity" >
+            >
+        </activity>
         <activity
-            android:name="com.ziftr.android.ziftrwallet.OWWelcomeActivity" >
-            ></activity>
-        <activity
-            android:name="com.ziftr.android.ziftrwallet.OWMainFragmentActivity" 
-            android:windowSoftInputMode="adjustPan">
+            android:name="com.ziftr.android.ziftrwallet.OWMainFragmentActivity"
+            android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
             android:name="com.google.zxing.client.android.CaptureActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
     </application>
 

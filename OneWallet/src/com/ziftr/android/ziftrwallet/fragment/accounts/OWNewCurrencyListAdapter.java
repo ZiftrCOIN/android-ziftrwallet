@@ -26,7 +26,7 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 	private int resourceId;
 	private LayoutInflater inflater;
 	private Context context;
-	
+
 	public OWNewCurrencyListAdapter(Context ctx, int resourceId, 
 			List<OWNewCurrencyListItem> coins) {
 		super(ctx, resourceId, coins);
@@ -34,7 +34,7 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		this.inflater = LayoutInflater.from(ctx);
 		this.context = ctx;
 	}
-	
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// The convertView is an oldView that android is recycling.
@@ -42,9 +42,9 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		final OWNewCurrencyListItem newCurrencyListItem = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-        	convertView = (LinearLayout) this.inflater.inflate(this.resourceId, null);
-        }
-		
+			convertView = (LinearLayout) this.inflater.inflate(this.resourceId, null);
+		}
+
 		// Whether or not we just created one, we reset all the resources
 		// to match the newCurrencyListItem.
 
@@ -52,11 +52,11 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
 		Drawable image = context.getResources().getDrawable(newCurrencyListItem.getCoinId().getLogoResId());
 		coinLogo.setImageDrawable(image);
-		
+
 		// Set the text next to logo
 		TextView coinName = (TextView) convertView.findViewById(R.id.topLeftTextView);
 		coinName.setText(newCurrencyListItem.getCoinId().getLongTitle());
-		
+
 		CheckBox check = (CheckBox) convertView.findViewById(R.id.rightIcon);
 		if (newCurrencyListItem.isChecked()){
 			check.setChecked(true);
@@ -64,14 +64,10 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 			check.setChecked(false);
 		}
 		check.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				if (((CheckBox)v).isChecked()){
-					newCurrencyListItem.setIsChecked(true);
-				} else {
-					newCurrencyListItem.setIsChecked(false);
-				}
+				newCurrencyListItem.setIsChecked(!((CheckBox)v).isChecked());
 			}
 		});
 		return convertView;

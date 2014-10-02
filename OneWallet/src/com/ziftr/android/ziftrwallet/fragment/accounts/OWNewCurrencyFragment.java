@@ -8,6 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -15,7 +18,7 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 
-public class OWNewCurrencyFragment extends OWFragment implements OnClickListener{
+public class OWNewCurrencyFragment extends OWFragment implements OnClickListener, OnItemClickListener{
 
 	private OWNewCurrencyListAdapter currencyAdapter;
 
@@ -73,6 +76,7 @@ public class OWNewCurrencyFragment extends OWFragment implements OnClickListener
 		this.listView = (ListView) this.rootView.findViewById(R.id.currencyListView);
 		listView.setFooterDividersEnabled(false);
 		listView.setAdapter(this.currencyAdapter);
+		listView.setOnItemClickListener(this);
 	}
 
 	public List<OWNewCurrencyListItem> generateCurrencyListFrom(List<OWCoin> list, Bundle savedInstanceState) {
@@ -135,6 +139,14 @@ public class OWNewCurrencyFragment extends OWFragment implements OnClickListener
 
 			getOWMainActivity().addNewCurrency(b);
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		OWNewCurrencyListItem item = (OWNewCurrencyListItem)listView.getItemAtPosition(position);
+		item.setIsChecked(!item.isChecked());
+		((CheckBox)view.findViewById(R.id.rightIcon)).setChecked(item.isChecked());
 	}
 
 }

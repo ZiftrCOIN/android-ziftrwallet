@@ -2,7 +2,6 @@ package com.ziftr.android.ziftrwallet;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -11,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.util.OWTags;
 
 public class OWWelcomeNameFragment extends Fragment implements OnClickListener {
 
@@ -41,10 +41,9 @@ public class OWWelcomeNameFragment extends Fragment implements OnClickListener {
 		saveNameButton = (Button) rootView.findViewById(R.id.set_name);
 		askMeLaterButton = (Button) rootView.findViewById(R.id.skip_name);
 
-		nameEditText = (EditText) rootView.findViewById(R.id.usersName).findViewById(R.id.ow_editText);
-		nameEditText.setId(R.id.save_user_name_edit_text);
-		nameEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-
+		nameEditText = (EditText) rootView.findViewById(R.id.usersName).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		nameEditText.setId(R.id.ow_save_user_name_edit_text);
+		
 		saveNameButton.setOnClickListener(this);
 		askMeLaterButton.setOnClickListener(this);
 	}
