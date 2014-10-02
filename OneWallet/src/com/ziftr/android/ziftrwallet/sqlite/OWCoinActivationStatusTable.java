@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 
 
+// TODO make a column for balance so that we don't have to loop through transaction table? 
 public class OWCoinActivationStatusTable extends OWTable {
 
 	/** The title of the column that contains a string identifying the OWCoin for the row. */

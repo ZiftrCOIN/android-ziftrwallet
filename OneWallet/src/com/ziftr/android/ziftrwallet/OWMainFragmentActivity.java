@@ -275,16 +275,7 @@ ZiftrNetworkHandler {
 		this.initializeCoinType(savedInstanceState);
 
 		// Get passphrase from welcome screen if exists
-		// TODO is this using the hash?
-		Bundle info = getIntent().getExtras();
-		if (info != null && info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY) != null) {
-			// We can only get here if there is no previous passphrase, so we put in null
-			if (OWPreferencesUtils.userHasPassphrase(this)) {
-				throw new IllegalArgumentException("Cannot have a passphrase and be setting in onCreate");
-			} else {
-				changePassphrase(null, info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY));
-			}
-		}
+		this.handleWelcomeActivityResults();
 
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
@@ -302,6 +293,29 @@ ZiftrNetworkHandler {
 		this.initializeSearchBarText();
 
 		ZiftrNetworkManager.registerNetworkHandler(this);
+	}
+
+	/**
+	 * This method handles the results from the welcome activity. Specifically,
+	 * if the intent that brought us to this activity contains a passphrase or a bundle
+	 * here then we take appropriate action using those values.
+	 */
+	private void handleWelcomeActivityResults() {
+		Bundle info = getIntent().getExtras();
+		if (info != null) {
+			if (info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY) != null) {
+				if (OWPreferencesUtils.userHasPassphrase(this)) {
+					throw new IllegalArgumentException("Cannot have a passphrase and be setting in onCreate");
+				} else {
+					// We can only get here if there is no previous passphrase, so we put in null
+					changePassphrase(null, info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY));
+				}
+			}
+			
+			if (info.getString(OWPreferencesUtils.BUNDLE_NAME_KEY) != null) { 
+				OWPreferencesUtils.setUserName(this, info.getString(OWPreferencesUtils.BUNDLE_NAME_KEY));
+			}
+		}
 	}
 
 	/**
@@ -456,8 +470,7 @@ ZiftrNetworkHandler {
 	public void showFragment(Fragment fragToShow, String tag, 
 			int resId, boolean addToBackStack, String backStackTag) {
 		// The transaction that will take place to show the new fragment
-		FragmentTransaction transaction = 
-				this.getSupportFragmentManager().beginTransaction();
+		FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
 
 		// TODO add animation to transaciton here
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
@@ -686,8 +699,7 @@ ZiftrNetworkHandler {
 				if (fragmentType.getDrawerMenuView() != null) {
 					this.selectSingleDrawerMenuOption(fragmentType.getDrawerMenuView());
 				} else {
-					ZLog.log("The drawer menu was null, "
-							+ "can't select... shouldn't happen1");
+					ZLog.log("The drawer menu was null, can't select... shouldn't happen1");
 				}
 			}
 		}

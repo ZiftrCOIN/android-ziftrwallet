@@ -164,7 +164,8 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 
 	private void generateQrCode(boolean withAnimation) {
 		String addressString = this.addressEditText.getText().toString();
-		String qrCodeData = OWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, null, null, null);
+		String qrCodeData = OWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, null, 
+				OWPreferencesUtils.getUserName(getActivity()), null);
 
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);

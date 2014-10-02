@@ -13,15 +13,22 @@ public abstract class OWPreferencesUtils {
 
 	/** For putting the passphrase into a bundle and/or intent extras. */
 	public static final String BUNDLE_PASSPHRASE_KEY = "bundle_passphrase_key";
+	
+	/** For putting the passphrase into a bundle and/or intent extras. */
+	public static final String BUNDLE_NAME_KEY = "bundle_name_key";
 
 	/** Used for getting the preferences */
-	public static final String PREFERENCES_NAME = "ziftrWALLET_Prefs";
-
+	public static final String PREFERENCES_FILE_NAME = "ziftrWALLET_Prefs";
+	
 	/** The key for getting the passphrase hash from the preferences. */
 	public static final String PREFS_PASSPHRASE_KEY = "ow_passphrase_key_1";
 
+	/** The key for getting the name of the user from the preferences. */
+	public static final String PREFS_USER_NAME_KEY = "ow_name_key";
+	
 	/** The key to get and save the salt as used by the specific user of the application. */
 	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
+	
 
 	/** So we can skip the welcome screen and save the boolean. */
 	public final static String PASSPHRASE_DISABLED_KEY = "ow_disabled_passphrase_key";
@@ -135,16 +142,26 @@ public abstract class OWPreferencesUtils {
 		Editor editor = prefs.edit();
 		editor.putString(FIAT_CURRENCY_KEY, fiatSelected);
 		editor.commit();
-
+	}
+	
+	public static String getUserName(Context a) {
+		SharedPreferences prefs = getPrefs(a);
+		return prefs.getString(PREFS_USER_NAME_KEY, null);
+	}
+	
+	public static boolean userHasSetName(Context a) {
+		return getUserName(a) != null;
+	}
+	
+	public static void setUserName(Context a, String userName) {
+		SharedPreferences prefs = getPrefs(a);
+		Editor editor = prefs.edit();
+		editor.putString(PREFS_USER_NAME_KEY, userName);
+		editor.commit();
 	}
 
-
-	/**
-	 * @param a
-	 * @return
-	 */
 	public static SharedPreferences getPrefs(Context a) {
-		return a.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
+		return a.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
 	}
 
 }

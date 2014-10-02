@@ -51,8 +51,8 @@
     <style name="white_divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1.5dp</item>
-        <item name="android:layout_marginTop">5dp</item>
-        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
         <item name="android:layout_marginLeft">@dimen/ow_total_icon_side_length</item>
         <item name="android:layout_marginRight">@dimen/ow_total_icon_side_length</item>
         <item name="android:background">@drawable/gradient_white_divider</item>
