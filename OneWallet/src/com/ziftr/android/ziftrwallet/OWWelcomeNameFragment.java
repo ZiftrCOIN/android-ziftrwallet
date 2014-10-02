@@ -42,6 +42,7 @@ public class OWWelcomeNameFragment extends Fragment implements OnClickListener {
 		askMeLaterButton = (Button) rootView.findViewById(R.id.skip_name);
 
 		nameEditText = (EditText) rootView.findViewById(R.id.usersName).findViewById(R.id.ow_editText);
+		nameEditText.setId(R.id.save_user_name_edit_text);
 		nameEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
 
 		saveNameButton.setOnClickListener(this);
