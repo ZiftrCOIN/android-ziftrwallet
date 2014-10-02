@@ -58,7 +58,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			this.editableConfirmationFee.setChecked(false);
 		}
 
-		this.updateSettingsVisibility();
+		this.updateSettingsVisibility(false);
 		return rootView;
 	}
 
@@ -67,8 +67,8 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		this.getOWMainActivity().changeActionBar("SETTINGS", true, true);
 	}
 
-	public void updateSettingsVisibility() {
-		if (OWPreferencesUtils.userHasPassphrase(this.getActivity())) {
+	public void updateSettingsVisibility(boolean justSetPass) {
+		if (OWPreferencesUtils.userHasPassphrase(this.getActivity()) || justSetPass) {
 			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Reset Passphrase");
 		} else if (!OWPreferencesUtils.getPassphraseDisabled(this.getActivity())) {
@@ -121,7 +121,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			}
 		} else if (v == this.disablePassphrase){
 			OWPreferencesUtils.setPassphraseDisabled(this.getActivity(), true);
-			updateSettingsVisibility();
+			updateSettingsVisibility(false);
 		} else if (v == this.setFiatCurrency){
 			getOWMainActivity().openSetFiatCurrency();
 		}

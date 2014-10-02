@@ -34,5 +34,8 @@ public class OWTags {
 	public static final String EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK = "edit_address_label_address_book";
 	
 	public static final String CONFIRM_NEW_ADDRESS = "confirm_new_address_dialog";
+	
+	//EDIT TEXT
+	public static final String OW_EDIT_TEXT = "ow_edit_text";
 
 }

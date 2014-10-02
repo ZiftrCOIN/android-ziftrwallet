@@ -142,7 +142,8 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 		this.generateAddressForLabel = (ImageView) this.rootView.findViewById(R.id.generateNewAddressForLabel);
 		this.generateAddressForLabel.setOnClickListener(this);
-		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.ow_editText);
+		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		labelEditText.setId(R.id.ow_receive_address_label);
 		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {

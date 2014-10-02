@@ -218,7 +218,8 @@ public class OWAccountsFragment extends OWFragment {
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, item.getCoinId().toString());
 				b.putInt("ITEM_LOCATION", position);
-				getOWMainActivity().alertConfirmation(OWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to de-activate this wallet?", 
+				getOWMainActivity().alertConfirmation(OWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to "
+						+ "deactivate this wallet? This will not actually delete any of your stored data, and you can reactivate it at any time.", 
 						OWTags.DEACTIVATE_WALLET, b);
 				return true;
 			}

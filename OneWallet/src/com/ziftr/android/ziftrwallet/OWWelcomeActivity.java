@@ -16,6 +16,7 @@ import com.ziftr.android.ziftrwallet.dialog.OWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
+import com.ziftr.android.ziftrwallet.util.OWTags;
 
 public class OWWelcomeActivity extends FragmentActivity 
 implements OnClickListener, OWNeutralDialogHandler {
@@ -47,12 +48,14 @@ implements OnClickListener, OWNeutralDialogHandler {
 		setPassphraseButton = (Button) this.findViewById(R.id.set_password);
 		skipPassphraseButton = (Button) this.findViewById(R.id.skip_password);
 
-		passphraseEditText = (EditText) this.findViewById(R.id.new_password).findViewById(R.id.ow_editText);
+		passphraseEditText = (EditText) this.findViewById(R.id.new_password).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		passphraseEditText.setId(R.id.ow_welcome_passphrase_1);
 		passphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-		confirmPassphraseEditText = (EditText) this.findViewById(R.id.new_confirm_password).findViewById(R.id.ow_editText);
+		confirmPassphraseEditText = (EditText) this.findViewById(R.id.new_confirm_password).findViewWithTag(OWTags.OW_EDIT_TEXT);
 
 		confirmPassphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		confirmPassphraseEditText.clearFocus();
+		confirmPassphraseEditText.setId(R.id.ow_welcome_passphrase_2);
 
 		setPassphraseButton.setOnClickListener(this);
 		skipPassphraseButton.setOnClickListener(this);

@@ -66,6 +66,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 	private View getQRCodeButton;
 	private View pasteButton;
+	private View helpFeeButton;
 
 	private ImageView cancelButton;
 	private ImageView sendButton;
@@ -93,7 +94,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.initializeEditText();
 		return this.rootView;
 	}
-	
+
 	public void onViewStateRestored(Bundle savedInstanceState){
 		// Whenever one of the amount views changes, all the other views should
 		// change to constant show an updated version of what the user will send.
@@ -209,6 +210,13 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
+		} else if (v == this.helpFeeButton){
+			getOWMainActivity().alertUser(
+					"Why is there a fee?\n\nThis fee is NOT paid to Ziftr. "
+					+ "The fee goes to the miner that secures your transaction as a reward for their service. "
+					+ "This is standard for all cryptocurrency applications. Without it, your transaction would "
+					+ "likely stay as pending for an inconvenient length of time.", 
+					"fiat_fee_help_dialog");
 		}
 	}
 
@@ -257,20 +265,34 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.sendCoinsContainingView = this.rootView.findViewById(R.id.sendCoinsContainingView);
 
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmount).findViewById(R.id.ow_editText);
+				R.id.sendEditTextAmount).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		coinAmountEditText.setId(R.id.ow_send_coin_amount);
+
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmountFiatEquiv).findViewById(R.id.ow_editText);
+				R.id.sendEditTextAmountFiatEquiv).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		fiatAmountEditText.setId(R.id.ow_send_fiat_amount);
+
 		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFeeFiatEquiv).findViewById(R.id.ow_editText);
+				R.id.sendEditTextTransactionFeeFiatEquiv).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		fiatFeeEditText.setId(R.id.ow_send_fiat_fee);
+
 		this.coinFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFee).findViewById(R.id.ow_editText);
+				R.id.sendEditTextTransactionFee).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		coinFeeEditText.setId(R.id.ow_send_coin_fee);
+
+
 		this.labelEditText = (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_reciever_name).findViewById(R.id.ow_editText);
+				R.id.send_edit_text_reciever_name).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		labelEditText.setId(R.id.ow_send_name);
+		
 		this.addressEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextReceiverAddress);
 
 		this.getQRCodeButton = this.rootView.findViewById(R.id.send_qr_icon);
 		this.getQRCodeButton.setOnClickListener(this);
+		
+		this.helpFeeButton = (ImageView) this.rootView.findViewById(R.id.help_fee_button);
+		helpFeeButton.setOnClickListener(this);
 
 		this.pasteButton = this.rootView.findViewById(R.id.send_paste_icon);
 		this.pasteButton.setOnClickListener(this);
@@ -280,6 +302,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.sendButton = (ImageView) this.rootView.findViewById(R.id.send_button);
 		this.sendButton.setOnClickListener(this);
+		
 
 		if (this.prefilledAddress != null){
 			addressEditText.setText(this.prefilledAddress);
@@ -346,7 +369,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		changeFiatStartedFromProgram = false;
 
 		changeCoinStartedFromProgram = true;
-		coinAmountEditText.setText("0");
+		if (coinAmountEditText.getText().toString().isEmpty()){
+			coinAmountEditText.setText("0");
+		}
 		changeCoinStartedFromProgram = false;
 	}
 

@@ -134,11 +134,19 @@
     <string name="ow_welcome_message">Please take a moment to set your passphrase below. 
         This will ensure that your coins are secure in the unfortunate event that someone steals or hacks your phone. 
         We recommend using a few words that you are sure to remember and that only you will know.\n\nOnce you\'ve set your 
-        passphrase, DO NOT FORGET IT! You will not be able to spend your coins without it.
-    </string>
+        passphrase, DO NOT FORGET IT! You will not be able to spend your coins without it.</string>
     <string name="ow_create_new_address">CREATE NEW ADDRESS</string>
-        <!-- Description here -->
+    <!-- Description here -->
     <string name="ow_receive_button_text">RECEIVE</string>
-    
+    <!-- Description here -->
+    <string name="ow_add_currency_description">This is your home screen where you can navigate between all of your different wallets. Click the + icon below to begin adding currencies to your ziftrWALLET.</string>
+    <!-- Description here -->
+    <string name="ow_about_text">ziftrWALLET streamlines the process of sending, receiving and storing different types of cryptocurrency.\n\n
+        ziftrWALLET was created by the talented entrepreneurs, software developers and marketers behind Ziftr, a suite of shopping tools that has helped more than 2 million users find the best deals at their favorite online retailers.\n\n 
+		To learn more about Ziftr, go to www.ziftr.com.\n\n
+		Coming Soon: ziftrCOIN!\n\n
+		ziftrCOIN, the first digital currency developed for online shoppers, aims to revolutionize shopping by putting cryptocurrency into the hands of consumers and enabling them to conduct simple, secure transactions at their favorite online retailers. \n\n 
+		To learn more about ziftrCOIN, go to www.ziftrCOIN.com.</string>
 
+    
 </resources>

@@ -702,7 +702,7 @@ ZiftrNetworkHandler {
 
 	private void initializeSearchBarText() {
 		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
-		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewById(R.id.ow_editText);
+		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		this.searchEditText.clearFocus();
 		this.searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
@@ -1193,7 +1193,7 @@ ZiftrNetworkHandler {
 						//if we were setting the passphrase, turn disabled passphrase off
 						OWPreferencesUtils.setPassphraseDisabled(this, false);
 						((OWSettingsFragment)this.getSupportFragmentManager(
-								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
+								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 					}
 				}
 			} else {
