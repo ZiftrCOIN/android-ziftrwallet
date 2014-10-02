@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet.fragment.accounts;
 import android.view.View;
 
 import com.ziftr.android.ziftrwallet.OWWalletManager;
-import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 
@@ -22,11 +21,6 @@ public abstract class OWWalletUserFragment extends OWFragment {
 
 	protected OWCoin getSelectedCoin() {
 		return this.getOWMainActivity().getSelectedCoin();
-	}
-	
-
-	public View getHeaderView() {
-		return this.getOWMainActivity().findViewById(R.id.walletHeader);
 	}
 	
 	public void populateWalletHeader(View v) {
