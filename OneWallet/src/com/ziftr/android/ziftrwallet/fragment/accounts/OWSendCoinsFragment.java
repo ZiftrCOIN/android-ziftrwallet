@@ -199,9 +199,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		} else if (v == this.helpFeeButton) {
 			getOWMainActivity().alertUser(
 					"Why is there a fee?\n\nThis fee is NOT paid to Ziftr. "
-					+ "The fee goes to the miner that secures your transaction as a reward for their service. "
-					+ "This is standard for all cryptocurrency applications. Without it, your transaction would "
-					+ "likely stay as pending for an inconvenient length of time.", 
+							+ "The fee goes to the miner that secures your transaction as a reward for their service. "
+							+ "This is standard for all cryptocurrency applications. Without it, your transaction would "
+							+ "likely stay as pending for an inconvenient length of time.", 
 					"fiat_fee_help_dialog");
 		}
 	}
@@ -269,13 +269,13 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.labelEditText = (EditText) this.rootView.findViewById(
 				R.id.send_edit_text_reciever_name).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		labelEditText.setId(R.id.ow_send_name);
-		
+
 		this.addressEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextReceiverAddress);
 
 		this.getQRCodeButton = this.rootView.findViewById(R.id.send_qr_icon);
 		this.getQRCodeButton.setOnClickListener(this);
-		
+
 		this.helpFeeButton = (ImageView) this.rootView.findViewById(R.id.help_fee_button);
 		helpFeeButton.setOnClickListener(this);
 
@@ -287,7 +287,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.sendButton = (ImageView) this.rootView.findViewById(R.id.send_button);
 		this.sendButton.setOnClickListener(this);
-		
+
 
 		if (this.prefilledAddress != null) {
 			addressEditText.setText(this.prefilledAddress);

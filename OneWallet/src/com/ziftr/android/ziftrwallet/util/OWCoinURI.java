@@ -128,7 +128,7 @@ public class OWCoinURI {
 
 		if (!input.startsWith(this.scheme + "://")) {
 			throw new OWCoinURIParseException("Error parsing uri. Expected scheme: " + this.scheme + ". " + 
-					"Scheme received: " + input.substring(0, input.indexOf(":")));
+					"Scheme received: " + input);
 		}
 
 		Uri uri;
