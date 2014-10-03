@@ -70,7 +70,6 @@ import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
  * @author Gary Rowe (BIP21 support)
  * @see <a href="https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki">BIP 0021</a>
  * 
- * TODO update this for multiple coins and to comply to the specs on this page:
  * https://en.bitcoin.it/wiki/Talk:BIP_0021
  */
 public class OWCoinURI {
@@ -262,16 +261,12 @@ public class OWCoinURI {
 	 * @return A String containing the Bitcoin URI
 	 */
 	public static String convertToCoinURI(OWCoin coinType, String address, BigInteger amount, String label,String message) throws IllegalArgumentException {
-		if (address == null) {
-			throw new IllegalArgumentException("Address may not be null");
-		}
-
 		if (amount != null && amount.compareTo(BigInteger.ZERO) < 0) {
 			throw new IllegalArgumentException("Amount must be positive");
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(coinType.getScheme()).append(":").append(address);
+		builder.append(coinType.getScheme()).append(":").append(address == null ? "" : address);
 
 		boolean questionMarkHasBeenOutput = false;
 

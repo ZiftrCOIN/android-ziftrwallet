@@ -1,36 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/background" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="20dp"
+    android:paddingTop="20dp" >
 
-    <LinearLayout
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="20dp"
-        android:paddingTop="20dp" >
+        android:layout_marginTop="@dimen/ow_quarter_icon_size"
+        android:background="@color/White"
+        android:contentDescription="@string/ow_empty_string"
+        android:padding="@dimen/ow_large_icon_margin"
+        android:src="@drawable/logo_ziftrwallet_orange" />
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/ow_quarter_icon_size"
-            android:background="@color/White"
-            android:contentDescription="@string/ow_empty_string"
-            android:padding="@dimen/ow_large_icon_margin"
-            android:src="@drawable/logo_ziftrwallet_orange" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/ow_quarter_icon_size"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/dropshadow" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/ow_quarter_icon_size"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/dropshadow" />
+    <FrameLayout
+        android:id="@+id/welcomeScreenFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </FrameLayout>
 
-        <FrameLayout
-            android:id="@+id/welcomeScreenFragmentContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-        </FrameLayout>
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

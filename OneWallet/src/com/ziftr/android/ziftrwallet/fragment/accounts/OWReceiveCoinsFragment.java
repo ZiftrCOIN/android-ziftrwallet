@@ -1,5 +1,8 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -9,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +53,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	private View qrCodeContainer;
 	private View scrollView;
 	private ImageView generateAddressForLabel;
+	private EditText messageEditText;
 
 	private boolean qrCodeGenerated = false;
 
@@ -94,7 +99,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 			this.conditionallyGenerateNewAddress(true);
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(true, R.id.receiveCoinBaseFrameLayout);
-		} else if (v == this.generateAddressForLabel){
+		} else if (v == this.generateAddressForLabel) {
 			this.conditionallyGenerateNewAddress(false);
 		}
 
@@ -125,52 +130,83 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	private void initializeViewFields(LayoutInflater inflater, ViewGroup container) {
 		super.initializeViewFields(this.rootView, R.id.recallAddressFromHistoryIcon);
 
-		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
+		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 
+		
+		// For the amounts and the binding
+		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
+				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		this.coinAmountEditText.setId(R.id.ow_receive_coin_amount);
+		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
+				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		this.fiatAmountEditText.setId(R.id.ow_receive_fiat_amount);
+		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+		this.bindEditTextValues(this.coinAmountEditText, this.fiatAmountEditText, 
+				this.changeCoinStartedFromProgram, this.changeFiatStartedFromProgram);
+		
+		// For the message edit text
+		this.messageEditText = (EditText) this.rootView.findViewById(
+				R.id.receiveMessageContainer).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		this.messageEditText.setId(R.id.ow_receive_message);
+
+		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
+		this.addressEditText.setId(R.id.ow_receive_address);
 
 		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
 
 		this.qrCodeImageView = (ImageView) this.rootView.findViewById(R.id.generateAddressQrCodeImageView);
 		this.qrCodeImageView.setOnClickListener(this);
-		if (fragmentHasAddress()){
+		if (fragmentHasAddress()) {
 			this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
 		}
+
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 
-		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 		this.generateAddressForLabel = (ImageView) this.rootView.findViewById(R.id.generateNewAddressForLabel);
 		this.generateAddressForLabel.setOnClickListener(this);
+
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewWithTag(OWTags.OW_EDIT_TEXT);
-		labelEditText.setId(R.id.ow_receive_address_label);
+		this.labelEditText.setId(R.id.ow_receive_address_label);
 		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
 			@Override
-			public void afterTextChanged(Editable s) {
+			public void afterTextChanged(Editable arg0) {
 				if (fragmentHasAddress()) {
 					updateAddressLabelInDatabase();
 				}
-			}
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
-				// TODO Auto-generated method stub
-			}
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				toggleAddressCreation();
+				refreshAddNewAddressButtonsEnabled();
 			}
 		});
-		toggleAddressCreation();
+
+		this.refreshAddNewAddressButtonsEnabled();
 	}
 
 	private void generateQrCode(boolean withAnimation) {
 		String addressString = this.addressEditText.getText().toString();
-		String qrCodeData = OWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, null, 
-				OWPreferencesUtils.getUserName(getActivity()), null);
+
+		String amountString = this.coinAmountEditText.getText().toString();
+		BigInteger amountVal = null;
+		try {
+			amountVal = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), new BigDecimal(amountString));
+		} catch(NumberFormatException nfe) {
+			// Amount is just left null
+		}
+		if (amountVal != null && (amountVal.compareTo(BigInteger.ZERO) < 0)) {
+			amountVal = null;
+		}
+
+		String message = this.messageEditText.getText().toString();
+		message = message != null && message.isEmpty() ? null : message;
+		String qrCodeData = OWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, amountVal, 
+				OWPreferencesUtils.getUserName(getActivity()), message);
 
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
 		this.qrCodeImageView.setPadding(0, 0, 0, 0);
+
 		int qrCodeDimension = this.qrCodeImageView.getWidth();
 		qrCodeDimension = Math.min(qrCodeDimension, rootView.getWidth());
 		qrCodeDimension = Math.min(qrCodeDimension, rootView.getHeight());
@@ -178,7 +214,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				Contents.Type.TEXT, BarcodeFormat.QR_CODE.toString(), qrCodeDimension/2);
 		this.qrCodeImageView.getLayoutParams().width = qrCodeDimension;
 		this.qrCodeImageView.getLayoutParams().height = qrCodeDimension;
-
 
 		try {
 			Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
@@ -284,14 +319,14 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		return this.scrollView;
 	}
 
-	public void toggleAddressCreation(){
-		if (!labelEditText.getText().toString().equals("") || fragmentHasAddress()){
+	public void refreshAddNewAddressButtonsEnabled() {
+		if (!labelEditText.getText().toString().isEmpty() || fragmentHasAddress()) {
 			qrCodeContainer.setAlpha(1);
 			addressEditText.setAlpha(1);
 			generateAddressForLabel.setClickable(true);
 		} else {
-			qrCodeContainer.setAlpha((float) .5);
-			addressEditText.setAlpha((float) .5);
+			qrCodeContainer.setAlpha((float) 0.5);
+			addressEditText.setAlpha((float) 0.5);
 			generateAddressForLabel.setClickable(false);
 		}
 	}

@@ -71,8 +71,8 @@ public class OWNewCurrencyFragment extends OWFragment implements OnClickListener
 	}
 
 	public void initializeCurrencyList() {
-		this.currencyAdapter = new OWNewCurrencyListAdapter(this.getActivity(), R.layout.accounts_new_currency_list_item,
-				this.currencyList);
+		this.currencyAdapter = new OWNewCurrencyListAdapter(this.getActivity(), 
+				R.layout.accounts_new_currency_list_item,this.currencyList);
 		this.listView = (ListView) this.rootView.findViewById(R.id.currencyListView);
 		listView.setFooterDividersEnabled(false);
 		listView.setAdapter(this.currencyAdapter);

@@ -34,7 +34,6 @@ import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -46,17 +45,8 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
-	/** A boolean to keep track of changes to disallow infinite changes. */
-	private boolean changeCoinStartedFromProgram = false;
-
-	/** A boolean to keep track of changes to disallow infinite changes. */
-	private boolean changeFiatStartedFromProgram = false;
-
 	/** The view container for this fragment. */
 	private View rootView;
-
-	private EditText coinAmountEditText;
-	private EditText fiatAmountEditText;
 
 	private EditText fiatFeeEditText;
 	private EditText coinFeeEditText;
@@ -70,8 +60,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 	private ImageView cancelButton;
 	private ImageView sendButton;
-
-	private OWFiat selectedFiat; 
 
 	private View sendCoinsContainingView;
 
@@ -95,7 +83,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		return this.rootView;
 	}
 
-	public void onViewStateRestored(Bundle savedInstanceState){
+	public void onViewStateRestored(Bundle savedInstanceState) {
 		// Whenever one of the amount views changes, all the other views should
 		// change to constant show an updated version of what the user will send.
 		super.onViewStateRestored(savedInstanceState);
@@ -208,7 +196,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
-		} else if (v == this.helpFeeButton){
+		} else if (v == this.helpFeeButton) {
 			getOWMainActivity().alertUser(
 					"Why is there a fee?\n\nThis fee is NOT paid to Ziftr. "
 					+ "The fee goes to the miner that secures your transaction as a reward for their service. "
@@ -262,12 +250,12 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.sendCoinsContainingView = this.rootView.findViewById(R.id.sendCoinsContainingView);
 
-		this.coinAmountEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmount).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
+				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		coinAmountEditText.setId(R.id.ow_send_coin_amount);
 
-		this.fiatAmountEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextAmountFiatEquiv).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
+				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		fiatAmountEditText.setId(R.id.ow_send_fiat_amount);
 
 		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
@@ -277,7 +265,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.coinFeeEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextTransactionFee).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		coinFeeEditText.setId(R.id.ow_send_coin_fee);
-
 
 		this.labelEditText = (EditText) this.rootView.findViewById(
 				R.id.send_edit_text_reciever_name).findViewWithTag(OWTags.OW_EDIT_TEXT);
@@ -302,15 +289,15 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.sendButton.setOnClickListener(this);
 		
 
-		if (this.prefilledAddress != null){
+		if (this.prefilledAddress != null) {
 			addressEditText.setText(this.prefilledAddress);
 		}
-		this.selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
 
 		this.fiatAmountLabel = (TextView) this.rootView.findViewById(R.id.amount_fiat_label);
 		this.fiatFeeLabel = (TextView) this.rootView.findViewById(R.id.fee_fiat_label);
-		this.fiatAmountLabel.setText(this.selectedFiat.getName());
-		this.fiatFeeLabel.setText(this.selectedFiat.getName());
+		this.fiatAmountLabel.setText(selectedFiat.getName());
+		this.fiatFeeLabel.setText(selectedFiat.getName());
 
 		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
 			this.coinFeeEditText.setFocusable(true);
@@ -341,12 +328,14 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private void initializeTextViewDependencies() {
 		// Bind the amount values so that when one changes the other changes
 		// according to the current exchange rate.
-		this.bindEditTextValues(this.coinAmountEditText, this.fiatAmountEditText);
+		this.bindEditTextValues(this.coinAmountEditText, this.fiatAmountEditText,
+				this.changeCoinStartedFromProgram, this.changeFiatStartedFromProgram);
 
 		// Bind the fee values so that when one changes the other changes
 		// according to the current exchange rate.
 		EditText feeTextView = this.coinFeeEditText;
-		this.bindEditTextValues(feeTextView, this.fiatFeeEditText);
+		this.bindEditTextValues(feeTextView, this.fiatFeeEditText,
+				this.changeCoinStartedFromProgram, this.changeFiatStartedFromProgram);
 
 		TextWatcher refreshTotalTextWatcher = new OWTextWatcher() {
 			@Override
@@ -362,15 +351,15 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		feeTextView.addTextChangedListener(refreshTotalTextWatcher);
 
 		// Set the fee to the default and set send amount to 0 initially 
-		changeFiatStartedFromProgram = true;
+		changeFiatStartedFromProgram.set(true);
 		feeTextView.setText(this.getSelectedCoin().getDefaultFeePerKb());
-		changeFiatStartedFromProgram = false;
+		changeFiatStartedFromProgram.set(false);
 
-		changeCoinStartedFromProgram = true;
-		if (coinAmountEditText.getText().toString().isEmpty()){
+		changeCoinStartedFromProgram.set(true);
+		if (coinAmountEditText.getText().toString().isEmpty()) {
 			coinAmountEditText.setText("0");
 		}
-		changeCoinStartedFromProgram = false;
+		changeCoinStartedFromProgram.set(false);
 	}
 
 	private void initializeEditText() {
@@ -380,79 +369,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-	}
-
-	/**
-	 * This is a useful method that binds two textviews together with
-	 * TextWatchers in such a way that when one changes the other also 
-	 * changes. One EditText contains coin values and the other should 
-	 * contain fiat values.
-	 * 
-	 * @param coinValEditText - The coin EditText
-	 * @param fiatValEditText - The fiat EditText
-	 */
-	private void bindEditTextValues(final EditText coinValEditText, 
-			final EditText fiatValEditText) {
-		TextWatcher updateFiat = new OWTextWatcher() {
-			@Override
-			public void afterTextChanged(Editable text) {
-				if (!changeCoinStartedFromProgram) {
-					String newVal = text.toString();
-					BigDecimal newCoinVal = null;
-					BigDecimal newFiatVal = null;
-					try {
-						newCoinVal = new BigDecimal(newVal);
-						newFiatVal = OWConverter.convert(
-								newCoinVal, getSelectedCoin(), selectedFiat); 
-					} catch(NumberFormatException nfe) {
-						// If a value can't be parsed then we just do nothing
-						// and leave the other box with what was already in it.
-						return;
-					} catch (ArithmeticException ae) {
-						// Shouldn't happen
-						ZLog.log("User entered non-sensical value. Returning for now.");
-						return;
-					}
-
-					changeFiatStartedFromProgram = true;
-					fiatValEditText.setText(OWFiat.formatFiatAmount(
-							selectedFiat, newFiatVal, false));
-					changeFiatStartedFromProgram = false;
-
-				}
-			}
-		};
-		coinValEditText.addTextChangedListener(updateFiat);
-
-		TextWatcher updateCoin = new OWTextWatcher() {
-			@Override
-			public void afterTextChanged(Editable text) {
-				if (!changeFiatStartedFromProgram) {
-					String newVal = text.toString();
-					BigDecimal newFiatVal = null;
-					BigDecimal newCoinVal = null;
-					try {
-						newFiatVal = new BigDecimal(newVal);
-						newCoinVal =  OWConverter.convert(
-								newFiatVal, selectedFiat, getSelectedCoin());
-					} catch(NumberFormatException nfe) {
-						// If a value can't be parsed then we just do nothing
-						// and leave the other box with what was already in it.
-						return;
-					} catch (ArithmeticException ae) {
-						// Shouldn't happen
-						ZLog.log("Shouldn't have happened, but it did!");
-						return;
-					}
-
-					changeCoinStartedFromProgram = true;
-					coinValEditText.setText(OWCoin.formatCoinAmount(
-							getSelectedCoin(), newCoinVal).toPlainString());
-					changeCoinStartedFromProgram = false;
-				}
-			}
-		};
-		fiatValEditText.addTextChangedListener(updateCoin);
 	}
 
 	/**
@@ -474,8 +390,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		BigDecimal fiatTotal = OWConverter.convert(total, getSelectedCoin(), this.selectedFiat);
-		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(this.selectedFiat, fiatTotal, false) + ")");
+		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+		BigDecimal fiatTotal = OWConverter.convert(total, getSelectedCoin(), selectedFiat);
+		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(selectedFiat, fiatTotal, false) + ")");
 	}
 
 	/**
@@ -538,7 +455,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		return this.sendCoinsContainingView;
 	}
 
-	public void setSendToAddress(String address){
+	public void setSendToAddress(String address) {
 		this.prefilledAddress = address;
 	}
 

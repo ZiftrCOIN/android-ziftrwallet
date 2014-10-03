@@ -57,6 +57,8 @@
                     android:src="@drawable/address_book_icon_clickable" />
             </RelativeLayout>
 
+            <View style="@style/white_divider" />
+
             <TextView
                 android:id="@+id/addressValueTitleTextView"
                 style="@style/send_receive_label"
@@ -127,6 +129,32 @@
                     android:src="@drawable/button_plus_address_clickable" />
             </RelativeLayout>
 
+            <View style="@style/white_divider" />
+
+            <TextView
+                android:id="@+id/receiveMessage"
+                style="@style/send_receive_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                android:text="@string/ow_receive_message_title" >
+            </TextView>
+
+            <include
+                android:id="@+id/receiveMessageContainer"
+                style="@style/send_receive_block"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/_edit_text_shadow" />
+
+            <View style="@style/white_divider" />
+
+            <include
+                android:id="@+id/receiveAmountCoinFiatDualView"
+                layout="@layout/_dual_text_box_with_titles" />
+
+            <View style="@style/white_divider" />
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
@@ -147,9 +175,9 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:adjustViewBounds="true"
-                        android:scaleType="center"
                         android:contentDescription="@string/ow_empty_string"
                         android:padding="@dimen/ow_total_icon_side_length"
+                        android:scaleType="center"
                         android:src="@drawable/add_address" />
                 </LinearLayout>
 

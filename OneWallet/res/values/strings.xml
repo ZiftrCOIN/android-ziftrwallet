@@ -39,6 +39,8 @@
     <!-- Description here -->
     <string name="ow_send_to_address_name">NAME: </string>
     <!-- Description here -->
+    <string name="ow_receive_message_title">MESSAGE: </string>
+    <!-- Description here -->
     <string name="ow_send_amount">AMOUNT: </string>
     <!-- Description here -->
     <string name="ow_send_amount_equivalent">USD</string>

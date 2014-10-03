@@ -378,7 +378,7 @@ ZiftrNetworkHandler {
 		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
 			super.onBackPressed();
 			//if we are in set fiat screen, back should go back to settings
-		} else if (topFragment.getTag().equals(OWTags.SET_FIAT)){
+		} else if (topFragment.getTag().equals(OWTags.SET_FIAT)) {
 			super.onBackPressed();
 		} else {
 			//Select accounts in drawer since anywhere you hit back, you will end up in accounts
@@ -392,13 +392,9 @@ ZiftrNetworkHandler {
 		}
 	}
 
-
-
 	private OWFragment getTopDisplayedFragment() {
 		return (OWFragment) this.getSupportFragmentManager().findFragmentById(R.id.oneWalletBaseFragmentHolder);
 	}
-
-
 
 	/**
 	 * Here we need to close all the wallets. 
@@ -410,8 +406,6 @@ ZiftrNetworkHandler {
 		OWWalletManager.closeInstance();
 		super.onDestroy();
 	}
-
-
 
 	/**
 	 * When the user hits the sync button, we get the top fragment

@@ -1,16 +1,27 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
+import java.math.BigDecimal;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
+import com.ziftr.android.ziftrwallet.util.OWBoolean;
+import com.ziftr.android.ziftrwallet.util.OWCoin;
+import com.ziftr.android.ziftrwallet.util.OWConverter;
+import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWTags;
+import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class OWAddressBookParentFragment extends OWWalletUserFragment implements OnClickListener {
 
@@ -18,6 +29,15 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 
 	protected EditText labelEditText;
 	protected EditText addressEditText;
+	
+	/** A boolean to keep track of changes to disallow infinite changes. */
+	protected OWBoolean changeCoinStartedFromProgram = new OWBoolean();
+
+	/** A boolean to keep track of changes to disallow infinite changes. */
+	protected OWBoolean changeFiatStartedFromProgram = new OWBoolean();
+
+	protected EditText coinAmountEditText;
+	protected EditText fiatAmountEditText;
 
 	public abstract View getContainerView();
 	public abstract String getActionBarTitle();
@@ -140,9 +160,14 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 	 * A convenience method to update the database from this class.
 	 */
 	protected void updateAddressLabelInDatabase() {
-		String label = this.labelEditText.getText().toString();
-		String address = this.addressEditText.getText().toString();
-		getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, true);
+		final String label = this.labelEditText.getText().toString();
+		final String address = this.addressEditText.getText().toString();
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			@Override
+			public void run() {
+				getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, true);
+			}
+		});
 	}
 	
 	@Override
@@ -151,6 +176,84 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 			this.getChildFragment().onDataUpdated();
 		}
 		super.onDataUpdated();
+	}
+	
+	/**
+	 * This is a useful method that binds two textviews together with
+	 * TextWatchers in such a way that when one changes the other also 
+	 * changes. One EditText contains coin values and the other should 
+	 * contain fiat values.
+	 * 
+	 * @param coinValEditText - The coin EditText
+	 * @param fiatValEditText - The fiat EditText
+	 */
+	protected void bindEditTextValues(final EditText coinValEditText, final EditText fiatValEditText,
+			final OWBoolean changeCoinStartedFromProgram, final OWBoolean changeFiatStartedFromProgram) {
+		TextWatcher updateFiat = new OWTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable text) {
+				if (getActivity() == null) {
+					return;
+				}
+				OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+				if (!changeCoinStartedFromProgram.get()) {
+					String newVal = text.toString();
+					BigDecimal newCoinVal = null;
+					BigDecimal newFiatVal = null;
+					try {
+						newCoinVal = new BigDecimal(newVal);
+						newFiatVal = OWConverter.convert(newCoinVal, getSelectedCoin(), selectedFiat);
+					} catch(NumberFormatException nfe) {
+						// If a value can't be parsed then we just do nothing
+						// and leave the other box with what was already in it.
+						return;
+					} catch (ArithmeticException ae) {
+						// Shouldn't happen
+						ZLog.log("User entered non-sensical value. Returning for now.");
+						return;
+					}
+
+					changeFiatStartedFromProgram.set(true);
+					fiatValEditText.setText(OWFiat.formatFiatAmount(selectedFiat, newFiatVal, false));
+					changeFiatStartedFromProgram.set(false);
+
+				}
+			}
+		};
+		coinValEditText.addTextChangedListener(updateFiat);
+
+		TextWatcher updateCoin = new OWTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable text) {
+				if (getActivity() == null) {
+					return;
+				}
+				OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+				if (!changeFiatStartedFromProgram.get()) {
+					String newVal = text.toString();
+					BigDecimal newFiatVal = null;
+					BigDecimal newCoinVal = null;
+					try {
+						newFiatVal = new BigDecimal(newVal);
+						newCoinVal =  OWConverter.convert(newFiatVal, selectedFiat, getSelectedCoin());
+					} catch(NumberFormatException nfe) {
+						// If a value can't be parsed then we just do nothing
+						// and leave the other box with what was already in it.
+						return;
+					} catch (ArithmeticException ae) {
+						// Shouldn't happen
+						ZLog.log("Shouldn't have happened, but it did!");
+						return;
+					}
+
+					changeCoinStartedFromProgram.set(true);
+					coinValEditText.setText(OWCoin.formatCoinAmount(
+							getSelectedCoin(), newCoinVal).toPlainString());
+					changeCoinStartedFromProgram.set(false);
+				}
+			}
+		};
+		fiatValEditText.addTextChangedListener(updateCoin);
 	}
 
 }
