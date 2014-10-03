@@ -9,7 +9,7 @@
     <include
         android:id="@+id/searchBarContainer"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/ow_search_bar_height"
         android:layout_weight="1"
         layout="@layout/_edit_text_shadow" />
 

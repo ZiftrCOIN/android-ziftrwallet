@@ -25,6 +25,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	private CheckBox editableConfirmationFee;
 	private RelativeLayout setFiatCurrency;
 	private TextView chosenFiat;
+	private RelativeLayout editableConfirmationFeeBar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -44,7 +45,8 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		this.disablePassphrase.setOnClickListener(this);
 		this.setFiatCurrency = (RelativeLayout) rootView.findViewById(R.id.select_fiat_currency);
 		this.setFiatCurrency.setOnClickListener(this);
-		
+		this.editableConfirmationFeeBar =(RelativeLayout) rootView.findViewById(R.id.editable_confirmation_fees_bar);
+		this.editableConfirmationFeeBar.setOnClickListener(this);
 		this.chosenFiat = (TextView) rootView.findViewById(R.id.chosen_fiat);
 		this.chosenFiat.setText(OWPreferencesUtils.getFiatCurrency(getActivity()).getName());
 		this.resetPassword = (RelativeLayout) rootView.findViewById(R.id.reset_password_button);
@@ -113,17 +115,16 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 				}
 			}
 		} else if (v==this.editableConfirmationFee){
-			if (this.editableConfirmationFee.isChecked()){
-				OWPreferencesUtils.setFeesAreEditable(this.getActivity(), true);
-			} else {
-				OWPreferencesUtils.setFeesAreEditable(this.getActivity(), false);
-
-			}
+				OWPreferencesUtils.setFeesAreEditable(this.getActivity(), this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
 			OWPreferencesUtils.setPassphraseDisabled(this.getActivity(), true);
 			updateSettingsVisibility(false);
 		} else if (v == this.setFiatCurrency){
 			getOWMainActivity().openSetFiatCurrency();
+		} else if (v == this.editableConfirmationFeeBar){
+			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
+			OWPreferencesUtils.setFeesAreEditable(this.getActivity(), this.editableConfirmationFee.isChecked());
+
 		}
 	}
 

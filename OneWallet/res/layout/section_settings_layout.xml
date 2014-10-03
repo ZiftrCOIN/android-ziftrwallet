@@ -43,13 +43,13 @@
 
             <TextView
                 android:id="@+id/chosen_fiat"
-                android:textColor="@color/orangeSoda"
-                android:textSize="@dimen/ow_txt_medium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@+id/fiat_arrow"
-                android:text="USD" />
+                android:text="USD"
+                android:textColor="@color/orangeSoda"
+                android:textSize="@dimen/ow_txt_medium" />
         </RelativeLayout>
 
         <View
@@ -64,8 +64,9 @@
             android:text="@string/ow_confirmation_fee" />
 
         <RelativeLayout
+            android:id="@+id/editable_confirmation_fees_bar"
             style="@style/settings_bar"
-            android:background="@color/White" >
+            android:background="@drawable/currency_list_selector" >
 
             <TextView
                 style="@style/setting_bar_title"
