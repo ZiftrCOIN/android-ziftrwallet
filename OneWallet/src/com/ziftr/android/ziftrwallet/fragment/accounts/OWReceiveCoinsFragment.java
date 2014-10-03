@@ -71,8 +71,14 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.initializeViewFields(inflater, container);
 
 		this.initializeQrCodeFromBundle(savedInstanceState);
-
+		
 		return this.rootView;
+	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		refreshAddNewAddressButtonsEnabled();
 	}
 
 	@Override
@@ -153,7 +159,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.messageEditText.setId(R.id.ow_receive_message);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
-		this.addressEditText.setId(R.id.ow_receive_address);
 
 		this.copyButton = (ImageView) this.rootView.findViewById(R.id.receiveCopyIcon);
 		this.copyButton.setOnClickListener(this);
@@ -323,10 +328,12 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		if (!labelEditText.getText().toString().isEmpty() || fragmentHasAddress()) {
 			qrCodeContainer.setAlpha(1);
 			addressEditText.setAlpha(1);
+			qrCodeImageView.setClickable(true);
 			generateAddressForLabel.setClickable(true);
 		} else {
 			qrCodeContainer.setAlpha((float) 0.5);
 			addressEditText.setAlpha((float) 0.5);
+			qrCodeImageView.setClickable(false);
 			generateAddressForLabel.setClickable(false);
 		}
 	}

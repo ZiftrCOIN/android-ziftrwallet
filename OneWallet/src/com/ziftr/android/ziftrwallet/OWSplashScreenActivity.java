@@ -102,7 +102,7 @@ public class OWSplashScreenActivity extends FragmentActivity {
 
 	private void loadNoFragmentUi() {
 		if ((!OWPreferencesUtils.userHasPassphrase(this) && !OWPreferencesUtils.getPassphraseDisabled(this)) || 
-				!OWPreferencesUtils.userHasSetName(this)) {
+				!OWPreferencesUtils.userHasSetName(this) && !OWPreferencesUtils.getDisabledName(this)) {
 			Intent noFragmentIntent = new Intent(OWSplashScreenActivity.this, OWWelcomeActivity.class);
 			startActivity(noFragmentIntent);
 		} else {

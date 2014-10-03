@@ -13,6 +13,7 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.dialog.OWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.OWResetPassphraseDialog;
+import com.ziftr.android.ziftrwallet.dialog.OWSetNameDialog;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 
@@ -26,6 +27,9 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	private RelativeLayout setFiatCurrency;
 	private TextView chosenFiat;
 	private RelativeLayout editableConfirmationFeeBar;
+	private RelativeLayout setName;
+	private RelativeLayout disableName;
+	private TextView setNameLabel;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -54,6 +58,11 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		this.resetPasswordLabel = ((TextView) resetPassword.findViewById(R.id.reset_password_text));
 		this.editableConfirmationFee = (CheckBox) rootView.findViewById(R.id.editable_confirmation_fees);
 		this.editableConfirmationFee.setOnClickListener(this);
+		this.setName = (RelativeLayout) rootView.findViewById(R.id.set_name_button);
+		this.setName.setOnClickListener(this);
+		this.disableName = (RelativeLayout) rootView.findViewById(R.id.disable_name_button);
+		this.disableName.setOnClickListener(this);
+		this.setNameLabel = (TextView) this.setName.findViewById(R.id.set_name_label);
 		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
 			this.editableConfirmationFee.setChecked(true);
 		} else {
@@ -70,6 +79,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	}
 
 	public void updateSettingsVisibility(boolean justSetPass) {
+		//Show/hide options based on password settings
 		if (OWPreferencesUtils.userHasPassphrase(this.getActivity()) || justSetPass) {
 			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Reset Passphrase");
@@ -80,7 +90,15 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		}
-
+		//Show/hide options based on name settings
+		if (OWPreferencesUtils.userHasSetName(this.getActivity())){
+			this.setNameLabel.setText("Change Name");
+		} else if (OWPreferencesUtils.getDisabledName(this.getActivity())) {
+			this.setNameLabel.setText("Set Name");
+		} else {
+			this.setNameLabel.setText("Set Name");
+		}
+		
 	}
 
 	@Override
@@ -124,8 +142,21 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		} else if (v == this.editableConfirmationFeeBar){
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
 			OWPreferencesUtils.setFeesAreEditable(this.getActivity(), this.editableConfirmationFee.isChecked());
-
-		}
+		} else if (v == this.disableName){
+			OWPreferencesUtils.setUserName(this.getActivity(), null);
+			OWPreferencesUtils.setDisabledName(this.getActivity(), true);
+			this.updateSettingsVisibility(false);
+		} else if (v == this.setName){
+			OWSetNameDialog setNameDialog = new OWSetNameDialog();
+			setNameDialog.setTargetFragment(OWSettingsFragment.this, OWRequestCodes.SET_NAME_DIALOG);
+			setNameDialog.setupDialog("ziftrWALLET", "Enter your name.", "Save", null, "Cancel");
+			Bundle args = new Bundle();
+			args.putInt(OWDialogFragment.REQUEST_CODE_KEY, OWRequestCodes.SET_NAME_DIALOG);
+			setNameDialog.setArguments(args);
+			if (!getOWMainActivity().isShowingDialog()) {
+				setNameDialog.show(OWSettingsFragment.this.getFragmentManager(), 
+						"set_name");
+			}		}
 	}
 
 }

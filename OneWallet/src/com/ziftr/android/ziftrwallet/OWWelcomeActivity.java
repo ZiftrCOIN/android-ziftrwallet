@@ -28,9 +28,9 @@ public class OWWelcomeActivity extends FragmentActivity implements OWNeutralDial
 		this.setContentView(R.layout.welcome);
 		
 		if (savedInstanceState == null) {
-			if (!OWPreferencesUtils.userHasPassphrase(this)) {
+			if (!OWPreferencesUtils.userHasPassphrase(this) && !OWPreferencesUtils.getPassphraseDisabled(this)) {
 				this.openPassphraseFragment();
-			} else if (!OWPreferencesUtils.userHasSetName(this)) {
+			} else if (!OWPreferencesUtils.userHasSetName(this) && !OWPreferencesUtils.getDisabledName(this)) {
 				this.openNameFragment(null);
 			} else {
 				throw new RuntimeException(

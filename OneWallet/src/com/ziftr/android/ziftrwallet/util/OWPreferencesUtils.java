@@ -29,7 +29,9 @@ public abstract class OWPreferencesUtils {
 	/** The key to get and save the salt as used by the specific user of the application. */
 	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
 	
-
+	/** skip the screen for name */
+	public final static String NAME_DISABLED_KEY = "ow_disabled_name_key";
+	
 	/** So we can skip the welcome screen and save the boolean. */
 	public final static String PASSPHRASE_DISABLED_KEY = "ow_disabled_passphrase_key";
 
@@ -158,6 +160,19 @@ public abstract class OWPreferencesUtils {
 		Editor editor = prefs.edit();
 		editor.putString(PREFS_USER_NAME_KEY, userName);
 		editor.commit();
+	}
+	
+	public static void setDisabledName(Context a, boolean isDisabled){
+		SharedPreferences prefs = getPrefs(a);
+		Editor editor = prefs.edit();
+		editor.putBoolean(NAME_DISABLED_KEY, isDisabled);
+		editor.commit();
+	}
+	
+	public static boolean getDisabledName(Context a){
+		SharedPreferences prefs = getPrefs(a);
+		return prefs.getBoolean(NAME_DISABLED_KEY, false);
+
 	}
 
 	public static SharedPreferences getPrefs(Context a) {

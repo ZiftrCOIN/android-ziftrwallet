@@ -47,6 +47,7 @@
                     android:autoLink="web"
                     android:text="@string/ow_about_text"
                     android:textColor="@color/White"
+                    android:textSize="@dimen/ow_txt_mediumsmall"
                     android:textColorLink="@color/LemonChiffon" />
 
                 <Button

@@ -35,9 +35,9 @@
     <!-- ow default text sizes -->
     <dimen name="ow_txt_largest">40sp</dimen>
     <dimen name="ow_txt_mediumlarge">26sp</dimen>
-    <dimen name="ow_txt_medium">20sp</dimen>
-    <dimen name="ow_txt_mediumsmall">16sp</dimen>
-    <dimen name="ow_txt_small">14sp</dimen>
+    <dimen name="ow_txt_medium">22sp</dimen>
+    <dimen name="ow_txt_mediumsmall">18sp</dimen>
+    <dimen name="ow_txt_small">16sp</dimen>
     <dimen name="ow_edit_text_padding">8dp</dimen>
     <dimen name="ow_edit_text_height">@dimen/ow_total_icon_side_length</dimen>
     <dimen name="ow_edit_text_heightx2">90dp</dimen>

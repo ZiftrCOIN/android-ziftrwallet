@@ -18,7 +18,7 @@
         android:contentDescription="@string/ow_empty_string"
         android:gravity="center_vertical"
         android:padding="@dimen/ow_borderless_icon_margin"
-        android:src="@drawable/button_edit_pencil" />
+        android:src="@drawable/button_edit_pencil_clickable" />
 
     <ImageView
         android:id="@+id/rightIcon"

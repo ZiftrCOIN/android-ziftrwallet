@@ -175,10 +175,11 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:adjustViewBounds="true"
+                        android:clickable="false"
                         android:contentDescription="@string/ow_empty_string"
                         android:padding="@dimen/ow_total_icon_side_length"
                         android:scaleType="center"
-                        android:src="@drawable/add_address" />
+                        android:src="@drawable/add_address_clickable" />
                 </LinearLayout>
 
                 <ImageView

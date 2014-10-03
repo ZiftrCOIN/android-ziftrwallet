@@ -8,7 +8,6 @@
     <item name="ow_send_coin_fee" type="id"/>
     <item name="ow_send_fiat_fee" type="id"/>
     <item name="ow_receive_address_label" type="id"/>
-    <item name="ow_receive_address" type="id"/>
     <item name="ow_receive_message" type="id"/>
     <item name="ow_receive_coin_amount" type="id"/>
     <item name="ow_receive_fiat_amount" type="id"/>

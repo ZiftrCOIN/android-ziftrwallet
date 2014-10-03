@@ -1,5 +1,7 @@
 package com.ziftr.android.ziftrwallet;
 
+import com.ziftr.android.ziftrwallet.util.OWTypefaceUtil;
+
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
 
@@ -21,6 +23,7 @@ public class OWApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		self = this;
+	    OWTypefaceUtil.overrideFont(getApplicationContext());
 		isDebuggable = (0 != 
 				(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		PRNGFixes.apply();

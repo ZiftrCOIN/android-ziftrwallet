@@ -9,7 +9,7 @@
     <include layout="@layout/custom_dialog_message" />
 
     <EditText
-        android:id="@+id/addressLabelEditText"
+        android:id="@+id/singleEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"

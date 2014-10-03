@@ -44,6 +44,7 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.OWConfirmationDialogHandler
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWEditAddressLabelDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWResetPassphraseDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.handlers.OWSetNameDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.OWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
@@ -78,7 +79,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class OWMainFragmentActivity extends ActionBarActivity 
 implements DrawerListener, OWValidatePassphraseDialogHandler, OWNeutralDialogHandler, 
-OWResetPassphraseDialogHandler, OWConfirmationDialogHandler, OWEditAddressLabelDialogHandler, OnClickListener, 
+OWResetPassphraseDialogHandler, OWConfirmationDialogHandler, OWEditAddressLabelDialogHandler, OWSetNameDialogHandler, OnClickListener, 
 ZiftrNetworkHandler {
 
 	/*
@@ -1254,6 +1255,17 @@ ZiftrNetworkHandler {
 				}
 			});
 			break;
+		}
+	}
+	
+	@Override
+	public void handleSetNamePositive(int requestCode, String newName){
+		if (newName.isEmpty()){
+			this.alertUser("Looks like you wanted to disable your name instead!", "set name is empty");
+		} else {
+			OWPreferencesUtils.setUserName(this, newName);
+			((OWSettingsFragment)this.getSupportFragmentManager(
+					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
 		}
 	}
 

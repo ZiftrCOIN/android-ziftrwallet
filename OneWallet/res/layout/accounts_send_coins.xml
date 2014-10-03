@@ -36,6 +36,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                    android:layout_marginTop="10dp"
                     android:text="@string/ow_send_to_address_name" >
                 </TextView>
 
@@ -121,16 +122,17 @@
                         android:layout_height="@dimen/ow_total_icon_side_length"
                         android:layout_alignRight="@+id/sendEditTextReceiverAddress"
                         android:layout_centerVertical="true"
+                        android:clickable="true"
                         android:contentDescription="@string/ow_old_passphrase_hint"
                         android:padding="@dimen/ow_bordered_icon_margin"
-                        android:src="@drawable/qrcode_enabled" />
+                        android:src="@drawable/qr_code_clickable" />
                 </RelativeLayout>
 
                 <View style="@style/white_divider" />
 
-				<include
-				    android:id="@+id/sendAmountCoinFiatDualView"
-				    layout="@layout/_dual_text_box_with_titles"/>
+                <include
+                    android:id="@+id/sendAmountCoinFiatDualView"
+                    layout="@layout/_dual_text_box_with_titles" />
 
                 <View style="@style/white_divider" />
 

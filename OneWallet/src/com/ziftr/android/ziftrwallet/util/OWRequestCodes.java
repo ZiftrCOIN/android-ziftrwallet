@@ -24,4 +24,6 @@ public class OWRequestCodes {
 	
 	public static final int CONFIRM_CREATE_NEW_ADDRESS = 11;
 	
+	public static final int SET_NAME_DIALOG = 12;
+	
 }

@@ -95,7 +95,7 @@ public class OWWelcomePassphraseFragment extends Fragment implements OnClickList
 		}
 
 		OWWelcomeActivity welcomeActivity = (OWWelcomeActivity) this.getActivity();
-		if (OWPreferencesUtils.userHasSetName(welcomeActivity)) {
+		if (OWPreferencesUtils.userHasSetName(welcomeActivity) || OWPreferencesUtils.getDisabledName(welcomeActivity)) {
 			welcomeActivity.startOWMainActivity(b);
 		} else {
 			welcomeActivity.openNameFragment(b);

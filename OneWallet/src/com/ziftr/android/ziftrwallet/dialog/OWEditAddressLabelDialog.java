@@ -49,7 +49,7 @@ public class OWEditAddressLabelDialog extends OWDialogFragment {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
-				R.layout.dialog_edit_address_label, null));
+				R.layout.dialog_single_edit_text, null));
 		this.initDialogFields();
 
 		builder.setView(this.getDialogView());
@@ -60,11 +60,11 @@ public class OWEditAddressLabelDialog extends OWDialogFragment {
 		Button next = (Button) this.getDialogView().findViewById(R.id.right_dialog_button);
 		next.setOnClickListener(this);
 		
-		this.setStringInTextView(R.id.addressLabelEditText, this.getArguments().getString(CURRENT_ENTERED_TEXT_KEY));
+		this.setStringInTextView(R.id.singleEditText, this.getArguments().getString(CURRENT_ENTERED_TEXT_KEY));
 		
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY) != null) {
-				this.setStringInTextView(R.id.addressLabelEditText, 
+				this.setStringInTextView(R.id.singleEditText, 
 						savedInstanceState.getString(CURRENT_ENTERED_TEXT_KEY));
 			}
 		}
@@ -84,7 +84,7 @@ public class OWEditAddressLabelDialog extends OWDialogFragment {
 		case R.id.right_dialog_button:
 			//CONTINUE
 			String address = this.getArguments().getString(ADDRESS_KEY);
-			String label = this.getStringFromTextView(R.id.addressLabelEditText);
+			String label = this.getStringFromTextView(R.id.singleEditText);
 			handler.handleAddressLabelChange(this.getRequestCode(), address, label, getIsReceiving());
 			this.dismiss();
 			break;
@@ -110,7 +110,7 @@ public class OWEditAddressLabelDialog extends OWDialogFragment {
 
 		// Save all of the important strings in the dialog
 		outState.putString(CURRENT_ENTERED_TEXT_KEY, 
-				this.getStringFromTextView(R.id.addressLabelEditText));
+				this.getStringFromTextView(R.id.singleEditText));
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public class OWEditAddressLabelDialog extends OWDialogFragment {
 	
 	@Override
 	public void dismiss() {
-		this.closeKeyboard(R.id.addressLabelEditText);
+		this.closeKeyboard(R.id.singleEditText);
 		super.dismiss();
 	}
 	
