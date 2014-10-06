@@ -222,7 +222,16 @@ public class Base58 {
     
     public static void main(String[] args) {
     	try {
-    		BigInteger bi = new BigInteger(1, ZiftrUtils.hexStringToBytes("9e4cc0c2243c26fa5821583a471df80ba98695f47d9c1018e215d9ab21f8d672"));
+    		
+    		String hexTxData = "0100000001eccf7e3034189b851985d871f91384b8ee357cd47c3024736e5676eb2debb3f2010000001976a914010966776006953d5567439e5e39f86a0d273bee88acffffffff01605af405000000001976a914097072524438d003d23a2f23edb65aae1bb3e46988ac0000000001000000";
+    		byte[] txData = ZiftrUtils.hexStringToBytes(hexTxData);
+    		System.out.println("double hash: " + ZiftrUtils.bytesToHexString(ZiftrUtils.Sha256Hash(ZiftrUtils.Sha256Hash(txData))));
+    		
+    		
+    		System.out.println("\n\n\n");
+    		
+    		
+    		BigInteger bi = new BigInteger(1, ZiftrUtils.hexStringToBytes("9fbdeae6e1d6e3d2e9c9a49fc32d87d439dff8be9b677c19fa1617e5180bc1b3"));
     		System.out.println(bi.toString());
     		System.out.println(ZiftrUtils.bytesToHexString(bi.toByteArray()));
     		System.out.println(ZiftrUtils.bytesToHexString(ZiftrUtils.bigIntegerToBytes(bi, 32)));
@@ -232,7 +241,6 @@ public class Base58 {
 			System.out.println("encoded: " + encoded);
 			byte[] x = ZiftrUtils.stripVersionAndChecksum(decodeChecked(encoded));
 			System.out.println("decoded: " + (x.length) + "  " + ZiftrUtils.bytesToHexString(x));
-			
 		} catch (OWAddressFormatException e) {
 			e.printStackTrace();
 		}
