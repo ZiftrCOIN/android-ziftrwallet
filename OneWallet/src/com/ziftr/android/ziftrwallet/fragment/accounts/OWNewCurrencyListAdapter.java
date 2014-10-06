@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * In the accounts section of the app there is a list of currencies that opens
@@ -67,7 +68,12 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 
 			@Override
 			public void onClick(View v) {
-				newCurrencyListItem.setIsChecked(!((CheckBox)v).isChecked());
+				if (newCurrencyListItem.isChecked()){
+					newCurrencyListItem.setIsChecked(false);
+				} else {
+					newCurrencyListItem.setIsChecked(true);
+				}
+				ZLog.log(newCurrencyListItem.isChecked());
 			}
 		});
 		return convertView;

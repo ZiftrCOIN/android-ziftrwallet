@@ -162,6 +162,8 @@
     <!-- Description here -->
     <string name="ow_create_new_address">CREATE NEW ADDRESS</string>
     <!-- Description here -->
+    <string name="ow_total_label">Total</string>
+    <!-- Description here -->
     <string name="ow_add_currency_description">This is your home screen where you can navigate between all of your different wallets. Click the + icon below to begin adding currencies to your ziftrWALLET.</string>
     <!-- Description here -->
     <string name="ow_about_text">ziftrWALLET streamlines the process of sending, receiving and storing different types of cryptocurrency.\n\n

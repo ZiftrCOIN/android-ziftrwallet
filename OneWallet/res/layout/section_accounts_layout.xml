@@ -10,9 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="@dimen/ow_half_icon_size"
         android:paddingLeft="@dimen/ow_horizontal_margin"
-        android:paddingRight="@dimen/ow_horizontal_margin" >
+        android:paddingRight="@dimen/ow_horizontal_margin"
+        android:paddingTop="@dimen/ow_half_icon_size" >
 
         <TextView
             android:layout_width="match_parent"
@@ -35,6 +35,23 @@
         android:layout_height="0dp"
         android:layout_weight="1" >
     </ListView>
+
+    <TextView
+        android:id="@+id/total_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+        android:text="@string/ow_total_label"
+        android:textColor="@color/ow_default_text"
+        android:textSize="@dimen/ow_txt_medium" />
+
+    <TextView
+        android:id="@+id/user_total_balance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+        android:textColor="@color/ow_default_text"
+        android:textSize="@dimen/ow_txt_largest" />
 
     <ImageView
         android:id="@+id/addNewCurrencyButton"

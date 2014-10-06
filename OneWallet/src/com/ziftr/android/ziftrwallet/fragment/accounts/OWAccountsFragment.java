@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +17,15 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
+import com.ziftr.android.ziftrwallet.util.OWFiat;
+import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 
@@ -51,6 +55,9 @@ public class OWAccountsFragment extends OWFragment {
 	private ImageView addButton;
 
 	private View footer;
+	
+	private TextView totalBalance;
+	private OWFiat fiatType;
 
 	/** 
 	 * Placeholder for later, doesn't do anything other than 
@@ -90,6 +97,8 @@ public class OWAccountsFragment extends OWFragment {
 		//dropshadow under listview
 		this.footer = this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null);
 
+		this.totalBalance = (TextView) this.rootView.findViewById(R.id.user_total_balance);
+		
 		this.setAddCurrency();
 
 		// Initialize the list of user wallets that they can open
@@ -97,7 +106,11 @@ public class OWAccountsFragment extends OWFragment {
 		
 		//show Add Currency Message if user has no wallets
 		this.toggleAddCurrencyMessage();
+		
+		this.fiatType = OWPreferencesUtils.getFiatCurrency(this.getActivity());
 
+		this.calculateTotal();
+		
 		// Return the view which was inflated
 		return rootView;
 	}
@@ -251,10 +264,24 @@ public class OWAccountsFragment extends OWFragment {
 	public void toggleAddCurrencyMessage(){
 		if (this.userWallets.size() <=0){
 			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.VISIBLE);
+			this.rootView.findViewById(R.id.total_label).setVisibility(View.GONE);
+			this.totalBalance.setVisibility(View.GONE);
 		} else {
 			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.GONE);
+			this.rootView.findViewById(R.id.total_label).setVisibility(View.VISIBLE);
+			this.totalBalance.setVisibility(View.VISIBLE);
 		}
 
+	}
+	
+	private void calculateTotal(){
+		BigDecimal total = BigDecimal.ZERO;
+		for (int i=0; i< this.walletAdapter.getCount(); i++){
+			OWCurrencyListItem wallet = this.walletAdapter.getItem(i);
+			BigDecimal amount = new BigDecimal(wallet.getWalletTotalFiatEquiv());
+			total = total.add(amount);
+		}
+		this.totalBalance.setText(this.fiatType.getSymbol() + total.toPlainString());
 	}
 
 }
