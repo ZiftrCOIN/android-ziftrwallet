@@ -68,14 +68,14 @@ public class OWCoin implements OWCurrency {
 	private String longTitle;
 	private String type;
 	private String chain;
-	private int numberOfDigitsOfPrecision;
+	private int numberOfDigitsOfPrecision; // TODO 
 	private int logoResId;
 	private NetworkParameters networkParameters;
-	private byte pubKeyHashPrefix;
-	private byte scriptHashPrefix;
-	private byte privKeyPrefix;
-	private int numRecommendedConfirmations;
-	private int secondsPerAverageBlockSolve;
+	private byte pubKeyHashPrefix; // TODO 
+	private byte scriptHashPrefix; // TODO 
+	private byte privKeyPrefix; // TODO 
+	private int numRecommendedConfirmations; // TODO 
+	private int secondsPerAverageBlockSolve; // TODO 
 	private String signingMessageMagic;
 	private String scheme; 
 
