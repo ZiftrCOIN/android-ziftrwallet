@@ -16,6 +16,7 @@ import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
 
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -123,6 +124,30 @@ public class ZiftrNetRequest {
 	}
 	
 	
+	/**
+	 * Create a network request for a given url with headers query paramters and using json as the post data.
+	 * @param url the url for this network request
+	 * @param headers headers a map of headers to use, can be null for no additional headers
+	 * @param queryParams a {@link ZiftrParamList} of query parameters to add to the request
+	 * @param postData a {@link JSONObject} containing the data to send
+	 * @return
+	 */
+	public static ZiftrNetRequest createRequest(String url, Map<String,String> headers, ZiftrParamList queryParams, JSONObject postData) {
+		ZiftrNetRequest request = new ZiftrNetRequest(url);
+		request.queryParameters = queryParams;
+		request.sentHeaders = headers;
+		
+		if(postData != null) {
+			request.setUploadData(postData.toString());
+			if(request.sentHeaders.get("Content-Type") == null) {
+				request.sentHeaders.put("Content-Type", "application/json");
+			}
+		}
+		
+		return request;
+	}
+	
+	
 	
 	private ZiftrNetRequest(String url) {
 		this.urlString = url;
@@ -135,6 +160,11 @@ public class ZiftrNetRequest {
 	 */
 	public void forceRequestMethod(String requestMethod) {
 		this.forcedRequestMethod = requestMethod;
+	}
+	
+	
+	public void setContentType(String contentType) {
+		
 	}
 	
 	
