@@ -15,9 +15,6 @@ public class OWNewCurrencyListItem {
 	/** The name of the coin to put under the logo. */
 	private OWCoin coinType;
 	
-	/** keeps track of which currencies are checked */
-	private boolean isChecked;
-	
 	/**
 	 * Make a new {@link OWNewCurrencyListItem} and set the appropriate
 	 * fields. 
@@ -43,11 +40,4 @@ public class OWNewCurrencyListItem {
 		this.coinType = coinType;
 	}
 	
-	public void setIsChecked(boolean isChecked){
-		this.isChecked= isChecked;
-	}
-	
-	public boolean isChecked(){
-		return this.isChecked;
-	}
 }

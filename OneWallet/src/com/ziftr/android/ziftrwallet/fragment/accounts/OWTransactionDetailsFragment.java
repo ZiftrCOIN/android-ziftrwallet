@@ -102,7 +102,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false);
+		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false, false);
 	}
 
 	/**

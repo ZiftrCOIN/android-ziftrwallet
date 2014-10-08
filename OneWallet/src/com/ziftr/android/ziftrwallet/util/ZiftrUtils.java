@@ -464,6 +464,10 @@ public class ZiftrUtils {
 		System.arraycopy(biBytes, start, bytes, numBytes - length, length);
 		return bytes;        
 	}
+	
+	public static String bigIntegerToString(BigInteger b, int numBytes) {
+		return ZiftrUtils.bytesToHexString(ZiftrUtils.bigIntegerToBytes(b, numBytes));
+	}
 
 	/**
 	 * Based on the type, this method converts the number of atomic

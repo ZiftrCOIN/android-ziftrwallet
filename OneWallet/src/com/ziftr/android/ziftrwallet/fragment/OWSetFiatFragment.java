@@ -39,7 +39,7 @@ public class OWSetFiatFragment extends OWFragment implements OnItemClickListener
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("SETTINGS", false, true);
+		this.getOWMainActivity().changeActionBar("SETTINGS", false, true, false);
 	}
 
 	@Override

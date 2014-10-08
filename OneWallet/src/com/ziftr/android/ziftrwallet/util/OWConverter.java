@@ -14,7 +14,9 @@ public class OWConverter {
 		Map<OWCurrency, BigDecimal> cMap = new HashMap<OWCurrency, BigDecimal>();
 		cMap.put(OWFiat.USD, new BigDecimal("1.00", MathContext.DECIMAL64));
 		cMap.put(OWFiat.EUR, new BigDecimal("0.74", MathContext.DECIMAL64));
+		cMap.put(OWFiat.GBP, new BigDecimal("0.62", MathContext.DECIMAL64));
 
+		
 		cMap.put(OWCoin.BTC, new BigDecimal("622.06", MathContext.DECIMAL64));
 		cMap.put(OWCoin.LTC, new BigDecimal("8.60", MathContext.DECIMAL64));
 		cMap.put(OWCoin.PPC, new BigDecimal("1.38", MathContext.DECIMAL64));

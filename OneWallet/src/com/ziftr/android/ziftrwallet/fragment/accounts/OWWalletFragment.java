@@ -51,7 +51,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	public void onResume() {
 		super.onResume();
 		// Changes action bar and registers this as the listener for search button clicks
-		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, this, this.txAdapter);
+		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
 	}
 
 	@Override

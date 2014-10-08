@@ -22,7 +22,7 @@ public class OWAboutFragment extends OWFragment {
 	
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ABOUT", true, true);
+		this.getOWMainActivity().changeActionBar("ABOUT", true, true, false);
 	}
 	
 }

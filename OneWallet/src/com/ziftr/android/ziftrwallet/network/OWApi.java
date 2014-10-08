@@ -1,6 +1,10 @@
 package com.ziftr.android.ziftrwallet.network;
 
+import java.math.BigInteger;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -9,7 +13,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class OWApi {
 
 	
-	private static final String BASE_URL = "http://mocksvc.mulesoft.com/mocks/027762f2-ebf1-4866-a693-0f320b288ede/mocks/1e572f44-bcd7-479b-9b8f-cd1f6e6a07e0";
+	private static final String BASE_URL = "http://mocksvc.mulesoft.com/mocks/fa5dec6e-b96d-46b7-ac46-28624489f7dd";
 	
 	
 	
@@ -40,6 +44,46 @@ public class OWApi {
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, query);
 		return request;
 	}
+	/**
+	 * create transaction request blockchains /{type} /{chain} /requests POST
+	 * @param type
+	 * @param chain
+	 * @param fee = fee per kb
+	 * @param refundAddress = newly generated hidden address where change from spent from address goes
+	 * @param inputs = addresses we are sending from
+	 * @param output = address to send to
+	 * @return
+	 */
+	public static ZiftrNetRequest makeTransactionRequest(String type, String chain, BigInteger fee, 
+			String refundAddress, List<String> inputs, String output, BigInteger amount){
+		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions/requests";
+		try {
+			JSONObject body = new JSONObject();
+			body.put("fee_per_kb", fee);
+			body.put("surplus_refund_address", refundAddress);
+			JSONArray inputAddresses = new JSONArray();
+			for (String addr : inputs){
+				inputAddresses.put(addr);
+			}
+			body.put("input_addresses", inputAddresses);
+			JSONArray outputAddresses = new JSONArray();
+			outputAddresses.put(new JSONObject().put("address", output).put("amount", amount));
+			body.put("output_addresses", outputAddresses);
+			ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, null, null,  body);
+			return request;
+		} catch (Exception e) {
+			ZLog.log("something is not working JSON");		
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	// POST signed txn /blockchains /{type} /{chain} /transactions
+	public static ZiftrNetRequest makeTransaction(String type, String chain, JSONObject signedTxn){
+		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions";
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, null, null,  signedTxn);
+		return request;
+	}
 
 	
 	/**
@@ -51,12 +95,5 @@ public class OWApi {
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(BASE_URL + urlPart);
 		return request;
 	}
-
-
-
-
-
-
-
 
 }

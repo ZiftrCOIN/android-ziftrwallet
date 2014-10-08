@@ -20,7 +20,7 @@ public class OWTermsFragment extends OWFragment {
 	}
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("TERMS", true, true);
+		this.getOWMainActivity().changeActionBar("TERMS", true, true, false);
 	}
 
 	

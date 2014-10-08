@@ -58,24 +58,6 @@ public class OWNewCurrencyListAdapter extends ArrayAdapter<OWNewCurrencyListItem
 		TextView coinName = (TextView) convertView.findViewById(R.id.topLeftTextView);
 		coinName.setText(newCurrencyListItem.getCoinId().getLongTitle());
 
-		CheckBox check = (CheckBox) convertView.findViewById(R.id.rightIcon);
-		if (newCurrencyListItem.isChecked()){
-			check.setChecked(true);
-		} else {
-			check.setChecked(false);
-		}
-		check.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				if (newCurrencyListItem.isChecked()){
-					newCurrencyListItem.setIsChecked(false);
-				} else {
-					newCurrencyListItem.setIsChecked(true);
-				}
-				ZLog.log(newCurrencyListItem.isChecked());
-			}
-		});
 		return convertView;
 	}
 }

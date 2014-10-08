@@ -41,7 +41,7 @@ implements TextWatcher, OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, this, this.addressAdapter);
+		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, false, this, this.addressAdapter);
 	}
 
 	@Override

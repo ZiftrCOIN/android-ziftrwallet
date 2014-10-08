@@ -176,6 +176,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		this.labelEditText.setId(R.id.ow_receive_address_label);
+		this.labelEditText.requestFocus();
 		this.labelEditText.addTextChangedListener(new OWTextWatcher() {
 			@Override
 			public void afterTextChanged(Editable arg0) {
@@ -328,13 +329,33 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		if (!labelEditText.getText().toString().isEmpty() || fragmentHasAddress()) {
 			qrCodeContainer.setAlpha(1);
 			addressEditText.setAlpha(1);
+			messageEditText.setAlpha(1);
+			fiatAmountEditText.setAlpha(1);
+			coinAmountEditText.setAlpha(1);
 			qrCodeImageView.setClickable(true);
 			generateAddressForLabel.setClickable(true);
+			messageEditText.setFocusable(true);
+			fiatAmountEditText.setFocusable(true);
+			coinAmountEditText.setFocusable(true);
+			messageEditText.setFocusableInTouchMode(true);
+			fiatAmountEditText.setFocusableInTouchMode(true);
+			coinAmountEditText.setFocusableInTouchMode(true);
 		} else {
+			messageEditText.setAlpha((float) 0.5);
+			fiatAmountEditText.setAlpha((float) 0.5);
+			coinAmountEditText.setAlpha((float) 0.5);
 			qrCodeContainer.setAlpha((float) 0.5);
 			addressEditText.setAlpha((float) 0.5);
 			qrCodeImageView.setClickable(false);
 			generateAddressForLabel.setClickable(false);
+			messageEditText.setFocusable(false);
+			fiatAmountEditText.setFocusable(false);
+			coinAmountEditText.setFocusable(false);
+			messageEditText.setFocusableInTouchMode(false);
+			fiatAmountEditText.setFocusableInTouchMode(false);
+			coinAmountEditText.setFocusableInTouchMode(false);
+
+
 		}
 	}
 

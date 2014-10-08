@@ -38,6 +38,8 @@ creation_timestamp
 - INT
 modified_timestamp
 - INT
+hidden
+- INT
 -------------------------
 Transaction table
 -------------------------

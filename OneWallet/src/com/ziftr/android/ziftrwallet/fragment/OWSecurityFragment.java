@@ -20,7 +20,7 @@ public class OWSecurityFragment extends OWFragment {
 	}
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("SECURITY", true, true);
+		this.getOWMainActivity().changeActionBar("SECURITY", true, true, false);
 	}
 
 }

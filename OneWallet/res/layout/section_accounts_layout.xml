@@ -51,17 +51,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/ow_horizontal_margin"
         android:textColor="@color/ow_default_text"
+        android:layout_marginBottom="40dp"
         android:textSize="@dimen/ow_txt_largest" />
 
-    <ImageView
-        android:id="@+id/addNewCurrencyButton"
-        android:layout_width="@dimen/ow_large_icon_size"
-        android:layout_height="@dimen/ow_large_icon_size"
-        android:layout_gravity="center"
-        android:clickable="true"
-        android:contentDescription="@string/ow_empty_string"
-        android:padding="@dimen/ow_large_icon_margin"
-        android:src="@drawable/button_add_currency_clickable" >
-    </ImageView>
 
 </LinearLayout>

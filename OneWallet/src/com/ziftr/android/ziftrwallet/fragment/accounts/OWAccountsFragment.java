@@ -9,13 +9,11 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -52,8 +50,6 @@ public class OWAccountsFragment extends OWFragment {
 
 	private ArrayAdapter<OWCurrencyListItem> walletAdapter;
 
-	private ImageView addButton;
-
 	private View footer;
 	
 	private TextView totalBalance;
@@ -78,7 +74,7 @@ public class OWAccountsFragment extends OWFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ziftrWALLET", true, false);
+		this.getOWMainActivity().changeActionBar("ziftrWALLET", true, false, true);
 	}
 
 	/**
@@ -93,14 +89,11 @@ public class OWAccountsFragment extends OWFragment {
 
 		this.walletManager = this.getOWMainActivity().getWalletManager();
 
-		this.addButton = (ImageView) this.rootView.findViewById(R.id.addNewCurrencyButton);
 		//dropshadow under listview
 		this.footer = this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null);
 
 		this.totalBalance = (TextView) this.rootView.findViewById(R.id.user_total_balance);
 		
-		this.setAddCurrency();
-
 		// Initialize the list of user wallets that they can open
 		this.initializeCurrencyListView();
 		
@@ -240,20 +233,6 @@ public class OWAccountsFragment extends OWFragment {
 		});
 
 	}
-	//set onclicklistener for addnewcurrency button
-	private void setAddCurrency(){
-		addButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				List<OWCoin> usersCurWallets = new ArrayList<OWCoin>();
-				for (OWCurrencyListItem newItem : userWallets) {
-					usersCurWallets.add(newItem.getCoinId());
-				}
-				getOWMainActivity().openAddCurrency(usersCurWallets);
-			}
-		});
-	}
 
 	public void removeFromView(int pos){
 		this.userWallets.remove(pos);
@@ -285,10 +264,4 @@ public class OWAccountsFragment extends OWFragment {
 	}
 
 }
-
-
-
-
-
-
 

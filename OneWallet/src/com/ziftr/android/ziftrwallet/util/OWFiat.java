@@ -7,9 +7,11 @@ import java.util.List;
 public class OWFiat implements OWCurrency {
 
 	public static final OWFiat USD = new OWFiat("US Dollars","$", 2);
-	public static final OWFiat EUR = new OWFiat("Euros", String.valueOf((char) 0x80), 2);
+	public static final OWFiat EUR = new OWFiat("Euros", "\u20ac", 2);
+	public static final OWFiat GBP = new OWFiat("Pound", "\u00a3", 2);
 
-	public static final OWFiat[] TYPES = new OWFiat[] {USD, EUR};
+
+	public static final OWFiat[] TYPES = new OWFiat[] {USD, EUR, GBP};
 
 	public static final OWFiat[] values() {
 		return TYPES;

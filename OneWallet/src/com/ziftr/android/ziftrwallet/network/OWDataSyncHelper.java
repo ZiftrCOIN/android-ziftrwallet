@@ -2,6 +2,7 @@ package com.ziftr.android.ziftrwallet.network;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,12 +10,74 @@ import org.json.JSONObject;
 
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
+import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWDataSyncHelper {
+
+	public static void sendCoinsRequest(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
+		ZiftrNetworkManager.networkStarted();
+
+		ZLog.log("Sending" + amount + "coins to :" + output);
+
+		//create new address for change TODO make this address hidden
+		String refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin).toString();
+
+		//make request
+		ZiftrNetRequest request = OWApi.makeTransactionRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
+		String response = request.sendAndWait();
+
+		if (request.getResponseCode() == 200){
+			try {
+				JSONObject jsonRes = new JSONObject(response);
+				//Sign txn and then POST to server
+				ArrayList<String> addresses = new ArrayList<String>();
+				for (String a : inputs){
+					addresses.add(a);
+				}
+				addresses.add(output);
+				sendCoinsTransaction(coin, jsonRes, amount, addresses);
+			}catch(Exception e) {
+				ZLog.log("Exception send coin request: ", e);
+			}
+		}
+		ZiftrNetworkManager.networkStopped();
+	}
+
+	public static void sendCoinsTransaction(OWCoin coin, JSONObject response, BigInteger amount, ArrayList<String> addresses) throws JSONException{
+		//sign the response
+		JSONArray signedList = new JSONArray();
+		JSONArray toSignList = new JSONArray(response.get("to_sign").toString());
+		for (int i=0; i< toSignList.length(); i++){
+			JSONObject toSign = new JSONObject(toSignList.get(i).toString());
+			OWECKey key = new OWECKey();
+			//OWECKey key = OWWalletManager.getInstance().readAddress(coin, toSign.get("address").toString(), true).getKey();
+			toSign.put("pub_key", ZiftrUtils.bytesToHexString(key.getPubKey()));
+			
+			OWSha256Hash hash = new OWSha256Hash(toSign.getString("data")); 
+			String rHex = ZiftrUtils.bigIntegerToString(key.sign(hash).r, 32);
+			String sHex = ZiftrUtils.bigIntegerToString(key.sign(hash).s, 32);
+			String hex =  rHex + sHex;
+			toSign.put("sig", hex);
+			signedList.put(toSign);
+			ZLog.log(toSign);
+		}
+		response.put("to_sign", signedList);
+		ZLog.log(response);
+		
+		//send txn to server after signage
+		ZiftrNetRequest req = OWApi.makeTransaction(coin.getType(), coin.getChain(), response);
+		String res = req.sendAndWait();
+		ZLog.log(res);
+		if (req.getResponseCode() == 202){
+			//update DB
+			createTransaction(coin, response, addresses);
+		}
+	}
 
 	public static void updateTransactionHistory(OWCoin coin) {
 		ZiftrNetworkManager.networkStarted();
@@ -43,18 +106,19 @@ public class OWDataSyncHelper {
 				ZiftrNetworkManager.dataUpdated();
 			}
 			catch(Exception e) {
-				ZLog.log("Exceptionn downloading transactions: ", e);
+				ZLog.log("Exception downloading transactions: ", e);
 			}
 		}//end if response code = 200
 
 		ZiftrNetworkManager.networkStopped();
 	}
 
+	//creates transaction in local database from json response
 	private static OWTransaction createTransaction(OWCoin coin, JSONObject json, ArrayList<String> addresses) throws JSONException {
 
 		String hash = json.getString("hash");
 		//String time = json.getString("time_received");  //TODO -need to add this to transaction table
-		BigInteger fees = new BigInteger(json.getString("fees"));
+		BigInteger fees = new BigInteger(json.getString("fee"));
 		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs
 		long confirmations = json.getLong("num_confirmations");
 		ArrayList<String> displayAddresses = new ArrayList<String>();
