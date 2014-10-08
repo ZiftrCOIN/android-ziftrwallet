@@ -127,7 +127,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 
 			if (address != null) {
-				OWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false);
+				OWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false, false);
 				if (owAddress != null) {
 					// If there wasn't a note given in URI then we pre-fill from address
 					txNote = txNote == null ? owAddress.getLabel() : txNote;

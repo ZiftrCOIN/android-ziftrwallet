@@ -19,6 +19,7 @@ import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWAddressListAdapter.SortState;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWAddressBookFragment extends OWWalletUserFragment 
@@ -125,12 +126,11 @@ implements TextWatcher, OnClickListener {
 	 */
 	private void loadAddressesFromDatabase() {
 		final OWWalletManager manager = this.getWalletManager();
-
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 				final List<OWAddress> addresses = 
-						manager.readAllAddresses(getSelectedCoin(), includeReceivingNotSending);
+						manager.readAllAddresses(getSelectedCoin(), includeReceivingNotSending, !includeReceivingNotSending);
 
 				Activity a = OWAddressBookFragment.this.getOWMainActivity();
 				// It it's null then the app is dying and we do it on the next round

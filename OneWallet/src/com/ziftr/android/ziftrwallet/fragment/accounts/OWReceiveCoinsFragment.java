@@ -29,6 +29,7 @@ import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
+import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWCoinURI;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
@@ -280,7 +281,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel);
+				final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, OWReceivingAddressesTable.VISIBLE_TO_USER);
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
@@ -354,7 +355,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 			messageEditText.setFocusableInTouchMode(false);
 			fiatAmountEditText.setFocusableInTouchMode(false);
 			coinAmountEditText.setFocusableInTouchMode(false);
-
 
 		}
 	}

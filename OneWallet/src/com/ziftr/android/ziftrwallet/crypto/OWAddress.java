@@ -69,7 +69,9 @@ public class OWAddress implements OWSearchableListItem {
 	 * The most recent time that this address had a transaction made using it. May not be up to date.
 	 */
 	private long lastTimeModifiedSeconds;
-
+	
+	/** whether the address is hidden to the user */
+	private int hidden;
 
 	//////////////////////////////////////////////
 	//////////  Address Content Fields  //////////
@@ -95,6 +97,7 @@ public class OWAddress implements OWSearchableListItem {
 
 	/** The ECKey for this address, if known. May be null. */
 	private OWECKey key;
+	
 	
 	/**
 	 * <p>Uses a new ECKey to make an Address.</p> 
@@ -204,6 +207,14 @@ public class OWAddress implements OWSearchableListItem {
 		
 		// Default, should be overridden with the setter method
 		lastTimeModifiedSeconds = System.currentTimeMillis() / 1000;
+	}
+
+	public int isHidden() {
+		return hidden;
+	}
+
+	public void setHidden(int hidden) {
+		this.hidden = hidden;
 	}
 
 	public OWCoin getCoinId() {

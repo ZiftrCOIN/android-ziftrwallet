@@ -31,6 +31,12 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	/** The public key, encoded as a string. */
 	public static final String COLUMN_PUB_KEY = "pub_key";
 	
+	/** whether a receiving address is hidden from the user or not (for change addresses) */
+	public static final String COLUMN_HIDDEN = "hidden";
+	
+	public static int VISIBLE_TO_USER = 0;
+	public static int HIDDEN_FROM_USER = 1;
+	
 	@Override
 	protected String getTablePostfix() {
 		return TABLE_POSTFIX;
@@ -47,7 +53,8 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		sb.append(COLUMN_LABEL).append(" TEXT, ");
 		sb.append(COLUMN_BALANCE).append(" INTEGER, ");
 		sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
-		sb.append(COLUMN_MODIFIED_TIMESTAMP).append(" INTEGER );");
+		sb.append(COLUMN_MODIFIED_TIMESTAMP).append(" INTEGER, ");
+		sb.append(COLUMN_HIDDEN).append(" INTEGER );");
 		return sb.toString();
 	}
 
@@ -85,7 +92,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getKey().getCreationTimeSeconds());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());
-
+		values.put(COLUMN_HIDDEN, address.isHidden());
 		// The id will be generated upon insertion.
 		return values;
 	}

@@ -13,6 +13,7 @@ import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
+import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -24,8 +25,8 @@ public class OWDataSyncHelper {
 
 		ZLog.log("Sending" + amount + "coins to :" + output);
 
-		//create new address for change TODO make this address hidden
-		String refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin).toString();
+		//create new address for change
+		String refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin, OWReceivingAddressesTable.HIDDEN_FROM_USER).toString();
 
 		//make request
 		ZiftrNetRequest request = OWApi.makeTransactionRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
@@ -163,7 +164,7 @@ public class OWDataSyncHelper {
 		//pick and address to use for displaying the note to the user
 		String note = null; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		for(String noteAddress : displayAddresses) {
-			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true);
+			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true, false);
 			note = databaseAddress.getLabel();
 			if(note != null && note.length() > 0) {
 				break;

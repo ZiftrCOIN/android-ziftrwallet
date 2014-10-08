@@ -44,6 +44,7 @@ import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
@@ -579,12 +580,12 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		//throw new OWInsufficientMoneyException(coinId, e.missing, e.getMessage());
 	}
 	
-	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId) {
-		return super.createReceivingAddress(this.passphraseToCrypter(passphrase), coinId);
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, int hidden) {
+		return super.createReceivingAddress(this.passphraseToCrypter(passphrase), coinId, hidden);
 	}
 	
-	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note) {
-		return super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note);
+	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note, int hidden) {
+		return super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, hidden);
 	}
 	
 	/**
@@ -598,7 +599,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 */
 	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note, 
 			long balance, long creation, long modified) {
-		OWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified);
+		OWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified, OWReceivingAddressesTable.VISIBLE_TO_USER);
 		this.getWallet(coinId).addKey(owKeytoBitcoinjKey(addr.getKey()));
 		return addr;
 	}
@@ -720,7 +721,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		// if a tx is sent to us but has a change address (that isn't in our db) then we
 		// don't need that change address to be shown/saved.
 		boolean receiving = tx.getValue(this.getWallet(coinId)).compareTo(BigInteger.ZERO) > 0;
-		List<OWAddress> addresses = this.readAddresses(coinId, addressStrings, receiving);
+		List<OWAddress> addresses = this.readAddresses(coinId, addressStrings, receiving, false);
 
 		for (OWAddress a : addresses) {
 			owTx.addDisplayAddress(a.toString());

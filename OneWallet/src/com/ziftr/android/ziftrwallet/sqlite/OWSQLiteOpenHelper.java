@@ -194,8 +194,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	protected OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId) {
-		return createReceivingAddress(crypter, coinId, "");
+	protected OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, int hidden) {
+		return createReceivingAddress(crypter, coinId, "", hidden);
 	}
 
 	/**
@@ -207,9 +207,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param note - The note that the user associates with this address.
 	 */
-	protected OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, String note) {
+	protected OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, String note, int hidden) {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, note, 0, time, time);
+		return createReceivingAddress(crypter, coinId, note, 0, time, time, hidden);
 	}
 
 	/**
@@ -220,13 +220,14 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param key - The key to use.
 	 */
 	protected synchronized OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, String note, 
-			long balance, long creation, long modified) {
+			long balance, long creation, long modified, int hidden) {
 		OWAddress address = new OWAddress(coinId);
 		address.getKey().setKeyCrypter(crypter);
 		address.setLabel(note);
 		address.setLastKnownBalance(balance);
 		address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
+		address.setHidden(hidden);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
 		return address;
 	}
@@ -265,8 +266,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized OWAddress readAddress(OWCoin coinId, String address, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readAddress(coinId, address, getReadableDatabase());
+	public synchronized OWAddress readAddress(OWCoin coinId, String address, boolean receivingNotSending, boolean showHidden) {
+		return this.getTable(receivingNotSending).readAddress(coinId, address, getReadableDatabase(), showHidden);
 	}
 
 	/**
@@ -277,8 +278,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readAddresses(coinId, addresses, getReadableDatabase());
+	public synchronized List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, boolean receivingNotSending, boolean showHidden) {
+		return this.getTable(receivingNotSending).readAddresses(coinId, addresses, getReadableDatabase(), showHidden);
 	}
 
 	/**
@@ -289,8 +290,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 * @return List of {@link OWAddress} objects. See {@link #getAddressList(OWCoin, boolean)} for list of Address strings.
 	 */
-	public synchronized List<OWAddress> readAllAddresses(OWCoin coinId, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readAllAddresses(coinId, getReadableDatabase());
+	public synchronized List<OWAddress> readAllAddresses(OWCoin coinId, boolean receivingNotSending, boolean showHidden) {
+		return this.getTable(receivingNotSending).readAllAddresses(coinId, getReadableDatabase(), showHidden);
 	}
 
 	/**
@@ -398,9 +399,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public List<OWAddress> readAllAddresses(OWCoin coinId) {
-		List<OWAddress> addresses = this.readAllAddresses(coinId, false);
-		addresses.addAll(this.readAllAddresses(coinId, true));
+	public List<OWAddress> readAllAddresses(OWCoin coinId, boolean showHidden) {
+		List<OWAddress> addresses = this.readAllAddresses(coinId, false, false);
+		addresses.addAll(this.readAllAddresses(coinId, true, showHidden));
 		return addresses;
 	}
 
