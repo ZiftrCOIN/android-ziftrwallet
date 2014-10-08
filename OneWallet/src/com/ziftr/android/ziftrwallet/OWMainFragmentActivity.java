@@ -28,6 +28,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -190,6 +193,9 @@ ZiftrNetworkHandler {
 	private EditText searchEditText;
 
 	private OWCoin selectedCoin;
+	private ImageView syncButton; //the button in various fragments users can press to sync their data
+	private boolean isSyncing = false;
+	
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -416,7 +422,7 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public void onClick(View v) {
-		if (v.getId() == R.id.rightIcon) {
+		if (v == syncButton) {
 			OWFragment top = this.getTopDisplayedFragment();
 			if (top != null) {
 				top.refreshData();
@@ -1340,9 +1346,12 @@ ZiftrNetworkHandler {
 		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBalance, this.selectedCoin, selectedFiat);
 		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(selectedFiat, walletBalanceInFiat, true));
 
-		ImageView syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
+		syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
 		syncButton.setOnClickListener(this);
+		if(isSyncing) {
+			startSyncAnimation();
+		}
 	}
 
 
@@ -1508,12 +1517,58 @@ ZiftrNetworkHandler {
 
 	@Override
 	public void networkStarted() {
-		//TODO -start network sync'ing animationg here
+		
+		ZLog.log("Network started.......");
+		
+		this.runOnUiThread( new Runnable() {
+			
+			@Override
+			public void run() {
+				startSyncAnimation();
+			}
+		});
+		
 	}
 
 	@Override
 	public void networkStopped() {
-		//TODO -stop network sync'ing animationg here
+		
+		this.runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				stopSyncAnimation();
+			}
+		});
+		
 	}
 
+	
+	private synchronized void startSyncAnimation() {
+		isSyncing = true;
+		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
+			syncButton.clearAnimation(); //clear out any old animations before starting the new one
+			
+			Animation rotation = AnimationUtils.loadAnimation(OWMainFragmentActivity.this, R.anim.rotation);
+			rotation.setRepeatCount(Animation.INFINITE);
+			syncButton.startAnimation(rotation);
+			
+			rotation.setRepeatCount(0);
+		}
+	}
+	
+	
+	private synchronized void stopSyncAnimation() {
+		isSyncing = false;
+		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
+			ZLog.log("Stopping animation....");
+			
+			Animation rotation = syncButton.getAnimation();
+			if(rotation != null) {
+				rotation.setRepeatCount(0);
+			}
+		}
+	}
+	
+	
 }
