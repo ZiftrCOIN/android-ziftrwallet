@@ -280,7 +280,11 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel);
+				
+				long time = System.currentTimeMillis() / 1000;
+				final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, 0, time, time);
+				
+				//final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel);
 
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
