@@ -195,7 +195,7 @@ ZiftrNetworkHandler {
 	private OWCoin selectedCoin;
 	private ImageView syncButton; //the button in various fragments users can press to sync their data
 	private boolean isSyncing = false;
-	
+
 
 	/**
 	 * This is an enum to differentiate between the different
@@ -370,7 +370,7 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public void onBackPressed() {
-		if (drawerMenuIsOpen()){
+		if (drawerMenuIsOpen()) {
 			this.menuDrawer.closeDrawer(Gravity.LEFT);
 			return;
 		}
@@ -964,7 +964,7 @@ ZiftrNetworkHandler {
 		this.showFragment(fragToShow, OWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, OWTags.ACCOUNTS_INNER);
 
-		if (address!=null){
+		if (address!=null) {
 			((OWSendCoinsFragment) fragToShow).setSendToAddress(address);		
 		}
 	}
@@ -1013,9 +1013,9 @@ ZiftrNetworkHandler {
 	/**
 	 * Open View for selecting fiat currency in settings
 	 */
-	public void openSetFiatCurrency(){
+	public void openSetFiatCurrency() {
 		OWSetFiatFragment fragToShow = (OWSetFiatFragment) this.getSupportFragmentManager().findFragmentByTag(OWTags.SET_FIAT);
-		if (fragToShow == null){
+		if (fragToShow == null) {
 			fragToShow = new OWSetFiatFragment();
 		}
 		this.showFragment(fragToShow, OWTags.SET_FIAT, R.id.oneWalletBaseFragmentHolder, true, OWTags.SET_FIAT);
@@ -1227,7 +1227,7 @@ ZiftrNetworkHandler {
 			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));
-			if (this.selectedCoin == coinId){
+			if (this.selectedCoin == coinId) {
 				this.selectedCoin = null;
 			}
 			break;
@@ -1260,8 +1260,8 @@ ZiftrNetworkHandler {
 	}
 
 	@Override
-	public void handleSetNamePositive(int requestCode, String newName){
-		if (newName.isEmpty()){
+	public void handleSetNamePositive(int requestCode, String newName) {
+		if (newName.isEmpty()) {
 			this.alertUser("Looks like you wanted to disable your name instead!", "set name is empty");
 		} else {
 			OWPreferencesUtils.setUserName(this, newName);
@@ -1430,9 +1430,9 @@ ZiftrNetworkHandler {
 		}
 
 		if (addCurrency) {
+			searchButton.setVisibility(View.GONE);
 			addCurrencyButton.setVisibility(View.VISIBLE);
 			addCurrencyButton.setOnClickListener(new OnClickListener() {
-
 				@Override
 				public void onClick(View v) {
 					List<OWCoin> usersCurWallets = new ArrayList<OWCoin>();
@@ -1461,6 +1461,7 @@ ZiftrNetworkHandler {
 
 			});
 
+			addCurrencyButton.setVisibility(View.GONE);
 			searchButton.setVisibility(View.VISIBLE);
 
 			searchButton.setOnClickListener(new OnClickListener() {
@@ -1532,58 +1533,58 @@ ZiftrNetworkHandler {
 
 	@Override
 	public void networkStarted() {
-		
+
 		ZLog.log("Network started.......");
-		
+
 		this.runOnUiThread( new Runnable() {
-			
+
 			@Override
 			public void run() {
 				startSyncAnimation();
 			}
 		});
-		
+
 	}
 
 	@Override
 	public void networkStopped() {
-		
+
 		this.runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				stopSyncAnimation();
 			}
 		});
-		
+
 	}
 
-	
+
 	private synchronized void startSyncAnimation() {
 		isSyncing = true;
 		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
 			syncButton.clearAnimation(); //clear out any old animations before starting the new one
-			
+
 			Animation rotation = AnimationUtils.loadAnimation(OWMainFragmentActivity.this, R.anim.rotation);
 			rotation.setRepeatCount(Animation.INFINITE);
 			syncButton.startAnimation(rotation);
-			
+
 			rotation.setRepeatCount(0);
 		}
 	}
-	
-	
+
+
 	private synchronized void stopSyncAnimation() {
 		isSyncing = false;
 		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
 			ZLog.log("Stopping animation....");
-			
+
 			Animation rotation = syncButton.getAnimation();
 			if(rotation != null) {
 				rotation.setRepeatCount(0);
 			}
 		}
 	}
-	
-	
+
+
 }
