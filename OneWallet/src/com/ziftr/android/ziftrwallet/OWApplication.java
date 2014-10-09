@@ -1,9 +1,9 @@
 package com.ziftr.android.ziftrwallet;
 
-import com.ziftr.android.ziftrwallet.util.OWTypefaceUtil;
-
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
+
+import com.ziftr.android.ziftrwallet.util.OWTypefaceUtil;
 
 public class OWApplication extends Application {
 

@@ -38,7 +38,7 @@ import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
+public class OWReceiveCoinsFragment extends OWAddressBookParentFragment {
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
@@ -137,13 +137,20 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		super.initializeViewFields(this.rootView, R.id.recallAddressFromHistoryIcon);
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
-
 		
 		// For the amounts and the binding
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		this.coinAmountEditText.setId(R.id.ow_receive_coin_amount);
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.coinAmountEditText.addTextChangedListener(new OWTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable arg0) {
+				// If we just set this to false, then the global layout listener should
+				// redraw the qr code
+				setQrCodeGenerated(false);
+			}
+		});
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(OWTags.OW_EDIT_TEXT);
@@ -157,6 +164,14 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.messageEditText = (EditText) this.rootView.findViewById(
 				R.id.receiveMessageContainer).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		this.messageEditText.setId(R.id.ow_receive_message);
+		this.messageEditText.addTextChangedListener(new OWTextWatcher() {
+			@Override
+			public void afterTextChanged(Editable arg0) {
+				// If we just set this to false, then the global layout listener should
+				// redraw the qr code
+				setQrCodeGenerated(false);
+			}
+		});
 
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
 
@@ -313,9 +328,13 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	@Override
 	public void acceptAddress(String address, String label) {
 		super.acceptAddress(address, label);
+		this.messageEditText.setText("");
+		this.coinAmountEditText.setText("");
+		this.fiatAmountEditText.setText("");
 		this.setQrCodeGenerated(false);
 	}
 
+	@Override
 	public String getActionBarTitle() {
 		return "RECEIVE"; 
 	}
@@ -354,8 +373,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 			messageEditText.setFocusableInTouchMode(false);
 			fiatAmountEditText.setFocusableInTouchMode(false);
 			coinAmountEditText.setFocusableInTouchMode(false);
-
-
 		}
 	}
 

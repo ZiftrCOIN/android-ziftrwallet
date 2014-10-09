@@ -17,10 +17,10 @@ public class OWConverter {
 		cMap.put(OWFiat.GBP, new BigDecimal("0.62", MathContext.DECIMAL64));
 
 		
-		cMap.put(OWCoin.BTC, new BigDecimal("622.06", MathContext.DECIMAL64));
-		cMap.put(OWCoin.LTC, new BigDecimal("8.60", MathContext.DECIMAL64));
-		cMap.put(OWCoin.PPC, new BigDecimal("1.38", MathContext.DECIMAL64));
-		cMap.put(OWCoin.DOGE, new BigDecimal("0.000227", MathContext.DECIMAL64));
+		cMap.put(OWCoin.BTC, new BigDecimal("350", MathContext.DECIMAL64));
+		cMap.put(OWCoin.LTC, new BigDecimal("4.50", MathContext.DECIMAL64));
+		cMap.put(OWCoin.PPC, new BigDecimal("0.78", MathContext.DECIMAL64));
+		cMap.put(OWCoin.DOGE, new BigDecimal("0.000321", MathContext.DECIMAL64));
 
 		cMap.put(OWCoin.BTC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
 		cMap.put(OWCoin.LTC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
@@ -29,8 +29,7 @@ public class OWConverter {
 		convertMap = Collections.unmodifiableMap(cMap);
 	}
 
-	public static BigDecimal convert(BigDecimal amount, 
-			OWCurrency convertFrom, OWCurrency convertTo) {
+	public static BigDecimal convert(BigDecimal amount, OWCurrency convertFrom, OWCurrency convertTo) {
 		try {
 			return amount
 					.multiply(convertMap.get(convertFrom), MathContext.DECIMAL64)

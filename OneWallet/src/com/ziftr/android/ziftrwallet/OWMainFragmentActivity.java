@@ -30,7 +30,6 @@ import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -1430,7 +1429,7 @@ ZiftrNetworkHandler {
 			homeButton.setVisibility(View.GONE);
 		}
 
-		if (addCurrency){
+		if (addCurrency) {
 			addCurrencyButton.setVisibility(View.VISIBLE);
 			addCurrencyButton.setOnClickListener(new OnClickListener() {
 
