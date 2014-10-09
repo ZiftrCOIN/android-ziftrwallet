@@ -563,6 +563,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public void sendCoins(final OWCoin coinId, final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
+		//inputAddresses = all the user's receiving addresses, including hidden change addresses
 		List<OWAddress> inputAddresses = this.readAllAddresses(coinId, true);
 		final List<String> inputs = new ArrayList<String>();
 		for (OWAddress addr : inputAddresses){
@@ -721,7 +722,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		// if a tx is sent to us but has a change address (that isn't in our db) then we
 		// don't need that change address to be shown/saved.
 		boolean receiving = tx.getValue(this.getWallet(coinId)).compareTo(BigInteger.ZERO) > 0;
-		List<OWAddress> addresses = this.readAddresses(coinId, addressStrings, receiving, false);
+		List<OWAddress> addresses = this.readAddresses(coinId, addressStrings, receiving, true);
 
 		for (OWAddress a : addresses) {
 			owTx.addDisplayAddress(a.toString());

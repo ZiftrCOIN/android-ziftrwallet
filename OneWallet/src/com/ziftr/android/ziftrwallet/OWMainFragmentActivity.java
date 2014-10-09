@@ -301,6 +301,7 @@ ZiftrNetworkHandler {
 		this.initializeSearchBarText();
 
 		ZiftrNetworkManager.registerNetworkHandler(this);
+		
 	}
 
 	/**

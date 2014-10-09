@@ -90,7 +90,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * @param coinId
 	 * @param addresses
 	 * @param db
-	 * @param getHidden true if want all addresses including the hidden ones, false if only want to read visible to user addresses
+	 * @param getHidden true if want all addresses, false for send addresses db and/or to show only visible to user addresses
 	 * @return
 	 */
 	protected List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, SQLiteDatabase db, boolean getHidden) {
@@ -111,14 +111,15 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 				if (i != (addresses.size() - 1)) {
 					sb.append(",");
 				} else {
-					if (!getHidden){
-						sb.append(" AND " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = 0");
+					//if we don't want to get the hidden addresses, only show visible
+					if (!getHidden){ 
+						sb.append(" AND " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = " + OWReceivingAddressesTable.VISIBLE_TO_USER);
 					}
 					sb.append(")");
 				}
 			}
 		} else if (!getHidden){
-			sb.append(" WHERE " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = 0");
+			sb.append(" WHERE " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = " + OWReceivingAddressesTable.VISIBLE_TO_USER);
 		}
 
 		sb.append(";");
