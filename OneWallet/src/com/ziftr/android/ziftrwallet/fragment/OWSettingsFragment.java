@@ -75,7 +75,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("SETTINGS", true, true);
+		this.getOWMainActivity().changeActionBar("SETTINGS", true, true, false);
 	}
 
 	public void updateSettingsVisibility(boolean justSetPass) {

@@ -57,6 +57,7 @@ import com.ziftr.android.ziftrwallet.fragment.OWSettingsFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWNewCurrencyFragment;
+import com.ziftr.android.ziftrwallet.fragment.accounts.OWNewCurrencyListItem;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListAdapter;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
@@ -318,7 +319,7 @@ ZiftrNetworkHandler {
 					changePassphrase(null, info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY));
 				}
 			}
-			
+
 			if (info.getString(OWPreferencesUtils.BUNDLE_NAME_KEY) != null) { 
 				OWPreferencesUtils.setUserName(this, info.getString(OWPreferencesUtils.BUNDLE_NAME_KEY));
 			}
@@ -860,36 +861,31 @@ ZiftrNetworkHandler {
 	 * 
 	 * @param bundle with OWCoin of wallet to add
 	 */
-	public void addNewCurrency(Bundle info) {
-		ArrayList<String> toAdd = info.getStringArrayList(OWCoin.TYPE_KEY);
-		if (toAdd.size() > 0){
-			for (String itemToAdd : toAdd){
-				OWCoin newItem = OWCoin.valueOf(itemToAdd);
-				// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
-				// Make sure that this view only has wallets
-				// in it which the user do
-				for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
-					if (type == newItem) {
-						// Already in list, shouldn't ever get here though because
-						// we only show currencies in the dialog which we don't have
-						this.onBackPressed();
-						return;
-					}
-				}
-				if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
-					// We can assume the wallet hasn't been set up yet
-					// or we wouldn't have gotten here 
+	public void addNewCurrency(OWNewCurrencyListItem item) {
+		OWCoin newItem = item.getCoinId();
+		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
+		// Make sure that this view only has wallets
+		// in it which the user do
+		for (OWCoin type : this.walletManager.readAllActivatedTypes()) {
+			if (type == newItem) {
+				// Already in list, shouldn't ever get here though because
+				// we only show currencies in the dialog which we don't have
+				this.onBackPressed();
+				return;
+			}
+		}
+		if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
+			// We can assume the wallet hasn't been set up yet
+			// or we wouldn't have gotten here 
 
-					if (!walletManager.walletHasBeenSetUp(newItem)) {
-						if (walletManager.setUpWallet(newItem)) {
-						} else {
-							Toast.makeText(this, "Error a wallet could not be set up!", Toast.LENGTH_LONG).show();
-							return;
-						}
-					}
+			if (!walletManager.walletHasBeenSetUp(newItem)) {
+				if (walletManager.setUpWallet(newItem)) {
+				} else {
+					Toast.makeText(this, "Error a wallet could not be set up!", Toast.LENGTH_LONG).show();
+					return;
 				}
 			}
-			Toast.makeText(this, "Wallet(s) Created!", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
 			this.onBackPressed();
 		}
 
@@ -1174,7 +1170,7 @@ ZiftrNetworkHandler {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
 				OWSendCoinsFragment sendFrag = (OWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.SEND_FRAGMENT);
-				sendFrag.onClickSendCoins();
+				sendFrag.onClickSendCoins(passphrase);
 				break;
 			}
 		} else {
@@ -1263,7 +1259,7 @@ ZiftrNetworkHandler {
 			break;
 		}
 	}
-	
+
 	@Override
 	public void handleSetNamePositive(int requestCode, String newName){
 		if (newName.isEmpty()){
@@ -1362,9 +1358,10 @@ ZiftrNetworkHandler {
 	 * then the back button will be visible.
 	 * @param home - boolean to display home button
 	 * @param search - boolean to display search button
+	 * @param addCurrency - boolean to display + button to add new currency
 	 */
-	public void changeActionBar(String title, boolean menu, boolean home) {
-		this.changeActionBar(title, menu, home, null, null);
+	public void changeActionBar(String title, boolean menu, boolean home, boolean addCurrency) {
+		this.changeActionBar(title, menu, home, addCurrency, null, null);
 	}
 
 	/**
@@ -1374,8 +1371,9 @@ ZiftrNetworkHandler {
 	 * then the back button will be visible.
 	 * @param home - boolean to display home button
 	 * @param search - boolean to display search button
+	 * @param addCurrency - boolean to display + button to add new currency
 	 */
-	public void changeActionBar(String title, boolean menu, boolean home, 
+	public void changeActionBar(String title, boolean menu, boolean home, boolean addCurrency,
 			final TextWatcher textWatcher, 
 			final OWSearchableListAdapter<? extends OWSearchableListItem> adapter) {
 
@@ -1383,6 +1381,7 @@ ZiftrNetworkHandler {
 		ImageView backButton = (ImageView) this.findViewById(R.id.actionBarBack);
 		ImageView homeButton = (ImageView) this.findViewById(R.id.actionBarHome);
 		ImageView searchButton = (ImageView) this.findViewById(R.id.actionBarSearch);
+		ImageView addCurrencyButton = (ImageView) this.findViewById(R.id.actionBarAddCurrency);
 
 		final View searchBar = findViewById(R.id.searchBar);
 
@@ -1429,6 +1428,23 @@ ZiftrNetworkHandler {
 
 		} else {
 			homeButton.setVisibility(View.GONE);
+		}
+
+		if (addCurrency){
+			addCurrencyButton.setVisibility(View.VISIBLE);
+			addCurrencyButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					List<OWCoin> usersCurWallets = new ArrayList<OWCoin>();
+					for (OWCoin newItem : getWalletManager().readAllActivatedTypes()) {
+						usersCurWallets.add(newItem);
+					}
+					openAddCurrency(usersCurWallets);
+				}
+			});
+		} else {
+			addCurrencyButton.setVisibility(View.GONE);
 		}
 
 		// For search bar

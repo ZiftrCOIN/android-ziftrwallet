@@ -84,7 +84,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 	 */
 	protected void setActionBar() {
 		if (!this.showingChildFragment()) {
-			this.getOWMainActivity().changeActionBar(getActionBarTitle(), false, true);
+			this.getOWMainActivity().changeActionBar(getActionBarTitle(), false, true, false);
 		}
 	}
 

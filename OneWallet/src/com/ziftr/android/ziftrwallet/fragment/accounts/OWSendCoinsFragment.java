@@ -192,7 +192,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				getOWMainActivity().showGetPassphraseDialog(
 						OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, OWTags.VALIDATE_PASS_SEND);
 			} else {
-				this.onClickSendCoins();
+				this.onClickSendCoins(null);
 			}
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
@@ -206,14 +206,14 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		}
 	}
 
-	public void onClickSendCoins() {
+	public void onClickSendCoins(String passphrase) {
 		// Need to make sure amount to send is less than balance
 		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getAmountToSendFromEditText());
 		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getFeeFromEditText());
 		String addressToSendTo = this.addressEditText.getText().toString();
 		try {
 			getWalletManager().sendCoins(getSelectedCoin(), addressToSendTo, 
-					amountSending, feeSending);
+					amountSending, feeSending, passphrase);
 		} catch(OWAddressFormatException afe) {
 			this.getOWMainActivity().alertUser(
 					"The address is not formatted correctly. Please try again. ", 
@@ -357,7 +357,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		changeCoinStartedFromProgram.set(true);
 		if (coinAmountEditText.getText().toString().isEmpty()) {
-			coinAmountEditText.setText("0");
+			coinAmountEditText.setText("0.00");
+			fiatAmountEditText.setText("0.00");
 		}
 		changeCoinStartedFromProgram.set(false);
 	}

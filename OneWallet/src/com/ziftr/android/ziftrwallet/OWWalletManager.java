@@ -18,7 +18,6 @@ import javax.crypto.SecretKey;
 import android.content.Context;
 
 import com.google.bitcoin.core.AbstractWalletEventListener;
-import com.google.bitcoin.core.Address;
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.BlockChain;
 import com.google.bitcoin.core.CheckpointManager;
@@ -36,7 +35,6 @@ import com.google.bitcoin.store.BlockStore;
 import com.google.bitcoin.store.BlockStoreException;
 import com.google.bitcoin.store.SPVBlockStore;
 import com.google.bitcoin.store.UnreadableWalletException;
-import com.google.bitcoin.utils.Threading;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
@@ -45,6 +43,7 @@ import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
+import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
@@ -560,61 +559,24 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @throws AddressFormatException
 	 * @throws InsufficientMoneyException
 	 */
-	public void sendCoins(OWCoin coinId, String address, BigInteger value, BigInteger feePerKb) 
+	public void sendCoins(final OWCoin coinId, final String address, final BigInteger value, 
+			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
-
-		// TODO should database be updated here or should we do it after API call, or... ?
-
-		Wallet wallet = this.walletMap.get(coinId);
-
-		// Create an address object based on network parameters in use 
-		// and the entered address. This is the address we will send coins to.
-		Address sendAddress;
-		try {
-			sendAddress = new Address(wallet.getNetworkParameters(), address);
-		} catch (AddressFormatException e) {
-			throw new OWAddressFormatException(e.getMessage());
+		List<OWAddress> inputAddresses = this.readAllAddresses(coinId, true);
+		final List<String> inputs = new ArrayList<String>();
+		for (OWAddress addr : inputAddresses){
+			inputs.add(addr.toString());
 		}
-
-		// Use the address and the value to create a new send request object
-		Wallet.SendRequest sendRequest = Wallet.SendRequest.to(sendAddress, value);
-
-
-		// If the wallet is encrypted then we have to load the AES key so that the
-		// wallet can get at the private keys and sign the data.
-		if (wallet.isEncrypted()) {
-			sendRequest.aesKey = wallet.getKeyCrypter().deriveKey("password");
-		}
-
-		// Make sure we aren't adding any additional fees
-		sendRequest.ensureMinRequiredFee = false;
-
-		// Set a fee for the transaction, always the minimum for now.
-		// sendRequest.fee = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE;
-		sendRequest.fee = BigInteger.ZERO;
-
-		// TODO make the rest of the code have variable names that reflect that this
-		// is actually a fee per kilobyte.
-		sendRequest.feePerKb = feePerKb;
-
-		// I don't think we want to do this. 
-		//wallet.decrypt(null);
-
-		Wallet.SendResult sendResult;
-		try {
-			sendResult = wallet.sendCoins(sendRequest);
-		} catch (InsufficientMoneyException e) {
-			throw new OWInsufficientMoneyException(coinId, e.missing, e.getMessage());
-		}
-		sendResult.broadcastComplete.addListener(new Runnable() {
+		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				// TODO if we want something to be done here that relates
-				// to the gui thread, how do we do that?
-				log("Successfully sent coins to address!");
+				OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
 			}
-		}, Threading.SAME_THREAD); // changed from MoreExecutors.sameThreadExecutor()
+		});
 
+		//throw new OWAddressFormatException();
+
+		//throw new OWInsufficientMoneyException(coinId, e.missing, e.getMessage());
 	}
 	
 	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId) {

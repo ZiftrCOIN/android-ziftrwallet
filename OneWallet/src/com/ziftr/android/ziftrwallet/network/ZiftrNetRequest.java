@@ -76,7 +76,6 @@ public class ZiftrNetRequest {
 		return request;
 	}
 	
-	
 	/**
 	 * Create a network request for a given url with a list of query parameters
 	 * @param url the url for this network request
@@ -135,11 +134,12 @@ public class ZiftrNetRequest {
 	public static ZiftrNetRequest createRequest(String url, Map<String,String> headers, ZiftrParamList queryParams, JSONObject postData) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		request.queryParameters = queryParams;
-		request.sentHeaders = headers;
-		
+		if (headers != null){
+			request.sentHeaders = headers;
+		}
 		if(postData != null) {
 			request.setUploadData(postData.toString());
-			if(request.sentHeaders.get("Content-Type") == null) {
+			if(request.sentHeaders != null && request.sentHeaders.get("Content-Type") == null) {
 				request.sentHeaders.put("Content-Type", "application/json");
 			}
 		}
@@ -343,7 +343,7 @@ public class ZiftrNetRequest {
 				if (forcedRequestMethod == null) {
 					connection.setRequestMethod("POST");
 				}
-				
+				connection.setRequestProperty("Content-Type", "application/json");
 				connection.setDoOutput(true);
 				
 				OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());

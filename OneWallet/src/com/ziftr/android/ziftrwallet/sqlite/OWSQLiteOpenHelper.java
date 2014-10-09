@@ -554,7 +554,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		else {
 			addresses = this.sendingAddressesTable.getAddressesList(coin, getWritableDatabase());
 		}
-
 		return addresses;
 	}
 
