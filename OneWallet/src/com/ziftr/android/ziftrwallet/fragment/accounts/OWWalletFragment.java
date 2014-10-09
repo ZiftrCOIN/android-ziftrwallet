@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -50,8 +52,6 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	@Override
 	public void onResume() {
 		super.onResume();
-		// Changes action bar and registers this as the listener for search button clicks
-		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
 	}
 
 	@Override
@@ -77,6 +77,8 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
+		
+		setHasOptionsMenu(true); //we need to change the activities action menu so we need to know when it's safe to do so
 
 		if (getWalletManager() == null || getWalletManager().getWallet(getSelectedCoin()) == null) {
 			throw new IllegalArgumentException(
@@ -223,4 +225,20 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 			getOWMainActivity().openTxnDetails(txItem);
 		}
 	}
+	
+
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		
+		// Changes action bar and registers this as the listener for search button clicks
+		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
+	}
+	
+	
+	
 }
+
+
+

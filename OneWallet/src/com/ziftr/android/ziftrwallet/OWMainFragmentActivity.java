@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -273,9 +274,11 @@ ZiftrNetworkHandler {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		this.requestWindowFeature(Window.FEATURE_ACTION_BAR);
+		
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
-
+		
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance();
 
@@ -293,9 +296,6 @@ ZiftrNetworkHandler {
 
 		// Make sure the base fragment view is initialized
 		this.initializeBaseFragmentContainer(savedInstanceState);
-
-		// Make sure the action bar changes with what fragment we are in
-		this.initializeActionBar();
 
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
@@ -332,6 +332,10 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		
+		// Make sure the action bar changes with what fragment we are in
+		this.initializeActionBar();
+		
 		//setup actionbar menu button
 		ImageView menuButton = (ImageView) this.findViewById(R.id.switchTaskMenuButton);
 		menuButton.setOnClickListener(new OnClickListener() {
@@ -709,9 +713,9 @@ ZiftrNetworkHandler {
 
 	private void initializeActionBar() {
 		// Set up actionbar
-		ActionBar actionbar = this.getActionBar();
+		android.support.v7.app.ActionBar actionbar = this.getSupportActionBar(); // getActionBar();
 		actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-		actionbar.setCustomView(R.layout._app_header_bar);
+		actionbar.setCustomView(R.layout._app_header_bar);	
 	}
 
 	private void initializeSearchBarText() {
@@ -1361,7 +1365,7 @@ ZiftrNetworkHandler {
 	 * @param addCurrency - boolean to display + button to add new currency
 	 */
 	public void changeActionBar(String title, boolean menu, boolean home, boolean addCurrency) {
-		this.changeActionBar(title, menu, home, addCurrency, null, null);
+		//this.changeActionBar(title, menu, home, addCurrency, null, null);
 	}
 
 	/**
@@ -1486,6 +1490,7 @@ ZiftrNetworkHandler {
 			searchButton.setVisibility(View.GONE);
 			searchBar.setVisibility(View.GONE);
 		}
+
 	}
 
 	private void filterAccordingToVisibility(

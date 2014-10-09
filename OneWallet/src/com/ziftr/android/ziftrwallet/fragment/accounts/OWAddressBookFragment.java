@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -41,7 +43,6 @@ implements TextWatcher, OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, false, this, this.addressAdapter);
 	}
 
 	@Override
@@ -61,6 +62,8 @@ implements TextWatcher, OnClickListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+		setHasOptionsMenu(true);  
+		
 		rootView = inflater.inflate(R.layout.accounts_address_book, container, false);
 
 		// So that on screen rotates the background view stays invisible
@@ -207,4 +210,11 @@ implements TextWatcher, OnClickListener {
 		super.onDestroyView();
 	}
 
+	
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, false, this, this.addressAdapter);
+	}
+	
 }
