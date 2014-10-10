@@ -230,6 +230,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		address.setHidden(hidden);
 		address.setSpentFrom(spentFrom);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
+		
 		return address;
 	}
 

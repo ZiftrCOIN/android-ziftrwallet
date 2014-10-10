@@ -293,7 +293,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, 0, time, time);
 
 				//final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, OWReceivingAddressesTable.VISIBLE_TO_USER);
-
+				
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
 					@Override
