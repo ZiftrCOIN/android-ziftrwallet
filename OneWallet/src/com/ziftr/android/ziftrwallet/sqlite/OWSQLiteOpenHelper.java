@@ -228,6 +228,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
+		
 		return address;
 	}
 
