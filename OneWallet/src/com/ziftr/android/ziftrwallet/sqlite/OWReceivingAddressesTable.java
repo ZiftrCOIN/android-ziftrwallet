@@ -34,8 +34,14 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 	/** whether a receiving address is hidden from the user or not (for change addresses) */
 	public static final String COLUMN_HIDDEN = "hidden";
 	
+	/** whether an address has spent money or not */
+	public static final String COLUMN_SPENT_FROM = "spent_From";
+	
 	public static int VISIBLE_TO_USER = 0;
 	public static int HIDDEN_FROM_USER = 1;
+	
+	public static int UNSPENT_FROM = 0;
+	public static int SPENT_FROM = 1;
 	
 	@Override
 	protected String getTablePostfix() {
@@ -54,6 +60,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		sb.append(COLUMN_BALANCE).append(" INTEGER, ");
 		sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
 		sb.append(COLUMN_MODIFIED_TIMESTAMP).append(" INTEGER, ");
+		sb.append(COLUMN_SPENT_FROM).append(" INTEGER, ");
 		sb.append(COLUMN_HIDDEN).append(" INTEGER );");
 		return sb.toString();
 	}
@@ -138,7 +145,48 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		}
 
 	}
+	
+	public List<OWAddress> readHiddenAddresses(OWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT * FROM ");
+		sb.append(getTableName(coin));
+		sb.append(" WHERE ");
+		sb.append(COLUMN_HIDDEN);
+		sb.append(" = ");
+		sb.append(HIDDEN_FROM_USER);
+		if (!includeSpentFrom){
+			sb.append(" AND ");
+			sb.append(COLUMN_SPENT_FROM);
+			sb.append(" = ");
+			sb.append(UNSPENT_FROM);
+		}
+		sb.append(";");
+		String toQuery = sb.toString();
+		Cursor c = db.rawQuery(toQuery, null);
+		
+		List<OWAddress> newAddresses = new ArrayList<OWAddress>();
 
+		// Move to first returns false if cursor is empty
+		if (c.moveToFirst()) {
+			// Recreate key from stored private key
+			try {
+				do {
+					// TODO deal with encryption of private key
+					newAddresses.add(cursorToAddress(coin, c));
+				} while (c.moveToNext());
+			} catch (OWAddressFormatException afe) {
+				ZLog.log("Error loading address from ", coin.toString(), 
+						" receiving addresses database.");
+				afe.printStackTrace();
+			}
+		}
+		
+		// Make sure we close the cursor
+		c.close();
+
+		return newAddresses;
+	}
+	
 	/**
 	 * @param dataInPrivColumn
 	 * @param privDataWithoutEncryptionPrefix

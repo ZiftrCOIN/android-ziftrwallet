@@ -16,8 +16,6 @@ import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
-import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -199,19 +197,6 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	public void afterTextChanged(Editable s) {
 		// TODO Auto-generated method stub
 		this.txAdapter.getFilter().filter(s);
-	}
-
-	
-	
-	@Override
-	public void refreshData() {
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				OWDataSyncHelper.updateTransactionHistory(getOWMainActivity().getSelectedCoin());
-			}
-		});
 	}
 
 	@Override

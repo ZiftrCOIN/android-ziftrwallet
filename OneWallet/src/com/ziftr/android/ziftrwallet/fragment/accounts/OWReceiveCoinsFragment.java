@@ -29,7 +29,6 @@ import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
-import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWCoinURI;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;

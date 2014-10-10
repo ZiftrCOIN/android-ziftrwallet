@@ -563,12 +563,43 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public void sendCoins(final OWCoin coinId, final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
-		//inputAddresses = all the user's receiving addresses, including hidden change addresses
-		List<OWAddress> inputAddresses = this.readAllAddresses(coinId, true);
+		Long amountLeftToSend = value.longValue();
+		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
 		final List<String> inputs = new ArrayList<String>();
-		for (OWAddress addr : inputAddresses){
-			inputs.add(addr.toString());
+		
+		final List<OWAddress> usingTheseHiddenAddresses = new ArrayList<OWAddress>();
+		//use from hidden change addresses first
+		List<OWAddress> hiddenAddresses = this.readHiddenAddresses(coinId);
+		for (OWAddress addr : hiddenAddresses){
+			if (addr.getLastKnownBalance() > 0){
+				amountLeftToSend -= addr.getLastKnownBalance();
+				inputs.add(addr.getAddress());
+				usingTheseHiddenAddresses.add(addr);
+				addr.setSpentFrom(OWReceivingAddressesTable.SPENT_FROM);
+			}
+			if (amountLeftToSend <= 0){
+				break;
+			}
 		}
+		
+		List<OWAddress> inputAddresses = this.readAllAddresses(coinId, false);
+		for (OWAddress addr : inputAddresses){
+			if (amountLeftToSend <= 0){
+				break;
+			}
+			if (addr.getLastKnownBalance() > 0){
+				amountLeftToSend -= addr.getLastKnownBalance();
+				inputs.add(addr.getAddress());
+			}
+		}
+		
+		if (amountLeftToSend > 0){
+			for (OWAddress addr : usingTheseHiddenAddresses){
+				addr.setSpentFrom(OWReceivingAddressesTable.UNSPENT_FROM);
+			}
+			throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
+		}
+		
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
@@ -578,7 +609,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		//throw new OWAddressFormatException();
 
-		//throw new OWInsufficientMoneyException(coinId, e.missing, e.getMessage());
 	}
 	
 	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, int hidden) {
@@ -600,7 +630,8 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 */
 	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, String note, 
 			long balance, long creation, long modified) {
-		OWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified, OWReceivingAddressesTable.VISIBLE_TO_USER);
+		OWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, 
+				modified, OWReceivingAddressesTable.VISIBLE_TO_USER, OWReceivingAddressesTable.UNSPENT_FROM);
 		this.getWallet(coinId).addKey(owKeytoBitcoinjKey(addr.getKey()));
 		return addr;
 	}

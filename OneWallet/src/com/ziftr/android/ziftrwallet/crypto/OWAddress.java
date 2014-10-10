@@ -25,6 +25,7 @@ import android.annotation.SuppressLint;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWWrongNetworkException;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
+import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -71,7 +72,10 @@ public class OWAddress implements OWSearchableListItem {
 	private long lastTimeModifiedSeconds;
 	
 	/** whether the address is hidden to the user */
-	private int hidden;
+	private int hidden = OWReceivingAddressesTable.SPENT_FROM;
+	
+	/** whether the address has been spent from */
+	private int spent_from = OWReceivingAddressesTable.UNSPENT_FROM;
 
 	//////////////////////////////////////////////
 	//////////  Address Content Fields  //////////
@@ -216,7 +220,15 @@ public class OWAddress implements OWSearchableListItem {
 	public void setHidden(int hidden) {
 		this.hidden = hidden;
 	}
-
+	
+	public int spentFrom(){
+		return this.spent_from;
+	}
+	
+	public void setSpentFrom(int spentFrom){
+		this.spent_from = spentFrom;
+	}
+	
 	public OWCoin getCoinId() {
 		return this.coinId;
 	}

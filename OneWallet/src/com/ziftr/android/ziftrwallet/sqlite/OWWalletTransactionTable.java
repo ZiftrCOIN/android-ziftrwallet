@@ -377,14 +377,6 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		
 		return sb.toString();
 	}
-
-	
 	
 	
 }
-
-
-
-
-
-

@@ -209,7 +209,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	protected OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, String note, int hidden) {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, note, 0, time, time, hidden);
+		return createReceivingAddress(crypter, coinId, note, 0, time, time, hidden, OWReceivingAddressesTable.UNSPENT_FROM);
 	}
 
 	/**
@@ -220,7 +220,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param key - The key to use.
 	 */
 	protected synchronized OWAddress createReceivingAddress(OWKeyCrypter crypter, OWCoin coinId, String note, 
-			long balance, long creation, long modified, int hidden) {
+			long balance, long creation, long modified, int hidden, int spentFrom) {
 		OWAddress address = new OWAddress(coinId);
 		address.getKey().setKeyCrypter(crypter);
 		address.setLabel(note);
@@ -228,6 +228,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
 		address.setHidden(hidden);
+		address.setSpentFrom(spentFrom);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
 		return address;
 	}
@@ -284,6 +285,14 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		//if we are reading from the sending table, we always want to show all addresses since sending table doesn't have column hidden
 		showHidden = showHidden || !receivingNotSending;
 		return this.getTable(receivingNotSending).readAddresses(coinId, addresses, getReadableDatabase(), showHidden);
+	}
+	
+	public synchronized List<OWAddress> readHiddenAddresses(OWCoin coinId) {
+		return ((OWReceivingAddressesTable)this.receivingAddressesTable).readHiddenAddresses(coinId, getReadableDatabase(), true);
+	}
+	
+	public synchronized List<OWAddress> readHiddenUnspentAddresses(OWCoin coinId) {
+		return ((OWReceivingAddressesTable)this.receivingAddressesTable).readHiddenAddresses(coinId, getReadableDatabase(), false);
 	}
 
 	/**

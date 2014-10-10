@@ -31,7 +31,7 @@ public class OWWelcomeActivity extends FragmentActivity implements OWNeutralDial
 			if (!OWPreferencesUtils.userHasPassphrase(this) && !OWPreferencesUtils.getPassphraseDisabled(this)) {
 				this.openPassphraseFragment();
 			} else if (!OWPreferencesUtils.userHasSetName(this) && !OWPreferencesUtils.getDisabledName(this)) {
-				this.openNameFragment(null);
+				this.openNameFragment(null, false);
 			} else {
 				throw new RuntimeException(
 						"Shouldn't be in the welcome screen if user already has passphrase and set name!");
@@ -43,27 +43,30 @@ public class OWWelcomeActivity extends FragmentActivity implements OWNeutralDial
 	 * 
 	 */
 	public void openPassphraseFragment() {
-		this.openFragment(new OWWelcomePassphraseFragment(), false);
+		this.openFragment(new OWWelcomePassphraseFragment(), false, false);
 	}
 	
 	/**
 	 * 
 	 */
-	public void openNameFragment(Bundle resultsOfPassphraseFragment) {
+	public void openNameFragment(Bundle resultsOfPassphraseFragment, boolean addToBackStack) {
 		Fragment welcomeFrag = new OWWelcomeNameFragment();
 		if (resultsOfPassphraseFragment != null) {
 			welcomeFrag.setArguments(resultsOfPassphraseFragment);
 		}
-		this.openFragment(welcomeFrag, true);
+		this.openFragment(welcomeFrag, true, addToBackStack);
 	}
 	
 	/**
 	 * 
 	 */
-	private void openFragment(Fragment fragToOpen, boolean addTransition) {
+	private void openFragment(Fragment fragToOpen, boolean addTransition, boolean addToBackStack) {
 		FragmentTransaction tx = this.getSupportFragmentManager().beginTransaction();
 		if (addTransition) {
 			tx.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
+		}
+		if  (addToBackStack){
+			tx.addToBackStack("");
 		}
 		tx.replace(R.id.welcomeScreenFragmentContainer, fragToOpen, "welcome_passphrase_fragment");
 		tx.commit();

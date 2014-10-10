@@ -201,7 +201,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
 
 		long estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
-		this.timeLeft.setText(formatEstimatedTime(estimatedTime));
+		this.timeLeft.setText("Estimated Time: " + formatEstimatedTime(estimatedTime));
 
 		//in theory a really old network, or a network with fast enough blocks, could have more blocks than an int can hold
 		//however even in this case it's needed confirmations would still be a smaller number
