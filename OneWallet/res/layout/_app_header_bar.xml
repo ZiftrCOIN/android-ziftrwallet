@@ -13,7 +13,7 @@
 
         <ImageView
             android:id="@+id/switchTaskMenuButton"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/ow_total_icon_side_length"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:clickable="true"
@@ -25,7 +25,7 @@
 
         <ImageView
             android:id="@+id/actionBarBack"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/ow_total_icon_side_length"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
             android:clickable="true"
@@ -37,7 +37,7 @@
 
         <ImageView
             android:id="@+id/actionBarHome"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/ow_total_icon_side_length"
             android:layout_height="match_parent"
             android:clickable="true"
             android:contentDescription="@string/ow_ab_home_description"
@@ -45,7 +45,6 @@
             android:padding="10dp"
             android:src="@drawable/icon_home_statelist"
             android:visibility="visible" />
-
     </LinearLayout>
 
     <TextView
@@ -61,7 +60,7 @@
 
     <ImageView
         android:id="@+id/actionBarSearch"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/ow_total_icon_side_length"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:clickable="true"
@@ -72,9 +71,8 @@
 
     <ImageView
         android:id="@+id/actionBarAddCurrency"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_width="@dimen/ow_total_icon_side_length"
+        android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:clickable="true"
         android:layout_margin="@dimen/ow_borderless_icon_margin"

@@ -13,6 +13,7 @@ import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
+import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -24,9 +25,15 @@ public class OWDataSyncHelper {
 
 		ZLog.log("Sending" + amount + "coins to :" + output);
 
-		//create new address for change TODO make this address hidden
-		String refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin).toString();
-
+		List<OWAddress> changeAddresses = OWWalletManager.getInstance().readHiddenUnspentAddresses(coin);
+		String refundAddress;
+		if (changeAddresses.size() <= 0){
+			//create new address for change
+			refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin, OWReceivingAddressesTable.HIDDEN_FROM_USER).toString();
+		} else {
+			//or reuse one that hasnt been spent from
+			refundAddress = changeAddresses.get(0).getAddress();
+		}
 		//make request
 		ZiftrNetRequest request = OWApi.makeTransactionRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
 		String response = request.sendAndWait();
@@ -55,9 +62,10 @@ public class OWDataSyncHelper {
 		for (int i=0; i< toSignList.length(); i++){
 			JSONObject toSign = new JSONObject(toSignList.get(i).toString());
 			OWECKey key = new OWECKey();
+			//uncomment when API works
 			//OWECKey key = OWWalletManager.getInstance().readAddress(coin, toSign.get("address").toString(), true).getKey();
 			toSign.put("pub_key", ZiftrUtils.bytesToHexString(key.getPubKey()));
-			
+
 			OWSha256Hash hash = new OWSha256Hash(toSign.getString("data")); 
 			String rHex = ZiftrUtils.bigIntegerToString(key.sign(hash).r, 32);
 			String sHex = ZiftrUtils.bigIntegerToString(key.sign(hash).s, 32);
@@ -68,7 +76,7 @@ public class OWDataSyncHelper {
 		}
 		response.put("to_sign", signedList);
 		ZLog.log(response);
-		
+
 		//send txn to server after signage
 		ZiftrNetRequest req = OWApi.makeTransaction(coin.getType(), coin.getChain(), response);
 		String res = req.sendAndWait();
@@ -132,13 +140,13 @@ public class OWDataSyncHelper {
 			boolean usedValue = false;
 			for(int y = 0; y < inputAddresses.length(); y++) {
 				String inputAddress = inputAddresses.getString(y);
-				if(addresses.contains(inputAddress)) {		
-					displayAddresses.add(inputAddress);
+				if(addresses.contains(inputAddress)) {	
 					String outputValue = input.getString("output_value");
 					if(!usedValue) {
 						usedValue = true;
 						value.subtract(new BigInteger(outputValue));
 					}
+					displayAddresses.add(inputAddress);
 				}
 			}//end for y
 		}//end for x
@@ -163,17 +171,25 @@ public class OWDataSyncHelper {
 		//pick and address to use for displaying the note to the user
 		String note = null; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		for(String noteAddress : displayAddresses) {
-			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true);
+			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true, false);
 			note = databaseAddress.getLabel();
 			if(note != null && note.length() > 0) {
 				break;
 			}
 		}
 
-
 		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddresses, new OWSha256Hash(hash), note, confirmations);
 
 		return transaction;
+	}
+	
+	public static List<String> getHiddenAddresses(OWCoin coin){
+		List<OWAddress> addresses = OWWalletManager.getInstance().readHiddenAddresses(coin);
+		List<String> hiddenAddresses = new ArrayList<String>();
+		for (OWAddress addr : addresses){
+			hiddenAddresses.add(addr.getAddress());
+		}
+		return hiddenAddresses;
 	}
 
 }

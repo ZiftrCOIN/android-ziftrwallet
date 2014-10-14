@@ -30,13 +30,17 @@
                     android:layout_height="wrap_content"
                     layout="@layout/_dual_icon_coin_view" />
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/ow_quarter_icon_size"
+                    android:background="@drawable/dropshadow" />
+
                 <TextView
                     android:id="@+id/sendToNameTitle"
                     style="@style/send_receive_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:layout_marginTop="10dp"
                     android:text="@string/ow_send_to_address_name" >
                 </TextView>
 
@@ -101,7 +105,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
                         android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_borderless_icon_margin"
+                        android:padding="@dimen/ow_bordered_icon_margin"
                         android:src="@drawable/address_book_icon_clickable" />
 
                     <ImageView
@@ -113,7 +117,7 @@
                         android:layout_marginRight="@dimen/ow_borderless_icon_margin"
                         android:clickable="true"
                         android:contentDescription="@string/ow_old_passphrase_hint"
-                        android:padding="@dimen/ow_borderless_icon_margin"
+                    	android:padding="@dimen/ow_bordered_icon_margin"
                         android:src="@drawable/copy_icon_clickable" />
 
                     <ImageView
@@ -184,7 +188,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
                         android:clickable="true"
-                        android:padding="@dimen/ow_borderless_icon_margin"
+                        android:padding="@dimen/ow_bordered_icon_margin"
                         android:src="@drawable/button_help_clickable" />
 
                     <LinearLayout

@@ -127,7 +127,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 
 			if (address != null) {
-				OWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false);
+				OWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false, false);
 				if (owAddress != null) {
 					// If there wasn't a note given in URI then we pre-fill from address
 					txNote = txNote == null ? owAddress.getLabel() : txNote;
@@ -202,7 +202,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 							+ "The fee goes to the miner that secures your transaction as a reward for their service. "
 							+ "This is standard for all cryptocurrency applications. Without it, your transaction would "
 							+ "likely stay as pending for an inconvenient length of time.", 
-					"fiat_fee_help_dialog");
+					"fee_help_dialog");
 		}
 	}
 
@@ -370,6 +370,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		this.fiatFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 	}
 
 	/**

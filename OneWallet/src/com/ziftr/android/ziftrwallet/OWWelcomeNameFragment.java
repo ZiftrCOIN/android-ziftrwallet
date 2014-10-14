@@ -33,7 +33,7 @@ public class OWWelcomeNameFragment extends Fragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onSaveInstanceState(outState);
 	}
-
+	
 	/**
 	 * Finds all the view fields and sets the listeners.  
 	 */

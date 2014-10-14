@@ -23,6 +23,11 @@
                 android:layout_height="wrap_content"
                 layout="@layout/_dual_icon_coin_view" />
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/ow_quarter_icon_size"
+                android:background="@drawable/dropshadow" />
+
             <TextView
                 android:id="@+id/addressNameTitleTextView"
                 style="@style/send_receive_label"
@@ -34,8 +39,7 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/ow_send_receive_list_block_padding_vertical" >
+                android:layout_height="wrap_content" >
 
                 <include
                     android:id="@+id/addressName"
@@ -140,12 +144,28 @@
                 android:text="@string/ow_receive_message_title" >
             </TextView>
 
-            <include
-                android:id="@+id/receiveMessageContainer"
-                style="@style/send_receive_block"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                layout="@layout/_edit_text_shadow" />
+                android:layout_height="wrap_content" >
+
+                <ImageView
+                    android:id="@+id/help_msg_button"
+                    android:layout_width="@dimen/ow_total_icon_side_length"
+                    android:layout_height="@dimen/ow_total_icon_side_length"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
+                    android:clickable="true"
+                    android:padding="@dimen/ow_bordered_icon_margin"
+                    android:src="@drawable/button_help_clickable" />
+
+                <include
+                    android:id="@+id/receiveMessageContainer"
+                    style="@style/send_receive_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/_edit_text_shadow" />
+            </RelativeLayout>
 
             <View style="@style/white_divider" />
 
@@ -157,7 +177,8 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ow_send_receive_list_block_padding_vertical" >
 
                 <LinearLayout
                     android:id="@+id/generateAddressQrCodeContainer"

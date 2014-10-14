@@ -54,6 +54,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	private View scrollView;
 	private ImageView generateAddressForLabel;
 	private EditText messageEditText;
+	private ImageView helpButton;
 
 	private boolean qrCodeGenerated = false;
 
@@ -107,6 +108,12 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 			this.openAddressBook(true, R.id.receiveCoinBaseFrameLayout);
 		} else if (v == this.generateAddressForLabel) {
 			this.conditionallyGenerateNewAddress(false);
+		} else if (v == this.helpButton){
+			getOWMainActivity().alertUser(
+					"The message and amount fields are encoded into the QRcode and should be used if you wish to pre-fill a message" +
+					" and/or amount label in the scanning user's application. These are optional and are not saved" +
+					" when loading an address from the address book.", 
+					"msg_help_dialog");
 		}
 
 	}
@@ -153,6 +160,8 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.bindEditTextValues(this.coinAmountEditText, this.fiatAmountEditText, 
 				this.changeCoinStartedFromProgram, this.changeFiatStartedFromProgram);
 		
+		this.helpButton = (ImageView) this.rootView.findViewById(R.id.help_msg_button);
+		this.helpButton.setOnClickListener(this);
 		// For the message edit text
 		this.messageEditText = (EditText) this.rootView.findViewById(
 				R.id.receiveMessageContainer).findViewWithTag(OWTags.OW_EDIT_TEXT);
@@ -280,12 +289,11 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				
 				long time = System.currentTimeMillis() / 1000;
 				final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, 0, time, time);
-				
-				//final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel);
 
+				//final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, OWReceivingAddressesTable.VISIBLE_TO_USER);
+				
 				// Run the updating of the UI on the UI thread
 				OWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
 					@Override
@@ -358,7 +366,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 			messageEditText.setFocusableInTouchMode(false);
 			fiatAmountEditText.setFocusableInTouchMode(false);
 			coinAmountEditText.setFocusableInTouchMode(false);
-
 
 		}
 	}

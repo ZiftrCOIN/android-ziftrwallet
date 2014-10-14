@@ -67,7 +67,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		address.setId(insertId);
 	}
 
-	protected OWAddress readAddress(OWCoin coinId, String address, SQLiteDatabase db) {
+	protected OWAddress readAddress(OWCoin coinId, String address, SQLiteDatabase db, boolean showHidden) {
 		if (address == null) {
 			return null;
 		}
@@ -75,7 +75,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		List<String> addresses = new ArrayList<String>();
 		addresses.add(address);
 
-		List<OWAddress> readAddresses = readAddresses(coinId, addresses, db);
+		List<OWAddress> readAddresses = readAddresses(coinId, addresses, db, showHidden);
 		if (readAddresses.size() == 0) {
 			return null;
 		} else {
@@ -90,17 +90,17 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * @param coinId
 	 * @param addresses
 	 * @param db
+	 * @param getHidden true if want all addresses, false for send addresses db and/or to show only visible to user addresses
 	 * @return
 	 */
-	protected List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, SQLiteDatabase db) {
+	protected List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, SQLiteDatabase db, boolean getHidden) {
 		if (addresses != null && addresses.size() == 0) {
 			return null;
 		}
-
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coinId));
-
+		
 		// If null, we take that to mean that they want all addresses
 		if (addresses != null) {
 			sb.append(" WHERE ");
@@ -111,9 +111,15 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 				if (i != (addresses.size() - 1)) {
 					sb.append(",");
 				} else {
+					//if we don't want to get the hidden addresses, only show visible
+					if (!getHidden){ 
+						sb.append(" AND " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = " + OWReceivingAddressesTable.VISIBLE_TO_USER);
+					}
 					sb.append(")");
 				}
 			}
+		} else if (!getHidden){
+			sb.append(" WHERE " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = " + OWReceivingAddressesTable.VISIBLE_TO_USER);
 		}
 
 		sb.append(";");
@@ -143,8 +149,8 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		return newAddresses;
 	}
 
-	protected List<OWAddress> readAllAddresses(OWCoin coinId, SQLiteDatabase db) {
-		return this.readAddresses(coinId, null, db);
+	protected List<OWAddress> readAllAddresses(OWCoin coinId, SQLiteDatabase db, boolean showHidden) {
+		return this.readAddresses(coinId, null, db, showHidden);
 	}
 
 	protected void updateAddress(OWAddress address, SQLiteDatabase db) {

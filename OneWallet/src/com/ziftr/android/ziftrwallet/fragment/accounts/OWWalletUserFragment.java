@@ -1,20 +1,11 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.OWWalletManager;
-import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
-import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
+import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWConverter;
-import com.ziftr.android.ziftrwallet.util.OWFiat;
-import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class OWWalletUserFragment extends OWFragment {
@@ -74,5 +65,14 @@ public abstract class OWWalletUserFragment extends OWFragment {
 		syncButton.setOnClickListener((View.OnClickListener)this.getOWMainActivity());
 	}
 	*****/
-		
+	@Override
+	public void refreshData() {
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				OWDataSyncHelper.updateTransactionHistory(getOWMainActivity().getSelectedCoin());
+			}
+		});
+	}
 }

@@ -125,12 +125,11 @@ implements TextWatcher, OnClickListener {
 	 */
 	private void loadAddressesFromDatabase() {
 		final OWWalletManager manager = this.getWalletManager();
-
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 				final List<OWAddress> addresses = 
-						manager.readAllAddresses(getSelectedCoin(), includeReceivingNotSending);
+						manager.readAllAddresses(getSelectedCoin(), includeReceivingNotSending, !includeReceivingNotSending);
 
 				Activity a = OWAddressBookFragment.this.getOWMainActivity();
 				// It it's null then the app is dying and we do it on the next round
