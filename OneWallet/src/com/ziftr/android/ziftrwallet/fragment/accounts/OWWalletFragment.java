@@ -76,7 +76,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-		if (getWalletManager() == null || getWalletManager().getWallet(getSelectedCoin()) == null) {
+		if (getWalletManager() == null) {
 			throw new IllegalArgumentException(
 					"Shouldn't happen, this is just a safety check because we "
 							+ "need a wallet to send coins.");

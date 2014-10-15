@@ -219,7 +219,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		sb.append(getTableName(coinId));
 
 		// If null, we take that to mean that they want all addresses
-		if (!where.isEmpty()) {
+		if (where != null && !where.isEmpty()) {
 			sb.append(" WHERE ");
 			sb.append(where);
 

@@ -30,7 +30,6 @@ import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -410,8 +409,6 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	protected void onDestroy() {
-		// TODO how should these combined?
-		this.walletManager.closeAllSetupWallets();
 		OWWalletManager.closeInstance();
 		super.onDestroy();
 	}
@@ -875,20 +872,19 @@ ZiftrNetworkHandler {
 				return;
 			}
 		}
-		if (newItem == OWCoin.BTC_TEST || newItem == OWCoin.BTC) {
-			// We can assume the wallet hasn't been set up yet
-			// or we wouldn't have gotten here 
-
-			if (!walletManager.walletHasBeenSetUp(newItem)) {
-				if (walletManager.setUpWallet(newItem)) {
-				} else {
-					Toast.makeText(this, "Error a wallet could not be set up!", Toast.LENGTH_LONG).show();
-					return;
-				}
+		
+		
+		// We can assume the wallet hasn't been set up yet
+		// or we wouldn't have gotten here 
+		if (!walletManager.walletHasBeenSetUp(newItem)) {
+			if (walletManager.setUpWallet(newItem)) {
+			} else {
+				Toast.makeText(this, "Error a wallet could not be set up!", Toast.LENGTH_LONG).show();
+				return;
 			}
-			Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
-			this.onBackPressed();
 		}
+		Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
+		this.onBackPressed();
 
 	}
 
@@ -1225,7 +1221,6 @@ ZiftrNetworkHandler {
 		case OWRequestCodes.DEACTIVATE_WALLET:
 			OWCoin coinId = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
 			this.walletManager.updateTableActivitedStatus(coinId, OWSQLiteOpenHelper.DEACTIVATED);
-			this.walletManager.closeWallet(coinId);
 			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));

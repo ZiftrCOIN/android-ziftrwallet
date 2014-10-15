@@ -1,46 +1,25 @@
 package com.ziftr.android.ziftrwallet;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.crypto.SecretKey;
 
 import android.content.Context;
 
-import com.google.bitcoin.core.AbstractWalletEventListener;
 import com.google.bitcoin.core.AddressFormatException;
-import com.google.bitcoin.core.BlockChain;
-import com.google.bitcoin.core.CheckpointManager;
 import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.InsufficientMoneyException;
-import com.google.bitcoin.core.PeerAddress;
 import com.google.bitcoin.core.PeerGroup;
-import com.google.bitcoin.core.Sha256Hash;
-import com.google.bitcoin.core.Transaction;
-import com.google.bitcoin.core.TransactionConfidence;
-import com.google.bitcoin.core.TransactionOutput;
-import com.google.bitcoin.core.Wallet;
-import com.google.bitcoin.net.discovery.DnsDiscovery;
 import com.google.bitcoin.store.BlockStore;
-import com.google.bitcoin.store.BlockStoreException;
-import com.google.bitcoin.store.SPVBlockStore;
-import com.google.bitcoin.store.UnreadableWalletException;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
-import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
-import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
@@ -68,7 +47,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class OWWalletManager extends OWSQLiteOpenHelper {
 
 	/** The map which holds all of the wallets. */
-	private Map<OWCoin, Wallet> walletMap = new HashMap<OWCoin, Wallet>();
+	//private Map<OWCoin, Wallet> walletMap = new HashMap<OWCoin, Wallet>();
 
 	/** The wallet files for each of the coin types. */
 	private Map<OWCoin, File> walletFiles = new HashMap<OWCoin, File>();
@@ -170,13 +149,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		super(context, databasePath);
 		this.context = context;
-
-		for (OWCoin activatedType : readAllActivatedTypes()) {
-			this.setUpWallet(activatedType);
-			for (ECKey key : this.walletMap.get(activatedType).getKeys()) {
-				ZLog.log("Bitcoinj key: " + key.toAddress(activatedType.getNetworkParameters()));
-			}
-		}
 	}
 
 	/**
@@ -191,7 +163,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public boolean walletHasBeenSetUp(OWCoin id) {
 		// There is no add wallet method, so the only way
 		// a wallet can be added to the map is by setupWallet.
-		return this.typeIsActivated(id) && walletMap.get(id) != null;
+		return this.typeIsActivated(id);
 	}
 
 	/**
@@ -211,15 +183,29 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		return list;
 	}
 
+	
+	
+	
+	
+	
+	
 	/**
 	 * A convenience method that closes all wallets that have been 
 	 * set up. 
 	 */
+	/**********
 	public void closeAllSetupWallets() {
 		for (OWCoin type : this.getAllSetupWalletTypes()) {
 			this.closeWallet(type);
 		}
 	}
+	*********/
+	
+	
+	
+	
+	
+	
 
 	/**
 	 * Sets up a wallet object for this fragment by either loading it 
@@ -255,77 +241,11 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			return false;
 		}
 
-		this.walletMap.put(id, null);
-
-		// Try to load the wallet from a file
-		try {
-			this.walletMap.put(id, Wallet.loadFromFile(this.walletFiles.get(id)));
-		} catch (UnreadableWalletException e) {
-			log("Exception trying to load wallet file: ");
-		}
-
-		// If the load was unsucecssful (presumably only if this is the first 
-		// time this type of wallet was set up) then we make a new wallet and add
-		// a new key to the wallet.
-		if (this.walletMap.get(id) == null) {
-			this.walletMap.put(id, new Wallet(id.getNetworkParameters()));
-			try {
-				this.walletMap.get(id).saveToFile(this.walletFiles.get(id));
-			} catch (IOException e) {
-				log("Exception trying to save new wallet file: ", e);
-				// TODO this is just test code of course but this is probably 
-				// "fatal" as if we can't save our wallet, that's a problem
-				return false;
-			}
-		}
-
-		this.getWallet(id).addEventListener(new AbstractWalletEventListener() {
-			@Override
-			public synchronized void onCoinsReceived(
-					Wallet w, 
-					Transaction tx, 
-					BigInteger prevBalance, 
-					final BigInteger newBalance) {
-				// TODO need to update the data in the list of transactions
-				log(id.toString() + ": coins received...!");
-			}
-
-			// TODO override more methods here to do things like changing 
-			// transactions from pending to finalized, etc.
-		});
-
-		// How to watch an outside address, note: we probably 
-		// won't do this client side in the actual app
-		//		Address watchedAddress;
-		//		try {
-		//			watchedAddress = new Address(networkParams, 
-		//					"mrbgTx73gQiu8oHJfSadFHYQose3Arj3Db");
-		//			wallet.addWatchedAddress(watchedAddress, 1402200000);
-		//		} catch (AddressFormatException e) {
-		//			log("Exception trying to add a watched address: ", e);
-		//		}
-
-		// If it is encrypted, bitcoinj just works with it encrypted as long
-		// as all sendRequests etc have the 
-		//KeyParameter keyParam = wallet.encrypt("password");
-
-		// TODO autosave using 
-		// this.wallet.autosaveToFile(f, delayTime, timeUnit, eventListener);
-
-		// To decrypt the wallet. Note that this should only be done if 
-		// the user specifically requests that their wallet be unencrypted. 
-		//wallet.decrypt(wallet.getKeyCrypter().deriveKey("password"));
-
-		// Note: wallets should only be encrypted once using the 
-		// password, decryption is specifically for removing encryption 
-		// completely instead any spending transactions should set 
-		// SendRequest.aesKey and it will be used to decrypt keys as it signs.
-		// TODO Explain???
-
-		this.beginSyncWithNetwork(id);
 		return true;
 	}
 
+	
+	/***
 	public void closeWallet(OWCoin id) {
 		if (peerGroups.get(id) != null) {
 			peerGroups.get(id).stop();
@@ -352,10 +272,23 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 		}
 	}
+	*****/
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * 
 	 */
+	
+	
+	/********
 	private void beginSyncWithNetwork(final OWCoin id) {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
@@ -539,7 +472,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		        for (Transaction tx : recentTransactions) {
 		        	log("Recent transaction: ", tx);
 		        }
-					 ***/
+					// ***   /
 
 				} catch (BlockStoreException e) {
 					log("Exeption creating block store: ", e);
@@ -550,6 +483,12 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 		});
 	}
+	******************************/
+	
+	
+	
+	
+	
 
 	/**
 	 * Sends the type of coin that this thread actually represents to 
@@ -632,7 +571,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			long balance, long creation, long modified) {
 		OWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, 
 				modified, OWReceivingAddressesTable.VISIBLE_TO_USER, OWReceivingAddressesTable.UNSPENT_FROM);
-		this.getWallet(coinId).addKey(owKeytoBitcoinjKey(addr.getKey()));
 		return addr;
 	}
 
@@ -664,13 +602,31 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
+	
+	
+	
+	
+	
+	
+	/***************
 	@Override
 	public BigInteger getWalletBalance(OWCoin coinId, BalanceType bType) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
 		// method is called. 
 		return this.walletMap.get(coinId).getBalance(Wallet.BalanceType.valueOf(bType.toString()));
 	}
+	***************************/
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/********************************
 	@Override
 	public List<OWTransaction> getPendingTransactions(OWCoin coinId) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
@@ -685,6 +641,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		return pendingTransactions;
 	}
 
+	
 	@Override
 	public List<OWTransaction> getConfirmedTransactions(OWCoin coinId) {
 		// TODO After ready to remove bitcoinj, remove this whole method so that super's
@@ -717,7 +674,17 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		return confirmedTransactions;
 	}
-
+	******************************************/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * A quick temporary converter method. Makes a OWWalletTransaction that is mainly
 	 * just good for use in views since it doesn't have any of the database fields set.
@@ -726,6 +693,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @param tx
 	 * @return
 	 */
+	/******************************************
 	private OWTransaction bitcoinjTransactionToOWTransaction(OWCoin coinId, Transaction tx) {
 
 		OWTransaction owTx = this.readTransactionByHash(coinId, tx.getHashAsString());
@@ -791,6 +759,15 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 		return owTx;
 	}
+	****************************************/
+	
+	
+	
+	
+	
+	
+	
+	
 
 	//	private OWAddress bitcoinjAddressToOWAddress(OWCoin coinId, Address address) {
 	//		OWAddress owAddress = null;
@@ -822,16 +799,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		this.context = activity;
 	}
 
-	/**
-	 * Gives the wallet for the specified coin type or null
-	 * if the wallet has not been set up yet. 
-	 * 
-	 * @param id - The coin type to get the wallet for. 
-	 * @return as above
-	 */
-	public Wallet getWallet(OWCoin id) {
-		return this.walletMap.get(id);
-	}
+	
 
 	/** 
 	 * Gets the file where the wallet for the specified
