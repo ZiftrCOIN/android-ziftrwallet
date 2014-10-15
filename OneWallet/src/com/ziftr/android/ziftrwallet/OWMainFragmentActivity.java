@@ -896,19 +896,6 @@ ZiftrNetworkHandler {
 	public void openWalletView(OWCoin typeOfWalletToStart) {
 		this.setSelectedCoin(typeOfWalletToStart);
 
-		// Temporarily need to just work for enabled types only
-		OWCoin t = null;
-		for (OWCoin enabledType : OWWalletManager.enabledCoinTypes) {
-			if (typeOfWalletToStart == enabledType) {
-				t = enabledType;
-			}
-		}
-
-		// Coin type is not enabled
-		if (t == null) {
-			return;
-		}
-
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.WALLET_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWWalletFragment();

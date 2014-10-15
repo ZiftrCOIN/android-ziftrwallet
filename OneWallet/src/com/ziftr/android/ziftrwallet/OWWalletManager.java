@@ -52,25 +52,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	/** The wallet files for each of the coin types. */
 	private Map<OWCoin, File> walletFiles = new HashMap<OWCoin, File>();
 
-	/** The file where the BlockStore for this coin will be stored. */
-	private Map<OWCoin, File> blockStoreFiles = new HashMap<OWCoin, File>();
-
-	/** A map of hashes to StoredBlocks to save StoredBlock objects to disk. */
-	private Map<OWCoin, BlockStore> blockStores = 
-			new HashMap<OWCoin, BlockStore>();
-
-	/** The PeerGroup that this SPV node is connected to. */
-	private Map<OWCoin, PeerGroup> peerGroups = 
-			new HashMap<OWCoin, PeerGroup>();
-
-	/** 
-	 * When the app is started it searches through all of these and looks for 
-	 * any wallet files that alread exists. If they do, it sets them up.  
-	 */
-	public static OWCoin[] enabledCoinTypes = new OWCoin[] {
-		OWCoin.BTC_TEST,
-		OWCoin.BTC
-	};
 
 	/** 
 	 * This should be cleared when saving this object 
