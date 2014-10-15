@@ -268,10 +268,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized OWAddress readAddress(OWCoin coinId, String address, boolean receivingNotSending, boolean showHidden) {
-		//if we are reading from the sending table, we always want to show all addresses since sending table doesn't have column hidden
-		showHidden = showHidden || !receivingNotSending;
-		return this.getTable(receivingNotSending).readAddress(coinId, address, getReadableDatabase(), showHidden);
+	public synchronized OWAddress readVisibleAddress(OWCoin coinId, String address, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readVisibleAddress(coinId, address, getReadableDatabase(), receivingNotSending);
 	}
 
 	/**
@@ -282,10 +280,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, boolean receivingNotSending, boolean showHidden) {
-		//if we are reading from the sending table, we always want to show all addresses since sending table doesn't have column hidden
-		showHidden = showHidden || !receivingNotSending;
-		return this.getTable(receivingNotSending).readAddresses(coinId, addresses, getReadableDatabase(), showHidden);
+	public synchronized List<OWAddress> readVisibleAddress(OWCoin coinId, List<String> addresses, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readVisibleAddresses(coinId, addresses, getReadableDatabase(), receivingNotSending);
 	}
 	
 	public synchronized List<OWAddress> readHiddenAddresses(OWCoin coinId) {
@@ -304,8 +300,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 * @return List of {@link OWAddress} objects. See {@link #getAddressList(OWCoin, boolean)} for list of Address strings.
 	 */
-	public synchronized List<OWAddress> readAllAddresses(OWCoin coinId, boolean receivingNotSending, boolean showHidden) {
-		return this.getTable(receivingNotSending).readAllAddresses(coinId, getReadableDatabase(), showHidden);
+	public synchronized List<OWAddress> readAllVisibleAddresses(OWCoin coinId, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readAllVisibleAddresses(coinId, getReadableDatabase(), receivingNotSending);
 	}
 
 	/**
@@ -413,9 +409,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	public List<OWAddress> readAllAddresses(OWCoin coinId, boolean showHidden) {
-		List<OWAddress> addresses = this.readAllAddresses(coinId, false, false);
-		addresses.addAll(this.readAllAddresses(coinId, true, showHidden));
+	public List<OWAddress> readAllVisibleAddresses(OWCoin coinId) {
+		List<OWAddress> addresses = this.readAllVisibleAddresses(coinId, false);
+		addresses.addAll(this.readAllVisibleAddresses(coinId, true));
 		return addresses;
 	}
 

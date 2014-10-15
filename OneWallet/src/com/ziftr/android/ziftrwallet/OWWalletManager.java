@@ -14,8 +14,6 @@ import android.content.Context;
 import com.google.bitcoin.core.AddressFormatException;
 import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.InsufficientMoneyException;
-import com.google.bitcoin.core.PeerGroup;
-import com.google.bitcoin.store.BlockStore;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
@@ -164,7 +162,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		return list;
 	}
 
-	
 
 	/**
 	 * Sets up a wallet object for this fragment by either loading it 
@@ -216,6 +213,10 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public void sendCoins(final OWCoin coinId, final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
+		
+		if (!coinId.addressIsValid(address)){
+			throw new OWAddressFormatException();
+		}
 		Long amountLeftToSend = value.longValue();
 		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
 		final List<String> inputs = new ArrayList<String>();
@@ -234,8 +235,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				break;
 			}
 		}
-		
-		List<OWAddress> inputAddresses = this.readAllAddresses(coinId, false);
+		List<OWAddress> inputAddresses = this.readAllVisibleAddresses(coinId);
 		for (OWAddress addr : inputAddresses){
 			if (amountLeftToSend <= 0){
 				break;
@@ -252,15 +252,12 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 			throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
 		}
-		
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 				OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
 			}
 		});
-
-		//throw new OWAddressFormatException();
 
 	}
 	
@@ -316,7 +313,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
-	
 	/**
 	 * A quick temporary converter method.
 	 * 

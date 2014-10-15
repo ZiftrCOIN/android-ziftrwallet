@@ -129,7 +129,7 @@ implements TextWatcher, OnClickListener {
 			@Override
 			public void run() {
 				final List<OWAddress> addresses = 
-						manager.readAllAddresses(getSelectedCoin(), includeReceivingNotSending, !includeReceivingNotSending);
+						manager.readAllVisibleAddresses(getSelectedCoin(), includeReceivingNotSending);
 
 				Activity a = OWAddressBookFragment.this.getOWMainActivity();
 				// It it's null then the app is dying and we do it on the next round

@@ -16,7 +16,7 @@ public class OWSecurityFragment extends OWFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.section_contact_layout, container, false);
+		return inflater.inflate(R.layout.section_security_layout, container, false);
 	}
 	public void onResume() {
 		super.onResume();
