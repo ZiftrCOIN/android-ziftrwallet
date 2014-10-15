@@ -187,7 +187,8 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 		where.append(COLUMN_NUM_CONFIRMATIONS);
 		where.append(" < ");
-		coinId.getNumRecommendedConfirmations();
+		int confirmationsRequired = coinId.getNumRecommendedConfirmations();
+		where.append(DatabaseUtils.sqlEscapeString(String.valueOf(confirmationsRequired)));
 
 		return this.readTransactions(coinId, where.toString(), db);
 	}
@@ -198,7 +199,8 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 		where.append(COLUMN_NUM_CONFIRMATIONS);
 		where.append(" >= ");
-		coinId.getNumRecommendedConfirmations();
+		int confirmationsRequired = coinId.getNumRecommendedConfirmations();
+		where.append(DatabaseUtils.sqlEscapeString(String.valueOf(confirmationsRequired)));
 
 		return this.readTransactions(coinId, where.toString(), db);
 	}
