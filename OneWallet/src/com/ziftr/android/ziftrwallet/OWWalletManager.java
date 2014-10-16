@@ -11,13 +11,7 @@ import javax.crypto.SecretKey;
 
 import android.content.Context;
 
-import com.google.bitcoin.core.AddressFormatException;
-import com.google.bitcoin.core.ECKey;
-import com.google.bitcoin.core.InsufficientMoneyException;
-import com.google.bitcoin.core.PeerGroup;
-import com.google.bitcoin.store.BlockStore;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
-import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -316,17 +310,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
-	
-	/**
-	 * A quick temporary converter method.
-	 * 
-	 * @param coinId
-	 * @param tx
-	 * @return
-	 */
-	private ECKey owKeytoBitcoinjKey(OWECKey ziftrKey) {
-		return new ECKey(new BigInteger(1, ziftrKey.getPrivKeyBytes()), ziftrKey.getPubKey(), ziftrKey.isCompressed());
-	}
 
 	/**
 	 * @param activity the context to set

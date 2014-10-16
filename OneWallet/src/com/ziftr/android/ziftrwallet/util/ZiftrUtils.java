@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +24,7 @@ import java.util.concurrent.Executors;
 
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -37,6 +39,9 @@ public class ZiftrUtils {
 
 	private static final ExecutorService threadService = Executors.newCachedThreadPool();
 
+	/** flag indicating if the fixes for secure random number generator have been applied */
+	private static boolean randomSecured = false;
+	
 	/** formatting for date written like "2013-08-26T13:59:30-04:00" */
 	public static final DateFormat formatter = 
 			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
@@ -511,6 +516,30 @@ public class ZiftrUtils {
 		System.arraycopy(wifPrivBytes, 1, privBytes, 0, 32);
 		return privBytes;
 	}
+	
+	/**
+	 * See: https://android-developers.blogspot.com/2013/08/some-securerandom-thoughts.html
+	 * Makes sure the fixes are applied and by using {@link PRNGFixes#apply()}.
+	 * Then creates a new instance of {@link SecureRandom}.
+	 * @return a new {@link SecureRandom} or null if something fatal happened and fixes could not be applied
+	 */
+	@SuppressLint("TrulyRandom")
+	public static synchronized SecureRandom createTrulySecureRandom() {
+		if(!randomSecured) {
+			try {
+				PRNGFixes.apply();
+				randomSecured = true;
+			}
+			catch(Exception e) {
+				ZLog.log("Unable to secure RNG: ", e);
+				return null;
+			}
+		}
+		
+		return new SecureRandom();
+	}
+	
+	
 	
 	public static long readUint32(byte[] bytes, int offset) {
         return ((bytes[offset++] & 0xFFL) << 0) |

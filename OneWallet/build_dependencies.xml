@@ -18,7 +18,9 @@
 	
     <target name="build_libraries">
 
-    	<antcall target="build_bitcoinj_eclipse"/>
+    	<!--
+    	   <antcall target="build_bitcoinj_eclipse"/>
+    	-->
     	
     	<antcall target="download_ziftr_dependencies" />
     	

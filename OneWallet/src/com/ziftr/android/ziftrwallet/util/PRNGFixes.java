@@ -8,7 +8,7 @@
  * freely, as long as the origin is not misrepresented.
  */
 
-package com.ziftr.android.ziftrwallet; 
+package com.ziftr.android.ziftrwallet.util; 
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -51,7 +51,7 @@ public final class PRNGFixes {
      *
      * @throws SecurityException if a fix is needed but could not be applied.
      */
-    public static void apply() {
+    protected static void apply() {
         applyOpenSSLFix();
         installLinuxPRNGSecureRandom();
     }

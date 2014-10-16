@@ -27,12 +27,10 @@ import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-import org.bitcoin.NativeSecp256k1;
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.ASN1Integer;
 import org.spongycastle.asn1.ASN1OctetString;
 import org.spongycastle.asn1.DERBitString;
-import org.spongycastle.asn1.DERInteger;
 import org.spongycastle.asn1.DEROctetString;
 import org.spongycastle.asn1.DERSequenceGenerator;
 import org.spongycastle.asn1.DERTaggedObject;
@@ -96,11 +94,12 @@ public class OWECKey {
 		X9ECParameters params = SECNamedCurves.getByName("secp256k1");
 		CURVE = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
 		HALF_CURVE_ORDER = params.getN().shiftRight(1);
+		
 		// Have added a fix for this in com.ziftr.android.onewallet.PRNGFixes.java
 		// Applied the fix in com.ziftr.android.onewallet.OWApplication.java
 		// TODO does the fix for this (applied in OWApplication) need to be applied every time
 		// wallet starts up?
-		secureRandom = new SecureRandom();
+		secureRandom = ZiftrUtils.createTrulySecureRandom();
 	}
 
 	/**
@@ -146,18 +145,12 @@ public class OWECKey {
 		ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
 		ECPublicKeyParameters pubParams = (ECPublicKeyParameters) keypair.getPublic();
 		priv = privParams.getD();
-		// Unfortunately Bouncy Castle does not let us explicitly change a point to be compressed, even though it
-		// could easily do so. We must re-build it here so the ECPoints withCompression flag can be set to true.
-		ECPoint uncompressed = pubParams.getQ();
-		ECPoint compressed = compressPoint(uncompressed);
-		pub = compressed.getEncoded();
+		
+		pub = pubParams.getQ().getEncoded(true); //always compress
 
 		creationTimeSeconds = System.currentTimeMillis() / 1000;
 	}
 
-	private static ECPoint compressPoint(ECPoint uncompressed) {
-		return new ECPoint.Fp(CURVE.getCurve(), uncompressed.getX(), uncompressed.getY(), true);
-	}
 
 	/**
 	 * Construct an ECKey from an ASN.1 encoded private key. These are produced by OpenSSL and stored by the Bitcoin
@@ -275,9 +268,8 @@ public class OWECKey {
 	 */
 	public static byte[] publicKeyFromPrivate(BigInteger privKey, boolean compressed) {
 		ECPoint point = CURVE.getG().multiply(privKey);
-		if (compressed)
-			point = compressPoint(point);
-		return point.getEncoded();
+		
+		return point.getEncoded(compressed);
 	}
 
 	/** Gets the hash160 form of the public key (as seen in addresses). */
@@ -401,9 +393,6 @@ public class OWECKey {
 	 */
 	public static boolean verify(byte[] data, OWECDSASignature signature, byte[] pub) {
 
-		if (NativeSecp256k1.enabled)
-			return NativeSecp256k1.verify(data, signature.encodeToDER(), pub);
-
 		ECDSASigner signer = new ECDSASigner();
 		ECPublicKeyParameters params = new ECPublicKeyParameters(CURVE.getCurve().decodePoint(pub), CURVE);
 		signer.init(false, params);
@@ -426,8 +415,7 @@ public class OWECKey {
 	 * @param pub       The public key bytes to use.
 	 */
 	public static boolean verify(byte[] data, byte[] signature, byte[] pub) {
-		if (NativeSecp256k1.enabled)
-			return NativeSecp256k1.verify(data, signature, pub);
+		
 		return verify(data, OWECDSASignature.decodeFromDER(signature), pub);
 	}
 
@@ -489,7 +477,7 @@ public class OWECKey {
 			ASN1InputStream decoder = new ASN1InputStream(asn1privkey);
 			DLSequence seq = (DLSequence) decoder.readObject();
 			checkArgument(seq.size() == 4, "Input does not appear to be an ASN.1 OpenSSL EC private key");
-			checkArgument(((DERInteger) seq.getObjectAt(0)).getValue().equals(BigInteger.ONE),
+			checkArgument(((ASN1Integer) seq.getObjectAt(0)).getValue().equals(BigInteger.ONE),
 					"Input is of wrong version");
 			Object obj = seq.getObjectAt(1);
 			byte[] bits = ((ASN1OctetString) obj).getOctets();
@@ -660,11 +648,8 @@ public class OWECKey {
 		BigInteger srInv = rInv.multiply(sig.s).mod(n);
 		BigInteger eInvrInv = rInv.multiply(eInv).mod(n);
 		ECPoint.Fp q = (ECPoint.Fp) ECAlgorithms.sumOfTwoMultiplies(CURVE.getG(), eInvrInv, R, srInv);
-		if (compressed) {
-			// We have to manually recompress the point as the compressed-ness gets lost when multiply() is used.
-			q = new ECPoint.Fp(curve, q.getX(), q.getY(), true);
-		}
-		return new OWECKey((byte[])null, q.getEncoded());
+
+		return new OWECKey((byte[])null, q.getEncoded(compressed));
 	}
 
 	/** Decompress a compressed public key (x co-ord and low-bit of y-coord). */

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import org.spongycastle.asn1.ASN1InputStream;
-import org.spongycastle.asn1.DERInteger;
+import org.spongycastle.asn1.ASN1Integer;
 import org.spongycastle.asn1.DERSequenceGenerator;
 import org.spongycastle.asn1.DLSequence;
 
@@ -62,10 +62,10 @@ public class OWECDSASignature {
 		try {
 			ASN1InputStream decoder = new ASN1InputStream(bytes);
 			DLSequence seq = (DLSequence) decoder.readObject();
-			DERInteger r, s;
+			ASN1Integer r, s;
 			try {
-				r = (DERInteger) seq.getObjectAt(0);
-				s = (DERInteger) seq.getObjectAt(1);
+				r = (ASN1Integer) seq.getObjectAt(0);
+				s = (ASN1Integer) seq.getObjectAt(1);
 			} catch (ClassCastException e) {
 				throw new IllegalArgumentException(e);
 			} finally {
@@ -83,8 +83,8 @@ public class OWECDSASignature {
 		// Usually 70-72 bytes.
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(72);
 		DERSequenceGenerator seq = new DERSequenceGenerator(bos);
-		seq.addObject(new DERInteger(r));
-		seq.addObject(new DERInteger(s));
+		seq.addObject(new ASN1Integer(r));
+		seq.addObject(new ASN1Integer(s));
 		seq.close();
 		return bos;
 	}

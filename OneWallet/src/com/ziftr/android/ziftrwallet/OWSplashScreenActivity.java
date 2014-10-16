@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 
-import com.google.bitcoin.utils.BriefLogFormatter;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -30,9 +29,6 @@ public class OWSplashScreenActivity extends FragmentActivity {
 		if (savedInstanceState !=null && savedInstanceState.containsKey("started")) {
 			this.started = savedInstanceState.getBoolean("started");
 		}
-
-		// Temporary Bitcoinj logging
-		BriefLogFormatter.initVerbose();
 
 		if (!this.started) {
 			this.started = true;

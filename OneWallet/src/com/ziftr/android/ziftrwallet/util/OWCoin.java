@@ -3,9 +3,6 @@ package com.ziftr.android.ziftrwallet.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import com.google.bitcoin.core.NetworkParameters;
-import com.google.bitcoin.params.MainNetParams;
-import com.google.bitcoin.params.TestNet3Params;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 
@@ -28,24 +25,24 @@ public class OWCoin implements OWCurrency {
 	/** When using bundles, this can be used to store a specific coin type. */
 	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
 
-	public static final OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin, MainNetParams.get(),
+	public static final OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin,
 			(byte) 0, (byte) 5, (byte) 128, 6, 600, "Bitcoin Signed Message:\n");
-	public static final OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "ltc", "main", "litecoin", 8, R.drawable.logo_litecoin, null,
+	public static final OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "ltc", "main", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 48, (byte) 5, (byte) 176, 12, 150, "Litecoin Signed Message:\n");
 
-	public static final OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin, null,
+	public static final OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 55, (byte) 117, (byte) 183, 6, 600, "PPCoin Signed Message:\n");
-	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin, null,
+	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 30, (byte) 22, (byte) 158, 6, 60, "Dogecoin Signed Message:\n");
 
-	public static final OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin, TestNet3Params.get(),
+	public static final OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
 			// (byte) 0, (byte) 5, (byte) 128, 6);
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "Bitcoin Signed Message:\n");
-	public static final OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin, null,
+	public static final OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 111, (byte) 196, (byte) 239, 12, 150, "Litecoin Signed Message:\n");
-	public static final OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin, null,
+	public static final OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "PPCoin Signed Message:\n");
-	public static final OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin, null,
+	public static final OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 113, (byte) 196, (byte) 241, 6, 60, "Dogecoin Signed Message:\n");
 
 	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE, BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
@@ -71,7 +68,6 @@ public class OWCoin implements OWCurrency {
 	private String scheme; 
 	private int numberOfDigitsOfPrecision; 
 	private int logoResId;
-	private NetworkParameters networkParameters;
 	private byte pubKeyHashPrefix; 
 	private byte scriptHashPrefix;  
 	private byte privKeyPrefix; // TODO assume its pubKeyHashPrefix + 128
@@ -79,11 +75,9 @@ public class OWCoin implements OWCurrency {
 	private int secondsPerAverageBlockSolve;  
 	private String signingMessageMagic;
 
-	private OWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type,
-			String chain, String scheme, int numberOfDigitsOfPrecision, int logoResId, 
-			NetworkParameters networkParameters, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve,
-			String signingMessageMagic) {
+	private OWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type, String chain, 
+			String scheme, int numberOfDigitsOfPrecision, int logoResId, byte pubKeyHashPrefix, byte scriptHashPrefix, 
+			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve, String signingMessageMagic) {
 		this.defaultFeePerKb = defaultFeePerKb;
 		this.shortTitle = shortTitle;
 		this.longTitle = longTitle;
@@ -92,7 +86,6 @@ public class OWCoin implements OWCurrency {
 		this.scheme = scheme;
 		this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
 		this.logoResId = logoResId;
-		this.networkParameters = networkParameters;
 		this.pubKeyHashPrefix = pubKeyHashPrefix;
 		this.scriptHashPrefix = scriptHashPrefix;
 		this.privKeyPrefix = privKeyPrefix;
@@ -181,14 +174,7 @@ public class OWCoin implements OWCurrency {
 		return logoResId;
 	}
 
-
-	/**
-	 * @return the networkParameters
-	 */
-	public NetworkParameters getNetworkParameters() {
-		return networkParameters;
-	}
-
+	
 	/**
 	 * @return the pubKeyHashPrefix
 	 */

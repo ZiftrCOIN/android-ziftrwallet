@@ -1,9 +1,10 @@
 package com.ziftr.android.ziftrwallet;
 
-import com.ziftr.android.ziftrwallet.util.OWTypefaceUtil;
-
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
+
+import com.ziftr.android.ziftrwallet.util.OWTypefaceUtil;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWApplication extends Application {
 
@@ -26,7 +27,7 @@ public class OWApplication extends Application {
 	    OWTypefaceUtil.overrideFont(getApplicationContext());
 		isDebuggable = (0 != 
 				(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-		PRNGFixes.apply();
+		ZiftrUtils.createTrulySecureRandom(); //just call to initialze fixes here ahead of time
 	}
 	
 	
