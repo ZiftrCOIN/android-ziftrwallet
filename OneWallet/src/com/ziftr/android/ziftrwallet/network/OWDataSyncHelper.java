@@ -171,7 +171,7 @@ public class OWDataSyncHelper {
 		//pick and address to use for displaying the note to the user
 		String note = null; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		for(String noteAddress : displayAddresses) {
-			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true, false);
+			OWAddress databaseAddress = OWWalletManager.getInstance().readVisibleAddress(coin, noteAddress, true);
 			note = databaseAddress.getLabel();
 			if(note != null && note.length() > 0) {
 				break;

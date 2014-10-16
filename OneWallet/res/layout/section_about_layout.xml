@@ -4,13 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/White"
-        android:padding="@dimen/ow_large_icon_margin"
-        android:src="@drawable/logo_ziftrwallet_orange" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
@@ -19,6 +12,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/White"
+                android:padding="@dimen/ow_large_icon_margin"
+                android:src="@drawable/logo_ziftrwallet_orange" />
 
             <View
                 android:layout_width="match_parent"
@@ -47,8 +47,8 @@
                     android:autoLink="web"
                     android:text="@string/ow_about_text"
                     android:textColor="@color/White"
-                    android:textSize="@dimen/ow_txt_mediumsmall"
-                    android:textColorLink="@color/LemonChiffon" />
+                    android:textColorLink="@color/LemonChiffon"
+                    android:textSize="@dimen/ow_txt_mediumsmall" />
 
                 <Button
                     android:id="@+id/send_feedback"

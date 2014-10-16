@@ -43,6 +43,7 @@ public class OWNewCurrencyFragment extends OWFragment implements OnItemClickList
 		this.rootView = inflater.inflate(R.layout.currency_get_new_list, container, false);
 
 		initializeFromBundle(this.getArguments());
+
 		generateCurrencyListFrom(this.coinsToShow, savedInstanceState);
 
 		initializeCurrencyList();
@@ -75,7 +76,9 @@ public class OWNewCurrencyFragment extends OWFragment implements OnItemClickList
 	@Override
 	public void setArguments(Bundle args) {
 		this.initializeFromBundle(args);
-		super.setArguments(args);
+		if (this.getArguments() == null){
+			super.setArguments(args);
+		}
 	}
 
 	/**

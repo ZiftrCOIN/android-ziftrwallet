@@ -39,6 +39,8 @@
         android:layout_toRightOf="@id/leftIcon"
         android:clickable="false"
         android:ellipsize="end"
+        android:textStyle="bold"
+        android:textSize="@dimen/ow_txt_mediumsmall"
         android:maxLines="1"
         android:singleLine="true"
         android:text="@string/ow_empty_string" />

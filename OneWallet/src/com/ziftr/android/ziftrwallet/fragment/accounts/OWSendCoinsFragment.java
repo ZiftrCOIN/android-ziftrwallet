@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.R;
@@ -127,7 +128,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 
 			if (address != null) {
-				OWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false, false);
+				OWAddress owAddress = this.getWalletManager().readVisibleAddress(this.getSelectedCoin(), address, false);
 				if (owAddress != null) {
 					// If there wasn't a note given in URI then we pre-fill from address
 					txNote = txNote == null ? owAddress.getLabel() : txNote;
@@ -234,7 +235,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 					"error_in_send_dialog");
 			return;
 		}
-
+		Toast.makeText(getOWMainActivity(), getSelectedCoin().toString() + " Sent!", Toast.LENGTH_LONG).show();
 		// To exit out of the send coins fragment
 		Activity a = getActivity();
 		if (a != null) {

@@ -232,7 +232,7 @@ ZiftrNetworkHandler {
 			}
 		},
 		/** The enum to identify the contact fragment of the app. */
-		CONTACT_FRAGMENT_TYPE {
+		SECURITY_FRAGMENT_TYPE {
 			@Override
 			public Fragment getNewFragment() {
 				return new OWSecurityFragment();
@@ -532,7 +532,7 @@ ZiftrNetworkHandler {
 		selectionItems.add(this.findViewById(R.id.menuDrawerTermsLayout));
 		selectionItems.add(this.findViewById(R.id.menuDrawerSettingsLayout));
 		selectionItems.add(this.findViewById(R.id.menuDrawerAboutLayout));
-		selectionItems.add(this.findViewById(R.id.menuDrawerContactLayout));
+		selectionItems.add(this.findViewById(R.id.menuDrawerSecurityLayout));
 
 		// return the result
 		return selectionItems;
@@ -623,16 +623,16 @@ ZiftrNetworkHandler {
 			});
 
 			// Set up for contact section
-			View contactMenuButton = 
-					this.findViewById(R.id.menuDrawerContactLayout);
-			FragmentType.CONTACT_FRAGMENT_TYPE.setDrawerMenuView(
-					contactMenuButton);
-			contactMenuButton.setOnClickListener(new OnClickListener() {
+			View securityMenuButton = 
+					this.findViewById(R.id.menuDrawerSecurityLayout);
+			FragmentType.SECURITY_FRAGMENT_TYPE.setDrawerMenuView(
+					securityMenuButton);
+			securityMenuButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View clickedView) {
 					OWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 					OWMainFragmentActivity.this.showFragmentFromType(
-							FragmentType.CONTACT_FRAGMENT_TYPE, true);
+							FragmentType.SECURITY_FRAGMENT_TYPE, true);
 				}
 			});
 
@@ -975,6 +975,9 @@ ZiftrNetworkHandler {
 	 * Open view for add new currency
 	 */
 	public void openAddCurrency(List<OWCoin> userCurWallets) {
+		if (drawerMenuIsOpen()){
+			this.menuDrawer.closeDrawer(Gravity.LEFT);
+		}
 		OWNewCurrencyFragment fragToShow = (OWNewCurrencyFragment) 
 				this.getSupportFragmentManager().findFragmentByTag(OWTags.ADD_CURRENCY);
 		if (fragToShow == null) {
@@ -990,7 +993,6 @@ ZiftrNetworkHandler {
 			b.putBoolean(type.toString(), true);
 		}
 		fragToShow.setArguments(b);
-
 		this.showFragment(fragToShow, OWTags.ADD_CURRENCY, R.id.oneWalletBaseFragmentHolder, true, 
 				OWTags.ACCOUNTS_INNER);
 

@@ -195,12 +195,12 @@
         <!-- The Contact Section -->
 
         <TableRow
-            android:id="@+id/menuDrawerContactRow"
+            android:id="@+id/menuDrawerSecurityRow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
 
             <LinearLayout
-                android:id="@+id/menuDrawerContactLayout"
+                android:id="@+id/menuDrawerSecurityLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
@@ -216,7 +216,7 @@
                     android:duplicateParentState="true" />
 
                 <TextView
-                    android:id="@+id/menuDrawerContactText"
+                    android:id="@+id/menuDrawerSecurityText"
                     style="@style/drawer_menu_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

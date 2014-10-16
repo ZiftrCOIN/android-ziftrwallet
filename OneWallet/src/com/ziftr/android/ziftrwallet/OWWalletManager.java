@@ -158,7 +158,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		return list;
 	}
 
-	
 
 	/**
 	 * Sets up a wallet object for this fragment by either loading it 
@@ -210,6 +209,10 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	public void sendCoins(final OWCoin coinId, final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
+		
+		if (!coinId.addressIsValid(address)){
+			throw new OWAddressFormatException();
+		}
 		Long amountLeftToSend = value.longValue();
 		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
 		final List<String> inputs = new ArrayList<String>();
@@ -228,8 +231,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				break;
 			}
 		}
-		
-		List<OWAddress> inputAddresses = this.readAllAddresses(coinId, false);
+		List<OWAddress> inputAddresses = this.readAllVisibleAddresses(coinId);
 		for (OWAddress addr : inputAddresses){
 			if (amountLeftToSend <= 0){
 				break;
@@ -246,15 +248,12 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 			throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
 		}
-		
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 				OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
 			}
 		});
-
-		//throw new OWAddressFormatException();
 
 	}
 	

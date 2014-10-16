@@ -4,6 +4,11 @@
     android:versionCode="3"
     android:versionName="0.0.3 (alpha)" >
 
+    <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:label="test"
+        android:targetPackage="com.ziftr.android.ziftrwallet" />
+
     <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="19" />
@@ -69,6 +74,8 @@
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
         </activity>
+
+        <uses-library android:name="android.test.runner" />
     </application>
 
 </manifest>

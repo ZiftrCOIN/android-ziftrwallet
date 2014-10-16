@@ -103,7 +103,6 @@ public class OWAccountsFragment extends OWFragment {
 		this.fiatType = OWPreferencesUtils.getFiatCurrency(this.getActivity());
 
 		this.calculateTotal();
-		
 		// Return the view which was inflated
 		return rootView;
 	}
