@@ -19,9 +19,8 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWDataSyncHelper {
-
-	public static void sendCoinsRequest(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
-		ZiftrNetworkManager.networkStarted();
+	
+	public static ZiftrNetRequest sendCoinsRequest(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
 
 		ZLog.log("Sending" + amount + "coins to :" + output);
 
@@ -30,29 +29,13 @@ public class OWDataSyncHelper {
 		if (changeAddresses.size() <= 0){
 			//create new address for change
 			refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin, OWReceivingAddressesTable.HIDDEN_FROM_USER).toString();
+			ZLog.log(refundAddress);
 		} else {
 			//or reuse one that hasnt been spent from
 			refundAddress = changeAddresses.get(0).getAddress();
 		}
 		//make request
-		ZiftrNetRequest request = OWApi.makeTransactionRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
-		String response = request.sendAndWait();
-
-		if (request.getResponseCode() == 200){
-			try {
-				JSONObject jsonRes = new JSONObject(response);
-				//Sign txn and then POST to server
-				ArrayList<String> addresses = new ArrayList<String>();
-				for (String a : inputs){
-					addresses.add(a);
-				}
-				addresses.add(output);
-				sendCoinsTransaction(coin, jsonRes, amount, addresses);
-			}catch(Exception e) {
-				ZLog.log("Exception send coin request: ", e);
-			}
-		}
-		ZiftrNetworkManager.networkStopped();
+		return OWApi.makeTransactionRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
 	}
 
 	public static void sendCoinsTransaction(OWCoin coin, JSONObject response, BigInteger amount, ArrayList<String> addresses) throws JSONException{

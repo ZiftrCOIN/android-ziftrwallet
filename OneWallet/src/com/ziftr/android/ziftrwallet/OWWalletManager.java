@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import org.json.JSONObject;
+
 import android.content.Context;
 
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
@@ -17,6 +19,7 @@ import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.network.ZiftrNetRequest;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
@@ -76,7 +79,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 
 	public static synchronized OWWalletManager getInstance() {
-
 		if (instance == null) {
 
 			Context context = OWApplication.getApplication();
@@ -251,7 +253,22 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
+				ZiftrNetRequest request = OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
+				String response = request.sendAndWait();
+				if (request.getResponseCode() == 200){
+					try {
+						JSONObject jsonRes = new JSONObject(response);
+						//Sign txn and then POST to server
+						ArrayList<String> addresses = new ArrayList<String>();
+						for (String a : inputs){
+							addresses.add(a);
+						}
+						addresses.add(address);
+						OWDataSyncHelper.sendCoinsTransaction(coinId, jsonRes, value, addresses);
+					}catch(Exception e) {
+						ZLog.log("Exception send coin request: ", e);
+					}
+				}
 			}
 		});
 

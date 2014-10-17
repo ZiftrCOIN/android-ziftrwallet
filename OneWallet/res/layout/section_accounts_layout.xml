@@ -41,6 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/ow_horizontal_margin"
+        android:layout_marginTop="10dp"
         android:text="@string/ow_total_label"
         android:textColor="@color/ow_default_text"
         android:textSize="@dimen/ow_txt_medium" />
@@ -49,10 +50,9 @@
         android:id="@+id/user_total_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:layout_marginLeft="@dimen/ow_horizontal_margin"
         android:textColor="@color/ow_default_text"
-        android:layout_marginBottom="40dp"
         android:textSize="@dimen/ow_txt_largest" />
-
 
 </LinearLayout>

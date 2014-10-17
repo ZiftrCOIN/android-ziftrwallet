@@ -10,6 +10,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
@@ -230,7 +231,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		address.setHidden(hidden);
 		address.setSpentFrom(spentFrom);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
-		
+
 		return address;
 	}
 

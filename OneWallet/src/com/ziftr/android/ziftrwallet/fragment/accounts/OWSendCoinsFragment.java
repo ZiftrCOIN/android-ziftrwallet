@@ -395,7 +395,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				R.id.sendTotalFiatEquivTextView);
 		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
 		BigDecimal fiatTotal = OWConverter.convert(total, getSelectedCoin(), selectedFiat);
-		totalEquivTextView.setText("(" + OWFiat.formatFiatAmount(selectedFiat, fiatTotal, false) + ")");
+		totalEquivTextView.setText("(" + selectedFiat.getSymbol() + " " + OWFiat.formatFiatAmount(selectedFiat, fiatTotal, false) + ")");
 	}
 
 	/**

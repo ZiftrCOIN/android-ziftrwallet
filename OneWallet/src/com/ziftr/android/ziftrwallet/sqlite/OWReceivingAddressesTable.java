@@ -100,6 +100,7 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getKey().getCreationTimeSeconds());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());
 		values.put(COLUMN_HIDDEN, address.isHidden());
+		values.put(COLUMN_SPENT_FROM, address.spentFrom());
 		// The id will be generated upon insertion.
 		return values;
 	}
@@ -183,7 +184,6 @@ public class OWReceivingAddressesTable extends OWAddressesTable {
 		
 		// Make sure we close the cursor
 		c.close();
-
 		return newAddresses;
 	}
 	

@@ -45,7 +45,7 @@ public class OWApi {
 		return request;
 	}
 	/**
-	 * create transaction request blockchains /{type} /{chain} /requests POST
+	 * create transaction request blockchains /{type} /{chain} /transactions /requests POST
 	 * @param type
 	 * @param chain
 	 * @param fee = fee per kb
