@@ -457,6 +457,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);
+		tx.setTxFee(txFee);
 		this.transactionsTable.insertTx(tx, getWritableDatabase());
 		return tx;
 	}

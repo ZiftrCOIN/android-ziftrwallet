@@ -16,6 +16,7 @@ import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -154,7 +155,6 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 
 		this.txListView = (ListView) this.rootView.findViewById(R.id.txListView);
 		this.txListView.setAdapter(this.txAdapter);
-
 		// Opens transactions details fragment by calling openTxnDetails in MainActivity, passing
 		// the txnItem when user clicks a txn list item.
 		this.txListView.setOnItemClickListener(this);

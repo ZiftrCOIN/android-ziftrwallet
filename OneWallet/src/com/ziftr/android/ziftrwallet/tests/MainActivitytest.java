@@ -1,9 +1,11 @@
 package com.ziftr.android.ziftrwallet.tests;
 
 
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +22,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.OWMainFragmentActivity;
@@ -27,6 +30,8 @@ import com.ziftr.android.ziftrwallet.OWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
+import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
+import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWNewCurrencyListItem;
 import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetRequest;
@@ -83,7 +88,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		TextView total = (TextView) mActivity.findViewById(R.id.total_label);
 		assertTrue(total.getVisibility() == View.GONE || mActivity.getWalletManager().getAllSetupWalletTypes().size() != 0);
 	}
-	
+
 	@UiThreadTest
 	public void testAddWallet() {
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
@@ -94,7 +99,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
 
 	}
-	
+
 	@UiThreadTest
 	public void testDrawerBackStack(){
 		FragmentManager fm = mActivity.getSupportFragmentManager();
@@ -114,7 +119,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		mActivity.findViewById(R.id.menuDrawerAccountsLayout).performClick();
 		assertEquals(0, fm.getBackStackEntryCount());
 	}
-	
+
 	@UiThreadTest
 	public void testCreateReceivingAddress(){
 		createWallet(OWCoin.DOGE);
@@ -128,7 +133,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		//size of doge visible addresses in db should remain the same after creating a hidden address
 		assertEquals(currentAddresses + 1, manager.readAllVisibleAddresses(OWCoin.DOGE).size());
 	}
-	
+
 	@SuppressLint("NewApi")
 	@UiThreadTest
 	public void testQRCodeVisiblity() throws InterruptedException{
@@ -150,17 +155,17 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		assertTrue(qrCodeImageView.getWidth() <= screenSize.x);
 		assertTrue(qrCodeImageView.getHeight() <= screenSize.y);
 	}
-	
+
 	//test if creating a request for sending coins provides response with to sign attributes
 	@UiThreadTest
-	public void testSendCoinsRequest(){
+	public void testSendCoinsRequest() throws InterruptedException{
 		createWallet(OWCoin.BTC);
 		OWAddress spendFrom = manager.createReceivingAddress(null, OWCoin.BTC, OWReceivingAddressesTable.VISIBLE_TO_USER);
 		final List<String> input = new ArrayList<String>();
 		input.add(spendFrom.toString());
 		final String sendToAddress = "1DBb6HuozwS6esCGiaM5iB4xxoK759BYFW";
 		final BigInteger sendingAmount = BigInteger.ZERO;
-		
+
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
@@ -181,10 +186,11 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 				}
 			}
 		});	
-		//there should be one or more hidden unspent addresses to put change in 
+		//there should be one or more hidden unspent addresses to put change in
+		Thread.sleep(500);
 		assertTrue(manager.readHiddenUnspentAddresses(OWCoin.BTC).size() >= 1);
 	}
-	
+
 	//test sending signed txn 
 	public void sendCoinTxn(JSONObject req, List<String> inputs, String sendToAddr, BigInteger sendingAmount){
 		ArrayList<String> addresses = new ArrayList<String>();
@@ -200,11 +206,42 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 			e.printStackTrace();
 		}
 	}
-	
+
+	@UiThreadTest
+	public void testCreateTransaction(){
+		createWallet(OWCoin.BTC);
+		List<String> addresses = new ArrayList<String>();
+		addresses.add("1HbMfYui17L5m6sAy3L3WXAtf2P32bxJXq");
+		int numTxn = manager.readAllTransactions(OWCoin.BTC).size();
+		manager.createTransaction(OWCoin.BTC, BigInteger.ONE, BigInteger.ONE, addresses, new OWSha256Hash(randomishHexHash()), "Unittest fake txn", 3);
+		mActivity.openWalletView(OWCoin.BTC);
+		mActivity.getSupportFragmentManager().executePendingTransactions();
+		View BTCwallet  = mActivity.getSupportFragmentManager().findFragmentByTag(OWTags.WALLET_FRAGMENT).getView();
+		ListView txns = (ListView) BTCwallet.findViewById(R.id.txListView);
+		//There should be 1 more txn than numTxn + 2 dividers
+		assertEquals(numTxn+3, txns.getCount());
+	}
+
 	private void createWallet(OWCoin type){
 		//add wallet
 		OWNewCurrencyListItem coin = new OWNewCurrencyListItem(type);
 		mActivity.addNewCurrency(coin);
+	}
+
+	private String randomishHexHash(){
+		StringBuilder sb = new StringBuilder();
+		Random r = new Random();
+		for (int i=0; i<64; i++){
+			int rand = r.nextInt(16);
+			if (rand < 6){
+				char c = (char) (rand + 97);
+				sb.append(c);
+			} else {
+				sb.append(r.nextInt(10));
+			}
+		}
+		ZLog.log("sap   " + sb.toString());
+		return sb.toString();
 	}
 
 }

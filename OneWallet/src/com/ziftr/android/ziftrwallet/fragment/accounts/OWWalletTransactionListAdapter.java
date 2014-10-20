@@ -55,6 +55,15 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWSe
 			return TYPE_DIVIDER;
 		}
 	}
+	
+	@Override
+	public boolean isEnabled(int position){
+		if (this.getItemViewType(position) == TYPE_TRANSACTION){
+			return super.isEnabled(position);
+		} else {
+			return false;
+		}
+	}
 
 	
 	/**

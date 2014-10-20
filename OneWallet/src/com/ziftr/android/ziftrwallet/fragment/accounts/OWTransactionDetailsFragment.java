@@ -4,10 +4,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -194,27 +197,44 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 
 	}
 
+	@SuppressLint("NewApi")
+	@SuppressWarnings("deprecation")
 	private void populatePendingInformation() {
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
 		long confirmed = txItem.getNumConfirmations();
-
-		this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
-
-		long estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
-		this.timeLeft.setText("Estimated Time: " + formatEstimatedTime(estimatedTime));
-
+		if (((int)confirmed) >= totalConfirmations){
+			this.status.setText("Confirmed");
+		} else {
+			this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
+		}
+		
+		//TO prevent estimated time and Confirmed text views from overlapping,
+		//we only show estimated time if the screen width > 3 * width of the confirmed textview
+		int screenWidth;
+		if (android.os.Build.VERSION.SDK_INT < 13){
+			screenWidth = getOWMainActivity().getWindowManager().getDefaultDisplay().getWidth();
+		} else {
+			Point size = new Point();
+			getOWMainActivity().getWindowManager().getDefaultDisplay().getSize(size);
+			screenWidth = size.x; 
+		}
+		this.status.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+		
+		if (confirmed < totalConfirmations && screenWidth > this.status.getMeasuredWidth() * 3){
+			long estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
+			this.timeLeft.setText("Estimated Time: " + formatEstimatedTime(estimatedTime));
+		}
 		//in theory a really old network, or a network with fast enough blocks, could have more blocks than an int can hold
 		//however even in this case it's needed confirmations would still be a smaller number
 		//this just checks it so that if we're for some reason checking the progress of a really old transactions 
 		//it won't have usses due to converting a long to an int
 		int progress;
-		if(confirmed > totalConfirmations) {
+		if(confirmed <= totalConfirmations) {
 			progress = (int) confirmed;
 		}
 		else {
 			progress = totalConfirmations;
 		}
-		
 		this.progressBar.setMax(totalConfirmations);
 		this.progressBar.setProgress(progress);
 	}

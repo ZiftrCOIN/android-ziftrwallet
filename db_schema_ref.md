@@ -40,6 +40,8 @@ modified_timestamp
 - INT
 hidden
 - INT
+spent_From
+- INT
 -------------------------
 Transaction table
 -------------------------
