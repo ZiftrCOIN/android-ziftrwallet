@@ -66,7 +66,7 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 			//this is the same padding as the editbox_background_normal
 			this.textView.setPadding(5, 8, 13, 8);
 			this.textView.setClickable(false);
-			imgView.setImageResource(R.drawable.edit_enabled);
+			imgView.setImageResource(R.drawable.button_edit_pencil_clickable);
 
 			handler.onEditEnd(this.returnData);
 		} else {
@@ -76,7 +76,7 @@ public class OWEditableTextBoxController<T> extends OWTextWatcher implements OnC
 			this.textView.setFocusableInTouchMode(true);
 			this.textView.setClickable(true);
 			this.textView.setSelection(this.textView.getText().length());
-			imgView.setImageResource(R.drawable.close_enabled);
+			imgView.setImageResource(R.drawable.button_cancel);
 			this.textView.requestFocus();
 
 			handler.onEditStart(getNewEditState(), this.returnData);
