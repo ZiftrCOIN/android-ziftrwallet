@@ -6,6 +6,7 @@ import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class OWWalletUserFragment extends OWFragment {
@@ -72,6 +73,7 @@ public abstract class OWWalletUserFragment extends OWFragment {
 			@Override
 			public void run() {
 				OWDataSyncHelper.updateTransactionHistory(getOWMainActivity().getSelectedCoin());
+
 			}
 		});
 	}

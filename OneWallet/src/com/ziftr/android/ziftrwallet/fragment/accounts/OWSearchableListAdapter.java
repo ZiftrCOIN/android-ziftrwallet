@@ -3,6 +3,8 @@ package com.ziftr.android.ziftrwallet.fragment.accounts;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ziftr.android.ziftrwallet.util.ZLog;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.BaseAdapter;

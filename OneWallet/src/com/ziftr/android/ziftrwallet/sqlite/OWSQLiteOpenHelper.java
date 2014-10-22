@@ -10,7 +10,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
@@ -457,7 +456,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);
-		tx.setTxFee(txFee);
+		//since the mock server is sending txn for address that isnt in our db, we comment this so that this throws exception downloading transactions
+		//tx.setTxFee(txFee);
 		this.transactionsTable.insertTx(tx, getWritableDatabase());
 		return tx;
 	}

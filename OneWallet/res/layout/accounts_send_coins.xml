@@ -315,7 +315,7 @@
                         android:adjustViewBounds="true"
                         android:clickable="true"
                         android:padding="@dimen/ow_borderless_icon_margin"
-                        android:scaleType="centerInside"
+                        android:scaleType="fitCenter"
                         android:src="@drawable/send_go_icon_clickable" />
 
                     <View

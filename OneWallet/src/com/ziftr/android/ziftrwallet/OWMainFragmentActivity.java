@@ -1480,7 +1480,8 @@ ZiftrNetworkHandler {
 			adapter.getFilter().filter("");
 		} else {
 			// Stop filtering
-			adapter.getFilter().filter(this.searchEditText.getText());			
+			adapter.getFilter().filter(this.searchEditText.getText());
+
 		}
 	}
 

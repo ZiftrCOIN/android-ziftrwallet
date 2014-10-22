@@ -44,6 +44,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 	}
 
 	@Override
@@ -51,6 +52,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 		super.onResume();
 		// Changes action bar and registers this as the listener for search button clicks
 		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
+
 	}
 
 	@Override
@@ -87,7 +89,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
 
 		this.initializeTxListView();
-		
+
 		this.initializeButtons();
 
 		return this.rootView;
