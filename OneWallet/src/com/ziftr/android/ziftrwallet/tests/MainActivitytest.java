@@ -213,7 +213,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		List<String> addresses = new ArrayList<String>();
 		addresses.add("1HbMfYui17L5m6sAy3L3WXAtf2P32bxJXq");
 		int numTxn = manager.readAllTransactions(OWCoin.BTC).size();
-		manager.createTransaction(OWCoin.BTC, BigInteger.ONE, BigInteger.ONE, addresses, new OWSha256Hash(randomishHexHash()), "Unittest fake txn", 3);
+		manager.createTransaction(OWCoin.BTC, BigInteger.ONE, BigInteger.ONE, addresses, new OWSha256Hash(randomishHexHash()), "Halloween Costume", 3);
 		mActivity.openWalletView(OWCoin.BTC);
 		mActivity.getSupportFragmentManager().executePendingTransactions();
 		View BTCwallet  = mActivity.getSupportFragmentManager().findFragmentByTag(OWTags.WALLET_FRAGMENT).getView();

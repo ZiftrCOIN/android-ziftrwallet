@@ -33,7 +33,7 @@ public class OWNewCurrencyFragment extends OWFragment implements OnItemClickList
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("CURRENCY", false, true, false);
+		this.getOWMainActivity().changeActionBar("CURRENCY", true, true, false);
 	}
 
 	@Override
