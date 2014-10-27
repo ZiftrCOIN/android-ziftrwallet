@@ -20,6 +20,10 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 	public static final String WIDGET_RECEIVE = "widgetReceiveButton";
 	public static final String WIDGET_CURR = "widgetCurrencyButton";
 	
+	private static final int send_intent_requestcode = 0;
+	private static final int receive_intent_requestcode = 1;
+	private static final int curr_requestcode = 2;
+	
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds){
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
 		for (int i=0; i<appWidgetIds.length; i++){
@@ -27,26 +31,24 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 
 			Intent intent_send = new Intent(context, OWMainFragmentActivity.class);
 			intent_send.putExtra(WIDGET_SEND, true);
-			PendingIntent pendingIntent_send = PendingIntent.getActivity(context, 0, intent_send, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingIntent_send = PendingIntent.getActivity(context, send_intent_requestcode, intent_send, PendingIntent.FLAG_UPDATE_CURRENT);
 			views.setOnClickPendingIntent(R.id.widget_send, pendingIntent_send);
 
 			Intent intent_receive = new Intent(context, OWMainFragmentActivity.class);
 			intent_receive.putExtra(WIDGET_RECEIVE, true);
-			PendingIntent pendingIntent_receive = PendingIntent.getActivity(context, 0, intent_receive, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingIntent_receive = PendingIntent.getActivity(context, receive_intent_requestcode, intent_receive, PendingIntent.FLAG_UPDATE_CURRENT);
 			views.setOnClickPendingIntent(R.id.widget_receive, pendingIntent_receive);
 
 			Intent intent = new Intent(context, ziftrwalletWidget.class);
 			intent.setAction(WIDGET_CURR);
-			PendingIntent pendingIntent_curr = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent pendingIntent_curr = PendingIntent.getBroadcast(context, curr_requestcode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 			views.setOnClickPendingIntent(R.id.widget_change_coin, pendingIntent_curr);
-			
-			if (OWPreferencesUtils.getWidgetCoin(context) == null){
-				OWPreferencesUtils.setWidgetCoin(context, OWWalletManager.getInstance().getAllSetupWalletTypes().get(0).toString());
-			}
 			changeCurrency(context, views);
             appWidgetManager.updateAppWidget(appWidgetIds[i], views);
 		}
 	}
+	
+	
 	
 	@Override
 	public void onReceive(Context context, Intent intent){
@@ -63,6 +65,9 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 	private void changeCurrency(Context context, RemoteViews views){
 		List<OWCoin> coins = OWWalletManager.getInstance().getAllSetupWalletTypes();
 		if (coins.size() >0) {
+			if (OWPreferencesUtils.getWidgetCoin(context) == null){
+				OWPreferencesUtils.setWidgetCoin(context, OWWalletManager.getInstance().getAllSetupWalletTypes().get(0).toString());
+			}
 			int next = (coins.indexOf(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin(context))) + 1) % coins.size();
 			OWPreferencesUtils.setWidgetCoin(context, coins.get(next).toString());
 			OWCoin selectedCurr = coins.get(next);
