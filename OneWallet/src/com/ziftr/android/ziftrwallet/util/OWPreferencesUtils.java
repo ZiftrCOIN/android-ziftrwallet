@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+import com.ziftr.android.ziftrwallet.ziftrwalletWidget;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypterException;
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
 
@@ -172,9 +173,21 @@ public abstract class OWPreferencesUtils {
 	public static boolean getDisabledName(Context a){
 		SharedPreferences prefs = getPrefs(a);
 		return prefs.getBoolean(NAME_DISABLED_KEY, false);
-
 	}
 
+	public static String getWidgetCoin(Context a){
+		SharedPreferences prefs = getPrefs(a);
+		return prefs.getString(ziftrwalletWidget.WIDGET_CURR, null);
+	}
+	
+	public static void setWidgetCoin(Context a, String coin){
+		SharedPreferences prefs = getPrefs(a);
+		Editor editor = prefs.edit();
+		editor.putString(ziftrwalletWidget.WIDGET_CURR, coin);
+		editor.commit();
+	}
+
+	
 	public static SharedPreferences getPrefs(Context a) {
 		return a.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
 	}

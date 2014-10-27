@@ -277,7 +277,8 @@ ZiftrNetworkHandler {
 
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance();
-
+		
+		
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
 
@@ -298,6 +299,18 @@ ZiftrNetworkHandler {
 
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
+		
+		//Check if loaded from widget
+		if (getIntent() != null){
+			this.setSelectedCoin(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin(this)));
+			if (this.selectedCoin != null) {
+				if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND)){
+					openSendCoinsView(null);
+				} else if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_RECEIVE)){
+					openReceiveCoinsView();
+				}
+			}
+		}
 
 		ZiftrNetworkManager.registerNetworkHandler(this);
 		
@@ -1308,6 +1321,7 @@ ZiftrNetworkHandler {
 		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(this);
 
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
+		ZLog.log(this.selectedCoin);
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
 
 		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
