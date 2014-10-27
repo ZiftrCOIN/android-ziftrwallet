@@ -301,12 +301,14 @@ ZiftrNetworkHandler {
 		this.initializeSearchBarText();
 		
 		//Check if loaded from widget
-		if (getIntent() != null){
+		if (getIntent() != null && (getIntent().hasExtra(ziftrwalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND))){
 			this.setSelectedCoin(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin(this)));
 			if (this.selectedCoin != null) {
 				if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND)){
+					getIntent().removeExtra(ziftrwalletWidget.WIDGET_SEND);
 					openSendCoinsView(null);
-				} else if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_RECEIVE)){
+				} else{
+					getIntent().removeExtra(ziftrwalletWidget.WIDGET_RECEIVE);
 					openReceiveCoinsView();
 				}
 			}
@@ -971,7 +973,6 @@ ZiftrNetworkHandler {
 	 * Open the view for transaction details
 	 */
 	public void openTxnDetails(OWTransaction txItem) {
-
 		OWTransactionDetailsFragment fragToShow = (OWTransactionDetailsFragment) 
 				this.getSupportFragmentManager().findFragmentByTag(OWTags.TXN_DETAILS);
 		if (fragToShow == null) {

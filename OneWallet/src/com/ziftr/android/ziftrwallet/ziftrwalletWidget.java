@@ -13,7 +13,6 @@ import android.widget.RemoteViews;
 
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ziftrwalletWidget extends AppWidgetProvider{
 	
@@ -70,12 +69,15 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 
 		Intent intent_send = new Intent(context, OWMainFragmentActivity.class);
 		intent_send.putExtra(WIDGET_SEND, true);
-		PendingIntent pendingIntent_send = PendingIntent.getActivity(context, send_intent_requestcode, intent_send, PendingIntent.FLAG_UPDATE_CURRENT);
+		intent_send.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		PendingIntent pendingIntent_send = PendingIntent.getActivity(context, send_intent_requestcode, intent_send, PendingIntent.FLAG_CANCEL_CURRENT);
 		views.setOnClickPendingIntent(R.id.widget_send, pendingIntent_send);
 
 		Intent intent_receive = new Intent(context, OWMainFragmentActivity.class);
 		intent_receive.putExtra(WIDGET_RECEIVE, true);
-		PendingIntent pendingIntent_receive = PendingIntent.getActivity(context, receive_intent_requestcode, intent_receive, PendingIntent.FLAG_UPDATE_CURRENT);
+		intent_receive.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+		PendingIntent pendingIntent_receive = PendingIntent.getActivity(context, receive_intent_requestcode, intent_receive, PendingIntent.FLAG_CANCEL_CURRENT);
 		views.setOnClickPendingIntent(R.id.widget_receive, pendingIntent_receive);
 
 		Intent intent = new Intent(context, ziftrwalletWidget.class);
