@@ -65,6 +65,16 @@ public class ZiftrNetRequest {
 		return request;
 	}
 	
+	/**
+	 * Create a network request for a given url
+	 * @param url the url this network request is for
+	 * @return a network request object with default settings pointing to the url
+	 */
+	public static ZiftrNetRequest createRequest( Map<String,String> headers, String url) {
+		ZiftrNetRequest request = new ZiftrNetRequest(url);
+		request.sentHeaders = headers;
+		return request;
+	}
 	
 	/**
 	 * Create a network request for a given url with a string of post data

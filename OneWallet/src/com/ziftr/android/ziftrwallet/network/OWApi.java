@@ -128,8 +128,10 @@ public class OWApi {
 	 * @param urlPart the part of the url to append to the base api url to create the network request
 	 * @return a network request object for the full url, will be a GET and have no additional parameters
 	 */
-	public static ZiftrNetRequest buildGenericApiRequest(String urlPart) {
-		ZiftrNetRequest request = ZiftrNetRequest.createRequest(BASE_URL + urlPart);
+	public static ZiftrNetRequest buildGenericApiRequest(boolean secure, String urlPart) {
+		String protocol;
+		protocol = secure ? "https" : "http";
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(buildGenericHeaders() ,protocol + "://" + BASE_URL + urlPart);
 		return request;
 	}
 

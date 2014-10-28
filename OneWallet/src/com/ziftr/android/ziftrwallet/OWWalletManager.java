@@ -208,7 +208,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @throws AddressFormatException
 	 * @throws InsufficientMoneyException
 	 */
-	public void sendCoins(final OWCoin coinId, final String address, final BigInteger value, 
+	public void handleSendCoins(final OWCoin coinId, final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
 		
@@ -253,22 +253,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				ZiftrNetRequest request = OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
-				String response = request.sendAndWait();
-				if (request.getResponseCode() == 200){
-					try {
-						JSONObject jsonRes = new JSONObject(response);
-						//Sign txn and then POST to server
-						ArrayList<String> addresses = new ArrayList<String>();
-						for (String a : inputs){
-							addresses.add(a);
-						}
-						addresses.add(address);
-						OWDataSyncHelper.sendCoinsTransaction(coinId, jsonRes, value, addresses);
-					}catch(Exception e) {
-						ZLog.log("Exception send coin request: ", e);
-					}
-				}
+				OWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
 			}
 		});
 

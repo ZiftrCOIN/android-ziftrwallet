@@ -213,7 +213,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getFeeFromEditText());
 		String addressToSendTo = this.addressEditText.getText().toString();
 		try {
-			getWalletManager().sendCoins(getSelectedCoin(), addressToSendTo, 
+			getWalletManager().handleSendCoins(getSelectedCoin(), addressToSendTo, 
 					amountSending, feeSending, passphrase);
 		} catch(OWAddressFormatException afe) {
 			this.getOWMainActivity().alertUser(

@@ -3,6 +3,7 @@ package com.ziftr.android.ziftrwallet.network;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +21,28 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWDataSyncHelper {
 	
+	public static void sendCoins(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
+		ZiftrNetworkManager.networkStarted();
+		ZiftrNetRequest request = OWDataSyncHelper.sendCoinsRequest(coin, fee, amount, inputs, output, passphrase);
+		String response = request.sendAndWait();
+		if (request.getResponseCode() == 200){
+			try {
+				JSONObject jsonRes = new JSONObject(response);
+				//Sign txn and then POST to server
+				ArrayList<String> addresses = new ArrayList<String>();
+				for (String a : inputs){
+					addresses.add(a);
+				}
+				addresses.add(output);
+				OWDataSyncHelper.sendCoinsTransaction(coin, jsonRes, amount, addresses);
+			}catch(Exception e) {
+				ZLog.log("Exception send coin request: ", e);
+			}
+		}
+		ZiftrNetworkManager.networkStopped();
+	}
+	
+	//create a send coins request to be signed
 	public static ZiftrNetRequest sendCoinsRequest(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
 
 		ZLog.log("Sending" + amount + "coins to :" + output);
@@ -37,7 +60,8 @@ public class OWDataSyncHelper {
 		//make request
 		return OWApi.makeTransactionRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
 	}
-
+	
+	//send signed transaction to server
 	public static void sendCoinsTransaction(OWCoin coin, JSONObject response, BigInteger amount, ArrayList<String> addresses) throws JSONException{
 		//sign the response
 		JSONArray signedList = new JSONArray();
@@ -69,6 +93,46 @@ public class OWDataSyncHelper {
 			createTransaction(coin, response, addresses);
 		}
 	}
+	
+	public static List<OWCoin> getBlockChainWallets(){
+		ZiftrNetworkManager.networkStarted();
+
+		List<OWCoin> supportedCoins = new ArrayList<OWCoin>();
+		
+		ZiftrNetRequest request = OWApi.buildGenericApiRequest(false, "/blockchains");
+		String response = request.sendAndWait();
+		if (request.getResponseCode() == 200){
+			JSONArray res;
+			try {
+				res = new JSONArray((new JSONObject(response)).getString("blockchains"));
+				for (int i=0; i< res.length(); i++){
+					JSONObject coinJson = res.getJSONObject(i);
+					OWCoin supportedCoin;
+					if (coinJson.getString("chain").contains("test")){
+						supportedCoin = OWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()) + "_TEST");
+					} else {
+						supportedCoin = OWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()));
+					}
+					supportedCoins.add(supportedCoin);
+					OWCoin.updateCoin(supportedCoin.toString(), coinJson.getString("default_fee_per_kb"), ZiftrUtils.hexStringToBytes(coinJson.getString("p2pkh_byte"))[0], 
+							ZiftrUtils.hexStringToBytes(coinJson.getString("p2sh_byte"))[0], ZiftrUtils.hexStringToBytes(coinJson.getString("priv_byte"))[0], Integer.parseInt(coinJson.getString("recommended_confirmations")), 
+							Integer.parseInt(coinJson.getString("seconds_per_block_generated")));
+						
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			ZLog.log(response);
+		}
+		ZiftrNetworkManager.networkStopped();
+		for (OWCoin x : supportedCoins){
+			ZLog.log(x.toString());
+		}
+		return supportedCoins;
+	}
+
 
 	public static void updateTransactionHistory(OWCoin coin) {
 		ZiftrNetworkManager.networkStarted();
@@ -166,15 +230,5 @@ public class OWDataSyncHelper {
 		return transaction;
 	}
 	
-	/***
-	public static List<String> getHiddenAddresses(OWCoin coin){
-		List<OWAddress> addresses = OWWalletManager.getInstance().readHiddenAddresses(coin);
-		List<String> hiddenAddresses = new ArrayList<String>();
-		for (OWAddress addr : addresses){
-			hiddenAddresses.add(addr.getAddress());
-		}
-		return hiddenAddresses;
-	}
-	***/
-
+	
 }

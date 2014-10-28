@@ -72,8 +72,8 @@ public abstract class OWWalletUserFragment extends OWFragment {
 			@Override
 			public void run() {
 				OWDataSyncHelper.updateTransactionHistory(getOWMainActivity().getSelectedCoin());
-
 			}
+
 		});
 	}
 }
