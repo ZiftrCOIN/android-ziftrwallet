@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import android.app.PendingIntent;
@@ -11,8 +12,10 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ziftrwalletWidget extends AppWidgetProvider{
 	
@@ -59,6 +62,8 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 			views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
 			views.setImageViewResource(R.id.widget_select_coin, selectedCurr.getLogoResId());
 			views.setTextViewText(R.id.widget_coin, selectedCurr.getLongTitle());
+			BigDecimal balance = ZiftrUtils.bigIntToBigDec(selectedCurr, OWWalletManager.getInstance().getWalletBalance(selectedCurr, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
+			views.setTextViewText(R.id.widget_balance, OWCoin.formatCoinAmount(selectedCurr, balance).toPlainString());
 		} else {
 			views.setViewVisibility(R.id.widget_select_coin, View.INVISIBLE);
 			views.setTextViewText(R.id.widget_coin, "No Wallets");

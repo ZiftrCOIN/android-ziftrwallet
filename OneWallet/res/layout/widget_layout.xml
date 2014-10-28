@@ -5,7 +5,7 @@
     android:background="@drawable/widget_bg_shape"
     android:orientation="horizontal" >
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/widget_change_coin"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -17,25 +17,38 @@
             android:id="@+id/widget_select_coin"
             android:layout_width="@dimen/ow_medium_icon_side_length"
             android:layout_height="@dimen/ow_medium_icon_side_length"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="6dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
             android:src="@drawable/logo_bitcoin" />
-
+		
         <TextView
             android:id="@+id/widget_coin"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:padding="2dp"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/widget_select_coin"
+            android:layout_toRightOf="@id/widget_select_coin"
             android:shadowColor="#40000000"
             android:shadowDx="0"
             android:shadowDy="2"
             android:shadowRadius="1"
-            android:text="Bitcoin"
+            android:text="Loading"
             android:textColor="@color/ow_default_text"
             android:textSize="@dimen/ow_txt_mediumsmall" />
-        
-    </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/widget_coin"
+            android:layout_below="@id/widget_coin"
+            android:shadowColor="#40000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="1"
+            android:textColor="@color/ow_default_text"
+            android:textSize="@dimen/ow_txt_small" />
+    </RelativeLayout>
 
     <ImageView
         android:id="@+id/widget_send"

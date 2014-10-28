@@ -1333,7 +1333,7 @@ ZiftrNetworkHandler {
 		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(selectedFiat, unitPriceInFiat, true));
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
-		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.ESTIMATED);
+		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.AVAILABLE);
 		BigDecimal walletBalance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
 
 		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBalance).toPlainString());
