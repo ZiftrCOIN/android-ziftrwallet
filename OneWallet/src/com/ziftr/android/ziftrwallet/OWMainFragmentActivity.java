@@ -1522,7 +1522,7 @@ ZiftrNetworkHandler {
 	}
 
 	@Override
-	public void handleGenericError(String errorMessage) {
+	public void handleNetworkError(String errorMessage) {
 		// TODO Auto-generated method stub
 
 	}

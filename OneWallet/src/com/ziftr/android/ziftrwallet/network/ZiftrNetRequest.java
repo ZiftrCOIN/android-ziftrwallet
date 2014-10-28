@@ -18,6 +18,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -85,6 +87,22 @@ public class ZiftrNetRequest {
 	public static ZiftrNetRequest createRequest(String url, ZiftrParamList queryParams) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		request.queryParameters = queryParams;
+		return request;
+	}
+	
+	
+	/**
+	 * Create a network request for a given url with headers query parameters and post data.
+	 * @param url the url for this network request
+	 * @param headers a map of headers to use, can be null for no additional headers
+	 * @param queryParams a {@link ZiftrParamList} of query parameters to add to the request
+	 * @param postData post data to send, can be null, request will be a GET with null post data, pass an empty string for a POST with no data
+	 * @return a network request setup with the passed in parameters
+	 */
+	public static ZiftrNetRequest createRequest(String url, Map<String,String> headers, ZiftrParamList queryParams) {
+		ZiftrNetRequest request = new ZiftrNetRequest(url);
+		request.queryParameters = queryParams;
+		request.sentHeaders = headers;
 		return request;
 	}
 	
@@ -362,12 +380,29 @@ public class ZiftrNetRequest {
 				InputStream stream = connection.getInputStream();
 				response = ZiftrUtils.streamToString(stream);
 			} catch(Exception e) {
-				ZLog.log("Exception getting response from server: ", e);
 				try {
 					response = ZiftrUtils.streamToString(connection.getErrorStream());
 				} catch(Exception e2) {
 					//don't care much about this, just trying to see if we can extra response info
 				}
+				
+				if(response == null || response.length() == 0) {
+					try {
+						int responseCode = connection.getResponseCode();
+						String responseMessage = connection.getResponseMessage();
+						response = "Error: " + String.valueOf(responseCode) + " - " + responseMessage;
+					}
+					catch(Exception e3) {
+						//dont' care just trying to get failure information
+					}
+					
+					if(response == null || response.length() == 0) {
+						//if the response is still null, just jam the exception into it
+						response = Log.getStackTraceString(e);
+						ZLog.log("Exception getting response from server: ", e);
+					}
+				}
+				
 				
 				//TODO -code for handling expired login here, we don't need this, yet...
 				/***
@@ -390,6 +425,7 @@ public class ZiftrNetRequest {
 			this.responseData = response;
 		}
 		catch(Exception e) {
+			//to get here it means there's a problem in the code itself (malformed url for example), so just log the exception
 			ZLog.log("Ziftr Network Request Exception: ", e);
 		}
 		finally {
