@@ -1,15 +1,19 @@
 package com.ziftr.android.ziftrwallet.network;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
+@SuppressLint("DefaultLocale")
 public class OWApi {
 
 	
@@ -19,6 +23,9 @@ public class OWApi {
 	
 	private static final String BASE_URL = SANDBOX_BASE_URL;
 	
+	
+	private static final String AUTHORIZATION = "Basic dGVzdGtleTo=";
+	private static final String ACCEPT = "application/vnd.ziftr.fpa.v1+json";
 	
 	
 	private static String buildBaseUrl(String type, String chain) {
@@ -36,6 +43,17 @@ public class OWApi {
 		
 		return protocol + "://" + BASE_URL + "/blockchains/" + type + "/" + chain + "/";
 	}
+	
+	
+	private static Map<String, String> buildGenericHeaders() {
+		Map<String, String> headers = new HashMap<String, String>(2);
+		
+		headers.put("Accept", ACCEPT);
+		headers.put("Authorization", AUTHORIZATION);
+		
+		return headers;
+	}
+	
 	
 	
 	/**
@@ -57,9 +75,12 @@ public class OWApi {
 		
 		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions";
 		ZLog.log("Transaction request url: ", url);
-		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, query);
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), query);
 		return request;
 	}
+	
+	
+	
 	/**
 	 * create transaction request blockchains /{type} /{chain} /transactions /requests POST
 	 * @param type
