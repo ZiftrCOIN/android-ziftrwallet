@@ -1,6 +1,8 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +24,13 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
+import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
+import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 
@@ -130,33 +135,36 @@ public class OWAccountsFragment extends OWFragment {
 
 		// TODO see if we can get the constructor of OWCurrencyListItem 
 		// to take very few things
+		
 		int resId = R.layout.accounts_currency_list_single_item;
+		BigDecimal amount = ZiftrUtils.bigIntToBigDec(id, this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
+		String balance = OWCoin.formatCoinAmount(id, amount).toPlainString();
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(this.getActivity());
+		String fiatBalance = OWConverter.convert(amount, id, fiat).setScale(2, RoundingMode.HALF_DOWN).toPlainString();
 		if (id == OWCoin.BTC) {
 			return new OWCurrencyListItem(OWCoin.BTC, 
-					"620.00", "0.00000000", "0.00", resId);
+					"620.00", balance, fiatBalance, resId);
 		} else if (id == OWCoin.BTC_TEST) {
-			String balance = OWCoin.formatCoinAmount(OWCoin.BTC_TEST, this.walletManager.getWalletBalance(
-					id, OWSQLiteOpenHelper.BalanceType.AVAILABLE)).toPlainString();
 			return new OWCurrencyListItem(OWCoin.BTC_TEST, 
-					"0.00", balance, "0.00", resId);
+					"0.00", balance, fiatBalance, resId);
 		} else if (id == OWCoin.LTC) {
 			return new OWCurrencyListItem(OWCoin.LTC, 
-					"6.70", "0.00000000", "0.00", resId);
+					"6.70", balance, fiatBalance, resId);
 		} else if (id == OWCoin.LTC_TEST) {
 			return new OWCurrencyListItem(OWCoin.LTC_TEST, 
-					"0.00", "0.00000000", "0.00", resId);
+					"0.00", balance, fiatBalance, resId);
 		} else if (id == OWCoin.PPC) {
 			return new OWCurrencyListItem(OWCoin.PPC, 
-					"1.40", "0.00000000", "0.00", resId);
+					"1.40", balance, fiatBalance, resId);
 		} else if (id == OWCoin.PPC_TEST) {
 			return new OWCurrencyListItem(OWCoin.PPC_TEST,
-					"0.00", "0.00000000", "0.00", resId);
+					"0.00", balance, fiatBalance, resId);
 		} else if (id == OWCoin.DOGE) {
 			return new OWCurrencyListItem(OWCoin.DOGE, 
-					"0.0023", "0.00000000", "0.00", resId);
+					"0.0023", balance, fiatBalance, resId);
 		} else if (id == OWCoin.DOGE_TEST) {
 			return new OWCurrencyListItem(OWCoin.DOGE_TEST, 
-					"0.00", "0.00000000", "0.00", resId);
+					"0.00", balance, fiatBalance, resId);
 		}  
 
 		// Should never get here
