@@ -151,7 +151,7 @@ public class OWDataSyncHelper {
 			}
 		}
 
-		//pick and address to use for displaying the note to the user
+		//pick an address to use for displaying the note to the user
 		String note = null; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		for(String noteAddress : displayAddresses) {
 			OWAddress databaseAddress = OWWalletManager.getInstance().readVisibleAddress(coin, noteAddress, true);
@@ -166,6 +166,7 @@ public class OWDataSyncHelper {
 		return transaction;
 	}
 	
+	/***
 	public static List<String> getHiddenAddresses(OWCoin coin){
 		List<OWAddress> addresses = OWWalletManager.getInstance().readHiddenAddresses(coin);
 		List<String> hiddenAddresses = new ArrayList<String>();
@@ -174,5 +175,6 @@ public class OWDataSyncHelper {
 		}
 		return hiddenAddresses;
 	}
+	***/
 
 }

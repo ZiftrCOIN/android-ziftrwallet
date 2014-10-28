@@ -388,7 +388,11 @@ public class ZiftrNetRequest {
 			}
 		
 			this.responseData = response;
-		} finally {
+		}
+		catch(Exception e) {
+			ZLog.log("Ziftr Network Request Exception: ", e);
+		}
+		finally {
 			try {
 				this.lastConnection = connection;
 				connection.disconnect();

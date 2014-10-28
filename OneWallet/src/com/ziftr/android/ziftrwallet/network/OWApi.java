@@ -13,12 +13,28 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class OWApi {
 
 	
-	private static final String BASE_URL = "http://mocksvc.mulesoft.com/mocks/fa5dec6e-b96d-46b7-ac46-28624489f7dd";
+	private static final String MOCK_BASE_URL = "mocksvc.mulesoft.com/mocks/fa5dec6e-b96d-46b7-ac46-28624489f7dd";
+	private static final String SANDBOX_BASE_URL = "sandbox.fpa.bz";
+	private static final String LIVE_BASE_URL = "api.fpa.bz";
+	
+	private static final String BASE_URL = SANDBOX_BASE_URL;
 	
 	
 	
 	private static String buildBaseUrl(String type, String chain) {
-		return BASE_URL + "/blockchains/" + type + "/" + chain + "/";
+		return buildBaseUrl(type, chain, false);
+	}
+	
+	private static String buildBaseUrl(String type, String chain, boolean secure) {
+		String protocol;
+		if(secure) {
+			protocol = "https";
+		}
+		else {
+			protocol = "http";
+		}
+		
+		return protocol + "://" + BASE_URL + "/blockchains/" + type + "/" + chain + "/";
 	}
 	
 	
