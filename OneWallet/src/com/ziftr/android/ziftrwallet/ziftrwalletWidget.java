@@ -53,9 +53,15 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 	private void changeCurrency(Context context, RemoteViews views){
 		List<OWCoin> coins = OWWalletManager.getInstance().getAllSetupWalletTypes();
 		if (coins.size() >0) {
+			views.setViewVisibility(R.id.no_wallets, View.GONE);
+			views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
+			views.setViewVisibility(R.id.widget_coin, View.VISIBLE);
+			views.setViewVisibility(R.id.widget_balance, View.VISIBLE);
+
 			if (OWPreferencesUtils.getWidgetCoin(context) == null){
 				OWPreferencesUtils.setWidgetCoin(context, OWWalletManager.getInstance().getAllSetupWalletTypes().get(0).toString());
 			}
+			
 			int next = (coins.indexOf(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin(context))) + 1) % coins.size();
 			OWPreferencesUtils.setWidgetCoin(context, coins.get(next).toString());
 			OWCoin selectedCurr = coins.get(next);
@@ -65,8 +71,11 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 			BigDecimal balance = ZiftrUtils.bigIntToBigDec(selectedCurr, OWWalletManager.getInstance().getWalletBalance(selectedCurr, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
 			views.setTextViewText(R.id.widget_balance, OWCoin.formatCoinAmount(selectedCurr, balance).toPlainString());
 		} else {
+			OWPreferencesUtils.setWidgetCoin(context, null);
 			views.setViewVisibility(R.id.widget_select_coin, View.INVISIBLE);
-			views.setTextViewText(R.id.widget_coin, "No Wallets");
+			views.setViewVisibility(R.id.widget_coin, View.INVISIBLE);
+			views.setViewVisibility(R.id.widget_balance, View.INVISIBLE);
+			views.setViewVisibility(R.id.no_wallets, View.VISIBLE);
 		}
 	}
 	

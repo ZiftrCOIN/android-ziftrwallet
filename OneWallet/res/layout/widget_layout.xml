@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg_shape"
+    android:padding="@dimen/widget_margin"
     android:orientation="horizontal" >
 
     <RelativeLayout
@@ -21,33 +22,34 @@
             android:layout_marginLeft="6dp"
             android:layout_marginRight="6dp"
             android:src="@drawable/logo_bitcoin" />
-		
+
         <TextView
             android:id="@+id/widget_coin"
+            style="@style/widget_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/widget_select_coin"
             android:layout_toRightOf="@id/widget_select_coin"
-            android:shadowColor="#40000000"
-            android:shadowDx="0"
-            android:shadowDy="2"
-            android:shadowRadius="1"
-            android:text="Loading"
-            android:textColor="@color/ow_default_text"
             android:textSize="@dimen/ow_txt_mediumsmall" />
 
         <TextView
             android:id="@+id/widget_balance"
+            style="@style/widget_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@id/widget_coin"
             android:layout_below="@id/widget_coin"
-            android:shadowColor="#40000000"
-            android:shadowDx="0"
-            android:shadowDy="2"
-            android:shadowRadius="1"
-            android:textColor="@color/ow_default_text"
             android:textSize="@dimen/ow_txt_small" />
+
+        <TextView
+            android:id="@+id/no_wallets"
+            style="@style/widget_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="12dp"
+            android:text="No Wallets"
+            android:textSize="@dimen/ow_txt_mediumsmall" />
     </RelativeLayout>
 
     <ImageView

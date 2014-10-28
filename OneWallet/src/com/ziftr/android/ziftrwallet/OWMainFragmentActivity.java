@@ -303,7 +303,7 @@ ZiftrNetworkHandler {
 		//Check if loaded from widget
 		if (getIntent() != null && (getIntent().hasExtra(ziftrwalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND))){
 			this.setSelectedCoin(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin(this)));
-			if (this.selectedCoin != null) {
+			if (this.selectedCoin != null && this.getWalletManager().typeIsActivated(this.selectedCoin)) {
 				if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND)){
 					getIntent().removeExtra(ziftrwalletWidget.WIDGET_SEND);
 					openSendCoinsView(null);
