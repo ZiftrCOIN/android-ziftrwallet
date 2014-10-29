@@ -73,7 +73,7 @@ public class OWApi {
 		ZiftrParamList query = new ZiftrParamList();
 		query.add("addresses", addressesList);
 		
-		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions";
+		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions";
 		ZLog.log("Transaction request url: ", url);
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), query);
 		return request;
@@ -93,7 +93,7 @@ public class OWApi {
 	 */
 	public static ZiftrNetRequest makeTransactionRequest(String type, String chain, BigInteger fee, 
 			String refundAddress, List<String> inputs, String output, BigInteger amount){
-		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions/requests";
+		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions/requests";
 		try {
 			JSONObject body = new JSONObject();
 			body.put("fee_per_kb", fee);
@@ -117,7 +117,7 @@ public class OWApi {
 	
 	// POST signed txn /blockchains /{type} /{chain} /transactions
 	public static ZiftrNetRequest makeTransaction(String type, String chain, JSONObject signedTxn){
-		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions";
+		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions";
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, null, null,  signedTxn);
 		return request;
 	}
