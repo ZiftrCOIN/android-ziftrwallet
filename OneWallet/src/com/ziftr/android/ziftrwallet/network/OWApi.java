@@ -1,14 +1,13 @@
 package com.ziftr.android.ziftrwallet.network;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+
 import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 

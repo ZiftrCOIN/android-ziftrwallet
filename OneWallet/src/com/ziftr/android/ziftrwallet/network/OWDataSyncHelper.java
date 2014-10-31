@@ -19,38 +19,12 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWDataSyncHelper {
-	
-	
-	/****
-	private static ZiftrNetRequest sendCoinsRequest(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
 
-		ZLog.log("Sending" + amount + "coins to :" + output);
-
-		List<OWAddress> changeAddresses = OWWalletManager.getInstance().readHiddenUnspentAddresses(coin);
-		String refundAddress;
-		if (changeAddresses.size() <= 0){
-			//create new address for change
-			refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin, OWReceivingAddressesTable.HIDDEN_FROM_USER).toString();
-			ZLog.log(refundAddress);
-		} else {
-			//or reuse one that hasnt been spent from
-			refundAddress = changeAddresses.get(0).getAddress();
-		}
-		
-		
-		//make request
-		return OWApi.buildSpendRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
-	}
-	***/
 	
-	
-	
-	public static List<String> sendCoins(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
-
+	public static void sendCoins(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
 	
 		ZLog.log("Sending " + amount + " coins to : ." + output);
-
-		ArrayList<String> usedAddresses = new ArrayList<String>();
+		ZiftrNetworkManager.networkStarted();
 		
 		//find (or create) an address for change that hasn't been spent from
 		List<OWAddress> changeAddresses = OWWalletManager.getInstance().readHiddenUnspentAddresses(coin);
@@ -78,20 +52,18 @@ public class OWDataSyncHelper {
 				
 				ZLog.log("Send coins step 1 response: ", jsonRes.toString());
 				
-				signSentCoins(coin, jsonRes);
+				signSentCoins(coin, jsonRes, inputs, passphrase);
 			}catch(Exception e) {
 				ZLog.log("Exception send coin request: ", e);
 			}
 		}
-		
-		
 
-		return usedAddresses;
+		ZiftrNetworkManager.networkStopped();
 	}
 	
 	
 	
-	public static void signSentCoins(OWCoin coin, JSONObject serverResponse) {
+	private static void signSentCoins(OWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
 		try {
 			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
 			for (int i=0; i< toSignList.length(); i++){
@@ -115,11 +87,6 @@ public class OWDataSyncHelper {
 				String sHex = ZiftrUtils.bigIntegerToString(key.sign(hash).s, 32);
 				toSign.put("s", sHex);
 				
-				//String hex =  rHex + sHex;
-				//toSign.put("sig", hex);
-				
-				//signedList.put(toSign);
-				
 				ZLog.log(toSign);
 			}
 		}
@@ -131,46 +98,22 @@ public class OWDataSyncHelper {
 		ZiftrNetRequest signingRequest = OWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), serverResponse);
 		
 		String response = signingRequest.sendAndWait();
-		if(signingRequest.getResponseCode() == 200) {
-			ZLog.log("Spend response: ", response);
+		if(signingRequest.getResponseCode() == 202){
+			try {
+				//update DB
+				
+				JSONObject responseJson = new JSONObject(response);
+				
+				OWTransaction completedTransaction = createTransaction(coin, responseJson, inputs);
+				OWWalletManager.getInstance().updateTransaction(completedTransaction); //TODO -we should change it so that the create will automatically do this if needed
+			}
+			catch(Exception e) {
+				ZLog.log("Exception saving spend transaction: ", e);
+			}
 		}
 	}
 	
-	
 
-	public static void sendCoinsTransaction(OWCoin coin, JSONObject response, BigInteger amount, ArrayList<String> addresses) throws JSONException{
-		//sign the response
-		JSONArray signedList = new JSONArray();
-		JSONArray toSignList = new JSONArray(response.get("to_sign").toString());
-		for (int i=0; i< toSignList.length(); i++){
-			JSONObject toSign = new JSONObject(toSignList.get(i).toString());
-			OWECKey key = new OWECKey();
-			//uncomment when API works
-			//OWECKey key = OWWalletManager.getInstance().readAddress(coin, toSign.get("address").toString(), true).getKey();
-			toSign.put("pub_key", ZiftrUtils.bytesToHexString(key.getPubKey()));
-
-			OWSha256Hash hash = new OWSha256Hash(toSign.getString("data")); 
-			String rHex = ZiftrUtils.bigIntegerToString(key.sign(hash).r, 32);
-			String sHex = ZiftrUtils.bigIntegerToString(key.sign(hash).s, 32);
-			String hex =  rHex + sHex;
-			toSign.put("sig", hex);
-			signedList.put(toSign);
-			ZLog.log(toSign);
-		}
-		response.put("to_sign", signedList);
-		ZLog.log(response);
-
-		//send txn to server after signage
-		ZiftrNetRequest req = OWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), response);
-		String res = req.sendAndWait();
-		ZLog.log(res);
-		if (req.getResponseCode() == 202){
-			//update DB
-			createTransaction(coin, response, addresses);
-		}
-	}
-
-	
 	
 	public static void updateTransactionHistory(OWCoin coin) {
 		ZiftrNetworkManager.networkStarted();
@@ -206,8 +149,9 @@ public class OWDataSyncHelper {
 		ZiftrNetworkManager.networkStopped();
 	}
 
+	
 	//creates transaction in local database from json response
-	private static OWTransaction createTransaction(OWCoin coin, JSONObject json, ArrayList<String> addresses) throws JSONException {
+	private static OWTransaction createTransaction(OWCoin coin, JSONObject json, List<String> addresses) throws JSONException {
 
 		String hash = json.getString("hash");
 		//String time = json.getString("time_received");  //TODO -need to add this to transaction table

@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -31,15 +28,12 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWNewCurrencyListItem;
-import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.network.ZiftrNetRequest;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.ZLog;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFragmentActivity> {
 
@@ -154,10 +148,10 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		assertTrue(qrCodeImageView.getHeight() <= screenSize.y);
 	}
 
-	//test if creating a request for sending coins provides response with to sign attributes
-	@UiThreadTest
 	
 	/*******
+	//test if creating a request for sending coins provides response with to sign attributes
+	@UiThreadTest
 	public void testSendCoinsRequest() throws InterruptedException{
 		createWallet(OWCoin.BTC);
 		OWAddress spendFrom = manager.createReceivingAddress(null, OWCoin.BTC, OWReceivingAddressesTable.VISIBLE_TO_USER);
@@ -193,6 +187,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 	*********/
 
 	//test sending signed txn 
+	/***
 	public void sendCoinTxn(JSONObject req, List<String> inputs, String sendToAddr, BigInteger sendingAmount){
 		ArrayList<String> addresses = new ArrayList<String>();
 		for (String a : inputs){
@@ -200,13 +195,15 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		}
 		addresses.add(sendToAddr);
 		try {
-			OWDataSyncHelper.sendCoinsTransaction(OWCoin.BTC, req, sendingAmount, addresses);
+			OWDataSyncHelper.sendCoins(OWCoin.BTC, req, sendingAmount, addresses);
 			ZLog.log("Abbbb");
 			assertTrue(manager.readAddress(OWCoin.BTC, "1DBb6HuozwS6esCGiaM5iB4xxoK759BYFW", false)!=null);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
+	***/
+	
 
 	@UiThreadTest
 	public void testCreateTransaction(){
