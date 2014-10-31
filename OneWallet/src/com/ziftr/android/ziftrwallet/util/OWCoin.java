@@ -25,14 +25,14 @@ public class OWCoin implements OWCurrency {
 	/** When using bundles, this can be used to store a specific coin type. */
 	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
 
-	public static OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin,
+	public static OWCoin BTC = new OWCoin("10000", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin,
 			(byte) 0, (byte) 5, (byte) 128, 6, 600, "Bitcoin Signed Message:\n");
-	public static OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "ltc", "main", "litecoin", 8, R.drawable.logo_litecoin,
+	public static OWCoin LTC = new OWCoin("100000", "LTC", "Litecoin", "ltc", "main", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 48, (byte) 5, (byte) 176, 12, 150, "Litecoin Signed Message:\n");
 
-	public static OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin,
+	public static OWCoin PPC = new OWCoin("1000000", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 55, (byte) 117, (byte) 183, 6, 600, "PPCoin Signed Message:\n");
-	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
+	public static final OWCoin DOGE = new OWCoin("100000000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 30, (byte) 22, (byte) 158, 6, 60, "Dogecoin Signed Message:\n");
 
 	public static OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
@@ -97,7 +97,7 @@ public class OWCoin implements OWCurrency {
 
 
 	/**
-	 * As the name describes, this gets the default fee per kb for the
+	 * As the name describes, this gets the default fee per kb in satoshis for the
 	 * coin. It might be useful to use BigDecimal() or BigInteger for the parsing
 	 * as they are better to store monetary values and they will do the parsing
 	 * of this string right in the constructor. 

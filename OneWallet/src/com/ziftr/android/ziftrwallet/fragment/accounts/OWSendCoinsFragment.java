@@ -365,7 +365,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		// Set the fee to the default and set send amount to 0 initially 
 		changeFiatStartedFromProgram.set(true);
-		feeTextView.setText(this.getSelectedCoin().getDefaultFeePerKb());
+		BigDecimal fee = new BigDecimal(this.getSelectedCoin().getDefaultFeePerKb());
+		BigDecimal satoshi =  new BigDecimal(".00000001");
+		feeTextView.setText(fee.multiply(satoshi).toString());
 		changeFiatStartedFromProgram.set(false);
 
 		changeCoinStartedFromProgram.set(true);
