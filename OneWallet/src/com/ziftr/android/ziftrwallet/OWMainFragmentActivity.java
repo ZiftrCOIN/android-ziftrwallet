@@ -1028,13 +1028,13 @@ ZiftrNetworkHandler {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				availCoins = OWDataSyncHelper.getBlockChainWallets();
+				//availCoins = OWDataSyncHelper.getBlockChainWallets();
 				//if API call failed
-				if (availCoins.size() <= 0){
+				//if (availCoins.size() <= 0){
 					for (OWCoin coin : OWCoin.TYPES){
 						availCoins.add(coin);
 					}
-				}
+				//}
 			}
 		});
 	}
