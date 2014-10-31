@@ -232,7 +232,6 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 		sb.append(";");
 		String toQuery = sb.toString();
-		ZLog.log("Query: " + toQuery);
 		Cursor c = db.rawQuery(toQuery, null);
 
 		List<OWTransaction> newTxs = new ArrayList<OWTransaction>();

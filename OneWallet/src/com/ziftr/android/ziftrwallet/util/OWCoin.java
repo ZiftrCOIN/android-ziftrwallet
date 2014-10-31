@@ -278,15 +278,14 @@ public class OWCoin implements OWCurrency {
 	public String getSigningMessageMagic() {
 		return signingMessageMagic;
 	}
-	public static void updateCoin(String coinToUpdate, String default_fee_per_kb, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve){
-		OWCoin coin = OWCoin.valueOf(coinToUpdate);
-		coin.defaultFeePerKb = default_fee_per_kb;
-		coin.pubKeyHashPrefix = pubKeyHashPrefix;
-		coin.scriptHashPrefix = scriptHashPrefix;
-		coin.privKeyPrefix = privKeyPrefix;
-		coin.numRecommendedConfirmations = numRecommendedConfirmations;
-		coin.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
+	
+	public void updateCoin(String defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime){
+		this.defaultFeePerKb = defaultFee;
+		this.pubKeyHashPrefix = pubKeyPrefix;
+		this.scriptHashPrefix = scriptHashPrefix;
+		this.privKeyPrefix = privKeyPrefix;
+		this.numRecommendedConfirmations = confirmationsNeeded;
+		this.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
 	}
 
 }

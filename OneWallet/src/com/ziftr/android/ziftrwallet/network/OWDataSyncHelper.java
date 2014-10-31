@@ -135,9 +135,19 @@ public class OWDataSyncHelper {
 						supportedCoin = OWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()));
 					}
 					supportedCoins.add(supportedCoin);
-					OWCoin.updateCoin(supportedCoin.toString(), coinJson.getString("default_fee_per_kb"), ZiftrUtils.hexStringToBytes(coinJson.getString("p2pkh_byte"))[0], 
-							ZiftrUtils.hexStringToBytes(coinJson.getString("p2sh_byte"))[0], ZiftrUtils.hexStringToBytes(coinJson.getString("priv_byte"))[0], Integer.parseInt(coinJson.getString("recommended_confirmations")), 
-							Integer.parseInt(coinJson.getString("seconds_per_block_generated")));
+					
+					if(supportedCoin != null) {
+						String coin = supportedCoin.toString(); //TODO why are we converting a coin object to a string then calling a static method?...
+						String defaultFee = coinJson.getString("default_fee_per_kb");
+						int pubKeyPrefix = coinJson.getInt("p2pkh_byte");
+						int scriptHashPrefix = coinJson.getInt("p2sh_byte");
+						int privateBytePrefix = coinJson.getInt("priv_byte");
+						int blockTime = coinJson.getInt("seconds_per_block_generated");
+						int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
+					
+						supportedCoin.updateCoin(defaultFee, (byte)pubKeyPrefix, (byte)scriptHashPrefix, (byte)privateBytePrefix, confirmationsNeeded, blockTime);
+					}
+					
 						
 				}
 			} catch (JSONException e) {

@@ -212,7 +212,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	public void onClickSendCoins(String passphrase) {
 		// Need to make sure amount to send is less than balance
 		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getAmountToSendFromEditText());
+		
 		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getFeeFromEditText());
+		
 		String addressToSendTo = this.addressEditText.getText().toString();
 		String addressName = labelEditText.getText().toString();
 		OWWalletManager manager = getWalletManager();
