@@ -35,14 +35,14 @@ public class OWCoin implements OWCurrency {
 	public static final OWCoin DOGE = new OWCoin("100000000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 30, (byte) 22, (byte) 158, 6, 60, "Dogecoin Signed Message:\n");
 
-	public static OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
+	public static OWCoin BTC_TEST = new OWCoin("10000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
 			// (byte) 0, (byte) 5, (byte) 128, 6);
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "Bitcoin Signed Message:\n");
-	public static OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
+	public static OWCoin LTC_TEST = new OWCoin("100000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 111, (byte) 196, (byte) 239, 12, 150, "Litecoin Signed Message:\n");
 	public static OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "PPCoin Signed Message:\n");
-	public static OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
+	public static OWCoin DOGE_TEST = new OWCoin("100000000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 113, (byte) 196, (byte) 241, 6, 60, "Dogecoin Signed Message:\n");
 
 	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE, BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};

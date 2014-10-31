@@ -495,8 +495,10 @@ public class ZiftrUtils {
 	 * @return The big decimal converted to a big integer
 	 */
 	public static BigInteger bigDecToBigInt(OWCurrency type, BigDecimal amount) {
-		return amount.multiply(new BigDecimal(BigInteger.TEN, 
-				-1*type.getNumberOfDigitsOfPrecision())).toBigInteger();
+		int precision = -1*type.getNumberOfDigitsOfPrecision();
+		//note, RTFM, this constructor is for making small numbers and makes the scale negative
+		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
+		return amount.multiply(multiplier).toBigInteger();
 	}
 	
 	/**
