@@ -268,10 +268,11 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized OWAddress readVisibleAddress(OWCoin coinId, String address, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readVisibleAddress(coinId, address, getReadableDatabase(), receivingNotSending);
+	public synchronized OWAddress readAddress(OWCoin coinId, String address, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readAddress(coinId, address, getReadableDatabase(), receivingNotSending);
 	}
 
+	
 	/**
 	 * As part of the R in CRUD, this method gets an address from the 
 	 * database for the given coin type and table boolean.
@@ -280,8 +281,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized List<OWAddress> readVisibleAddress(OWCoin coinId, List<String> addresses, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readVisibleAddresses(coinId, addresses, getReadableDatabase(), receivingNotSending);
+	public synchronized List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).readAddresses(coinId, addresses, getReadableDatabase(), receivingNotSending);
 	}
 	
 	public synchronized List<OWAddress> readHiddenAddresses(OWCoin coinId) {

@@ -67,21 +67,42 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		address.setId(insertId);
 	}
 
-	protected OWAddress readVisibleAddress(OWCoin coinId, String address, SQLiteDatabase db, boolean receivingNotSending) {
-		if (address == null) {
-			return null;
-		}
 
-		List<String> addresses = new ArrayList<String>();
-		addresses.add(address);
+	
+	protected OWAddress readAddress(OWCoin coinId, String address, SQLiteDatabase db, boolean receivingNotSending) {
+	
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT * FROM ");
+		sb.append(getTableName(coinId));
+		sb.append(" WHERE ").append(COLUMN_ADDRESS).append(" = ");
+		sb.append(DatabaseUtils.sqlEscapeString(address));
+		
+		String toQuery = sb.toString();
+		Cursor c = db.rawQuery(toQuery, null);
 
-		List<OWAddress> readAddresses = readVisibleAddresses(coinId, addresses, db, receivingNotSending);
-		if (readAddresses.size() == 0) {
-			return null;
-		} else {
-			return readAddresses.get(0);
+		OWAddress foundAddress = null;
+		
+		if (c.moveToFirst()) {
+			// Recreate key from stored private key
+			try {
+				foundAddress = cursorToAddress(coinId, c);
+				return foundAddress;
+
+			}
+			catch (OWAddressFormatException afe) {
+				ZLog.log("Error loading address from ", coinId.toString(), 
+						" receiving addresses database.");
+				ZLog.log(afe);
+			}
 		}
+		
+		// Make sure we close the cursor
+		c.close();
+
+		return null;
+		
 	}
+	
 
 	/**
 	 * Gets a list of addresses from the database. If addresses is null 
@@ -93,15 +114,12 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	 * @param receivingNotSending true
 	 * @return
 	 */
-	protected List<OWAddress> readVisibleAddresses(OWCoin coinId, List<String> addresses, SQLiteDatabase db, boolean receivingNotSending) {
-		if (addresses != null && addresses.size() == 0) {
-			return null;
-		}
+	protected List<OWAddress> readAddresses(OWCoin coinId, List<String> addresses, SQLiteDatabase db, boolean receivingNotSending) {
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coinId));
 		
-		// If null, we take that to mean that they want all addresses
 		if (addresses != null) {
 			sb.append(" WHERE ");
 			sb.append(COLUMN_ADDRESS);
@@ -111,14 +129,12 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 				if (i != (addresses.size() - 1)) {
 					sb.append(",");
 				} else {
-					//we don't want to get the hidden addresses, only show visible, only filter if querying receiving table
-					if (receivingNotSending){ 
-						sb.append(" AND " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = " + OWReceivingAddressesTable.VISIBLE_TO_USER);
-					}
 					sb.append(")");
 				}
 			}
-		} else if (receivingNotSending){
+		} 
+		else if (receivingNotSending) {
+			//if addresses array is null and we ask for receiving addresses then assume we want all visible addresses only
 			sb.append(" WHERE " + OWReceivingAddressesTable.COLUMN_HIDDEN + " = " + OWReceivingAddressesTable.VISIBLE_TO_USER);
 		}
 
@@ -150,7 +166,7 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 	}
 
 	protected List<OWAddress> readAllVisibleAddresses(OWCoin coinId, SQLiteDatabase db, boolean receivingNotSending) {
-		return this.readVisibleAddresses(coinId, null, db, receivingNotSending);
+		return this.readAddresses(coinId, null, db, receivingNotSending);
 	}
 
 	protected void updateAddress(OWAddress address, SQLiteDatabase db) {

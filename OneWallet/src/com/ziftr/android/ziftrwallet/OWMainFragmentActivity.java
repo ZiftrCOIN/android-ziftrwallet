@@ -1030,9 +1030,16 @@ ZiftrNetworkHandler {
 			@Override
 			public void run() {
 				availCoins = OWDataSyncHelper.getBlockChainWallets();
+				//if API call failed
+				if (availCoins.size() <= 0){
+					for (OWCoin coin : OWCoin.TYPES){
+						availCoins.add(coin);
+					}
+				}
 			}
 		});
 	}
+
 	/**
 	 * Open View for selecting fiat currency in settings
 	 */

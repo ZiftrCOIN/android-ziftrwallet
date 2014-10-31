@@ -73,7 +73,7 @@ public class OWApi {
 		ZiftrParamList query = new ZiftrParamList();
 		query.add("addresses", addressesList);
 		
-		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions";
+		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions";
 		ZLog.log("Transaction request url: ", url);
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), query);
 		return request;
@@ -81,47 +81,34 @@ public class OWApi {
 	
 	
 	
+	
 	/**
 	 * create transaction request blockchains /{type} /{chain} /transactions /requests POST
 	 * @param type
 	 * @param chain
-	 * @param fee = fee per kb
-	 * @param refundAddress = newly generated hidden address where change from spent from address goes
-	 * @param inputs = addresses we are sending from
-	 * @param output = address to send to
 	 * @return
 	 */
-	public static ZiftrNetRequest makeTransactionRequest(String type, String chain, BigInteger fee, 
-			String refundAddress, List<String> inputs, String output, BigInteger amount){
-		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions/requests";
-		try {
-			JSONObject body = new JSONObject();
-			body.put("fee_per_kb", fee);
-			body.put("surplus_refund_address", refundAddress);
-			JSONArray inputAddresses = new JSONArray();
-			for (String addr : inputs){
-				inputAddresses.put(addr);
-			}
-			body.put("input_addresses", inputAddresses);
-			JSONArray outputAddresses = new JSONArray();
-			outputAddresses.put(new JSONObject().put("address", output).put("amount", amount));
-			body.put("output_addresses", outputAddresses);
-			ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, null, null,  body);
-			return request;
-		} catch (Exception e) {
-			ZLog.log("something is not working JSON");		
-			e.printStackTrace();
-		}
-		return null;
+	public static ZiftrNetRequest buildSpendRequest(String type, String chain, JSONObject spendPostData){
+		
+		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions/requests";
+		
+		//TODO -add auth token  here, but I want to see it fail first
+		
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null,  spendPostData);
+		return request;
 	}
 	
 	// POST signed txn /blockchains /{type} /{chain} /transactions
-	public static ZiftrNetRequest makeTransaction(String type, String chain, JSONObject signedTxn){
-		String url = buildBaseUrl(type.toUpperCase(), chain) + "transactions";
-		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, null, null,  signedTxn);
+	public static ZiftrNetRequest buildSpendSigningRequest(String type, String chain, JSONObject signedTxn){
+		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions";
+		
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null,  signedTxn);
 		return request;
 	}
 
+	
+	
+	
 	
 	/**
 	 * builds a network request for any url by appending the passed in string to the API's base url

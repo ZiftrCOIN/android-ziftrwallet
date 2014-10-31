@@ -35,6 +35,7 @@ import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -128,7 +129,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			}
 
 			if (address != null) {
-				OWAddress owAddress = this.getWalletManager().readVisibleAddress(this.getSelectedCoin(), address, false);
+				OWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false);
 				if (owAddress != null) {
 					// If there wasn't a note given in URI then we pre-fill from address
 					txNote = txNote == null ? owAddress.getLabel() : txNote;
@@ -227,6 +228,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			return;
 		} catch(Exception e) {
 			// Shouldn't really happen, just helpful for debugging
+			ZLog.log("Exception trying to send coin: ", e);
 			this.getOWMainActivity().alertUser(
 					"There was an error with your request. \n" + (e.getMessage() == null ? "" : e.getMessage()) + 
 					"\nAmount: " + amountSending + 

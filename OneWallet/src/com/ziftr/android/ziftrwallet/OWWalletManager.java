@@ -238,25 +238,59 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			if (amountLeftToSend <= 0){
 				break;
 			}
-			if (addr.getLastKnownBalance() > 0){
+			//TODO -hacking this up to test implementing the new API
+			
+///////////////////**********************************************************************************************
+			
+			//add all address to the list
+			//if (addr.getLastKnownBalance() > 0){
 				amountLeftToSend -= addr.getLastKnownBalance();
 				inputs.add(addr.getAddress());
-			}
+			//}
 		}
 		
 		if (amountLeftToSend > 0){
 			for (OWAddress addr : usingTheseHiddenAddresses){
+				//TODO -this seems off, can this clear a previously legitmately set spent flag?
 				addr.setSpentFrom(OWReceivingAddressesTable.UNSPENT_FROM);
 			}
-			throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
+		
+			//TODO -put back
+			//throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
+		
+		
+		
 		}
+		
+		
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
+				
 				OWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
+				
+				
+				/*********************************************
+				ZiftrNetRequest request = OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
+				String response = request.sendAndWait();
+				if (request.getResponseCode() == 200){
+					try {
+						JSONObject jsonRes = new JSONObject(response);
+						//Sign txn and then POST to server
+						ArrayList<String> addresses = new ArrayList<String>();
+						for (String a : inputs){
+							addresses.add(a);
+						}
+						addresses.add(address);
+						OWDataSyncHelper.sendCoinsTransaction(coinId, jsonRes, value, addresses);
+					}catch(Exception e) {
+						ZLog.log("Exception send coin request: ", e);
+					}
+				}
+				***************************************/
+				
 			}
 		});
-
 	}
 	
 	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, int hidden) {
