@@ -20,7 +20,9 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWDataSyncHelper {
 	
-	public static ZiftrNetRequest sendCoinsRequest(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
+	
+	/****
+	private static ZiftrNetRequest sendCoinsRequest(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, String passphrase){
 
 		ZLog.log("Sending" + amount + "coins to :" + output);
 
@@ -34,9 +36,107 @@ public class OWDataSyncHelper {
 			//or reuse one that hasnt been spent from
 			refundAddress = changeAddresses.get(0).getAddress();
 		}
+		
+		
 		//make request
-		return OWApi.makeTransactionRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
+		return OWApi.buildSpendRequest(coin.getType(), coin.getChain(), fee, refundAddress, inputs, output, amount);
 	}
+	***/
+	
+	
+	
+	public static List<String> sendCoins(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
+
+	
+		ZLog.log("Sending " + amount + " coins to : ." + output);
+
+		ArrayList<String> usedAddresses = new ArrayList<String>();
+		
+		//find (or create) an address for change that hasn't been spent from
+		List<OWAddress> changeAddresses = OWWalletManager.getInstance().readHiddenUnspentAddresses(coin);
+		String refundAddress;
+		if (changeAddresses.size() <= 0){
+			//create new address for change
+			refundAddress = OWWalletManager.getInstance().createReceivingAddress(passphrase, coin, OWReceivingAddressesTable.HIDDEN_FROM_USER).toString();
+			ZLog.log(refundAddress);
+		} else {
+			//or reuse one that hasnt been spent from
+			refundAddress = changeAddresses.get(0).getAddress();
+		}
+		
+		JSONObject spendJson = buildSpendPostData(inputs, output, amount, fee.toString(), refundAddress);
+		
+		ZLog.log("Spending coins with json: ", spendJson.toString());
+		
+		ZiftrNetRequest request = OWApi.buildSpendRequest(coin.getType(), coin.getChain(), spendJson);
+		
+		String response = request.sendAndWait();
+		ZLog.forceFullLog(response);
+		if (request.getResponseCode() == 200){
+			try {
+				JSONObject jsonRes = new JSONObject(response);
+				
+				ZLog.log("Send coins step 1 response: ", jsonRes.toString());
+				
+				signSentCoins(coin, jsonRes);
+			}catch(Exception e) {
+				ZLog.log("Exception send coin request: ", e);
+			}
+		}
+		
+		
+
+		return usedAddresses;
+	}
+	
+	
+	
+	public static void signSentCoins(OWCoin coin, JSONObject serverResponse) {
+		try {
+			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
+			for (int i=0; i< toSignList.length(); i++){
+				JSONObject toSign = toSignList.getJSONObject(i);
+	
+				String signingAddressPublic = toSign.optString("address");
+				
+				//TODO -remove when api works
+				signingAddressPublic = "n1DmeLFrEiR2AUZZfqbwRgMJCKS1CF4ACF";
+				
+				OWAddress signingAddress = OWWalletManager.getInstance().readAddress(coin, signingAddressPublic, true);
+				OWECKey key = signingAddress.getKey();
+	
+				toSign.put("pub_key", ZiftrUtils.bytesToHexString(key.getPubKey()));
+	
+				OWSha256Hash hash = new OWSha256Hash(toSign.getString("tosign")); 
+				
+				String rHex = ZiftrUtils.bigIntegerToString(key.sign(hash).r, 32);
+				toSign.put("r", rHex);
+				
+				String sHex = ZiftrUtils.bigIntegerToString(key.sign(hash).s, 32);
+				toSign.put("s", sHex);
+				
+				//String hex =  rHex + sHex;
+				//toSign.put("sig", hex);
+				
+				//signedList.put(toSign);
+				
+				ZLog.log(toSign);
+			}
+		}
+		catch(Exception e) {
+			ZLog.log("Exeption attemting to sign transactions: ", e);
+		}
+		
+		//now that we've packed all the signing into a json object send it off to the server
+		ZiftrNetRequest signingRequest = OWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), serverResponse);
+		
+		String response = signingRequest.sendAndWait();
+		if(signingRequest.getResponseCode() == 200) {
+			ZLog.log("Spend response: ", response);
+		}
+	}
+	
+	
 
 	public static void sendCoinsTransaction(OWCoin coin, JSONObject response, BigInteger amount, ArrayList<String> addresses) throws JSONException{
 		//sign the response
@@ -61,7 +161,7 @@ public class OWDataSyncHelper {
 		ZLog.log(response);
 
 		//send txn to server after signage
-		ZiftrNetRequest req = OWApi.makeTransaction(coin.getType(), coin.getChain(), response);
+		ZiftrNetRequest req = OWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), response);
 		String res = req.sendAndWait();
 		ZLog.log(res);
 		if (req.getResponseCode() == 202){
@@ -70,6 +170,8 @@ public class OWDataSyncHelper {
 		}
 	}
 
+	
+	
 	public static void updateTransactionHistory(OWCoin coin) {
 		ZiftrNetworkManager.networkStarted();
 
@@ -154,7 +256,7 @@ public class OWDataSyncHelper {
 		//pick an address to use for displaying the note to the user
 		String note = null; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		for(String noteAddress : displayAddresses) {
-			OWAddress databaseAddress = OWWalletManager.getInstance().readVisibleAddress(coin, noteAddress, true);
+			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true);
 			note = databaseAddress.getLabel();
 			if(note != null && note.length() > 0) {
 				break;
@@ -166,15 +268,35 @@ public class OWDataSyncHelper {
 		return transaction;
 	}
 	
-	/***
-	public static List<String> getHiddenAddresses(OWCoin coin){
-		List<OWAddress> addresses = OWWalletManager.getInstance().readHiddenAddresses(coin);
-		List<String> hiddenAddresses = new ArrayList<String>();
-		for (OWAddress addr : addresses){
-			hiddenAddresses.add(addr.getAddress());
+
+	
+	private static JSONObject buildSpendPostData(List<String> inputs, String output, BigInteger amount, String fee, String changeAddress) {
+		JSONObject postData = new JSONObject();
+		try {
+			postData.put("fee_per_kb", fee);
+			postData.put("surplus_refund_address", changeAddress);
+			JSONArray inputAddresses = new JSONArray();
+			for (String addr : inputs){
+				inputAddresses.put(addr);
+			}
+			
+			postData.put("input_addresses", inputAddresses);
+			JSONObject outputAddresses = new JSONObject();
+			
+			outputAddresses.put(output, amount.longValue());
+			
+			postData.put("output_addresses", outputAddresses);
 		}
-		return hiddenAddresses;
+		catch(Exception e) {
+			ZLog.log("Exception build spend JSON: ", e);
+		}
+		
+		return postData;
 	}
-	***/
 
 }
+
+
+
+
+

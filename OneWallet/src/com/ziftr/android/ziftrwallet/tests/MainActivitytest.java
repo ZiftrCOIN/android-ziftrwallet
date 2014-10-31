@@ -156,6 +156,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 
 	//test if creating a request for sending coins provides response with to sign attributes
 	@UiThreadTest
+	
+	/*******
 	public void testSendCoinsRequest() throws InterruptedException{
 		createWallet(OWCoin.BTC);
 		OWAddress spendFrom = manager.createReceivingAddress(null, OWCoin.BTC, OWReceivingAddressesTable.VISIBLE_TO_USER);
@@ -188,6 +190,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		Thread.sleep(500);
 		assertTrue(manager.readHiddenUnspentAddresses(OWCoin.BTC).size() >= 1);
 	}
+	*********/
 
 	//test sending signed txn 
 	public void sendCoinTxn(JSONObject req, List<String> inputs, String sendToAddr, BigInteger sendingAmount){
@@ -199,7 +202,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		try {
 			OWDataSyncHelper.sendCoinsTransaction(OWCoin.BTC, req, sendingAmount, addresses);
 			ZLog.log("Abbbb");
-			assertTrue(manager.readVisibleAddress(OWCoin.BTC, "1DBb6HuozwS6esCGiaM5iB4xxoK759BYFW", false)!=null);
+			assertTrue(manager.readAddress(OWCoin.BTC, "1DBb6HuozwS6esCGiaM5iB4xxoK759BYFW", false)!=null);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
