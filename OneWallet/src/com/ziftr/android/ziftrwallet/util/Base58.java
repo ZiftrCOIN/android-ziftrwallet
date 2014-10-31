@@ -239,7 +239,7 @@ public class Base58 {
     		String encoded = encode((byte) 128, key.getPrivKeyBytesForAddressEncoding());
     		System.out.println("priv: " + ZiftrUtils.bytesToHexString(key.getPrivKeyBytes()));
 			System.out.println("encoded: " + encoded);
-			byte[] x = ZiftrUtils.stripVersionAndChecksum(decodeChecked(encoded));
+			byte[] x = ZiftrUtils.stripVersionAndChecksum(decodeChecked(encoded), 32);
 			System.out.println("decoded: " + (x.length) + "  " + ZiftrUtils.bytesToHexString(x));
 		} catch (OWAddressFormatException e) {
 			e.printStackTrace();

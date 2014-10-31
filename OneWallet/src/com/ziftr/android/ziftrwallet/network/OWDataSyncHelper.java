@@ -74,8 +74,8 @@ public class OWDataSyncHelper {
 		ZLog.forceFullLog(response);
 		if (request.getResponseCode() == 200){
 			try {
+				//OWWalletManager.getInstance().createSendingAddress(coin, output);
 				JSONObject jsonRes = new JSONObject(response);
-				
 				ZLog.log("Send coins step 1 response: ", jsonRes.toString());
 				
 				signSentCoins(coin, jsonRes);

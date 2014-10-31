@@ -511,9 +511,9 @@ public class ZiftrUtils {
 	 * @param wifPrivBytes
 	 * @return
 	 */
-	public static byte[] stripVersionAndChecksum(byte[] wifPrivBytes) {
-		byte[] privBytes = new byte[32];
-		System.arraycopy(wifPrivBytes, 1, privBytes, 0, 32);
+	public static byte[] stripVersionAndChecksum(byte[] wifPrivBytes, int size) {
+		byte[] privBytes = new byte[size];
+		System.arraycopy(wifPrivBytes, 1, privBytes, 0, size);
 		return privBytes;
 	}
 	
