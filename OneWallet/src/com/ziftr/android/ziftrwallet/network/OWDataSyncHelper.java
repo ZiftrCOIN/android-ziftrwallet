@@ -3,6 +3,7 @@ package com.ziftr.android.ziftrwallet.network;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -112,9 +113,48 @@ public class OWDataSyncHelper {
 			}
 		}
 	}
-	
 
-	
+
+	public static List<OWCoin> getBlockChainWallets(){
+		ZiftrNetworkManager.networkStarted();
+
+		List<OWCoin> supportedCoins = new ArrayList<OWCoin>();
+		
+		ZiftrNetRequest request = OWApi.buildGenericApiRequest(false, "/blockchains");
+		String response = request.sendAndWait();
+		if (request.getResponseCode() == 200){
+			JSONArray res;
+			try {
+				res = new JSONArray((new JSONObject(response)).getString("blockchains"));
+				for (int i=0; i< res.length(); i++){
+					JSONObject coinJson = res.getJSONObject(i);
+					OWCoin supportedCoin;
+					if (coinJson.getString("chain").contains("test")){
+						supportedCoin = OWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()) + "_TEST");
+					} else {
+						supportedCoin = OWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()));
+					}
+					supportedCoins.add(supportedCoin);
+					OWCoin.updateCoin(supportedCoin.toString(), coinJson.getString("default_fee_per_kb"), ZiftrUtils.hexStringToBytes(coinJson.getString("p2pkh_byte"))[0], 
+							ZiftrUtils.hexStringToBytes(coinJson.getString("p2sh_byte"))[0], ZiftrUtils.hexStringToBytes(coinJson.getString("priv_byte"))[0], Integer.parseInt(coinJson.getString("recommended_confirmations")), 
+							Integer.parseInt(coinJson.getString("seconds_per_block_generated")));
+						
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			ZLog.log(response);
+		}
+		ZiftrNetworkManager.networkStopped();
+		for (OWCoin x : supportedCoins){
+			ZLog.log(x.toString());
+		}
+		return supportedCoins;
+	}
+
+
 	public static void updateTransactionHistory(OWCoin coin) {
 		ZiftrNetworkManager.networkStarted();
 

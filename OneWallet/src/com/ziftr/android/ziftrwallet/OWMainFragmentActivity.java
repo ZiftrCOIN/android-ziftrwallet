@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +62,7 @@ import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSendCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
@@ -170,6 +170,9 @@ ZiftrNetworkHandler {
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
+	
+	/** available coins that the user can generate wallets for */
+	private List<OWCoin> availCoins;
 
 	/** Use this key to save which section of the drawer menu is open. */
 	private static final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
@@ -195,6 +198,7 @@ ZiftrNetworkHandler {
 	private OWCoin selectedCoin;
 	private ImageView syncButton; //the button in various fragments users can press to sync their data
 	private boolean isSyncing = false;
+	
 	
 
 	/**
@@ -313,9 +317,13 @@ ZiftrNetworkHandler {
 				}
 			}
 		}
+		
+		//load available coins from API blockchains
+		if (this.availCoins == null){
+			initAvailableCoins();
+		}
 
 		ZiftrNetworkManager.registerNetworkHandler(this);
-		
 	}
 
 	/**
@@ -999,9 +1007,12 @@ ZiftrNetworkHandler {
 		}
 		// Here we get all the coins that the user doesn't currently 
 		// have a wallet for because those are the ones we put in the new view.
-		Set<OWCoin> coinsNotInListCurrently = new HashSet<OWCoin>(
-				Arrays.asList(OWCoin.values()));
-		coinsNotInListCurrently.removeAll(userCurWallets);
+		Set<OWCoin> coinsNotInListCurrently = new HashSet<OWCoin>(availCoins);
+		for (OWCoin type : userCurWallets){
+			if (coinsNotInListCurrently.contains(type)){
+				coinsNotInListCurrently.remove(type);
+			}
+		}
 		Bundle b = new Bundle();
 		for (OWCoin type : coinsNotInListCurrently) {
 			b.putBoolean(type.toString(), true);
@@ -1011,6 +1022,23 @@ ZiftrNetworkHandler {
 				OWTags.ACCOUNTS_INNER);
 
 	}
+	
+	//initialize available coin currencies the user can choose to add
+	public void initAvailableCoins(){
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			@Override
+			public void run() {
+				availCoins = OWDataSyncHelper.getBlockChainWallets();
+				//if API call failed
+				if (availCoins.size() <= 0){
+					for (OWCoin coin : OWCoin.TYPES){
+						availCoins.add(coin);
+					}
+				}
+			}
+		});
+	}
+
 	/**
 	 * Open View for selecting fiat currency in settings
 	 */
@@ -1282,7 +1310,7 @@ ZiftrNetworkHandler {
 			}
 		});
 	}
-
+	
 	@Override
 	public void handleNeutral(int requestCode) {
 		switch (requestCode) {
@@ -1560,7 +1588,6 @@ ZiftrNetworkHandler {
 		
 	}
 
-	
 	private synchronized void startSyncAnimation() {
 		isSyncing = true;
 		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
@@ -1573,7 +1600,6 @@ ZiftrNetworkHandler {
 			rotation.setRepeatCount(0);
 		}
 	}
-	
 	
 	private synchronized void stopSyncAnimation() {
 		isSyncing = false;

@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
+import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
@@ -213,9 +214,16 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getAmountToSendFromEditText());
 		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getFeeFromEditText());
 		String addressToSendTo = this.addressEditText.getText().toString();
+		String addressName = labelEditText.getText().toString();
+		OWWalletManager manager = getWalletManager();
 		try {
-			getWalletManager().sendCoins(getSelectedCoin(), addressToSendTo, 
+			manager.handleSendCoins(getSelectedCoin(), addressToSendTo, 
 					amountSending, feeSending, passphrase);
+			if (manager.readAddress(getSelectedCoin(), addressToSendTo, false) != null){
+				manager.updateAddressLabel(getSelectedCoin(), addressToSendTo, addressName, false);
+			} else {
+				manager.createSendingAddress(getSelectedCoin(), addressToSendTo, addressName);
+			}
 		} catch(OWAddressFormatException afe) {
 			this.getOWMainActivity().alertUser(
 					"The address is not formatted correctly. Please try again. ", 

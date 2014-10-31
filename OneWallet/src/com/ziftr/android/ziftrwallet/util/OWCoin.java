@@ -25,24 +25,24 @@ public class OWCoin implements OWCurrency {
 	/** When using bundles, this can be used to store a specific coin type. */
 	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
 
-	public static final OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin,
+	public static OWCoin BTC = new OWCoin("0.0001", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin,
 			(byte) 0, (byte) 5, (byte) 128, 6, 600, "Bitcoin Signed Message:\n");
-	public static final OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "ltc", "main", "litecoin", 8, R.drawable.logo_litecoin,
+	public static OWCoin LTC = new OWCoin("0.0010", "LTC", "Litecoin", "ltc", "main", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 48, (byte) 5, (byte) 176, 12, 150, "Litecoin Signed Message:\n");
 
-	public static final OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin,
+	public static OWCoin PPC = new OWCoin("0.0100", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 55, (byte) 117, (byte) 183, 6, 600, "PPCoin Signed Message:\n");
 	public static final OWCoin DOGE = new OWCoin("1.0000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 30, (byte) 22, (byte) 158, 6, 60, "Dogecoin Signed Message:\n");
 
-	public static final OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
+	public static OWCoin BTC_TEST = new OWCoin("0.0000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
 			// (byte) 0, (byte) 5, (byte) 128, 6);
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "Bitcoin Signed Message:\n");
-	public static final OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
+	public static OWCoin LTC_TEST = new OWCoin("0.0000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 111, (byte) 196, (byte) 239, 12, 150, "Litecoin Signed Message:\n");
-	public static final OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin,
+	public static OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "PPCoin Signed Message:\n");
-	public static final OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
+	public static OWCoin DOGE_TEST = new OWCoin("0.0000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 113, (byte) 196, (byte) 241, 6, 60, "Dogecoin Signed Message:\n");
 
 	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE, BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
@@ -277,6 +277,16 @@ public class OWCoin implements OWCurrency {
 	 */
 	public String getSigningMessageMagic() {
 		return signingMessageMagic;
+	}
+	public static void updateCoin(String coinToUpdate, String default_fee_per_kb, byte pubKeyHashPrefix, byte scriptHashPrefix, 
+			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve){
+		OWCoin coin = OWCoin.valueOf(coinToUpdate);
+		coin.defaultFeePerKb = default_fee_per_kb;
+		coin.pubKeyHashPrefix = pubKeyHashPrefix;
+		coin.scriptHashPrefix = scriptHashPrefix;
+		coin.privKeyPrefix = privKeyPrefix;
+		coin.numRecommendedConfirmations = numRecommendedConfirmations;
+		coin.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
 	}
 
 }

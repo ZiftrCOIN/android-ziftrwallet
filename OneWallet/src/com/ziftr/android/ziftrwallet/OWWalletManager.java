@@ -205,7 +205,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	 * @throws AddressFormatException
 	 * @throws InsufficientMoneyException
 	 */
-	public void sendCoins(final OWCoin coinId, final String address, final BigInteger value, 
+	public void handleSendCoins(final OWCoin coinId, final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
 		
@@ -286,10 +286,8 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 				}
 				***************************************/
 				
-				
 			}
 		});
-
 	}
 	
 	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, int hidden) {

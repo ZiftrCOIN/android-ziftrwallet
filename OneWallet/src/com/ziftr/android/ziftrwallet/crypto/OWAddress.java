@@ -153,7 +153,7 @@ public class OWAddress implements OWSearchableListItem {
 	public OWAddress(OWCoin coinId, String address) throws OWAddressFormatException {
 		// Checksum is validated in the decoding
 		byte[] allData = Base58.decodeChecked(address);
-		byte[] hash160 = ZiftrUtils.stripVersionAndChecksum(allData);
+		byte[] hash160 = ZiftrUtils.stripVersionAndChecksum(allData, 20);
 
 		this.initialize(coinId, allData[0], hash160);
 	}
