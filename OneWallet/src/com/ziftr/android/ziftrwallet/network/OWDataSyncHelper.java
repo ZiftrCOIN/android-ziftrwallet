@@ -1,7 +1,9 @@
 package com.ziftr.android.ziftrwallet.network;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -73,7 +75,9 @@ public class OWDataSyncHelper {
 				String signingAddressPublic = toSign.optString("address");
 				
 				//TODO -remove when api works
-				signingAddressPublic = "n1DmeLFrEiR2AUZZfqbwRgMJCKS1CF4ACF";
+				if(signingAddressPublic == null || signingAddressPublic.length() == 0 || signingAddressPublic.equals("null")) {
+					signingAddressPublic = "n1DmeLFrEiR2AUZZfqbwRgMJCKS1CF4ACF";
+				}
 				
 				OWAddress signingAddress = OWWalletManager.getInstance().readAddress(coin, signingAddressPublic, true);
 				OWECKey key = signingAddress.getKey();
@@ -103,10 +107,15 @@ public class OWDataSyncHelper {
 			try {
 				//update DB
 				
+				//TODO -this is so in-efficient, but for now, just update transaction history again
+				updateTransactionHistory(coin);
+				
+				/***
 				JSONObject responseJson = new JSONObject(response);
 				
 				OWTransaction completedTransaction = createTransaction(coin, responseJson, inputs);
 				OWWalletManager.getInstance().updateTransaction(completedTransaction); //TODO -we should change it so that the create will automatically do this if needed
+				*****/
 			}
 			catch(Exception e) {
 				ZLog.log("Exception saving spend transaction: ", e);
@@ -175,16 +184,22 @@ public class OWDataSyncHelper {
 		ZiftrNetRequest request = OWApi.buildTransactionsRequest(coin.getType(), coin.getChain(), addresses);
 		String response = request.sendAndWait();
 
-		ZLog.log("Transaction history response(" + request.getResponseCode() + "): ", response);
+		ZLog.forceFullLog("Transaction history response(" + request.getResponseCode() + "): " + response);
 		if(request.getResponseCode() == 200) {
 			try {
-				JSONArray transactions = new JSONArray(response);
+				
+				HashMap<String, JSONObject> parsedTransactions = new HashMap<String, JSONObject>();
+				
+				JSONObject responseJson = new JSONObject(response);
+				JSONArray transactions = responseJson.getJSONArray("transactions");
 
 				//we now have an array of transactions with a transaction hash and a url to get more data about the transaction
-				for(int x = 0; x < transactions.length(); x++) {
+				for(int x = transactions.length() -1; x >= 0; x--) {
 					JSONObject transactionJson = transactions.getJSONObject(x);
+					String txid = transactionJson.getString("txid");
+					parsedTransactions.put(txid, transactionJson);
 
-					OWTransaction transaction = createTransaction(coin, transactionJson, addresses);
+					OWTransaction transaction = createTransaction(coin, transactionJson, addresses, parsedTransactions);
 					OWWalletManager.getInstance().updateTransaction(transaction); //TODO -we should change it so that the create will automatically do this if needed
 				}
 
@@ -197,26 +212,70 @@ public class OWDataSyncHelper {
 		}//end if response code = 200
 
 		ZiftrNetworkManager.networkStopped();
+		
+		ZiftrNetworkManager.dataUpdated();
 	}
 
 	
 	//creates transaction in local database from json response
-	private static OWTransaction createTransaction(OWCoin coin, JSONObject json, List<String> addresses) throws JSONException {
+	private static OWTransaction createTransaction(OWCoin coin, JSONObject json, List<String> addresses, HashMap<String, JSONObject> parsedTransactions) throws JSONException {
 
-		String hash = json.getString("hash");
-		//String time = json.getString("time_received");  //TODO -need to add this to transaction table
-		BigInteger fees = new BigInteger(json.getString("fee"));
+		String hash = json.getString("txid");
+		long time = json.optLong("time");
+		if(time == 0) {
+			//this happens when a transaction hasn't even been confirmed once
+			//so just use the current time
+			time = System.currentTimeMillis() / 1000; //server sends us seconds, so our hold over time should be formatted the same way
+		}
+		
+		//TODO -just setting this as zero for now, need to either get server to send this, or calculate it
+		//BigInteger fees = new BigInteger(json.getString("fee"));
+		BigInteger fees = new BigInteger("0");
+		
 		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs
-		long confirmations = json.getLong("num_confirmations");
+		long confirmations = json.optLong("confirmations");
 		ArrayList<String> displayAddresses = new ArrayList<String>();
 
-		JSONArray inputs = json.getJSONArray("inputs");
-		JSONArray outputs = json.getJSONArray("outputs");
+		JSONArray inputs = json.getJSONArray("vin");
+		JSONArray outputs = json.getJSONArray("vout");
 
 		for(int x = 0; x < inputs.length(); x++) {
 			JSONObject input = inputs.getJSONObject(x);
-			JSONArray inputAddresses = input.getJSONArray("addresses");
+			
 			boolean usedValue = false;
+			
+			//the json doesn't have an input address or value, so we have to look at previously parsed transactions
+			//and see if this input is the output of another, which would indicate that it is us spending coins
+			String inputTxid = input.getString("txid");
+			
+			JSONObject matchingTransaction = parsedTransactions.get(inputTxid);
+			if(matchingTransaction != null) {
+				//this means we're spending coins in this transaction
+				int voutIndex = input.getInt("vout");
+				JSONArray vouts = matchingTransaction.getJSONArray("vout");
+				JSONObject vout = vouts.optJSONObject(voutIndex);
+				if(vout != null) {
+					JSONObject scriptPubKey = vout.getJSONObject("scriptPubKey");
+					JSONArray inputAddresses = scriptPubKey.getJSONArray("addresses");
+					for(int y = 0; y < inputAddresses.length(); y++) {
+						String inputAddress = inputAddresses.getString(y);
+						if(addresses.contains(inputAddress)) {	
+							String outputValue = vout.getString("value");
+							if(!usedValue) {
+								usedValue = true;
+								//TODO -multiply hack until server fixes decimal issue
+								BigInteger outputValueInt = new BigInteger(outputValue);
+								value = value.subtract(outputValueInt);
+							}
+							displayAddresses.add(inputAddress);
+						}
+					}//end for y
+				}
+				
+			}
+			
+			/*******
+			JSONArray inputAddresses = input.getJSONArray("addresses");
 			for(int y = 0; y < inputAddresses.length(); y++) {
 				String inputAddress = inputAddresses.getString(y);
 				if(addresses.contains(inputAddress)) {	
@@ -228,19 +287,24 @@ public class OWDataSyncHelper {
 					displayAddresses.add(inputAddress);
 				}
 			}//end for y
+			**************/
+			
 		}//end for x
 
 		for(int x = 0; x < outputs.length(); x++) {
 			JSONObject output = outputs.getJSONObject(x);
-			JSONArray outputAddresses = output.getJSONArray("addresses");
+			JSONObject scriptPubKey = output.getJSONObject("scriptPubKey");
+			JSONArray outputAddresses = scriptPubKey.getJSONArray("addresses");
 			boolean usedValue = false;
 			for(int y = 0; y < outputAddresses.length(); y++) {
 				String outputAddress = outputAddresses.getString(y);
 				if(addresses.contains(outputAddress)) {
 					if(!usedValue) {
 						usedValue = true;
-						String outputValue = output.getString("output_value");
-						value.add(new BigInteger(outputValue));
+						String outputValue = output.getString("value");
+						//value.add(new BigInteger(outputValue));
+						BigInteger outputValueInt = new BigInteger(outputValue); 
+						value = value.add(outputValueInt);
 					}
 					displayAddresses.add(outputAddress);
 				}
@@ -248,7 +312,7 @@ public class OWDataSyncHelper {
 		}
 
 		//pick an address to use for displaying the note to the user
-		String note = null; //TODO -maybe make this an array or character build to hold notes for multiple strings
+		String note = ""; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		for(String noteAddress : displayAddresses) {
 			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true);
 			note = databaseAddress.getLabel();
@@ -257,7 +321,10 @@ public class OWDataSyncHelper {
 			}
 		}
 
-		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddresses, new OWSha256Hash(hash), note, confirmations);
+		
+		time = time * 1000;
+		
+		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddresses, new OWSha256Hash(hash), note, confirmations, time);
 
 		return transaction;
 	}

@@ -108,6 +108,9 @@ public class OWTransaction implements OWSearchableListItem {
 	 * @return the txNote
 	 */
 	public String getTxNote() {
+		if(txNote == null) {
+			return "";
+		}
 		return txNote;
 	}
 
@@ -211,6 +214,9 @@ public class OWTransaction implements OWSearchableListItem {
 	 * @return the displayAddress
 	 */
 	public List<String> getDisplayAddresses() {
+		if(displayAddresses == null) {
+			return new ArrayList<String>();
+		}
 		return displayAddresses;
 	}
 

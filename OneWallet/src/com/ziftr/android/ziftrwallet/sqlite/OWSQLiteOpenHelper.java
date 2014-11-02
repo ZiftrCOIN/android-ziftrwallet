@@ -433,9 +433,9 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param displayAddress - See {@link OWTransaction}
 	 */
 	public OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
-			BigInteger txFee, List<String> displayAddress) {
+			BigInteger txFee, List<String> displayAddress, long timestamp) {
 		return createTransaction(coinId, txAmount, txFee, 
-				displayAddress, new OWSha256Hash(""), "", -1);
+				displayAddress, new OWSha256Hash(""), "", -1, timestamp);
 	}
 
 	/**
@@ -452,13 +452,13 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public synchronized OWTransaction createTransaction(OWCoin coinId, BigInteger txAmount,
 			BigInteger txFee, List<String> displayAddresses, OWSha256Hash hash, 
-			String note, long numConfirmations) {
-		OWTransaction tx = new OWTransaction(coinId, note, System.currentTimeMillis() / 100, txAmount);
+			String note, long numConfirmations, long timestamp) {
+		OWTransaction tx = new OWTransaction(coinId, note, timestamp / 1000, txAmount);
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);
-		//since the mock server is sending txn for address that isnt in our db, we comment this so that this throws exception downloading transactions
-		//tx.setTxFee(txFee);
+		
+		tx.setTxFee(txFee);
 		this.transactionsTable.insertTx(tx, getWritableDatabase());
 		return tx;
 	}

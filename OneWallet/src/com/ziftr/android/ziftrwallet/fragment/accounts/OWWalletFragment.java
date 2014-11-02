@@ -93,7 +93,17 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 
 		return this.rootView;
 	}
+	
+	
+	
 
+
+	@Override
+	public void onDataUpdated() {
+		this.initializeTxListView();
+	}
+	
+	
 
 	private void initializeTxListView() {
 		// TODO make this non-UI blocking
