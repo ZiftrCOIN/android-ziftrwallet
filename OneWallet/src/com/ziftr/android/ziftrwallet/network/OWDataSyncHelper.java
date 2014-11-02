@@ -74,11 +74,6 @@ public class OWDataSyncHelper {
 	
 				String signingAddressPublic = toSign.optString("address");
 				
-				//TODO -remove when api works
-				if(signingAddressPublic == null || signingAddressPublic.length() == 0 || signingAddressPublic.equals("null")) {
-					signingAddressPublic = "n1DmeLFrEiR2AUZZfqbwRgMJCKS1CF4ACF";
-				}
-				
 				OWAddress signingAddress = OWWalletManager.getInstance().readAddress(coin, signingAddressPublic, true);
 				OWECKey key = signingAddress.getKey();
 	
