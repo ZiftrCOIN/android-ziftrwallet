@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
+import com.ziftr.android.ziftrwallet.crypto.OWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
@@ -74,17 +75,23 @@ public class OWDataSyncHelper {
 	
 				String signingAddressPublic = toSign.optString("address");
 				
+				ZLog.log("Signing a transaction with address: ", signingAddressPublic);
+				
 				OWAddress signingAddress = OWWalletManager.getInstance().readAddress(coin, signingAddressPublic, true);
 				OWECKey key = signingAddress.getKey();
-	
-				toSign.put("pub_key", ZiftrUtils.bytesToHexString(key.getPubKey()));
+
+				toSign.put("pubkey", ZiftrUtils.bytesToHexString(key.getPubKey()));
 	
 				OWSha256Hash hash = new OWSha256Hash(toSign.getString("tosign")); 
 				
-				String rHex = ZiftrUtils.bigIntegerToString(key.sign(hash).r, 32);
+				OWECDSASignature signature = key.sign(hash);
+				
+				//signature.encodeToDER();
+				
+				String rHex = ZiftrUtils.bigIntegerToString(signature.r, 32);
 				toSign.put("r", rHex);
 				
-				String sHex = ZiftrUtils.bigIntegerToString(key.sign(hash).s, 32);
+				String sHex = ZiftrUtils.bigIntegerToString(signature.s, 32);
 				toSign.put("s", sHex);
 				
 				ZLog.log(toSign);
@@ -98,6 +105,7 @@ public class OWDataSyncHelper {
 		ZiftrNetRequest signingRequest = OWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), serverResponse);
 		
 		String response = signingRequest.sendAndWait();
+		ZLog.log("Response from signing: ", response);
 		if(signingRequest.getResponseCode() == 202){
 			try {
 				//update DB
@@ -116,6 +124,7 @@ public class OWDataSyncHelper {
 				ZLog.log("Exception saving spend transaction: ", e);
 			}
 		}
+		
 	}
 
 

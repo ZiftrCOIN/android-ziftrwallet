@@ -220,17 +220,18 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		//use from hidden change addresses first
 		List<OWAddress> hiddenAddresses = this.readHiddenAddresses(coinId);
 		for (OWAddress addr : hiddenAddresses){
-			if (addr.getLastKnownBalance() > 0){
+			//if (addr.getLastKnownBalance() > 0){
 				amountLeftToSend -= addr.getLastKnownBalance();
 				inputs.add(addr.getAddress());
 				usingTheseHiddenAddresses.add(addr);
 				addr.setSpentFrom(OWReceivingAddressesTable.SPENT_FROM);
-			}
+			//}
+				//TODO -put if back when values work properly
 			if (amountLeftToSend <= 0){
 				break;
 			}
 		}
-		List<OWAddress> inputAddresses = this.readAllVisibleAddresses(coinId);
+		List<OWAddress> inputAddresses = this.readAllVisibleAddresses(coinId, true);
 		for (OWAddress addr : inputAddresses){
 			if (amountLeftToSend <= 0){
 				break;
