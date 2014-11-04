@@ -202,7 +202,6 @@ public class OWDataSyncHelper {
 					JSONObject transactionJson = transactions.getJSONObject(x);
 					String txid = transactionJson.getString("txid");
 					parsedTransactions.put(txid, transactionJson);
-
 					OWTransaction transaction = createTransaction(coin, transactionJson, addresses, parsedTransactions);
 					OWWalletManager.getInstance().updateTransaction(transaction); //TODO -we should change it so that the create will automatically do this if needed
 				}
@@ -223,7 +222,6 @@ public class OWDataSyncHelper {
 	
 	//creates transaction in local database from json response
 	private static OWTransaction createTransaction(OWCoin coin, JSONObject json, List<String> addresses, HashMap<String, JSONObject> parsedTransactions) throws JSONException {
-
 		String hash = json.getString("txid");
 		long time = json.optLong("time");
 		if(time == 0) {
@@ -231,7 +229,6 @@ public class OWDataSyncHelper {
 			//so just use the current time
 			time = System.currentTimeMillis() / 1000; //server sends us seconds, so our hold over time should be formatted the same way
 		}
-		
 		//TODO -just setting this as zero for now, need to either get server to send this, or calculate it
 		//BigInteger fees = new BigInteger(json.getString("fee"));
 		BigInteger fees = new BigInteger("0");
@@ -239,6 +236,11 @@ public class OWDataSyncHelper {
 		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs
 		long confirmations = json.optLong("confirmations");
 		ArrayList<String> displayAddresses = new ArrayList<String>();
+		ArrayList<String> myHiddenAddresses = new ArrayList<String>();
+		
+		for (OWAddress addr : OWWalletManager.getInstance().readHiddenAddresses(coin)){
+			myHiddenAddresses.add(addr.getAddress());
+		}
 
 		JSONArray inputs = json.getJSONArray("vin");
 		JSONArray outputs = json.getJSONArray("vout");
@@ -247,7 +249,6 @@ public class OWDataSyncHelper {
 			JSONObject input = inputs.getJSONObject(x);
 			
 			boolean usedValue = false;
-			
 			//the json doesn't have an input address or value, so we have to look at previously parsed transactions
 			//and see if this input is the output of another, which would indicate that it is us spending coins
 			String inputTxid = input.getString("txid");
@@ -263,7 +264,7 @@ public class OWDataSyncHelper {
 					JSONArray inputAddresses = scriptPubKey.getJSONArray("addresses");
 					for(int y = 0; y < inputAddresses.length(); y++) {
 						String inputAddress = inputAddresses.getString(y);
-						if(addresses.contains(inputAddress)) {	
+						if(addresses.contains(inputAddress)) {
 							String outputValue = vout.getString("value");
 							if(!usedValue) {
 								usedValue = true;
@@ -271,9 +272,18 @@ public class OWDataSyncHelper {
 								BigInteger outputValueInt = new BigInteger(outputValue);
 								value = value.subtract(outputValueInt);
 							}
-							displayAddresses.add(inputAddress);
 						}
 					}//end for y
+					
+					//get the address we sent to for displaying
+					JSONArray addressesSentTo = outputs.optJSONObject(x).getJSONObject("scriptPubKey").getJSONArray("addresses");
+					for(int y = 0; y < addressesSentTo.length(); y++) {
+						String sentToAddr = addressesSentTo.getString(y);
+						OWAddress sentTo = OWWalletManager.getInstance().readAddress(coin, sentToAddr, false);
+						if (sentTo != null && !myHiddenAddresses.contains(sentToAddr)){
+							displayAddresses.add(sentTo.getAddress());
+						}
+					}
 				}
 				
 			}
@@ -310,24 +320,27 @@ public class OWDataSyncHelper {
 						BigInteger outputValueInt = new BigInteger(outputValue); 
 						value = value.add(outputValueInt);
 					}
-					displayAddresses.add(outputAddress);
 				}
 			}
 		}
-
-		//pick an address to use for displaying the note to the user
-		String note = ""; //TODO -maybe make this an array or character build to hold notes for multiple strings
-		for(String noteAddress : displayAddresses) {
-			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, true);
-			note = databaseAddress.getLabel();
-			if(note != null && note.length() > 0) {
-				break;
-			}
+		if (displayAddresses.size() == 0){
+			//API doesn't expose who sent to us addresses
+			displayAddresses.add("unknown");
 		}
 
-		
+		//pick an address to use for displaying the note to the user
+		String note = "unknown"; //TODO -maybe make this an array or character build to hold notes for multiple strings
+		for(String noteAddress : displayAddresses) {
+			//we only see notes for addresses we sent to since the api doesn't expose addresses of who sent to us
+			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, false);
+			if (databaseAddress != null){
+			if(databaseAddress.getLabel() != null && databaseAddress.getLabel().length() > 0) {
+				note = databaseAddress.getLabel();
+				break;
+				}
+			}
+		}
 		time = time * 1000;
-		
 		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddresses, new OWSha256Hash(hash), note, confirmations, time);
 
 		return transaction;

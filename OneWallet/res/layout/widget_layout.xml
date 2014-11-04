@@ -20,8 +20,7 @@
             android:layout_height="@dimen/ow_medium_icon_side_length"
             android:layout_centerVertical="true"
             android:layout_marginLeft="6dp"
-            android:layout_marginRight="6dp"
-            android:src="@drawable/logo_bitcoin" />
+            android:layout_marginRight="6dp" />
 
         <TextView
             android:id="@+id/widget_coin"

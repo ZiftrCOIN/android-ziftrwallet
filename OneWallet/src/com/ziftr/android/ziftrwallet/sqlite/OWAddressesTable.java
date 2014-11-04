@@ -183,13 +183,17 @@ public abstract class OWAddressesTable extends OWCoinRelativeTable {
 		db.update(getTableName(coin), values, whereClause, null);
 	}
 	
-	
+	/**
+	 * 
+	 * @param coin
+	 * @param db
+	 * @return
+	 */
 	protected ArrayList<String> getAddressesList(OWCoin coin, SQLiteDatabase db) {
 		
 		ArrayList<String> addresses = new ArrayList<String>();
 		
 		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin);
-		
 		Cursor cursor = db.rawQuery(sql, null);
 		if(cursor.moveToFirst()) {
 			do {

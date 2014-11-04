@@ -321,7 +321,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 
 		OWAddressesTable correctTable = tx.getTxAmount().compareTo(BigInteger.ZERO) >= 0 ? 
 				this.receivingAddressesTable : this.sendingAddressesTable;
-
+		
 		tx.setDisplayAddresses(this.parseDisplayAddresses(coinId, 
 				c.getString(c.getColumnIndex(COLUMN_DISPLAY_ADDRESSES)), db, correctTable));
 
