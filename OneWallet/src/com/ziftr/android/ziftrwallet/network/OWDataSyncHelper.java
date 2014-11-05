@@ -1,6 +1,5 @@
 package com.ziftr.android.ziftrwallet.network;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
