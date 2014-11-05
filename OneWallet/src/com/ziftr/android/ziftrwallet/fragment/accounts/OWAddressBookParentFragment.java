@@ -247,8 +247,10 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 					}
 
 					changeCoinStartedFromProgram.set(true);
-					coinValEditText.setText(OWCoin.formatCoinAmount(
-							getSelectedCoin(), newCoinVal).toPlainString());
+					if (newCoinVal.compareTo(new BigDecimal("0"))!=0){
+						coinValEditText.setText(OWCoin.formatCoinAmount(
+								getSelectedCoin(), newCoinVal).toPlainString());
+					}
 					changeCoinStartedFromProgram.set(false);
 				}
 			}

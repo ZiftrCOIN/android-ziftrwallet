@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.OWWalletManager;
@@ -247,12 +246,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 					"error_in_send_dialog");
 			return;
 		}
-		Toast.makeText(getOWMainActivity(), getSelectedCoin().toString() + " Sent!", Toast.LENGTH_LONG).show();
-		// To exit out of the send coins fragment
-		Activity a = getActivity();
-		if (a != null) {
-			a.onBackPressed();
-		}
+
 	}
 
 	/**
@@ -376,8 +370,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		changeCoinStartedFromProgram.set(true);
 		if (coinAmountEditText.getText().toString().isEmpty()) {
-			coinAmountEditText.setText("0.00");
-			fiatAmountEditText.setText("0.00");
+			coinAmountEditText.setText("0");
+			fiatAmountEditText.setText("0");
 		}
 		changeCoinStartedFromProgram.set(false);
 	}

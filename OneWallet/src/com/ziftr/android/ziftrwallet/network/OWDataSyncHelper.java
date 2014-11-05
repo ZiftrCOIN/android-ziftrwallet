@@ -275,11 +275,11 @@ public class OWDataSyncHelper {
 					}//end for y
 					
 					//get the address we sent to for displaying
-					JSONArray addressesSentTo = outputs.optJSONObject(x).getJSONObject("scriptPubKey").getJSONArray("addresses");
+					JSONArray addressesSentTo = outputs.optJSONObject(voutIndex).getJSONObject("scriptPubKey").getJSONArray("addresses");
 					for(int y = 0; y < addressesSentTo.length(); y++) {
 						String sentToAddr = addressesSentTo.getString(y);
 						OWAddress sentTo = OWWalletManager.getInstance().readAddress(coin, sentToAddr, false);
-						if (sentTo != null && !myHiddenAddresses.contains(sentToAddr)){
+						if (sentTo != null && !myHiddenAddresses.contains(sentToAddr) && !displayAddresses.contains(sentTo.getAddress())){
 							displayAddresses.add(sentTo.getAddress());
 						}
 					}
