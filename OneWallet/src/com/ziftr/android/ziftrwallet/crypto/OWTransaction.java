@@ -11,7 +11,6 @@ import android.annotation.SuppressLint;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletTransactionListAdapter;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * This class is just a data holder for the {@link OWWalletTransactionListAdapter}.
@@ -190,10 +189,11 @@ public class OWTransaction implements OWSearchableListItem {
 	 * @return True if this transaction type is pending
 	 */
 	public Boolean isPending() {
-		// TODO should this be -1 or 0?
-		ZLog.log("numConfs: " + this.numConfirmations);
-		return -1 <= this.numConfirmations && 
-				this.numConfirmations < this.coinId.getNumRecommendedConfirmations();
+		if(this.numConfirmations < this.coinId.getNumRecommendedConfirmations()) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**

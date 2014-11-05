@@ -263,6 +263,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 		this.sendCoinsContainingView = this.rootView.findViewById(R.id.sendCoinsContainingView);
 
+		//note the strange way of initializing the text views
+		//this is because due to xml reuse in the layout files all the edit texts have the same id
+		//so they need to be dug out and explicitly have a unique id set
+		//otherwise their contents will not be stored automatically during a suspend/resume cycle
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(OWTags.OW_EDIT_TEXT);
 		coinAmountEditText.setId(R.id.ow_send_coin_amount);
