@@ -239,7 +239,7 @@ public class OWTransaction implements OWSearchableListItem {
 			return "";
 		} else {
 			StringBuilder sb = new StringBuilder();
-			sb.append(",");
+			//sb.append(","); why did we want a comma in the front? it gets interpreted as an empty address later
 			for (String address : this.getDisplayAddresses()) {
 				sb.append(address).append(",");
 			}
