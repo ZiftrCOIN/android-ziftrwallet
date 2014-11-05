@@ -1028,16 +1028,26 @@ ZiftrNetworkHandler {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				//availCoins = OWDataSyncHelper.getBlockChainWallets();
+				availCoins = OWDataSyncHelper.getBlockChainWallets();
 				//if API call failed
-				//if (availCoins.size() <= 0){
-				availCoins = new ArrayList<OWCoin>();
+				if (availCoins.size() <= 0){
+					availCoins = new ArrayList<OWCoin>();
 					for (OWCoin coin : OWCoin.TYPES){
 						availCoins.add(coin);
 					}
-				//}
+				}
+				initMarketValues();
 			}
 		});
+	}
+	
+	//update currency exchange rates
+	public void initMarketValues(){
+		OWFiat selectedFiat =OWPreferencesUtils.getFiatCurrency(this);
+		for (OWCoin coin: this.availCoins){
+			String val = OWDataSyncHelper.getMarketValue(coin.toString(), selectedFiat.getCode());
+			OWConverter.updateConvertRate(coin, val);
+		}
 	}
 
 	/**

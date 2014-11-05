@@ -150,7 +150,6 @@ public class OWDataSyncHelper {
 					supportedCoins.add(supportedCoin);
 					
 					if(supportedCoin != null) {
-						String coin = supportedCoin.toString(); //TODO why are we converting a coin object to a string then calling a static method?...
 						String defaultFee = coinJson.getString("default_fee_per_kb");
 						int pubKeyPrefix = coinJson.getInt("p2pkh_byte");
 						int scriptHashPrefix = coinJson.getInt("p2sh_byte");
@@ -175,6 +174,27 @@ public class OWDataSyncHelper {
 			ZLog.log(x.toString());
 		}
 		return supportedCoins;
+	}
+	
+	public static String getMarketValue(String type, String fiat){
+		ZiftrNetworkManager.networkStarted();
+		String val = "";
+		ZiftrNetRequest request = OWApi.buildMarketValueRequest(type, fiat);
+		String response = request.sendAndWait();
+		if (request.getResponseCode() == 200){
+			//TODO when api market_value call works
+		} else {
+			String dummy_res = "{\"currency_to\": \"usd\",\"currency_from\": \"btc/main\",\"exchange_rate\": 40000, \"exchange_rate_divisor\": 100 }";
+			try {
+				JSONObject res = new JSONObject(dummy_res);
+				BigDecimal usdRate = new BigDecimal(res.getLong("exchange_rate") / res.getLong("exchange_rate_divisor"));
+				val = usdRate.toPlainString();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		ZiftrNetworkManager.networkStopped();
+		return val;
 	}
 
 

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OWConverter {
-	private static final Map<OWCurrency, BigDecimal> convertMap;
+	private static Map<OWCurrency, BigDecimal> convertMap;
 	static {
 		// TODO need to get these values from some sort of an API
 		Map<OWCurrency, BigDecimal> cMap = new HashMap<OWCurrency, BigDecimal>();
@@ -26,7 +26,7 @@ public class OWConverter {
 		cMap.put(OWCoin.LTC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
 		cMap.put(OWCoin.PPC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
 		cMap.put(OWCoin.DOGE_TEST, new BigDecimal("0", MathContext.DECIMAL64));
-		convertMap = Collections.unmodifiableMap(cMap);
+		convertMap = cMap;
 	}
 
 	public static BigDecimal convert(BigDecimal amount, 
@@ -46,6 +46,10 @@ public class OWConverter {
 		return ZiftrUtils.bigDecToBigInt(convertTo, 
 				convert(ZiftrUtils.bigIntToBigDec(convertFrom, amount), 
 						convertFrom, convertTo));
+	}
+	
+	public static void updateConvertRate(OWCurrency curr, String usdEquiv){
+		convertMap.put(curr, new BigDecimal(usdEquiv, MathContext.DECIMAL64));
 	}
 
 }
