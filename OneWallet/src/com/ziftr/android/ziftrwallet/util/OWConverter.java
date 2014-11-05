@@ -18,12 +18,12 @@ public class OWConverter {
 
 		
 		cMap.put(OWCoin.BTC, new BigDecimal("622.06", MathContext.DECIMAL64));
-		cMap.put(OWCoin.LTC, new BigDecimal("8.60", MathContext.DECIMAL64));
+		cMap.put(OWCoin.LTC, new BigDecimal("3.65", MathContext.DECIMAL64));
 		cMap.put(OWCoin.PPC, new BigDecimal("1.38", MathContext.DECIMAL64));
 		cMap.put(OWCoin.DOGE, new BigDecimal("0.000227", MathContext.DECIMAL64));
 
 		cMap.put(OWCoin.BTC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
-		cMap.put(OWCoin.LTC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
+		cMap.put(OWCoin.LTC_TEST, new BigDecimal("3.65", MathContext.DECIMAL64));
 		cMap.put(OWCoin.PPC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
 		cMap.put(OWCoin.DOGE_TEST, new BigDecimal("0", MathContext.DECIMAL64));
 		convertMap = Collections.unmodifiableMap(cMap);
