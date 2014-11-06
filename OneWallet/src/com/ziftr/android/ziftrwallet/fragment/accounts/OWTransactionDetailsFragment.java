@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
-import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWEditState;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
@@ -146,7 +145,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 	private void populateAmount() {
 		BigInteger baseAmount = this.txItem.getTxAmount();
 		BigDecimal amountValue = ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
-		amount.setText(OWCoin.formatCoinAmount(txItem.getCoinId(), amountValue).toPlainString());
+		amount.setText(txItem.getCoinId().getFormattedAmount(amountValue));
 		if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
 			// This means the tx is sent (relative to user)
 			this.amountLabel.setText("Amount Sent");

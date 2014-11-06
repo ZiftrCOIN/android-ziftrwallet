@@ -14,7 +14,6 @@ import android.widget.ImageView;
 
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.util.OWBoolean;
-import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
@@ -248,8 +247,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 
 					changeCoinStartedFromProgram.set(true);
 					if (newCoinVal.compareTo(new BigDecimal("0"))!=0){
-						coinValEditText.setText(OWCoin.formatCoinAmount(
-								getSelectedCoin(), newCoinVal).toPlainString());
+						coinValEditText.setText(getSelectedCoin().getFormattedAmount(newCoinVal));
 					}
 					changeCoinStartedFromProgram.set(false);
 				}

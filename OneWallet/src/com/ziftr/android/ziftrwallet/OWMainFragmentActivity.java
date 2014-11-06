@@ -1364,7 +1364,7 @@ ZiftrNetworkHandler {
 		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.AVAILABLE);
 		BigDecimal walletBalance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
 
-		walletBalanceTextView.setText(OWCoin.formatCoinAmount(this.selectedCoin, walletBalance).toPlainString());
+		walletBalanceTextView.setText(this.selectedCoin.getFormattedAmount(walletBalance));
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBalance, this.selectedCoin, selectedFiat);

@@ -1,6 +1,5 @@
 package com.ziftr.android.ziftrwallet.fragment.accounts;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
-import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
@@ -110,9 +108,8 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWSe
 			txTimeTextView.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 
 			TextView txAmount = (TextView) convertView.findViewById(R.id.txAmount);
-			BigDecimal amt = OWCoin.formatCoinAmount(
-					txListItem.getCoinId(), txListItem.getTxAmount());
-			txAmount.setText(amt.toPlainString());
+			String amt = txListItem.getCoinId().getFormattedAmount(txListItem.getTxAmount());
+			txAmount.setText(amt);
 
 			OWFiat fiat = OWPreferencesUtils.getFiatCurrency(this.getContext());
 			

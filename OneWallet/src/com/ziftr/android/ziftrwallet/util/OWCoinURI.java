@@ -272,7 +272,7 @@ public class OWCoinURI {
 
 		if (amount != null) {
 			builder.append(QUESTION_MARK_SEPARATOR).append(FIELD_AMOUNT).append("=");
-			builder.append(OWCoin.formatCoinAmount(coinType, amount).toPlainString());
+			builder.append(coinType.getFormattedAmount(amount));
 			questionMarkHasBeenOutput = true;
 		}
 

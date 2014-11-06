@@ -399,8 +399,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		// Update the text in the total text view
 		TextView totalTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalTextView);
-		totalTextView.setText(OWCoin.formatCoinAmount(
-				getSelectedCoin(), total).toPlainString());
+		totalTextView.setText(getSelectedCoin().getFormattedAmount(total));
 
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(

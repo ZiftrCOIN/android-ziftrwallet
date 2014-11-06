@@ -136,7 +136,7 @@ public class OWAccountsFragment extends OWFragment {
 		
 		int resId = R.layout.accounts_currency_list_single_item;
 		BigDecimal amount = ZiftrUtils.bigIntToBigDec(id, this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
-		String balance = OWCoin.formatCoinAmount(id, amount).toPlainString();
+		String balance = id.getFormattedAmount(amount);
 		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(this.getActivity());
 		String fiatBalance = OWConverter.convert(amount, id, fiat).setScale(2, RoundingMode.HALF_DOWN).toPlainString();
 		if (id == OWCoin.BTC) {

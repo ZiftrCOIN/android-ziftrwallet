@@ -227,9 +227,11 @@ public class OWCoin implements OWCurrency {
 	 * @param toFormat - The BigDecimal to format.
 	 * @return as above
 	 */
-	public static BigDecimal formatCoinAmount(OWCoin coinType, BigDecimal toFormat) {
-		return ZiftrUtils.formatToNDecimalPlaces(
-				coinType.getNumberOfDigitsOfPrecision(), toFormat);
+	public String getFormattedAmount(BigDecimal amount) {
+		
+		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), amount);
+		
+		return coins.stripTrailingZeros().toPlainString();
 	}
 
 	/**
@@ -240,9 +242,12 @@ public class OWCoin implements OWCurrency {
 	 * @param toFormat - The BigDecimal to format.
 	 * @return as above
 	 */
-	public static BigDecimal formatCoinAmount(OWCoin coinType, BigInteger toFormat) {
-		return ZiftrUtils.formatToNDecimalPlaces(
-				coinType.getNumberOfDigitsOfPrecision(), new BigDecimal(toFormat, coinType.getNumberOfDigitsOfPrecision()));
+	public String getFormattedAmount(BigInteger amount) {
+		
+		BigDecimal toFormatAsDecimal = new BigDecimal(amount);
+		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), toFormatAsDecimal);
+		
+		return coins.stripTrailingZeros().toPlainString();
 	}
 
 	/**
