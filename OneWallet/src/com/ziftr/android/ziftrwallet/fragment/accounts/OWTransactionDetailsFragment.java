@@ -224,7 +224,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		
 		if (confirmed < totalConfirmations && screenWidth > this.status.getMeasuredWidth() * 3){
 			long estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
-			this.timeLeft.setText("Estimated Time: " + formatEstimatedTime(estimatedTime));
+			this.timeLeft.setText("ETC: " + formatEstimatedTime(estimatedTime));
 		}
 		//in theory a really old network, or a network with fast enough blocks, could have more blocks than an int can hold
 		//however even in this case it's needed confirmations would still be a smaller number
@@ -256,7 +256,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		estimatedTime = estimatedTime % 60;
 		sb.append (minutes + " minutes");
 		if (estimatedTime != 0) {
-			sb.append(estimatedTime + ", seconds");
+			sb.append(", " + estimatedTime + " seconds");
 		}
 		return sb.toString();
 	}

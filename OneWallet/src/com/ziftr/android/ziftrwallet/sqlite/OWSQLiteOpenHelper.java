@@ -63,8 +63,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		/**
 		 * Balance that can be safely used to create new spends. This is whatever the default coin selector would
-		 * make available, which by default means transaction outputs with at least 1 confirmation and pending
-		 * transactions created by our own wallet which have been propagated across the network.
+		 * make available, which by default means all confirmed transaction outputs minus pending spend transactions.
 		 */
 		AVAILABLE
 	}
@@ -535,7 +534,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		for (OWTransaction tx : txs) {
 			if (bType == BalanceType.AVAILABLE) {
-				if (!tx.isPending()) {
+				if (!tx.isPending() || tx.getTxAmount().compareTo(BigInteger.ZERO) == -1) {
 					balance = balance.add(tx.getTxAmount());
 				}
 			} else if (tx.isBroadcasted()) {
