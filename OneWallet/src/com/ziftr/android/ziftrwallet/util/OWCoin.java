@@ -107,7 +107,7 @@ public class OWCoin implements OWCurrency {
 	public String getDefaultFeePerKb() {
 		return this.defaultFeePerKb;
 	}
-
+	
 	/**
 	 * @return the shortTitle
 	 */

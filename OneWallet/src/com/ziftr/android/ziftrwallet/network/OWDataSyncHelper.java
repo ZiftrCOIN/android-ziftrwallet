@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet.network;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +25,8 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class OWDataSyncHelper {
 
 	
-	public static void sendCoins(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
-	
+	public static String sendCoins(OWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
+		String message = "";
 		ZLog.log("Sending " + amount + " coins to : ." + output);
 		ZiftrNetworkManager.networkStarted();
 		
@@ -48,25 +49,35 @@ public class OWDataSyncHelper {
 		ZiftrNetRequest request = OWApi.buildSpendRequest(coin.getType(), coin.getChain(), spendJson);
 		
 		String response = request.sendAndWait();
-		ZLog.forceFullLog(response);
-		if (request.getResponseCode() == 200){
-			try {
-				JSONObject jsonRes = new JSONObject(response);
-				
-				ZLog.log("Send coins step 1 response: ", jsonRes.toString());
-				
-				signSentCoins(coin, jsonRes, inputs, passphrase);
-			}catch(Exception e) {
-				ZLog.log("Exception send coin request: ", e);
-			}
+//		commented out since throws NPE if no internet
+//		ZLog.forceFullLog(response);
+		switch (request.getResponseCode()){
+			case 200:
+				try {
+					JSONObject jsonRes = new JSONObject(response);
+					
+					ZLog.log("Send coins step 1 response: ", jsonRes.toString());
+					
+					message = signSentCoins(coin, jsonRes, inputs, passphrase);
+				}catch(Exception e) {
+					ZLog.log("Exception send coin request: ", e);
+				}
+				break;
+			case 0:
+				ZLog.log("Unable to connect to server. Please check your connection.");
+				message = "Unable to connect to server. Please check your connection.";
+				break;
+			default:
+				message = "Error, something went wrong!";
+				break;
 		}
 
 		ZiftrNetworkManager.networkStopped();
+		return message;
 	}
 	
 	
-	
-	private static void signSentCoins(OWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
+	private static String signSentCoins(OWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
 		try {
 			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
 			for (int i=0; i< toSignList.length(); i++){
@@ -118,11 +129,13 @@ public class OWDataSyncHelper {
 				OWTransaction completedTransaction = createTransaction(coin, responseJson, inputs);
 				OWWalletManager.getInstance().updateTransaction(completedTransaction); //TODO -we should change it so that the create will automatically do this if needed
 				*****/
+				return "";
 			}
 			catch(Exception e) {
 				ZLog.log("Exception saving spend transaction: ", e);
 			}
 		}
+		return "error: " + signingRequest.getResponseMessage();
 		
 	}
 
@@ -222,7 +235,7 @@ public class OWDataSyncHelper {
 					String txid = transactionJson.getString("txid");
 					parsedTransactions.put(txid, transactionJson);
 					OWTransaction transaction = createTransaction(coin, transactionJson, addresses, parsedTransactions);
-					OWWalletManager.getInstance().updateTransaction(transaction); //TODO -we should change it so that the create will automatically do this if needed
+					OWWalletManager.getInstance().updateTransactionNumConfirmations(transaction); //TODO -we should change it so that the create will automatically do this if needed
 				}
 
 				//if we got this far without any exceptions, everything went good, so let the UI know the database has changed, so it can update
@@ -293,18 +306,7 @@ public class OWDataSyncHelper {
 							}
 						}
 					}//end for y
-					
-					//get the address we sent to for displaying
-					JSONArray addressesSentTo = outputs.optJSONObject(voutIndex).getJSONObject("scriptPubKey").getJSONArray("addresses");
-					for(int y = 0; y < addressesSentTo.length(); y++) {
-						String sentToAddr = addressesSentTo.getString(y);
-						OWAddress sentTo = OWWalletManager.getInstance().readAddress(coin, sentToAddr, false);
-						if (sentTo != null && !myHiddenAddresses.contains(sentToAddr) && !displayAddresses.contains(sentTo.getAddress())){
-							displayAddresses.add(sentTo.getAddress());
-						}
-					}
 				}
-				
 			}
 			
 			/*******
@@ -340,6 +342,16 @@ public class OWDataSyncHelper {
 						value = value.add(outputValueInt);
 					}
 				}
+				
+				//get the address we sent to for displaying
+				JSONArray addressesSentTo = outputs.optJSONObject(y).getJSONObject("scriptPubKey").getJSONArray("addresses");
+				for(int z = 0; z < addressesSentTo.length(); z++) {
+					String sentToAddr = addressesSentTo.getString(z);
+					OWAddress sentTo = OWWalletManager.getInstance().readAddress(coin, sentToAddr, false);
+					if (sentTo != null && !myHiddenAddresses.contains(sentToAddr) && !displayAddresses.contains(sentTo.getAddress())){
+						displayAddresses.add(sentTo.getAddress());
+					}
+				}
 			}
 		}
 		if (displayAddresses.size() == 0){
@@ -353,7 +365,7 @@ public class OWDataSyncHelper {
 			//we only see notes for addresses we sent to since the api doesn't expose addresses of who sent to us
 			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, false);
 			if (databaseAddress != null){
-			if(databaseAddress.getLabel() != null && databaseAddress.getLabel().length() > 0) {
+			if(databaseAddress.getLabel() != null && databaseAddress.getLabel().length() > 0 && !databaseAddress.getLabel().equals("unknown")) {
 				note = databaseAddress.getLabel();
 				break;
 				}

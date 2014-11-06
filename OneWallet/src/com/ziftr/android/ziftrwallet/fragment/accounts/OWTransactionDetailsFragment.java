@@ -127,7 +127,9 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(getActivity());
 		this.populateAmount();
 		this.populateCurrency();
-		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
+		
+		
+		this.confirmationFee.setText(txItem.getTxFee().toString());
 		this.currencyType.setText(fiat.getName());
 
 		Date date = new Date(this.txItem.getTxTime() * 1000);

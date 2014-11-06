@@ -133,8 +133,15 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWSe
 				txAmount.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
 				txAmountFiatEquiv.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
 			} else if (txListItem.getTxAmount().compareTo(BigInteger.ZERO) >= 0){
+				txTitleTextView.setTextColor(this.getContext().getResources().getColor(R.color.Black));
+				txTimeTextView.setTextColor(this.getContext().getResources().getColor(R.color.Black));
 				txAmount.setTextColor(this.getContext().getResources().getColor(R.color.Green));
 				txAmountFiatEquiv.setTextColor(this.getContext().getResources().getColor(R.color.Green));
+			} else {
+				txTitleTextView.setTextColor(this.getContext().getResources().getColor(R.color.Black));
+				txTimeTextView.setTextColor(this.getContext().getResources().getColor(R.color.Black));
+				txAmount.setTextColor(this.getContext().getResources().getColor(R.color.Black));
+				txAmountFiatEquiv.setTextColor(this.getContext().getResources().getColor(R.color.Black));
 
 			}
 

@@ -457,7 +457,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);
-		
 		tx.setTxFee(txFee);
 		this.transactionsTable.insertTx(tx, getWritableDatabase());
 		return tx;
@@ -520,7 +519,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized void updateTransaction(OWTransaction tx) {
 		this.transactionsTable.updateTransaction(tx, getWritableDatabase());
 	}
-
+	
 	public synchronized void updateTransactionNumConfirmations(OWTransaction tx) {
 		this.transactionsTable.updateTransactionNumConfirmations(tx, getReadableDatabase());
 	}

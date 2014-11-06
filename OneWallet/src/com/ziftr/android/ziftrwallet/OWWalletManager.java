@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
@@ -77,7 +78,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 	public static synchronized OWWalletManager getInstance() {
 		if (instance == null) {
-
 			Context context = OWApplication.getApplication();
 
 			// Here we build the path for the first time if have not yet already
@@ -95,7 +95,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 
 			instance = new OWWalletManager(context);
-		} 
+		}
 		return instance;
 	}
 
@@ -265,9 +265,21 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			@Override
 			public void run() {
 				
-				OWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
-				
-				
+				final String message = OWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
+					((OWMainFragmentActivity)context).runOnUiThread(new Runnable(){
+	
+						@Override
+						public void run() {
+							if (!message.isEmpty()){
+								((OWMainFragmentActivity)context).alertUser(message, "error_sending_coins");
+							} else {
+								((OWMainFragmentActivity)context).onBackPressed();
+								Toast.makeText(context, coinId.toString() + " sent!", Toast.LENGTH_LONG).show();
+							}
+						}
+					
+					});
+
 				/*********************************************
 				ZiftrNetRequest request = OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
 				String response = request.sendAndWait();

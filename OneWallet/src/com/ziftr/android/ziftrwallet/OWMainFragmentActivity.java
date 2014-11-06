@@ -62,6 +62,7 @@ import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSendCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
@@ -280,7 +281,7 @@ ZiftrNetworkHandler {
 
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance();
-		
+		this.walletManager.setActivity(this);
 		
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);

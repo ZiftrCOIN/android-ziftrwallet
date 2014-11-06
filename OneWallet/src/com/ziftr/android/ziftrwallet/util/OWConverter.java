@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OWConverter {
+	
+	public static final BigDecimal satoshi =  new BigDecimal(".00000001");
+
 	private static Map<OWCurrency, BigDecimal> convertMap;
 	static {
 		// TODO need to get these values from some sort of an API
@@ -50,6 +53,10 @@ public class OWConverter {
 	
 	public static void updateConvertRate(OWCurrency curr, String usdEquiv){
 		convertMap.put(curr, new BigDecimal(usdEquiv, MathContext.DECIMAL64));
+	}
+	
+	public static String convertFeeFromSatoshi(String fee){
+		return (new BigDecimal(fee).multiply(satoshi)).toPlainString();
 	}
 
 }
