@@ -15,7 +15,6 @@ import android.widget.RemoteViews;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ziftrwalletWidget extends AppWidgetProvider{
 	
@@ -68,7 +67,7 @@ public class ziftrwalletWidget extends AppWidgetProvider{
 			views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
 			views.setImageViewResource(R.id.widget_select_coin, selectedCurr.getLogoResId());
 			views.setTextViewText(R.id.widget_coin, selectedCurr.getLongTitle());
-			BigDecimal balance = ZiftrUtils.bigIntToBigDec(selectedCurr, OWWalletManager.getInstance().getWalletBalance(selectedCurr, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
+			BigDecimal balance = selectedCurr.getAmount(OWWalletManager.getInstance().getWalletBalance(selectedCurr, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
 			views.setTextViewText(R.id.widget_balance, selectedCurr.getFormattedAmount(balance));
 		} else {
 			OWPreferencesUtils.setWidgetCoin(context, null);

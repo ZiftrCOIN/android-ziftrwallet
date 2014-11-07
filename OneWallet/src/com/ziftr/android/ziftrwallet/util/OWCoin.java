@@ -219,13 +219,11 @@ public class OWCoin implements OWCurrency {
 		return this.getShortTitle();
 	}
 
+	
 	/**
-	 * A convenience method to format a BigDecimal. In Standard use,
-	 * one can just use standard BigDecimal methods and use this
-	 * right before formatting for displaying a coin value.
-	 * 
-	 * @param toFormat - The BigDecimal to format.
-	 * @return as above
+	 * gets the value of the amount as a string without trailing zeros
+	 * @param amount
+	 * @return
 	 */
 	public String getFormattedAmount(BigDecimal amount) {
 		
@@ -234,17 +232,15 @@ public class OWCoin implements OWCurrency {
 		return coins.stripTrailingZeros().toPlainString();
 	}
 
+	
 	/**
-	 * A convenience method to format a BigDecimal. In Standard use,
-	 * one can just use standard BigDecimal methods and use this
-	 * right before formatting for displaying a coin value.
-	 * 
-	 * @param toFormat - The BigDecimal to format.
-	 * @return as above
+	 * gets the value in coins of the atomic units, without trailing zeros
+	 * @param atmoicUnits 
+	 * @return 
 	 */
-	public String getFormattedAmount(BigInteger amount) {
+	public String getFormattedAmount(BigInteger atmoicUnits) {
 		
-		BigDecimal toFormatAsDecimal = new BigDecimal(amount);
+		BigDecimal toFormatAsDecimal = this.getAmount(atmoicUnits);
 		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), toFormatAsDecimal);
 		
 		return coins.stripTrailingZeros().toPlainString();
@@ -293,4 +289,32 @@ public class OWCoin implements OWCurrency {
 		this.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
 	}
 
+	
+	
+	@Override
+	public BigDecimal getAmount(BigInteger atomicUnits) {
+		return new BigDecimal(atomicUnits, this.getNumberOfDigitsOfPrecision());
+	}
+
+	
+	@Override
+	public BigInteger getAtomicUnits(BigDecimal amount) {
+		int precision = -1*this.getNumberOfDigitsOfPrecision();
+		
+		//note, this constructor is weird to me, but RTFM, it's for making small numbers and makes the scale negative
+		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
+		return amount.multiply(multiplier).toBigInteger();
+	}
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
 }

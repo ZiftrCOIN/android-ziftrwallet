@@ -36,7 +36,6 @@ import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZLog;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The section of the app where users fill out a form and click send 
@@ -210,9 +209,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 	public void onClickSendCoins(String passphrase) {
 		// Need to make sure amount to send is less than balance
-		BigInteger amountSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getAmountToSendFromEditText());
+		BigInteger amountSending = getSelectedCoin().getAtomicUnits(getAmountToSendFromEditText());
 		
-		BigInteger feeSending = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), getFeeFromEditText());
+		BigInteger feeSending = getSelectedCoin().getAtomicUnits(getFeeFromEditText());
 		
 		String addressToSendTo = this.addressEditText.getText().toString();
 		String addressName = labelEditText.getText().toString();

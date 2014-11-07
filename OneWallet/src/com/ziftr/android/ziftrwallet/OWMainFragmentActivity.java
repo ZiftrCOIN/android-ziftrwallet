@@ -1362,7 +1362,7 @@ ZiftrNetworkHandler {
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.AVAILABLE);
-		BigDecimal walletBalance = ZiftrUtils.bigIntToBigDec(this.selectedCoin, atomicUnits);
+		BigDecimal walletBalance = this.selectedCoin.getAmount(atomicUnits);
 
 		walletBalanceTextView.setText(this.selectedCoin.getFormattedAmount(walletBalance));
 

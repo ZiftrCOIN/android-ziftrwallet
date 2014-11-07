@@ -205,7 +205,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		String amountString = this.coinAmountEditText.getText().toString();
 		BigInteger amountVal = null;
 		try {
-			amountVal = ZiftrUtils.bigDecToBigInt(getSelectedCoin(), new BigDecimal(amountString));
+			amountVal = getSelectedCoin().getAtomicUnits(new BigDecimal(amountString));
 		} catch(NumberFormatException nfe) {
 			// Amount is just left null
 		}

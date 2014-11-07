@@ -43,8 +43,7 @@ public class OWConverter {
 
 	public static BigInteger convert(BigInteger amount, 
 			OWCurrency convertFrom, OWCurrency convertTo) {
-		return ZiftrUtils.bigDecToBigInt(convertTo, 
-				convert(ZiftrUtils.bigIntToBigDec(convertFrom, amount), 
+		return convertTo.getAtomicUnits(convert(convertFrom.getAmount(amount), 
 						convertFrom, convertTo));
 	}
 

@@ -28,7 +28,6 @@ import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The OWMainActivity starts this fragment. This fragment is 
@@ -135,7 +134,7 @@ public class OWAccountsFragment extends OWFragment {
 		// to take very few things
 		
 		int resId = R.layout.accounts_currency_list_single_item;
-		BigDecimal amount = ZiftrUtils.bigIntToBigDec(id, this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
+		BigDecimal amount = id.getAmount(this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
 		String balance = id.getFormattedAmount(amount);
 		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(this.getActivity());
 		String fiatBalance = OWConverter.convert(amount, id, fiat).setScale(2, RoundingMode.HALF_DOWN).toPlainString();

@@ -285,7 +285,7 @@ public class OWDataSyncHelper {
 					}
 				}
 				
-			}
+			}//end if matchingTransaction...
 			
 			/*******
 			JSONArray inputAddresses = input.getJSONArray("addresses");

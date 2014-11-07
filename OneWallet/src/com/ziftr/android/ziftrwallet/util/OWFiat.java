@@ -1,6 +1,7 @@
 package com.ziftr.android.ziftrwallet.util;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,5 +92,25 @@ public class OWFiat implements OWCurrency {
 
 		return formattedString;
 	}
+	
+	
+	@Override
+	public BigDecimal getAmount(BigInteger atomicUnits) {
+		return new BigDecimal(atomicUnits, this.getNumberOfDigitsOfPrecision());
+	}
+
+	
+	@Override
+	public BigInteger getAtomicUnits(BigDecimal amount) {
+		int precision = -1*this.getNumberOfDigitsOfPrecision();
+		
+		//note, this constructor is weird to me, but RTFM, it's for making small numbers and makes the scale negative
+		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
+		return amount.multiply(multiplier).toBigInteger();
+	}
 
 }
+
+
+
+

@@ -338,14 +338,6 @@ public class ZiftrUtils {
 		return toFormat.setScale(numDecimalPlaces, RoundingMode.HALF_UP);
 	}
 
-	/**
-	 * Trims the zeroes 
-	 * @param decToFormat
-	 * @return
-	 */
-	public static String trimZeroes(BigDecimal decToFormat) {
-		return String.format("%s", decToFormat.doubleValue());
-	}
 	
 	/**
 	 * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
@@ -474,32 +466,6 @@ public class ZiftrUtils {
 		return ZiftrUtils.bytesToHexString(ZiftrUtils.bigIntegerToBytes(b, numBytes));
 	}
 
-	/**
-	 * Based on the type, this method converts the number of atomic
-	 * units to a BigDecimal. 
-	 * 
-	 * @param type - OWCoin.BTC for bitcoin, etc.
-	 * @param numAtomicUnits - The number of atomic units to convert. 
-	 * @return The big integer converted to a big decimal
-	 */
-	public static BigDecimal bigIntToBigDec(OWCurrency type, BigInteger numAtomicUnits) {
-		return new BigDecimal(numAtomicUnits, type.getNumberOfDigitsOfPrecision());
-	}
-
-	/**
-	 * Based on the coin type, this method converts the number BigDecimal units
-	 * to a BigInteger (i.e. to the number of atomic units).
-	 * 
-	 * @param type - OWCoin.BTC for bitcoin, etc.
-	 * @param amount - The BigDecimal to convert.
-	 * @return The big decimal converted to a big integer
-	 */
-	public static BigInteger bigDecToBigInt(OWCurrency type, BigDecimal amount) {
-		int precision = -1*type.getNumberOfDigitsOfPrecision();
-		//note, RTFM, this constructor is for making small numbers and makes the scale negative
-		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
-		return amount.multiply(multiplier).toBigInteger();
-	}
 	
 	/**
 	 * Decoded bytes sometimes have format (when for uncompressed private keys):

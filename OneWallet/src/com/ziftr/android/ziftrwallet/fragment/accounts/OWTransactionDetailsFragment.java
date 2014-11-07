@@ -144,7 +144,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 
 	private void populateAmount() {
 		BigInteger baseAmount = this.txItem.getTxAmount();
-		BigDecimal amountValue = ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), baseAmount); 
+		BigDecimal amountValue = txItem.getCoinId().getAmount(baseAmount); 
 		amount.setText(txItem.getCoinId().getFormattedAmount(amountValue));
 		if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
 			// This means the tx is sent (relative to user)
@@ -168,7 +168,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), fiat);
 		String formattedfiatAmt = OWFiat.formatFiatAmount(fiat, 
-				ZiftrUtils.bigIntToBigDec(txItem.getCoinId(), fiatAmt), false);
+				txItem.getCoinId().getAmount(fiatAmt), false);
 
 		currency.setText(formattedfiatAmt);
 
