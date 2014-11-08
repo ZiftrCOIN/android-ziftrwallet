@@ -1358,7 +1358,7 @@ ZiftrNetworkHandler {
 
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
 		BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, this.selectedCoin, selectedFiat);
-		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(selectedFiat, unitPriceInFiat, true));
+		fiatExchangeRateText.setText(selectedFiat.getFormattedAmount(unitPriceInFiat, true));
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, OWSQLiteOpenHelper.BalanceType.AVAILABLE);
@@ -1368,7 +1368,7 @@ ZiftrNetworkHandler {
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBalance, this.selectedCoin, selectedFiat);
-		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(selectedFiat, walletBalanceInFiat, true));
+		walletBalanceInFiatText.setText(selectedFiat.getFormattedAmount(walletBalanceInFiat, true));
 
 		syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);

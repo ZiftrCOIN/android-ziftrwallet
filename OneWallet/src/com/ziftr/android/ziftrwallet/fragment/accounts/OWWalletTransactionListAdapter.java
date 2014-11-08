@@ -118,7 +118,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWSe
 			BigInteger fiatAmt = OWConverter.convert(txListItem.getTxAmount(), 
 					txListItem.getCoinId(), fiat);
 			
-			txAmountFiatEquiv.setText(OWFiat.formatFiatAmount(fiat, txListItem.getCoinId().getAmount(fiatAmt), true));
+			txAmountFiatEquiv.setText(fiat.getFormattedAmount(fiatAmt, true));
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
 			Drawable image = this.getContext().getResources().getDrawable(

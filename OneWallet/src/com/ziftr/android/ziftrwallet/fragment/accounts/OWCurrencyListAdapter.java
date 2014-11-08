@@ -87,7 +87,7 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 			TextView coinValue = (TextView) 
 					convertView.findViewById(R.id.bottomLeftTextView);
 			BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
-			coinValue.setText(OWFiat.formatFiatAmount(fiatType, unitPriceInFiat, true));
+			coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true));
 
 			TextView walletTotal = (TextView) 
 					convertView.findViewById(R.id.topRightTextView);

@@ -213,7 +213,7 @@ public abstract class OWAddressBookParentFragment extends OWWalletUserFragment i
 					}
 
 					changeFiatStartedFromProgram.set(true);
-					fiatValEditText.setText(OWFiat.formatFiatAmount(selectedFiat, newFiatVal, false));
+					fiatValEditText.setText(selectedFiat.getFormattedAmount(newFiatVal));
 					changeFiatStartedFromProgram.set(false);
 
 				}

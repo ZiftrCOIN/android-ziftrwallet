@@ -29,7 +29,8 @@ public class OWFiat implements OWCurrency {
 
 	/** This is the symbol for the currency. "$" for USD, etc. */
 	private String symbol;
-
+	private boolean symbolBeforeNumber = true;
+	
 	/** Name of currency US Dollars for USD*/
 	private String name;
 
@@ -72,27 +73,6 @@ public class OWFiat implements OWCurrency {
 
 	}
 
-	/**
-	 * A convenience method to format a BigDecimal. In Standard use,
-	 * one can just use standard BigDecimal methods and use this
-	 * right before formatting for displaying a fiat value. 
-	 * 
-	 * @param toFormat - The BigDecimal to format.
-	 * @return as above
-	 */
-	public static String formatFiatAmount(OWFiat fiat, BigDecimal toFormat, boolean includeSymbols) {
-
-		String formattedString = "";
-
-		if(includeSymbols) {
-			formattedString += fiat.getSymbol();
-		}
-
-		formattedString += ZiftrUtils.formatToNDecimalPlaces(fiat.getNumberOfDigitsOfPrecision(), toFormat).toPlainString();
-
-		return formattedString;
-	}
-	
 	
 	@Override
 	public BigDecimal getAmount(BigInteger atomicUnits) {
@@ -107,6 +87,46 @@ public class OWFiat implements OWCurrency {
 		//note, this constructor is weird to me, but RTFM, it's for making small numbers and makes the scale negative
 		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
 		return amount.multiply(multiplier).toBigInteger();
+	}
+
+	
+
+	public String getFormattedAmount(BigDecimal amount, boolean addSymbol) {
+
+		String formattedString = "";
+
+		if(addSymbol && symbolBeforeNumber) {
+			formattedString += this.getSymbol();
+		}
+
+		BigDecimal formatted = ZiftrUtils.formatToNDecimalPlaces(getNumberOfDigitsOfPrecision(), amount);
+		
+		formattedString += formatted.toPlainString();
+
+		if(addSymbol && !symbolBeforeNumber) {
+			formattedString += this.getSymbol();
+		}
+		
+		return formattedString;
+	}
+	
+	
+	@Override
+	public String getFormattedAmount(BigDecimal amount) {
+		return this.getFormattedAmount(amount, false);
+	}
+
+	
+	public String getFormattedAmount(BigInteger atmoicUnits, boolean addSymbol) {
+		BigDecimal toFormatAsDecimal = this.getAmount(atmoicUnits);
+		BigDecimal dollars = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), toFormatAsDecimal);
+		
+		return this.getFormattedAmount(dollars, addSymbol);
+	}
+	
+	@Override
+	public String getFormattedAmount(BigInteger atmoicUnits) {
+		return this.getFormattedAmount(atmoicUnits, false);
 	}
 
 }

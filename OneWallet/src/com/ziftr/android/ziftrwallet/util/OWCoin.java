@@ -220,30 +220,28 @@ public class OWCoin implements OWCurrency {
 	}
 
 	
-	/**
-	 * gets the value of the amount as a string without trailing zeros
-	 * @param amount
-	 * @return
-	 */
+	@Override
 	public String getFormattedAmount(BigDecimal amount) {
 		
 		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), amount);
 		
-		return coins.stripTrailingZeros().toPlainString();
+		coins = coins.stripTrailingZeros();
+		if(coins.scale() < 2) {
+			//make sure and always show 2 decimal places (even trailing zeros) like the QT wallets do
+			coins = coins.setScale(2);
+		}
+		
+		return coins.toPlainString();
 	}
 
 	
-	/**
-	 * gets the value in coins of the atomic units, without trailing zeros
-	 * @param atmoicUnits 
-	 * @return 
-	 */
+	@Override
 	public String getFormattedAmount(BigInteger atmoicUnits) {
 		
 		BigDecimal toFormatAsDecimal = this.getAmount(atmoicUnits);
 		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), toFormatAsDecimal);
 		
-		return coins.stripTrailingZeros().toPlainString();
+		return this.getFormattedAmount(coins);
 	}
 
 	/**

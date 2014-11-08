@@ -167,8 +167,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), fiat);
-		String formattedfiatAmt = OWFiat.formatFiatAmount(fiat, 
-				txItem.getCoinId().getAmount(fiatAmt), false);
+		String formattedfiatAmt = fiat.getFormattedAmount(fiatAmt);
 
 		currency.setText(formattedfiatAmt);
 

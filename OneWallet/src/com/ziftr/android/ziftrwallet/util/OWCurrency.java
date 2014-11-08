@@ -27,4 +27,23 @@ public interface OWCurrency {
 	 * @return an integer representing the value in the smallest possible denomination
 	 */
 	public BigInteger getAtomicUnits(BigDecimal amount);
+	
+	
+	/**
+	 * gets the value of the amount as a string without trailing zeros
+	 * @param amount
+	 * @return
+	 */
+	public String getFormattedAmount(BigDecimal amount);
+
+	
+	/**
+	 * gets the value in coins of the atomic units, without trailing zeros
+	 * @param atmoicUnits 
+	 * @return 
+	 */
+	public String getFormattedAmount(BigInteger atmoicUnits);
+	
 }
+
+
