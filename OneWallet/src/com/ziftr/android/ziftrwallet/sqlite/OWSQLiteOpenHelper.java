@@ -63,8 +63,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		/**
 		 * Balance that can be safely used to create new spends. This is whatever the default coin selector would
-		 * make available, which by default means transaction outputs with at least 1 confirmation and pending
-		 * transactions created by our own wallet which have been propagated across the network.
+		 * make available, which by default means all confirmed transaction outputs minus pending spend transactions.
 		 */
 		AVAILABLE
 	}
@@ -107,7 +106,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		// Fill in the table with all coin types, using UNACTIVATED as the status
 		for (OWCoin t : OWCoin.values()) {
-			this.coinActivationTable.insert(t, UNACTIVATED, db);
+			this.coinActivationTable.insert(t, UNACTIVATED, 0, db);
 		}
 	}
 
@@ -140,7 +139,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.create(coinId, this.getWritableDatabase());
 
 		// Update table to match activated status
-		this.updateTableActivitedStatus(coinId, ACTIVATED);
+		this.updateTableActivatedStatus(coinId, ACTIVATED);
 	}
 
 	public synchronized boolean typeIsActivated(OWCoin coinId) {
@@ -168,8 +167,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.coinActivationTable.getTypes(getWritableDatabase(), specifier.toString());
 	}
 
-	public synchronized void updateTableActivitedStatus(OWCoin coinId, int status) {
-		this.coinActivationTable.update(coinId, status, getWritableDatabase());
+	public synchronized void updateTableActivatedStatus(OWCoin coinId, int status) {
+		this.coinActivationTable.updateActivated(coinId, status, getWritableDatabase());
 	}
 
 	/*
@@ -457,7 +456,6 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		tx.setSha256Hash(hash);
 		tx.setDisplayAddresses(displayAddresses);
 		tx.setNumConfirmations(numConfirmations);
-		
 		tx.setTxFee(txFee);
 		this.transactionsTable.insertTx(tx, getWritableDatabase());
 		return tx;
@@ -520,7 +518,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized void updateTransaction(OWTransaction tx) {
 		this.transactionsTable.updateTransaction(tx, getWritableDatabase());
 	}
-
+	
 	public synchronized void updateTransactionNumConfirmations(OWTransaction tx) {
 		this.transactionsTable.updateTransactionNumConfirmations(tx, getReadableDatabase());
 	}
@@ -536,7 +534,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		for (OWTransaction tx : txs) {
 			if (bType == BalanceType.AVAILABLE) {
-				if (!tx.isPending()) {
+				if (!tx.isPending() || tx.getTxAmount().compareTo(BigInteger.ZERO) == -1) {
 					balance = balance.add(tx.getTxAmount());
 				}
 			} else if (tx.isBroadcasted()) {

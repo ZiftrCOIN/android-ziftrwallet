@@ -62,6 +62,7 @@ import com.ziftr.android.ziftrwallet.fragment.accounts.OWSearchableListItem;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWSendCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.accounts.OWWalletFragment;
+import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
@@ -1027,16 +1028,26 @@ ZiftrNetworkHandler {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				//availCoins = OWDataSyncHelper.getBlockChainWallets();
+				availCoins = OWDataSyncHelper.getBlockChainWallets();
 				//if API call failed
-				//if (availCoins.size() <= 0){
-				availCoins = new ArrayList<OWCoin>();
+				if (availCoins.size() <= 0){
+					availCoins = new ArrayList<OWCoin>();
 					for (OWCoin coin : OWCoin.TYPES){
 						availCoins.add(coin);
 					}
-				//}
+				}
+				initMarketValues();
 			}
 		});
+	}
+	
+	//update currency exchange rates
+	public void initMarketValues(){
+		OWFiat selectedFiat =OWPreferencesUtils.getFiatCurrency();
+		for (OWCoin coin: this.availCoins){
+			String val = OWDataSyncHelper.getMarketValue(coin.toString(), selectedFiat.getCode());
+			OWConverter.updateConvertRate(coin, val);
+		}
 	}
 
 	/**
@@ -1188,6 +1199,16 @@ ZiftrNetworkHandler {
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
+		if (requestCode == OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG && passphrase.equals("orca")){
+			if (OWPreferencesUtils.getDebugMode()){
+				OWPreferencesUtils.setDebugMode(false);
+			} else {
+				OWPreferencesUtils.setDebugMode(true);
+			}
+			((OWSettingsFragment)this.getSupportFragmentManager(
+					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
+			return;
+		}
 		if (OWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
 			switch(requestCode) {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
@@ -1251,7 +1272,7 @@ ZiftrNetworkHandler {
 		switch (requestCode) {
 		case OWRequestCodes.DEACTIVATE_WALLET:
 			OWCoin coinId = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
-			this.walletManager.updateTableActivitedStatus(coinId, OWSQLiteOpenHelper.DEACTIVATED);
+			this.walletManager.updateTableActivatedStatus(coinId, OWSQLiteOpenHelper.DEACTIVATED);
 			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));

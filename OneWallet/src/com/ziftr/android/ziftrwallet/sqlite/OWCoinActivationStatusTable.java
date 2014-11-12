@@ -18,7 +18,10 @@ public class OWCoinActivationStatusTable extends OWTable {
 
 	/** The title of the column that keeps track of the un/de/activated status. */
 	public static final String COLUMN_ACTIVATED_STATUS = "status";
-
+	
+	/** latest blockchain received from server */
+	public static final String COLUMN_LATEST_BLOCKCHAIN = "blockchain";
+	
 	protected String getTableName() {
 		return "coin_activation_status";
 	}
@@ -31,7 +34,8 @@ public class OWCoinActivationStatusTable extends OWTable {
 		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName()).append(" (");
 		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
 		sb.append(COLUMN_COIN_ID).append(" TEXT NOT NULL, ");
-		sb.append(COLUMN_ACTIVATED_STATUS).append(" INTEGER );");
+		sb.append(COLUMN_ACTIVATED_STATUS).append(" INTEGER, ");
+		sb.append(COLUMN_LATEST_BLOCKCHAIN).append(" INTEGER );");
 		return sb.toString();
 	}
 	
@@ -39,11 +43,11 @@ public class OWCoinActivationStatusTable extends OWTable {
 		db.execSQL(getCreateTableString());
 	}
 	
-	protected void insert(OWCoin coinId, int status, SQLiteDatabase db) {
+	protected void insert(OWCoin coinId, int status, int blockNum, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_COIN_ID, coinId.toString());
 		values.put(COLUMN_ACTIVATED_STATUS, status);
-
+		values.put(COLUMN_LATEST_BLOCKCHAIN, blockNum);
 		db.insert(getTableName(), null, values);
 	}
 
@@ -91,9 +95,15 @@ public class OWCoinActivationStatusTable extends OWTable {
 		}
 	}
 
-	protected void update(OWCoin coinId, int status, SQLiteDatabase db) {
+	protected void updateActivated(OWCoin coinId, int status, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ACTIVATED_STATUS, status);
+		db.update(getTableName(), values, COLUMN_COIN_ID + " = '" + coinId.toString() + "'", null);
+	}
+	
+	protected void updateLatestBlock(OWCoin coinId, int blockNum, SQLiteDatabase db){
+		ContentValues values = new ContentValues();
+		values.put(COLUMN_LATEST_BLOCKCHAIN, blockNum);
 		db.update(getTableName(), values, COLUMN_COIN_ID + " = '" + coinId.toString() + "'", null);
 	}
 

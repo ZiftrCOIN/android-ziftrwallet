@@ -105,7 +105,16 @@ public class OWApi {
 		return request;
 	}
 
-	
+	//GET /blockchains /{type} /market_value
+	public static ZiftrNetRequest buildMarketValueRequest(String type, String queryFiat){
+		String url = buildBaseUrl(type.toLowerCase(), "market_value");
+		
+		ZiftrParamList query = new ZiftrParamList();
+		query.add("fiat", queryFiat);
+		
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), query);
+		return request;
+	}
 	
 	
 	

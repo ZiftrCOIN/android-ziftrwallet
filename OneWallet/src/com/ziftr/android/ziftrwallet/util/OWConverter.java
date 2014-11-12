@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public class OWConverter {
 		cMap.put(OWCoin.LTC_TEST, new BigDecimal("3.65", MathContext.DECIMAL64));
 		cMap.put(OWCoin.PPC_TEST, new BigDecimal("0", MathContext.DECIMAL64));
 		cMap.put(OWCoin.DOGE_TEST, new BigDecimal("0", MathContext.DECIMAL64));
-		convertMap = Collections.unmodifiableMap(cMap);
+		convertMap = cMap;
 	}
 
 	
@@ -56,6 +55,10 @@ public class OWConverter {
 		BigDecimal convertToDecimal = convert(convertFromDecimal, convertFrom, convertTo);
 		
 		return convertTo.getAtomicUnits(convertToDecimal);
+	}
+	
+	public static void updateConvertRate(OWCurrency curr, String usdEquiv){
+		convertMap.put(curr, new BigDecimal(usdEquiv, MathContext.DECIMAL64));
 	}
 
 }

@@ -26,4 +26,6 @@ public class OWRequestCodes {
 	
 	public static final int SET_NAME_DIALOG = 12;
 	
+	public static final int DEBUG_MODE_PASSPHRASE_DIALOG = 13;
+	
 }

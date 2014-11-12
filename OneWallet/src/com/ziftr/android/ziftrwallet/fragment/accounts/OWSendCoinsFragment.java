@@ -2,6 +2,8 @@ package com.ziftr.android.ziftrwallet.fragment.accounts;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.ClipData;
@@ -19,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.OWWalletManager;
@@ -26,6 +29,8 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
+import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWCoinURI;
 import com.ziftr.android.ziftrwallet.util.OWCoinURIParseException;
@@ -37,6 +42,7 @@ import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZWCoinFiatTextWatcher;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The section of the app where users fill out a form and click send 
@@ -218,8 +224,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		String addressName = labelEditText.getText().toString();
 		OWWalletManager manager = getWalletManager();
 		try {
-			manager.handleSendCoins(getSelectedCoin(), addressToSendTo, 
+			handleSendCoins(getSelectedCoin(), addressToSendTo, 
 					amountSending, feeSending, passphrase);
+			
 			if (manager.readAddress(getSelectedCoin(), addressToSendTo, false) != null){
 				manager.updateAddressLabel(getSelectedCoin(), addressToSendTo, addressName, false);
 			} else {
@@ -368,9 +375,6 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		feeEditText.addTextChangedListener(refreshTotalTextWatcher);
 
 		BigDecimal fee = new BigDecimal(this.getSelectedCoin().getDefaultFeePerKb());
-		BigDecimal satoshi =  new BigDecimal(".00000001");
-		feeEditText.setText(fee.multiply(satoshi).toString());
-		
 		feeEditText.setText(getSelectedCoin().getFormattedAmount(getSelectedCoin().getDefaultFeePerKb()));
 
 	}
@@ -470,6 +474,98 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 
 	public void setSendToAddress(String address) {
 		this.prefilledAddress = address;
+	}
+	
+	
+	
+	
+	/**
+	 * Sends the type of coin that this thread actually represents to 
+	 * the specified address. 
+	 * 
+	 * @param address - The address to send coins to.
+	 * @param value - The number of atomic units (satoshis for BTC) to send
+	 * @throws AddressFormatException
+	 * @throws InsufficientMoneyException
+	 */
+	public void handleSendCoins(final OWCoin coinId, final String address, final BigInteger value, 
+			final BigInteger feePerKb, final String passphrase) 
+			throws OWAddressFormatException, OWInsufficientMoneyException {
+		
+		if (!coinId.addressIsValid(address)){
+			throw new OWAddressFormatException();
+		}
+		Long amountLeftToSend = value.longValue();
+		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
+		final List<String> inputs = new ArrayList<String>();
+		
+		final List<OWAddress> usingTheseHiddenAddresses = new ArrayList<OWAddress>();
+		//use from hidden change addresses first
+		List<OWAddress> hiddenAddresses = OWWalletManager.getInstance().readHiddenAddresses(coinId);
+		for (OWAddress addr : hiddenAddresses){
+			//if (addr.getLastKnownBalance() > 0){
+				amountLeftToSend -= addr.getLastKnownBalance();
+				inputs.add(addr.getAddress());
+				usingTheseHiddenAddresses.add(addr);
+				addr.setSpentFrom(OWReceivingAddressesTable.SPENT_FROM);
+			//}
+				//TODO -put if back when values work properly
+			if (amountLeftToSend <= 0){
+				break;
+			}
+		}
+		
+		List<OWAddress> inputAddresses = OWWalletManager.getInstance().readAllVisibleAddresses(coinId, true);
+		for (OWAddress addr : inputAddresses){
+			if (amountLeftToSend <= 0){
+				break;
+			}
+			//TODO -hacking this up to test implementing the new API
+			
+			///////////////////**********************************************************************************************
+			
+			//add all address to the list
+			//if (addr.getLastKnownBalance() > 0){
+				amountLeftToSend -= addr.getLastKnownBalance();
+				inputs.add(addr.getAddress());
+			//}
+		}
+		
+		if (amountLeftToSend > 0){
+			for (OWAddress addr : usingTheseHiddenAddresses){
+				//TODO -this seems off, can this clear a previously legitmately set spent flag?
+				addr.setSpentFrom(OWReceivingAddressesTable.UNSPENT_FROM);
+			}
+		
+			//TODO -put back
+			//throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
+		
+		
+		
+		}
+		
+		
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			@Override
+			public void run() {
+				
+				final String message = OWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
+				getOWMainActivity().runOnUiThread(new Runnable(){
+
+					@Override
+					public void run() {
+						if (!message.isEmpty()){
+							getOWMainActivity().alertUser(message, "error_sending_coins");
+						} else {
+							getOWMainActivity().onBackPressed();
+							Toast.makeText(getOWMainActivity(), coinId.toString() + " sent!", Toast.LENGTH_LONG).show();
+						}
+					}
+				
+					});
+
+			}
+		});
 	}
 
 }

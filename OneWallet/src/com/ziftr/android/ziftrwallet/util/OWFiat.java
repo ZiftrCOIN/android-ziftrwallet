@@ -7,9 +7,9 @@ import java.util.List;
 
 public class OWFiat implements OWCurrency {
 
-	public static final OWFiat USD = new OWFiat("US Dollars","$", 2);
-	public static final OWFiat EUR = new OWFiat("Euros", "\u20ac", 2);
-	public static final OWFiat GBP = new OWFiat("Pound", "\u00a3", 2);
+	public static final OWFiat USD = new OWFiat("US Dollars","$", "USD", 2);
+	public static final OWFiat EUR = new OWFiat("Euros", "\u20ac", "EUR", 2);
+	public static final OWFiat GBP = new OWFiat("Pound", "\u00a3", "GBP", 2);
 
 
 	public static final OWFiat[] TYPES = new OWFiat[] {USD, EUR, GBP};
@@ -33,13 +33,17 @@ public class OWFiat implements OWCurrency {
 	
 	/** Name of currency US Dollars for USD*/
 	private String name;
+	
+	/** short name of currency USD for dollars*/
+	private String code;
 
 	/** For most currencies this is 2, as non-whole amounts are displayed as 0.XX */
 	private int numberOfDigitsOfPrecision;
 
-	private OWFiat(String name, String symbol, int numberOfDigitsOfPrecision) {
+	private OWFiat(String name, String symbol, String code, int numberOfDigitsOfPrecision) {
 		this.symbol = symbol;
 		this.name = name;
+		this.code = code;
 		this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
 	}
 
@@ -73,7 +77,11 @@ public class OWFiat implements OWCurrency {
 
 	}
 
+	public String getCode(){
+		return this.code;
+	}
 	
+
 	@Override
 	public BigDecimal getAmount(BigInteger atomicUnits) {
 		return new BigDecimal(atomicUnits, this.getNumberOfDigitsOfPrecision());

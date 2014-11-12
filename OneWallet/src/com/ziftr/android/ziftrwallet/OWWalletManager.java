@@ -1,7 +1,6 @@
 package com.ziftr.android.ziftrwallet;
 
 import java.io.File;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,15 +13,11 @@ import android.content.Context;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
-import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
-import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
-import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /** 
  * This class controls all of the wallets and is responsible
@@ -46,14 +41,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	/** The wallet files for each of the coin types. */
 	private Map<OWCoin, File> walletFiles = new HashMap<OWCoin, File>();
 
-
-	/** 
-	 * This should be cleared when saving this object 
-	 * in {@link OWMainFragmentActivity}. 
-	 * 
-	 * TODO maybe we want to get this everytime?
-	 * or maybe a weak reference? 
-	 */
+	//the application context
 	private Context context;
 
 	///////////////////////////////////////////////////////
@@ -77,7 +65,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 
 	public static synchronized OWWalletManager getInstance() {
 		if (instance == null) {
-
 			Context context = OWApplication.getApplication();
 
 			// Here we build the path for the first time if have not yet already
@@ -95,7 +82,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 			}
 
 			instance = new OWWalletManager(context);
-		} 
+		}
 		return instance;
 	}
 
@@ -196,100 +183,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	}
 
 
-	/**
-	 * Sends the type of coin that this thread actually represents to 
-	 * the specified address. 
-	 * 
-	 * @param address - The address to send coins to.
-	 * @param value - The number of atomic units (satoshis for BTC) to send
-	 * @throws AddressFormatException
-	 * @throws InsufficientMoneyException
-	 */
-	public void handleSendCoins(final OWCoin coinId, final String address, final BigInteger value, 
-			final BigInteger feePerKb, final String passphrase) 
-			throws OWAddressFormatException, OWInsufficientMoneyException {
-		
-		if (!coinId.addressIsValid(address)){
-			throw new OWAddressFormatException();
-		}
-		Long amountLeftToSend = value.longValue();
-		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
-		final List<String> inputs = new ArrayList<String>();
-		
-		final List<OWAddress> usingTheseHiddenAddresses = new ArrayList<OWAddress>();
-		//use from hidden change addresses first
-		List<OWAddress> hiddenAddresses = this.readHiddenAddresses(coinId);
-		for (OWAddress addr : hiddenAddresses){
-			//if (addr.getLastKnownBalance() > 0){
-				amountLeftToSend -= addr.getLastKnownBalance();
-				inputs.add(addr.getAddress());
-				usingTheseHiddenAddresses.add(addr);
-				addr.setSpentFrom(OWReceivingAddressesTable.SPENT_FROM);
-			//}
-				//TODO -put if back when values work properly
-			if (amountLeftToSend <= 0){
-				break;
-			}
-		}
-		List<OWAddress> inputAddresses = this.readAllVisibleAddresses(coinId, true);
-		for (OWAddress addr : inputAddresses){
-			if (amountLeftToSend <= 0){
-				break;
-			}
-			//TODO -hacking this up to test implementing the new API
-			
-///////////////////**********************************************************************************************
-			
-			//add all address to the list
-			//if (addr.getLastKnownBalance() > 0){
-				amountLeftToSend -= addr.getLastKnownBalance();
-				inputs.add(addr.getAddress());
-			//}
-		}
-		
-		if (amountLeftToSend > 0){
-			for (OWAddress addr : usingTheseHiddenAddresses){
-				//TODO -this seems off, can this clear a previously legitmately set spent flag?
-				addr.setSpentFrom(OWReceivingAddressesTable.UNSPENT_FROM);
-			}
-		
-			//TODO -put back
-			//throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
-		
-		
-		
-		}
-		
-		
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			@Override
-			public void run() {
-				
-				OWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
-				
-				
-				/*********************************************
-				ZiftrNetRequest request = OWDataSyncHelper.sendCoinsRequest(coinId, feePerKb, value, inputs, address, passphrase);
-				String response = request.sendAndWait();
-				if (request.getResponseCode() == 200){
-					try {
-						JSONObject jsonRes = new JSONObject(response);
-						//Sign txn and then POST to server
-						ArrayList<String> addresses = new ArrayList<String>();
-						for (String a : inputs){
-							addresses.add(a);
-						}
-						addresses.add(address);
-						OWDataSyncHelper.sendCoinsTransaction(coinId, jsonRes, value, addresses);
-					}catch(Exception e) {
-						ZLog.log("Exception send coin request: ", e);
-					}
-				}
-				***************************************/
-				
-			}
-		});
-	}
+	
 	
 	public OWAddress createReceivingAddress(String passphrase, OWCoin coinId, int hidden) {
 		return super.createReceivingAddress(this.passphraseToCrypter(passphrase), coinId, hidden);
@@ -343,15 +237,6 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
-
-	/**
-	 * @param activity the context to set
-	 */
-	public void setActivity(OWMainFragmentActivity activity) {
-		this.context = activity;
-	}
-
-	
 
 	/** 
 	 * Gets the file where the wallet for the specified

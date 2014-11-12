@@ -111,7 +111,7 @@ public class OWCoin implements OWCurrency {
 	public BigInteger getDefaultFeePerKb() {
 		return this.defaultFeePerKb;
 	}
-
+	
 	/**
 	 * @return the shortTitle
 	 */
