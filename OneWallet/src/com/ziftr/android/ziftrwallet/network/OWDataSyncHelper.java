@@ -68,7 +68,7 @@ public class OWDataSyncHelper {
 				message = "Unable to connect to server. Please check your connection.";
 				break;
 			default:
-				message = "Error, something went wrong!";
+				message = "Error, something went wrong! " + request.getResponseCode() + " " + request.getResponseMessage();
 				break;
 		}
 
@@ -370,6 +370,9 @@ public class OWDataSyncHelper {
 				break;
 				}
 			}
+		}
+		if (hash.equals("c162f423fe6660c0e8e76801d06fc778026249bc90c0fc3d3634866ae17220b7")){
+		ZLog.log(value + " " + "gggg"  + note);
 		}
 		time = time * 1000;
 		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddresses, new OWSha256Hash(hash), note, confirmations, time);

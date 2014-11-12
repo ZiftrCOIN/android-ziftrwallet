@@ -57,7 +57,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		editor.commit();
 		//clear all wallets
 		for (OWCoin type : OWCoin.TYPES){
-			manager.updateTableActivitedStatus(type, OWSQLiteOpenHelper.DEACTIVATED);
+			manager.updateTableActivatedStatus(type, OWSQLiteOpenHelper.DEACTIVATED);
 		}
 	}
 
@@ -87,7 +87,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		createWallet(OWCoin.BTC);
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 1);
 		//remove wallet
-		mActivity.getWalletManager().updateTableActivitedStatus(OWCoin.BTC, OWSQLiteOpenHelper.DEACTIVATED);
+		mActivity.getWalletManager().updateTableActivatedStatus(OWCoin.BTC, OWSQLiteOpenHelper.DEACTIVATED);
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
 
 	}

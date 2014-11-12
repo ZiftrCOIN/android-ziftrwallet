@@ -106,7 +106,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		// Fill in the table with all coin types, using UNACTIVATED as the status
 		for (OWCoin t : OWCoin.values()) {
-			this.coinActivationTable.insert(t, UNACTIVATED, db);
+			this.coinActivationTable.insert(t, UNACTIVATED, 0, db);
 		}
 	}
 
@@ -139,7 +139,7 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.create(coinId, this.getWritableDatabase());
 
 		// Update table to match activated status
-		this.updateTableActivitedStatus(coinId, ACTIVATED);
+		this.updateTableActivatedStatus(coinId, ACTIVATED);
 	}
 
 	public synchronized boolean typeIsActivated(OWCoin coinId) {
@@ -167,8 +167,8 @@ public class OWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.coinActivationTable.getTypes(getWritableDatabase(), specifier.toString());
 	}
 
-	public synchronized void updateTableActivitedStatus(OWCoin coinId, int status) {
-		this.coinActivationTable.update(coinId, status, getWritableDatabase());
+	public synchronized void updateTableActivatedStatus(OWCoin coinId, int status) {
+		this.coinActivationTable.updateActivated(coinId, status, getWritableDatabase());
 	}
 
 	/*

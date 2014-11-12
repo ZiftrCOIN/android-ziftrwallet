@@ -197,6 +197,34 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/ow_quarter_icon_size"
             android:background="@drawable/dropshadow" />
+
+        <Button
+            android:id="@+id/debug_button"
+            android:layout_width="match_parent"
+            android:layout_marginTop="2dp"
+            android:layout_height="@dimen/ow_button_footer_height"
+            android:background="@drawable/clickable_button_color"
+            android:textColor="@color/ow_default_text" />
+
+        <Button
+            android:id="@+id/export_db"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/ow_button_footer_height"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/clickable_button_color"
+            android:text="Export db"
+            android:visibility="gone"
+            android:textColor="@color/ow_default_text" />
+        
+                <Button
+            android:id="@+id/export_logs"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/ow_button_footer_height"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/clickable_button_color"
+            android:text="Export logs"
+            android:visibility="gone"
+            android:textColor="@color/ow_default_text" />
     </LinearLayout>
 
 </ScrollView>

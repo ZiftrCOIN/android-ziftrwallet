@@ -1199,6 +1199,16 @@ ZiftrNetworkHandler {
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(this, passphrase);
+		if (requestCode == OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG && passphrase.equals("orca")){
+			if (OWPreferencesUtils.getDebugMode(this)){
+				OWPreferencesUtils.setDebugMode(this, false);
+			} else {
+				OWPreferencesUtils.setDebugMode(this, true);
+			}
+			((OWSettingsFragment)this.getSupportFragmentManager(
+					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
+			return;
+		}
 		if (OWPreferencesUtils.inputHashMatchesStoredHash(this, inputHash)) {
 			switch(requestCode) {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
@@ -1262,7 +1272,7 @@ ZiftrNetworkHandler {
 		switch (requestCode) {
 		case OWRequestCodes.DEACTIVATE_WALLET:
 			OWCoin coinId = OWCoin.valueOf(info.getString(OWCoin.TYPE_KEY));
-			this.walletManager.updateTableActivitedStatus(coinId, OWSQLiteOpenHelper.DEACTIVATED);
+			this.walletManager.updateTableActivatedStatus(coinId, OWSQLiteOpenHelper.DEACTIVATED);
 			OWAccountsFragment frag = (OWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));

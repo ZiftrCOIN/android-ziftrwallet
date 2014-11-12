@@ -1,10 +1,16 @@
 package com.ziftr.android.ziftrwallet.fragment;
 
+import java.io.File;
+
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -16,6 +22,7 @@ import com.ziftr.android.ziftrwallet.dialog.OWResetPassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWSetNameDialog;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
+import com.ziftr.android.ziftrwallet.util.OWTags;
 
 
 public class OWSettingsFragment extends OWFragment implements OnClickListener{
@@ -30,6 +37,8 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	private RelativeLayout setName;
 	private RelativeLayout disableName;
 	private TextView setNameLabel;
+	private Button debugButton;
+	private Button exportdbButton;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -69,6 +78,10 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			this.editableConfirmationFee.setChecked(false);
 		}
 
+		this.debugButton = (Button) rootView.findViewById(R.id.debug_button);
+		this.debugButton.setOnClickListener(this);
+		this.exportdbButton = (Button) rootView.findViewById(R.id.export_db);
+		this.exportdbButton.setOnClickListener(this);
 		this.updateSettingsVisibility(false);
 		return rootView;
 	}
@@ -99,7 +112,17 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			this.setNameLabel.setText("Set Name");
 		}
 		
+		//show debug button text based on dis/enabled
+		if (!OWPreferencesUtils.getDebugMode(this.getActivity())){
+			this.debugButton.setText(" Enable debugging ");
+			this.exportdbButton.setVisibility(View.GONE);
+		} else {
+			this.debugButton.setText(" Disable debugging ");
+			this.exportdbButton.setVisibility(View.VISIBLE);
+		}
+		
 	}
+	
 
 	@Override
 	public void onClick(View v) {
@@ -156,7 +179,17 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			if (!getOWMainActivity().isShowingDialog()) {
 				setNameDialog.show(OWSettingsFragment.this.getFragmentManager(), 
 						"set_name");
-			}		}
+			}		
+		} else if (v == this.debugButton) {
+			this.getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), OWTags.VALIDATE_PASS_DEBUG);
+		} else if (v == this.exportdbButton) {
+			//export DB 
+			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");
+			Intent intent = new Intent(Intent.ACTION_SEND);
+			intent.setType("plain/text");
+			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(wallet));
+			startActivity(Intent.createChooser(intent, "Send backup"));
+		}
 	}
 
 }

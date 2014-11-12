@@ -35,6 +35,8 @@ public class OWTags {
 	
 	public static final String CONFIRM_NEW_ADDRESS = "confirm_new_address_dialog";
 	
+	public static final String VALIDATE_PASS_DEBUG = "validate_passphrase_dialog_debug";
+	
 	//EDIT TEXT
 	public static final String OW_EDIT_TEXT = "ow_edit_text";
 

@@ -41,6 +41,9 @@ public abstract class OWPreferencesUtils {
 
 	/** Save the selected Fiat Currency of user*/
 	public final static String FIAT_CURRENCY_KEY = "ow_fiat_currency_key";
+	
+	/** Save whether we are in debug mode or not*/
+	public final static String DEBUG_SETTING_KEY = "debug_setting_key";
 
 	/**
 	 * Gets the stored hash of the users passphrase, if there is one.
@@ -187,6 +190,17 @@ public abstract class OWPreferencesUtils {
 		editor.commit();
 	}
 
+	public static boolean getDebugMode(Context a){
+		SharedPreferences prefs = getPrefs(a);
+		return prefs.getBoolean(DEBUG_SETTING_KEY, false);
+	}
+	
+	public static void setDebugMode(Context a, boolean enabled){
+		SharedPreferences prefs = getPrefs(a);
+		Editor editor = prefs.edit();
+		editor.putBoolean(DEBUG_SETTING_KEY, enabled);
+		editor.commit();
+	}
 	
 	public static SharedPreferences getPrefs(Context a) {
 		return a.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
