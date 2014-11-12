@@ -40,7 +40,7 @@ public class OWCoin implements OWCurrency {
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "Bitcoin Signed Message:\n");
 	public static OWCoin LTC_TEST = new OWCoin("100000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 111, (byte) 196, (byte) 239, 12, 150, "Litecoin Signed Message:\n");
-	public static OWCoin PPC_TEST = new OWCoin("0.0000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin,
+	public static OWCoin PPC_TEST = new OWCoin("1000000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "PPCoin Signed Message:\n");
 	public static OWCoin DOGE_TEST = new OWCoin("100000000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 113, (byte) 196, (byte) 241, 6, 60, "Dogecoin Signed Message:\n");
@@ -60,7 +60,7 @@ public class OWCoin implements OWCurrency {
 		return null;
 	}
 
-	private String defaultFeePerKb;
+	private BigInteger defaultFeePerKb;
 	private String shortTitle;
 	private String longTitle;
 	private String type;
@@ -78,7 +78,6 @@ public class OWCoin implements OWCurrency {
 	private OWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type, String chain, 
 			String scheme, int numberOfDigitsOfPrecision, int logoResId, byte pubKeyHashPrefix, byte scriptHashPrefix, 
 			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve, String signingMessageMagic) {
-		this.defaultFeePerKb = defaultFeePerKb;
 		this.shortTitle = shortTitle;
 		this.longTitle = longTitle;
 		this.type = type;
@@ -92,19 +91,24 @@ public class OWCoin implements OWCurrency {
 		this.numRecommendedConfirmations = numRecommendedConfirmations;
 		this.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
 		this.signingMessageMagic = signingMessageMagic;
+		try {
+			this.defaultFeePerKb = new BigInteger(defaultFeePerKb);
+		}
+		catch(Exception e) {
+			ZLog.log("Exception setting default fee of ", defaultFeePerKb, "to coin ", longTitle);
+			this.defaultFeePerKb = BigInteger.ZERO;
+		}
 	}
 
 
 
 	/**
 	 * As the name describes, this gets the default fee per kb in satoshis for the
-	 * coin. It might be useful to use BigDecimal() or BigInteger for the parsing
-	 * as they are better to store monetary values and they will do the parsing
-	 * of this string right in the constructor. 
+	 * coin. 
 	 * 
 	 * @return as above
 	 */
-	public String getDefaultFeePerKb() {
+	public BigInteger getDefaultFeePerKb() {
 		return this.defaultFeePerKb;
 	}
 
@@ -122,12 +126,6 @@ public class OWCoin implements OWCurrency {
 		return longTitle;
 	}
 
-
-	/**
-	 * Gives the title of the coin. e.g. "Bitcoin" for OWCoin.BTC, etc. 
-	 * 
-	 * @return as above
-	 */
 
 
 	/**
@@ -226,9 +224,13 @@ public class OWCoin implements OWCurrency {
 		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), amount);
 		
 		coins = coins.stripTrailingZeros();
-		if(coins.scale() < 2) {
+		if(coins.scale() < 2 || coins.compareTo(BigDecimal.ZERO) == 0) {
 			//make sure and always show 2 decimal places (even trailing zeros) like the QT wallets do
 			coins = coins.setScale(2);
+			
+			//note: there is a bug when stripping trailing zeroes from a BigDecimal with value of 0 eg 0.0000
+			//http://bugs.java.com/bugdatabase/view_bug.do?bug_id=6480539
+			//so we also test if coins has a value of zero and explicitly set the scale
 		}
 		
 		return coins.toPlainString();
@@ -279,7 +281,7 @@ public class OWCoin implements OWCurrency {
 	}
 	
 	public void updateCoin(String defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime){
-		this.defaultFeePerKb = defaultFee;
+		this.defaultFeePerKb = new BigInteger(defaultFee);
 		this.pubKeyHashPrefix = pubKeyPrefix;
 		this.scriptHashPrefix = scriptHashPrefix;
 		this.privKeyPrefix = privKeyPrefix;

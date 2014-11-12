@@ -149,7 +149,6 @@ public class OWDataSyncHelper {
 					supportedCoins.add(supportedCoin);
 					
 					if(supportedCoin != null) {
-						String coin = supportedCoin.toString(); //TODO why are we converting a coin object to a string then calling a static method?...
 						String defaultFee = coinJson.getString("default_fee_per_kb");
 						int pubKeyPrefix = coinJson.getInt("p2pkh_byte");
 						int scriptHashPrefix = coinJson.getInt("p2sh_byte");

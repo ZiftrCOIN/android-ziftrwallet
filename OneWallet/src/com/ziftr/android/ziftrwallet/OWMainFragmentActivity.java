@@ -305,7 +305,7 @@ ZiftrNetworkHandler {
 		
 		//Check if loaded from widget
 		if (getIntent() != null && (getIntent().hasExtra(ziftrwalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND))){
-			this.setSelectedCoin(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin(this)));
+			this.setSelectedCoin(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin()));
 			if (this.selectedCoin != null && this.getWalletManager().typeIsActivated(this.selectedCoin)) {
 				if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND)){
 					getIntent().removeExtra(ziftrwalletWidget.WIDGET_SEND);
@@ -334,7 +334,7 @@ ZiftrNetworkHandler {
 		Bundle info = getIntent().getExtras();
 		if (info != null) {
 			if (info.getString(OWPreferencesUtils.BUNDLE_PASSPHRASE_KEY) != null) {
-				if (OWPreferencesUtils.userHasPassphrase(this)) {
+				if (OWPreferencesUtils.userHasPassphrase()) {
 					throw new IllegalArgumentException("Cannot have a passphrase and be setting in onCreate");
 				} else {
 					// We can only get here if there is no previous passphrase, so we put in null
@@ -343,7 +343,7 @@ ZiftrNetworkHandler {
 			}
 
 			if (info.getString(OWPreferencesUtils.BUNDLE_NAME_KEY) != null) { 
-				OWPreferencesUtils.setUserName(this, info.getString(OWPreferencesUtils.BUNDLE_NAME_KEY));
+				OWPreferencesUtils.setUserName(info.getString(OWPreferencesUtils.BUNDLE_NAME_KEY));
 			}
 		}
 	}
@@ -864,9 +864,9 @@ ZiftrNetworkHandler {
 				OWMainFragmentActivity.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						SharedPreferences prefs = OWPreferencesUtils.getPrefs(OWMainFragmentActivity.this);
+						SharedPreferences prefs = OWPreferencesUtils.getPrefs();
 						Editor editor = prefs.edit();
-						String saltedHash = ZiftrUtils.saltedHashString(OWMainFragmentActivity.this, newPassphrase);
+						String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
 						editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
 						editor.commit();
 					}
@@ -1187,8 +1187,8 @@ ZiftrNetworkHandler {
 	}
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
-		byte[] inputHash = ZiftrUtils.saltedHash(this, passphrase);
-		if (OWPreferencesUtils.inputHashMatchesStoredHash(this, inputHash)) {
+		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
+		if (OWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
 			switch(requestCode) {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 				OWReceiveCoinsFragment receiveFrag = (OWReceiveCoinsFragment) getSupportFragmentManager(
@@ -1218,17 +1218,17 @@ ZiftrNetworkHandler {
 		// Can assume that there was a previously entered passphrase because 
 		// of the way the dialog was set up.
 		if (newPassphrase.equals(confirmPassphrase)) {
-			byte[] oldPassphraseHash = ZiftrUtils.saltedHash(this, oldPassphrase);
+			byte[] oldPassphraseHash = ZiftrUtils.saltedHash(oldPassphrase);
 			// It is possible that oldPassphraseHash and the value stored in prefs are both null
 			// if the user didn't have a passphrase when this was called. 
 			// In that case, input hash matches the stored hash because they are both null
-			if (OWPreferencesUtils.inputHashMatchesStoredHash(this, oldPassphraseHash)) {
+			if (OWPreferencesUtils.inputHashMatchesStoredHash(oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
 				if (this.changePassphrase(oldPassphrase, newPassphrase)) { 
 					//if the password was changed
 					if (requestCode == OWRequestCodes.CREATE_PASSPHRASE_DIALOG) { 
 						//if we were setting the passphrase, turn disabled passphrase off
-						OWPreferencesUtils.setPassphraseDisabled(this, false);
+						OWPreferencesUtils.setPassphraseDisabled(false);
 						((OWSettingsFragment)this.getSupportFragmentManager(
 								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 					}
@@ -1292,7 +1292,7 @@ ZiftrNetworkHandler {
 		if (newName.isEmpty()){
 			this.alertUser("Looks like you wanted to disable your name instead!", "set name is empty");
 		} else {
-			OWPreferencesUtils.setUserName(this, newName);
+			OWPreferencesUtils.setUserName(newName);
 			((OWSettingsFragment)this.getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
 		}
@@ -1347,7 +1347,7 @@ ZiftrNetworkHandler {
 	 */
 	public void populateWalletHeaderView(View headerView) {
 		//now that a coin type is set, setup the header view for it
-		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(this);
+		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency();
 
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		ZLog.log(this.selectedCoin);

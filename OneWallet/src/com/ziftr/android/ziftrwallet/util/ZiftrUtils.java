@@ -360,8 +360,8 @@ public class ZiftrUtils {
 	 * @param newPassphrase
 	 * @return
 	 */
-	public static byte[] saltedHash(Context c, String newPassphrase) {
-		return saltedHash(OWPreferencesUtils.getSalt(c), newPassphrase);
+	public static byte[] saltedHash(String newPassphrase) {
+		return saltedHash(OWPreferencesUtils.getSalt(), newPassphrase);
 	}
 	
 	public static byte[] saltedHash(String salt, String newPassphrase) {
@@ -380,8 +380,8 @@ public class ZiftrUtils {
 	 * @param newPassphrase
 	 * @return
 	 */
-	public static String saltedHashString(Context c, String newPassphrase) {
-		return ZiftrUtils.bytesToHexString(saltedHash(c, newPassphrase));
+	public static String saltedHashString(String newPassphrase) {
+		return ZiftrUtils.bytesToHexString(saltedHash(newPassphrase));
 	}
 
 	/**

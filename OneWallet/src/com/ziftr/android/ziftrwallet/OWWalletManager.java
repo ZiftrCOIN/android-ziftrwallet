@@ -322,7 +322,7 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 	private OWKeyCrypter passphraseToCrypter(String passphrase) {
 		OWKeyCrypter crypter = null;
 		if (passphrase != null) {
-			SecretKey secretKey = OWPbeAesCrypter.generateSecretKey(passphrase, OWPreferencesUtils.getSalt(this.context));
+			SecretKey secretKey = OWPbeAesCrypter.generateSecretKey(passphrase, OWPreferencesUtils.getSalt());
 			crypter = new OWPbeAesCrypter(secretKey);
 		}
 		return crypter;

@@ -111,7 +111,7 @@ public class OWWalletTransactionListAdapter extends OWSearchableListAdapter<OWSe
 			String amt = txListItem.getCoinId().getFormattedAmount(txListItem.getTxAmount());
 			txAmount.setText(amt);
 
-			OWFiat fiat = OWPreferencesUtils.getFiatCurrency(this.getContext());
+			OWFiat fiat = OWPreferencesUtils.getFiatCurrency();
 			
 			TextView txAmountFiatEquiv = (TextView) 
 					convertView.findViewById(R.id.txAmountFiatEquiv);

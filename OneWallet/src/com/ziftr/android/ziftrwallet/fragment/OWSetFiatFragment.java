@@ -46,7 +46,7 @@ public class OWSetFiatFragment extends OWFragment implements OnItemClickListener
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		OWFiat fiatType = (OWFiat) parent.getItemAtPosition(position);
-		OWPreferencesUtils.setFiatCurrency(getActivity(), fiatType.getName());
+		OWPreferencesUtils.setFiatCurrency(fiatType.getName());
 		getOWMainActivity().onBackPressed();
 	}
 

@@ -102,7 +102,7 @@ public class OWAccountsFragment extends OWFragment {
 		//show Add Currency Message if user has no wallets
 		this.toggleAddCurrencyMessage();
 		
-		this.fiatType = OWPreferencesUtils.getFiatCurrency(this.getActivity());
+		this.fiatType = OWPreferencesUtils.getFiatCurrency();
 
 		this.calculateTotal();
 		// Return the view which was inflated
@@ -136,7 +136,7 @@ public class OWAccountsFragment extends OWFragment {
 		int resId = R.layout.accounts_currency_list_single_item;
 		BigDecimal amount = id.getAmount(this.walletManager.getWalletBalance(id, OWSQLiteOpenHelper.BalanceType.AVAILABLE));
 		String balance = id.getFormattedAmount(amount);
-		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(this.getActivity());
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency();
 		String fiatBalance = OWConverter.convert(amount, id, fiat).setScale(2, RoundingMode.HALF_DOWN).toPlainString();
 		if (id == OWCoin.BTC) {
 			return new OWCurrencyListItem(OWCoin.BTC, 

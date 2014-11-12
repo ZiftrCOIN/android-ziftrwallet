@@ -74,7 +74,7 @@ public class OWCurrencyListAdapter extends ArrayAdapter<OWCurrencyListItem> {
 			// If it doesn't have an old view then we make a new one 
 			convertView = this.inflater.inflate(currencyListItem.getResId(), null);
 		}
-			OWFiat fiatType =OWPreferencesUtils.getFiatCurrency(getContext());
+			OWFiat fiatType =OWPreferencesUtils.getFiatCurrency();
 //		if (getItemViewType(position) == OWCurrencyListAdapter.coinType) {
 			String fiatSymbol = fiatType.getSymbol();
 

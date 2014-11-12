@@ -8,13 +8,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OWConverter {
+	/**
+	 * A Map of currencies related to USD.
+	 * Formatted as how much USD that 1.0 of the currency is, eg 1.0 bitcoins
+	 * might be worth 375.56 USD.
+	 */
 	private static final Map<OWCurrency, BigDecimal> convertMap;
 	static {
 		// TODO need to get these values from some sort of an API
 		Map<OWCurrency, BigDecimal> cMap = new HashMap<OWCurrency, BigDecimal>();
 		cMap.put(OWFiat.USD, new BigDecimal("1.00", MathContext.DECIMAL64));
-		cMap.put(OWFiat.EUR, new BigDecimal("0.74", MathContext.DECIMAL64));
-		cMap.put(OWFiat.GBP, new BigDecimal("0.62", MathContext.DECIMAL64));
+		cMap.put(OWFiat.EUR, new BigDecimal("1.25", MathContext.DECIMAL64));
+		cMap.put(OWFiat.GBP, new BigDecimal("1.59", MathContext.DECIMAL64));
 
 		
 		cMap.put(OWCoin.BTC, new BigDecimal("622.06", MathContext.DECIMAL64));
@@ -29,22 +34,28 @@ public class OWConverter {
 		convertMap = Collections.unmodifiableMap(cMap);
 	}
 
-	public static BigDecimal convert(BigDecimal amount, 
-			OWCurrency convertFrom, OWCurrency convertTo) {
+	
+	public static BigDecimal convert(BigDecimal amount, OWCurrency convertFrom, OWCurrency convertTo) {
 		try {
-			return amount
-					.multiply(convertMap.get(convertFrom), MathContext.DECIMAL64)
-					.divide(convertMap.get(convertTo), MathContext.DECIMAL64);
+			BigDecimal convertFromUsdMultiplier = convertMap.get(convertFrom);
+			BigDecimal convertToUsdMultiplier = convertMap.get(convertTo);
+			BigDecimal conversionRate = convertFromUsdMultiplier.divide(convertToUsdMultiplier, MathContext.DECIMAL64);
+			
+			return amount.multiply(conversionRate, MathContext.DECIMAL64);
+			
 		} catch (ArithmeticException ae) {
+			//certain test coins can have a value of zero could could cause this
 			return BigDecimal.ZERO;
 		}
-
 	} 
+	
 
-	public static BigInteger convert(BigInteger amount, 
-			OWCurrency convertFrom, OWCurrency convertTo) {
-		return convertTo.getAtomicUnits(convert(convertFrom.getAmount(amount), 
-						convertFrom, convertTo));
+	public static BigInteger convert(BigInteger amount, OWCurrency convertFrom, OWCurrency convertTo) {
+		
+		BigDecimal convertFromDecimal = convertFrom.getAmount(amount);
+		BigDecimal convertToDecimal = convert(convertFromDecimal, convertFrom, convertTo);
+		
+		return convertTo.getAtomicUnits(convertToDecimal);
 	}
 
 }

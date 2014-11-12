@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+import com.ziftr.android.ziftrwallet.OWApplication;
 import com.ziftr.android.ziftrwallet.ziftrwalletWidget;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypterException;
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
@@ -47,9 +48,9 @@ public abstract class OWPreferencesUtils {
 	 * 
 	 * @return the stored hash of the users passphrase, if there is one.
 	 */
-	static byte[] getStoredPassphraseHash(Context a) {
+	static byte[] getStoredPassphraseHash() {
 		// Get the preferences
-		SharedPreferences prefs = getPrefs(a);
+		SharedPreferences prefs = getPrefs();
 		// Get the passphrase hash
 		String storedPassphrase = prefs.getString(PREFS_PASSPHRASE_KEY, null);
 		// If it's not null, convert it back to a byte array
@@ -66,8 +67,8 @@ public abstract class OWPreferencesUtils {
 	 * @return a boolean describing whether or not the user 
 	 * has entered a passphrase before.
 	 */
-	public static boolean userHasPassphrase(Context a) {
-		return getStoredPassphraseHash(a) != null;
+	public static boolean userHasPassphrase() {
+		return getStoredPassphraseHash() != null;
 	}
 
 	/**
@@ -77,8 +78,8 @@ public abstract class OWPreferencesUtils {
 	 * @param inputHash - the hash to check agains
 	 * @return as above
 	 */
-	public static boolean inputHashMatchesStoredHash(Context a, byte[] inputHash) {
-		byte[] storedHash = getStoredPassphraseHash(a);
+	public static boolean inputHashMatchesStoredHash(byte[] inputHash) {
+		byte[] storedHash = getStoredPassphraseHash();
 		if (storedHash != null && inputHash != null) {
 			return Arrays.equals(storedHash, inputHash); 
 		} else if (storedHash == null && inputHash == null) {
@@ -89,8 +90,8 @@ public abstract class OWPreferencesUtils {
 		}
 	}
 
-	public static String getSalt(Context a) {
-		SharedPreferences prefs = getPrefs(a);
+	public static String getSalt() {
+		SharedPreferences prefs = getPrefs();
 		String salt = prefs.getString(PREFS_SALT_KEY, null);
 		if (salt != null && !salt.isEmpty()) {
 			return salt;
@@ -110,86 +111,86 @@ public abstract class OWPreferencesUtils {
 		return salt;
 	}
 
-	public static boolean getFeesAreEditable(Context a) {
-		SharedPreferences prefs = getPrefs(a);
+	public static boolean getFeesAreEditable() {
+		SharedPreferences prefs = getPrefs();
 		return prefs.getBoolean(EDITABLE_FEES_KEY, false);
 	}
 
-	public static void setFeesAreEditable(Context a, boolean feesAreEditable) {
-		SharedPreferences prefs = getPrefs(a);
+	public static void setFeesAreEditable(boolean feesAreEditable) {
+		SharedPreferences prefs = getPrefs();
 		Editor editor = prefs.edit();
 		editor.putBoolean(EDITABLE_FEES_KEY, feesAreEditable);
 		editor.commit();
 	}
 
-	public static boolean getPassphraseDisabled(Context a) {
-		SharedPreferences prefs = getPrefs(a);
+	public static boolean getPassphraseDisabled() {
+		SharedPreferences prefs = getPrefs();
 		return prefs.getBoolean(PASSPHRASE_DISABLED_KEY, false);
 	}
 
-	public static void setPassphraseDisabled(Context a, boolean isDisabled) {
-		SharedPreferences prefs = getPrefs(a);
+	public static void setPassphraseDisabled(boolean isDisabled) {
+		SharedPreferences prefs = getPrefs();
 		Editor editor = prefs.edit();
 		editor.putBoolean(PASSPHRASE_DISABLED_KEY, isDisabled);
 		editor.commit();
 	}
 
-	public static OWFiat getFiatCurrency(Context a){
-		SharedPreferences prefs = getPrefs(a);
+	public static OWFiat getFiatCurrency(){
+		SharedPreferences prefs = getPrefs();
 		return OWFiat.valueOf(prefs.getString(FIAT_CURRENCY_KEY, "US Dollars"));
 
 	}
 
-	public static void setFiatCurrency(Context a, String fiatSelected){
-		SharedPreferences prefs = getPrefs(a);
+	public static void setFiatCurrency(String fiatSelected){
+		SharedPreferences prefs = getPrefs();
 		Editor editor = prefs.edit();
 		editor.putString(FIAT_CURRENCY_KEY, fiatSelected);
 		editor.commit();
 	}
 	
-	public static String getUserName(Context a) {
-		SharedPreferences prefs = getPrefs(a);
+	public static String getUserName() {
+		SharedPreferences prefs = getPrefs();
 		return prefs.getString(PREFS_USER_NAME_KEY, null);
 	}
 	
-	public static boolean userHasSetName(Context a) {
-		return getUserName(a) != null;
+	public static boolean userHasSetName() {
+		return getUserName() != null;
 	}
 	
-	public static void setUserName(Context a, String userName) {
-		SharedPreferences prefs = getPrefs(a);
+	public static void setUserName(String userName) {
+		SharedPreferences prefs = getPrefs();
 		Editor editor = prefs.edit();
 		editor.putString(PREFS_USER_NAME_KEY, userName);
 		editor.commit();
 	}
 	
-	public static void setDisabledName(Context a, boolean isDisabled){
-		SharedPreferences prefs = getPrefs(a);
+	public static void setDisabledName(boolean isDisabled){
+		SharedPreferences prefs = getPrefs();
 		Editor editor = prefs.edit();
 		editor.putBoolean(NAME_DISABLED_KEY, isDisabled);
 		editor.commit();
 	}
 	
-	public static boolean getDisabledName(Context a){
-		SharedPreferences prefs = getPrefs(a);
+	public static boolean getDisabledName(){
+		SharedPreferences prefs = getPrefs();
 		return prefs.getBoolean(NAME_DISABLED_KEY, false);
 	}
 
-	public static String getWidgetCoin(Context a){
-		SharedPreferences prefs = getPrefs(a);
+	public static String getWidgetCoin(){
+		SharedPreferences prefs = getPrefs();
 		return prefs.getString(ziftrwalletWidget.WIDGET_CURR, null);
 	}
 	
-	public static void setWidgetCoin(Context a, String coin){
-		SharedPreferences prefs = getPrefs(a);
+	public static void setWidgetCoin(String coin){
+		SharedPreferences prefs = getPrefs();
 		Editor editor = prefs.edit();
 		editor.putString(ziftrwalletWidget.WIDGET_CURR, coin);
 		editor.commit();
 	}
 
 	
-	public static SharedPreferences getPrefs(Context a) {
-		return a.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
+	public static SharedPreferences getPrefs() {
+		return OWApplication.getApplication().getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
 	}
 
 }

@@ -52,7 +52,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		this.editableConfirmationFeeBar =(RelativeLayout) rootView.findViewById(R.id.editable_confirmation_fees_bar);
 		this.editableConfirmationFeeBar.setOnClickListener(this);
 		this.chosenFiat = (TextView) rootView.findViewById(R.id.chosen_fiat);
-		this.chosenFiat.setText(OWPreferencesUtils.getFiatCurrency(getActivity()).getName());
+		this.chosenFiat.setText(OWPreferencesUtils.getFiatCurrency().getName());
 		this.resetPassword = (RelativeLayout) rootView.findViewById(R.id.reset_password_button);
 		this.resetPassword.setOnClickListener(this);
 		this.resetPasswordLabel = ((TextView) resetPassword.findViewById(R.id.reset_password_text));
@@ -63,7 +63,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		this.disableName = (RelativeLayout) rootView.findViewById(R.id.disable_name_button);
 		this.disableName.setOnClickListener(this);
 		this.setNameLabel = (TextView) this.setName.findViewById(R.id.set_name_label);
-		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
+		if (OWPreferencesUtils.getFeesAreEditable()) {
 			this.editableConfirmationFee.setChecked(true);
 		} else {
 			this.editableConfirmationFee.setChecked(false);
@@ -80,10 +80,10 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 
 	public void updateSettingsVisibility(boolean justSetPass) {
 		//Show/hide options based on password settings
-		if (OWPreferencesUtils.userHasPassphrase(this.getActivity()) || justSetPass) {
+		if (OWPreferencesUtils.userHasPassphrase() || justSetPass) {
 			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Reset Passphrase");
-		} else if (!OWPreferencesUtils.getPassphraseDisabled(this.getActivity())) {
+		} else if (!OWPreferencesUtils.getPassphraseDisabled()) {
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		} else {
@@ -91,9 +91,9 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			this.resetPasswordLabel.setText("Set Passphrase");
 		}
 		//Show/hide options based on name settings
-		if (OWPreferencesUtils.userHasSetName(this.getActivity())){
+		if (OWPreferencesUtils.userHasSetName()){
 			this.setNameLabel.setText("Change Name");
-		} else if (OWPreferencesUtils.getDisabledName(this.getActivity())) {
+		} else if (OWPreferencesUtils.getDisabledName()) {
 			this.setNameLabel.setText("Set Name");
 		} else {
 			this.setNameLabel.setText("Set Name");
@@ -104,7 +104,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		if (v==this.resetPassword){
-			if (OWPreferencesUtils.userHasPassphrase(this.getActivity())) {
+			if (OWPreferencesUtils.userHasPassphrase()) {
 				OWResetPassphraseDialog passphraseDialog = 
 						new OWResetPassphraseDialog();
 				// Set the target fragment
@@ -133,18 +133,18 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 				}
 			}
 		} else if (v==this.editableConfirmationFee){
-				OWPreferencesUtils.setFeesAreEditable(this.getActivity(), this.editableConfirmationFee.isChecked());
+				OWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
-			OWPreferencesUtils.setPassphraseDisabled(this.getActivity(), true);
+			OWPreferencesUtils.setPassphraseDisabled(true);
 			updateSettingsVisibility(false);
 		} else if (v == this.setFiatCurrency){
 			getOWMainActivity().openSetFiatCurrency();
 		} else if (v == this.editableConfirmationFeeBar){
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
-			OWPreferencesUtils.setFeesAreEditable(this.getActivity(), this.editableConfirmationFee.isChecked());
+			OWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disableName){
-			OWPreferencesUtils.setUserName(this.getActivity(), null);
-			OWPreferencesUtils.setDisabledName(this.getActivity(), true);
+			OWPreferencesUtils.setUserName(null);
+			OWPreferencesUtils.setDisabledName(true);
 			this.updateSettingsVisibility(false);
 		} else if (v == this.setName){
 			OWSetNameDialog setNameDialog = new OWSetNameDialog();

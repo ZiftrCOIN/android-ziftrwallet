@@ -68,8 +68,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 
 	public void testPreconditions(){
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
-		assertFalse(OWPreferencesUtils.getDisabledName(mActivity));
-		assertNull(OWPreferencesUtils.getUserName(mActivity));
+		assertFalse(OWPreferencesUtils.getDisabledName());
+		assertNull(OWPreferencesUtils.getUserName());
 		assertTrue(mActivity.getSupportFragmentManager().getBackStackEntryCount() == 0);
 	}
 

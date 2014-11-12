@@ -123,10 +123,13 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 				this.getSelectedCoin().getLogoResId());
 		this.coinLogo.setImageDrawable(coinImage);
 
-		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency();
 		this.populateAmount();
 		this.populateCurrency();
-		this.confirmationFee.setText(txItem.getCoinId().getDefaultFeePerKb());
+		
+		String feeString = txItem.getCoinId().getFormattedAmount(txItem.getTxFee());
+		this.confirmationFee.setText(feeString);
+		
 		this.currencyType.setText(fiat.getName());
 
 		Date date = new Date(this.txItem.getTxTime() * 1000);
@@ -163,7 +166,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 	}
 
 	private void populateCurrency() {
-		OWFiat fiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+		OWFiat fiat = OWPreferencesUtils.getFiatCurrency();
 		
 		BigInteger fiatAmt = OWConverter.convert(txItem.getTxAmount(), 
 				txItem.getCoinId(), fiat);

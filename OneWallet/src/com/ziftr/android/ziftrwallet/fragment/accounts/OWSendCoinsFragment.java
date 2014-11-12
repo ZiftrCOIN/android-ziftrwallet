@@ -36,6 +36,7 @@ import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZWCoinFiatTextWatcher;
 
 /**
  * The section of the app where users fill out a form and click send 
@@ -187,7 +188,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 				a.onBackPressed();
 			}
 		} else if (v == sendButton) {
-			if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
+			if (OWPreferencesUtils.userHasPassphrase()) {
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 				getOWMainActivity().showGetPassphraseDialog(
@@ -302,14 +303,14 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		if (this.prefilledAddress != null) {
 			addressEditText.setText(this.prefilledAddress);
 		}
-		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency();
 
 		this.fiatAmountLabel = (TextView) this.rootView.findViewById(R.id.amount_fiat_label);
 		this.fiatFeeLabel = (TextView) this.rootView.findViewById(R.id.fee_fiat_label);
 		this.fiatAmountLabel.setText(selectedFiat.getName());
 		this.fiatFeeLabel.setText(selectedFiat.getName());
 
-		if (OWPreferencesUtils.getFeesAreEditable(this.getActivity())) {
+		if (OWPreferencesUtils.getFeesAreEditable()) {
 			this.coinFeeEditText.setFocusable(true);
 			this.coinFeeEditText.setFocusableInTouchMode(true);
 			this.coinFeeEditText.setClickable(true);
@@ -338,14 +339,20 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private void initializeTextViewDependencies() {
 		// Bind the amount values so that when one changes the other changes
 		// according to the current exchange rate.
-		this.bindEditTextValues(this.coinAmountEditText, this.fiatAmountEditText,
-				this.changeCoinStartedFromProgram, this.changeFiatStartedFromProgram);
+		ZWCoinFiatTextWatcher coinTextWatcher = new ZWCoinFiatTextWatcher(getSelectedCoin(), this.coinAmountEditText, this.fiatAmountEditText);
+		coinAmountEditText.addTextChangedListener(coinTextWatcher);
+		fiatAmountEditText.addTextChangedListener(coinTextWatcher);
+		
+		//set the hint text to zeros
+		fiatAmountEditText.setHint(OWPreferencesUtils.getFiatCurrency().getFormattedAmount(BigDecimal.ZERO));
+		coinAmountEditText.setHint(getSelectedCoin().getFormattedAmount(BigDecimal.ZERO));
 
 		// Bind the fee values so that when one changes the other changes
 		// according to the current exchange rate.
-		EditText feeTextView = this.coinFeeEditText;
-		this.bindEditTextValues(feeTextView, this.fiatFeeEditText,
-				this.changeCoinStartedFromProgram, this.changeFiatStartedFromProgram);
+		EditText feeEditText = this.coinFeeEditText;
+		
+		ZWCoinFiatTextWatcher feeTextWatcher = new ZWCoinFiatTextWatcher(getSelectedCoin(), feeEditText, this.fiatFeeEditText);
+		feeEditText.addTextChangedListener(feeTextWatcher);
 
 		TextWatcher refreshTotalTextWatcher = new OWTextWatcher() {
 			@Override
@@ -358,21 +365,14 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		coinAmountEditText.addTextChangedListener(refreshTotalTextWatcher);
 
 		// Add the listener to the fee text view
-		feeTextView.addTextChangedListener(refreshTotalTextWatcher);
+		feeEditText.addTextChangedListener(refreshTotalTextWatcher);
 
-		// Set the fee to the default and set send amount to 0 initially 
-		changeFiatStartedFromProgram.set(true);
 		BigDecimal fee = new BigDecimal(this.getSelectedCoin().getDefaultFeePerKb());
 		BigDecimal satoshi =  new BigDecimal(".00000001");
-		feeTextView.setText(fee.multiply(satoshi).toString());
-		changeFiatStartedFromProgram.set(false);
+		feeEditText.setText(fee.multiply(satoshi).toString());
+		
+		feeEditText.setText(getSelectedCoin().getFormattedAmount(getSelectedCoin().getDefaultFeePerKb()));
 
-		changeCoinStartedFromProgram.set(true);
-		if (coinAmountEditText.getText().toString().isEmpty()) {
-			coinAmountEditText.setText("0");
-			fiatAmountEditText.setText("0");
-		}
-		changeCoinStartedFromProgram.set(false);
 	}
 
 	private void initializeEditText() {
@@ -403,7 +403,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		// Update the text in the total fiat equiv
 		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
 				R.id.sendTotalFiatEquivTextView);
-		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(getActivity());
+		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency();
 		BigDecimal fiatTotal = OWConverter.convert(total, getSelectedCoin(), selectedFiat);
 		totalEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true) + ")");
 	}

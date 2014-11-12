@@ -36,6 +36,7 @@ import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
 import com.ziftr.android.ziftrwallet.util.OWTextWatcher;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
+import com.ziftr.android.ziftrwallet.util.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
@@ -122,7 +123,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		if(!(requireFragHasAddress && this.fragmentHasAddress()) && !this.labelEditText.getText().toString().isEmpty()) {
 			// TODO make the passphrase diaog have extra information about how they 
 			// won't be able to delete the address they are about to make
-			if (OWPreferencesUtils.userHasPassphrase(getOWMainActivity())) {
+			if (OWPreferencesUtils.userHasPassphrase()) {
 				Bundle b = new Bundle();
 				b.putString(OWCoin.TYPE_KEY, getSelectedCoin().toString());
 				getOWMainActivity().showGetPassphraseDialog(
@@ -157,8 +158,9 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		this.fiatAmountEditText.setId(R.id.ow_receive_fiat_amount);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
-		this.bindEditTextValues(this.coinAmountEditText, this.fiatAmountEditText, 
-				this.changeCoinStartedFromProgram, this.changeFiatStartedFromProgram);
+		ZWCoinFiatTextWatcher coinTextWatcher = new ZWCoinFiatTextWatcher(getSelectedCoin(), coinAmountEditText, fiatAmountEditText);
+		coinAmountEditText.addTextChangedListener(coinTextWatcher);
+		fiatAmountEditText.addTextChangedListener(coinTextWatcher);
 		
 		this.helpButton = (ImageView) this.rootView.findViewById(R.id.help_msg_button);
 		this.helpButton.setOnClickListener(this);
@@ -216,7 +218,7 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		String message = this.messageEditText.getText().toString();
 		message = message != null && message.isEmpty() ? null : message;
 		String qrCodeData = OWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, amountVal, 
-				OWPreferencesUtils.getUserName(getActivity()), message);
+				OWPreferencesUtils.getUserName(), message);
 
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
