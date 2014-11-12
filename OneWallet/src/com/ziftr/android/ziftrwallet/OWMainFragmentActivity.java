@@ -3,6 +3,7 @@ package com.ziftr.android.ziftrwallet;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -275,6 +276,7 @@ ZiftrNetworkHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
 
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);

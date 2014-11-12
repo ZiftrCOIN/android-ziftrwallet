@@ -1,5 +1,9 @@
 package com.ziftr.android.ziftrwallet.util;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+
 import android.util.Log;
 
 import com.ziftr.android.ziftrwallet.OWApplication;
@@ -106,6 +110,23 @@ public abstract class ZLog {
 				}
 				else {
 					Log.v(tag, logMessage.toString());
+				}
+				
+				if (OWPreferencesUtils.getDebugMode()){
+					File dir = new File(OWApplication.getApplication().getExternalFilesDir(null) + "/logs");
+					dir.mkdirs();
+					File logfile = new File(dir, "Zlog.txt");
+					FileOutputStream f;
+					try {
+						f = new FileOutputStream(logfile, true);
+						OutputStreamWriter writer = new OutputStreamWriter(f);
+						writer.write(logMessage.toString() + "\n");
+						writer.flush();
+						writer.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
 				}
 			}
 			

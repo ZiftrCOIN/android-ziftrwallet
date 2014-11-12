@@ -38,6 +38,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	private TextView setNameLabel;
 	private Button debugButton;
 	private Button exportdbButton;
+	private Button exportlogsButton;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -81,6 +82,8 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		this.debugButton.setOnClickListener(this);
 		this.exportdbButton = (Button) rootView.findViewById(R.id.export_db);
 		this.exportdbButton.setOnClickListener(this);
+		this.exportlogsButton = (Button) rootView.findViewById(R.id.export_logs);
+		this.exportlogsButton.setOnClickListener(this);
 		this.updateSettingsVisibility(false);
 		return rootView;
 	}
@@ -115,9 +118,12 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		if (!OWPreferencesUtils.getDebugMode()){
 			this.debugButton.setText(" Enable debugging ");
 			this.exportdbButton.setVisibility(View.GONE);
+			this.exportlogsButton.setVisibility(View.GONE);
 		} else {
 			this.debugButton.setText(" Disable debugging ");
 			this.exportdbButton.setVisibility(View.VISIBLE);
+			this.exportlogsButton.setVisibility(View.VISIBLE);
+
 		}
 		
 	}
@@ -182,12 +188,18 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		} else if (v == this.debugButton) {
 			this.getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), OWTags.VALIDATE_PASS_DEBUG);
 		} else if (v == this.exportdbButton) {
-			//export DB 
 			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");
 			Intent intent = new Intent(Intent.ACTION_SEND);
 			intent.setType("plain/text");
 			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(wallet));
 			startActivity(Intent.createChooser(intent, "Send backup"));
+		} else if (v == this.exportlogsButton){ 
+			File log = new File(this.getActivity().getExternalFilesDir(null) + "/logs", "Zlog.txt");
+			Intent intent = new Intent(Intent.ACTION_SEND);
+			intent.setType("plain/text");
+			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(log));
+			startActivity(Intent.createChooser(intent, "Send logs"));
+
 		}
 	}
 
