@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;

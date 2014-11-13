@@ -186,12 +186,10 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < txItem.getDisplayAddresses().size(); i++) {
 			String a = txItem.getDisplayAddresses().get(i);
-			ZLog.log("ABCEEEEE" + a);
 			sb.append(a);
+			ZLog.log("displaying addresses in txndetails: " + a);
 			if (i != txItem.getDisplayAddresses().size()-1) {
 				sb.append("\n");
-				ZLog.log("ABCDEF"+i);
-				ZLog.log("ABCGHE" + txItem.getDisplayAddresses().size());
 			}
 		}
 		addressTextView.setText(sb.toString());

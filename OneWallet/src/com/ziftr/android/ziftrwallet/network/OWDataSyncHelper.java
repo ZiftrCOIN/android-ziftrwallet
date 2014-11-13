@@ -104,7 +104,7 @@ public class OWDataSyncHelper {
 				String sHex = ZiftrUtils.bigIntegerToString(signature.s, 32);
 				toSign.put("s", sHex);
 				
-				ZLog.log(toSign);
+				ZLog.log("Sending this signed send request to server: " + toSign);
 			}
 		}
 		catch(Exception e) {
@@ -179,12 +179,9 @@ public class OWDataSyncHelper {
 				e.printStackTrace();
 			}
 		} else {
-			ZLog.log(response);
+			ZLog.log("error getting supported wallets: " + response);
 		}
 		ZiftrNetworkManager.networkStopped();
-		for (OWCoin x : supportedCoins){
-			ZLog.log(x.toString());
-		}
 		return supportedCoins;
 	}
 	
@@ -300,7 +297,6 @@ public class OWDataSyncHelper {
 							String outputValue = vout.getString("value");
 							if(!usedValue) {
 								usedValue = true;
-								//TODO -multiply hack until server fixes decimal issue
 								BigInteger outputValueInt = new BigInteger(outputValue);
 								value = value.subtract(outputValueInt);
 							}
@@ -370,9 +366,6 @@ public class OWDataSyncHelper {
 				break;
 				}
 			}
-		}
-		if (hash.equals("c162f423fe6660c0e8e76801d06fc778026249bc90c0fc3d3634866ae17220b7")){
-		ZLog.log(value + " " + "gggg"  + note);
 		}
 		time = time * 1000;
 		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddresses, new OWSha256Hash(hash), note, confirmations, time);

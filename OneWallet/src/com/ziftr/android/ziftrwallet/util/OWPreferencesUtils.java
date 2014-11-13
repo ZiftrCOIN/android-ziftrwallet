@@ -45,6 +45,9 @@ public abstract class OWPreferencesUtils {
 	
 	/** Save whether we are in debug mode or not*/
 	public final static String DEBUG_SETTING_KEY = "debug_setting_key";
+	
+	/** Save whether we are in logging to filee or not*/
+	public final static String LOG_TO_FILE_KEY = "log_to_file_key";
 
 	/**
 	 * Gets the stored hash of the users passphrase, if there is one.
@@ -202,6 +205,19 @@ public abstract class OWPreferencesUtils {
 		editor.putBoolean(DEBUG_SETTING_KEY, enabled);
 		editor.commit();
 	}
+	
+	public static boolean getLogToFile(){
+		SharedPreferences prefs = getPrefs();
+		return prefs.getBoolean(LOG_TO_FILE_KEY, false);
+	}
+	
+	public static void setLogToFile(boolean enabled){
+		SharedPreferences prefs = getPrefs();
+		Editor editor = prefs.edit();
+		editor.putBoolean(LOG_TO_FILE_KEY, enabled);
+		editor.commit();
+	}
+	
 	
 	public static SharedPreferences getPrefs() {
 		return OWApplication.getApplication().getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);

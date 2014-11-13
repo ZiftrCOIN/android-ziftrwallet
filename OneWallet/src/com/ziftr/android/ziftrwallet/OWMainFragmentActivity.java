@@ -276,6 +276,9 @@ ZiftrNetworkHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (OWPreferencesUtils.getLogToFile()){
+			ZLog.setLogger(ZLog.FILE_LOGGER);
+		}
 		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
 
 		// Everything is held within this main activity layout
@@ -1202,11 +1205,7 @@ ZiftrNetworkHandler {
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
 		if (requestCode == OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG && passphrase.equals("orca")){
-			if (OWPreferencesUtils.getDebugMode()){
-				OWPreferencesUtils.setDebugMode(false);
-			} else {
-				OWPreferencesUtils.setDebugMode(true);
-			}
+			OWPreferencesUtils.setDebugMode(true);
 			((OWSettingsFragment)this.getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 			return;
@@ -1373,7 +1372,6 @@ ZiftrNetworkHandler {
 		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency();
 
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
-		ZLog.log(this.selectedCoin);
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
 
 		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);

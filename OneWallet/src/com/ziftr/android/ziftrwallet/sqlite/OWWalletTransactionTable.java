@@ -270,7 +270,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		try {
 			ContentValues values = new ContentValues();
 			values.put(COLUMN_NUM_CONFIRMATIONS, tx.getNumConfirmations());
-			ZLog.log(getWhereClaus(tx));
+			ZLog.log("Updating transaction confirmations with:  " + getWhereClaus(tx));
 			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
 					getWhereClaus(tx), null);
 
@@ -288,7 +288,7 @@ public class OWWalletTransactionTable extends OWCoinRelativeTable {
 		try {
 			ContentValues values = new ContentValues();
 			values.put(COLUMN_NOTE, tx.getTxNote());
-			ZLog.log(getWhereClaus(tx));
+			ZLog.log("Updating transaction note with:  " + getWhereClaus(tx));
 			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
 					getWhereClaus(tx), null);
 
