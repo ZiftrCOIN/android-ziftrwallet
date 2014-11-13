@@ -37,6 +37,8 @@ public class OWTags {
 	
 	public static final String VALIDATE_PASS_DEBUG = "validate_passphrase_dialog_debug";
 	
+	public static final String VALIDATE_PASS_DISABLE = "validate_disable_passphrase_dialog";
+	
 	//EDIT TEXT
 	public static final String OW_EDIT_TEXT = "ow_edit_text";
 

@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp" >
+    android:layout_height="match_parent" >
 
-    <TextView
-        android:id="@+id/contactPlaceholderText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Placeholder for contact section layout" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+        android:layout_marginRight="@dimen/ow_horizontal_margin"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp" >
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/contactPlaceholderText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ow_security_text"
+            android:textColor="@color/ow_default_text"
+            android:textSize="@dimen/ow_txt_mediumsmall" />
+    </LinearLayout>
+
+</ScrollView>

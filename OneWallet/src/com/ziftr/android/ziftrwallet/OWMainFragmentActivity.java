@@ -881,6 +881,7 @@ ZiftrNetworkHandler {
 		});
 		return true;
 	}
+	
 
 	/**
 	 * called after user enters password for creating new wallet 
@@ -1204,12 +1205,14 @@ ZiftrNetworkHandler {
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
+		
 		if (requestCode == OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG && passphrase.equals("orca")){
 			OWPreferencesUtils.setDebugMode(true);
 			((OWSettingsFragment)this.getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 			return;
 		}
+		
 		if (OWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
 			switch(requestCode) {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
@@ -1221,6 +1224,13 @@ ZiftrNetworkHandler {
 				OWSendCoinsFragment sendFrag = (OWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.SEND_FRAGMENT);
 				sendFrag.onClickSendCoins(passphrase);
+				break;
+			case OWRequestCodes.DISABLE_PASSPHRASE_DIALOG:
+				OWPreferencesUtils.disablePassphrase();
+				OWPreferencesUtils.setPassphraseDisabled(true);
+				((OWSettingsFragment)this.getSupportFragmentManager(
+						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
+
 				break;
 			}
 		} else {

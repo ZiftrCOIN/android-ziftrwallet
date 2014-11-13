@@ -218,7 +218,13 @@ public abstract class OWPreferencesUtils {
 		editor.commit();
 	}
 	
-	
+	public static void disablePassphrase(){
+		SharedPreferences prefs = OWPreferencesUtils.getPrefs();
+		Editor editor = prefs.edit();
+		editor.putString(OWPreferencesUtils.PREFS_PASSPHRASE_KEY, null);
+		editor.commit();
+	}
+
 	public static SharedPreferences getPrefs() {
 		return OWApplication.getApplication().getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
 	}

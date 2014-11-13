@@ -28,4 +28,6 @@ public class OWRequestCodes {
 	
 	public static final int DEBUG_MODE_PASSPHRASE_DIALOG = 13;
 	
+	public static final int DISABLE_PASSPHRASE_DIALOG = 14;
+	
 }

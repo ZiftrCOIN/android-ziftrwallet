@@ -103,14 +103,14 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	public void updateSettingsVisibility(boolean justSetPass) {
 		//Show/hide options based on password settings
 		if (OWPreferencesUtils.userHasPassphrase() || justSetPass) {
-			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Reset Passphrase");
-		} else if (!OWPreferencesUtils.getPassphraseDisabled()) {
+			this.disablePassphrase.setVisibility(View.VISIBLE);
+		} else if (!OWPreferencesUtils.getPassphraseDisabled()){
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		} else {
-			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Set Passphrase");
+			this.disablePassphrase.setVisibility(View.GONE);
 		}
 		//Show/hide options based on name settings
 		if (OWPreferencesUtils.userHasSetName()){
@@ -178,8 +178,14 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		} else if (v==this.editableConfirmationFee){
 			OWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
-			OWPreferencesUtils.setPassphraseDisabled(true);
-			updateSettingsVisibility(false);
+			if (OWPreferencesUtils.userHasPassphrase()){
+				this.getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), OWTags.VALIDATE_PASS_DISABLE);
+			} else {
+				OWPreferencesUtils.setPassphraseDisabled(true);
+				//update settings visibility too slow with recognizing disabled password so update here
+				this.disablePassphrase.setVisibility(View.GONE);
+				this.resetPasswordLabel.setText("Set Passphrase");
+			}
 		} else if (v == this.setFiatCurrency){
 			getOWMainActivity().openSetFiatCurrency();
 		} else if (v == this.editableConfirmationFeeBar){
