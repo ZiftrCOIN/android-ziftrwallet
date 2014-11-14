@@ -11,13 +11,17 @@ import javax.crypto.SecretKey;
 import android.content.Context;
 
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
+import com.ziftr.android.ziftrwallet.crypto.OWECDSASignature;
+import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /** 
  * This class controls all of the wallets and is responsible
@@ -249,6 +253,25 @@ public class OWWalletManager extends OWSQLiteOpenHelper {
 		return this.walletFiles.get(id);
 	}
 
+	
+	
+	/**
+	 * gets an {@link OWECKey} that can be used for signing from the public address,
+	 * note the user must "own" the address (have a private key in the local db that corresponds to this public address)
+	 * @param publicAddress the public address of the key to be used for signing
+	 * @return 
+	 */
+	public OWECKey getKeyForAddress(OWCoin coin, String publicAddress, String passphrase) {
+		OWAddress signingAddress = OWWalletManager.getInstance().readAddress(coin, publicAddress, true);
+		OWECKey key = signingAddress.getKey();
+		key.setKeyCrypter(this.passphraseToCrypter(passphrase));
+		return key;
+	}
 
 
 }
+
+
+
+
+

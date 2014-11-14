@@ -224,8 +224,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		String addressName = labelEditText.getText().toString();
 		OWWalletManager manager = getWalletManager();
 		try {
-			handleSendCoins(getSelectedCoin(), addressToSendTo, 
-					amountSending, feeSending, passphrase);
+			sendCoins(addressToSendTo, amountSending, feeSending, passphrase);
 			
 			if (manager.readAddress(getSelectedCoin(), addressToSendTo, false) != null){
 				manager.updateAddressLabel(getSelectedCoin(), addressToSendTo, addressName, false);
@@ -488,9 +487,11 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	 * @throws AddressFormatException
 	 * @throws InsufficientMoneyException
 	 */
-	public void handleSendCoins(final OWCoin coinId, final String address, final BigInteger value, 
+	public void sendCoins(final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws OWAddressFormatException, OWInsufficientMoneyException {
+		
+		final OWCoin coinId = getSelectedCoin();
 		
 		if (!coinId.addressIsValid(address)){
 			throw new OWAddressFormatException();
