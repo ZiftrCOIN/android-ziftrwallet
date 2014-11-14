@@ -3,6 +3,7 @@ package com.ziftr.android.ziftrwallet;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1042,6 +1043,10 @@ ZiftrNetworkHandler {
 						availCoins.add(coin);
 					}
 				}
+				
+				if (!OWPreferencesUtils.getDebugMode()){
+					availCoins.removeAll(Arrays.asList(OWCoin.TYPES_TEST));
+				}
 				initMarketValues();
 			}
 		});
@@ -1208,6 +1213,7 @@ ZiftrNetworkHandler {
 		
 		if (requestCode == OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG && passphrase.equals("orca")){
 			OWPreferencesUtils.setDebugMode(true);
+			this.initAvailableCoins(); //re-init coins to show testnet in debug mode
 			((OWSettingsFragment)this.getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 			return;

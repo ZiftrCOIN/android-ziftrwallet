@@ -193,7 +193,7 @@ public class OWDataSyncHelper {
 		if (request.getResponseCode() == 200){
 			//TODO when api market_value call works
 		} else {
-			String dummy_res = "{\"currency_to\": \"usd\",\"currency_from\": \"btc/main\",\"exchange_rate\": 40000, \"exchange_rate_divisor\": 100 }";
+			String dummy_res = "{\"currency_to\": \"usd\",\"currency_from\": \"btc/main\",\"exchange_rate\": 400, \"exchange_rate_divisor\": 100 }";
 			try {
 				JSONObject res = new JSONObject(dummy_res);
 				BigDecimal usdRate = new BigDecimal(res.getLong("exchange_rate") / res.getLong("exchange_rate_divisor"));

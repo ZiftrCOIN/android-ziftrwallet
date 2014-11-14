@@ -45,10 +45,17 @@ public class OWCoin implements OWCurrency {
 	public static OWCoin DOGE_TEST = new OWCoin("100000000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 113, (byte) 196, (byte) 241, 6, 60, "Dogecoin Signed Message:\n");
 
-	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE, BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
-
+	public static final OWCoin[] TYPES = new OWCoin[] {BTC, LTC, PPC, DOGE};
+	public static final OWCoin[] TYPES_TEST = new OWCoin[] {BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
 	public static final OWCoin[] values() {
-		return TYPES;
+		OWCoin[] all = new OWCoin[TYPES.length + TYPES_TEST.length];
+		for (int i=0; i<TYPES.length; i++){
+			all[i] = TYPES[i];
+		}
+		for (int j=0; j<TYPES_TEST.length; j++){
+			all[TYPES.length + j] = TYPES_TEST[j];
+		}
+		return all;
 	}
 
 	public static OWCoin valueOf(String coinStr) {

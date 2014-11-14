@@ -123,13 +123,13 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		
 		//show debug button text based on dis/enabled
 		if (!OWPreferencesUtils.getDebugMode()){
-			this.debugButton.setText(" Enable debugging ");
+			this.debugButton.setText("Enable debugging");
 			this.exportwalletButton.setVisibility(View.GONE);
 			this.exportlogsButton.setVisibility(View.GONE);
 			this.enablelogsButton.setVisibility(View.GONE);
 
 		} else {
-			this.debugButton.setText(" Disable debugging ");
+			this.debugButton.setText("Disable debugging");
 			this.exportwalletButton.setVisibility(View.VISIBLE);
 			this.exportlogsButton.setVisibility(View.VISIBLE);
 			this.enablelogsButton.setVisibility(View.VISIBLE);
@@ -138,9 +138,7 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			} else {
 				this.enablelogsButton.setText(" Enable File logging ");
 			}
-
 		}
-		
 	}
 	
 
@@ -210,6 +208,8 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			if (OWPreferencesUtils.getDebugMode()){
 				OWPreferencesUtils.setDebugMode(false);
 				resetLoggerHelper();
+				//re-init coins to not show testnet in non-debug mode
+				this.getOWMainActivity().initAvailableCoins();
 				this.updateSettingsVisibility(false);
 			} else {
 				this.getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), OWTags.VALIDATE_PASS_DEBUG);

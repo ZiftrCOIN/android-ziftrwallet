@@ -29,6 +29,7 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
+import com.ziftr.android.ziftrwallet.exceptions.OWSendAmountException;
 import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
@@ -242,6 +243,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 					"The current wallet does not have enough coins to send the amount requested. ", 
 					"insufficient_funds_dialog");
 			return;
+		} catch(OWSendAmountException e){
+			this.getOWMainActivity().alertUser(
+					"Error: You can't send 0 coins!", 
+					"sending_0_dialog");
 		} catch(Exception e) {
 			// Shouldn't really happen, just helpful for debugging
 			ZLog.log("Exception trying to send coin: ", e);
@@ -490,58 +495,20 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	 */
 	public void handleSendCoins(final OWCoin coinId, final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
-			throws OWAddressFormatException, OWInsufficientMoneyException {
+			throws OWAddressFormatException, Exception {
 		
 		if (!coinId.addressIsValid(address)){
 			throw new OWAddressFormatException();
+		} else if (value.signum() != 1){
+			//user wants to send <=0 coins
+			throw new OWSendAmountException("Error: Cannot send 0 coins!");
 		}
-		Long amountLeftToSend = value.longValue();
 		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
 		final List<String> inputs = new ArrayList<String>();
 		
-		final List<OWAddress> usingTheseHiddenAddresses = new ArrayList<OWAddress>();
-		//use from hidden change addresses first
-		List<OWAddress> hiddenAddresses = OWWalletManager.getInstance().readHiddenAddresses(coinId);
-		for (OWAddress addr : hiddenAddresses){
-			//if (addr.getLastKnownBalance() > 0){
-				amountLeftToSend -= addr.getLastKnownBalance();
-				inputs.add(addr.getAddress());
-				usingTheseHiddenAddresses.add(addr);
-				addr.setSpentFrom(OWReceivingAddressesTable.SPENT_FROM);
-			//}
-				//TODO -put if back when values work properly
-			if (amountLeftToSend <= 0){
-				break;
-			}
-		}
-		
-		List<OWAddress> inputAddresses = OWWalletManager.getInstance().readAllVisibleAddresses(coinId, true);
-		for (OWAddress addr : inputAddresses){
-			if (amountLeftToSend <= 0){
-				break;
-			}
-			//TODO -hacking this up to test implementing the new API
-			
-			///////////////////**********************************************************************************************
-			
-			//add all address to the list
-			//if (addr.getLastKnownBalance() > 0){
-				amountLeftToSend -= addr.getLastKnownBalance();
-				inputs.add(addr.getAddress());
-			//}
-		}
-		
-		if (amountLeftToSend > 0){
-			for (OWAddress addr : usingTheseHiddenAddresses){
-				//TODO -this seems off, can this clear a previously legitmately set spent flag?
-				addr.setSpentFrom(OWReceivingAddressesTable.UNSPENT_FROM);
-			}
-		
-			//TODO -put back
-			//throw new OWInsufficientMoneyException(coinId, BigInteger.valueOf(amountLeftToSend));
-		
-		
-		
+		//send all user's addresses to the server
+		for (OWAddress addr : OWWalletManager.getInstance().readAddresses(coinId, null, true)){
+			inputs.add(addr.toString());
 		}
 		
 		
