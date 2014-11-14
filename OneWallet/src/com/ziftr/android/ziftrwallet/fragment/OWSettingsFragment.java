@@ -14,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ziftr.android.ziftrwallet.OWApplication;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.dialog.OWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
@@ -22,6 +23,7 @@ import com.ziftr.android.ziftrwallet.dialog.OWSetNameDialog;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWRequestCodes;
 import com.ziftr.android.ziftrwallet.util.OWTags;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
 public class OWSettingsFragment extends OWFragment implements OnClickListener{
@@ -37,8 +39,10 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	private RelativeLayout disableName;
 	private TextView setNameLabel;
 	private Button debugButton;
-	private Button exportdbButton;
+	private Button exportwalletButton;
 	private Button exportlogsButton;
+	private Button enablelogsButton;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -80,10 +84,13 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 
 		this.debugButton = (Button) rootView.findViewById(R.id.debug_button);
 		this.debugButton.setOnClickListener(this);
-		this.exportdbButton = (Button) rootView.findViewById(R.id.export_db);
-		this.exportdbButton.setOnClickListener(this);
+		this.exportwalletButton = (Button) rootView.findViewById(R.id.export_db);
+		this.exportwalletButton.setOnClickListener(this);
 		this.exportlogsButton = (Button) rootView.findViewById(R.id.export_logs);
 		this.exportlogsButton.setOnClickListener(this);
+		this.enablelogsButton = (Button) rootView.findViewById(R.id.enable_logs);
+		this.enablelogsButton.setOnClickListener(this);
+		
 		this.updateSettingsVisibility(false);
 		return rootView;
 	}
@@ -96,14 +103,14 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 	public void updateSettingsVisibility(boolean justSetPass) {
 		//Show/hide options based on password settings
 		if (OWPreferencesUtils.userHasPassphrase() || justSetPass) {
-			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Reset Passphrase");
-		} else if (!OWPreferencesUtils.getPassphraseDisabled()) {
+			this.disablePassphrase.setVisibility(View.VISIBLE);
+		} else if (!OWPreferencesUtils.getPassphraseDisabled()){
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		} else {
-			this.disablePassphrase.setVisibility(View.GONE);
 			this.resetPasswordLabel.setText("Set Passphrase");
+			this.disablePassphrase.setVisibility(View.GONE);
 		}
 		//Show/hide options based on name settings
 		if (OWPreferencesUtils.userHasSetName()){
@@ -117,12 +124,20 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 		//show debug button text based on dis/enabled
 		if (!OWPreferencesUtils.getDebugMode()){
 			this.debugButton.setText(" Enable debugging ");
-			this.exportdbButton.setVisibility(View.GONE);
+			this.exportwalletButton.setVisibility(View.GONE);
 			this.exportlogsButton.setVisibility(View.GONE);
+			this.enablelogsButton.setVisibility(View.GONE);
+
 		} else {
 			this.debugButton.setText(" Disable debugging ");
-			this.exportdbButton.setVisibility(View.VISIBLE);
+			this.exportwalletButton.setVisibility(View.VISIBLE);
 			this.exportlogsButton.setVisibility(View.VISIBLE);
+			this.enablelogsButton.setVisibility(View.VISIBLE);
+			if (OWPreferencesUtils.getLogToFile()){
+				this.enablelogsButton.setText(" Disable File logging ");
+			} else {
+				this.enablelogsButton.setText(" Enable File logging ");
+			}
 
 		}
 		
@@ -161,10 +176,16 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 				}
 			}
 		} else if (v==this.editableConfirmationFee){
-				OWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
+			OWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
-			OWPreferencesUtils.setPassphraseDisabled(true);
-			updateSettingsVisibility(false);
+			if (OWPreferencesUtils.userHasPassphrase()){
+				this.getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), OWTags.VALIDATE_PASS_DISABLE);
+			} else {
+				OWPreferencesUtils.setPassphraseDisabled(true);
+				//update settings visibility too slow with recognizing disabled password so update here
+				this.disablePassphrase.setVisibility(View.GONE);
+				this.resetPasswordLabel.setText("Set Passphrase");
+			}
 		} else if (v == this.setFiatCurrency){
 			getOWMainActivity().openSetFiatCurrency();
 		} else if (v == this.editableConfirmationFeeBar){
@@ -186,8 +207,14 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 						"set_name");
 			}		
 		} else if (v == this.debugButton) {
-			this.getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), OWTags.VALIDATE_PASS_DEBUG);
-		} else if (v == this.exportdbButton) {
+			if (OWPreferencesUtils.getDebugMode()){
+				OWPreferencesUtils.setDebugMode(false);
+				resetLoggerHelper();
+				this.updateSettingsVisibility(false);
+			} else {
+				this.getOWMainActivity().showGetPassphraseDialog(OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), OWTags.VALIDATE_PASS_DEBUG);
+			}
+		} else if (v == this.exportwalletButton) {
 			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");
 			Intent intent = new Intent(Intent.ACTION_SEND);
 			intent.setType("plain/text");
@@ -199,7 +226,23 @@ public class OWSettingsFragment extends OWFragment implements OnClickListener{
 			intent.setType("plain/text");
 			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(log));
 			startActivity(Intent.createChooser(intent, "Send logs"));
-
+		} else if (v == this.enablelogsButton){
+			if (OWPreferencesUtils.getLogToFile()){
+				resetLoggerHelper();
+			} else {
+				OWPreferencesUtils.setLogToFile(true);
+				ZLog.setLogger(ZLog.FILE_LOGGER);
+			}
+			this.updateSettingsVisibility(false);
+		}
+	}
+	
+	private void resetLoggerHelper(){
+		OWPreferencesUtils.setLogToFile(false);
+		if (OWApplication.isDebuggable()){
+			ZLog.setLogger(ZLog.ANDROID_LOGGER);
+		} else {
+			ZLog.setLogger(ZLog.NOOP_LOGGER);
 		}
 	}
 

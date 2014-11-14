@@ -276,6 +276,9 @@ ZiftrNetworkHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (OWPreferencesUtils.getLogToFile()){
+			ZLog.setLogger(ZLog.FILE_LOGGER);
+		}
 		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
 
 		// Everything is held within this main activity layout
@@ -878,6 +881,7 @@ ZiftrNetworkHandler {
 		});
 		return true;
 	}
+	
 
 	/**
 	 * called after user enters password for creating new wallet 
@@ -1205,16 +1209,14 @@ ZiftrNetworkHandler {
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
+		
 		if (requestCode == OWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG && passphrase.equals("orca")){
-			if (OWPreferencesUtils.getDebugMode()){
-				OWPreferencesUtils.setDebugMode(false);
-			} else {
-				OWPreferencesUtils.setDebugMode(true);
-			}
+			OWPreferencesUtils.setDebugMode(true);
 			((OWSettingsFragment)this.getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 			return;
 		}
+		
 		if (OWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
 			switch(requestCode) {
 			case OWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
@@ -1226,6 +1228,13 @@ ZiftrNetworkHandler {
 				OWSendCoinsFragment sendFrag = (OWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(OWTags.SEND_FRAGMENT);
 				sendFrag.onClickSendCoins(passphrase);
+				break;
+			case OWRequestCodes.DISABLE_PASSPHRASE_DIALOG:
+				OWPreferencesUtils.disablePassphrase();
+				OWPreferencesUtils.setPassphraseDisabled(true);
+				((OWSettingsFragment)this.getSupportFragmentManager(
+						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
+
 				break;
 			}
 		} else {
@@ -1378,7 +1387,6 @@ ZiftrNetworkHandler {
 		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency();
 
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
-		ZLog.log(this.selectedCoin);
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
 
 		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);

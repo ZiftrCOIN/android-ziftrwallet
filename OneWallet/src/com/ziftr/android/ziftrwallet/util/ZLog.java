@@ -12,14 +12,29 @@ public abstract class ZLog {
 	
 	public static final int DEFAULT_LOGLEVEL = 0;
 	
-	//private static ZLog logger = new AndroidLogger(); //logging on
-	//private static ZLog logger = new NoOpLogger(); //logging off
+	public static final int FILE_LOGGER = 1;
+	public static final int ANDROID_LOGGER = 2;
+	public static final int NOOP_LOGGER = 3;
 	
+	private static ZLog logger = initLogger();
 	
-	private static final ZLog logger = initLogger();
+	public static void setLogger(int loggerType){
+		switch(loggerType){
+			case FILE_LOGGER:
+				logger = new FileLogger();
+				break;
+			case ANDROID_LOGGER:
+				logger = new AndroidLogger();
+				break;
+			case NOOP_LOGGER:
+				logger = new NoOpLogger();
+				break;
+		}
+	}
 	
 	private static ZLog initLogger() {
 		if (OWApplication.isDebuggable()) {
+			
 			return new AndroidLogger();
 		}
 		
@@ -112,22 +127,7 @@ public abstract class ZLog {
 					Log.v(tag, logMessage.toString());
 				}
 				
-				if (OWPreferencesUtils.getDebugMode()){
-					File dir = new File(OWApplication.getApplication().getExternalFilesDir(null) + "/logs");
-					dir.mkdirs();
-					File logfile = new File(dir, "Zlog.txt");
-					FileOutputStream f;
-					try {
-						f = new FileOutputStream(logfile, true);
-						OutputStreamWriter writer = new OutputStreamWriter(f);
-						writer.write(logMessage.toString() + "\n");
-						writer.flush();
-						writer.close();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
-				}
+
 			}
 			
 		}
@@ -150,6 +150,50 @@ public abstract class ZLog {
 		@Override
 		protected void doLog(Object... messages) {
 			//noop
+		}
+		
+	}
+	
+	private static class FileLogger extends ZLog {
+
+		@Override
+		protected void doLog(String tag, int logLevel, Object... messages) {
+			if (logLevel <= this.logLevel) {
+				StringBuilder logMessage = new StringBuilder();
+				for (Object msg : messages) {
+					if (msg != null) {
+						if (msg instanceof Exception) {
+							Exception e = (Exception)msg;
+							logMessage.append(Log.getStackTraceString(e));
+						}
+						else {
+							logMessage.append(msg.toString());
+						}
+					}
+				}
+				Log.e(tag, logMessage.toString());
+
+				File dir = new File(OWApplication.getApplication().getExternalFilesDir(null) + "/logs");
+				if (!dir.exists()){
+					dir.mkdirs();
+				}
+				File logfile = new File(dir, "Zlog.txt");
+				FileOutputStream f;
+				try {
+					f = new FileOutputStream(logfile, true);
+					OutputStreamWriter writer = new OutputStreamWriter(f);
+					writer.write(logMessage.toString() + "\n");
+					writer.flush();
+					writer.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		@Override
+		protected void doLog(Object... messages) {
+			this.doLog(getCurrentClassName(6), DEFAULT_LOGLEVEL, messages);
 		}
 		
 	}

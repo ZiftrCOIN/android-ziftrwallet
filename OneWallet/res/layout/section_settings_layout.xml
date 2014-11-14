@@ -212,7 +212,17 @@
             android:layout_height="@dimen/ow_button_footer_height"
             android:layout_marginTop="4dp"
             android:background="@drawable/clickable_button_color"
-            android:text="Export db"
+            android:text="Export wallet"
+            android:textColor="@color/ow_default_text"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/enable_logs"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/ow_button_footer_height"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/clickable_button_color"
+            android:text="Enable logs"
             android:textColor="@color/ow_default_text"
             android:visibility="gone" />
 
