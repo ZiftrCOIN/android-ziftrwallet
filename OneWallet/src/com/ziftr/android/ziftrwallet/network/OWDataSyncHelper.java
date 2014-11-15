@@ -15,8 +15,10 @@ import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
+import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
+import com.ziftr.android.ziftrwallet.dialog.OWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -87,16 +89,11 @@ public class OWDataSyncHelper {
 				
 				ZLog.log("Signing a transaction with address: ", signingAddressPublic);
 				
-				OWAddress signingAddress = OWWalletManager.getInstance().readAddress(coin, signingAddressPublic, true);
-				OWECKey key = signingAddress.getKey();
-
+				OWECKey key = OWWalletManager.getInstance().getKeyForAddress(coin, signingAddressPublic, passphrase);
 				toSign.put("pubkey", ZiftrUtils.bytesToHexString(key.getPubKey()));
 	
-				OWSha256Hash hash = new OWSha256Hash(toSign.getString("tosign")); 
-				
-				OWECDSASignature signature = key.sign(hash);
-				
-				//signature.encodeToDER();
+				String stringToSign = toSign.getString("tosign");
+				OWECDSASignature signature = key.sign(stringToSign);
 				
 				String rHex = ZiftrUtils.bigIntegerToString(signature.r, 32);
 				toSign.put("r", rHex);

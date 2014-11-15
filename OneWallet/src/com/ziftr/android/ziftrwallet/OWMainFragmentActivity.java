@@ -1168,6 +1168,7 @@ ZiftrNetworkHandler {
 		}
 	}
 
+	
 	/**
 	 * generate dialog to ask for passphrase
 	 * 
@@ -1188,6 +1189,7 @@ ZiftrNetworkHandler {
 		}
 	}
 
+	
 	///////////// Handler methods /////////////
 
 	@Override
@@ -1207,6 +1209,8 @@ ZiftrNetworkHandler {
 			break;
 		}
 	}
+	
+	
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
@@ -1245,6 +1249,7 @@ ZiftrNetworkHandler {
 
 	}
 
+	
 	/**
 	 * By positive, this means that the user has selected 'Yes' or 'Okay' 
 	 * rather than cancel or exiting the dialog. This is called when

@@ -338,13 +338,30 @@ public class OWECKey {
 		}
 	}
 
+	
+	
+	/**
+	 * converts the string to a {@link OWSha256Hash} then signs it and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
+	 * usually encoded using DER format, so you want ECKey.ECDSASignature#encodeToDER()
+	 * instead. However sometimes the independent components can be useful, for instance, if you're doing to do further
+	 * EC math using the R and S components.
+	 *
+	 * @param hashString a string representation of a hash to be signed
+	 * @throws OWKeyCrypterException if this ECKey doesn't have a private part.
+	 */
+	public OWECDSASignature sign(String hashString) throws OWKeyCrypterException {
+		OWSha256Hash hash = new OWSha256Hash(hashString);
+		return this.sign(hash);
+	}
+	
+	
 	/**
 	 * Signs the given hash and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
 	 * usually encoded using DER format, so you want ECKey.ECDSASignature#encodeToDER()
 	 * instead. However sometimes the independent components can be useful, for instance, if you're doing to do further
 	 * EC math using the R and S components.
 	 *
-	 * @param aesKey The AES key to use for decryption of the private key. If null then no decryption is required.
+	 * @param input a {@link OWSha256Hash} to be signed
 	 * @throws OWKeyCrypterException if this ECKey doesn't have a private part.
 	 */
 	public OWECDSASignature sign(OWSha256Hash input) throws OWKeyCrypterException {
