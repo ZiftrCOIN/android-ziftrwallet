@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
+import com.ziftr.android.ziftrwallet.OWApplication;
 import com.ziftr.android.ziftrwallet.R;
 
 
@@ -24,6 +26,10 @@ public class OWAboutFragment extends OWFragment implements OnClickListener{
 		View rootView = inflater.inflate(R.layout.section_about_layout, container, false);
 		this.feedbackButton = (Button) rootView.findViewById(R.id.send_feedback);
 		this.feedbackButton.setOnClickListener(this);
+		
+		TextView versionText = (TextView) rootView.findViewById(R.id.ziftrWalletVersionText);
+		versionText.setText("v" + OWApplication.getVersionName() + " r" + String.valueOf(OWApplication.getVersionCode()));
+		
 		return rootView;
 	}
 	

@@ -2,6 +2,8 @@ package com.ziftr.android.ziftrwallet;
 
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.util.Log;
 
 import com.ziftr.android.ziftrwallet.util.OWTypefaceUtil;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -12,6 +14,8 @@ public class OWApplication extends Application {
 	private static boolean isDebuggable;
 
 	private static OWApplication self;
+	private static int versionCode = 0;
+	private static String versionName = "0.0.1";
 	
 	/**
 	 * This is the first code called when android app launches (even 
@@ -28,6 +32,15 @@ public class OWApplication extends Application {
 		isDebuggable = (0 != 
 				(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		ZiftrUtils.createTrulySecureRandom(); //just call to initialze fixes here ahead of time
+		
+		try {
+			versionCode = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+			
+			versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+		} 
+    	catch (NameNotFoundException e) {
+    		Log.e("ZiftrWallet", "Couldn't get version code from manifest.");
+		}
 	}
 	
 	
@@ -57,5 +70,19 @@ public class OWApplication extends Application {
 	public static boolean isDebuggable() {
 		return isDebuggable;
 	}
+	
+	
+	public static int getVersionCode() {
+		return versionCode;
+	}
+	
+	
+	public static String getVersionName() {
+		return versionName;
+	}
 
+	
+	
 }
+
+
