@@ -11,17 +11,14 @@ import javax.crypto.SecretKey;
 import android.content.Context;
 
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
-import com.ziftr.android.ziftrwallet.crypto.OWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
 import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWPbeAesCrypter;
-import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /** 
  * This class controls all of the wallets and is responsible
