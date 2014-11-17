@@ -199,7 +199,7 @@ public class ZiftrUtils {
 		String line = null;
 		try {
 			while((line = reader.readLine()) != null) {
-				builder.append(line);
+				builder.append(line).append('\n');
 			}
 		} catch (IOException e) {
 			ZLog.log("Exception reading stream to string: \n", e);
