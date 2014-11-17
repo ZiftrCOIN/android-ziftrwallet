@@ -243,8 +243,8 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 			return;
 		} catch(OWSendAmountException e){
 			this.getOWMainActivity().alertUser(
-					"Error: You can't send 0 coins!", 
-					"sending_0_dialog");
+					e.getMessage(), 
+					"error_sending_amount_dialog");
 		} catch(Exception e) {
 			// Shouldn't really happen, just helpful for debugging
 			ZLog.log("Exception trying to send coin: ", e);
@@ -502,7 +502,10 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		} else if (value.signum() != 1){
 			//user wants to send <=0 coins
 			throw new OWSendAmountException("Error: Cannot send 0 coins!");
+		} else if (feePerKb.compareTo(coinId.getDefaultFeePerKb()) == 0 && value.compareTo(feePerKb) < 1){
+			throw new OWSendAmountException("Error: The desired amount to send is too small!");
 		}
+		
 		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
 		final List<String> inputs = new ArrayList<String>();
 		
