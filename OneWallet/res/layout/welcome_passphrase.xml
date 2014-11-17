@@ -1,84 +1,79 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/ow_horizontal_margin"
+    android:paddingRight="@dimen/ow_horizontal_margin" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="@dimen/ow_horizontal_margin"
-        android:paddingRight="@dimen/ow_horizontal_margin" >
+        android:text="@string/ow_hello"
+        android:textColor="@color/White"
+        android:textSize="@dimen/ow_txt_mediumlarge" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ow_hello"
-            android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_mediumlarge" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ow_welcome"
+        android:textColor="@color/White"
+        android:textSize="@dimen/ow_txt_small" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ow_welcome"
-            android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_small" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ow_welcome_passphrase_message"
+        android:textColor="@color/White"
+        android:textSize="@dimen/ow_txt_small" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ow_welcome_passphrase_message"
-            android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_small" />
+    <View
+        style="@style/white_divider"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp" />
 
-        <View
-            style="@style/white_divider"
-            android:paddingBottom="4dp"
-            android:paddingTop="4dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ow_create_passphrase"
+        android:textColor="@color/White"
+        android:textSize="@dimen/ow_txt_small" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ow_create_passphrase"
-            android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_small" />
+    <include
+        android:id="@+id/new_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        layout="@layout/_edit_text_shadow" />
 
-        <include
-            android:id="@+id/new_password"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            layout="@layout/_edit_text_shadow" />
+    <include
+        android:id="@+id/new_confirm_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        layout="@layout/_edit_text_shadow" />
 
-        <include
-            android:id="@+id/new_confirm_password"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            layout="@layout/_edit_text_shadow" />
+    <Button
+        android:id="@+id/set_password"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/clickable_button_color"
+        android:text="@string/ow_save_passphrase"
+        android:textColor="@color/White"
+        android:textSize="@dimen/ow_txt_small" />
 
-        <Button
-            android:id="@+id/set_password"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/clickable_button_color"
-            android:text="@string/ow_save_passphrase"
-            android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_small" />
+    <View
+        style="@style/white_divider"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp" />
 
-        <View
-            style="@style/white_divider"
-            android:paddingBottom="4dp"
-            android:paddingTop="4dp" />
+    <Button
+        android:id="@+id/skip_password"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/clickable_button_color"
+        android:text="@string/ow_ask_me_later"
+        android:textColor="@color/White"
+        android:textSize="@dimen/ow_txt_small" />
 
-        <Button
-            android:id="@+id/skip_password"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/clickable_button_color"
-            android:text="@string/ow_ask_me_later"
-            android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_small" />
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

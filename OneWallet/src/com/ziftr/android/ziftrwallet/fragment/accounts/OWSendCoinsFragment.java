@@ -31,7 +31,6 @@ import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.OWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.OWSendAmountException;
 import com.ziftr.android.ziftrwallet.network.OWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWCoinURI;
 import com.ziftr.android.ziftrwallet.util.OWCoinURIParseException;

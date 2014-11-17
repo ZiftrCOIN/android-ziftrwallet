@@ -20,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWEditState;
@@ -50,7 +51,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 	private TextView timeLeft;
 	private ProgressBar progressBar;
 	private ImageView coinLogo;
-	private ImageView sendToAddress;
+	private ImageView reuseAddress;
 
 	private OWTransaction txItem;
 
@@ -86,7 +87,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		this.timeLeft = (TextView) rootView.findViewById(R.id.time_left);
 		this.progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
 		this.coinLogo = (ImageView) rootView.findViewById(R.id.coin_logo);
-		this.sendToAddress = (ImageView) rootView.findViewById(R.id.sendTo);
+		this.reuseAddress = (ImageView) rootView.findViewById(R.id.reuse_address);
 		this.initFields(savedInstanceState);
 
 		return this.rootView;
@@ -138,7 +139,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		this.populateAddress();
 
 		this.populatePendingInformation();
-		this.sendToAddress.setOnClickListener(this);
+		this.reuseAddress.setOnClickListener(this);
 		OWEditableTextBoxController<OWTransaction> controller = new OWEditableTextBoxController<OWTransaction>(
 				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
 		editLabelButton.setOnClickListener(controller);
@@ -153,10 +154,12 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 			// This means the tx is sent (relative to user)
 			this.amountLabel.setText("Amount Sent");
 			this.timeLabel.setText("Sent");
+			this.reuseAddress.setImageResource(R.drawable.send_yellow_clickable);
 		} else {
 			// This means the tx is received (relative to user)
 			this.amountLabel.setText("Amount Received");
 			this.timeLabel.setText("Received");
+			this.reuseAddress.setImageResource(R.drawable.received_yellow_clickable);
 		}
 
 		if (txItem.isPending()) {
@@ -315,8 +318,19 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 
 	@Override
 	public void onClick(View v) {
-		if (v==this.sendToAddress){
-			getOWMainActivity().openSendCoinsView(this.addressTextView.getText().toString());
+		if (v==this.reuseAddress){
+			if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
+				//sent to this address
+				getOWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0));
+			} else {
+				//received on this address
+				try {
+					OWAddress address = getWalletManager().readAddress(txItem.getCoinId(), txItem.getDisplayAddresses().get(0), true);
+					getOWMainActivity().openReceiveCoinsView(address);
+				} catch (Exception e) {
+					ZLog.log("Error trying to get OWAddress from display address  " + e);
+				}
+			}
 		}
 	}
 

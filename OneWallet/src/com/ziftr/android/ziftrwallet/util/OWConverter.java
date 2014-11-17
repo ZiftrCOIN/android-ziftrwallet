@@ -58,7 +58,11 @@ public class OWConverter {
 	}
 	
 	public static void updateConvertRate(OWCurrency curr, String usdEquiv){
-		convertMap.put(curr, new BigDecimal(usdEquiv, MathContext.DECIMAL64));
+		if (!usdEquiv.isEmpty()){
+			convertMap.put(curr, new BigDecimal(usdEquiv, MathContext.DECIMAL64));
+		} else {
+			ZLog.log("updateConvertRate failed for " + curr.toString() + " usdEquiv returned was empty");
+		}
 	}
 
 }

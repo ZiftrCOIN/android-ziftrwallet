@@ -15,10 +15,8 @@ import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
-import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
-import com.ziftr.android.ziftrwallet.dialog.OWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -205,9 +203,12 @@ public class OWDataSyncHelper {
 
 
 	public static void updateTransactionHistory(OWCoin coin) {
-		ZiftrNetworkManager.networkStarted();
-
 		ArrayList<String> addresses = OWWalletManager.getInstance().getAddressList(coin, true);
+		if (addresses.size() <= 0){
+			ZLog.log("No addresses to get transaction history for");
+			return;
+		}
+		ZiftrNetworkManager.networkStarted();
 
 		ZLog.log("Getting transaction history for addresses: ", addresses);
 
@@ -261,7 +262,7 @@ public class OWDataSyncHelper {
 		
 		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs
 		long confirmations = json.optLong("confirmations");
-		ArrayList<String> displayAddresses = new ArrayList<String>();
+		ArrayList<OWAddress> displayAddresses = new ArrayList<OWAddress>();
 		ArrayList<String> myHiddenAddresses = new ArrayList<String>();
 		
 		for (OWAddress addr : OWWalletManager.getInstance().readHiddenAddresses(coin)){
@@ -301,22 +302,6 @@ public class OWDataSyncHelper {
 					}//end for y
 				}
 			}
-			
-			/*******
-			JSONArray inputAddresses = input.getJSONArray("addresses");
-			for(int y = 0; y < inputAddresses.length(); y++) {
-				String inputAddress = inputAddresses.getString(y);
-				if(addresses.contains(inputAddress)) {	
-					String outputValue = input.getString("output_value");
-					if(!usedValue) {
-						usedValue = true;
-						value.subtract(new BigInteger(outputValue));
-					}
-					displayAddresses.add(inputAddress);
-				}
-			}//end for y
-			**************/
-			
 		}//end for x
 
 		for(int x = 0; x < outputs.length(); x++) {
@@ -334,38 +319,38 @@ public class OWDataSyncHelper {
 						BigInteger outputValueInt = new BigInteger(outputValue); 
 						value = value.add(outputValueInt);
 					}
+					//add the receiving address to the display
+					OWAddress receivedOn = OWWalletManager.getInstance().readAddress(coin, outputAddress,true);
+					if (receivedOn != null && !myHiddenAddresses.contains(receivedOn) && !displayAddresses.contains(receivedOn)){
+						displayAddresses.add(receivedOn);
+					}
 				}
 				
-				//get the address we sent to for displaying
+				//if this was a sent transaction get the address we sent to for displaying
 				JSONArray addressesSentTo = outputs.optJSONObject(y).getJSONObject("scriptPubKey").getJSONArray("addresses");
 				for(int z = 0; z < addressesSentTo.length(); z++) {
 					String sentToAddr = addressesSentTo.getString(z);
 					OWAddress sentTo = OWWalletManager.getInstance().readAddress(coin, sentToAddr, false);
-					if (sentTo != null && !myHiddenAddresses.contains(sentToAddr) && !displayAddresses.contains(sentTo.getAddress())){
-						displayAddresses.add(sentTo.getAddress());
+					if (sentTo != null && !myHiddenAddresses.contains(sentToAddr) && !displayAddresses.contains(sentTo)){
+						displayAddresses.add(sentTo);
 					}
 				}
 			}
 		}
-		if (displayAddresses.size() == 0){
-			//API doesn't expose who sent to us addresses
-			displayAddresses.add("unknown");
-		}
 
 		//pick an address to use for displaying the note to the user
-		String note = "unknown"; //TODO -maybe make this an array or character build to hold notes for multiple strings
-		for(String noteAddress : displayAddresses) {
-			//we only see notes for addresses we sent to since the api doesn't expose addresses of who sent to us
-			OWAddress databaseAddress = OWWalletManager.getInstance().readAddress(coin, noteAddress, false);
-			if (databaseAddress != null){
-			if(databaseAddress.getLabel() != null && databaseAddress.getLabel().length() > 0 && !databaseAddress.getLabel().equals("unknown")) {
-				note = databaseAddress.getLabel();
-				break;
+		String note = ""; //TODO -maybe make this an array or character build to hold notes for multiple strings
+		
+		ArrayList<String> displayAddressesString = new ArrayList<String>();
+
+		for(OWAddress addr : displayAddresses) {
+			displayAddressesString.add(addr.getAddress());
+			if(addr.getLabel() != null && addr.getLabel().length() > 0) {
+				note = addr.getLabel();
 				}
 			}
-		}
 		time = time * 1000;
-		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddresses, new OWSha256Hash(hash), note, confirmations, time);
+		OWTransaction transaction = OWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddressesString, new OWSha256Hash(hash), note, confirmations, time);
 
 		return transaction;
 	}

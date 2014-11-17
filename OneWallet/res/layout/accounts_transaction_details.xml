@@ -113,7 +113,7 @@
             android:orientation="horizontal" >
 
             <ImageView
-                android:id="@+id/sendTo"
+                android:id="@+id/reuse_address"
                 android:layout_width="@dimen/ow_medium_icon_side_length"
                 android:layout_height="@dimen/ow_medium_icon_side_length"
                 android:adjustViewBounds="true"

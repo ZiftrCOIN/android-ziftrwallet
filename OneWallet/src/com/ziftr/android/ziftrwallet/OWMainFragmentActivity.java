@@ -37,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
 import com.ziftr.android.ziftrwallet.dialog.OWConfirmationDialog;
 import com.ziftr.android.ziftrwallet.dialog.OWDialogFragment;
@@ -319,7 +320,7 @@ ZiftrNetworkHandler {
 					openSendCoinsView(null);
 				} else{
 					getIntent().removeExtra(ziftrwalletWidget.WIDGET_RECEIVE);
-					openReceiveCoinsView();
+					openReceiveCoinsView(null);
 				}
 			}
 		}
@@ -954,7 +955,7 @@ ZiftrNetworkHandler {
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openReceiveCoinsView() {
+	public void openReceiveCoinsView(OWAddress address) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.RECIEVE_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWReceiveCoinsFragment();
@@ -963,6 +964,9 @@ ZiftrNetworkHandler {
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, OWTags.RECIEVE_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, OWTags.ACCOUNTS_INNER);
+		if (address != null){
+			((OWReceiveCoinsFragment) fragToShow).setReceiveAddress(address);		
+		}
 	}
 
 	/**
