@@ -15,10 +15,8 @@ import com.ziftr.android.ziftrwallet.OWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.OWAddress;
 import com.ziftr.android.ziftrwallet.crypto.OWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.OWECKey;
-import com.ziftr.android.ziftrwallet.crypto.OWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.OWTransaction;
-import com.ziftr.android.ziftrwallet.dialog.OWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -184,7 +182,7 @@ public class OWDataSyncHelper {
 	
 	public static String getMarketValue(String type, String fiat){
 		ZiftrNetworkManager.networkStarted();
-		String val = "";
+		String val = null;
 		ZiftrNetRequest request = OWApi.buildMarketValueRequest(type, fiat);
 		String response = request.sendAndWait();
 		if (request.getResponseCode() == 200){

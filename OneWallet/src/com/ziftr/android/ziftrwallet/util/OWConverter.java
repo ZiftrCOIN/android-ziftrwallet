@@ -57,8 +57,12 @@ public class OWConverter {
 		return convertTo.getAtomicUnits(convertToDecimal);
 	}
 	
+	
 	public static void updateConvertRate(OWCurrency curr, String usdEquiv){
-		convertMap.put(curr, new BigDecimal(usdEquiv, MathContext.DECIMAL64));
+		//don't crash the app if the market value server is down or there is some other network issue
+		if(usdEquiv != null && usdEquiv.length() > 0) {
+			convertMap.put(curr, new BigDecimal(usdEquiv, MathContext.DECIMAL64));
+		}
 	}
 
 }
