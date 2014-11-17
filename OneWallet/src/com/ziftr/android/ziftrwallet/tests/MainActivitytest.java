@@ -33,7 +33,6 @@ import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.OWTags;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFragmentActivity> {
 
@@ -131,7 +130,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 	public void testQRCodeVisiblity() throws InterruptedException{
 		createWallet(OWCoin.BTC_TEST);
 		mActivity.openWalletView(OWCoin.BTC_TEST);
-		mActivity.openReceiveCoinsView();
+		mActivity.openReceiveCoinsView(null);
 		mActivity.getSupportFragmentManager().executePendingTransactions();
 		View receiveScreen  = mActivity.getSupportFragmentManager().findFragmentByTag(OWTags.RECIEVE_FRAGMENT).getView();
 		View qrCodeContainer = receiveScreen.findViewById(R.id.generateAddressQrCodeContainer);
@@ -238,7 +237,6 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 				sb.append(r.nextInt(10));
 			}
 		}
-		ZLog.log("sap   " + sb.toString());
 		return sb.toString();
 	}
 

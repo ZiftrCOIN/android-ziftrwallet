@@ -56,6 +56,8 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	private ImageView generateAddressForLabel;
 	private EditText messageEditText;
 	private ImageView helpButton;
+	
+	private OWAddress prefilledAddress;
 
 	private boolean qrCodeGenerated = false;
 
@@ -179,7 +181,6 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 		if (fragmentHasAddress()) {
 			this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
 		}
-
 		this.qrCodeContainer = this.rootView.findViewById(R.id.generateAddressQrCodeContainer);
 
 		this.generateAddressForLabel = (ImageView) this.rootView.findViewById(R.id.generateNewAddressForLabel);
@@ -197,6 +198,11 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 				refreshAddNewAddressButtonsEnabled();
 			}
 		});
+		
+		if (this.prefilledAddress != null) {
+			this.addressEditText.setText(this.prefilledAddress.getAddress());
+			this.labelEditText.setText(this.prefilledAddress.getLabel());
+		}
 
 		this.refreshAddNewAddressButtonsEnabled();
 	}
@@ -337,6 +343,10 @@ public class OWReceiveCoinsFragment extends OWAddressBookParentFragment{
 	@Override
 	public View getContainerView() {
 		return this.scrollView;
+	}
+	
+	public void setReceiveAddress(OWAddress address){
+		this.prefilledAddress = address;
 	}
 
 	public void refreshAddNewAddressButtonsEnabled() {
