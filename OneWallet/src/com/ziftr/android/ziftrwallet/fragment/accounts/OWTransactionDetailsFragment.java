@@ -130,6 +130,11 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		String feeString = txItem.getCoinId().getFormattedAmount(txItem.getTxFee());
 		this.confirmationFee.setText(feeString);
 		
+		//TODO -big hack fix later, hardcoding fee display to default value until we can get the proper info from the server
+		feeString = txItem.getCoinId().getFormattedAmount(txItem.getCoinId().getDefaultFeePerKb());
+		this.confirmationFee.setText(feeString);
+		
+		
 		this.currencyType.setText(fiat.getName());
 
 		Date date = new Date(this.txItem.getTxTime() * 1000);
@@ -196,7 +201,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 
 	}
 
-	@SuppressLint("NewApi")
+	@SuppressLint("NewApi")  //we call getWindowManager().getDefaultDisplay().getSize(size); but only after checking we are a high enough api level
 	@SuppressWarnings("deprecation")
 	private void populatePendingInformation() {
 		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
