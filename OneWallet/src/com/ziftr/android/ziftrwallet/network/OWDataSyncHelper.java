@@ -182,11 +182,12 @@ public class OWDataSyncHelper {
 	
 	public static String getMarketValue(String type, String fiat){
 		ZiftrNetworkManager.networkStarted();
-		String val = "";
+		String val = null;
 		ZiftrNetRequest request = OWApi.buildMarketValueRequest(type, fiat);
 		String response = request.sendAndWait();
 		if (request.getResponseCode() == 200){
 			//TODO when api market_value call works
+			ZLog.log("Market Value Response: ", response);
 		} else {
 			String dummy_res = "{\"currency_to\": \"usd\",\"currency_from\": \"btc/main\",\"exchange_rate\": 400, \"exchange_rate_divisor\": 100 }";
 			try {

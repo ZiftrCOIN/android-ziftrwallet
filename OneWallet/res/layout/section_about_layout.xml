@@ -41,11 +41,32 @@
                     android:textSize="@dimen/ow_txt_mediumlarge" />
 
                 <TextView
+                    android:id="@+id/ziftrWalletVersionText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:text="v0.0.1"
+                    android:textColor="@color/White"
+                    android:textColorLink="@color/LemonChiffon"
+                    android:textSize="@dimen/ow_txt_mediumsmall" />
+
+                <TextView
                     android:id="@+id/aboutPlaceholderText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:autoLink="web"
                     android:text="@string/ow_about_text"
+                    android:textColor="@color/White"
+                    android:textColorLink="@color/LemonChiffon"
+                    android:textSize="@dimen/ow_txt_mediumsmall" />
+
+                <TextView
+                    android:id="@+id/zxingText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:autoLink="web"
+                    android:text="@string/ow_zxing_license"
                     android:textColor="@color/White"
                     android:textColorLink="@color/LemonChiffon"
                     android:textSize="@dimen/ow_txt_mediumsmall" />
