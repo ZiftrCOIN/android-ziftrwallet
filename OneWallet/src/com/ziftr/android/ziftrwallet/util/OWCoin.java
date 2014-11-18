@@ -60,7 +60,7 @@ public class OWCoin implements OWCurrency {
 
 	public static OWCoin valueOf(String coinStr) {
 		for (OWCoin coin : OWCoin.values()) {
-			if (coin.toString().equals(coinStr)) {
+			if (coin.toString().equals(coinStr) || coin.getLongTitle().toLowerCase().equals(coinStr)) {
 				return coin;
 			}
 		}

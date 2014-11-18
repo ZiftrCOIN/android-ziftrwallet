@@ -72,6 +72,7 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 	private View sendCoinsContainingView;
 
 	private String prefilledAddress;
+	private String prefilledAmount;
 
 	/**
 	 * Inflate, initialize, and return the send coins layout.
@@ -313,6 +314,11 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		if (this.prefilledAddress != null) {
 			addressEditText.setText(this.prefilledAddress);
 		}
+		if (this.prefilledAmount != null) {
+			coinAmountEditText.setText(this.prefilledAmount);
+			fiatAmountEditText.setText(OWConverter.convert(new BigDecimal(this.prefilledAmount), this.getSelectedCoin(), 
+					OWPreferencesUtils.getFiatCurrency()).toPlainString());
+		}
 		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency();
 
 		this.fiatAmountLabel = (TextView) this.rootView.findViewById(R.id.amount_fiat_label);
@@ -479,8 +485,9 @@ public class OWSendCoinsFragment extends OWAddressBookParentFragment {
 		this.prefilledAddress = address;
 	}
 	
-	
-	
+	public void setAmount(String amount){
+		this.prefilledAmount = amount;
+	}
 	
 	/**
 	 * Sends the type of coin that this thread actually represents to 

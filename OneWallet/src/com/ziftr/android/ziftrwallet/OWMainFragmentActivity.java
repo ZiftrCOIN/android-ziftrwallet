@@ -50,6 +50,7 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.OWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWResetPassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWSetNameDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.OWValidatePassphraseDialogHandler;
+import com.ziftr.android.ziftrwallet.exceptions.OWAddressFormatException;
 import com.ziftr.android.ziftrwallet.fragment.OWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWFragment;
 import com.ziftr.android.ziftrwallet.fragment.OWSecurityFragment;
@@ -70,6 +71,8 @@ import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.OWCoin;
+import com.ziftr.android.ziftrwallet.util.OWCoinURI;
+import com.ziftr.android.ziftrwallet.util.OWCoinURIParseException;
 import com.ziftr.android.ziftrwallet.util.OWConverter;
 import com.ziftr.android.ziftrwallet.util.OWFiat;
 import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
@@ -289,10 +292,14 @@ ZiftrNetworkHandler {
 		// Recreate wallet manager
 		this.walletManager = OWWalletManager.getInstance();
 		
-		
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
-
+		
+		//load available coins from API blockchains
+		if (this.availCoins == null){
+			initAvailableCoins();
+		}
+		
 		// Get passphrase from welcome screen if exists
 		this.handleWelcomeActivityResults();
 
@@ -311,28 +318,45 @@ ZiftrNetworkHandler {
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
 		
-		//Check if loaded from widget
-		if (getIntent() != null && (getIntent().hasExtra(ziftrwalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND))){
-			this.setSelectedCoin(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin()));
-			if (this.selectedCoin != null && this.getWalletManager().typeIsActivated(this.selectedCoin)) {
-				if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND)){
-					getIntent().removeExtra(ziftrwalletWidget.WIDGET_SEND);
-					openSendCoinsView(null);
-				} else{
-					getIntent().removeExtra(ziftrwalletWidget.WIDGET_RECEIVE);
-					openReceiveCoinsView(null);
+		if (getIntent() != null){
+			//Check if loaded from widget
+			if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND)){
+				this.setSelectedCoin(OWCoin.valueOf(OWPreferencesUtils.getWidgetCoin()));
+				if (this.selectedCoin != null && this.getWalletManager().typeIsActivated(this.selectedCoin)) {
+					if (getIntent().hasExtra(ziftrwalletWidget.WIDGET_SEND)){
+						getIntent().removeExtra(ziftrwalletWidget.WIDGET_SEND);
+						openSendCoinsView(null, null);
+					} else{
+						getIntent().removeExtra(ziftrwalletWidget.WIDGET_RECEIVE);
+						openReceiveCoinsView(null);
+					}
+				}
+			//loaded from coin uri
+			} else if (getIntent().getAction() == Intent.ACTION_VIEW){
+				String data = getIntent().getDataString();
+				OWCoin coin = OWCoin.valueOf(data.substring(0, data.indexOf(':')));
+				this.setSelectedCoin(coin);
+				if (this.selectedCoin != null && this.getWalletManager().typeIsActivated(this.selectedCoin)){
+					try {
+						OWCoinURI uri = new OWCoinURI(coin, data);
+						openSendCoinsView(uri.getAddress(), uri.getAmount());
+					} catch (OWCoinURIParseException e) {
+						e.printStackTrace();
+					} catch (OWAddressFormatException e) {
+						this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
+					}
 				}
 			}
 		}
 		
-		//load available coins from API blockchains
-		if (this.availCoins == null){
-			initAvailableCoins();
-		}
 
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
-
+	public void onNewIntent(Intent intent){
+		ZLog.log("waffles");
+		super.onNewIntent(intent);
+		
+	}
 	/**
 	 * This method handles the results from the welcome activity. Specifically,
 	 * if the intent that brought us to this activity contains a passphrase or a bundle
@@ -974,7 +998,7 @@ ZiftrNetworkHandler {
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openSendCoinsView(String address) {
+	public void openSendCoinsView(String address, String amount) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(OWTags.SEND_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new OWSendCoinsFragment();
@@ -985,6 +1009,9 @@ ZiftrNetworkHandler {
 
 		if (address!=null){
 			((OWSendCoinsFragment) fragToShow).setSendToAddress(address);		
+		}
+		if (amount!=null){
+			((OWSendCoinsFragment) fragToShow).setAmount(amount);		
 		}
 	}
 
