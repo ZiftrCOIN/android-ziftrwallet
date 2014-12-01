@@ -67,6 +67,8 @@ public class OWApi {
 	 */
 	public static ZiftrNetRequest buildTransactionsRequest(String type, String chain, List<String> addresses) {
 		
+		//TODO use URLEncoder.encode for each address, this convenient shortcut would break stuff
+		//if there's ever a coin with illegal characters allowed in the addresses for some reason
 		String addressesList = Joiner.on(',').join(addresses);
 		
 		ZiftrParamList query = new ZiftrParamList();
