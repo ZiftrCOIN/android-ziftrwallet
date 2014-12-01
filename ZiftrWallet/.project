@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>OneWallet</name>
+	<name>ZiftrWallet</name>
 	<comment>Ziftr&apos;s single wallet crypto coin solution</comment>
 	<projects>
 		<project>android-support-v7-appcompat</project>
