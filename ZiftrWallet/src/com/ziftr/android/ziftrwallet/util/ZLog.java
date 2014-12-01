@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 
 import android.util.Log;
 
-import com.ziftr.android.ziftrwallet.OWApplication;
+import com.ziftr.android.ziftrwallet.ZWApplication;
 
 public abstract class ZLog {
 	
@@ -33,7 +33,7 @@ public abstract class ZLog {
 	}
 	
 	private static ZLog initLogger() {
-		if (OWApplication.isDebuggable()) {
+		if (ZWApplication.isDebuggable()) {
 			
 			return new AndroidLogger();
 		}
@@ -173,7 +173,7 @@ public abstract class ZLog {
 				}
 				Log.e(tag, logMessage.toString());
 
-				File dir = new File(OWApplication.getApplication().getExternalFilesDir(null) + "/logs");
+				File dir = new File(ZWApplication.getApplication().getExternalFilesDir(null) + "/logs");
 				if (!dir.exists()){
 					dir.mkdirs();
 				}

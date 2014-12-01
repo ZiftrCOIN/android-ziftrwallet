@@ -33,7 +33,9 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedLongs;
-import com.ziftr.android.ziftrwallet.crypto.OWVarInt;
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWVarInt;
 
 public class ZiftrUtils {
 
@@ -361,7 +363,7 @@ public class ZiftrUtils {
 	 * @return
 	 */
 	public static byte[] saltedHash(String newPassphrase) {
-		return saltedHash(OWPreferencesUtils.getSalt(), newPassphrase);
+		return saltedHash(ZWPreferencesUtils.getSalt(), newPassphrase);
 	}
 	
 	public static byte[] saltedHash(String salt, String newPassphrase) {
@@ -419,14 +421,14 @@ public class ZiftrUtils {
 	 * 
 	 * TODO this is only for bitcoin right now, need to make it general
 	 */
-	public static byte[] formatMessageForSigning(OWCoin coinId, String message) {
+	public static byte[] formatMessageForSigning(ZWCoin coinId, String message) {
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			byte[] magicBytes = coinId.getSigningMessageMagic().getBytes(Charsets.UTF_8);
 			bos.write(magicBytes.length);
 			bos.write(magicBytes);
 			byte[] messageBytes = message.getBytes(Charsets.UTF_8);
-			OWVarInt size = new OWVarInt(messageBytes.length);
+			ZWVarInt size = new ZWVarInt(messageBytes.length);
 			bos.write(size.encode());
 			bos.write(messageBytes);
 			return bos.toByteArray();

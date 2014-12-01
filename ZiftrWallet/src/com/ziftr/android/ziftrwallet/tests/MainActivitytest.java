@@ -21,26 +21,26 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.ziftr.android.ziftrwallet.OWMainFragmentActivity;
-import com.ziftr.android.ziftrwallet.OWMainFragmentActivity.FragmentType;
-import com.ziftr.android.ziftrwallet.OWWalletManager;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.crypto.OWAddress;
-import com.ziftr.android.ziftrwallet.crypto.OWSha256Hash;
-import com.ziftr.android.ziftrwallet.fragment.accounts.OWNewCurrencyListItem;
-import com.ziftr.android.ziftrwallet.sqlite.OWReceivingAddressesTable;
-import com.ziftr.android.ziftrwallet.sqlite.OWSQLiteOpenHelper;
-import com.ziftr.android.ziftrwallet.util.OWCoin;
-import com.ziftr.android.ziftrwallet.util.OWPreferencesUtils;
-import com.ziftr.android.ziftrwallet.util.OWTags;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWSha256Hash;
+import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyListItem;
+import com.ziftr.android.ziftrwallet.fragment.ZWTags;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
+import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 
-public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFragmentActivity> {
+public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFragmentActivity> {
 
-	private OWMainFragmentActivity mActivity;
-	private OWWalletManager manager;
+	private ZWMainFragmentActivity mActivity;
+	private ZWWalletManager manager;
 
 	public MainActivitytest(){
-		super(OWMainFragmentActivity.class);
+		super(ZWMainFragmentActivity.class);
 	}
 
 	@Override
@@ -55,8 +55,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 		editor.clear();
 		editor.commit();
 		//clear all wallets
-		for (OWCoin type : OWCoin.TYPES){
-			manager.updateTableActivatedStatus(type, OWSQLiteOpenHelper.DEACTIVATED);
+		for (ZWCoin type : ZWCoin.TYPES){
+			manager.updateTableActivatedStatus(type, ZWSQLiteOpenHelper.DEACTIVATED);
 		}
 	}
 
@@ -67,8 +67,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 
 	public void testPreconditions(){
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
-		assertFalse(OWPreferencesUtils.getDisabledName());
-		assertNull(OWPreferencesUtils.getUserName());
+		assertFalse(ZWPreferencesUtils.getDisabledName());
+		assertNull(ZWPreferencesUtils.getUserName());
 		assertTrue(mActivity.getSupportFragmentManager().getBackStackEntryCount() == 0);
 	}
 
@@ -83,10 +83,10 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 	@UiThreadTest
 	public void testAddWallet() {
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
-		createWallet(OWCoin.BTC);
+		createWallet(ZWCoin.BTC);
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 1);
 		//remove wallet
-		mActivity.getWalletManager().updateTableActivatedStatus(OWCoin.BTC, OWSQLiteOpenHelper.DEACTIVATED);
+		mActivity.getWalletManager().updateTableActivatedStatus(ZWCoin.BTC, ZWSQLiteOpenHelper.DEACTIVATED);
 		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
 
 	}
@@ -113,28 +113,28 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 
 	@UiThreadTest
 	public void testCreateReceivingAddress(){
-		createWallet(OWCoin.DOGE);
-		int currentAddresses = manager.readAllVisibleAddresses(OWCoin.DOGE).size();
-		manager.createReceivingAddress(null, OWCoin.DOGE, OWReceivingAddressesTable.VISIBLE_TO_USER);
-		OWAddress dogeAddress = manager.readAllVisibleAddresses(OWCoin.DOGE).get(currentAddresses);
+		createWallet(ZWCoin.DOGE);
+		int currentAddresses = manager.readAllVisibleAddresses(ZWCoin.DOGE).size();
+		manager.createReceivingAddress(null, ZWCoin.DOGE, ZWReceivingAddressesTable.VISIBLE_TO_USER);
+		ZWAddress dogeAddress = manager.readAllVisibleAddresses(ZWCoin.DOGE).get(currentAddresses);
 		assertTrue(dogeAddress.getAddress().charAt(0) == 'D');
 		//size of doge visible addresses in db should be +1
-		assertEquals(currentAddresses + 1, manager.readAllVisibleAddresses(OWCoin.DOGE).size());
-		manager.createReceivingAddress(null, OWCoin.DOGE, OWReceivingAddressesTable.HIDDEN_FROM_USER);
+		assertEquals(currentAddresses + 1, manager.readAllVisibleAddresses(ZWCoin.DOGE).size());
+		manager.createReceivingAddress(null, ZWCoin.DOGE, ZWReceivingAddressesTable.HIDDEN_FROM_USER);
 		//size of doge visible addresses in db should remain the same after creating a hidden address
-		assertEquals(currentAddresses + 1, manager.readAllVisibleAddresses(OWCoin.DOGE).size());
+		assertEquals(currentAddresses + 1, manager.readAllVisibleAddresses(ZWCoin.DOGE).size());
 	}
 
 	@SuppressLint("NewApi")
 	@UiThreadTest
 	public void testQRCodeVisiblity() throws InterruptedException{
-		createWallet(OWCoin.BTC_TEST);
-		mActivity.openWalletView(OWCoin.BTC_TEST);
+		createWallet(ZWCoin.BTC_TEST);
+		mActivity.openWalletView(ZWCoin.BTC_TEST);
 		mActivity.openReceiveCoinsView(null);
 		mActivity.getSupportFragmentManager().executePendingTransactions();
-		View receiveScreen  = mActivity.getSupportFragmentManager().findFragmentByTag(OWTags.RECIEVE_FRAGMENT).getView();
+		View receiveScreen  = mActivity.getSupportFragmentManager().findFragmentByTag(ZWTags.RECIEVE_FRAGMENT).getView();
 		View qrCodeContainer = receiveScreen.findViewById(R.id.generateAddressQrCodeContainer);
-		EditText label = (EditText) receiveScreen.findViewById(R.id.addressName).findViewWithTag(OWTags.OW_EDIT_TEXT);
+		EditText label = (EditText) receiveScreen.findViewById(R.id.addressName).findViewWithTag(ZWTags.OW_EDIT_TEXT);
 		ImageView addAddress = (ImageView) receiveScreen.findViewById(R.id.generateNewAddressForLabel);
 		ImageView qrCodeImageView = (ImageView) receiveScreen.findViewById(R.id.generateAddressQrCodeImageView);
 		assertEquals((float) 0.5 , qrCodeContainer.getAlpha());
@@ -206,22 +206,22 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<OWMainFra
 
 	@UiThreadTest
 	public void testCreateTransaction(){
-		createWallet(OWCoin.BTC);
+		createWallet(ZWCoin.BTC);
 		List<String> addresses = new ArrayList<String>();
 		addresses.add("1HbMfYui17L5m6sAy3L3WXAtf2P32bxJXq");
-		int numTxn = manager.readAllTransactions(OWCoin.BTC).size();
-		manager.createTransaction(OWCoin.BTC, BigInteger.ONE, BigInteger.ONE, addresses, new OWSha256Hash(randomishHexHash()), "Halloween Costume", 3, System.currentTimeMillis());
-		mActivity.openWalletView(OWCoin.BTC);
+		int numTxn = manager.readAllTransactions(ZWCoin.BTC).size();
+		manager.createTransaction(ZWCoin.BTC, BigInteger.ONE, BigInteger.ONE, addresses, new ZWSha256Hash(randomishHexHash()), "Halloween Costume", 3, System.currentTimeMillis());
+		mActivity.openWalletView(ZWCoin.BTC);
 		mActivity.getSupportFragmentManager().executePendingTransactions();
-		View BTCwallet  = mActivity.getSupportFragmentManager().findFragmentByTag(OWTags.WALLET_FRAGMENT).getView();
+		View BTCwallet  = mActivity.getSupportFragmentManager().findFragmentByTag(ZWTags.WALLET_FRAGMENT).getView();
 		ListView txns = (ListView) BTCwallet.findViewById(R.id.txListView);
 		//There should be 1 more txn than numTxn + 2 dividers
 		assertEquals(numTxn+3, txns.getCount());
 	}
 
-	private void createWallet(OWCoin type){
+	private void createWallet(ZWCoin type){
 		//add wallet
-		OWNewCurrencyListItem coin = new OWNewCurrencyListItem(type);
+		ZWNewCurrencyListItem coin = new ZWNewCurrencyListItem(type);
 		mActivity.addNewCurrency(coin);
 	}
 

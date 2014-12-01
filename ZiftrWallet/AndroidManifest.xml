@@ -47,12 +47,12 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name="com.ziftr.android.ziftrwallet.OWApplication"
+        android:name="com.ziftr.android.ziftrwallet.ZWApplication"
         android:allowBackup="true"
         android:icon="@drawable/ziftr_launcher"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.ziftr.android.ziftrwallet.OWSplashScreenActivity"
+            android:name="com.ziftr.android.ziftrwallet.ZWSplashScreenActivity"
             android:label="@string/ow_app_name"
             android:theme="@android:style/Theme.Black.NoTitleBar" >
             <intent-filter>
@@ -61,11 +61,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.ziftr.android.ziftrwallet.OWWelcomeActivity" >
+        <activity android:name="com.ziftr.android.ziftrwallet.ZWWelcomeActivity" >
             >
         </activity>
         <activity
-            android:name="com.ziftr.android.ziftrwallet.OWMainFragmentActivity"
+            android:name="com.ziftr.android.ziftrwallet.ZWMainFragmentActivity"
             android:label="ziftrWALLET"
             android:windowSoftInputMode="adjustPan" >
             <intent-filter>
