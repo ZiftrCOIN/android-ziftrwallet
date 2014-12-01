@@ -127,10 +127,10 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				if (this.getSelectedCoin().addressIsValid(dataFromQRScan)) {
 					address = dataFromQRScan;
 				} else {
-					this.getOWMainActivity().alertUser("There was an error in the scanned data.", "error_in_request");
+					this.getZWMainActivity().alertUser("There was an error in the scanned data.", "error_in_request");
 				}
 			} catch (ZWAddressFormatException e) {
-				this.getOWMainActivity().alertUser("The scanned address is not valid.", "invalid_scanned_address_dialog");
+				this.getZWMainActivity().alertUser("The scanned address is not valid.", "invalid_scanned_address_dialog");
 			}
 
 			if (address != null) {
@@ -196,7 +196,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			if (ZWPreferencesUtils.userHasPassphrase()) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().toString());
-				getOWMainActivity().showGetPassphraseDialog(
+				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, ZWTags.VALIDATE_PASS_SEND);
 			} else {
 				this.onClickSendCoins(null);
@@ -204,7 +204,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
 		} else if (v == this.helpFeeButton) {
-			getOWMainActivity().alertUser(
+			getZWMainActivity().alertUser(
 					"Why is there a fee?\n\nThis fee is NOT paid to Ziftr. "
 							+ "The fee goes to the miner that secures your transaction as a reward for their service. "
 							+ "This is standard for all cryptocurrency applications. Without it, your transaction would "
@@ -231,23 +231,23 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				manager.createSendingAddress(getSelectedCoin(), addressToSendTo, addressName);
 			}
 		} catch(ZWAddressFormatException afe) {
-			this.getOWMainActivity().alertUser(
+			this.getZWMainActivity().alertUser(
 					"The address is not formatted correctly. Please try again. ", 
 					"address_format_error_dialog");
 			return;
 		} catch(ZWInsufficientMoneyException ime) {
-			this.getOWMainActivity().alertUser(
+			this.getZWMainActivity().alertUser(
 					"The current wallet does not have enough coins to send the amount requested. ", 
 					"insufficient_funds_dialog");
 			return;
 		} catch(ZWSendAmountException e){
-			this.getOWMainActivity().alertUser(
+			this.getZWMainActivity().alertUser(
 					e.getMessage(), 
 					"error_sending_amount_dialog");
 		} catch(Exception e) {
 			// Shouldn't really happen, just helpful for debugging
 			ZLog.log("Exception trying to send coin: ", e);
-			this.getOWMainActivity().alertUser(
+			this.getZWMainActivity().alertUser(
 					"There was an error with your request. \n" + (e.getMessage() == null ? "" : e.getMessage()) + 
 					"\nAmount: " + amountSending + 
 					". \nFee: " + feeSending + 
@@ -271,23 +271,23 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		//so they need to be dug out and explicitly have a unique id set
 		//otherwise their contents will not be stored automatically during a suspend/resume cycle
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		coinAmountEditText.setId(R.id.ow_send_coin_amount);
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		fiatAmountEditText.setId(R.id.ow_send_fiat_amount);
 
 		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFeeFiatEquiv).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				R.id.sendEditTextTransactionFeeFiatEquiv).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		fiatFeeEditText.setId(R.id.ow_send_fiat_fee);
 
 		this.coinFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFee).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				R.id.sendEditTextTransactionFee).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		coinFeeEditText.setId(R.id.ow_send_coin_fee);
 
 		this.labelEditText = (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_reciever_name).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				R.id.send_edit_text_reciever_name).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		labelEditText.setId(R.id.ow_send_name);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(
@@ -524,15 +524,15 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			public void run() {
 				
 				final String message = ZWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
-				getOWMainActivity().runOnUiThread(new Runnable(){
+				getZWMainActivity().runOnUiThread(new Runnable(){
 
 					@Override
 					public void run() {
 						if (!message.isEmpty()){
-							getOWMainActivity().alertUser(message, "error_sending_coins");
+							getZWMainActivity().alertUser(message, "error_sending_coins");
 						} else {
-							getOWMainActivity().onBackPressed();
-							Toast.makeText(getOWMainActivity(), coinId.toString() + " sent!", Toast.LENGTH_LONG).show();
+							getZWMainActivity().onBackPressed();
+							Toast.makeText(getZWMainActivity(), coinId.toString() + " sent!", Toast.LENGTH_LONG).show();
 						}
 					}
 				

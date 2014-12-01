@@ -104,7 +104,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("TRANSACTION", false, false, false);
+		this.getZWMainActivity().changeActionBar("TRANSACTION", false, false, false);
 	}
 
 	/**
@@ -218,10 +218,10 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		//we only show estimated time if the screen width > 3 * width of the confirmed textview
 		int screenWidth;
 		if (android.os.Build.VERSION.SDK_INT < 13){
-			screenWidth = getOWMainActivity().getWindowManager().getDefaultDisplay().getWidth();
+			screenWidth = getZWMainActivity().getWindowManager().getDefaultDisplay().getWidth();
 		} else {
 			Point size = new Point();
-			getOWMainActivity().getWindowManager().getDefaultDisplay().getSize(size);
+			getZWMainActivity().getWindowManager().getDefaultDisplay().getSize(size);
 			screenWidth = size.x; 
 		}
 		this.status.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
@@ -325,14 +325,14 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		if (v==this.reuseAddress){
 			if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
 				//sent to this address
-				getOWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0), null);
+				getZWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0), null);
 			} else {
 				//received on this address
 				try {
 					ZWAddress address = getWalletManager().readAddress(txItem.getCoinId(), txItem.getDisplayAddresses().get(0), true);
-					getOWMainActivity().openReceiveCoinsView(address);
+					getZWMainActivity().openReceiveCoinsView(address);
 				} catch (Exception e) {
-					ZLog.log("Error trying to get OWAddress from display address  " + e);
+					ZLog.log("Error trying to get ZWAddress from display address  " + e);
 				}
 			}
 		}

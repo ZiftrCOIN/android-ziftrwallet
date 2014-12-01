@@ -121,8 +121,8 @@ public class ZWDataSyncHelper {
 				/***
 				JSONObject responseJson = new JSONObject(response);
 				
-				OWTransaction completedTransaction = createTransaction(coin, responseJson, inputs);
-				OWWalletManager.getInstance().updateTransaction(completedTransaction); //TODO -we should change it so that the create will automatically do this if needed
+				ZWTransaction completedTransaction = createTransaction(coin, responseJson, inputs);
+				ZWWalletManager.getInstance().updateTransaction(completedTransaction); //TODO -we should change it so that the create will automatically do this if needed
 				*****/
 				return "";
 			}

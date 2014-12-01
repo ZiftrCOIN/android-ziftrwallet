@@ -165,7 +165,7 @@ public abstract class ZWDialogFragment extends DialogFragment implements View.On
 	protected abstract Object getHandler();
 
 	/**
-	 * OWDialogs must have their own respective handlers. When
+	 * ZWDialogs must have their own respective handlers. When
 	 * the activity is attached, this method should be called in
 	 * order to verify that either the target fragment or the 
 	 * activity is a handler of the type specified (by the c param).

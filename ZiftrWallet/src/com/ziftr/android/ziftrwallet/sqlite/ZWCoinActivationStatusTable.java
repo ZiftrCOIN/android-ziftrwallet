@@ -13,7 +13,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 // TODO make a column for balance so that we don't have to loop through transaction table? 
 public class ZWCoinActivationStatusTable extends ZWTable {
 
-	/** The title of the column that contains a string identifying the OWCoin for the row. */
+	/** The title of the column that contains a string identifying the ZWCoin for the row. */
 	public static final String COLUMN_COIN_ID = "coin_type";
 
 	/** The title of the column that keeps track of the un/de/activated status. */

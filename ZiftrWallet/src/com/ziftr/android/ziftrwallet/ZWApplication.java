@@ -54,7 +54,7 @@ public class ZWApplication extends Application {
 	public static ZWApplication getApplication() {
 		if(self == null) {
 			throw new RuntimeException("Attempting to access Application Context before it's been set. " +
-					"Make sure OWApplication class isn't accessing anything statically that might cause a loop back.");
+					"Make sure ZWApplication class isn't accessing anything statically that might cause a loop back.");
 		}
 		return self;
 	}

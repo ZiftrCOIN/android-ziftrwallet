@@ -272,7 +272,7 @@ ZiftrNetworkHandler {
 	};
 
 	/**
-	 * Loads up the views and starts the OWHomeFragment 
+	 * Loads up the views and starts the ZWHomeFragment 
 	 * if necessary. 
 	 * 
 	 * @param savedInstanceState - The stored bundle
@@ -767,7 +767,7 @@ ZiftrNetworkHandler {
 
 	private void initializeSearchBarText() {
 		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
-		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		this.searchEditText.clearFocus();
 		this.searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
@@ -911,7 +911,7 @@ ZiftrNetworkHandler {
 	/**
 	 * called after user enters password for creating new wallet 
 	 * 
-	 * @param bundle with OWCoin of wallet to add
+	 * @param bundle with ZWCoin of wallet to add
 	 */
 	public void addNewCurrency(ZWNewCurrencyListItem item) {
 		ZWCoin newItem = item.getCoinId();
@@ -962,8 +962,8 @@ ZiftrNetworkHandler {
 
 	/**
 	 * A convenience method that we can use to start a dialog from this bundle.
-	 * The bundle should contain one string OWCoin.___.toString() which 
-	 * can be extracted by getting from the bundle with the key OWCoin.TYPE_KEY.
+	 * The bundle should contain one string ZWCoin.___.toString() which 
+	 * can be extracted by getting from the bundle with the key ZWCoin.TYPE_KEY.
 	 * 
 	 * @param info - The bundle used to tell which wallet to open.
 	 */
@@ -1180,8 +1180,8 @@ ZiftrNetworkHandler {
 	/**
 	 * generate dialog to ask for passphrase
 	 * 
-	 * @param requestcode = OWRequestcodes parameter to differentiate where the password dialog is
-	 * @param args = bundle with OWCoinType of currency to add if user is adding currency
+	 * @param requestcode = ZWRequestcodes parameter to differentiate where the password dialog is
+	 * @param args = bundle with ZWCoinType of currency to add if user is adding currency
 	 */
 	public void showEditAddressLabelDialog(int requestcode, boolean isReceiving, Bundle args, String tag) {
 		if (!isShowingDialog()) {
@@ -1202,8 +1202,8 @@ ZiftrNetworkHandler {
 	/**
 	 * generate dialog to ask for passphrase
 	 * 
-	 * @param requestcode = OWRequestcodes parameter to differentiate where the password dialog is
-	 * @param args = bundle with OWCoinType of currency to add if user is adding currency
+	 * @param requestcode = ZWRequestcodes parameter to differentiate where the password dialog is
+	 * @param args = bundle with ZWCoinType of currency to add if user is adding currency
 	 */
 	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag) {
 		if (!isShowingDialog()) {

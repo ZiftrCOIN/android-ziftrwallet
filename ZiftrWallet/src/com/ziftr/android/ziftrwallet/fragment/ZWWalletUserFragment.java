@@ -17,15 +17,15 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 	 * @return the wallet manager
 	 */
 	protected ZWWalletManager getWalletManager() {
-		return this.getOWMainActivity().getWalletManager();
+		return this.getZWMainActivity().getWalletManager();
 	}
 
 	protected ZWCoin getSelectedCoin() {
-		return this.getOWMainActivity().getSelectedCoin();
+		return this.getZWMainActivity().getSelectedCoin();
 	}
 	
 	public void populateWalletHeader(View v) {
-		this.getOWMainActivity().populateWalletHeaderView(v);
+		this.getZWMainActivity().populateWalletHeaderView(v);
 	}
 	
 	
@@ -34,8 +34,8 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 	/*****
 	void populateWalletHeaderView(View headerView) {
 		
-		OWCoin selectedCoin = this.getSelectedCoin();
-		OWFiat selectedFiat = OWPreferencesUtils.getFiatCurrency(this.getOWMainActivity());
+		ZWCoin selectedCoin = this.getSelectedCoin();
+		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency(this.getZWMainActivity());
 
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		coinLogo.setImageResource(selectedCoin.getLogoResId());
@@ -44,24 +44,24 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 		coinTitle.setText(selectedCoin.getLongTitle());
 
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = OWConverter.convert(BigDecimal.ONE, selectedCoin, selectedFiat);
-		fiatExchangeRateText.setText(OWFiat.formatFiatAmount(selectedFiat, unitPriceInFiat, true));
+		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, selectedCoin, selectedFiat);
+		fiatExchangeRateText.setText(ZWFiat.formatFiatAmount(selectedFiat, unitPriceInFiat, true));
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
-		BigInteger atomicUnits = getWalletManager().getWalletBalance(selectedCoin, OWSQLiteOpenHelper.BalanceType.ESTIMATED);
+		BigInteger atomicUnits = getWalletManager().getWalletBalance(selectedCoin, ZWSQLiteOpenHelper.BalanceType.ESTIMATED);
 		BigDecimal walletBalance = ZiftrUtils.bigIntToBigDec(selectedCoin, atomicUnits);
 
-		walletBalanceTextView.setText(OWCoin.formatCoinAmount(selectedCoin, walletBalance).toPlainString());
+		walletBalanceTextView.setText(ZWCoin.formatCoinAmount(selectedCoin, walletBalance).toPlainString());
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceInFiat = OWConverter.convert(walletBalance, selectedCoin, selectedFiat);
-		walletBalanceInFiatText.setText(OWFiat.formatFiatAmount(selectedFiat, walletBalanceInFiat, true));
+		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, selectedCoin, selectedFiat);
+		walletBalanceInFiatText.setText(ZWFiat.formatFiatAmount(selectedFiat, walletBalanceInFiat, true));
 
 		ImageView syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
 		
 		//TODO -this is hacky, if we use this method, fix this
-		syncButton.setOnClickListener((View.OnClickListener)this.getOWMainActivity());
+		syncButton.setOnClickListener((View.OnClickListener)this.getZWMainActivity());
 	}
 	*****/
 	@Override
@@ -70,7 +70,7 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 			
 			@Override
 			public void run() {
-				ZWDataSyncHelper.updateTransactionHistory(getOWMainActivity().getSelectedCoin());
+				ZWDataSyncHelper.updateTransactionHistory(getZWMainActivity().getSelectedCoin());
 			}
 
 		});

@@ -95,8 +95,8 @@ public class ZWECKey {
 		HALF_CURVE_ORDER = params.getN().shiftRight(1);
 		
 		// Have added a fix for this in com.ziftr.android.onewallet.PRNGFixes.java
-		// Applied the fix in com.ziftr.android.onewallet.OWApplication.java
-		// TODO does the fix for this (applied in OWApplication) need to be applied every time
+		// Applied the fix in com.ziftr.android.onewallet.ZWApplication.java
+		// TODO does the fix for this (applied in ZWApplication) need to be applied every time
 		// wallet starts up?
 		secureRandom = ZiftrUtils.createTrulySecureRandom();
 	}
@@ -784,9 +784,9 @@ public class ZWECKey {
 	public ZWECKey decrypt() throws ZWKeyCrypterException {
 		// Check that the keyCrypter matches the one used to encrypt the keys, if set.
 		if (this.keyCrypter == null) {
-			throw new ZWKeyCrypterException("There is no secret key set to decrypt this OWKey.");
+			throw new ZWKeyCrypterException("There is no secret key set to decrypt this ZWKey.");
 		} else if (!this.isEncrypted()) {
-			throw new ZWKeyCrypterException("This OWECKey is not encrypted.");
+			throw new ZWKeyCrypterException("This ZWECKey is not encrypted.");
 		}
 		byte[] unencryptedPrivateKey = this.keyCrypter.decryptToBytes(this.encryptedPrivateKey); 
 		ZWECKey key = new ZWECKey(new BigInteger(1, unencryptedPrivateKey), null, isCompressed());

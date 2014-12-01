@@ -32,7 +32,7 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
         <!-- <item name="android:windowNoTitle">true</item> -->
         <item name="android:windowBackground">@drawable/background</item>
-        <!-- serif is overriden to be ubuntuLight in OWTypeFaceUtil -->
+        <!-- serif is overriden to be ubuntuLight in ZWTypeFaceUtil -->
         <item name="android:typeface">serif</item>
     </style>
 

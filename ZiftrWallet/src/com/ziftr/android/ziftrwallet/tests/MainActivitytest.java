@@ -134,7 +134,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		mActivity.getSupportFragmentManager().executePendingTransactions();
 		View receiveScreen  = mActivity.getSupportFragmentManager().findFragmentByTag(ZWTags.RECIEVE_FRAGMENT).getView();
 		View qrCodeContainer = receiveScreen.findViewById(R.id.generateAddressQrCodeContainer);
-		EditText label = (EditText) receiveScreen.findViewById(R.id.addressName).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+		EditText label = (EditText) receiveScreen.findViewById(R.id.addressName).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		ImageView addAddress = (ImageView) receiveScreen.findViewById(R.id.generateNewAddressForLabel);
 		ImageView qrCodeImageView = (ImageView) receiveScreen.findViewById(R.id.generateAddressQrCodeImageView);
 		assertEquals((float) 0.5 , qrCodeContainer.getAlpha());
@@ -152,8 +152,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	//test if creating a request for sending coins provides response with to sign attributes
 	@UiThreadTest
 	public void testSendCoinsRequest() throws InterruptedException{
-		createWallet(OWCoin.BTC);
-		OWAddress spendFrom = manager.createReceivingAddress(null, OWCoin.BTC, OWReceivingAddressesTable.VISIBLE_TO_USER);
+		createWallet(ZWCoin.BTC);
+		ZWAddress spendFrom = manager.createReceivingAddress(null, ZWCoin.BTC, ZWReceivingAddressesTable.VISIBLE_TO_USER);
 		final List<String> input = new ArrayList<String>();
 		input.add(spendFrom.toString());
 		final String sendToAddress = "1DBb6HuozwS6esCGiaM5iB4xxoK759BYFW";
@@ -162,7 +162,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				ZiftrNetRequest request = OWDataSyncHelper.sendCoinsRequest(OWCoin.BTC, BigInteger.ZERO, sendingAmount, input, sendToAddress, null);
+				ZiftrNetRequest request = ZWDataSyncHelper.sendCoinsRequest(ZWCoin.BTC, BigInteger.ZERO, sendingAmount, input, sendToAddress, null);
 				String response = request.sendAndWait();
 				try {
 					JSONObject res = new JSONObject(response);
@@ -181,7 +181,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		});	
 		//there should be one or more hidden unspent addresses to put change in
 		Thread.sleep(500);
-		assertTrue(manager.readHiddenUnspentAddresses(OWCoin.BTC).size() >= 1);
+		assertTrue(manager.readHiddenUnspentAddresses(ZWCoin.BTC).size() >= 1);
 	}
 	*********/
 
@@ -194,9 +194,9 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		}
 		addresses.add(sendToAddr);
 		try {
-			OWDataSyncHelper.sendCoins(OWCoin.BTC, req, sendingAmount, addresses);
+			ZWDataSyncHelper.sendCoins(ZWCoin.BTC, req, sendingAmount, addresses);
 			ZLog.log("Abbbb");
-			assertTrue(manager.readAddress(OWCoin.BTC, "1DBb6HuozwS6esCGiaM5iB4xxoK759BYFW", false)!=null);
+			assertTrue(manager.readAddress(ZWCoin.BTC, "1DBb6HuozwS6esCGiaM5iB4xxoK759BYFW", false)!=null);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

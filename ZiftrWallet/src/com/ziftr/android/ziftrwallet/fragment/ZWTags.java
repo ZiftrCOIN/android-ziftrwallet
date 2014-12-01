@@ -40,6 +40,6 @@ public class ZWTags {
 	public static final String VALIDATE_PASS_DISABLE = "validate_disable_passphrase_dialog";
 	
 	//EDIT TEXT
-	public static final String OW_EDIT_TEXT = "ow_edit_text";
+	public static final String ZW_EDIT_TEXT = "ow_edit_text";
 
 }

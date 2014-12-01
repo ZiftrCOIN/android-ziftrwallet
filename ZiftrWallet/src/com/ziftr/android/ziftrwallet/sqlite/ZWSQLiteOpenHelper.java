@@ -22,8 +22,8 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  * This class gives the app access to a database that will persist in different
  * sessions of the app being opened. 
  * 
- * To get an instance of this class call OWSQLiteOpenHelper.getInstance(Context).
- * When finished accessing the database, call OWSQLiteOpenHelper.closeInstance().
+ * To get an instance of this class call ZWSQLiteOpenHelper.getInstance(Context).
+ * When finished accessing the database, call ZWSQLiteOpenHelper.closeInstance().
  * 
  * TODO add a long click to list items to delete coin types
  * TODO how does the encrypting of the private keys work into this?

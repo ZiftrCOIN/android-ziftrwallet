@@ -55,7 +55,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 
 		// TODO add or replace?
 		transaction.add(baseLayout, childFragment, ZWTags.ADDRESS_BOOK);
-		//transaction.replace(baseLayout, childFragment, OWTags.ADDRESS_BOOK);
+		//transaction.replace(baseLayout, childFragment, ZWTags.ADDRESS_BOOK);
 		transaction.addToBackStack(null);
 		transaction.commit();
 	}
@@ -72,7 +72,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 	 */
 	protected void setActionBar() {
 		if (!this.showingChildFragment()) {
-			this.getOWMainActivity().changeActionBar(getActionBarTitle(), false, true, false);
+			this.getZWMainActivity().changeActionBar(getActionBarTitle(), false, true, false);
 		}
 	}
 

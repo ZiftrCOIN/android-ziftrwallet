@@ -35,7 +35,7 @@ public class ZWAboutFragment extends ZWFragment implements OnClickListener{
 	
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ABOUT", true, true, false);
+		this.getZWMainActivity().changeActionBar("ABOUT", true, true, false);
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class ZWSetFiatFragment extends ZWFragment implements OnItemClickListener
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("SETTINGS", false, true, false);
+		this.getZWMainActivity().changeActionBar("SETTINGS", false, true, false);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class ZWSetFiatFragment extends ZWFragment implements OnItemClickListener
 			long id) {
 		ZWFiat fiatType = (ZWFiat) parent.getItemAtPosition(position);
 		ZWPreferencesUtils.setFiatCurrency(fiatType.getName());
-		getOWMainActivity().onBackPressed();
+		getZWMainActivity().onBackPressed();
 	}
 
 }

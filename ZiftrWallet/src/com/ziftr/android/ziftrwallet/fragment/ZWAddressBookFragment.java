@@ -41,12 +41,12 @@ implements TextWatcher, OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ADDRESSES", false, false, false, this, this.addressAdapter);
+		this.getZWMainActivity().changeActionBar("ADDRESSES", false, false, false, this, this.addressAdapter);
 	}
 
 	@Override
 	public void onPause() {
-		this.getOWMainActivity().unregisterSearchBarTextWatcher(this);
+		this.getZWMainActivity().unregisterSearchBarTextWatcher(this);
 		super.onPause();
 	}
 
@@ -96,7 +96,7 @@ implements TextWatcher, OnClickListener {
 	}
 
 	private void initializeAddressList(Bundle savedInstanceState) {
-		this.addressAdapter = new ZWAddressListAdapter(this.getOWMainActivity());
+		this.addressAdapter = new ZWAddressListAdapter(this.getZWMainActivity());
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(SORT_STATE_KEY) != null) {
 				this.addressAdapter.setSortState(SortState.valueOf(savedInstanceState.getString(SORT_STATE_KEY)));
@@ -131,7 +131,7 @@ implements TextWatcher, OnClickListener {
 				final List<ZWAddress> addresses = 
 						manager.readAllVisibleAddresses(getSelectedCoin(), includeReceivingNotSending);
 
-				Activity a = ZWAddressBookFragment.this.getOWMainActivity();
+				Activity a = ZWAddressBookFragment.this.getZWMainActivity();
 				// It it's null then the app is dying and we do it on the next round
 				if (a != null) {
 					a.runOnUiThread(new Runnable() {
@@ -158,11 +158,11 @@ implements TextWatcher, OnClickListener {
 
 	/**
 	 * We initialize the list of coins to show in the dialog and then 
-	 * for each OWCoin.___.toString() that has a boolean value
+	 * for each ZWCoin.___.toString() that has a boolean value
 	 * of true in the bundle we add it to the list.
 	 *  
 	 * @param args - The bundle with the booleans put into it. The keys are 
-	 * the toString()s of the different OWCoin possible values.
+	 * the toString()s of the different ZWCoin possible values.
 	 */
 	private void initializeFromArguments() {
 		Bundle args = this.getArguments();

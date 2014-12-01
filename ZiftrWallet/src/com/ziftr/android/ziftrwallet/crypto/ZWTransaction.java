@@ -254,7 +254,7 @@ public class ZWTransaction implements ZWSearchableListItem {
 		// also meet the search criteria...
 		
 		/**
-		OWTransaction owNextTransaction = (OWTransaction) nextItem;
+		ZWTransaction owNextTransaction = (ZWTransaction) nextItem;
 		if (owNextTransaction != null && owNextTransaction.isDivider()) {
 			// The pending bar shouldn't show if it the only bar
 			return false;

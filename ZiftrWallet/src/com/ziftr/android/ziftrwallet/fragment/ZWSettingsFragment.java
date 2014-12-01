@@ -95,7 +95,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("SETTINGS", true, true, false);
+		this.getZWMainActivity().changeActionBar("SETTINGS", true, true, false);
 	}
 
 	public void updateSettingsVisibility(boolean justSetPass) {
@@ -154,7 +154,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				passphraseDialog.setArguments(args);
 				passphraseDialog.setupDialog("ziftrWALLET", null, 
 						"Continue", null, "Cancel");
-				if (!getOWMainActivity().isShowingDialog()) {
+				if (!getZWMainActivity().isShowingDialog()) {
 					passphraseDialog.show(ZWSettingsFragment.this.getFragmentManager(), 
 							"scan_qr");
 				}
@@ -166,7 +166,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.CREATE_PASSPHRASE_DIALOG);
 				createPassphraseDialog.setArguments(args);
 
-				if (!getOWMainActivity().isShowingDialog()) {
+				if (!getZWMainActivity().isShowingDialog()) {
 					createPassphraseDialog.show(ZWSettingsFragment.this.getFragmentManager(), 
 							"create_passphrase");
 				}
@@ -175,7 +175,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			ZWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
 			if (ZWPreferencesUtils.userHasPassphrase()){
-				this.getOWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
+				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
 			} else {
 				ZWPreferencesUtils.setPassphraseDisabled(true);
 				//update settings visibility too slow with recognizing disabled password so update here
@@ -183,7 +183,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				this.resetPasswordLabel.setText("Set Passphrase");
 			}
 		} else if (v == this.setFiatCurrency){
-			getOWMainActivity().openSetFiatCurrency();
+			getZWMainActivity().openSetFiatCurrency();
 		} else if (v == this.editableConfirmationFeeBar){
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
 			ZWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
@@ -198,7 +198,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			Bundle args = new Bundle();
 			args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.SET_NAME_DIALOG);
 			setNameDialog.setArguments(args);
-			if (!getOWMainActivity().isShowingDialog()) {
+			if (!getZWMainActivity().isShowingDialog()) {
 				setNameDialog.show(ZWSettingsFragment.this.getFragmentManager(), 
 						"set_name");
 			}		
@@ -207,10 +207,10 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				ZWPreferencesUtils.setDebugMode(false);
 				resetLoggerHelper();
 				//re-init coins to not show testnet in non-debug mode
-				this.getOWMainActivity().initAvailableCoins();
+				this.getZWMainActivity().initAvailableCoins();
 				this.updateSettingsVisibility(false);
 			} else {
-				this.getOWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DEBUG);
+				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DEBUG);
 			}
 		} else if (v == this.exportwalletButton) {
 			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");

@@ -27,7 +27,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 
 /**
- * The OWMainActivity starts this fragment. This fragment is 
+ * The ZWMainActivity starts this fragment. This fragment is 
  * associated with list view of user wallets and a bar at the bottom of the list
  * view which opens a dialog to add rows to the list view.  
  */
@@ -73,7 +73,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("ziftrWALLET", true, false, true);
+		this.getZWMainActivity().changeActionBar("ziftrWALLET", true, false, true);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class ZWAccountsFragment extends ZWFragment {
 
 		this.rootView = inflater.inflate(R.layout.section_accounts_layout, container, false);
 
-		this.walletManager = this.getOWMainActivity().getWalletManager();
+		this.walletManager = this.getZWMainActivity().getWalletManager();
 
 		//dropshadow under listview
 		this.footer = this.getActivity().getLayoutInflater().inflate(R.layout.dropshadowlayout, null);
@@ -127,7 +127,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	private ZWCurrencyListItem getItemForCoinType(ZWCoin id) {
 		// TODO need to get market values from some sort of an API
 
-		// TODO see if we can get the constructor of OWCurrencyListItem 
+		// TODO see if we can get the constructor of ZWCurrencyListItem 
 		// to take very few things
 		
 		int resId = R.layout.accounts_currency_list_single_item;
@@ -210,7 +210,7 @@ public class ZWAccountsFragment extends ZWFragment {
 				ZWCurrencyListItem item = (ZWCurrencyListItem) 
 						parent.getItemAtPosition(position);
 
-				getOWMainActivity().openWalletView(item.getCoinId());
+				getZWMainActivity().openWalletView(item.getCoinId());
 
 			}
 		});
@@ -225,7 +225,7 @@ public class ZWAccountsFragment extends ZWFragment {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, item.getCoinId().toString());
 				b.putInt("ITEM_LOCATION", position);
-				getOWMainActivity().alertConfirmation(ZWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to "
+				getZWMainActivity().alertConfirmation(ZWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to "
 						+ "deactivate this wallet? This will not actually delete any of your stored data, and you can reactivate it at any time.", 
 						ZWTags.DEACTIVATE_WALLET, b);
 				return true;

@@ -50,20 +50,20 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 	public void onResume() {
 		super.onResume();
 		// Changes action bar and registers this as the listener for search button clicks
-		this.getOWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
+		this.getZWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
 
 	}
 
 	@Override
 	public void onPause() {
-		this.getOWMainActivity().unregisterSearchBarTextWatcher(this);
+		this.getZWMainActivity().unregisterSearchBarTextWatcher(this);
 		super.onPause();
 	}
 
 	@Override
 	public void onStop() {
 		//detoggle search bar if user navigates away
-		View searchBar = this.getOWMainActivity().findViewById(R.id.searchBar);
+		View searchBar = this.getZWMainActivity().findViewById(R.id.searchBar);
 		searchBar.setVisibility(View.GONE);
 
 		super.onStop();
@@ -177,7 +177,7 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 		receiveButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				getOWMainActivity().openReceiveCoinsView(null);
+				getZWMainActivity().openReceiveCoinsView(null);
 			}
 		});
 
@@ -186,7 +186,7 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				getOWMainActivity().openSendCoinsView(null, null);
+				getZWMainActivity().openSendCoinsView(null, null);
 			}
 		});
 
@@ -216,7 +216,7 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 		if(parent.getAdapter().getItemViewType(position) == ZWWalletTransactionListAdapter.TYPE_TRANSACTION) {
 			ZWTransaction txItem = (ZWTransaction) 
 					txListView.getItemAtPosition(position);
-			getOWMainActivity().openTxnDetails(txItem);
+			getZWMainActivity().openTxnDetails(txItem);
 		}
 	}
 }

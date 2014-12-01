@@ -26,7 +26,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class ZWCoin implements ZWCurrency {
 
 	/** When using bundles, this can be used to store a specific coin type. */
-	public static final String TYPE_KEY = "OWCOIN_TYPE_KEY";
+	public static final String TYPE_KEY = "ZWCOIN_TYPE_KEY";
 
 	public static ZWCoin BTC = new ZWCoin("10000", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin,
 			(byte) 0, (byte) 5, (byte) 128, 6, 600, "Bitcoin Signed Message:\n");

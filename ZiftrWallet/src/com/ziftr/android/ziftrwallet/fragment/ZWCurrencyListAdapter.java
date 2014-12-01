@@ -75,7 +75,7 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 			convertView = this.inflater.inflate(currencyListItem.getResId(), null);
 		}
 			ZWFiat fiatType =ZWPreferencesUtils.getFiatCurrency();
-//		if (getItemViewType(position) == OWCurrencyListAdapter.coinType) {
+//		if (getItemViewType(position) == ZWCurrencyListAdapter.coinType) {
 			String fiatSymbol = fiatType.getSymbol();
 
 			// Whether or not we just created one, we reset all the resources

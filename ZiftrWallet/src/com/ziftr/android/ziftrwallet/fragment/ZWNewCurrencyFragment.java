@@ -32,7 +32,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getOWMainActivity().changeActionBar("CURRENCY", true, true, false);
+		this.getZWMainActivity().changeActionBar("CURRENCY", true, true, false);
 	}
 
 	@Override
@@ -82,11 +82,11 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 
 	/**
 	 * We initialize the list of coins to show in the dialog and then 
-	 * for each OWCoin.___.toString() that has a boolean value
+	 * for each ZWCoin.___.toString() that has a boolean value
 	 * of true in the bundle we add it to the list.
 	 *  
 	 * @param args - The bundle with the booleans put into it. The keys are 
-	 * the toString()s of the different OWCoin possible values.
+	 * the toString()s of the different ZWCoin possible values.
 	 */
 	private void initializeFromBundle(Bundle args) {
 		this.coinsToShow = new ArrayList<ZWCoin>();
@@ -103,7 +103,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		ZWNewCurrencyListItem item = (ZWNewCurrencyListItem)listView.getItemAtPosition(position);
-		getOWMainActivity().addNewCurrency(item);
+		getZWMainActivity().addNewCurrency(item);
 	}
 
 }

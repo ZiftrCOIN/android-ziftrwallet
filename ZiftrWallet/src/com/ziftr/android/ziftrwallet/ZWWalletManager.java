@@ -27,7 +27,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  * 
  * The goal is that this class will make it easy to switch between using bitocoinj
  * and switching to our API. All database access and bitcoinj access should go in here.
- * More specifically, database access should go in OWSQLiteOpenHelper, and if the database
+ * More specifically, database access should go in ZWSQLiteOpenHelper, and if the database
  * method is not quite correct, then it should be overridden in here to do somthing
  * with bitcoinj.
  * 
@@ -36,7 +36,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class ZWWalletManager extends ZWSQLiteOpenHelper {
 
 	/** The map which holds all of the wallets. */
-	//private Map<OWCoin, Wallet> walletMap = new HashMap<OWCoin, Wallet>();
+	//private Map<ZWCoin, Wallet> walletMap = new HashMap<ZWCoin, Wallet>();
 
 	/** The wallet files for each of the coin types. */
 	private Map<ZWCoin, File> walletFiles = new HashMap<ZWCoin, File>();
@@ -172,7 +172,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 		} else {
 			log("null NULL EXTERNAL DIR");
 			/***
-			OWSimpleAlertDialog alertUserDialog = new OWSimpleAlertDialog();
+			ZWSimpleAlertDialog alertUserDialog = new ZWSimpleAlertDialog();
 			alertUserDialog.setupDialog("OneWallet", "Error: No external storage detected.", null, "OK", null);
 			alertUserDialog.show(this.activity.getSupportFragmentManager(), "null_externalDirectory");
 			 **/

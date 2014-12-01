@@ -95,7 +95,7 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		alertDialog.show(this.getSupportFragmentManager(), tag);
 	}
 	
-	protected void startOWMainActivity(Bundle extras) {
+	protected void startZWMainActivity(Bundle extras) {
 		Intent main = new Intent(this, ZWMainFragmentActivity.class);
 		if (extras != null) {
 			main.putExtras(extras);

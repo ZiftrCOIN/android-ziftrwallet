@@ -10,7 +10,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public abstract class ZWFragment extends Fragment {
 
-	public ZWMainFragmentActivity getOWMainActivity() {
+	public ZWMainFragmentActivity getZWMainActivity() {
 		return ((ZWMainFragmentActivity) this.getActivity());
 	}
 

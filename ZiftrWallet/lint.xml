@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
     <issue id="DefaultLocale">
-        <ignore path="src/com/ziftr/android/ziftrwallet/network/OWApi.java" />
+        <ignore path="src/com/ziftr/android/ziftrwallet/network/ZWApi.java" />
     </issue>
 </lint>

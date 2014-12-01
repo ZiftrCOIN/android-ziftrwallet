@@ -91,10 +91,10 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 		db.insert(getTableName(tx.getCoinId()), null, txToContentValues(tx));
 	}
 
-	//	protected void updateNumConfirmationsOrInsert(OWTransaction tx, SQLiteDatabase db) {
+	//	protected void updateNumConfirmationsOrInsert(ZWTransaction tx, SQLiteDatabase db) {
 	//		try {
 	//			updateTransactionNumConfirmations(tx, db);
-	//		} catch(OWNoTransactionFoundException ntfe) {
+	//		} catch(ZWNoTransactionFoundException ntfe) {
 	//			this.insertTx(tx, db);
 	//		}
 	//	}

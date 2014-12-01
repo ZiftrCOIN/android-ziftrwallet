@@ -82,7 +82,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 
 		int viewType = getItemViewType(position);
 		
-		//OWTransaction txListItem = getItem(position);
+		//ZWTransaction txListItem = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one
 			if(viewType == TYPE_TRANSACTION) {

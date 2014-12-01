@@ -110,7 +110,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		} else if (v == this.generateAddressForLabel) {
 			this.conditionallyGenerateNewAddress(false);
 		} else if (v == this.helpButton){
-			getOWMainActivity().alertUser(
+			getZWMainActivity().alertUser(
 					"The message and amount fields are encoded into the QRcode and should be used if you wish to pre-fill a message" +
 					" and/or amount label in the scanning user's application. These are optional and are not saved" +
 					" when loading an address from the address book.", 
@@ -126,11 +126,11 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			if (ZWPreferencesUtils.userHasPassphrase()) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().toString());
-				getOWMainActivity().showGetPassphraseDialog(
+				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						ZWTags.VALIDATE_PASS_RECEIVE);
 			} else {
-				getOWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
+				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
 						"Addresses cannot be deleted once they are created. Are you sure?", 
 						ZWTags.CONFIRM_NEW_ADDRESS, new Bundle());
 			}
@@ -149,12 +149,12 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		
 		// For the amounts and the binding
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		this.coinAmountEditText.setId(R.id.ow_receive_coin_amount);
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		this.fiatAmountEditText.setId(R.id.ow_receive_fiat_amount);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
@@ -166,7 +166,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.helpButton.setOnClickListener(this);
 		// For the message edit text
 		this.messageEditText = (EditText) this.rootView.findViewById(
-				R.id.receiveMessageContainer).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+				R.id.receiveMessageContainer).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		this.messageEditText.setId(R.id.ow_receive_message);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
@@ -184,7 +184,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.generateAddressForLabel = (ImageView) this.rootView.findViewById(R.id.generateNewAddressForLabel);
 		this.generateAddressForLabel.setOnClickListener(this);
 
-		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewWithTag(ZWTags.OW_EDIT_TEXT);
+		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		this.labelEditText.setId(R.id.ow_receive_address_label);
 		this.labelEditText.requestFocus();
 		this.labelEditText.addTextChangedListener(new ZiftrTextWatcher() {
@@ -298,10 +298,10 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 				long time = System.currentTimeMillis() / 1000;
 				final ZWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, 0, time, time);
 
-				//final OWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, OWReceivingAddressesTable.VISIBLE_TO_USER);
+				//final ZWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, ZWReceivingAddressesTable.VISIBLE_TO_USER);
 				
 				// Run the updating of the UI on the UI thread
-				ZWReceiveCoinsFragment.this.getOWMainActivity().runOnUiThread(new Runnable() {
+				ZWReceiveCoinsFragment.this.getZWMainActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						String newAddress = address.toString();
