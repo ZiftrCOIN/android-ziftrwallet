@@ -93,8 +93,6 @@ public class ZWApi {
 		
 		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions/requests";
 		
-		//TODO -add auth token  here, but I want to see it fail first
-		
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null,  spendPostData);
 		return request;
 	}

@@ -27,7 +27,7 @@ public class ZWDataSyncHelper {
 	
 	public static String sendCoins(ZWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
 		String message = "";
-		ZLog.log("Sending " + amount + " coins to : ." + output);
+		ZLog.log("Sending " + amount + " coins to " + output);
 		ZiftrNetworkManager.networkStarted();
 		
 		//find (or create) an address for change that hasn't been spent from
@@ -49,8 +49,8 @@ public class ZWDataSyncHelper {
 		ZiftrNetRequest request = ZWApi.buildSpendRequest(coin.getType(), coin.getChain(), spendJson);
 		
 		String response = request.sendAndWait();
-//		commented out since throws NPE if no internet
-//		ZLog.forceFullLog(response);
+		ZLog.forceFullLog(response);		
+		
 		switch (request.getResponseCode()){
 			case 200:
 				try {
@@ -59,7 +59,8 @@ public class ZWDataSyncHelper {
 					ZLog.log("Send coins step 1 response: ", jsonRes.toString());
 					
 					message = signSentCoins(coin, jsonRes, inputs, passphrase);
-				}catch(Exception e) {
+				}
+				catch(Exception e) {
 					ZLog.log("Exception send coin request: ", e);
 				}
 				break;

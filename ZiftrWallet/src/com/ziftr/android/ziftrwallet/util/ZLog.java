@@ -52,6 +52,10 @@ public abstract class ZLog {
 	
 	public static void forceFullLog(String bigString) {
 		
+		if(bigString == null) {
+			bigString = "null";
+		}
+		
 		int charCount = 0;
 		while(charCount < bigString.length()) {
 			

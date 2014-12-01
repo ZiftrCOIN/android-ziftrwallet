@@ -1,63 +1,75 @@
+
+
+
+This is the repo for the Android version of Ziftr's mobile wallet app.
+
+Please note that while we make the source publicly available for a variety of reasons, this project is NOT "open source."
+<insert licensing notes>'
+
+
+
+
+-------- Project Setup --------
+
 Requirements:
-	1 - Maven - Java project management command line tools. Easily installed with home brew
-    	a quick google will give homebrew instructions.
-	2 - Eclipse with Android tools installed.
+    Maven and Ant are used for easy dependency management but are not used for Eclipse project setup or builds.
 
-Clone the Repo from Ziftr Github
-	One way to do this is to navigate to Ziftr github / OneWallet and
-	click Clone to Desktop
-	`cd OneWallet`
-	`git submodule update --init`
-	`cd bitcoinj`
-	`git checkout ziftr`
+    If using Eclipse, M2_REPO Classpath variable must be set.
+        In Eclipse->Preferences->Java->Build Path->Classpath Variables
+        Add a new classpath variable that has name M2_REPO and value to be
+        where ever the .m2/repository folder is on your machine. For me it was
+        /Users/stephenmorse/.m2/repository.
 
--------- To get bitcoinj projects in eclipse --------
 
-Open up a terminal
-	cd to the OneWallet/bitcoinj directory
-	run 'mvn eclipse:eclipse' (Will take a minute or two)
+Setup:
+
+Download this repo into a local folder.
 
 In Eclipse, do File->Import...
-	Choose 'Existing project into workspace'
-	Click the button to choose a folder to import from
-	Open the OneWallet/bitcionj folder - these
-	
-Set bitcoinj project to use Java 6
-	Select project
-	Cmd-i to open project properties (or right click and select properties)
-	Select Library tab
-	Click Add Library
-	Select JRE System Library
-	Click 'Alternate JRE' and Choose Java SE 6
-	Click Finish
-	Remove any other Java Libraries being used
+    Choose 'Existing Projects Into Workspace'
+    Click the "Browse..." button in the upper right next to "Select root directory"
+    Browse to the folder which contains this source and click finish
+    When the list of projects to import is displayed click "Deselect All"
+    Now click to check box to import the following projects:
+        ZiftrWallet
+        ZWCaptureActivity
+        android-support-v7-appcompat
 
-Set the M2_REPO Classpath variable
-	In Eclipse->Preferences->Java->Build Path->Classpath Variables
-	Add a new classpath variable that has name M2_REPO and value to be
-	where ever the .m2/repository folder is on your machine. For me it was
-	/Users/stephenmorse/.m2/repository.
+In the ZiftrWallet project right-click build_dependencies.xml and select Run As->Ant Build.
+    If Ant is not installed or configured correctly, you can also simply use maven and the projects pom.xml via
+    "mvn dependency:resolve"
 
-At this point, the 3 bitcoinj projects shouldn't have any errors.
+You should now be able to Run/Debug the ZiftrWallet project.
 
--------- To get OneWallet projects in eclipse --------
 
-Do the above first, as the OneWallet Project references the bitcoinj project.
 
-In Eclipse, do File->Import...
-	Choose 'Existing project into workspace'
-	Import the HOME/android-sdks/extras
-	Make sure only the appcompat project is imported, you don't need all three
-	This project shouldn't have any errors
-	
-In Eclipse, do File->Import...
-	Choose 'Existing android project into workspace' (notice the android)
-	Select the OneWallet folder which was cloned from Github and click finish
-	Right click on the build_dependencies.xml file and do Run As -> Ant Build
+-------- Possible Setup Issues --------
 
-For the OneWallet App:
-	Go into project properties-> Android
-	Remove the Appcompat library (bottom right)
-	Click add and select the appcompat Project previously imported
+ZWCaptureActivity isn't an option when importing projects.
+    This project depends on the zxing submodule.
+    You may need to manually update/pull the zxing module.
+    Make sure there is a zxing folder locally and it contains files.
+        If it is empty, do a git pull, checkout, or clone from within the zxing folder
+        Then attempt the project import again.
+
+
+The project has many errors.
+    This can happen when the project is missing (or can't find) required source files or projects.
+    See next issue.
+
+
+The project says it is missing a dependency, source folder, or sub project.
+    First make sure that Maven correctly downloaded the dependencies and that the ZiftrWallets project is correctly referencing them.
+        Right-click the ZiftrWallet project. Select properties. Select "Java Build Path." Select the Libraries tab. 
+        Make sure the M2_REPO variable is working correctly and that the libraries are actually in the right place.
+    It's also possible that eclipse envirenment variables have become removed and the project is not correctly using relative paths.
+        Right-click the ZiftrWallet project. Select properties. Select "Android." 
+        Make sure both the support library and the ZWCaptureActivity library are there and have green check marks.
+            If not, you may need to find and add them manually.
+    If the ZWCaptureActivy project is showing errors it may be missing it's zxing dependencies.
+        Right-click ZWCaptureActivity. Select properties. Select "Java Build Path." Select the source tab.
+        There should be two additional source folders, android-core and core.
+            If those folders are missing or have errors, correct them and clean the project.
+    
 	
 	
