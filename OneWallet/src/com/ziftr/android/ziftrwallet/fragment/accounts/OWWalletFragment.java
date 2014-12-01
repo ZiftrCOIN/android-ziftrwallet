@@ -186,7 +186,7 @@ public class OWWalletFragment extends OWWalletUserFragment implements TextWatche
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				getOWMainActivity().openSendCoinsView(null);
+				getOWMainActivity().openSendCoinsView(null, null);
 			}
 		});
 

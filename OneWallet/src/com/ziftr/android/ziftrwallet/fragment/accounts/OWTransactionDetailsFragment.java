@@ -326,7 +326,7 @@ implements OWEditableTextBoxController.EditHandler<OWTransaction>, OnClickListen
 		if (v==this.reuseAddress){
 			if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
 				//sent to this address
-				getOWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0));
+				getOWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0), null);
 			} else {
 				//received on this address
 				try {
