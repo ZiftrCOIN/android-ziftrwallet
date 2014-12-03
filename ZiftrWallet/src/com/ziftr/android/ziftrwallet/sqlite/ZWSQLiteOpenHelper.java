@@ -206,11 +206,18 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
-	 * address to the correct table within our database.
+	 * this method creates a receiving (owned by the user) {@link ZWAddress} object and adds it 
+	 * to the correct table within our database
 	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param key - The key to use.
+	 * @param crypter
+	 * @param coinId
+	 * @param note
+	 * @param balance
+	 * @param creation
+	 * @param modified
+	 * @param hidden
+	 * @param spentFrom 
+	 * @return
 	 */
 	protected synchronized ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, 
 			long balance, long creation, long modified, int hidden, int spentFrom) {
@@ -354,24 +361,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param txFee- See {@link ZWTransaction}
 	 * @param displayAddress - See {@link ZWTransaction}
 	 */
-	public ZWTransaction createTransaction(ZWCoin coinId, BigInteger txAmount,
-			BigInteger txFee, List<String> displayAddress, long timestamp) {
-		return createTransaction(coinId, txAmount, txFee, 
-				displayAddress, new ZWSha256Hash(""), "", -1, timestamp);
-	}
-
-	/**
-	 * As part of the C in CRUD, this method adds a new transaction
-	 * to the correct table within our database.
-	 * 
-	 * Default values will be used in this method for the hahs, note, time, 
-	 * and numConfirmations.
-	 * 
-	 * @param coinId - The coin type to determine which table we use.
-	 * @param txAmount - See {@link ZWTransaction}
-	 * @param txFee- See {@link ZWTransaction}
-	 * @param displayAddress - See {@link ZWTransaction}
-	 */
 	public synchronized ZWTransaction createTransaction(ZWCoin coinId, BigInteger txAmount,
 			BigInteger txFee, List<String> displayAddresses, ZWSha256Hash hash, 
 			String note, long numConfirmations, long timestamp) {
@@ -480,12 +469,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 
-	
-	
-	
-	
-
-	
 	
 	
 	public synchronized List<String> getAddressList(ZWCoin coin, boolean receivingAddresses) {

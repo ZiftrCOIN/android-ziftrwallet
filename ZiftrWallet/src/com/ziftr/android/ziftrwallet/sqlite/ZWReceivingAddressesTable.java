@@ -78,7 +78,6 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		ZWAddress newAddress = new ZWAddress(coinId, newKey);
 
 		// Reset all the address' parameters for use elsewhere
-		newAddress.setId(c.getLong(c.getColumnIndex(COLUMN_ID)));
 		newAddress.setLabel(c.getString(c.getColumnIndex(COLUMN_LABEL)));
 		newAddress.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
 		newAddress.getKey().setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));

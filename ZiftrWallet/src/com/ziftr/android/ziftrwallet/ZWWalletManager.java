@@ -184,22 +184,21 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	public ZWAddress createChangeAddress(String passphrase, ZWCoin coinId) {
 		return super.createChangeAddress(this.passphraseToCrypter(passphrase), coinId);
 	}
-	
-	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, int hidden) {
-		return super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, hidden);
-	}
+
 	
 	/**
-	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
-	 * address to the correct table within our database.
+	 * this method creates a receiving (owned by the user) {@link ZWAddress} object and adds it 
+	 * to the correct table within our database
 	 * 
-	 * Temporarily, we need to make the address and tell bitcoinj about it.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param key - The key to use.
+	 * @param passphrase
+	 * @param coinId
+	 * @param note
+	 * @param balance
+	 * @param creation
+	 * @param modified
+	 * @return
 	 */
-	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, 
-			long balance, long creation, long modified) {
+	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, long balance, long creation, long modified) {
 		ZWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, 
 				modified, ZWReceivingAddressesTable.VISIBLE_TO_USER, ZWReceivingAddressesTable.UNSPENT_FROM);
 		return addr;

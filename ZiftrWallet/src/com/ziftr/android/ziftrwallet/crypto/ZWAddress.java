@@ -49,11 +49,6 @@ public class ZWAddress implements ZWSearchableListItem {
 	///////////////////////////////////////
 
 	/**
-	 * The id for storage in an sqlite table. 
-	 */
-	private long id = -1;
-
-	/**
 	 * The note that the user has applied to this given address. 
 	 */
 	private String note = "";
@@ -273,19 +268,6 @@ public class ZWAddress implements ZWSearchableListItem {
 	//////////  Getters and Setters  //////////
 	///////////////////////////////////////////
 
-	/**
-	 * @return the id
-	 */
-	public long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(long id) {
-		this.id = id;
-	}
 
 	/**
 	 * @return the note
