@@ -148,7 +148,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 	}
 	
 	public List<String> getHiddenAddresses(ZWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
-		
+
 		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin) + " WHERE " + COLUMN_HIDDEN + " = " + HIDDEN_FROM_USER;
 		if(!includeSpentFrom) {
 			sql += " AND " + COLUMN_SPENT_FROM + " = " + UNSPENT_FROM;

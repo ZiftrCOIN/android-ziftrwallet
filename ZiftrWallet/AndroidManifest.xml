@@ -102,7 +102,7 @@
         <uses-library android:name="android.test.runner" />
 
         <receiver
-            android:name="ziftrwalletWidget"
+            android:name="ZWWalletWidget"
             android:label="ziftrWALLET" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

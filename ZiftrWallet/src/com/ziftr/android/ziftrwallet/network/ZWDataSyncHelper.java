@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,12 +81,15 @@ public class ZWDataSyncHelper {
 	
 	
 	private static String signSentCoins(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
+		Set<ZWAddress> addressesSpentFrom = new HashSet<ZWAddress>();
+		ZLog.log("signSentCoins called");
 		try {
 			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
 			for (int i=0; i< toSignList.length(); i++){
 				JSONObject toSign = toSignList.getJSONObject(i);
 	
 				String signingAddressPublic = toSign.optString("address");
+				addressesSpentFrom.add(ZWWalletManager.getInstance().getAddress(coin, signingAddressPublic, true));
 				
 				ZLog.log("Signing a transaction with address: ", signingAddressPublic);
 				
@@ -106,16 +111,25 @@ public class ZWDataSyncHelper {
 		catch(Exception e) {
 			ZLog.log("Exeption attemting to sign transactions: ", e);
 		}
-		
+		ZLog.log("sending  this signed txn to server :" + serverResponse);
 		//now that we've packed all the signing into a json object send it off to the server
 		ZiftrNetRequest signingRequest = ZWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), serverResponse);
 		
 		String response = signingRequest.sendAndWait();
+		ZLog.log(signingRequest.getResponseCode());
 		ZLog.log("Response from signing: ", response);
 		if(signingRequest.getResponseCode() == 202){
 			try {
 				//update DB
-				
+				if (addressesSpentFrom.size() <= 0){
+					ZLog.log("addresses we spent from weren't in our db ERROR!");
+				} else {
+					for (ZWAddress addr : addressesSpentFrom){
+						ZLog.log(addr.toString() + "changed to spent");
+						addr.setSpentFrom(ZWReceivingAddressesTable.SPENT_FROM);
+						ZWWalletManager.getInstance().updateAddress(addr);
+					}
+				}
 				//TODO -this is so in-efficient, but for now, just update transaction history again
 				updateTransactionHistory(coin);
 				
@@ -190,6 +204,7 @@ public class ZWDataSyncHelper {
 			//TODO when api market_value call works
 			ZLog.log("Market Value Response: ", response);
 		} else {
+			ZLog.log("Market Value Error: ", response);
 			String dummy_res = "{\"currency_to\": \"usd\",\"currency_from\": \"btc/main\",\"exchange_rate\": 400, \"exchange_rate_divisor\": 100 }";
 			try {
 				JSONObject res = new JSONObject(dummy_res);
