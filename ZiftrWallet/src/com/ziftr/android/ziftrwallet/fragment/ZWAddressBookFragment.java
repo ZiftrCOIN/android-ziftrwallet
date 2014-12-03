@@ -15,13 +15,12 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter.SortState;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWAddressBookFragment extends ZWWalletUserFragment 
+public abstract class ZWAddressBookFragment extends ZWWalletUserFragment 
 implements TextWatcher, OnClickListener {
 
 	/** The root view for this application. */
@@ -32,9 +31,6 @@ implements TextWatcher, OnClickListener {
 
 	private ImageView sortByTimeIcon;
 	private ImageView sortAlphabeticallyIcon;
-
-	public static final String INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY = "include_receiving";
-	private boolean includeReceivingNotSending;
 
 	public static final String SORT_STATE_KEY = "sort_state";
 
@@ -67,8 +63,6 @@ implements TextWatcher, OnClickListener {
 		getAddressBookParentFragment().setVisibility(View.INVISIBLE);
 
 		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
-
-		this.initializeFromArguments();
 
 		this.initializeSortingIcons();
 
@@ -120,17 +114,13 @@ implements TextWatcher, OnClickListener {
 		this.loadAddressesFromDatabase();
 	}
 
-	/**
-	 * @return
-	 */
+	
+	
 	private void loadAddressesFromDatabase() {
-		final ZWWalletManager manager = this.getWalletManager();
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final List<ZWAddress> addresses = 
-						manager.readAllVisibleAddresses(getSelectedCoin(), includeReceivingNotSending);
-
+				final List<ZWAddress> addresses = getDisplayAddresses();
 				Activity a = ZWAddressBookFragment.this.getZWMainActivity();
 				// It it's null then the app is dying and we do it on the next round
 				if (a != null) {
@@ -149,6 +139,15 @@ implements TextWatcher, OnClickListener {
 		});
 	}
 
+	
+	/**
+	 * read, load, create or otherwise obtain an array of {@link ZWAddress} objects for the 
+	 * fragment to display to the user
+	 * @return a list of address objects
+	 */
+	protected abstract List<ZWAddress> getDisplayAddresses();
+	
+	
 	/**
 	 * @return
 	 */
@@ -156,20 +155,6 @@ implements TextWatcher, OnClickListener {
 		return (ZWAddressBookParentFragment) getParentFragment();
 	}
 
-	/**
-	 * We initialize the list of coins to show in the dialog and then 
-	 * for each ZWCoin.___.toString() that has a boolean value
-	 * of true in the bundle we add it to the list.
-	 *  
-	 * @param args - The bundle with the booleans put into it. The keys are 
-	 * the toString()s of the different ZWCoin possible values.
-	 */
-	private void initializeFromArguments() {
-		Bundle args = this.getArguments();
-		if (args != null) {
-			this.includeReceivingNotSending = args.getBoolean(INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY);
-		}
-	}
 
 	@Override
 	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,

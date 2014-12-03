@@ -1,6 +1,5 @@
 package com.ziftr.android.ziftrwallet.fragment;
 
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
@@ -41,24 +40,19 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		this.setActionBar();
 	}
 
-	public void openAddressBook(boolean includeReceivingNotSending, int baseLayout) {
+	public void openAddressBook(ZWAddressBookFragment addressBookFragment, int baseLayout) {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = this.getChildFragmentManager().beginTransaction();
 
 		// TODO maybe add animation to transaciton here?
-
-		Fragment childFragment = new ZWAddressBookFragment();
-
-		Bundle b = new Bundle();
-		b.putBoolean(ZWAddressBookFragment.INCLUDE_RECEIVING_NOT_SENDING_ADDRESSES_KEY, includeReceivingNotSending);
-		childFragment.setArguments(b);
-
 		// TODO add or replace?
-		transaction.add(baseLayout, childFragment, ZWTags.ADDRESS_BOOK);
+		transaction.add(baseLayout, addressBookFragment, ZWTags.ADDRESS_BOOK);
 		//transaction.replace(baseLayout, childFragment, ZWTags.ADDRESS_BOOK);
 		transaction.addToBackStack(null);
 		transaction.commit();
 	}
+	
+	
 
 	public void setVisibility(int visibility) {
 		getContainerView().setVisibility(visibility);

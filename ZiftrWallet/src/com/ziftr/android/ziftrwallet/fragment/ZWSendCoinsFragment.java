@@ -2,7 +2,6 @@ package com.ziftr.android.ziftrwallet.fragment;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -24,9 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
+import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
@@ -38,8 +37,8 @@ import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -134,7 +133,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			}
 
 			if (address != null) {
-				ZWAddress owAddress = this.getWalletManager().readAddress(this.getSelectedCoin(), address, false);
+				ZWAddress owAddress = this.getWalletManager().getAddress(this.getSelectedCoin(), address, false);
 				if (owAddress != null) {
 					// If there wasn't a note given in URI then we pre-fill from address
 					txNote = txNote == null ? owAddress.getLabel() : txNote;
@@ -202,7 +201,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				this.onClickSendCoins(null);
 			}
 		} else if (v == this.getAddressBookImageView()) {
-			this.openAddressBook(false, R.id.sendCoinBaseFrameLayout);
+			this.openAddressBook(new ZWSendAddressBookFragment(), R.id.sendCoinBaseFrameLayout);
 		} else if (v == this.helpFeeButton) {
 			getZWMainActivity().alertUser(
 					"Why is there a fee?\n\nThis fee is NOT paid to Ziftr. "
@@ -225,7 +224,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		try {
 			sendCoins(addressToSendTo, amountSending, feeSending, passphrase);
 			
-			if (manager.readAddress(getSelectedCoin(), addressToSendTo, false) != null){
+			if (manager.getAddress(getSelectedCoin(), addressToSendTo, false) != null){
 				manager.updateAddressLabel(getSelectedCoin(), addressToSendTo, addressName, false);
 			} else {
 				manager.createSendingAddress(getSelectedCoin(), addressToSendTo, addressName);
@@ -499,31 +498,24 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			final BigInteger feePerKb, final String passphrase) 
 			throws ZWAddressFormatException, Exception {
 		
-		final ZWCoin coinId = getSelectedCoin();
+		final ZWCoin coin = getSelectedCoin();
 		
-		if (!coinId.addressIsValid(address)){
+		if (!coin.addressIsValid(address)){
 			throw new ZWAddressFormatException();
 		} else if (value.signum() != 1){
 			//user wants to send <=0 coins
 			throw new ZWSendAmountException("Error: Cannot send 0 coins!");
-		} else if (feePerKb.compareTo(coinId.getDefaultFeePerKb()) == 0 && value.compareTo(feePerKb) < 1){
+		} else if (feePerKb.compareTo(coin.getDefaultFeePerKb()) == 0 && value.compareTo(feePerKb) < 1){
 			throw new ZWSendAmountException("Error: The desired amount to send is too small!");
 		}
-		
-		//inputs = the user's receiving addresses, including hidden change addresses that he will spend from
-		final List<String> inputs = new ArrayList<String>();
-		
-		//send all user's addresses to the server
-		for (ZWAddress addr : ZWWalletManager.getInstance().readAddresses(coinId, null, true)){
-			inputs.add(addr.toString());
-		}
-		
-		
+
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 				
-				final String message = ZWDataSyncHelper.sendCoins(coinId, feePerKb, value, inputs, address, passphrase);
+				List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
+				
+				final String message = ZWDataSyncHelper.sendCoins(coin, feePerKb, value, inputs, address, passphrase);
 				getZWMainActivity().runOnUiThread(new Runnable(){
 
 					@Override
@@ -532,7 +524,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 							getZWMainActivity().alertUser(message, "error_sending_coins");
 						} else {
 							getZWMainActivity().onBackPressed();
-							Toast.makeText(getZWMainActivity(), coinId.toString() + " sent!", Toast.LENGTH_LONG).show();
+							Toast.makeText(getZWMainActivity(), coin.toString() + " sent!", Toast.LENGTH_LONG).show();
 						}
 					}
 				

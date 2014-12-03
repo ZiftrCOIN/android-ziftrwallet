@@ -23,8 +23,8 @@ public abstract class ZWCoinRelativeTable extends ZWTable {
 	 */
 	protected abstract String getTablePostfix();
 
-	protected String getTableName(ZWCoin coinId) {
-		return coinId.toString() + getTablePostfix();
+	protected String getTableName(ZWCoin coin) {
+		return coin.toString() + getTablePostfix();
 	}
 
 	protected void create(ZWCoin coinId, SQLiteDatabase db) {

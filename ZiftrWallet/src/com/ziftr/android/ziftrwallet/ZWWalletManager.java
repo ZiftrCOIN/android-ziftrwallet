@@ -233,7 +233,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 * @param curPassphrase - null if no encryption
 	 * @param salt
 	 */
-	public void changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
+	public synchronized void changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
 		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
@@ -258,7 +258,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 * @return 
 	 */
 	public ZWECKey getKeyForAddress(ZWCoin coin, String publicAddress, String passphrase) {
-		ZWAddress signingAddress = ZWWalletManager.getInstance().readAddress(coin, publicAddress, true);
+		ZWAddress signingAddress = ZWWalletManager.getInstance().getAddress(coin, publicAddress, true);
 		ZWECKey key = signingAddress.getKey();
 		key.setKeyCrypter(this.passphraseToCrypter(passphrase));
 		return key;

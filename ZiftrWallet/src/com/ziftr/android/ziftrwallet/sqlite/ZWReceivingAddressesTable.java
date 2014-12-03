@@ -147,45 +147,17 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 
 	}
 	
-	public List<ZWAddress> readHiddenAddresses(ZWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT * FROM ");
-		sb.append(getTableName(coin));
-		sb.append(" WHERE ");
-		sb.append(COLUMN_HIDDEN);
-		sb.append(" = ");
-		sb.append(HIDDEN_FROM_USER);
-		if (!includeSpentFrom){
-			sb.append(" AND ");
-			sb.append(COLUMN_SPENT_FROM);
-			sb.append(" = ");
-			sb.append(UNSPENT_FROM);
-		}
-		sb.append(";");
-		String toQuery = sb.toString();
-		Cursor c = db.rawQuery(toQuery, null);
+	public List<String> getHiddenAddresses(ZWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
 		
-		List<ZWAddress> newAddresses = new ArrayList<ZWAddress>();
-
-		// Move to first returns false if cursor is empty
-		if (c.moveToFirst()) {
-			// Recreate key from stored private key
-			try {
-				do {
-					// TODO deal with encryption of private key
-					newAddresses.add(cursorToAddress(coin, c));
-				} while (c.moveToNext());
-			} catch (ZWAddressFormatException afe) {
-				ZLog.log("Error loading address from ", coin.toString(), 
-						" receiving addresses database.");
-				afe.printStackTrace();
-			}
+		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin) + " WHERE " + COLUMN_HIDDEN + " = " + HIDDEN_FROM_USER;
+		if(!includeSpentFrom) {
+			sql += " AND " + COLUMN_SPENT_FROM + " = " + UNSPENT_FROM;
 		}
 		
-		// Make sure we close the cursor
-		c.close();
-		return newAddresses;
+		Cursor cursor = db.rawQuery(sql, null);
+		return this.readAddressList(coin, cursor);
 	}
+	
 	
 	/**
 	 * @param dataInPrivColumn
@@ -197,6 +169,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 	private ZWECKey getKeyFromStoredPrivData(String dataInPrivColumn, byte[] pubKeyBytes) {
 		ZWECKey newKey = null;
 		String privDataWithoutEncryptionPrefix = dataInPrivColumn.substring(1);
+
 		if (dataInPrivColumn.charAt(0) == ZWKeyCrypter.NO_ENCRYPTION) {
 			newKey = new ZWECKey(ZiftrUtils.hexStringToBytes(privDataWithoutEncryptionPrefix), pubKeyBytes);
 		} else if (dataInPrivColumn.charAt(0) == ZWKeyCrypter.PBE_AES_ENCRYPTION) {
@@ -229,4 +202,15 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		return encrypted ? (ZWKeyCrypter.PBE_AES_ENCRYPTION + data) : (ZWKeyCrypter.NO_ENCRYPTION + data);
 	}
 
+
+	protected List<ZWAddress> getAllVisibleAddresses(ZWCoin coin, SQLiteDatabase db) {
+		String sql = "SELECT * FROM " + getTableName(coin) + " WHERE " + COLUMN_HIDDEN + " = " + VISIBLE_TO_USER;
+		
+		Cursor cursor = db.rawQuery(sql, null);
+		List<ZWAddress> addresses = this.readAddresses(coin, cursor);
+		
+		return addresses;
+	}
+	
+	
 }

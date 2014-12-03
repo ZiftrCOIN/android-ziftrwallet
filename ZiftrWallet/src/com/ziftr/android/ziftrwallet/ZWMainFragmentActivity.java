@@ -1649,6 +1649,8 @@ ZiftrNetworkHandler {
 
 	@Override
 	public void networkStopped() {
+
+		ZLog.log("Network stopped.......");
 		
 		this.runOnUiThread(new Runnable() {
 			
@@ -1676,8 +1678,6 @@ ZiftrNetworkHandler {
 	private synchronized void stopSyncAnimation() {
 		isSyncing = false;
 		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
-			ZLog.log("Stopping animation....");
-			
 			Animation rotation = syncButton.getAnimation();
 			if(rotation != null) {
 				rotation.setRepeatCount(0);

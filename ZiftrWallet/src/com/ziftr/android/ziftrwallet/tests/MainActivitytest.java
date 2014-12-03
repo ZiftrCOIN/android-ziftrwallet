@@ -21,17 +21,15 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWSha256Hash;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyListItem;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 
 public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFragmentActivity> {
@@ -111,7 +109,11 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		assertEquals(0, fm.getBackStackEntryCount());
 	}
 
-	@UiThreadTest
+	
+	//this test is testing use of a method only used by this test
+	//which means it's either totally pointless, or isn't testing proper data anyway
+	//TODO fix this i guess?
+	/****
 	public void testCreateReceivingAddress(){
 		createWallet(ZWCoin.DOGE);
 		int currentAddresses = manager.readAllVisibleAddresses(ZWCoin.DOGE).size();
@@ -124,7 +126,9 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		//size of doge visible addresses in db should remain the same after creating a hidden address
 		assertEquals(currentAddresses + 1, manager.readAllVisibleAddresses(ZWCoin.DOGE).size());
 	}
+	*****/
 
+	
 	@SuppressLint("NewApi")
 	@UiThreadTest
 	public void testQRCodeVisiblity() throws InterruptedException{

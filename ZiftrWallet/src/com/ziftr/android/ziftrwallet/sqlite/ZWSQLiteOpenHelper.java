@@ -69,10 +69,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/** The helper for doing all things related to the receiving addresses table. */
-	private ZWAddressesTable receivingAddressesTable;
-	protected ZWAddressesTable getReceivingAddressesTable() {
-		return receivingAddressesTable;
-	}
+	private ZWReceivingAddressesTable receivingAddressesTable;
 
 	/** The helper for doing all things related to the sending addresses table. */
 	private ZWAddressesTable sendingAddressesTable;
@@ -238,7 +235,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		try {
-			ZWReceivingAddressesTable receiveTable = (ZWReceivingAddressesTable) this.getReceivingAddressesTable();
+			ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
 
 			for (ZWCoin coin : this.readAllNonUnactivatedTypes()) {
 				receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
@@ -258,63 +255,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	}
 
-	/**
-	 * As part of the R in CRUD, this method gets an address from the 
-	 * database for the given coin type and table boolean. Returns null if
-	 * no such address is found
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
-	 */
-	public synchronized ZWAddress readAddress(ZWCoin coinId, String address, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readAddress(coinId, address, getReadableDatabase(), receivingNotSending);
-	}
-
 	
-	/**
-	 * As part of the R in CRUD, this method gets an address from the 
-	 * database for the given coin type and table boolean.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
-	 */
-	public synchronized List<ZWAddress> readAddresses(ZWCoin coinId, List<String> addresses, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readAddresses(coinId, addresses, getReadableDatabase(), receivingNotSending);
-	}
-	
-	public synchronized List<ZWAddress> readHiddenAddresses(ZWCoin coinId) {
-		return ((ZWReceivingAddressesTable)this.receivingAddressesTable).readHiddenAddresses(coinId, getReadableDatabase(), true);
-	}
-	
-	public synchronized List<ZWAddress> readHiddenUnspentAddresses(ZWCoin coinId) {
-		return ((ZWReceivingAddressesTable)this.receivingAddressesTable).readHiddenAddresses(coinId, getReadableDatabase(), false);
-	}
-
-	/**
-	 * As part of the R in CRUD, this method gets all the addresses from the 
-	 * database for the given coin type and table boolean.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
-	 * @return List of {@link ZWAddress} objects. See {@link #getAddressList(ZWCoin, boolean)} for list of Address strings.
-	 */
-	public synchronized List<ZWAddress> readAllVisibleAddresses(ZWCoin coinId, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).readAllVisibleAddresses(coinId, getReadableDatabase(), receivingNotSending);
-	}
-
-	/**
-	 * As part of the R in CRUD, this method gives the number of entries
-	 * in the addresses table for the coin type specified and table boolean. 
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
-	 */
-	public synchronized int readNumAddresses(ZWCoin coinId, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).numEntries(coinId, getReadableDatabase());
-	}
-
 	/**
 	 * As part of the U in CRUD, this method updates the addresses table in 
 	 * the database for the given coin type and key and table boolean.
@@ -399,21 +340,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return address;
 	}
 
-	//////////////////////////////////////////////////////////
-	//////////  Helpful method for combining lists  //////////
-	//////////////////////////////////////////////////////////
-
-	/**
-	 * As part of the R in CRUD, this method gets all the known external (not 
-	 * owned) addresses from the database for the given coin type.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 */
-	public List<ZWAddress> readAllVisibleAddresses(ZWCoin coinId) {
-		List<ZWAddress> addresses = this.readAllVisibleAddresses(coinId, false);
-		addresses.addAll(this.readAllVisibleAddresses(coinId, true));
-		return addresses;
-	}
 
 	///////////////////////////////////////////////////////////
 	//////////  Interface for CRUDing transactions  ///////////
@@ -557,8 +483,16 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 
-	public synchronized ArrayList<String> getAddressList(ZWCoin coin, boolean receivingAddresses) {
-		ArrayList<String> addresses;
+	
+	
+	
+	
+
+	
+	
+	
+	public synchronized List<String> getAddressList(ZWCoin coin, boolean receivingAddresses) {
+		List<String> addresses;
 
 		if(receivingAddresses) {
 			addresses = this.receivingAddressesTable.getAddressesList(coin, getWritableDatabase());
@@ -569,4 +503,79 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return addresses;
 	}
 
+	
+	
+	/**
+	 * As part of the R in CRUD, this method gets an address from the 
+	 * database for the given coin type and table boolean. Returns null if
+	 * no such address is found
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 */
+	public synchronized ZWAddress getAddress(ZWCoin coinId, String address, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).getAddress(coinId, address, getReadableDatabase());
+	}
+
+	
+	/**
+	 * As part of the R in CRUD, this method gets an address from the 
+	 * database for the given coin type and table boolean.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 */
+	public synchronized List<ZWAddress> getAddresses(ZWCoin coinId, List<String> addresses, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).getAddresses(coinId, addresses, getReadableDatabase());
+	}
+	
+	
+	/**
+	 * gets all {@link ZWAddress} from the receiving table for the given coin
+	 * @param coin which coin to get addresses for
+	 * @param includeSpentFrom should "unsafe" addresses (which have previously been spent from) be included
+	 * @return a list of address objects
+	 */
+	public synchronized List<String> getHiddenAddressList(ZWCoin coin, boolean includeSpentFrom) {
+		return this.receivingAddressesTable.getHiddenAddresses(coin, getReadableDatabase(), true);
+	}
+
+	/**
+	 * As part of the R in CRUD, this method gets all the addresses from the 
+	 * database for the given coin type and table boolean.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 * @return List of {@link ZWAddress} objects. See {@link #getAddressList(ZWCoin, boolean)} for list of Address strings.
+	 */
+	public synchronized List<ZWAddress> getAllVisibleAddresses(ZWCoin coin) {
+		return this.receivingAddressesTable.getAllVisibleAddresses(coin, getReadableDatabase());
+	}
+	
+	
+	public synchronized List<ZWAddress> getAllSendAddresses(ZWCoin coin) {
+		return this.sendingAddressesTable.getAllAddresses(coin, getReadableDatabase());
+	}
+	
+
+	/**
+	 * As part of the R in CRUD, this method gives the number of entries
+	 * in the addresses table for the coin type specified and table boolean. 
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
+	 */
+	public synchronized int getNumAddresses(ZWCoin coinId, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).numEntries(coinId, getReadableDatabase());
+	}
+
+	
+	
+	
 }
+
+
+
+

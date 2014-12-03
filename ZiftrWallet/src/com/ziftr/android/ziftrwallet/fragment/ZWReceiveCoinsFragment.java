@@ -106,7 +106,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		} else if (v == this.qrCodeImageView) {
 			this.conditionallyGenerateNewAddress(true);
 		} else if (v == this.getAddressBookImageView()) {
-			this.openAddressBook(true, R.id.receiveCoinBaseFrameLayout);
+			this.openAddressBook(new ZWReceiveAddressBookFragment(), R.id.receiveCoinBaseFrameLayout);
 		} else if (v == this.generateAddressForLabel) {
 			this.conditionallyGenerateNewAddress(false);
 		} else if (v == this.helpButton){

@@ -31,7 +31,7 @@ public class ZWDataSyncHelper {
 		ZiftrNetworkManager.networkStarted();
 		
 		//find (or create) an address for change that hasn't been spent from
-		List<ZWAddress> changeAddresses = ZWWalletManager.getInstance().readHiddenUnspentAddresses(coin);
+		List<String> changeAddresses = ZWWalletManager.getInstance().getHiddenAddressList(coin, false);
 		String refundAddress;
 		if (changeAddresses.size() <= 0){
 			//create new address for change
@@ -39,7 +39,7 @@ public class ZWDataSyncHelper {
 			ZLog.log(refundAddress);
 		} else {
 			//or reuse one that hasnt been spent from
-			refundAddress = changeAddresses.get(0).getAddress();
+			refundAddress = changeAddresses.get(0);
 		}
 		
 		JSONObject spendJson = buildSpendPostData(inputs, output, amount, fee.toString(), refundAddress);
@@ -205,7 +205,7 @@ public class ZWDataSyncHelper {
 
 
 	public static void updateTransactionHistory(ZWCoin coin) {
-		ArrayList<String> addresses = ZWWalletManager.getInstance().getAddressList(coin, true);
+		List<String> addresses = ZWWalletManager.getInstance().getAddressList(coin, true);
 		if (addresses.size() <= 0){
 			ZLog.log("No addresses to get transaction history for");
 			return;
@@ -265,11 +265,8 @@ public class ZWDataSyncHelper {
 		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs
 		long confirmations = json.optLong("confirmations");
 		ArrayList<ZWAddress> displayAddresses = new ArrayList<ZWAddress>();
-		ArrayList<String> myHiddenAddresses = new ArrayList<String>();
-		
-		for (ZWAddress addr : ZWWalletManager.getInstance().readHiddenAddresses(coin)){
-			myHiddenAddresses.add(addr.getAddress());
-		}
+
+		List<String> myHiddenAddresses = ZWWalletManager.getInstance().getHiddenAddressList(coin, true);
 
 		JSONArray inputs = json.getJSONArray("vin");
 		JSONArray outputs = json.getJSONArray("vout");
@@ -322,7 +319,7 @@ public class ZWDataSyncHelper {
 						value = value.add(outputValueInt);
 					}
 					//add the receiving address to the display
-					ZWAddress receivedOn = ZWWalletManager.getInstance().readAddress(coin, outputAddress,true);
+					ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
 					if (receivedOn != null && !myHiddenAddresses.contains(receivedOn) && !displayAddresses.contains(receivedOn)){
 						displayAddresses.add(receivedOn);
 					}
@@ -332,7 +329,7 @@ public class ZWDataSyncHelper {
 				JSONArray addressesSentTo = outputs.optJSONObject(y).getJSONObject("scriptPubKey").getJSONArray("addresses");
 				for(int z = 0; z < addressesSentTo.length(); z++) {
 					String sentToAddr = addressesSentTo.getString(z);
-					ZWAddress sentTo = ZWWalletManager.getInstance().readAddress(coin, sentToAddr, false);
+					ZWAddress sentTo = ZWWalletManager.getInstance().getAddress(coin, sentToAddr, false);
 					if (sentTo != null && !myHiddenAddresses.contains(sentToAddr) && !displayAddresses.contains(sentTo)){
 						displayAddresses.add(sentTo);
 					}

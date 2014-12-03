@@ -69,7 +69,7 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 
 
 	
-	protected ZWAddress readAddress(ZWCoin coinId, String address, SQLiteDatabase db, boolean receivingNotSending) {
+	protected ZWAddress getAddress(ZWCoin coinId, String address, SQLiteDatabase db) {
 	
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
@@ -108,67 +108,75 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 	 * Gets a list of addresses from the database. If addresses is null 
 	 * then it gets all addresses from the database. 
 	 * 
-	 * @param coinId
+	 * @param coin
 	 * @param addresses
 	 * @param db
 	 * @param receivingNotSending true
 	 * @return
 	 */
-	protected List<ZWAddress> readAddresses(ZWCoin coinId, List<String> addresses, SQLiteDatabase db, boolean receivingNotSending) {
+	protected List<ZWAddress> getAddresses(ZWCoin coin, List<String> addresses, SQLiteDatabase db) {
 
+		if(addresses == null || addresses.size() == 0) {
+			ZLog.log("Trying to get addresses with specifiying public keys. Returning all addresses");
+			return getAllAddresses(coin, db);
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
-		sb.append(getTableName(coinId));
+		sb.append(getTableName(coin));
 		
-		if (addresses != null) {
-			sb.append(" WHERE ");
-			sb.append(COLUMN_ADDRESS);
-			sb.append(" IN (");
-			for (int i = 0; i < addresses.size(); i++) {
-				sb.append(DatabaseUtils.sqlEscapeString(addresses.get(i)));
-				if (i != (addresses.size() - 1)) {
-					sb.append(",");
-				} else {
-					sb.append(")");
-				}
+		sb.append(" WHERE ");
+		sb.append(COLUMN_ADDRESS);
+		sb.append(" IN (");
+		for (int i = 0; i < addresses.size(); i++) {
+			sb.append(DatabaseUtils.sqlEscapeString(addresses.get(i)));
+			if (i != (addresses.size() - 1)) {
+				sb.append(",");
+			} else {
+				sb.append(")");
 			}
-		} 
-		else if (receivingNotSending) {
+		}
+	 
+		//TODO -i think this is just not true, we also need to stop passing around this boolean which is essentially a type variable
+		/*
+		if(receivingNotSending) {
 			//if addresses array is null and we ask for receiving addresses then assume we want all visible addresses only
 			sb.append(" WHERE " + ZWReceivingAddressesTable.COLUMN_HIDDEN + " = " + ZWReceivingAddressesTable.VISIBLE_TO_USER);
 		}
+		*/
 
 		sb.append(";");
 		String toQuery = sb.toString();
-		Cursor c = db.rawQuery(toQuery, null);
+		Cursor cursor = db.rawQuery(toQuery, null);
 		
-		List<ZWAddress> newAddresses = new ArrayList<ZWAddress>();
-
-		// Move to first returns false if cursor is empty
-		if (c.moveToFirst()) {
-			// Recreate key from stored private key
-			try {
-				do {
-					// TODO deal with encryption of private key
-					newAddresses.add(cursorToAddress(coinId, c));
-				} while (c.moveToNext());
-			} catch (ZWAddressFormatException afe) {
-				ZLog.log("Error loading address from ", coinId.toString(), 
-						" receiving addresses database.");
-				afe.printStackTrace();
-			}
-		}
-		
-		// Make sure we close the cursor
-		c.close();
+		List<ZWAddress> newAddresses = this.readAddresses(coin, cursor);
 
 		return newAddresses;
 	}
 
-	protected List<ZWAddress> readAllVisibleAddresses(ZWCoin coinId, SQLiteDatabase db, boolean receivingNotSending) {
-		return this.readAddresses(coinId, null, db, receivingNotSending);
+	
+	protected List<ZWAddress> getAllAddresses(ZWCoin coin, SQLiteDatabase db) {
+		String sql = "SELECT * FROM " + getTableName(coin);
+		Cursor cursor = db.rawQuery(sql, null);
+		return this.readAddresses(coin, cursor);
 	}
 
+	
+	/**
+	 * returns a list of Strings of all addresses for the given coin
+	 * @param coin
+	 * @param db
+	 * @return
+	 */
+	protected List<String> getAddressesList(ZWCoin coin, SQLiteDatabase db) {
+		
+		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin);
+		Cursor cursor = db.rawQuery(sql, null);
+		
+		return this.readAddressList(coin, cursor);
+	}
+	
+	
 	protected void updateAddress(ZWAddress address, SQLiteDatabase db) {
 		ContentValues values = addressToContentValues(address);
 		String whereClause = COLUMN_ID + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
@@ -182,29 +190,60 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address);
 		db.update(getTableName(coin), values, whereClause, null);
 	}
+
+
+
+	
 	
 	/**
-	 * 
-	 * @param coin
-	 * @param db
-	 * @return
+	 * reads through the cursor and creates {@link ZWAddress} from contents,
+	 * closes cursor when done
+	 * @param coin which coin the cursor is for
+	 * @param cursor a cursor with data that can be converted to addresses
+	 * @return a {@link List} of {@link ZWAddress} objects
 	 */
-	protected ArrayList<String> getAddressesList(ZWCoin coin, SQLiteDatabase db) {
+	protected List<ZWAddress> readAddresses(ZWCoin coin, Cursor cursor) {
+		ArrayList<ZWAddress> addresses = new ArrayList<ZWAddress>();
 		
-		ArrayList<String> addresses = new ArrayList<String>();
-		
-		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin);
-		Cursor cursor = db.rawQuery(sql, null);
-		if(cursor.moveToFirst()) {
+		if(cursor != null && cursor.moveToFirst()) {
 			do {
-				addresses.add(cursor.getString(0));
+				try {
+					ZWAddress address = this.cursorToAddress(coin, cursor);
+					addresses.add(address);
+				}
+				catch (ZWAddressFormatException e) {
+					ZLog.log("Exception trying to Address from cursor: ", e);
+				}
 			}
-			while (cursor.moveToNext());
+			while(cursor.moveToNext());
 		}
+		
+		cursor.close();
 		
 		return addresses;
 	}
 	
 	
+	/**
+	 * reads through the cursor and pulls out public addresses, assumes address is string in first column of cursor,
+	 * closes cursor when done
+	 * @param coin which coin this cursor is for
+	 * @param cursor a cursor with address strings in the first column
+	 * @return a list of public address strings from the cursor
+	 */
+	protected List<String> readAddressList(ZWCoin coin, Cursor cursor) {
+		ArrayList<String> addresses = new ArrayList<String>();
+		
+		if(cursor != null && cursor.moveToFirst()) {
+			do {
+				addresses.add(cursor.getString(0));
+			}
+			while (cursor.moveToNext());
+		}
+		cursor.close();
+		
+		return addresses;
+	}
 
+	
 }

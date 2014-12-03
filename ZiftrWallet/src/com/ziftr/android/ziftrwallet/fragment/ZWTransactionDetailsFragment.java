@@ -329,7 +329,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 			} else {
 				//received on this address
 				try {
-					ZWAddress address = getWalletManager().readAddress(txItem.getCoinId(), txItem.getDisplayAddresses().get(0), true);
+					ZWAddress address = getWalletManager().getAddress(txItem.getCoinId(), txItem.getDisplayAddresses().get(0), true);
 					getZWMainActivity().openReceiveCoinsView(address);
 				} catch (Exception e) {
 					ZLog.log("Error trying to get ZWAddress from display address  " + e);
