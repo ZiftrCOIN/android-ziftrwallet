@@ -43,7 +43,7 @@ public class ZWSendingAddressesTable extends ZWAddressesTable {
 	@Override
 	protected ContentValues addressToContentValues(ZWAddress address) {
 		ContentValues values = new ContentValues();
-		values.put(COLUMN_ADDRESS, address.toString());
+		values.put(COLUMN_ADDRESS, address.getAddress());
 		values.put(COLUMN_LABEL, address.getLabel());
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());

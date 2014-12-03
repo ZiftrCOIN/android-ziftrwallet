@@ -30,9 +30,6 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  */
 public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
-	/** Following the standard, we name our wallet file as below. */
-	public static final String DATABASE_NAME = "wallet.dat";
-
 	/** The current database version, may change in later versions of app. */
 	public static final int DATABASE_VERSION = 1;
 
@@ -190,8 +187,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
-	protected ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, int hidden) {
-		return createReceivingAddress(crypter, coinId, "", hidden);
+	protected ZWAddress createChangeAddress(ZWKeyCrypter crypter, ZWCoin coinId) {
+		return createReceivingAddress(crypter, coinId, "", ZWReceivingAddressesTable.HIDDEN_FROM_USER);
 	}
 
 	/**

@@ -247,7 +247,7 @@ public class ZWCoinURI {
 	}
 
 	public static String convertToCoinURI(ZWAddress address, BigInteger amount, String label, String message) {
-		return convertToCoinURI(address.getCoinId(), address.toString(), amount, label, message);
+		return convertToCoinURI(address.getCoinId(), address.getAddress(), amount, label, message);
 	}
 
 	/**
