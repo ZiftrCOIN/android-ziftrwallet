@@ -81,7 +81,7 @@ public class ZWDataSyncHelper {
 	
 	
 	private static String signSentCoins(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
-		Set<ZWAddress> addressesSpentFrom = new HashSet<ZWAddress>();
+		Set<String> addressesSpentFrom = new HashSet<String>();
 		ZLog.log("signSentCoins called");
 		try {
 			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
@@ -89,7 +89,7 @@ public class ZWDataSyncHelper {
 				JSONObject toSign = toSignList.getJSONObject(i);
 	
 				String signingAddressPublic = toSign.optString("address");
-				addressesSpentFrom.add(ZWWalletManager.getInstance().getAddress(coin, signingAddressPublic, true));
+				addressesSpentFrom.add(signingAddressPublic);
 				
 				ZLog.log("Signing a transaction with address: ", signingAddressPublic);
 				
@@ -124,10 +124,11 @@ public class ZWDataSyncHelper {
 				if (addressesSpentFrom.size() <= 0){
 					ZLog.log("addresses we spent from weren't in our db ERROR!");
 				} else {
-					for (ZWAddress addr : addressesSpentFrom){
-						ZLog.log(addr.toString() + "changed to spent");
-						addr.setSpentFrom(ZWReceivingAddressesTable.SPENT_FROM);
-						ZWWalletManager.getInstance().updateAddress(addr);
+					for (String addr : addressesSpentFrom){
+						ZLog.log(addr + "changed to spent");
+						ZWAddress ZWaddr =ZWWalletManager.getInstance().getAddress(coin, addr, true);
+						ZWaddr.setSpentFrom(ZWReceivingAddressesTable.SPENT_FROM);
+						ZWWalletManager.getInstance().updateAddress(ZWaddr);
 					}
 				}
 				//TODO -this is so in-efficient, but for now, just update transaction history again
@@ -273,6 +274,8 @@ public class ZWDataSyncHelper {
 			//so just use the current time
 			time = System.currentTimeMillis() / 1000; //server sends us seconds, so our hold over time should be formatted the same way
 		}
+		time = time * 1000;
+
 		//TODO -just setting this as zero for now, need to either get server to send this, or calculate it
 		//BigInteger fees = new BigInteger(json.getString("fee"));
 		BigInteger fees = new BigInteger("0");
@@ -285,7 +288,7 @@ public class ZWDataSyncHelper {
 
 		JSONArray inputs = json.getJSONArray("vin");
 		JSONArray outputs = json.getJSONArray("vout");
-
+		
 		for(int x = 0; x < inputs.length(); x++) {
 			JSONObject input = inputs.getJSONObject(x);
 			
@@ -311,6 +314,13 @@ public class ZWDataSyncHelper {
 								usedValue = true;
 								BigInteger outputValueInt = new BigInteger(outputValue);
 								value = value.subtract(outputValueInt);
+								
+								ZWAddress sentFrom = ZWWalletManager.getInstance().getAddress(coin, inputAddress,true);
+								if (sentFrom != null){ 
+									sentFrom.setLastKnownBalance(sentFrom.getLastKnownBalance() - outputValueInt.longValue());
+									sentFrom.setLastTimeModifiedSeconds(time);
+									ZWWalletManager.getInstance().updateAddress(sentFrom);
+								}
 							}
 						}
 					}//end for y
@@ -332,20 +342,26 @@ public class ZWDataSyncHelper {
 						//value.add(new BigInteger(outputValue));
 						BigInteger outputValueInt = new BigInteger(outputValue); 
 						value = value.add(outputValueInt);
-					}
-					//add the receiving address to the display
-					ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
-					if (receivedOn != null && !myHiddenAddresses.contains(receivedOn) && !displayAddresses.contains(receivedOn)){
-						displayAddresses.add(receivedOn);
+						
+						//add the receiving address to the display if not hidden and update balance
+						ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
+						if (receivedOn != null){ 
+							if (!myHiddenAddresses.contains(outputAddress)){
+								displayAddresses.add(receivedOn);
+							}
+							receivedOn.setLastKnownBalance(receivedOn.getLastKnownBalance() + outputValueInt.longValue());
+							receivedOn.setLastTimeModifiedSeconds(time);
+							ZWWalletManager.getInstance().updateAddress(receivedOn);
+
+						}
 					}
 				}
-				
 				//if this was a sent transaction get the address we sent to for displaying
 				JSONArray addressesSentTo = outputs.optJSONObject(y).getJSONObject("scriptPubKey").getJSONArray("addresses");
 				for(int z = 0; z < addressesSentTo.length(); z++) {
 					String sentToAddr = addressesSentTo.getString(z);
 					ZWAddress sentTo = ZWWalletManager.getInstance().getAddress(coin, sentToAddr, false);
-					if (sentTo != null && !myHiddenAddresses.contains(sentToAddr) && !displayAddresses.contains(sentTo)){
+					if (sentTo != null && !myHiddenAddresses.contains(sentToAddr)){
 						displayAddresses.add(sentTo);
 					}
 				}
@@ -355,7 +371,7 @@ public class ZWDataSyncHelper {
 		//pick an address to use for displaying the note to the user
 		String note = ""; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		
-		ArrayList<String> displayAddressesString = new ArrayList<String>();
+		Set<String> displayAddressesString = new HashSet<String>();
 
 		for(ZWAddress addr : displayAddresses) {
 			displayAddressesString.add(addr.getAddress());
@@ -363,8 +379,7 @@ public class ZWDataSyncHelper {
 				note = addr.getLabel();
 				}
 			}
-		time = time * 1000;
-		ZWTransaction transaction = ZWWalletManager.getInstance().createTransaction(coin, value, fees, displayAddressesString, new ZWSha256Hash(hash), note, confirmations, time);
+		ZWTransaction transaction = ZWWalletManager.getInstance().createTransaction(coin, value, fees, new ArrayList<String>(displayAddressesString), new ZWSha256Hash(hash), note, confirmations, time);
 
 		return transaction;
 	}

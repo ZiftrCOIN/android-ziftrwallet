@@ -376,5 +376,5 @@ public class ZWAddress implements ZWSearchableListItem {
 				Locale.ENGLISH).contains(constraint.toString().toLowerCase());
 		return addressMatches || labelMatches;
 	}
-
+	
 }

@@ -179,8 +179,7 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 	
 	protected void updateAddress(ZWAddress address, SQLiteDatabase db) {
 		ContentValues values = addressToContentValues(address);
-		String whereClause = COLUMN_ID + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
-		
+		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
 		db.update(getTableName(address.getCoinId()), values, whereClause, null);
 	}
 

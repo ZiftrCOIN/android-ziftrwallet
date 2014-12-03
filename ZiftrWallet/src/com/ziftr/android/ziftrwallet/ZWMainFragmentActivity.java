@@ -76,6 +76,7 @@ import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -347,8 +348,8 @@ ZiftrNetworkHandler {
 				}
 			}
 		}
-		
 
+	
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 	public void onNewIntent(Intent intent){
