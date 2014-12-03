@@ -125,9 +125,9 @@ public class ZWDataSyncHelper {
 				} else {
 					for (String addr : addressesSpentFrom){
 						ZLog.log(addr + "changed to spent");
-						ZWAddress ZWaddr =ZWWalletManager.getInstance().getAddress(coin, addr, true);
-						ZWaddr.setSpentFrom(ZWReceivingAddressesTable.SPENT_FROM);
-						ZWWalletManager.getInstance().updateAddress(ZWaddr);
+						ZWAddress address = ZWWalletManager.getInstance().getAddress(coin, addr, true);
+						address.setSpentFrom(true);
+						ZWWalletManager.getInstance().updateAddress(address);
 					}
 				}
 				//TODO -this is so in-efficient, but for now, just update transaction history again

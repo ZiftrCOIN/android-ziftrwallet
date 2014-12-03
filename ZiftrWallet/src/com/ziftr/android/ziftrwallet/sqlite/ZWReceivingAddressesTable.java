@@ -82,6 +82,8 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		newAddress.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
 		newAddress.getKey().setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
 		newAddress.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
+		newAddress.setHidden(c.getInt(c.getColumnIndex(COLUMN_HIDDEN)) != 0);
+		newAddress.setSpentFrom(c.getInt(c.getColumnIndex(COLUMN_SPENT_FROM)) != 0);
 		return newAddress;
 	}
 
@@ -99,7 +101,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getKey().getCreationTimeSeconds());
 		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());
 		values.put(COLUMN_HIDDEN, address.isHidden());
-		values.put(COLUMN_SPENT_FROM, address.spentFrom());
+		values.put(COLUMN_SPENT_FROM, address.isSpentFrom());
 		// The id will be generated upon insertion.
 		return values;
 	}

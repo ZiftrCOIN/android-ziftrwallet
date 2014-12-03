@@ -25,7 +25,6 @@ import android.annotation.SuppressLint;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWWrongNetworkException;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListItem;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -66,10 +65,10 @@ public class ZWAddress implements ZWSearchableListItem {
 	private long lastTimeModifiedSeconds;
 	
 	/** whether the address is hidden to the user */
-	private int hidden = ZWReceivingAddressesTable.SPENT_FROM;
+	private boolean hidden = false;
 	
 	/** whether the address has been spent from */
-	private int spent_from = ZWReceivingAddressesTable.UNSPENT_FROM;
+	private boolean spentFrom = false;
 
 	//////////////////////////////////////////////
 	//////////  Address Content Fields  //////////
@@ -207,20 +206,20 @@ public class ZWAddress implements ZWSearchableListItem {
 		lastTimeModifiedSeconds = System.currentTimeMillis() / 1000;
 	}
 
-	public int isHidden() {
+	public boolean isHidden() {
 		return hidden;
 	}
 
-	public void setHidden(int hidden) {
+	public void setHidden(boolean hidden) {
 		this.hidden = hidden;
 	}
 	
-	public int spentFrom(){
-		return this.spent_from;
+	public boolean isSpentFrom(){
+		return this.spentFrom;
 	}
 	
-	public void setSpentFrom(int spentFrom){
-		this.spent_from = spentFrom;
+	public void setSpentFrom(boolean spentFrom){
+		this.spentFrom = spentFrom;
 	}
 	
 	public ZWCoin getCoinId() {

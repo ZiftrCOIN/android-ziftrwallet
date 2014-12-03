@@ -15,7 +15,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
@@ -199,8 +198,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 * @return
 	 */
 	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, long balance, long creation, long modified) {
-		ZWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, 
-				modified, ZWReceivingAddressesTable.VISIBLE_TO_USER, ZWReceivingAddressesTable.UNSPENT_FROM);
+		ZWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified, true, false);
 		return addr;
 	}
 

@@ -188,7 +188,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	protected ZWAddress createChangeAddress(ZWKeyCrypter crypter, ZWCoin coinId) {
-		return createReceivingAddress(crypter, coinId, "", ZWReceivingAddressesTable.HIDDEN_FROM_USER);
+		return createReceivingAddress(crypter, coinId, "", true);
 	}
 
 	/**
@@ -200,9 +200,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param note - The note that the user associates with this address.
 	 */
-	protected ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, int hidden) {
+	protected ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, boolean isHidden) {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, note, 0, time, time, hidden, ZWReceivingAddressesTable.UNSPENT_FROM);
+		return createReceivingAddress(crypter, coinId, note, 0, time, time, isHidden, false);
 	}
 
 	/**
@@ -220,7 +220,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @return
 	 */
 	protected synchronized ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, 
-			long balance, long creation, long modified, int hidden, int spentFrom) {
+			long balance, long creation, long modified, boolean hidden, boolean spentFrom) {
 		ZWAddress address = new ZWAddress(coinId);
 		address.getKey().setKeyCrypter(crypter);
 		address.setLabel(note);
