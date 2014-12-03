@@ -74,7 +74,7 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> {
 				Bundle args = new Bundle();
 				args.putBoolean(ZWEditAddressLabelDialog.IS_RECEIVING_NOT_SENDING_KEY, address.isPersonalAddress());
 				args.putString(ZWEditAddressLabelDialog.CURRENT_ENTERED_TEXT_KEY, address.getLabel());
-				args.putString(ZWEditAddressLabelDialog.ADDRESS_KEY, address.toString());
+				args.putString(ZWEditAddressLabelDialog.ADDRESS_KEY, address.getAddress());
 				activity.showEditAddressLabelDialog(ZWRequestCodes.EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK, 
 						address.isPersonalAddress(), args, ZWTags.EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK);
 			}
@@ -87,7 +87,7 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> {
 		addressLabelTextView.setText(address.getLabel());
 
 		TextView formattedAddressTextView = (TextView) convertView.findViewById(R.id.bottomLeftTextView);
-		formattedAddressTextView.setText(address.toString());
+		formattedAddressTextView.setText(address.getAddress());
 
 		return convertView;
 	}

@@ -20,7 +20,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -37,7 +36,7 @@ public class ZWDataSyncHelper {
 		String refundAddress;
 		if (changeAddresses.size() <= 0){
 			//create new address for change
-			refundAddress = ZWWalletManager.getInstance().createReceivingAddress(passphrase, coin, ZWReceivingAddressesTable.HIDDEN_FROM_USER).toString();
+			refundAddress = ZWWalletManager.getInstance().createChangeAddress(passphrase, coin).getAddress();
 			ZLog.log(refundAddress);
 		} else {
 			//or reuse one that hasnt been spent from

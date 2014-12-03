@@ -8,7 +8,7 @@ import java.util.Map;
 
 import javax.crypto.SecretKey;
 
-import android.content.Context;
+import android.app.Application;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
@@ -35,14 +35,11 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  */
 public class ZWWalletManager extends ZWSQLiteOpenHelper {
 
-	/** The map which holds all of the wallets. */
-	//private Map<ZWCoin, Wallet> walletMap = new HashMap<ZWCoin, Wallet>();
-
 	/** The wallet files for each of the coin types. */
 	private Map<ZWCoin, File> walletFiles = new HashMap<ZWCoin, File>();
-
-	//the application context
-	private Context context;
+	
+	/** Following the standard, we name our wallet file as below. */
+	public static final String DATABASE_NAME = "wallet.dat";
 
 	///////////////////////////////////////////////////////
 	//////////  Static Singleton Access Members ///////////
@@ -65,11 +62,11 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 
 	public static synchronized ZWWalletManager getInstance() {
 		if (instance == null) {
-			Context context = ZWApplication.getApplication();
+			Application applicationContext = ZWApplication.getApplication();
 
 			// Here we build the path for the first time if have not yet already
 			if (databasePath == null) {
-				File externalDirectory = context.getExternalFilesDir(null);
+				File externalDirectory = applicationContext.getExternalFilesDir(null);
 				if (externalDirectory != null) {
 					databasePath = new File(externalDirectory, DATABASE_NAME).getAbsolutePath();
 				} else {
@@ -81,7 +78,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 				}
 			}
 
-			instance = new ZWWalletManager(context);
+			instance = new ZWWalletManager(applicationContext);
 		}
 		return instance;
 	}
@@ -105,11 +102,10 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 * Make a new manager. This context should be cleared and then re-added when
 	 * saving and bringing back the wallet manager. 
 	 */
-	private ZWWalletManager(Context context) {
-		// Making the wallet manager opens up a connection with the database.
-
+	private ZWWalletManager(Application context) {
+		
+		// super constructor opens up a connection with the database.
 		super(context, databasePath);
-		this.context = context;
 	}
 
 	/**
@@ -165,7 +161,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 		this.walletFiles.put(id, null);
 
 		// This is application specific storage, will be deleted when app is uninstalled.
-		File externalDirectory = this.context.getExternalFilesDir(null);
+		File externalDirectory = ZWApplication.getApplication().getExternalFilesDir(null);
 		if (externalDirectory != null) {
 			this.walletFiles.put(id, new File(
 					externalDirectory, id.getShortTitle() + "_wallet.dat"));
@@ -185,25 +181,24 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 
 	
 	
-	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, int hidden) {
-		return super.createReceivingAddress(this.passphraseToCrypter(passphrase), coinId, hidden);
+	public ZWAddress createChangeAddress(String passphrase, ZWCoin coinId) {
+		return super.createChangeAddress(this.passphraseToCrypter(passphrase), coinId);
 	}
-	
-	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, int hidden) {
-		return super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, hidden);
-	}
+
 	
 	/**
-	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
-	 * address to the correct table within our database.
+	 * this method creates a receiving (owned by the user) {@link ZWAddress} object and adds it 
+	 * to the correct table within our database
 	 * 
-	 * Temporarily, we need to make the address and tell bitcoinj about it.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param key - The key to use.
+	 * @param passphrase
+	 * @param coinId
+	 * @param note
+	 * @param balance
+	 * @param creation
+	 * @param modified
+	 * @return
 	 */
-	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, 
-			long balance, long creation, long modified) {
+	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, long balance, long creation, long modified) {
 		ZWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, 
 				modified, ZWReceivingAddressesTable.VISIBLE_TO_USER, ZWReceivingAddressesTable.UNSPENT_FROM);
 		return addr;

@@ -304,7 +304,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 				ZWReceiveCoinsFragment.this.getZWMainActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						String newAddress = address.toString();
+						String newAddress = address.getAddress();
 						addressEditText.setText(newAddress);
 						updateAddressLabelInDatabase();
 						generateQrCode(true);
