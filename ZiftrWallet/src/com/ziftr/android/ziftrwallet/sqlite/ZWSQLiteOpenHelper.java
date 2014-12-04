@@ -449,9 +449,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.updateTransactionNote(tx, getWritableDatabase());
 	}
 
-
-	
-	
 	public synchronized List<String> getAddressList(ZWCoin coin, boolean receivingAddresses) {
 		List<String> addresses;
 
@@ -463,8 +460,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		}
 		return addresses;
 	}
-
-	
 	
 	/**
 	 * As part of the R in CRUD, this method gets an address from the 

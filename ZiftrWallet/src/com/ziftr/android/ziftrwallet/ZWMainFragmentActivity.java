@@ -347,8 +347,6 @@ ZiftrNetworkHandler {
 				}
 			}
 		}
-
-	
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 	public void onNewIntent(Intent intent){

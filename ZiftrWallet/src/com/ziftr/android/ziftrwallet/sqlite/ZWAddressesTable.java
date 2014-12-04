@@ -175,7 +175,6 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 		return this.readAddressList(coin, cursor);
 	}
 	
-	
 	protected void updateAddress(ZWAddress address, SQLiteDatabase db) {
 		ContentValues values = addressToContentValues(address);
 		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
@@ -189,10 +188,6 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 		db.update(getTableName(coin), values, whereClause, null);
 	}
 
-
-
-	
-	
 	/**
 	 * reads through the cursor and creates {@link ZWAddress} from contents,
 	 * closes cursor when done
