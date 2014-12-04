@@ -100,7 +100,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView txTitleTextView = (TextView) convertView.findViewById(R.id.txTitle);
-			txTitleTextView.setText(txListItem.getTxNote());
+			txTitleTextView.setText(txListItem.getNote());
 
 			TextView txTimeTextView = (TextView) convertView.findViewById(R.id.txTime);
 			// TODO we will continue using the seconds value for now. Is this right, though?
@@ -108,15 +108,15 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 			txTimeTextView.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 
 			TextView txAmount = (TextView) convertView.findViewById(R.id.txAmount);
-			String amt = txListItem.getCoinId().getFormattedAmount(txListItem.getTxAmount());
+			String amt = txListItem.getCoin().getFormattedAmount(txListItem.getAmount());
 			txAmount.setText(amt);
 
 			ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
 			
 			TextView txAmountFiatEquiv = (TextView) 
 					convertView.findViewById(R.id.txAmountFiatEquiv);
-			BigInteger fiatAmt = ZWConverter.convert(txListItem.getTxAmount(), 
-					txListItem.getCoinId(), fiat);
+			BigInteger fiatAmt = ZWConverter.convert(txListItem.getAmount(), 
+					txListItem.getCoin(), fiat);
 			
 			txAmountFiatEquiv.setText(fiat.getFormattedAmount(fiatAmt, true));
 
@@ -129,7 +129,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 				txTimeTextView.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
 				txAmount.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
 				txAmountFiatEquiv.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
-			} else if (txListItem.getTxAmount().compareTo(BigInteger.ZERO) >= 0){
+			} else if (txListItem.getAmount().compareTo(BigInteger.ZERO) >= 0){
 				txTitleTextView.setTextColor(this.getContext().getResources().getColor(R.color.Black));
 				txTimeTextView.setTextColor(this.getContext().getResources().getColor(R.color.Black));
 				txAmount.setTextColor(this.getContext().getResources().getColor(R.color.Green));
@@ -162,7 +162,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 	 */
 	private int getImgResIdForItem(ZWTransaction txListItem) {
 		int imgResId;
-		if (txListItem.getTxAmount().compareTo(BigInteger.ZERO) >= 0) {
+		if (txListItem.getAmount().compareTo(BigInteger.ZERO) >= 0) {
 			// This means the tx is received (relative to user)
 			if (txListItem.isPending()) {
 				imgResId = R.drawable.received_pending_enabled;

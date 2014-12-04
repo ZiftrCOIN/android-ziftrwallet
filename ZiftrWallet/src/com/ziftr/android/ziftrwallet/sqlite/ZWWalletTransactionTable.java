@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
@@ -57,13 +56,7 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	 */
 	public static final String COLUMN_DISPLAY_ADDRESSES = "display_addresses";
 
-	private ZWAddressesTable sendingAddressesTable;
-	private ZWAddressesTable receivingAddressesTable;
-
-	protected ZWWalletTransactionTable(ZWAddressesTable sendingAddressesTable,
-			ZWAddressesTable receivingAddressesTable) {
-		this.sendingAddressesTable = sendingAddressesTable;
-		this.receivingAddressesTable = receivingAddressesTable;
+	protected ZWWalletTransactionTable() {
 
 	}
 
@@ -87,17 +80,27 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 		return sb.toString();
 	}
 
-	protected void insertTx(ZWTransaction tx, SQLiteDatabase db) {
-		db.insert(getTableName(tx.getCoinId()), null, txToContentValues(tx));
+	protected void addTransaction(ZWTransaction transaction, SQLiteDatabase db) {
+		
+		StringBuilder sqlBuilder = new StringBuilder("INSERT OR IGNORE INTO ");
+		sqlBuilder.append(getTableName(transaction.getCoin())).append("(").append(COLUMN_HASH);
+		sqlBuilder.append(") VALUES (").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash()));
+		sqlBuilder.append("); ");
+		
+		sqlBuilder.append(" UPDATE ").append(getTableName(transaction.getCoin())).append(" SET ");
+		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString()).append(", ");
+		sqlBuilder.append(COLUMN_FEE).append(" = ").append(transaction.getFee().toString()).append(", ");
+		sqlBuilder.append(COLUMN_NOTE).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getNote())).append(", ");
+		sqlBuilder.append(COLUMN_NUM_CONFIRMATIONS).append(" = ").append(transaction.getConfirmationCount()).append(", ");
+		sqlBuilder.append(COLUMN_CREATION_TIMESTAMP).append(" = ").append(transaction.getTxTime()).append(", ");
+		sqlBuilder.append(COLUMN_DISPLAY_ADDRESSES).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getAddressAsCommaListString()));
+		
+		sqlBuilder.append(" WHERE ").append(COLUMN_HASH).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash()));
+		
+		db.compileStatement(sqlBuilder.toString()).execute();
+		
 	}
 
-	//	protected void updateNumConfirmationsOrInsert(ZWTransaction tx, SQLiteDatabase db) {
-	//		try {
-	//			updateTransactionNumConfirmations(tx, db);
-	//		} catch(ZWNoTransactionFoundException ntfe) {
-	//			this.insertTx(tx, db);
-	//		}
-	//	}
 
 	protected ZWTransaction readTransactionByHash(ZWCoin coinId, String hash, SQLiteDatabase db) {
 		if (hash == null) {
@@ -254,7 +257,7 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	protected void updateTransaction(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
 		try {
 			ContentValues values = txToContentValues(tx);
-			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
+			int numUpdated = db.update(getTableName(tx.getCoin()), values, 
 					getWhereClaus(tx), null);
 			if (numUpdated == 0) {
 				// Will happen when we try to do an update but not in there. 
@@ -269,9 +272,9 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	protected void updateTransactionNumConfirmations(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
 		try {
 			ContentValues values = new ContentValues();
-			values.put(COLUMN_NUM_CONFIRMATIONS, tx.getNumConfirmations());
+			values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
 			ZLog.log("Updating transaction confirmations with:  " + getWhereClaus(tx));
-			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
+			int numUpdated = db.update(getTableName(tx.getCoin()), values, 
 					getWhereClaus(tx), null);
 
 			if (numUpdated == 0) {
@@ -287,9 +290,9 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	protected void updateTransactionNote(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
 		try {
 			ContentValues values = new ContentValues();
-			values.put(COLUMN_NOTE, tx.getTxNote());
+			values.put(COLUMN_NOTE, tx.getNote());
 			ZLog.log("Updating transaction note with:  " + getWhereClaus(tx));
-			int numUpdated = db.update(getTableName(tx.getCoinId()), values, 
+			int numUpdated = db.update(getTableName(tx.getCoin()), values, 
 					getWhereClaus(tx), null);
 
 			if (numUpdated == 0) {
@@ -304,29 +307,28 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 
 	protected void deleteTransaction(ZWTransaction tx, SQLiteDatabase db) {
 
-		db.delete(getTableName(tx.getCoinId()), getWhereClaus(tx), null);
+		db.delete(getTableName(tx.getCoin()), getWhereClaus(tx), null);
 	}
 
-	private ZWTransaction cursorToTransaction(ZWCoin coinId, Cursor c,
-			SQLiteDatabase db) {
-
-		ZWTransaction tx = new ZWTransaction(coinId,
-				c.getString(c.getColumnIndex(COLUMN_NOTE)), 
-				c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)), 
-				new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))) );
-
-		tx.setSha256Hash(new ZWSha256Hash(c.getString(c.getColumnIndex(COLUMN_HASH))));
-
-		tx.setTxFee(new BigInteger(c.getString(c.getColumnIndex(COLUMN_FEE))));
-
-		ZWAddressesTable correctTable = tx.getTxAmount().compareTo(BigInteger.ZERO) >= 0 ? 
-				this.receivingAddressesTable : this.sendingAddressesTable;
+	private ZWTransaction cursorToTransaction(ZWCoin coin, Cursor c, SQLiteDatabase db) {
 		
-		tx.setDisplayAddresses(this.parseDisplayAddresses(coinId, 
-				c.getString(c.getColumnIndex(COLUMN_DISPLAY_ADDRESSES)), db, correctTable));
+		String hash = c.getString(c.getColumnIndex(COLUMN_HASH));
+		ZWTransaction tx = new ZWTransaction(coin, hash);
 
-		tx.setNumConfirmations(c.getInt(c.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
+		tx.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
+		tx.setTxTime(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+		tx.setAmount(new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))));
+		tx.setFee(new BigInteger(c.getString(c.getColumnIndex(COLUMN_FEE))));
+		tx.setConfirmationCount(c.getInt(c.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
 
+		String addressesString = c.getString(c.getColumnIndex(COLUMN_DISPLAY_ADDRESSES));
+		List<String> addressList = new ArrayList<String>();
+		String[] addressArray = addressesString.split(",");
+		for (String address : addressArray) {
+			addressList.add(address);
+		}
+		tx.setDisplayAddresses(addressList);
+		
 		return tx;
 
 	}
@@ -334,46 +336,24 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	private ContentValues txToContentValues(ZWTransaction tx) {
 		ContentValues values = new ContentValues();
 
-		// values.put(COLUMN_ID, tx.getId());
-		values.put(COLUMN_HASH, tx.getSha256Hash().toString());
-		values.put(COLUMN_AMOUNT, tx.getTxAmount().toString());
-		values.put(COLUMN_FEE, tx.getTxFee().toString());
-		values.put(COLUMN_NOTE, tx.getTxNote());
+		values.put(COLUMN_HASH, tx.getSha256Hash());
+		values.put(COLUMN_AMOUNT, tx.getAmount().toString());
+		values.put(COLUMN_FEE, tx.getFee().toString());
+		values.put(COLUMN_NOTE, tx.getNote());
 		values.put(COLUMN_CREATION_TIMESTAMP, tx.getTxTime());
-		values.put(COLUMN_NUM_CONFIRMATIONS, tx.getNumConfirmations());
+		values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
 		values.put(COLUMN_DISPLAY_ADDRESSES, tx.getAddressAsCommaListString());
 
 		return values;
 	}
 
-	/**
-	 * When there are multiple display addresses, they have to be parsed.
-	 * Entries in table look like ,1xy...,1jH...,18f..., (note the beginning
-	 * and ending with commas). 
-	 * 
-	 * @param displayAddressesStr
-	 */
-	private List<String> parseDisplayAddresses(ZWCoin coinId, 
-			String displayAddressesStr, SQLiteDatabase db, ZWAddressesTable addressTable) {
-		if (displayAddressesStr == null || displayAddressesStr.trim().isEmpty()) {
-			return null;
-		} else {
-			String[] addressArr = displayAddressesStr.split(",");
-			List<String> displayAddresses = new ArrayList<String>();
-			for (String a : addressArr) {
-				displayAddresses.add(a);
-			}
-			return displayAddresses;
-		}
-
-	}
 
 	private String getWhereClaus(ZWTransaction tx) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(COLUMN_HASH);
 		sb.append(" = ");
-		sb.append(DatabaseUtils.sqlEscapeString(tx.getSha256Hash().toString()));
+		sb.append(DatabaseUtils.sqlEscapeString(tx.getSha256Hash()));
 		sb.append(" ");
 		
 		return sb.toString();

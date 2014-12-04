@@ -127,11 +127,11 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		this.populateAmount();
 		this.populateCurrency();
 		
-		String feeString = txItem.getCoinId().getFormattedAmount(txItem.getTxFee());
+		String feeString = txItem.getCoin().getFormattedAmount(txItem.getFee());
 		this.confirmationFee.setText(feeString);
 		
 		//TODO -big hack fix later, hardcoding fee display to default value until we can get the proper info from the server
-		feeString = txItem.getCoinId().getFormattedAmount(txItem.getCoinId().getDefaultFeePerKb());
+		feeString = txItem.getCoin().getFormattedAmount(txItem.getCoin().getDefaultFeePerKb());
 		this.confirmationFee.setText(feeString);
 		
 		
@@ -145,16 +145,16 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		this.populatePendingInformation();
 		this.reuseAddress.setOnClickListener(this);
 		ZWEditableTextBoxController<ZWTransaction> controller = new ZWEditableTextBoxController<ZWTransaction>(
-				this, labelEditText, editLabelButton, this.txItem.getTxNote(), txItem);
+				this, labelEditText, editLabelButton, this.txItem.getNote(), txItem);
 		editLabelButton.setOnClickListener(controller);
 		this.labelEditText.addTextChangedListener(controller);
 	}
 
 	private void populateAmount() {
-		BigInteger baseAmount = this.txItem.getTxAmount();
-		BigDecimal amountValue = txItem.getCoinId().getAmount(baseAmount); 
-		amount.setText(txItem.getCoinId().getFormattedAmount(amountValue));
-		if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
+		BigInteger baseAmount = this.txItem.getAmount();
+		BigDecimal amountValue = txItem.getCoin().getAmount(baseAmount); 
+		amount.setText(txItem.getCoin().getFormattedAmount(amountValue));
+		if (this.txItem.getAmount().compareTo(BigInteger.ZERO) < 0) {
 			// This means the tx is sent (relative to user)
 			this.amountLabel.setText("Amount Sent");
 			this.timeLabel.setText("Sent");
@@ -175,8 +175,8 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	private void populateCurrency() {
 		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
 		
-		BigInteger fiatAmt = ZWConverter.convert(txItem.getTxAmount(), 
-				txItem.getCoinId(), fiat);
+		BigInteger fiatAmt = ZWConverter.convert(txItem.getAmount(), 
+				txItem.getCoin(), fiat);
 		String formattedfiatAmt = fiat.getFormattedAmount(fiatAmt);
 
 		currency.setText(formattedfiatAmt);
@@ -206,8 +206,8 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	@SuppressLint("NewApi")  //we call getWindowManager().getDefaultDisplay().getSize(size); but only after checking we are a high enough api level
 	@SuppressWarnings("deprecation")
 	private void populatePendingInformation() {
-		int totalConfirmations = txItem.getCoinId().getNumRecommendedConfirmations();
-		long confirmed = txItem.getNumConfirmations();
+		int totalConfirmations = txItem.getCoin().getNumRecommendedConfirmations();
+		long confirmed = txItem.getConfirmationCount();
 		if (((int)confirmed) >= totalConfirmations){
 			this.status.setText("Confirmed");
 		} else {
@@ -227,7 +227,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		this.status.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
 		
 		if (confirmed < totalConfirmations && screenWidth > this.status.getMeasuredWidth() * 3){
-			long estimatedTime = txItem.getCoinId().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
+			long estimatedTime = txItem.getCoin().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
 			this.timeLeft.setText("ETC: " + formatEstimatedTime(estimatedTime));
 		}
 		//in theory a really old network, or a network with fast enough blocks, could have more blocks than an int can hold
@@ -287,7 +287,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		}
 		this.curEditState = state;
 		// TODO Auto-generated method stub
-		txItem.setTxNote(state.text);
+		txItem.setNote(state.text);
 		getWalletManager().updateTransactionNote(txItem);
 	}
 
@@ -323,13 +323,13 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	@Override
 	public void onClick(View v) {
 		if (v==this.reuseAddress){
-			if (this.txItem.getTxAmount().compareTo(BigInteger.ZERO) < 0) {
+			if (this.txItem.getAmount().compareTo(BigInteger.ZERO) < 0) {
 				//sent to this address
 				getZWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0), null);
 			} else {
 				//received on this address
 				try {
-					ZWAddress address = getWalletManager().getAddress(txItem.getCoinId(), txItem.getDisplayAddresses().get(0), true);
+					ZWAddress address = getWalletManager().getAddress(txItem.getCoin(), txItem.getDisplayAddresses().get(0), true);
 					getZWMainActivity().openReceiveCoinsView(address);
 				} catch (Exception e) {
 					ZLog.log("Error trying to get ZWAddress from display address  " + e);

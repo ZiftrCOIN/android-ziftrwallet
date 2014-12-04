@@ -1024,7 +1024,7 @@ ZiftrNetworkHandler {
 			fragToShow = new ZWTransactionDetailsFragment();
 		}
 		Bundle b= new Bundle();
-		b.putString(ZWTransactionDetailsFragment.TX_ITEM_HASH_KEY, txItem.getSha256Hash().toString());
+		b.putString(ZWTransactionDetailsFragment.TX_ITEM_HASH_KEY, txItem.getSha256Hash());
 		fragToShow.setArguments(b);
 		this.showFragment(fragToShow, ZWTags.TXN_DETAILS, R.id.oneWalletBaseFragmentHolder, true, 
 				ZWTags.ACCOUNTS_INNER);

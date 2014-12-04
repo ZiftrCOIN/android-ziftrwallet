@@ -13,7 +13,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
-import com.ziftr.android.ziftrwallet.crypto.ZWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -88,7 +87,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.sendingAddressesTable = new ZWSendingAddressesTable();
 		this.receivingAddressesTable = new ZWReceivingAddressesTable();
 		this.coinActivationTable = new ZWCoinActivationStatusTable();
-		this.transactionsTable = new ZWWalletTransactionTable(this.sendingAddressesTable, this.receivingAddressesTable);
+		this.transactionsTable = new ZWWalletTransactionTable();
 	}
 
 	@Override
@@ -349,34 +348,16 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	//////////  Interface for CRUDing transactions  ///////////
 	///////////////////////////////////////////////////////////
 
+	
 	/**
-	 * As part of the C in CRUD, this method adds a new transaction
-	 * to the correct table within our database.
-	 * 
-	 * Default values will be used in this method for the hahs, note, time, 
-	 * and numConfirmations.
-	 * 
-	 * @param coinId - The coin type to determine which table we use.
-	 * @param txAmount - See {@link ZWTransaction}
-	 * @param txFee- See {@link ZWTransaction}
-	 * @param displayAddress - See {@link ZWTransaction}
+	 * add the transaction to the local database,
+	 * does an insert if the transaction is new otherwise updates the existing transaction
+	 * @param transaction {@link ZWTransaction} to be inserted/updated in the database
 	 */
-	public synchronized ZWTransaction createTransaction(ZWCoin coinId, BigInteger txAmount,
-			BigInteger txFee, List<String> displayAddresses, ZWSha256Hash hash, 
-			String note, long numConfirmations, long timestamp) {
-		ZWTransaction tx = new ZWTransaction(coinId, note, timestamp / 1000, txAmount);
-		tx.setSha256Hash(hash);
-		tx.setDisplayAddresses(displayAddresses);
-		tx.setNumConfirmations(numConfirmations);
-		tx.setTxFee(txFee);
-		this.transactionsTable.insertTx(tx, getWritableDatabase());
-		return tx;
+	public synchronized void addTransaction(ZWTransaction transaction) {
+		this.transactionsTable.addTransaction(transaction, getWritableDatabase());
 	}
 
-	protected ZWTransaction createTransaction(ZWTransaction tx) {
-		this.transactionsTable.insertTx(tx, getWritableDatabase());
-		return tx;
-	}
 
 	public synchronized ZWTransaction readTransactionByHash(ZWCoin coinId, String hash) {
 		if (hash == null) {
@@ -446,11 +427,11 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		for (ZWTransaction tx : txs) {
 			if (bType == BalanceType.AVAILABLE) {
-				if (!tx.isPending() || tx.getTxAmount().compareTo(BigInteger.ZERO) == -1) {
-					balance = balance.add(tx.getTxAmount());
+				if (!tx.isPending() || tx.getAmount().compareTo(BigInteger.ZERO) == -1) {
+					balance = balance.add(tx.getAmount());
 				}
 			} else if (tx.isBroadcasted()) {
-				balance = balance.add(tx.getTxAmount());
+				balance = balance.add(tx.getAmount());
 			}
 		}
 		return balance;

@@ -1,11 +1,6 @@
 package com.ziftr.android.ziftrwallet.tests;
 
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -18,7 +13,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
@@ -27,7 +21,6 @@ import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWSha256Hash;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyListItem;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
@@ -208,6 +201,9 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	***/
 	
 
+	//this is another test for a method that no longer exists
+	//TODO -re-implement transaction creation test
+	/***
 	@UiThreadTest
 	public void testCreateTransaction(){
 		createWallet(ZWCoin.BTC);
@@ -222,6 +218,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		//There should be 1 more txn than numTxn + 2 dividers
 		assertEquals(numTxn+3, txns.getCount());
 	}
+	***/
 
 	private void createWallet(ZWCoin type){
 		//add wallet
@@ -229,6 +226,9 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		mActivity.addNewCurrency(coin);
 	}
 
+	
+	//not used
+	/***
 	private String randomishHexHash(){
 		StringBuilder sb = new StringBuilder();
 		Random r = new Random();
@@ -243,5 +243,6 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		}
 		return sb.toString();
 	}
+	****/
 
 }

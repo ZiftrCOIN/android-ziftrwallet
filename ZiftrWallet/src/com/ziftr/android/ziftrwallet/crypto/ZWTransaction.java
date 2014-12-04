@@ -27,7 +27,7 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 * The identifier of this transaciton in the network. 
 	 * This should be given after creation, in an update.
 	 */
-	private ZWSha256Hash sha256Hash;
+	private String sha256Hash;
 
 	/** 
 	 * The amount that the transaction caused the balance of this wallet to change by. 
@@ -73,39 +73,44 @@ public class ZWTransaction implements ZWSearchableListItem {
 	
 	// Viewing stuff
 
-	/** The currency's title. e.g. "Bitcoin". */
-	private ZWCoin coinId;
+	/** Which coin this transaction is for */
+	private ZWCoin coin;
 
 	// TODO figure out what really needs to be in this constructor.
-	public ZWTransaction(ZWCoin coinId,
-			String txNote, 
-			long txTime, 
-			BigInteger txAmount) {
-		this.setCoinId(coinId);
-		this.setTxNote(txNote);
-		this.setTxTime(txTime);
-		this.setTxAmount(txAmount);
+	/**
+	public ZWTransaction(ZWCoin coin, String txNote, long txTime, BigInteger txAmount) {
+		this.coin = coin;
+		this.txNote = txNote;
+		this.txTime = txTime;
+		this.txAmount = txAmount;
 	}
+	***/
 	
+	public ZWTransaction(ZWCoin coin, String sha256Hash) {
+		this.coin = coin;
+		this.sha256Hash = sha256Hash; 
+		
+	}
+
 	/**
 	 * @return the coinId
 	 */
-	public ZWCoin getCoinId() {
-		return coinId;
+	public ZWCoin getCoin() {
+		return coin;
 	}
 
 	/**
 	 * @param coinId the coinId to set
 	 */
-	public void setCoinId(ZWCoin coinId) {
-		this.coinId = coinId;
+	public void setCoin(ZWCoin coin) {
+		this.coin = coin;
 	}
 
 
 	/**
 	 * @return the txNote
 	 */
-	public String getTxNote() {
+	public String getNote() {
 		if(txNote == null) {
 			return "";
 		}
@@ -115,7 +120,7 @@ public class ZWTransaction implements ZWSearchableListItem {
 	/**
 	 * @param txNote the txNote to set
 	 */
-	public void setTxNote(String txNote) {
+	public void setNote(String txNote) {
 		this.txNote = txNote;
 	}
 
@@ -123,28 +128,28 @@ public class ZWTransaction implements ZWSearchableListItem {
 	/**
 	 * @return the sha256Hash
 	 */
-	public ZWSha256Hash getSha256Hash() {
+	public String getSha256Hash() {
 		return sha256Hash;
 	}
 
 	/**
 	 * @param sha256Hash the sha256Hash to set
 	 */
-	public void setSha256Hash(ZWSha256Hash sha256Hash) {
+	public void setSha256Hash(String sha256Hash) {
 		this.sha256Hash = sha256Hash;
 	}
 
 	/**
 	 * @return the txFee
 	 */
-	public BigInteger getTxFee() {
+	public BigInteger getFee() {
 		return txFee;
 	}
 
 	/**
 	 * @param txFee the txFee to set
 	 */
-	public void setTxFee(BigInteger txFee) {
+	public void setFee(BigInteger txFee) {
 		this.txFee = txFee;
 	}
 
@@ -165,14 +170,14 @@ public class ZWTransaction implements ZWSearchableListItem {
 	/**
 	 * @return the txAmount
 	 */
-	public BigInteger getTxAmount() {
+	public BigInteger getAmount() {
 		return this.txAmount;
 	}
 
 	/**
 	 * @param txAmount the txAmount to set
 	 */
-	public void setTxAmount(BigInteger txAmount) {
+	public void setAmount(BigInteger txAmount) {
 		this.txAmount = txAmount;
 	}
 
@@ -188,7 +193,7 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 * @return True if this transaction type is pending
 	 */
 	public Boolean isPending() {
-		if(this.numConfirmations < this.coinId.getNumRecommendedConfirmations()) {
+		if(this.numConfirmations < this.coin.getNumRecommendedConfirmations()) {
 			return true;
 		}
 		
@@ -198,14 +203,14 @@ public class ZWTransaction implements ZWSearchableListItem {
 	/**
 	 * @return the numConfirmations
 	 */
-	public long getNumConfirmations() {
+	public long getConfirmationCount() {
 		return numConfirmations;
 	}
 
 	/**
 	 * @param numConfirmations the numConfirmations to set
 	 */
-	public void setNumConfirmations(long numConfirmations) {
+	public void setConfirmationCount(long numConfirmations) {
 		this.numConfirmations = numConfirmations;
 	}
 
@@ -264,7 +269,7 @@ public class ZWTransaction implements ZWSearchableListItem {
 		//	return true;
 		//} 
 		//else {
-			return this.getTxNote().toLowerCase(Locale.ENGLISH).contains(constraint.toString().toLowerCase());
+			return this.getNote().toLowerCase(Locale.ENGLISH).contains(constraint.toString().toLowerCase());
 		//}
 	}
 	

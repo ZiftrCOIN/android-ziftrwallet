@@ -18,7 +18,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
-import com.ziftr.android.ziftrwallet.crypto.ZWSha256Hash;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -246,8 +245,7 @@ public class ZWDataSyncHelper {
 					JSONObject transactionJson = transactions.getJSONObject(x);
 					String txid = transactionJson.getString("txid");
 					parsedTransactions.put(txid, transactionJson);
-					ZWTransaction transaction = createTransaction(coin, transactionJson, addresses, parsedTransactions);
-					ZWWalletManager.getInstance().updateTransactionNumConfirmations(transaction); //TODO -we should change it so that the create will automatically do this if needed
+					createTransaction(coin, transactionJson, addresses, parsedTransactions);
 				}
 
 				//if we got this far without any exceptions, everything went good, so let the UI know the database has changed, so it can update
@@ -265,29 +263,30 @@ public class ZWDataSyncHelper {
 
 	
 	//creates transaction in local database from json response
-	private static ZWTransaction createTransaction(ZWCoin coin, JSONObject json, List<String> addresses, HashMap<String, JSONObject> parsedTransactions) throws JSONException {
+	private static void createTransaction(ZWCoin coin, JSONObject json, List<String> addresses, HashMap<String, JSONObject> parsedTransactions) throws JSONException {
+		
 		String hash = json.getString("txid");
+		ZWTransaction transaction = new ZWTransaction(coin, hash);
+		
 		long time = json.optLong("time");
 		if(time == 0) {
 			//this happens when a transaction hasn't even been confirmed once
 			//so just use the current time
 			time = System.currentTimeMillis() / 1000; //server sends us seconds, so our hold over time should be formatted the same way
 		}
-		time = time * 1000;
-
+		
+		transaction.setTxTime(time * 1000);
+		transaction.setConfirmationCount(json.optLong("confirmations"));
+		
 		//TODO -just setting this as zero for now, need to either get server to send this, or calculate it
 		//BigInteger fees = new BigInteger(json.getString("fee"));
 		BigInteger fees = new BigInteger("0");
 		
-		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs
-		long confirmations = json.optLong("confirmations");
-		ArrayList<ZWAddress> displayAddresses = new ArrayList<ZWAddress>();
+		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs		
+		ArrayList<String> displayAddresses = new ArrayList<String>();
 
-		List<String> myHiddenAddresses = ZWWalletManager.getInstance().getHiddenAddressList(coin, true);
-
+		//read through all inputs
 		JSONArray inputs = json.getJSONArray("vin");
-		JSONArray outputs = json.getJSONArray("vout");
-		
 		for(int x = 0; x < inputs.length(); x++) {
 			JSONObject input = inputs.getJSONObject(x);
 			
@@ -313,13 +312,6 @@ public class ZWDataSyncHelper {
 								usedValue = true;
 								BigInteger outputValueInt = new BigInteger(outputValue);
 								value = value.subtract(outputValueInt);
-								
-								ZWAddress sentFrom = ZWWalletManager.getInstance().getAddress(coin, inputAddress,true);
-								if (sentFrom != null){ 
-									sentFrom.setLastKnownBalance(sentFrom.getLastKnownBalance() - outputValueInt.longValue());
-									sentFrom.setLastTimeModifiedSeconds(time);
-									ZWWalletManager.getInstance().updateAddress(sentFrom);
-								}
 							}
 						}
 					}//end for y
@@ -327,6 +319,9 @@ public class ZWDataSyncHelper {
 			}
 		}//end for x
 
+		
+		//read through all outputs
+		JSONArray outputs = json.getJSONArray("vout");
 		for(int x = 0; x < outputs.length(); x++) {
 			JSONObject output = outputs.getJSONObject(x);
 			JSONObject scriptPubKey = output.getJSONObject("scriptPubKey");
@@ -344,43 +339,36 @@ public class ZWDataSyncHelper {
 						
 						//add the receiving address to the display if not hidden and update balance
 						ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
-						if (receivedOn != null){ 
-							if (!myHiddenAddresses.contains(outputAddress)){
-								displayAddresses.add(receivedOn);
+						if(receivedOn != null && !receivedOn.isHidden()) {
+							displayAddresses.add(receivedOn.getAddress());
+							if(transaction.getNote() == null || transaction.getNote().length() == 0){
+								transaction.setNote(receivedOn.getLabel());
 							}
-							receivedOn.setLastKnownBalance(receivedOn.getLastKnownBalance() + outputValueInt.longValue());
-							receivedOn.setLastTimeModifiedSeconds(time);
-							ZWWalletManager.getInstance().updateAddress(receivedOn);
-
 						}
 					}
 				}
-				//if this was a sent transaction get the address we sent to for displaying
-				JSONArray addressesSentTo = outputs.optJSONObject(y).getJSONObject("scriptPubKey").getJSONArray("addresses");
-				for(int z = 0; z < addressesSentTo.length(); z++) {
-					String sentToAddr = addressesSentTo.getString(z);
-					ZWAddress sentTo = ZWWalletManager.getInstance().getAddress(coin, sentToAddr, false);
-					if (sentTo != null && !myHiddenAddresses.contains(sentToAddr)){
-						displayAddresses.add(sentTo);
+				else {
+					//if we didn't receive we may have sent to an address we have stored
+					ZWAddress sentTo = ZWWalletManager.getInstance().getAddress(coin, outputAddress, false);
+					if(sentTo != null) {
+						//if we have the address in our local db
+						displayAddresses.add(sentTo.getAddress());
+						if(transaction.getNote() == null || transaction.getNote().length() == 0){
+							transaction.setNote(sentTo.getLabel());
+						}
 					}
 				}
+
 			}
 		}
 
-		//pick an address to use for displaying the note to the user
-		String note = ""; //TODO -maybe make this an array or character build to hold notes for multiple strings
 		
-		Set<String> displayAddressesString = new HashSet<String>();
-
-		for(ZWAddress addr : displayAddresses) {
-			displayAddressesString.add(addr.getAddress());
-			if(addr.getLabel() != null && addr.getLabel().length() > 0) {
-				note = addr.getLabel();
-				}
-			}
-		ZWTransaction transaction = ZWWalletManager.getInstance().createTransaction(coin, value, fees, new ArrayList<String>(displayAddressesString), new ZWSha256Hash(hash), note, confirmations, time);
-
-		return transaction;
+		transaction.setAmount(value);
+		transaction.setFee(fees);
+		transaction.setDisplayAddresses(displayAddresses);
+		
+		ZWWalletManager.getInstance().addTransaction(transaction);
+		//return transaction;
 	}
 	
 
