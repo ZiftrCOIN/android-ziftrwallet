@@ -315,11 +315,10 @@ public class ZWDataSyncHelper {
 								value = value.subtract(outputValueInt);
 								
 								ZWAddress sentFrom = ZWWalletManager.getInstance().getAddress(coin, inputAddress,true);
-								if (sentFrom != null){ 
-									sentFrom.setLastKnownBalance(sentFrom.getLastKnownBalance() - outputValueInt.longValue());
-									sentFrom.setLastTimeModifiedSeconds(time);
-									ZWWalletManager.getInstance().updateAddress(sentFrom);
-								}
+								//sentFrom.setLastKnownBalance(sentFrom.getLastKnownBalance() - outputValueInt.longValue());
+								sentFrom.setHidden(false);
+								sentFrom.setLastTimeModifiedSeconds(time);
+								ZWWalletManager.getInstance().updateAddress(sentFrom);
 							}
 						}
 					}//end for y
@@ -344,15 +343,12 @@ public class ZWDataSyncHelper {
 						
 						//add the receiving address to the display if not hidden and update balance
 						ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
-						if (receivedOn != null){ 
-							if (!myHiddenAddresses.contains(outputAddress)){
-								displayAddresses.add(receivedOn);
-							}
-							receivedOn.setLastKnownBalance(receivedOn.getLastKnownBalance() + outputValueInt.longValue());
-							receivedOn.setLastTimeModifiedSeconds(time);
-							ZWWalletManager.getInstance().updateAddress(receivedOn);
-
+						if (!myHiddenAddresses.contains(outputAddress)){
+							displayAddresses.add(receivedOn);
 						}
+						//receivedOn.setLastKnownBalance(receivedOn.getLastKnownBalance() + outputValueInt.longValue());
+						receivedOn.setLastTimeModifiedSeconds(time);
+						ZWWalletManager.getInstance().updateAddress(receivedOn);
 					}
 				}
 				//if this was a sent transaction get the address we sent to for displaying

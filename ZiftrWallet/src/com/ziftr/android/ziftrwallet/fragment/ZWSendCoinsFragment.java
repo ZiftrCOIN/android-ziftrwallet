@@ -37,6 +37,7 @@ import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -505,8 +506,10 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		} else if (value.signum() != 1){
 			//user wants to send <=0 coins
 			throw new ZWSendAmountException("Error: Cannot send 0 coins!");
-		} else if (feePerKb.compareTo(coin.getDefaultFeePerKb()) == 0 && value.compareTo(feePerKb) < 1){
+		} else if (feePerKb.compareTo(coin.getDefaultFeePerKb()) == 0 && value.compareTo(feePerKb) == -1){
 			throw new ZWSendAmountException("Error: The desired amount to send is too small!");
+		} else if ((value.add(feePerKb)).compareTo(getWalletManager().getWalletBalance(coin, ZWSQLiteOpenHelper.BalanceType.AVAILABLE)) == 1){
+			throw new ZWSendAmountException("Error: You don't have enough coins to send this amount!");
 		}
 
 		ZiftrUtils.runOnNewThread(new Runnable() {
@@ -514,7 +517,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			public void run() {
 				
 				List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
-				
 				final String message = ZWDataSyncHelper.sendCoins(coin, feePerKb, value, inputs, address, passphrase);
 				getZWMainActivity().runOnUiThread(new Runnable(){
 
