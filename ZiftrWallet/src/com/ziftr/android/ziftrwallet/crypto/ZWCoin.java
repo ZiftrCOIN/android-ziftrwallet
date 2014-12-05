@@ -39,7 +39,6 @@ public class ZWCoin implements ZWCurrency {
 			(byte) 30, (byte) 22, (byte) 158, 6, 60, "Dogecoin Signed Message:\n");
 
 	public static ZWCoin BTC_TEST = new ZWCoin("10000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
-			// (byte) 0, (byte) 5, (byte) 128, 6);
 			(byte) 111, (byte) 196, (byte) 239, 6, 600, "Bitcoin Signed Message:\n");
 	public static ZWCoin LTC_TEST = new ZWCoin("100000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
 			(byte) 111, (byte) 196, (byte) 239, 12, 150, "Litecoin Signed Message:\n");

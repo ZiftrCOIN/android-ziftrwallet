@@ -295,9 +295,7 @@ ZiftrNetworkHandler {
 		this.initializeCoinType(savedInstanceState);
 		
 		//load available coins from API blockchains
-		if (this.availCoins == null){
-			initAvailableCoins();
-		}
+		initAvailableCoins();
 		
 		// Get passphrase from welcome screen if exists
 		this.handleWelcomeActivityResults();
@@ -1075,18 +1073,16 @@ ZiftrNetworkHandler {
 				if (!ZWPreferencesUtils.getDebugMode()){
 					availCoins.removeAll(Arrays.asList(ZWCoin.TYPES_TEST));
 				}
-				initMarketValues();
+				updateMarketValues();
 			}
 		});
 	}
 	
 	//update currency exchange rates
-	public void initMarketValues(){
+	public void updateMarketValues(){
 		ZWFiat selectedFiat =ZWPreferencesUtils.getFiatCurrency();
-		for (ZWCoin coin: this.availCoins){
-			String val = ZWDataSyncHelper.getMarketValue(coin.toString(), selectedFiat.getCode());
-			ZWConverter.updateConvertRate(coin, val);
-		}
+		ZWDataSyncHelper.getMarketValue(selectedFiat);
+
 	}
 
 	/**

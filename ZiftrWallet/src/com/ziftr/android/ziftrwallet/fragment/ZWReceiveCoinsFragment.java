@@ -33,6 +33,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -298,8 +299,6 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 				long time = System.currentTimeMillis() / 1000;
 				final ZWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, 0, time, time);
 
-				//final ZWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, ZWReceivingAddressesTable.VISIBLE_TO_USER);
-				
 				// Run the updating of the UI on the UI thread
 				ZWReceiveCoinsFragment.this.getZWMainActivity().runOnUiThread(new Runnable() {
 					@Override

@@ -186,7 +186,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 
 	
 	/**
-	 * this method creates a receiving (owned by the user) {@link ZWAddress} object and adds it 
+	 * this method creates a visible unspentfrom receiving (owned by the user) {@link ZWAddress} object and adds it 
 	 * to the correct table within our database
 	 * 
 	 * @param passphrase

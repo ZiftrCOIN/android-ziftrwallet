@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
@@ -75,6 +76,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	/** The table to keep track of transactions. */
 	private ZWWalletTransactionTable transactionsTable;
+	
+	/** Table with market values of currencies */
+	private ZWExchangeTable exchangeTable;
 
 	///////////////////////////////////////////////////////
 	//////////  Boiler plate SQLite Table Stuff ///////////
@@ -88,6 +92,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.receivingAddressesTable = new ZWReceivingAddressesTable();
 		this.coinActivationTable = new ZWCoinActivationStatusTable();
 		this.transactionsTable = new ZWWalletTransactionTable();
+		this.exchangeTable = new ZWExchangeTable();
 	}
 
 	@Override
@@ -101,6 +106,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		for (ZWCoin t : ZWCoin.values()) {
 			this.coinActivationTable.insert(t, UNACTIVATED, 0, db);
 		}
+
+		//Make exchange table
+		this.exchangeTable.create(db);
 	}
 
 	@Override
@@ -515,9 +523,17 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.getTable(receivingNotSending).numEntries(coinId, getReadableDatabase());
 	}
 
+	/////////////////////////////////////////////////////////////
+	//////////  Interface for CRUDing exchange table  ///////////
+	/////////////////////////////////////////////////////////////
 	
+	public synchronized String getExchangeValue(ZWCurrency from, ZWCurrency to){
+		return this.exchangeTable.getExchangeVal(from, to, getReadableDatabase());
+	}
 	
-	
+	public synchronized void upsertExchangeValue(ZWCurrency from, ZWCurrency to, String val){
+		this.exchangeTable.upsert(from, to, val, getWritableDatabase());
+	}
 }
 
 

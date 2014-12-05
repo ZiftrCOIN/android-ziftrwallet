@@ -10,6 +10,7 @@ public interface ZWCurrency {
 	
 	public int getNumberOfDigitsOfPrecision();
 	
+	public String getShortTitle();
 	
 	/**
 	 * converts an amount of atomic units to full coin values

@@ -2,6 +2,7 @@ package com.ziftr.android.ziftrwallet.network;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
@@ -177,7 +179,7 @@ public class ZWDataSyncHelper {
 						int privateBytePrefix = coinJson.getInt("priv_byte");
 						int blockTime = coinJson.getInt("seconds_per_block_generated");
 						int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
-					
+						ZLog.log(coinJson);
 						supportedCoin.updateCoin(defaultFee, (byte)pubKeyPrefix, (byte)scriptHashPrefix, (byte)privateBytePrefix, confirmationsNeeded, blockTime);
 					}
 					
@@ -194,27 +196,33 @@ public class ZWDataSyncHelper {
 		return supportedCoins;
 	}
 	
-	public static String getMarketValue(String type, String fiat){
+	public static void getMarketValue(ZWCurrency fiat){
 		ZiftrNetworkManager.networkStarted();
-		String val = null;
-		ZiftrNetRequest request = ZWApi.buildMarketValueRequest(type, fiat);
+		ZiftrNetRequest request = ZWApi.buildMarketValueRequest(fiat.getShortTitle());
 		String response = request.sendAndWait();
 		if (request.getResponseCode() == 200){
-			//TODO when api market_value call works
 			ZLog.log("Market Value Response: ", response);
-		} else {
-			ZLog.log("Market Value Error: ", response);
-			String dummy_res = "{\"currency_to\": \"usd\",\"currency_from\": \"btc/main\",\"exchange_rate\": 400, \"exchange_rate_divisor\": 100 }";
 			try {
-				JSONObject res = new JSONObject(dummy_res);
-				BigDecimal usdRate = new BigDecimal(res.getLong("exchange_rate") / res.getLong("exchange_rate_divisor"));
-				val = usdRate.toPlainString();
+				JSONArray marketRes = new JSONArray(response);
+				for (int i=0; i< marketRes.length(); i++){
+					JSONObject marketVal = new JSONObject(marketRes.getString(i));
+					BigDecimal fiatRate = new BigDecimal(marketVal.getLong("exchange_rate")).divide(new BigDecimal(marketVal.getLong("exchange_rate_divisor")), MathContext.DECIMAL64);
+					String cointype = marketVal.getString("currency_from").split("/")[0].toUpperCase(Locale.ENGLISH);
+					if (marketVal.getString("currency_from").split("/")[1].contains("test")){
+						cointype += "_TEST";
+					}
+					ZLog.log("Market value of " + cointype + " is fiat: " + fiatRate.toString());
+					ZWWalletManager.getInstance().upsertExchangeValue(ZWCoin.valueOf(cointype), fiat, fiatRate.toString());
+					//update DB with coin fiat value
+				}
 			} catch (JSONException e) {
+				ZLog.log("Market Value Response wasn't json array?!");
 				e.printStackTrace();
 			}
+		} else {
+			ZLog.log("Market Value Error: ", response);
 		}
 		ZiftrNetworkManager.networkStopped();
-		return val;
 	}
 
 

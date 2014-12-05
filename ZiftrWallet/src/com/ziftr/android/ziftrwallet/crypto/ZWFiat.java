@@ -37,15 +37,15 @@ public class ZWFiat implements ZWCurrency {
 	private String name;
 	
 	/** short name of currency USD for dollars*/
-	private String code;
+	private String shortTitle;
 
 	/** For most currencies this is 2, as non-whole amounts are displayed as 0.XX */
 	private int numberOfDigitsOfPrecision;
 
-	private ZWFiat(String name, String symbol, String code, int numberOfDigitsOfPrecision) {
+	private ZWFiat(String name, String symbol, String shortTitle, int numberOfDigitsOfPrecision) {
 		this.symbol = symbol;
 		this.name = name;
-		this.code = code;
+		this.shortTitle = shortTitle;
 		this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
 	}
 
@@ -79,8 +79,8 @@ public class ZWFiat implements ZWCurrency {
 
 	}
 
-	public String getCode(){
-		return this.code;
+	public String getShortTitle(){
+		return this.shortTitle;
 	}
 	
 

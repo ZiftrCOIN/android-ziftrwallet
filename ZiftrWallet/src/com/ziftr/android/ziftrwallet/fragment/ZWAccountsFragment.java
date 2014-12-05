@@ -25,6 +25,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * The ZWMainActivity starts this fragment. This fragment is 
@@ -125,44 +126,13 @@ public class ZWAccountsFragment extends ZWFragment {
 	 * @return as above
 	 */
 	private ZWCurrencyListItem getItemForCoinType(ZWCoin id) {
-		// TODO need to get market values from some sort of an API
-
-		// TODO see if we can get the constructor of ZWCurrencyListItem 
-		// to take very few things
-		
 		int resId = R.layout.accounts_currency_list_single_item;
 		BigDecimal amount = id.getAmount(this.walletManager.getWalletBalance(id, ZWSQLiteOpenHelper.BalanceType.AVAILABLE));
 		String balance = id.getFormattedAmount(amount);
 		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
 		String fiatBalance = ZWConverter.convert(amount, id, fiat).setScale(2, RoundingMode.HALF_DOWN).toPlainString();
-		if (id == ZWCoin.BTC) {
-			return new ZWCurrencyListItem(ZWCoin.BTC, 
-					"620.00", balance, fiatBalance, resId);
-		} else if (id == ZWCoin.BTC_TEST) {
-			return new ZWCurrencyListItem(ZWCoin.BTC_TEST, 
-					"0.00", balance, fiatBalance, resId);
-		} else if (id == ZWCoin.LTC) {
-			return new ZWCurrencyListItem(ZWCoin.LTC, 
-					"6.70", balance, fiatBalance, resId);
-		} else if (id == ZWCoin.LTC_TEST) {
-			return new ZWCurrencyListItem(ZWCoin.LTC_TEST, 
-					"0.00", balance, fiatBalance, resId);
-		} else if (id == ZWCoin.PPC) {
-			return new ZWCurrencyListItem(ZWCoin.PPC, 
-					"1.40", balance, fiatBalance, resId);
-		} else if (id == ZWCoin.PPC_TEST) {
-			return new ZWCurrencyListItem(ZWCoin.PPC_TEST,
-					"0.00", balance, fiatBalance, resId);
-		} else if (id == ZWCoin.DOGE) {
-			return new ZWCurrencyListItem(ZWCoin.DOGE, 
-					"0.0023", balance, fiatBalance, resId);
-		} else if (id == ZWCoin.DOGE_TEST) {
-			return new ZWCurrencyListItem(ZWCoin.DOGE_TEST, 
-					"0.00", balance, fiatBalance, resId);
-		}  
-
-		// Should never get here
-		return null;
+		String fiatVal = ZWConverter.convert(BigDecimal.ONE, id, fiat).toString();
+		return new ZWCurrencyListItem(id, fiatVal, balance, fiatBalance, resId);
 	}
 
 
@@ -192,7 +162,7 @@ public class ZWAccountsFragment extends ZWFragment {
 			this.userWallets.add(this.getItemForCoinType(type));
 		}
 		this.currencyListView = (ListView) 
-				this.rootView.findViewById(R.id.listOfUserWallets);
+		this.rootView.findViewById(R.id.listOfUserWallets);
 
 		// The dropshadow at the bottom
 		if (this.userWallets.size() > 0){

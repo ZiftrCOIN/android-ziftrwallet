@@ -106,7 +106,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	public ZWAddress(ZWCoin coinId) {
 		try {
 			this.key = new ZWECKey();
-			this.initialize(coinId, coinId.getPubKeyHashPrefix(), key.getPubKeyHash());
+			this.initialize(coinId, coinId.getPubKeyHashPrefix(), this.key.getPubKeyHash());
 		} catch(ZWAddressFormatException afe) {
 			ZLog.log("Error making new address, this should not have happened.");
 		}
@@ -192,6 +192,7 @@ public class ZWAddress implements ZWSearchableListItem {
 		} else {
 			// If null then we need to infer what the coinType is 
 			coinId = getCoinTypeFromVersionByte(versionByte);
+			ZLog.log("Avatar" + coinId);
 		}
 
 		if (coinId == null) {
@@ -201,7 +202,6 @@ public class ZWAddress implements ZWSearchableListItem {
 		this.coinId = coinId;
 		this.versionByte = versionByte;
 		this.hash160 = hash160;
-		
 		// Default, should be overridden with the setter method
 		lastTimeModifiedSeconds = System.currentTimeMillis() / 1000;
 	}
