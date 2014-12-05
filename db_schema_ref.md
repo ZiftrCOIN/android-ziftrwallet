@@ -2,37 +2,51 @@
 Activation table
 -------------------------
 ### _id
+
 - Primary Key
 - INT
 - AutoInc
+
 ### coin_type
+
 - Text
 - Not NUll
+
 ### status (Activated?)
+
 - INT
+
 ## blockchain
+
 - INT
 
 | _id | coin_type | status | blockchain | 
 | --- | ------- | ---------- | ------- |
-|  1  |    BTC  |   USD     |  55555  |
-|  2  |    LTC  |   EUR     |  22233  |
+|  1  |    BTC  |   0     |  55555  |
+|  2  |    LTC  |   1     |  22233  |
 
 
 Currency Exchange table
 -------------------------
 
 ### _id
+
 - Primary Key
 - INT
 - AutoInc
+
 ### name
+
 - Text
 - Not Null
+
 ### currency_to
+
 - Text
 - Not Null
-## Value
+
+### Value
+
 - Text
 
 | _id | name | currency_to | value | 
@@ -45,32 +59,52 @@ Per Coin
 -------------------------
 Receive table
 -------------------------
+
 ### _id
+
 - INT
 - Autoinc
+
 ### priv_key
+
 - Text
 - Unique
 - Not NUll
+
 ### pub_key
+
 - Text
 - Unique
 - Not Null
+
 ### address
+
 - Text
 - Unique
 - Not Null
+
 ### note
+
 - Text
+
 ### balance (last known)
+
 - INT
+
 ### creation_timestamp
+
 - INT
+
 ### modified_timestamp
+
 - INT
+
 ### hidden
+
 - INT
+
 ### spent_From
+
 - INT
 
 
@@ -80,40 +114,64 @@ Receive table
 
 Transaction table
 -------------------------
+
 ### _id
+
 - Primary Key
 - INT
 - Autoinc
+
 ### hash
+
 - Text
 - Unique
 - Not Null
+
 ### amount
+
 - INT
+
 ### fee
+
 - INT
+
 ### note
+
 - Text
+
 ### time
+
 - INT
+
 ### num_Confirmations
+
 - INT
 
 Send table
 -------------------------
+
 ### _id
+
 - Primary Key
 - INT
 - Autoinc
+
 ### address
+
 - Text
 - Unique
 - Not Null
+
 ### note
+
 - Text
+
 ### balance
+
 - INT
+
 ### modified_timestamp (Last known time address used in txn)
+
 - INT
 
 

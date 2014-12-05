@@ -20,6 +20,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -196,9 +197,9 @@ public class ZWDataSyncHelper {
 		return supportedCoins;
 	}
 	
-	public static void getMarketValue(ZWCurrency fiat){
+	public static void getMarketValue(){
 		ZiftrNetworkManager.networkStarted();
-		ZiftrNetRequest request = ZWApi.buildMarketValueRequest(fiat.getShortTitle());
+		ZiftrNetRequest request = ZWApi.buildMarketValueRequest();
 		String response = request.sendAndWait();
 		if (request.getResponseCode() == 200){
 			ZLog.log("Market Value Response: ", response);
@@ -206,14 +207,13 @@ public class ZWDataSyncHelper {
 				JSONArray marketRes = new JSONArray(response);
 				for (int i=0; i< marketRes.length(); i++){
 					JSONObject marketVal = new JSONObject(marketRes.getString(i));
-					BigDecimal fiatRate = new BigDecimal(marketVal.getLong("exchange_rate")).divide(new BigDecimal(marketVal.getLong("exchange_rate_divisor")), MathContext.DECIMAL64);
-					String cointype = marketVal.getString("currency_from").split("/")[0].toUpperCase(Locale.ENGLISH);
-					if (marketVal.getString("currency_from").split("/")[1].contains("test")){
-						cointype += "_TEST";
-					}
-					ZLog.log("Market value of " + cointype + " is fiat: " + fiatRate.toString());
-					ZWWalletManager.getInstance().upsertExchangeValue(ZWCoin.valueOf(cointype), fiat, fiatRate.toString());
-					//update DB with coin fiat value
+					ZWCurrency convertingFrom = parseCurrencyHelper(marketVal.getString("currency_from"));
+					ZWCurrency convertingTo = parseCurrencyHelper(marketVal.getString("currency_to"));
+
+					BigDecimal rate = new BigDecimal(marketVal.getLong("exchange_rate")).divide(new BigDecimal(marketVal.getLong("exchange_rate_divisor")), MathContext.DECIMAL64);
+					
+					ZLog.log("Market value of " + convertingFrom.getShortTitle() + " is : " + rate.toString() + " " + convertingTo.getShortTitle());
+					ZWWalletManager.getInstance().upsertExchangeValue(convertingFrom, convertingTo, rate.toString());
 				}
 			} catch (JSONException e) {
 				ZLog.log("Market Value Response wasn't json array?!");
@@ -224,7 +224,20 @@ public class ZWDataSyncHelper {
 		}
 		ZiftrNetworkManager.networkStopped();
 	}
-
+	//helper method to convert server market value string to ZWCurrency
+	private static ZWCurrency parseCurrencyHelper(String str){
+		if (str.split("/").length > 1){
+			//we are a coin
+			String coinType = str.split("/")[0].toUpperCase(Locale.ENGLISH);
+			if (str.split("/")[1].contains("test")){
+				coinType += "_TEST";
+			}
+			return ZWCoin.valueOf(coinType);
+		} else {
+			//we are a fiat
+			return ZWFiat.valueOf(str);
+		}
+	}
 
 	public static void updateTransactionHistory(ZWCoin coin) {
 		List<String> addresses = ZWWalletManager.getInstance().getAddressList(coin, true);

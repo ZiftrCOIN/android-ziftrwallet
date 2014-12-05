@@ -1080,9 +1080,7 @@ ZiftrNetworkHandler {
 	
 	//update currency exchange rates
 	public void updateMarketValues(){
-		ZWFiat selectedFiat =ZWPreferencesUtils.getFiatCurrency();
-		ZWDataSyncHelper.getMarketValue(selectedFiat);
-
+		ZWDataSyncHelper.getMarketValue();
 	}
 
 	/**

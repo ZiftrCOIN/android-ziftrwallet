@@ -106,12 +106,10 @@ public class ZWApi {
 	}
 
 	//GET /blockchains /market_value
-	public static ZiftrNetRequest buildMarketValueRequest(String queryFiat){
+	public static ZiftrNetRequest buildMarketValueRequest(){
 		String url = "http://" + BASE_URL + "/blockchains/market_values";
-		ZiftrParamList query = new ZiftrParamList();
-		query.add("fiat", queryFiat);
-		
-		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), query);
+
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null);
 		return request;
 	}
 	

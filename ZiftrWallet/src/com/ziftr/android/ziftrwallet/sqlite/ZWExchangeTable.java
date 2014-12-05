@@ -37,7 +37,6 @@ public class ZWExchangeTable extends ZWTable{
 		values.put(COLUMN_CURRENCY_NAME, currency.getShortTitle());
 		values.put(COLUMN_CURRENCY_TO, convertTo.getShortTitle());
 		values.put(COLUMN_EXCHANGE_VALUE, val);
-		ZLog.log(values);
 		if (db.update(getTableName(), values, whereIdentifier(currency, convertTo), null) == 0){
 			db.insert(getTableName(), null, values);
 		}

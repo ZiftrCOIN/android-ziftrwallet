@@ -22,7 +22,7 @@ public class ZWFiat implements ZWCurrency {
 
 	public static ZWFiat valueOf(String fiatStr) {
 		for (ZWFiat fiat : ZWFiat.values()) {
-			if (fiat.getName().equals(fiatStr)) {
+			if (fiat.getName().equals(fiatStr) || fiat.getShortTitle().equals(fiatStr.toUpperCase())) {
 				return fiat;
 			}
 		}
