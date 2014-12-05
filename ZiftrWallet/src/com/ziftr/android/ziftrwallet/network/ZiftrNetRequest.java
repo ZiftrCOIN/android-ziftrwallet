@@ -533,7 +533,7 @@ public class ZiftrNetRequest {
 		}
 		
 		ZLog.log("Trying to get response code before a connection was made, or when a connection failed.");
-		return 0;
+		return -1;
 	}
 	
 	
