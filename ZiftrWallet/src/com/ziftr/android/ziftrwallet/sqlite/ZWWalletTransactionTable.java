@@ -70,8 +70,8 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
 		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sb.append(COLUMN_HASH).append(" TEXT NOT NULL UNIQUE, ");
-		sb.append(COLUMN_AMOUNT).append(" INTEGER NOT NULL, ");
+		sb.append(COLUMN_HASH).append(" TEXT UNIQUE NOT NULL, ");
+		sb.append(COLUMN_AMOUNT).append(" INTEGER, ");
 		sb.append(COLUMN_FEE).append(" INTEGER, ");
 		sb.append(COLUMN_NOTE).append(" TEXT, ");
 		sb.append(COLUMN_NUM_CONFIRMATIONS).append(" INTEGER, ");
@@ -83,11 +83,15 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	protected void addTransaction(ZWTransaction transaction, SQLiteDatabase db) {
 		
 		StringBuilder sqlBuilder = new StringBuilder("INSERT OR IGNORE INTO ");
-		sqlBuilder.append(getTableName(transaction.getCoin())).append("(").append(COLUMN_HASH);
+		sqlBuilder.append(getTableName(transaction.getCoin())).append(" (").append(COLUMN_HASH);
 		sqlBuilder.append(") VALUES (").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash()));
-		sqlBuilder.append("); ");
+		sqlBuilder.append(")");
 		
-		sqlBuilder.append(" UPDATE ").append(getTableName(transaction.getCoin())).append(" SET ");
+		//first do an insert, ignoring any errors, with just primary key
+		db.execSQL(sqlBuilder.toString());
+		
+		
+		sqlBuilder = new StringBuilder("UPDATE ").append(getTableName(transaction.getCoin())).append(" SET ");
 		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString()).append(", ");
 		sqlBuilder.append(COLUMN_FEE).append(" = ").append(transaction.getFee().toString()).append(", ");
 		sqlBuilder.append(COLUMN_NOTE).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getNote())).append(", ");
@@ -95,9 +99,13 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 		sqlBuilder.append(COLUMN_CREATION_TIMESTAMP).append(" = ").append(transaction.getTxTime()).append(", ");
 		sqlBuilder.append(COLUMN_DISPLAY_ADDRESSES).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getAddressAsCommaListString()));
 		
-		sqlBuilder.append(" WHERE ").append(COLUMN_HASH).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash()));
+		sqlBuilder.append(" WHERE ").append(COLUMN_HASH).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(";");
 		
-		db.compileStatement(sqlBuilder.toString()).execute();
+		//now update the transaction with all the data
+		int updated = db.compileStatement(sqlBuilder.toString()).executeUpdateDelete();
+		if(updated == 0) {
+			ZLog.log("Error updating transaction: ", sqlBuilder.toString());
+		}
 		
 	}
 

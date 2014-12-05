@@ -187,22 +187,10 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param coinId - The coin type to determine which table we use. 
 	 */
 	protected ZWAddress createChangeAddress(ZWKeyCrypter crypter, ZWCoin coinId) {
-		return createReceivingAddress(crypter, coinId, "", true);
+		long time = System.currentTimeMillis() / 1000;
+		return createReceivingAddress(crypter, coinId, "", 0, time, time, false, false);
 	}
 
-	/**
-	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
-	 * address to the correct table within our database.
-	 * 
-	 * Default values will be used in this method for the balance and status.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param note - The note that the user associates with this address.
-	 */
-	protected ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, boolean isHidden) {
-		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, note, 0, time, time, isHidden, false);
-	}
 
 	/**
 	 * this method creates a receiving (owned by the user) {@link ZWAddress} object and adds it 

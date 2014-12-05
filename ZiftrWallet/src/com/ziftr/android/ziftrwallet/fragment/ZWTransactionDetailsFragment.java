@@ -137,7 +137,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		
 		this.currencyType.setText(fiat.getName());
 
-		Date date = new Date(this.txItem.getTxTime() * 1000);
+		Date date = new Date(this.txItem.getTxTime());
 		this.time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 
 		this.populateAddress();
@@ -185,7 +185,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		currencyType.setText(fiat.getName());
 
 		TextView time = (TextView) rootView.findViewById(R.id.date);
-		Date date = new Date(this.txItem.getTxTime() * 1000);
+		Date date = new Date(this.txItem.getTxTime());
 		time.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 	}
 

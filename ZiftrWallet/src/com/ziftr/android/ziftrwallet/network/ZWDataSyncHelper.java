@@ -333,7 +333,6 @@ public class ZWDataSyncHelper {
 					if(!usedValue) {
 						usedValue = true;
 						String outputValue = output.getString("value");
-						//value.add(new BigInteger(outputValue));
 						BigInteger outputValueInt = new BigInteger(outputValue); 
 						value = value.add(outputValueInt);
 						

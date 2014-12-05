@@ -103,8 +103,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 			txTitleTextView.setText(txListItem.getNote());
 
 			TextView txTimeTextView = (TextView) convertView.findViewById(R.id.txTime);
-			// TODO we will continue using the seconds value for now. Is this right, though?
-			Date date = new Date(txListItem.getTxTime() * 1000);
+			Date date = new Date(txListItem.getTxTime());
 			txTimeTextView.setText(ZiftrUtils.formatterNoTimeZone.format(date));
 
 			TextView txAmount = (TextView) convertView.findViewById(R.id.txAmount);

@@ -198,7 +198,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 * @return
 	 */
 	public ZWAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, long balance, long creation, long modified) {
-		ZWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified, true, false);
+		ZWAddress addr = super.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified, false, false);
 		return addr;
 	}
 
