@@ -180,8 +180,9 @@ public class ZWDataSyncHelper {
 						int privateBytePrefix = coinJson.getInt("priv_byte");
 						int blockTime = coinJson.getInt("seconds_per_block_generated");
 						int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
+						String chain = coinJson.getString("chain");
 						ZLog.log(coinJson);
-						supportedCoin.updateCoin(defaultFee, (byte)pubKeyPrefix, (byte)scriptHashPrefix, (byte)privateBytePrefix, confirmationsNeeded, blockTime);
+						supportedCoin.updateCoin(defaultFee, (byte)pubKeyPrefix, (byte)scriptHashPrefix, (byte)privateBytePrefix, confirmationsNeeded, blockTime, chain);
 					}
 					
 						
@@ -224,6 +225,7 @@ public class ZWDataSyncHelper {
 		}
 		ZiftrNetworkManager.networkStopped();
 	}
+	
 	//helper method to convert server market value string to ZWCurrency
 	private static ZWCurrency parseCurrencyHelper(String str){
 		if (str.split("/").length > 1){
@@ -357,7 +359,7 @@ public class ZWDataSyncHelper {
 						BigInteger outputValueInt = new BigInteger(outputValue); 
 						value = value.add(outputValueInt);
 						
-						//add the receiving address to the display if not hidden and update balance
+						//add the receiving address to the display if not hidden
 						ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
 						if(receivedOn != null && !receivedOn.isHidden()) {
 							displayAddresses.add(receivedOn.getAddress());

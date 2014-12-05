@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
@@ -518,6 +519,8 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				
 				List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
 				final String message = ZWDataSyncHelper.sendCoins(coin, feePerKb, value, inputs, address, passphrase);
+				ZWMainFragmentActivity main = getZWMainActivity();
+				if (main!=null){
 				getZWMainActivity().runOnUiThread(new Runnable(){
 
 					@Override
@@ -525,15 +528,22 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 						if (!message.isEmpty()){
 							getZWMainActivity().alertUser(message, "error_sending_coins");
 						} else {
-							getZWMainActivity().onBackPressed();
 							Toast.makeText(getZWMainActivity(), coin.toString() + " sent!", Toast.LENGTH_LONG).show();
+							getZWMainActivity().onBackPressed();
 						}
 					}
 				
 					});
-
+				} else {
+					ZLog.log("main was null here ?");
+				}
 			}
 		});
 	}
+	
+	public View getWalletHeaderView(){
+		return this.rootView.findViewById(R.id.walletHeader);
+	}
+
 
 }

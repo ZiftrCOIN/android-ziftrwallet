@@ -94,16 +94,11 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 		return this.rootView;
 	}
 	
-	
-	
-
-
 	@Override
 	public void onDataUpdated() {
 		this.initializeTxListView();
+		super.onDataUpdated();
 	}
-	
-	
 
 	private void initializeTxListView() {
 		// TODO make this non-UI blocking
@@ -219,4 +214,5 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 			getZWMainActivity().openTxnDetails(txItem);
 		}
 	}
+
 }

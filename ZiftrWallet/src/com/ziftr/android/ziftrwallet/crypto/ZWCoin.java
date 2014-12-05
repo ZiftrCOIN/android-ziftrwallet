@@ -289,13 +289,14 @@ public class ZWCoin implements ZWCurrency {
 		return signingMessageMagic;
 	}
 	
-	public void updateCoin(String defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime){
+	public void updateCoin(String defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime, String chain){
 		this.defaultFeePerKb = new BigInteger(defaultFee);
 		this.pubKeyHashPrefix = pubKeyPrefix;
 		this.scriptHashPrefix = scriptHashPrefix;
 		this.privKeyPrefix = privKeyPrefix;
 		this.numRecommendedConfirmations = confirmationsNeeded;
 		this.secondsPerAverageBlockSolve = blockGenTime;
+		this.chain = chain;
 	}
 
 	

@@ -196,7 +196,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	protected ZWAddress createChangeAddress(ZWKeyCrypter crypter, ZWCoin coinId) {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, "", 0, time, time, false, false);
+		return createReceivingAddress(crypter, coinId, "", 0, time, time, true, false);
 	}
 
 

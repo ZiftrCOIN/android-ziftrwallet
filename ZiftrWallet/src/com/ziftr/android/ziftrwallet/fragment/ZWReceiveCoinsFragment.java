@@ -378,6 +378,11 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 		}
 	}
+	
+	public View getWalletHeaderView(){
+		return this.rootView.findViewById(R.id.walletHeader);
+	}
+
 
 }
 

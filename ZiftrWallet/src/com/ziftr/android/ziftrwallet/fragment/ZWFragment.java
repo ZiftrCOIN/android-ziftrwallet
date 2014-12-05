@@ -23,7 +23,6 @@ public abstract class ZWFragment extends Fragment {
 	 * To be called by the main activity whenever the underlying data changes
 	 */
 	public void onDataUpdated() {
-		
 	}
 	
 	/**

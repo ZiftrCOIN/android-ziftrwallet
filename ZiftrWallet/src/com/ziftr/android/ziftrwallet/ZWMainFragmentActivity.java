@@ -204,8 +204,6 @@ ZiftrNetworkHandler {
 	private ImageView syncButton; //the button in various fragments users can press to sync their data
 	private boolean isSyncing = false;
 	
-	
-
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -477,9 +475,6 @@ ZiftrNetworkHandler {
 			}
 		}
 	}
-
-
-
 
 	/**
 	 * Starts a new fragment in the main layout space depending
@@ -1441,7 +1436,7 @@ ZiftrNetworkHandler {
 			startSyncAnimation();
 		}
 	}
-
+	
 
 	/**
 	 * Customize actionbar
