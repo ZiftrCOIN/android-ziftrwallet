@@ -383,6 +383,9 @@ public class ZiftrUtils {
 	 * @return
 	 */
 	public static String saltedHashString(String newPassphrase) {
+		if(newPassphrase == null || newPassphrase.isEmpty()) {
+			return null;
+		}
 		return ZiftrUtils.bytesToHexString(saltedHash(newPassphrase));
 	}
 

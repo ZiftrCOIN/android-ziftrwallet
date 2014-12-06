@@ -44,11 +44,16 @@ public class ZWCoinActivationStatusTable extends ZWTable {
 	}
 	
 	protected void insert(ZWCoin coinId, int status, int blockNum, SQLiteDatabase db) {
-		ContentValues values = new ContentValues();
-		values.put(COLUMN_COIN_ID, coinId.toString());
-		values.put(COLUMN_ACTIVATED_STATUS, status);
-		values.put(COLUMN_LATEST_BLOCKCHAIN, blockNum);
-		db.insert(getTableName(), null, values);
+		try {
+			ContentValues values = new ContentValues();
+			values.put(COLUMN_COIN_ID, coinId.toString());
+			values.put(COLUMN_ACTIVATED_STATUS, status);
+			values.put(COLUMN_LATEST_BLOCKCHAIN, blockNum);
+			db.insert(getTableName(), null, values);
+		}
+		catch(Exception e) {
+			//fail quietly, this could just be duplicate table issues during app setup
+		}
 	}
 
 	protected List<ZWCoin> getTypes(SQLiteDatabase db, String specifier) {

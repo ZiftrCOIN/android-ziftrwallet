@@ -36,7 +36,7 @@ public abstract class ZWPreferencesUtils {
 	public final static String NAME_DISABLED_KEY = "ow_disabled_name_key";
 	
 	/** So we can skip the welcome screen and save the boolean. */
-	public final static String PASSPHRASE_DISABLED_KEY = "ow_disabled_passphrase_key";
+	public final static String PASSPHRASE_WARNING_KEY = "ow_disabled_passphrase_key";
 
 	/** So we can save the boolean from settings, whether fees are edititable or not. */
 	public final static String EDITABLE_FEES_KEY = "ow_editable_fees_key";
@@ -60,11 +60,25 @@ public abstract class ZWPreferencesUtils {
 		SharedPreferences prefs = getPrefs();
 		// Get the passphrase hash
 		String storedPassphrase = prefs.getString(PREFS_PASSPHRASE_KEY, null);
-		// If it's not null, convert it back to a byte array
-		byte[] storedHash = (storedPassphrase == null) ?
-				null : ZiftrUtils.hexStringToBytes(storedPassphrase);
+		
+		byte[] storedHash;
+		if(storedPassphrase == null || storedPassphrase.isEmpty()) {
+			storedHash = null;
+		}
+		else {
+			// If it's not null, convert it back to a byte array
+			storedHash = ZiftrUtils.hexStringToBytes(storedPassphrase);
+		}
+		
 		// Return the result
 		return storedHash;
+	}
+	
+	static void setStoredPassphraseHash(String saltedHash) {
+		SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
+		Editor editor = prefs.edit();
+		editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
+		editor.commit();
 	}
 
 	/**
@@ -130,18 +144,27 @@ public abstract class ZWPreferencesUtils {
 		editor.commit();
 	}
 
-	public static boolean getPassphraseDisabled() {
+	public static boolean getPassphraseWarningDisabled() {
 		SharedPreferences prefs = getPrefs();
-		return prefs.getBoolean(PASSPHRASE_DISABLED_KEY, false);
+		return prefs.getBoolean(PASSPHRASE_WARNING_KEY, false);
 	}
 
-	public static void setPassphraseDisabled(boolean isDisabled) {
+	
+	public static void setPassphraseWarningDisabled(boolean isDisabled) {
 		SharedPreferences prefs = getPrefs();
 		Editor editor = prefs.edit();
-		editor.putBoolean(PASSPHRASE_DISABLED_KEY, isDisabled);
+		editor.putBoolean(PASSPHRASE_WARNING_KEY, isDisabled);
+		editor.commit();
+	}
+	
+	public static void disablePassphrase(){
+		SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
+		Editor editor = prefs.edit();
+		editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, null);
 		editor.commit();
 	}
 
+	
 	public static ZWFiat getFiatCurrency(){
 		SharedPreferences prefs = getPrefs();
 		return ZWFiat.valueOf(prefs.getString(FIAT_CURRENCY_KEY, "US Dollars"));
@@ -218,15 +241,8 @@ public abstract class ZWPreferencesUtils {
 		editor.putBoolean(LOG_TO_FILE_KEY, enabled);
 		editor.commit();
 	}
-	
-	public static void disablePassphrase(){
-		SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
-		Editor editor = prefs.edit();
-		editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, null);
-		editor.commit();
-	}
 
-	public static SharedPreferences getPrefs() {
+	private static SharedPreferences getPrefs() {
 		return ZWApplication.getApplication().getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
 	}
 

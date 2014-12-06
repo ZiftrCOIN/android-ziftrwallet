@@ -103,7 +103,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		if (ZWPreferencesUtils.userHasPassphrase() || justSetPass) {
 			this.resetPasswordLabel.setText("Reset Passphrase");
 			this.disablePassphrase.setVisibility(View.VISIBLE);
-		} else if (!ZWPreferencesUtils.getPassphraseDisabled()){
+		} else if (!ZWPreferencesUtils.getPassphraseWarningDisabled()){
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		} else {
@@ -177,7 +177,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			if (ZWPreferencesUtils.userHasPassphrase()){
 				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
 			} else {
-				ZWPreferencesUtils.setPassphraseDisabled(true);
+				ZWPreferencesUtils.setPassphraseWarningDisabled(true);
 				//update settings visibility too slow with recognizing disabled password so update here
 				this.disablePassphrase.setVisibility(View.GONE);
 				this.resetPasswordLabel.setText("Set Passphrase");

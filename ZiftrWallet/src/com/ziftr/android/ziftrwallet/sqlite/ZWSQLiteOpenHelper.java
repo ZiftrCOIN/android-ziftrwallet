@@ -95,13 +95,12 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.exchangeTable = new ZWExchangeTable();
 	}
 
+	
 	@Override
-	public void onCreate(SQLiteDatabase db) {
-		ZLog.log("onCreate for helper called");
-
+	public void onOpen(SQLiteDatabase db) {
 		// Make table of coin activation statuses
 		this.coinActivationTable.create(db);
-
+		
 		// Fill in the table with all coin types, using UNACTIVATED as the status
 		for (ZWCoin t : ZWCoin.values()) {
 			this.coinActivationTable.insert(t, UNACTIVATED, 0, db);
@@ -109,6 +108,13 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		//Make exchange table
 		this.exchangeTable.create(db);
+	}
+	
+	
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		
+		//do nothing, handled in onOpen (so that it's guaranteed to be there)
 	}
 
 	@Override
@@ -196,7 +202,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	protected ZWAddress createChangeAddress(ZWKeyCrypter crypter, ZWCoin coinId) {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, "", 0, time, time, false, false);
+		return createReceivingAddress(crypter, coinId, "", 0, time, time, true, false);
 	}
 
 

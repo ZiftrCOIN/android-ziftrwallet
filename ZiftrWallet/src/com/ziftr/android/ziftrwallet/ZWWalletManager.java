@@ -208,7 +208,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 */
 	private ZWKeyCrypter passphraseToCrypter(String passphrase) {
 		ZWKeyCrypter crypter = null;
-		if (passphrase != null) {
+		if (passphrase != null && passphrase.length() > 0) {
 			SecretKey secretKey = ZWPbeAesCrypter.generateSecretKey(passphrase, ZWPreferencesUtils.getSalt());
 			crypter = new ZWPbeAesCrypter(secretKey);
 		}
