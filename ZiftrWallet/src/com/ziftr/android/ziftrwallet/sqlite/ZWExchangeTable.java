@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
 
 
-public class ZWExchangeTable extends ZWTable{
+public class ZWExchangeTable {
 	
 	/** The title of the column that contains a string identifying the ZWCurrency for the row. */
 	public static final String COLUMN_CURRENCY_NAME= "name";
@@ -46,13 +46,14 @@ public class ZWExchangeTable extends ZWTable{
 		Cursor c = db.rawQuery(selectQuery, null);
 		if (c.moveToFirst()) {
 			if (!c.isLast()) {
-				c.close();
-				throw new RuntimeException("There was more than one row in sql query.");
-			} else {
-				String val = c.getString(c.getColumnIndex(COLUMN_EXCHANGE_VALUE));
-				c.close();
-				return val;
-			}
+
+				
+			} 
+			
+			String val = c.getString(c.getColumnIndex(COLUMN_EXCHANGE_VALUE));
+			c.close();
+			return val;
+		
 		} else {
 			c.close();
 			//no row found = no internet or api call failed when retreiving fiat rates return 0

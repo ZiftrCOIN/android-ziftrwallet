@@ -92,7 +92,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 		this.coinsToShow = new ArrayList<ZWCoin>();
 		if (args != null) {
 			for (ZWCoin type : ZWCoin.values()) {
-				if (args.getBoolean(type.toString())) {
+				if (args.getBoolean(type.getShortTitle())) {
 					this.coinsToShow.add(type);
 				}
 			}

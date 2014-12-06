@@ -18,8 +18,7 @@ public class ZWSendingAddressesTable extends ZWAddressesTable {
 	protected String getCreateTableString(ZWCoin coinId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
-		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sb.append(COLUMN_ADDRESS).append(" TEXT NOT NULL, ");
+		sb.append(COLUMN_ADDRESS).append(" TEXT UNIQUE NOT NULL, ");
 		sb.append(COLUMN_LABEL).append(" TEXT, ");
 		sb.append(COLUMN_BALANCE).append(" INTEGER, ");
 		//sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");

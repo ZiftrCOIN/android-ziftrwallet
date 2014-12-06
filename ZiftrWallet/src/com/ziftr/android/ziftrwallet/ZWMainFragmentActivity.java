@@ -322,7 +322,7 @@ ZiftrNetworkHandler {
 		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
 		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
 		if (this.getSelectedCoin() != null) {
-			outState.putString(ZWCoin.TYPE_KEY, this.getSelectedCoin().toString());
+			outState.putString(ZWCoin.TYPE_KEY, this.getSelectedCoin().getShortTitle());
 		}
 	}
 
@@ -947,7 +947,7 @@ ZiftrNetworkHandler {
 		}
 		Bundle b = new Bundle();
 		for (ZWCoin type : coinsNotInListCurrently) {
-			b.putBoolean(type.toString(), true);
+			b.putBoolean(type.getShortTitle(), true);
 		}
 		fragToShow.setArguments(b);
 		this.showFragment(fragToShow, ZWTags.ADD_CURRENCY, R.id.oneWalletBaseFragmentHolder, true, 

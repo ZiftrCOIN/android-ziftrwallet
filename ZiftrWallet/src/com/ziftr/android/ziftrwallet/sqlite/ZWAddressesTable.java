@@ -89,7 +89,7 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 
 			}
 			catch (ZWAddressFormatException afe) {
-				ZLog.log("Error loading address from ", coinId.toString(), 
+				ZLog.log("Error loading address from ", coinId.getShortTitle(), 
 						" receiving addresses database.");
 				ZLog.log(afe);
 			}

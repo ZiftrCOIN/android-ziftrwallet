@@ -57,11 +57,11 @@ public class ZWWalletWidget extends AppWidgetProvider{
 			views.setViewVisibility(R.id.widget_balance, View.VISIBLE);
 
 			if (ZWPreferencesUtils.getWidgetCoin() == null){
-				ZWPreferencesUtils.setWidgetCoin(ZWWalletManager.getInstance().getAllSetupWalletTypes().get(0).toString());
+				ZWPreferencesUtils.setWidgetCoin(ZWWalletManager.getInstance().getAllSetupWalletTypes().get(0).getShortTitle());
 			}
 			
 			int next = (coins.indexOf(ZWCoin.valueOf(ZWPreferencesUtils.getWidgetCoin())) + 1) % coins.size();
-			ZWPreferencesUtils.setWidgetCoin(coins.get(next).toString());
+			ZWPreferencesUtils.setWidgetCoin(coins.get(next).getShortTitle());
 			ZWCoin selectedCurr = coins.get(next);
 			views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
 			views.setImageViewResource(R.id.widget_select_coin, selectedCurr.getLogoResId());

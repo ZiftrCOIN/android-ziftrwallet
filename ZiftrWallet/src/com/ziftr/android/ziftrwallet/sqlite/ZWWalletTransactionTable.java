@@ -69,7 +69,6 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	protected String getCreateTableString(ZWCoin coinId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
-		sb.append(COLUMN_ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT, ");
 		sb.append(COLUMN_HASH).append(" TEXT UNIQUE NOT NULL, ");
 		sb.append(COLUMN_AMOUNT).append(" INTEGER, ");
 		sb.append(COLUMN_FEE).append(" INTEGER, ");

@@ -196,7 +196,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		} else if (v == sendButton) {
 			if (ZWPreferencesUtils.userHasPassphrase()) {
 				Bundle b = new Bundle();
-				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().toString());
+				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getShortTitle());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, ZWTags.VALIDATE_PASS_SEND);
 			} else {
@@ -528,7 +528,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 						if (!message.isEmpty()){
 							getZWMainActivity().alertUser(message, "error_sending_coins");
 						} else {
-							Toast.makeText(getZWMainActivity(), coin.toString() + " sent!", Toast.LENGTH_LONG).show();
+							Toast.makeText(getZWMainActivity(), coin.getShortTitle() + " sent!", Toast.LENGTH_LONG).show();
 							getZWMainActivity().onBackPressed();
 						}
 					}

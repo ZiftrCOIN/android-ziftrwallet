@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 
-public abstract class ZWCoinRelativeTable extends ZWTable {
+public abstract class ZWCoinRelativeTable {
 	
 	/** The first time that this transaction was seen by the network (ziftr server). */
 	public static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
@@ -24,7 +24,7 @@ public abstract class ZWCoinRelativeTable extends ZWTable {
 	protected abstract String getTablePostfix();
 
 	protected String getTableName(ZWCoin coin) {
-		return coin.toString() + getTablePostfix();
+		return coin.getShortTitle() + getTablePostfix();
 	}
 
 	protected void create(ZWCoin coinId, SQLiteDatabase db) {

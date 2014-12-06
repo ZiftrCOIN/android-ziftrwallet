@@ -3,6 +3,7 @@ package com.ziftr.android.ziftrwallet.crypto;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import android.annotation.SuppressLint;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
@@ -60,9 +61,10 @@ public class ZWCoin implements ZWCurrency {
 		return all;
 	}
 
+	@SuppressLint("DefaultLocale")
 	public static ZWCoin valueOf(String coinStr) {
 		for (ZWCoin coin : ZWCoin.values()) {
-			if (coin.toString().equals(coinStr) || coin.getLongTitle().toLowerCase().equals(coinStr)) {
+			if (coin.getShortTitle().equals(coinStr) || coin.getLongTitle().toLowerCase().equals(coinStr)) {
 				return coin;
 			}
 		}
@@ -219,11 +221,6 @@ public class ZWCoin implements ZWCurrency {
 	 */
 	public int getSecondsPerAverageBlockSolve() {
 		return secondsPerAverageBlockSolve;
-	}
-
-	@Override
-	public String toString() {
-		return this.getShortTitle();
 	}
 
 	

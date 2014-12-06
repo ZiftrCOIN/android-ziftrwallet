@@ -125,7 +125,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			// won't be able to delete the address they are about to make
 			if (ZWPreferencesUtils.userHasPassphrase()) {
 				Bundle b = new Bundle();
-				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().toString());
+				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getShortTitle());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						ZWTags.VALIDATE_PASS_RECEIVE);
