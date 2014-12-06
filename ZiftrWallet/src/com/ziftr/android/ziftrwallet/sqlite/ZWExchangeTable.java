@@ -1,11 +1,10 @@
 package com.ziftr.android.ziftrwallet.sqlite;
 
-import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
-import com.ziftr.android.ziftrwallet.util.ZLog;
-
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
 
 
 public class ZWExchangeTable extends ZWTable{

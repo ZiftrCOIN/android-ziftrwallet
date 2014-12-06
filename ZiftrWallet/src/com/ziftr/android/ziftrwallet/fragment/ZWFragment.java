@@ -27,7 +27,10 @@ public abstract class ZWFragment extends Fragment {
 	
 	/**
 	 * tells the fragment that any data it's showing needs to be refreshed (likely at the request of a user)
-	 * fragments are responsible for initiating the network connections for the api
+	 * fragments are responsible for initiating the network connections for the api,
+	 * this and onDataUpdated may seem confusing, but refreshData is called when a fragment
+	 * should START the refresh process, onDataUpdated is called whn the refreshing is finished
+	 * and the UI needs to update itself based on new data
 	 */
 	public /*abstract*/ void refreshData() {
 		//TODO -this should be abstract, but don't want to blow up the wholoe project while it's slowly added

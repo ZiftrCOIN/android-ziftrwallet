@@ -131,10 +131,16 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 			}
 			
 			ZLog.log("priv key: ", decrypted);
-			ZWEncryptedData newlyEncryptedPrivateKey = newCrypter.encrypt(decrypted);
-
 			ContentValues cv = new ContentValues();
-			cv.put(COLUMN_PRIV_KEY, this.getPrivDataForInsert(newlyEncryptedPrivateKey.toString(), true));
+			
+			if(newCrypter != null) {
+				ZWEncryptedData newlyEncryptedPrivateKey = newCrypter.encrypt(decrypted);
+				cv.put(COLUMN_PRIV_KEY, this.getPrivDataForInsert(newlyEncryptedPrivateKey.toString(), true));
+			}
+			else {
+				//just remove encryption if there's no new crypter
+				cv.put(COLUMN_PRIV_KEY, this.getPrivDataForInsert(decrypted, false));
+			}
 
 			StringBuilder where = new StringBuilder();
 			where.append(COLUMN_PRIV_KEY).append(" = ").append(DatabaseUtils.sqlEscapeString(oldPrivKeyValInDb));

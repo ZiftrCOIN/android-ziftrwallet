@@ -14,8 +14,6 @@ import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -81,7 +79,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
- * This is the main activity of the OneWallet application. It handles
+ * This is the main activity of the ZiftrWallet application. It handles
  * the menu drawer and the switching between the different fragments 
  * depending on which task the user selects.
  */
@@ -89,89 +87,6 @@ public class ZWMainFragmentActivity extends ActionBarActivity
 implements DrawerListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
 ZWResetPassphraseDialogHandler, ZWConfirmationDialogHandler, ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
 ZiftrNetworkHandler {
-
-	/*
-	--- TODO list for the OneWallet project ---
-
-	X 1. Ability to generate new address upon user request
-	and be able to turn that into a QR code
-
-	o 2. Get transaction history for all addresses in wallet and
-	be able to display them.
-
-	o 3. Making layouts necessary for the wireframe models.
-
-	o 4. Organizing tasks that need to be done and appr. difficulty
-
-	o 5. Learn how to use sqlite and use it to save data about transactions, such
-	as the title of the transaction.
-
-	X 6. ZiftrUtils and Zlog for static useful methods.
-	ex. ZLog.log("aa", "b"); (get's exception message, as well)
-	also autotags comments with class name and shuts itself off at
-	launch time for release build.
-
-	X 7. Move all dialog stuff into dialog package and make dialogs
-	persistent.
-
-	X 8. Get QR code scanning example working
-
-	X 9. Get a list interface on top right corner. Move over to ActionBar
-	instead of custom header layout.
-
-	X 10. Get a reset working for the passphrase.
-
-	X 11. Get Fragment switching working with selection in the drawer layout
-
-	X 12. Put menu icon on the top left part of action bar rather than the right.
-	To do this we need to make a custom action bar. Maybe just keep it on the right?
-	In general, need to figure out how to make a more customizable action bar, 
-	might just have to use custom actionbar layout.
-
-	X 13. make it so that the content is moved over whenever we click the menu 
-	button.
-
-	X 14. Turn the EditText field in the passphrase dialog into an xml just like
-	the reset passphrase dialog.
-
-	o 15. Make the IO in loading/saving a wallet into an asynchrynous task
-	so as to not block the UI. Some lagging can be seen now, such as when you just
-	get into the accounts section and you try to rotate the screen horizontally.
-
-	X 16. Make the backgrounds of the grid view in the new currency dialog
-	reflect which item is currenly selected.
-
-	X 17. Add a nicer display to the dialogs than the default.
-
-	o 18. Redesign the send coins screen now that I know a little more about 
-	android layouts.
-
-	o 19. Make it so that the wallet is actually user passphrase protected. Right
-	now it just won't let you in unless you know the passphrase. We want to actually
-	encrypt the wallet.
-
-	o 20. Make the Ôadd new currency' bar a footer of list rather than last element.
-	Make sure that all list views have headers/footers where appropriate rather
-	than just extra views in the xml files. 
-
-	X 21. Don't show a pending transaction bar if there aren't any pending. 
-
-	o 22. Add descriptions to each of the resources (like @string/ resources).
-
-	X 23. Need to remember where we were when navigating back the accounts section
-
-	o 24. Should only need to have passphrase when sending coins.
-
-	X 25. Need to have all the fragments start fragments by routing through
-	the activity so that the activity can do more complicated things.
-
-	o 26. BUG: sending 0 testnet coins to valid address throws IllegalStateException (actually might just be bitcoinj)
-
-	TODO Maybe we don't want to set up all the open wallets right from the get go? 
-	But we need to get the balance...
-	This will be made easier with the API.
-
-	 */
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
@@ -873,26 +788,15 @@ ZiftrNetworkHandler {
 	 */
 	private boolean changePassphrase(final String oldPassphrase, final String newPassphrase) {
 		// TODO put up a blocking dialog while this is happening
-		if (newPassphrase == null || newPassphrase.isEmpty()) {
-			this.alertUser("A password with no text is no password at all!", "passphrase_is_empty_string");
-			return false;
-		}
-
+	
+		//note: null/blank newPassphrase is ok now, it's how password is cleared
+		
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
 				walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
-
-				ZWMainFragmentActivity.this.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
-						Editor editor = prefs.edit();
-						String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
-						editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
-						editor.commit();
-					}
-				});
+				String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
+				ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
 			}
 		});
 		return true;
@@ -1253,8 +1157,12 @@ ZiftrNetworkHandler {
 				sendFrag.onClickSendCoins(passphrase);
 				break;
 			case ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG:
+				this.changePassphrase(passphrase, null);
+				
 				ZWPreferencesUtils.disablePassphrase();
-				ZWPreferencesUtils.setPassphraseDisabled(true);
+				ZWPreferencesUtils.setPassphraseWarningDisabled(true);
+				
+				
 				((ZWSettingsFragment)this.getSupportFragmentManager(
 						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
 
@@ -1288,7 +1196,7 @@ ZiftrNetworkHandler {
 					//if the password was changed
 					if (requestCode == ZWRequestCodes.CREATE_PASSPHRASE_DIALOG) { 
 						//if we were setting the passphrase, turn disabled passphrase off
-						ZWPreferencesUtils.setPassphraseDisabled(false);
+						ZWPreferencesUtils.setPassphraseWarningDisabled(false);
 						((ZWSettingsFragment)this.getSupportFragmentManager(
 								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 					}

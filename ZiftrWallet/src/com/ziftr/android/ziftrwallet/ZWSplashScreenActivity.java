@@ -96,7 +96,7 @@ public class ZWSplashScreenActivity extends FragmentActivity {
 
 
 	private void loadNoFragmentUi() {
-		if ((!ZWPreferencesUtils.userHasPassphrase() && !ZWPreferencesUtils.getPassphraseDisabled()) || 
+		if ((!ZWPreferencesUtils.userHasPassphrase() && !ZWPreferencesUtils.getPassphraseWarningDisabled()) || 
 				!ZWPreferencesUtils.userHasSetName() && !ZWPreferencesUtils.getDisabledName()) {
 			Intent noFragmentIntent = new Intent(ZWSplashScreenActivity.this, ZWWelcomeActivity.class);
 			startActivity(noFragmentIntent);
