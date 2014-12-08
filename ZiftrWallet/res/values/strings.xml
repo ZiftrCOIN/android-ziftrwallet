@@ -153,11 +153,11 @@
     <string name="ow_save_name">SAVE NAME</string>
     <!-- Description here -->
     <string name="ow_set_name">SET NAME</string>
-        <!-- Description here -->
+    <!-- Description here -->
     <string name="ow_name_label">NAME</string>
-        <!-- Description here -->
+    <!-- Description here -->
     <string name="ow_set_name_settings">Set Name</string>
-        <!-- Description here -->
+    <!-- Description here -->
     <string name="ow_disable_name">Disable Name</string>
     <!-- Description here -->
     <string name="ow_create_new_address">CREATE NEW ADDRESS</string>
@@ -172,9 +172,11 @@
 		Coming Soon: ziftrCOIN!\n\n
 		ziftrCOIN, the first digital currency developed for online shoppers, aims to revolutionize shopping by putting cryptocurrency into the hands of consumers and enabling them to conduct simple, secure transactions at their favorite online retailers.\n\n
 		To learn more about ziftrCOIN, go to www.ziftrCOIN.com.</string>
-	<string name="ow_security_text"><b>ZiftrWallet</b> is a decentralized mobile wallet in that addresses and keys are stored on your phone. This way your wallet is safe from server-side attacks, however it is necessary for the user to keep the phone physically secure. 
+    <string name="ow_security_text"><b>ZiftrWallet</b> is a decentralized mobile wallet in that addresses and keys are stored on your phone. This way your wallet is safe from server-side attacks, however it is necessary for the user to keep the phone physically secure. 
 	    \n\nBe wary of allowing untrusted people or apps access to your phone. \n\nIt is recommended to store a spendable amount of cryptocurrency on ziftrWallet rather than your entire balance.
-	   \n\n<b>WARNING: Remember to transfer your coins to other wallets before uninstalling.</b>
-	</string>
-	<string name="ow_zxing_license">This software uses ZXing under the Apache 2 license  http://www.apache.org/licenses/LICENSE-2.0</string>
+	   \n\n<b>WARNING: Remember to transfer your coins to other wallets before uninstalling.</b></string>
+    <string name="ow_no_currency_description">No more wallets to add! Ensure you have wifi for this list to populate.</string>
+    <string name="ow_no_currency">No Available Currencies</string>
+    <string name="ow_zxing_license">This software uses ZXing under the Apache 2 license  http://www.apache.org/licenses/LICENSE-2.0</string>
+
 </resources>

@@ -44,7 +44,12 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 		initializeFromBundle(this.getArguments());
 
 		generateCurrencyListFrom(this.coinsToShow, savedInstanceState);
-
+		
+		if (this.coinsToShow.size() <= 0){
+			this.rootView.findViewById(R.id.no_currency_message).setVisibility(View.VISIBLE);
+		} else {
+			this.rootView.findViewById(R.id.no_currency_message).setVisibility(View.GONE);
+		}
 		initializeCurrencyList();
 		return this.rootView;
 	}

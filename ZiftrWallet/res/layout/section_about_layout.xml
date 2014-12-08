@@ -37,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/ow_about"
-                    android:textColor="@color/White"
+                    android:textColor="@color/ow_default_text"
                     android:textSize="@dimen/ow_txt_mediumlarge" />
 
                 <TextView

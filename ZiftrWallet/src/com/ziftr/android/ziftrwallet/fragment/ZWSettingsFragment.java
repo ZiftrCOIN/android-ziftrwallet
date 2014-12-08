@@ -210,7 +210,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				this.getZWMainActivity().initAvailableCoins();
 				this.updateSettingsVisibility(false);
 			} else {
-				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DEBUG);
+				this.getZWMainActivity().alertConfirmation(ZWRequestCodes.DEBUG_MODE_ON, "Are you sure you want to activate debug mode?", ZWTags.ACTIVATE_DEBUG, new Bundle());
 			}
 		} else if (v == this.exportwalletButton) {
 			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");

@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
-import android.view.WindowManager;
 
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
@@ -22,8 +21,6 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		// To make activity fullscreen
 		// Have to do this before setContentView so that we don't get a AndroidRuntimeException
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 		this.setContentView(R.layout.welcome);
 		
 		if (savedInstanceState == null) {

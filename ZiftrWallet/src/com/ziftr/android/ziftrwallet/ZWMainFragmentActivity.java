@@ -961,13 +961,6 @@ ZiftrNetworkHandler {
 			@Override
 			public void run() {
 				availCoins = ZWDataSyncHelper.getBlockChainWallets();
-				//if API call failed
-				if (availCoins.size() <= 0){
-					availCoins = new ArrayList<ZWCoin>();
-					for (ZWCoin coin : ZWCoin.TYPES){
-						availCoins.add(coin);
-					}
-				}
 				
 				if (!ZWPreferencesUtils.getDebugMode()){
 					availCoins.removeAll(Arrays.asList(ZWCoin.TYPES_TEST));
@@ -1136,14 +1129,6 @@ ZiftrNetworkHandler {
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
 		
-		if (requestCode == ZWRequestCodes.DEBUG_MODE_PASSPHRASE_DIALOG && passphrase.equals("orca")){
-			ZWPreferencesUtils.setDebugMode(true);
-			this.initAvailableCoins(); //re-init coins to show testnet in debug mode
-			((ZWSettingsFragment)this.getSupportFragmentManager(
-					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
-			return;
-		}
-		
 		if (ZWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
 			switch(requestCode) {
 			case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
@@ -1231,6 +1216,12 @@ ZiftrNetworkHandler {
 			ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
 					).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
 			receiveFrag.loadNewAddressFromDatabase(null);
+			break;
+		case ZWRequestCodes.DEBUG_MODE_ON:
+			ZWPreferencesUtils.setDebugMode(true);
+			this.initAvailableCoins(); //re-init coins to show testnet in debug mode
+			((ZWSettingsFragment)this.getSupportFragmentManager(
+					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
 			break;
 		}
 	}
