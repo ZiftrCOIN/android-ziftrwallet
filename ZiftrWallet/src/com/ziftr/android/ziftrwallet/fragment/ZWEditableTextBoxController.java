@@ -57,6 +57,7 @@ public class ZWEditableTextBoxController<T> extends ZiftrTextWatcher implements 
 		if (toggleOff) {
 			this.textView.setFocusable(false);
 			this.textView.setFocusableInTouchMode(false);
+			this.textView.setEnabled(false);
 			this.textView.setBackgroundColor(handler.getResources().getColor(R.color.transparent));
 			//this is the same padding as the editbox_background_normal
 			this.textView.setPadding(5, 8, 13, 8);
@@ -70,6 +71,7 @@ public class ZWEditableTextBoxController<T> extends ZiftrTextWatcher implements 
 			this.textView.setFocusable(true);
 			this.textView.setFocusableInTouchMode(true);
 			this.textView.setClickable(true);
+			this.textView.setEnabled(true);
 			this.textView.setSelection(this.textView.getText().length());
 			imgView.setImageResource(R.drawable.button_cancel);
 			this.textView.requestFocus();

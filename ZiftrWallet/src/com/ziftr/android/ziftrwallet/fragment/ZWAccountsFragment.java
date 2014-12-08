@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -54,10 +55,6 @@ public class ZWAccountsFragment extends ZWFragment {
 	private TextView totalBalance;
 	private ZWFiat fiatType;
 
-	/** 
-	 * Placeholder for later, doesn't do anything other than 
-	 * what parent method does right now.
-	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

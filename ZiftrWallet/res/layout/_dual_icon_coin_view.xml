@@ -28,7 +28,16 @@
         android:gravity="center_vertical"
         android:padding="@dimen/ow_bordered_icon_margin"
         android:src="@drawable/next_down_2" />
-
+    <ImageView
+        android:id="@+id/market_graph_icon"
+        android:layout_width="@dimen/zw_market_icon_size"
+        android:layout_height="@dimen/zw_market_icon_size"
+        android:layout_alignBottom="@id/leftIcon"
+        android:layout_toRightOf="@id/leftIcon"
+        android:scaleType="fitXY"
+        android:src="@drawable/market_graph"
+        android:visibility="gone" />
+    
     <TextView
         android:id="@+id/topRightTextView"
         android:layout_width="wrap_content"
@@ -55,12 +64,13 @@
         android:textSize="15sp"
         android:textStyle="bold" />
 
+
     <TextView
         android:id="@+id/bottomLeftTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/leftIcon"
-        android:layout_toRightOf="@id/leftIcon"
+        android:layout_toRightOf="@id/market_graph_icon"
         android:text="@string/ow_empty_string" />
 
 </RelativeLayout>

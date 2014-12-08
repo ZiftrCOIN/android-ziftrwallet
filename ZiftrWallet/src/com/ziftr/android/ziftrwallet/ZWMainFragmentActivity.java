@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet;
 
+import java.lang.ref.SoftReference;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -333,6 +335,7 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public void onBackPressed() {
+		closeKeyboard();
 		if (drawerMenuIsOpen()){
 			this.menuDrawer.closeDrawer(Gravity.LEFT);
 			return;
@@ -433,7 +436,7 @@ ZiftrNetworkHandler {
 
 		// TODO add animation to transaciton here
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
-
+		closeKeyboard();
 		if (fragToShow.isVisible()) {
 			// If the fragment is already visible, no need to do anything
 			return;
@@ -443,9 +446,14 @@ ZiftrNetworkHandler {
 		if (addToBackStack) {
 			transaction.addToBackStack(backStackTag);
 		}
+
 		transaction.commit();
 	}
-
+	
+	private void closeKeyboard(){
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
+	}
 
 
 	/**
@@ -678,10 +686,14 @@ ZiftrNetworkHandler {
 		this.searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
+				
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				if (hasFocus) {
+					//make keyboard overlap the send/receive buttons
+					getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 					imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
 				} else {
+					getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 					imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
 				}
 			}
@@ -1310,7 +1322,9 @@ ZiftrNetworkHandler {
 
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
-
+		
+		headerView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
+		
 		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
 		coinTitle.setText(this.selectedCoin.getLongTitle());
 
@@ -1323,7 +1337,7 @@ ZiftrNetworkHandler {
 		BigDecimal walletBalance = this.selectedCoin.getAmount(atomicUnits);
 
 		walletBalanceTextView.setText(this.selectedCoin.getFormattedAmount(walletBalance));
-
+		
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, this.selectedCoin, selectedFiat);
 		walletBalanceInFiatText.setText(selectedFiat.getFormattedAmount(walletBalanceInFiat, true));
