@@ -212,9 +212,6 @@ ZiftrNetworkHandler {
 		//load available coins from API blockchains
 		initAvailableCoins();
 		
-		// Get passphrase from welcome screen if exists
-		this.handleWelcomeActivityResults();
-
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
 
@@ -267,28 +264,7 @@ ZiftrNetworkHandler {
 		super.onNewIntent(intent);
 		
 	}
-	/**
-	 * This method handles the results from the welcome activity. Specifically,
-	 * if the intent that brought us to this activity contains a passphrase or a bundle
-	 * here then we take appropriate action using those values.
-	 */
-	private void handleWelcomeActivityResults() {
-		Bundle info = getIntent().getExtras();
-		if (info != null) {
-			if (info.getString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY) != null) {
-				if (ZWPreferencesUtils.userHasPassphrase()) {
-					throw new IllegalArgumentException("Cannot have a passphrase and be setting in onCreate");
-				} else {
-					// We can only get here if there is no previous passphrase, so we put in null
-					changePassphrase(null, info.getString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY));
-				}
-			}
 
-			if (info.getString(ZWPreferencesUtils.BUNDLE_NAME_KEY) != null) { 
-				ZWPreferencesUtils.setUserName(info.getString(ZWPreferencesUtils.BUNDLE_NAME_KEY));
-			}
-		}
-	}
 
 	/**
 	 * Create the options menu.
@@ -386,7 +362,7 @@ ZiftrNetworkHandler {
 	 */
 	@Override
 	public void onClick(View v) {
-		if (v == syncButton) {
+		if (v == syncButton && !isSyncing) {
 			ZWFragment top = this.getTopDisplayedFragment();
 			if (top != null) {
 				top.refreshData();
@@ -450,7 +426,7 @@ ZiftrNetworkHandler {
 		transaction.commit();
 	}
 	
-	private void closeKeyboard(){
+	public void closeKeyboard(){
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
 	}
@@ -1318,8 +1294,6 @@ ZiftrNetworkHandler {
 	 */
 	public void populateWalletHeaderView(View headerView) {
 		//now that a coin type is set, setup the header view for it
-		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
-
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
 		
@@ -1327,27 +1301,34 @@ ZiftrNetworkHandler {
 		
 		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
 		coinTitle.setText(this.selectedCoin.getLongTitle());
-
-		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, this.selectedCoin, selectedFiat);
-		fiatExchangeRateText.setText(selectedFiat.getFormattedAmount(unitPriceInFiat, true));
-
-		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
-		BigInteger atomicUnits = getWalletManager().getWalletBalance(this.selectedCoin, ZWSQLiteOpenHelper.BalanceType.AVAILABLE);
-		BigDecimal walletBalance = this.selectedCoin.getAmount(atomicUnits);
-
-		walletBalanceTextView.setText(this.selectedCoin.getFormattedAmount(walletBalance));
 		
-		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, this.selectedCoin, selectedFiat);
-		walletBalanceInFiatText.setText(selectedFiat.getFormattedAmount(walletBalanceInFiat, true));
-
+		updateWalletHeaderView(headerView);
+		
 		syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
 		syncButton.setOnClickListener(this);
 		if(isSyncing) {
 			startSyncAnimation();
 		}
+	}
+	
+	//update coin market val & wallet coin and fiat balances
+	public void updateWalletHeaderView(View headerView){
+		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
+		
+		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
+		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, getSelectedCoin(), selectedFiat);
+		fiatExchangeRateText.setText(selectedFiat.getFormattedAmount(unitPriceInFiat, true));
+
+		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
+		BigInteger atomicUnits = getWalletManager().getWalletBalance(getSelectedCoin(), ZWSQLiteOpenHelper.BalanceType.AVAILABLE);
+		BigDecimal walletBalance = getSelectedCoin().getAmount(atomicUnits);
+
+		walletBalanceTextView.setText(getSelectedCoin().getFormattedAmount(walletBalance));
+
+		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
+		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, getSelectedCoin(), selectedFiat);
+		walletBalanceInFiatText.setText(selectedFiat.getFormattedAmount(walletBalanceInFiat, true));
 	}
 	
 

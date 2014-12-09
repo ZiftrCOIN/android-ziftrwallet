@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -248,6 +250,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	public void setTxItem(ZWTransaction txItem) {
 		this.txItem = txItem;
 	}
+	
 
 	public String formatEstimatedTime(long estimatedTime) {
 		StringBuilder sb = new StringBuilder();
@@ -275,6 +278,9 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 			ZLog.log("Should have gotten the same object, something went wrong. ");
 			return;
 		}
+		//open keyboard when user toggles edit text
+		InputMethodManager imm = (InputMethodManager) getZWMainActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(this.labelEditText, InputMethodManager.SHOW_IMPLICIT);
 		this.curEditState = state;
 		this.isEditing = true;
 	}
@@ -300,6 +306,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 		// Now that we are done editing 
 		this.isEditing = false;
+		this.getZWMainActivity().closeKeyboard();
 	}
 
 	@Override

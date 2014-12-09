@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWWelcomePassphraseFragment extends Fragment implements OnClickListener {
 
@@ -67,14 +68,23 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 		}
 
 		if (v == skipPassphraseButton) {
-			this.startNextScreen(null);
+			this.startNextScreen();
 		} else if (v == setPassphraseButton) {
-			String passphrase = passphraseEditText.getText().toString();
+			final String passphrase = passphraseEditText.getText().toString();
 			String confirmPassphrase = confirmPassphraseEditText.getText().toString();
 
 			if (passphrase.equals(confirmPassphrase)) {
 				if (!passphrase.isEmpty()) {
-					this.startNextScreen(passphrase);
+					
+					ZiftrUtils.runOnNewThread(new Runnable() {
+						@Override
+						public void run() {
+							ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(null, passphrase);
+							String saltedHash = ZiftrUtils.saltedHashString(passphrase);
+							ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
+						}
+					});
+					this.startNextScreen();
 				} else {
 					welcomeActivity.alert("Your passphrase may not be empty. This is not secure!", 
 							"passphrase_is_empty_string");
@@ -86,18 +96,12 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 		}
 	}
 
-	private void startNextScreen(String passphrase) {
-		Bundle b = null;
-		if (passphrase != null) {
-			b = new Bundle();
-			b.putString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
-		}
-
+	private void startNextScreen() {
 		ZWWelcomeActivity welcomeActivity = (ZWWelcomeActivity) this.getActivity();
 		if (ZWPreferencesUtils.userHasSetName() || ZWPreferencesUtils.getDisabledName()) {
-			welcomeActivity.startZWMainActivity(b);
+			welcomeActivity.startZWMainActivity();
 		} else {
-			welcomeActivity.openNameFragment(b, true);
+			welcomeActivity.openNameFragment(true);
 		}
 	}
 

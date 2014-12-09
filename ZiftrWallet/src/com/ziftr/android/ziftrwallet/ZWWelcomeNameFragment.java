@@ -58,13 +58,13 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 
 		if (v == askMeLaterButton) {
 			if (this.getActivity() != null) {
-				this.startMain(null);
+				this.startMain();
 			}
 		} else if (v == saveNameButton) {
 			String name = nameEditText.getText().toString();
-
 			if (!name.isEmpty()) {
-				this.startMain(name);
+				ZWPreferencesUtils.setUserName(name);
+				this.startMain();
 			} else {
 				a.alert("An empty name doesn't give any information about you!", "name_is_empty_string");
 			}
@@ -72,13 +72,9 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 
 	}
 	
-	private void startMain(String name) {
+	private void startMain() {
 		ZWWelcomeActivity welcomeActivity = (ZWWelcomeActivity) this.getActivity();
-		Bundle args = this.getArguments() == null ? new Bundle() : this.getArguments();
-		if (name != null) {
-			args.putString(ZWPreferencesUtils.BUNDLE_NAME_KEY, name);
-		}
-		welcomeActivity.startZWMainActivity(args);
+		welcomeActivity.startZWMainActivity();
 	}
 }
 

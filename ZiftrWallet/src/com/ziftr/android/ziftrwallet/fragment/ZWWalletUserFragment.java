@@ -14,6 +14,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class ZWWalletUserFragment extends ZWFragment {
@@ -42,21 +43,9 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 	@Override
 	public void onDataUpdated(){
 		super.onDataUpdated();
-		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
-
-		TextView fiatExchangeRateText = (TextView) this.walletHeader.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, getZWMainActivity().getSelectedCoin(), selectedFiat);
-		fiatExchangeRateText.setText(selectedFiat.getFormattedAmount(unitPriceInFiat, true));
-
-		TextView walletBalanceTextView = (TextView) this.walletHeader.findViewById(R.id.topRightTextView);
-		BigInteger atomicUnits = getWalletManager().getWalletBalance(getZWMainActivity().getSelectedCoin(), ZWSQLiteOpenHelper.BalanceType.AVAILABLE);
-		BigDecimal walletBalance = getZWMainActivity().getSelectedCoin().getAmount(atomicUnits);
-
-		walletBalanceTextView.setText(getZWMainActivity().getSelectedCoin().getFormattedAmount(walletBalance));
-
-		TextView walletBalanceInFiatText = (TextView) this.walletHeader.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, getZWMainActivity().getSelectedCoin(), selectedFiat);
-		walletBalanceInFiatText.setText(selectedFiat.getFormattedAmount(walletBalanceInFiat, true));
+		if (this.walletHeader != null){
+			this.getZWMainActivity().updateWalletHeaderView(this.walletHeader);
+		}
 	}
 	
 	//Note: at some point we may want to completely handle the header views inside the fragments

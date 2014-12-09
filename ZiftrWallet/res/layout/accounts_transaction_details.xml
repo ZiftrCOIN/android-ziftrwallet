@@ -92,7 +92,6 @@
                 android:layout_marginLeft="@dimen/ow_txn_field_with_icon_margin"
                 android:layout_marginRight="@dimen/ow_horizontal_margin"
                 android:background="@android:color/transparent"
-                android:enabled="false"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="textNoSuggestions"

@@ -311,7 +311,9 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 
 
 		if (this.prefilledAddress != null) {
+			String loadedLabel = this.getWalletManager().getAddress(this.getSelectedCoin(), this.prefilledAddress, false).getLabel();
 			addressEditText.setText(this.prefilledAddress);
+			labelEditText.setText(loadedLabel);
 		}
 		if (this.prefilledAmount != null) {
 			coinAmountEditText.setText(this.prefilledAmount);

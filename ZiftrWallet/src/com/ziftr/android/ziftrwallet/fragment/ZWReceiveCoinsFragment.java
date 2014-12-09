@@ -34,6 +34,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -223,7 +224,6 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		message = message != null && message.isEmpty() ? null : message;
 		String qrCodeData = ZWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, amountVal, 
 				ZWPreferencesUtils.getUserName(), message);
-
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
 		this.qrCodeImageView.setPadding(0, 0, 0, 0);
@@ -265,7 +265,6 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		if (this.fragmentHasAddress()) {
 			// We have to set it to be invisible temporarily to not have a blue flash,
 			// will be drawn correctly once we can get the measurement of the qr code
-			this.qrCodeContainer.setBackgroundColor(getResources().getColor(R.color.transparent));
 			this.qrCodeContainer.setVisibility(View.INVISIBLE);
 		} 
 

@@ -27,7 +27,7 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 			if (!ZWPreferencesUtils.userHasPassphrase() && !ZWPreferencesUtils.getPassphraseWarningDisabled()) {
 				this.openPassphraseFragment();
 			} else if (!ZWPreferencesUtils.userHasSetName() && !ZWPreferencesUtils.getDisabledName()) {
-				this.openNameFragment(null, false);
+				this.openNameFragment(false);
 			} else {
 				throw new RuntimeException(
 						"Shouldn't be in the welcome screen if user already has passphrase and set name!");
@@ -45,11 +45,8 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 	/**
 	 * 
 	 */
-	public void openNameFragment(Bundle resultsOfPassphraseFragment, boolean addToBackStack) {
+	public void openNameFragment(boolean addToBackStack) {
 		Fragment welcomeFrag = new ZWWelcomeNameFragment();
-		if (resultsOfPassphraseFragment != null) {
-			welcomeFrag.setArguments(resultsOfPassphraseFragment);
-		}
 		this.openFragment(welcomeFrag, true, addToBackStack);
 	}
 	
@@ -92,11 +89,8 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		alertDialog.show(this.getSupportFragmentManager(), tag);
 	}
 	
-	protected void startZWMainActivity(Bundle extras) {
+	protected void startZWMainActivity() {
 		Intent main = new Intent(this, ZWMainFragmentActivity.class);
-		if (extras != null) {
-			main.putExtras(extras);
-		}
 		main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		startActivity(main);
 		this.finish();
