@@ -1,20 +1,10 @@
 package com.ziftr.android.ziftrwallet.fragment;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import android.view.View;
-import android.widget.TextView;
 
-import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
-import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class ZWWalletUserFragment extends ZWFragment {

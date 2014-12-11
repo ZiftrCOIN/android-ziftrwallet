@@ -34,7 +34,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
