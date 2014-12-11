@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
-import android.view.WindowManager;
 
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
@@ -22,15 +21,13 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		// To make activity fullscreen
 		// Have to do this before setContentView so that we don't get a AndroidRuntimeException
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 		this.setContentView(R.layout.welcome);
 		
 		if (savedInstanceState == null) {
 			if (!ZWPreferencesUtils.userHasPassphrase() && !ZWPreferencesUtils.getPassphraseWarningDisabled()) {
 				this.openPassphraseFragment();
 			} else if (!ZWPreferencesUtils.userHasSetName() && !ZWPreferencesUtils.getDisabledName()) {
-				this.openNameFragment(null, false);
+				this.openNameFragment(false);
 			} else {
 				throw new RuntimeException(
 						"Shouldn't be in the welcome screen if user already has passphrase and set name!");
@@ -48,11 +45,8 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 	/**
 	 * 
 	 */
-	public void openNameFragment(Bundle resultsOfPassphraseFragment, boolean addToBackStack) {
+	public void openNameFragment(boolean addToBackStack) {
 		Fragment welcomeFrag = new ZWWelcomeNameFragment();
-		if (resultsOfPassphraseFragment != null) {
-			welcomeFrag.setArguments(resultsOfPassphraseFragment);
-		}
 		this.openFragment(welcomeFrag, true, addToBackStack);
 	}
 	
@@ -95,11 +89,8 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		alertDialog.show(this.getSupportFragmentManager(), tag);
 	}
 	
-	protected void startZWMainActivity(Bundle extras) {
+	protected void startZWMainActivity() {
 		Intent main = new Intent(this, ZWMainFragmentActivity.class);
-		if (extras != null) {
-			main.putExtras(extras);
-		}
 		main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		startActivity(main);
 		this.finish();

@@ -61,13 +61,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.ziftr.android.ziftrwallet.ZWWelcomeActivity" >
-            >
+        <activity android:name="com.ziftr.android.ziftrwallet.ZWWelcomeActivity" 
+            android:windowSoftInputMode="adjustResize">
+            
         </activity>
         <activity
             android:name="com.ziftr.android.ziftrwallet.ZWMainFragmentActivity"
             android:label="ziftrWALLET"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

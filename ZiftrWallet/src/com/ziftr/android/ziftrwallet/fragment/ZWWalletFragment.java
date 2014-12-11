@@ -96,7 +96,13 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 	
 	@Override
 	public void onDataUpdated() {
+		//save scroll position
+		int top = this.txListView.getFirstVisiblePosition();
+		View topView = this.txListView.getChildAt(top);
+		int offset = topView == null ? 0 : topView.getTop();
 		this.initializeTxListView();
+		//reload saved scroll position
+		this.txListView.setSelectionFromTop(top, offset);
 		super.onDataUpdated();
 	}
 

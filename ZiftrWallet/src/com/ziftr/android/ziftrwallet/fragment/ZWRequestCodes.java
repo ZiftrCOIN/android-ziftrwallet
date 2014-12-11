@@ -26,8 +26,9 @@ public class ZWRequestCodes {
 	
 	public static final int SET_NAME_DIALOG = 12;
 	
-	public static final int DEBUG_MODE_PASSPHRASE_DIALOG = 13;
+	public static final int DEBUG_MODE_ON = 13;
 	
 	public static final int DISABLE_PASSPHRASE_DIALOG = 14;
+	
 	
 }

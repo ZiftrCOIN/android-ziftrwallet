@@ -62,7 +62,6 @@ public class ZWEditableTextBoxController<T> extends ZiftrTextWatcher implements 
 			this.textView.setPadding(5, 8, 13, 8);
 			this.textView.setClickable(false);
 			imgView.setImageResource(R.drawable.button_edit_pencil_clickable);
-
 			handler.onEditEnd(this.returnData);
 		} else {
 			this.textView.setBackgroundResource(android.R.drawable.editbox_background_normal);
@@ -73,7 +72,6 @@ public class ZWEditableTextBoxController<T> extends ZiftrTextWatcher implements 
 			this.textView.setSelection(this.textView.getText().length());
 			imgView.setImageResource(R.drawable.button_cancel);
 			this.textView.requestFocus();
-
 			handler.onEditStart(getNewEditState(), this.returnData);
 		}
 	}

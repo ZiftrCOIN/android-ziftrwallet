@@ -75,9 +75,10 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 			convertView = this.inflater.inflate(currencyListItem.getResId(), null);
 		}
 			ZWFiat fiatType =ZWPreferencesUtils.getFiatCurrency();
-//		if (getItemViewType(position) == ZWCurrencyListAdapter.coinType) {
 			String fiatSymbol = fiatType.getSymbol();
-
+			
+			convertView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
+			
 			// Whether or not we just created one, we reset all the resources
 			// to match the currencyListItem.
 			TextView coinName = (TextView) 

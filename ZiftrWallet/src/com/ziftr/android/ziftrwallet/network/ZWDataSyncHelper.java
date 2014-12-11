@@ -307,7 +307,10 @@ public class ZWDataSyncHelper {
 		
 		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs		
 		ArrayList<String> displayAddresses = new ArrayList<String>();
-
+		
+		//list to display if no non-hidden addresses received coins
+		ArrayList<String> hiddenReceivedOn = new ArrayList<String>();
+		
 		//read through all inputs
 		JSONArray inputs = json.getJSONArray("vin");
 		for(int x = 0; x < inputs.length(); x++) {
@@ -361,10 +364,14 @@ public class ZWDataSyncHelper {
 						
 						//add the receiving address to the display if not hidden
 						ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
-						if(receivedOn != null && !receivedOn.isHidden()) {
-							displayAddresses.add(receivedOn.getAddress());
-							if(transaction.getNote() == null || transaction.getNote().length() == 0){
-								transaction.setNote(receivedOn.getLabel());
+						if(receivedOn != null){
+							if (!receivedOn.isHidden()) {
+								displayAddresses.add(receivedOn.getAddress());
+								if(transaction.getNote() == null || transaction.getNote().length() == 0){
+									transaction.setNote(receivedOn.getLabel());
+								}
+							} else {
+								hiddenReceivedOn.add(receivedOn.getAddress());
 							}
 						}
 					}
@@ -387,7 +394,17 @@ public class ZWDataSyncHelper {
 		
 		transaction.setAmount(value);
 		transaction.setFee(fees);
-		transaction.setDisplayAddresses(displayAddresses);
+		if (displayAddresses.size() > 0){
+			transaction.setDisplayAddresses(displayAddresses);
+		} else {
+			transaction.setDisplayAddresses(hiddenReceivedOn);
+			//should only have one hidden address we received on
+			ZWAddress hiddenAddress = ZWWalletManager.getInstance().getAddress(coin, hiddenReceivedOn.get(0), true);
+			hiddenAddress.setHidden(false);
+			hiddenAddress.setLabel("Previously hidden address");
+			ZWWalletManager.getInstance().updateAddress(hiddenAddress);
+			transaction.setNote("Previously hidden address");
+		}
 		
 		ZWWalletManager.getInstance().addTransaction(transaction);
 		//return transaction;

@@ -35,7 +35,7 @@ public class ZWTags {
 	
 	public static final String CONFIRM_NEW_ADDRESS = "confirm_new_address_dialog";
 	
-	public static final String VALIDATE_PASS_DEBUG = "validate_passphrase_dialog_debug";
+	public static final String ACTIVATE_DEBUG = "activate_debug_dialog";
 	
 	public static final String VALIDATE_PASS_DISABLE = "validate_disable_passphrase_dialog";
 	
