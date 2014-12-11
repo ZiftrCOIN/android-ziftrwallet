@@ -178,5 +178,6 @@
     <string name="ow_no_currency_description">No more wallets to add! Ensure you have wifi for this list to populate.</string>
     <string name="ow_no_currency">No Available Currencies</string>
     <string name="ow_zxing_license">This software uses ZXing under the Apache 2 license  http://www.apache.org/licenses/LICENSE-2.0</string>
+    <string name="debug_warning">This will enable &quot;testnet&quot; coins and advanced options that may compromise wallet security and/or device performance. Use at your own risk!</string>
 
 </resources>

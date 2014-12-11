@@ -67,7 +67,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	private ZWActivationTable coinActivationTable;
 
 	/** The table to keep track of transactions. */
-	private ZWWalletTransactionTable transactionsTable;
+	private ZWTransactionTable transactionsTable;
 	
 	/** Table with market values of currencies */
 	private ZWExchangeTable exchangeTable;
@@ -83,7 +83,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.sendingAddressesTable = new ZWSendingAddressesTable();
 		this.receivingAddressesTable = new ZWReceivingAddressesTable();
 		this.coinActivationTable = new ZWActivationTable();
-		this.transactionsTable = new ZWWalletTransactionTable();
+		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
 	}
 
@@ -168,7 +168,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	
 	public synchronized void deactivateCoin(ZWCoin coin) {
-		this.coinActivationTable.setActivation(coin, ZWActivationTable.ACTIVATED, getWritableDatabase());
+		this.coinActivationTable.setActivation(coin, ZWActivationTable.DEACTIVATED, getWritableDatabase());
 	}
 	
 

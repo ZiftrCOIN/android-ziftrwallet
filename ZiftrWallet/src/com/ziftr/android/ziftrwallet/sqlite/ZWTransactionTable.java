@@ -14,7 +14,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
-public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
+public class ZWTransactionTable extends ZWCoinRelativeTable {
 
 	private static final String TABLE_NAME_BASE = "_transactions";
 	
@@ -58,7 +58,7 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	 */
 	public static final String COLUMN_DISPLAY_ADDRESSES = "display_addresses";
 
-	protected ZWWalletTransactionTable() {
+	protected ZWTransactionTable() {
 
 	}
 
@@ -71,7 +71,8 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 	
 	@Override
 	protected void createBaseTable(ZWCoin coin, SQLiteDatabase database) {
-		String createSql = "CREATE IF NOT EXISTS " + getTableName(coin) + " (" + COLUMN_HASH + " TEXT UNIQUE NOT NULL)";
+		String createSql = "CREATE TABLE IF NOT EXISTS " + getTableName(coin) + 
+				" (" + COLUMN_HASH + " TEXT UNIQUE NOT NULL)";
 		database.execSQL(createSql);
 	}
 
