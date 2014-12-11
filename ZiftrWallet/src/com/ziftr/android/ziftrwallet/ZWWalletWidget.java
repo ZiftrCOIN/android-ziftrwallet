@@ -49,7 +49,7 @@ public class ZWWalletWidget extends AppWidgetProvider{
 	}
 	
 	private void changeCurrency(Context context, RemoteViews views){
-		List<ZWCoin> coins = ZWWalletManager.getInstance().getAllSetupWalletTypes();
+		List<ZWCoin> coins = ZWWalletManager.getInstance().getActivatedCoins();
 		if (coins.size() >0) {
 			views.setViewVisibility(R.id.no_wallets, View.GONE);
 			views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
@@ -57,7 +57,7 @@ public class ZWWalletWidget extends AppWidgetProvider{
 			views.setViewVisibility(R.id.widget_balance, View.VISIBLE);
 
 			if (ZWPreferencesUtils.getWidgetCoin() == null){
-				ZWPreferencesUtils.setWidgetCoin(ZWWalletManager.getInstance().getAllSetupWalletTypes().get(0).getShortTitle());
+				ZWPreferencesUtils.setWidgetCoin(ZWWalletManager.getInstance().getActivatedCoins().get(0).getShortTitle());
 			}
 			
 			int next = (coins.indexOf(ZWCoin.valueOf(ZWPreferencesUtils.getWidgetCoin())) + 1) % coins.size();

@@ -15,6 +15,8 @@ import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
+
+	private static final String TABLE_NAME_BASE = "_transactions";
 	
 	/** The note column. This is for users to keep a string attached to an entry. */
 	public static final String COLUMN_NOTE = "note";
@@ -60,23 +62,40 @@ public class ZWWalletTransactionTable extends ZWCoinRelativeTable {
 
 	}
 
+	
 	@Override
-	protected String getTablePostfix() {
-		return "_transactions";
+	protected String getTableName(ZWCoin coin) {
+		return coin.getShortTitle() + TABLE_NAME_BASE;
 	}
 
+	
 	@Override
-	protected String getCreateTableString(ZWCoin coinId) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
-		sb.append(COLUMN_HASH).append(" TEXT UNIQUE NOT NULL, ");
-		sb.append(COLUMN_AMOUNT).append(" INTEGER, ");
-		sb.append(COLUMN_FEE).append(" INTEGER, ");
-		sb.append(COLUMN_NOTE).append(" TEXT, ");
-		sb.append(COLUMN_NUM_CONFIRMATIONS).append(" INTEGER, ");
-		sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
-		sb.append(COLUMN_DISPLAY_ADDRESSES).append(" TEXT ); ");
-		return sb.toString();
+	protected void createBaseTable(ZWCoin coin, SQLiteDatabase database) {
+		String createSql = "CREATE IF NOT EXISTS " + getTableName(coin) + " (" + COLUMN_HASH + " TEXT UNIQUE NOT NULL)";
+		database.execSQL(createSql);
+	}
+
+
+	@Override
+	protected void createTableColumns(ZWCoin coin, SQLiteDatabase database) {
+		
+		//add transaction amount column
+		addColumn(coin, COLUMN_AMOUNT, "INTEGER", database);
+		
+		//add fee paid column
+		addColumn(coin, COLUMN_FEE, "INTEGER", database);
+		
+		//add transaction note column
+		addColumn(coin, COLUMN_NOTE, "TEXT", database);
+		
+		//add column for number of confirmations that transaction has
+		addColumn(coin, COLUMN_NUM_CONFIRMATIONS, "INTEGER", database);
+		
+		//add column for which address to display
+		addColumn(coin, COLUMN_DISPLAY_ADDRESSES, "TEXT", database);
+		
+		//add transaction creation timestamp
+		addColumn(coin, COLUMN_CREATION_TIMESTAMP, "INTEGER", database);
 	}
 
 	protected void addTransaction(ZWTransaction transaction, SQLiteDatabase db) {

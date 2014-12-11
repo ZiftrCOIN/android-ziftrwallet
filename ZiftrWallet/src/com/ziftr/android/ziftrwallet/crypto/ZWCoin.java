@@ -50,6 +50,7 @@ public class ZWCoin implements ZWCurrency {
 
 	public static final ZWCoin[] TYPES = new ZWCoin[] {BTC, LTC, PPC, DOGE};
 	public static final ZWCoin[] TYPES_TEST = new ZWCoin[] {BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
+	
 	public static final ZWCoin[] values() {
 		ZWCoin[] all = new ZWCoin[TYPES.length + TYPES_TEST.length];
 		for (int i=0; i<TYPES.length; i++){

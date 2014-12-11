@@ -157,7 +157,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	private void initializeCurrencyListView() {
 		// Get the values from the manager and initialize the list view from them
 		this.userWallets = new ArrayList<ZWCurrencyListItem>();
-		for (ZWCoin type : this.walletManager.readAllActivatedTypes()) {
+		for (ZWCoin type : this.walletManager.getActivatedCoins()) {
 			this.userWallets.add(this.getItemForCoinType(type));
 		}
 		this.currencyListView = (ListView) 

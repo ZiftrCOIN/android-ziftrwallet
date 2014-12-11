@@ -66,6 +66,22 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 				null, addressToContentValues(address));
 	}
 
+	
+	@Override
+	protected void createTableColumns(ZWCoin coin, SQLiteDatabase database) {
+		
+		//add label column
+		addColumn(coin, COLUMN_LABEL, "TEXT", database);
+		
+		//add balance column
+		addColumn(coin, COLUMN_BALANCE, "INTEGER", database);
+		
+		//add creation timestamp column
+		addColumn(coin, COLUMN_CREATION_TIMESTAMP, "INTEGER", database);
+		
+		//add modified timestamp column
+		addColumn(coin, COLUMN_MODIFIED_TIMESTAMP, "INTEGER", database);
+	}
 
 	
 	protected ZWAddress getAddress(ZWCoin coinId, String address, SQLiteDatabase db) {

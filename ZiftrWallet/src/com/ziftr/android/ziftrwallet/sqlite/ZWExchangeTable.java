@@ -9,6 +9,9 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
 
 public class ZWExchangeTable {
 	
+	/** The name of the table in the sqlite database */
+	private static final String TABLE_NAME = "currency_exchange";
+	
 	/** The title of the column that contains a string identifying the ZWCurrency for the row. */
 	public static final String COLUMN_CURRENCY_NAME= "name";
 
@@ -18,17 +21,27 @@ public class ZWExchangeTable {
 	/** Value representing how many currency_to in 1 currency_name*/
 	public static final String COLUMN_EXCHANGE_VALUE = "value";
 	
-	protected String getTableName() {
-		return "currency_exchange";
-	}
+	/** the column for displaying whether the exchange rate has gone up, down, or stated the same (+1, -1, 0 respectively) */
+	public static final String COLUMN_RATE_CHANGE = "rate_change";
 	
-	protected String getCreateTableString() {
-		return "CREATE TABLE IF NOT EXISTS " + getTableName() + " (" + COLUMN_CURRENCY_NAME + " TEXT NOT NULL, " + COLUMN_CURRENCY_TO + 
+	
+	private String getCreateTableString() {
+		return "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + COLUMN_CURRENCY_NAME + " TEXT NOT NULL, " + COLUMN_CURRENCY_TO + 
 		" TEXT NOT NULL, " + COLUMN_EXCHANGE_VALUE + " TEXT NOT NULL );";
 	}
 	
 	protected void create(SQLiteDatabase db) {
+		String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + COLUMN_CURRENCY_NAME + " TEXT NOT NULL, " + COLUMN_CURRENCY_TO + 
+				" TEXT NOT NULL, " + COLUMN_EXCHANGE_VALUE + " TEXT NOT NULL );";
 		db.execSQL(getCreateTableString());
+		
+		try {
+			sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMN_RATE_CHANGE + " INTEGER";
+			db.execSQL(sql);
+		}
+		catch(Exception e) {
+			//just blindly throw alter table statements incase the user is using an older version
+		}
 	}
 	
 	protected void upsert(ZWCurrency currency, ZWCurrency convertTo , String val, SQLiteDatabase db) {
@@ -36,13 +49,13 @@ public class ZWExchangeTable {
 		values.put(COLUMN_CURRENCY_NAME, currency.getShortTitle());
 		values.put(COLUMN_CURRENCY_TO, convertTo.getShortTitle());
 		values.put(COLUMN_EXCHANGE_VALUE, val);
-		if (db.update(getTableName(), values, whereIdentifier(currency, convertTo), null) == 0){
-			db.insert(getTableName(), null, values);
+		if (db.update(TABLE_NAME, values, whereIdentifier(currency, convertTo), null) == 0){
+			db.insert(TABLE_NAME, null, values);
 		}
 	}
 	
 	protected String getExchangeVal(ZWCurrency currency, ZWCurrency convertTo,SQLiteDatabase db){
-		String selectQuery = "SELECT " + COLUMN_EXCHANGE_VALUE + " FROM " + getTableName() + " WHERE " + whereIdentifier(currency, convertTo);
+		String selectQuery = "SELECT " + COLUMN_EXCHANGE_VALUE + " FROM " + TABLE_NAME + " WHERE " + whereIdentifier(currency, convertTo);
 		Cursor c = db.rawQuery(selectQuery, null);
 		if (c.moveToFirst()) {
 			if (!c.isLast()) {

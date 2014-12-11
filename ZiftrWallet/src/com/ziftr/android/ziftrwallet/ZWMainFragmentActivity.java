@@ -232,7 +232,7 @@ ZiftrNetworkHandler {
 			//Check if loaded from widget
 			if (getIntent().hasExtra(ZWWalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
 				this.setSelectedCoin(ZWCoin.valueOf(ZWPreferencesUtils.getWidgetCoin()));
-				if (this.selectedCoin != null && this.getWalletManager().typeIsActivated(this.selectedCoin)) {
+				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)) {
 					if (getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_SEND);
 						openSendCoinsView(null, null);
@@ -246,7 +246,7 @@ ZiftrNetworkHandler {
 				String data = getIntent().getDataString();
 				ZWCoin coin = ZWCoin.valueOf(data.substring(0, data.indexOf(':')));
 				this.setSelectedCoin(coin);
-				if (this.selectedCoin != null && this.getWalletManager().typeIsActivated(this.selectedCoin)){
+				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)){
 					try {
 						ZWCoinURI uri = new ZWCoinURI(coin, data);
 						openSendCoinsView(uri.getAddress(), uri.getAmount());
@@ -813,7 +813,7 @@ ZiftrNetworkHandler {
 		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
 		// Make sure that this view only has wallets
 		// in it which the user do
-		for (ZWCoin type : this.walletManager.readAllActivatedTypes()) {
+		for (ZWCoin type : this.walletManager.getActivatedCoins()) {
 			if (type == newItem) {
 				// Already in list, shouldn't ever get here though because
 				// we only show currencies in the dialog which we don't have
@@ -822,16 +822,8 @@ ZiftrNetworkHandler {
 			}
 		}
 		
+		walletManager.activateCoin(newItem);
 		
-		// We can assume the wallet hasn't been set up yet
-		// or we wouldn't have gotten here 
-		if (!walletManager.walletHasBeenSetUp(newItem)) {
-			if (walletManager.setUpWallet(newItem)) {
-			} else {
-				Toast.makeText(this, "Error a wallet could not be set up!", Toast.LENGTH_LONG).show();
-				return;
-			}
-		}
 		Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
 		this.onBackPressed();
 
@@ -1218,12 +1210,12 @@ ZiftrNetworkHandler {
 	public void handleConfirmationPositive(int requestCode, Bundle info) {
 		switch (requestCode) {
 		case ZWRequestCodes.DEACTIVATE_WALLET:
-			ZWCoin coinId = ZWCoin.valueOf(info.getString(ZWCoin.TYPE_KEY));
-			this.walletManager.updateTableActivatedStatus(coinId, ZWSQLiteOpenHelper.DEACTIVATED);
+			ZWCoin coin = ZWCoin.valueOf(info.getString(ZWCoin.TYPE_KEY));
+			this.walletManager.deactivateCoin(coin);
 			ZWAccountsFragment frag = (ZWAccountsFragment) getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
 			frag.removeFromView(info.getInt("ITEM_LOCATION"));
-			if (this.selectedCoin == coinId){
+			if (this.selectedCoin == coin){
 				this.selectedCoin = null;
 			}
 			break;
@@ -1432,7 +1424,7 @@ ZiftrNetworkHandler {
 				@Override
 				public void onClick(View v) {
 					List<ZWCoin> usersCurWallets = new ArrayList<ZWCoin>();
-					for (ZWCoin newItem : getWalletManager().readAllActivatedTypes()) {
+					for (ZWCoin newItem : getWalletManager().getActivatedCoins()) {
 						usersCurWallets.add(newItem);
 					}
 					openAddCurrency(usersCurWallets);

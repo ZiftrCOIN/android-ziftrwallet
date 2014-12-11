@@ -23,7 +23,6 @@ import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyListItem;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
-import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 
 public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFragmentActivity> {
 
@@ -47,7 +46,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		editor.commit();
 		//clear all wallets
 		for (ZWCoin type : ZWCoin.TYPES){
-			manager.updateTableActivatedStatus(type, ZWSQLiteOpenHelper.DEACTIVATED);
+			manager.deactivateCoin(type);
 		}
 	}
 
@@ -57,7 +56,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	}
 
 	public void testPreconditions(){
-		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
+		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 0);
 		assertFalse(ZWPreferencesUtils.getDisabledName());
 		assertNull(ZWPreferencesUtils.getUserName());
 		assertTrue(mActivity.getSupportFragmentManager().getBackStackEntryCount() == 0);
@@ -66,19 +65,19 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	public void testInitialVisibility(){
 		//mActivity.getWalletManager().closeAllSetupWallets();
 		LinearLayout msg = (LinearLayout) mActivity.findViewById(R.id.add_currency_message);
-		assertTrue(msg.getVisibility() == View.VISIBLE || mActivity.getWalletManager().getAllSetupWalletTypes().size() != 0);
+		assertTrue(msg.getVisibility() == View.VISIBLE || mActivity.getWalletManager().getActivatedCoins().size() != 0);
 		TextView total = (TextView) mActivity.findViewById(R.id.total_label);
-		assertTrue(total.getVisibility() == View.GONE || mActivity.getWalletManager().getAllSetupWalletTypes().size() != 0);
+		assertTrue(total.getVisibility() == View.GONE || mActivity.getWalletManager().getActivatedCoins().size() != 0);
 	}
 
 	@UiThreadTest
 	public void testAddWallet() {
-		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
+		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 0);
 		createWallet(ZWCoin.BTC);
-		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 1);
+		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 1);
 		//remove wallet
-		mActivity.getWalletManager().updateTableActivatedStatus(ZWCoin.BTC, ZWSQLiteOpenHelper.DEACTIVATED);
-		assertTrue(mActivity.getWalletManager().getAllSetupWalletTypes().size() == 0);
+		mActivity.getWalletManager().deactivateCoin(ZWCoin.BTC);
+		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 0);
 
 	}
 

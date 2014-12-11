@@ -33,15 +33,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	/** The current database version, may change in later versions of app. */
 	public static final int DATABASE_VERSION = 1;
 
-	/** Used for table types that just haven't been used yet. */
-	public static final int UNACTIVATED = 0;
-
-	/** Used for table types that are activated and in use by user. */
-	public static final int ACTIVATED = 1;
-
-	/** Used for table types that used to be ACTIVATED, but now user deactivated them. */
-	public static final int DEACTIVATED = 2;
-
+	
 	/**
 	 * <p>It's possible to calculate a wallets balance from multiple points of view. This enum specifies which
 	 * of the two methods the getWallatBalance() should use.</p>
@@ -72,7 +64,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	private ZWAddressesTable sendingAddressesTable;
 
 	/** The table to keep track of coin activated/deactivated/unactivated status. */
-	private ZWCoinActivationStatusTable coinActivationTable;
+	private ZWActivationTable coinActivationTable;
 
 	/** The table to keep track of transactions. */
 	private ZWWalletTransactionTable transactionsTable;
@@ -90,7 +82,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		this.sendingAddressesTable = new ZWSendingAddressesTable();
 		this.receivingAddressesTable = new ZWReceivingAddressesTable();
-		this.coinActivationTable = new ZWCoinActivationStatusTable();
+		this.coinActivationTable = new ZWActivationTable();
 		this.transactionsTable = new ZWWalletTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
 	}
@@ -102,8 +94,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.coinActivationTable.create(db);
 		
 		// Fill in the table with all coin types, using UNACTIVATED as the status
-		for (ZWCoin t : ZWCoin.values()) {
-			this.coinActivationTable.insert(t, UNACTIVATED, 0, db);
+		for (ZWCoin coin : ZWCoin.values()) {
+			this.coinActivationTable.insertDefault(coin, db);
 		}
 
 		//Make exchange table
@@ -134,49 +126,51 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId
 	 */
-	public synchronized void ensureCoinTypeActivated(ZWCoin coinId) {
+	public synchronized void activateCoin(ZWCoin coin) {
 		// Safety check
-		if (typeIsActivated(coinId)) {
+		if (isCoinActivated(coin)) {
 			return;
 		}
 
 		// TODO create tables for coin type
-		this.receivingAddressesTable.create(coinId, this.getWritableDatabase());
-		this.sendingAddressesTable.create(coinId, this.getWritableDatabase());
-		this.transactionsTable.create(coinId, this.getWritableDatabase());
+		this.receivingAddressesTable.create(coin, this.getWritableDatabase());
+		this.sendingAddressesTable.create(coin, this.getWritableDatabase());
+		this.transactionsTable.create(coin, this.getWritableDatabase());
 
 		// Update table to match activated status
-		this.updateTableActivatedStatus(coinId, ACTIVATED);
+		this.coinActivationTable.setActivation(coin, ZWActivationTable.ACTIVATED, getWritableDatabase());
 	}
 
-	public synchronized boolean typeIsActivated(ZWCoin coinId) {
-		return this.coinActivationTable.getActivatedStatus(
-				coinId, getReadableDatabase()) == ACTIVATED;
+	public synchronized boolean isCoinActivated(ZWCoin coin) {
+		return this.coinActivationTable.isCoinActivated(coin, getReadableDatabase());
 	}
 
-	public synchronized List<ZWCoin> readAllActivatedTypes() {
-		// TODO use this method in wallet manager rather (/ in addition to?) bitcoinj
+	public synchronized List<ZWCoin> getActivatedCoins() {
 
-		StringBuilder specifier = new StringBuilder();
-		specifier.append(ZWCoinActivationStatusTable.COLUMN_ACTIVATED_STATUS);
-		specifier.append(" = ").append(ZWSQLiteOpenHelper.ACTIVATED);
-
-		return this.coinActivationTable.getTypes(getWritableDatabase(), specifier.toString());
+		return this.coinActivationTable.getCoinsByStatus(ZWActivationTable.ACTIVATED, getReadableDatabase());
 	}
 
-	public synchronized List<ZWCoin> readAllNonUnactivatedTypes() {
-		// TODO use this method in wallet manager rather (/ in addition to?) bitcoinj
-
-		StringBuilder specifier = new StringBuilder();
-		specifier.append(ZWCoinActivationStatusTable.COLUMN_ACTIVATED_STATUS);
-		specifier.append(" != ").append(ZWSQLiteOpenHelper.UNACTIVATED);
-
-		return this.coinActivationTable.getTypes(getWritableDatabase(), specifier.toString());
+	
+	/**
+	 * gets a list of every coin that has been, or currently is, activated,
+	 * basically excluded coins that are "un-activated",
+	 * the current usecase for this is changing passwords, where private keys 
+	 * that are in deactivated coin's databases must also be updated
+	 * @return a list of activated and deactivated coins
+	 */
+	public synchronized List<ZWCoin> getActivatedAndDeactivatedCoins() {
+		
+		int activationStatus = ZWActivationTable.ACTIVATED | ZWActivationTable.DEACTIVATED;
+		
+		return this.coinActivationTable.getCoinsByStatus(activationStatus, getReadableDatabase());
 	}
 
-	public synchronized void updateTableActivatedStatus(ZWCoin coinId, int status) {
-		this.coinActivationTable.updateActivated(coinId, status, getWritableDatabase());
+	
+	
+	public synchronized void deactivateCoin(ZWCoin coin) {
+		this.coinActivationTable.setActivation(coin, ZWActivationTable.ACTIVATED, getWritableDatabase());
 	}
+	
 
 	/*
 	 * NOTE:
@@ -242,7 +236,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		try {
 			ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
 
-			for (ZWCoin coin : this.readAllNonUnactivatedTypes()) {
+			for (ZWCoin coin : this.getActivatedAndDeactivatedCoins()) {
 				receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
 			}
 			db.setTransactionSuccessful();

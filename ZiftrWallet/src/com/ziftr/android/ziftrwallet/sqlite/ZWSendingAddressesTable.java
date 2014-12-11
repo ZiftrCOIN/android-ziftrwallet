@@ -2,6 +2,7 @@ package com.ziftr.android.ziftrwallet.sqlite;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
@@ -9,23 +10,24 @@ import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 
 public class ZWSendingAddressesTable extends ZWAddressesTable {
 
+	private static final String TABLE_NAME_BASE = "_sending_addresses";
+	
+	
 	@Override
-	protected String getTablePostfix() {
-		return "_sending_addresses";
+	protected String getTableName(ZWCoin coin) {
+		return coin.getShortTitle() + TABLE_NAME_BASE;
 	}
 
+	
 	@Override
-	protected String getCreateTableString(ZWCoin coinId) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
-		sb.append(COLUMN_ADDRESS).append(" TEXT UNIQUE NOT NULL, ");
-		sb.append(COLUMN_LABEL).append(" TEXT, ");
-		sb.append(COLUMN_BALANCE).append(" INTEGER, ");
-		//sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
-		sb.append(COLUMN_MODIFIED_TIMESTAMP).append(" INTEGER );");
-		return sb.toString();
+	protected void createBaseTable(ZWCoin coin, SQLiteDatabase database) {
+		String createSql = "CREATE TABLE IF NOT EXISTS " + getTableName(coin) + 
+				" (" + COLUMN_ADDRESS + " TEXT UNIQUE NOT NULL)";
+		
+		database.execSQL(createSql);
 	}
 
+	
 	@Override
 	protected ZWAddress cursorToAddress(ZWCoin coinId, Cursor c) throws ZWAddressFormatException {
 		ZWAddress newAddress = new ZWAddress(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));

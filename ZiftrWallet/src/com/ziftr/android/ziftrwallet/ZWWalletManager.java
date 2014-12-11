@@ -1,10 +1,6 @@
 package com.ziftr.android.ziftrwallet;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.crypto.SecretKey;
 
@@ -35,7 +31,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class ZWWalletManager extends ZWSQLiteOpenHelper {
 
 	/** The wallet files for each of the coin types. */
-	private Map<ZWCoin, File> walletFiles = new HashMap<ZWCoin, File>();
+	//private Map<ZWCoin, File> walletFiles = new HashMap<ZWCoin, File>();
 	
 	/** Following the standard, we name our wallet file as below. */
 	public static final String DATABASE_NAME = "wallet.dat";
@@ -107,78 +103,6 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 		super(context, databasePath);
 	}
 
-	/**
-	 * Returns a boolean describing whether or not the wallet for
-	 * the specified coin type has been setup yet. This is session 
-	 * specific as the wallets are closed down everytime the app is 
-	 * destroyed.
-	 * 
-	 * @param id - The coin type to test for
-	 * @return as above
-	 */
-	public boolean walletHasBeenSetUp(ZWCoin id) {
-		// There is no add wallet method, so the only way
-		// a wallet can be added to the map is by setupWallet.
-		return this.typeIsActivated(id);
-	}
-
-	/**
-	 * Gives a list of all the coin types for which the user has set up a wallet
-	 * this session. i.e. all wallet types for which walletHasBeenSetUp()
-	 * will return true.
-	 * 
-	 * @return as above
-	 */
-	public List<ZWCoin> getAllSetupWalletTypes() {
-		ArrayList<ZWCoin> list = new ArrayList<ZWCoin>();
-		for (ZWCoin type : ZWCoin.values()) {
-			if (this.walletHasBeenSetUp(type)) {
-				list.add(type);
-			}
-		}
-		return list;
-	}
-
-
-	/**
-	 * Sets up a wallet object for this fragment by either loading it 
-	 * from an existing stored file or by creating a new one from 
-	 * network parameters. Note, though Android won't crash out because 
-	 * of it, this shouldn't be called from a UI thread due to the 
-	 * blocking nature of creating files.
-	 * 
-	 * TODO check to make sure all places where this is called is okay.
-	 */
-	public boolean setUpWallet(final ZWCoin id) {
-		// Have to do this for both SQLite and bitcoinj right now.
-
-		// Set up the SQLite tables
-		this.ensureCoinTypeActivated(id);
-
-		// Here we recreate the files or create them if this is the first
-		// time the user opens the app.
-		this.walletFiles.put(id, null);
-
-		// This is application specific storage, will be deleted when app is uninstalled.
-		File externalDirectory = ZWApplication.getApplication().getExternalFilesDir(null);
-		if (externalDirectory != null) {
-			this.walletFiles.put(id, new File(
-					externalDirectory, id.getShortTitle() + "_wallet.dat"));
-		} else {
-			log("null NULL EXTERNAL DIR");
-			/***
-			ZWSimpleAlertDialog alertUserDialog = new ZWSimpleAlertDialog();
-			alertUserDialog.setupDialog("OneWallet", "Error: No external storage detected.", null, "OK", null);
-			alertUserDialog.show(this.activity.getSupportFragmentManager(), "null_externalDirectory");
-			 **/
-			return false;
-		}
-
-		return true;
-	}
-
-
-	
 	
 	public ZWAddress createChangeAddress(String passphrase, ZWCoin coinId) {
 		return super.createChangeAddress(this.passphraseToCrypter(passphrase), coinId);
@@ -228,18 +152,6 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 */
 	public synchronized void changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
 		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
-	}
-
-
-	/** 
-	 * Gets the file where the wallet for the specified
-	 * coin type is stored. 
-	 * 
-	 * @param id - The coin type of the wallet file to get
-	 * @return as above
-	 */
-	public File getWalletFile(ZWCoin id) {
-		return this.walletFiles.get(id);
 	}
 
 	

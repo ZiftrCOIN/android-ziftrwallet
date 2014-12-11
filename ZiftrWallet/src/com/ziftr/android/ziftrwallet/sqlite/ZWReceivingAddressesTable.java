@@ -23,7 +23,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class ZWReceivingAddressesTable extends ZWAddressesTable {
 
 	/** The postfix that assists in making the names for the users addresses table. */
-	private static final String TABLE_POSTFIX = "_receiving_addresses";
+	private static final String TABLE_NAME_BASE = "_receiving_addresses";
 
 	/** The private key encoded as a string using WIF. */
 	public static final String COLUMN_PRIV_KEY = "priv_key";
@@ -42,27 +42,39 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 	
 	public static int UNSPENT_FROM = 0;
 	public static int SPENT_FROM = 1;
+
+	
 	
 	@Override
-	protected String getTablePostfix() {
-		return TABLE_POSTFIX;
+	protected String getTableName(ZWCoin coin) {
+		return coin.getShortTitle() + TABLE_NAME_BASE;
+	}
+	
+	
+	@Override
+	protected void createBaseTable(ZWCoin coin, SQLiteDatabase database) {
+		
+		String createSql = "CREATE TABLE IF NOT EXISTS " + getTableName(coin) + 
+				" (" + COLUMN_PRIV_KEY + " TEXT UNQIUE NOT NULL, " + 
+				COLUMN_PUB_KEY + " TEXT UNIQUE NOT NULL, " + 
+				COLUMN_ADDRESS + " TEXT UNIQUE NOT NULL)";
+		
+		database.execSQL(createSql);
 	}
 
 	@Override
-	protected String getCreateTableString(ZWCoin coinId) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE IF NOT EXISTS ").append(getTableName(coinId)).append(" (");
-		sb.append(COLUMN_PRIV_KEY).append(" TEXT UNIQUE NOT NULL, ");
-		sb.append(COLUMN_PUB_KEY).append(" TEXT UNIQUE NOT NULL, ");
-		sb.append(COLUMN_ADDRESS).append(" TEXT UNIQUE NOT NULL, ");
-		sb.append(COLUMN_LABEL).append(" TEXT, ");
-		sb.append(COLUMN_BALANCE).append(" INTEGER, ");
-		sb.append(COLUMN_CREATION_TIMESTAMP).append(" INTEGER, ");
-		sb.append(COLUMN_MODIFIED_TIMESTAMP).append(" INTEGER, ");
-		sb.append(COLUMN_SPENT_FROM).append(" INTEGER, ");
-		sb.append(COLUMN_HIDDEN).append(" INTEGER );");
-		return sb.toString();
+	protected void createTableColumns(ZWCoin coin, SQLiteDatabase database) {
+
+		//create columns that all address tables use
+		super.createTableColumns(coin, database);
+
+		//add is_spent_from column
+		addColumn(coin, COLUMN_SPENT_FROM, "INTEGER", database);
+		
+		//add is_hidden column
+		addColumn(coin, COLUMN_HIDDEN, "INTEGER", database);
 	}
+	
 
 	@Override
 	protected ZWAddress cursorToAddress(ZWCoin coinId, Cursor c) throws ZWAddressFormatException {
