@@ -23,9 +23,6 @@ public class ZWActivationTable {
 	/** The title of the column that keeps track of the un/de/activated status. */
 	public static final String COLUMN_ACTIVATED_STATUS = "status";
 	
-	/** is the service side service/api available for this coin */
-	public static final String COLUMN_AVAILABLE_STATUS = "is_available";
-	
 	/** latest blockchain received from server */
 	public static final String COLUMN_LATEST_BLOCKCHAIN = "blockchain";
 	
@@ -65,24 +62,21 @@ public class ZWActivationTable {
 			//just blindly throw alter table statements incase the user is using an older version
 		}
 		
-		//add availability column
-		try {
-			sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMN_AVAILABLE_STATUS + " INTEGER";
-			db.execSQL(sql);
-		}
-		catch(Exception e) {
-			//just blindly throw alter table statements incase the user is using an older version
-		}
 	}
 	
 	
 	protected void insertDefault(ZWCoin coin, SQLiteDatabase db) {
-		ContentValues values = new ContentValues();
-		values.put(COLUMN_COIN_ID, coin.getShortTitle());
-		values.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
-		values.put(COLUMN_LATEST_BLOCKCHAIN, 0);
-		values.put(COLUMN_AVAILABLE_STATUS, false);
-		db.insert(TABLE_NAME, null, values);
+		try {
+			ContentValues values = new ContentValues();
+			values.put(COLUMN_COIN_ID, coin.getShortTitle());
+			values.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
+			values.put(COLUMN_LATEST_BLOCKCHAIN, 0);
+			db.insert(TABLE_NAME, null, values);
+		}
+		catch(Exception e) {
+			//for now just quietly fail, this whole activation table has to be redone
+			//using the data fetched from the server
+		}
 	}
 	
 	
