@@ -59,6 +59,7 @@ public abstract class ZWDialogFragment extends DialogFragment implements View.On
 		this.positiveButtonText = posButtonText;
 		this.neutralButtonText = neuButtonText;
 		this.negativeButtonText = negButtonText;
+		setCancelable(false);
 	}
 
 	/**

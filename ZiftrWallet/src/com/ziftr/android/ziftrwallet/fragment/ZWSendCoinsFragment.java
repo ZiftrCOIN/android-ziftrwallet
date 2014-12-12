@@ -20,11 +20,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
@@ -37,11 +35,9 @@ import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
-import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The section of the app where users fill out a form and click send 
@@ -72,7 +68,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 
 	private String prefilledAddress;
 	private String prefilledAmount;
-
+	
 	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
@@ -88,9 +84,11 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		this.initializeViewFields();
 
 		this.initializeEditText();
+		
 		return this.rootView;
 	}
-
+	
+	
 	public void onViewStateRestored(Bundle savedInstanceState) {
 		// Whenever one of the amount views changes, all the other views should
 		// change to constant show an updated version of what the user will send.
@@ -515,37 +513,13 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			throw new ZWSendAmountException("Error: You don't have enough coins to send this amount!");
 		}
 
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			@Override
-			public void run() {
-				
-				List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
-				final String message = ZWDataSyncHelper.sendCoins(coin, feePerKb, value, inputs, address, passphrase);
-				ZWMainFragmentActivity main = getZWMainActivity();
-				if (main!=null){
-				getZWMainActivity().runOnUiThread(new Runnable(){
-
-					@Override
-					public void run() {
-						if (!message.isEmpty()){
-							getZWMainActivity().alertUser(message, "error_sending_coins");
-						} else {
-							Toast.makeText(getZWMainActivity(), coin.getShortTitle() + " sent!", Toast.LENGTH_LONG).show();
-							getZWMainActivity().onBackPressed();
-						}
-					}
-				
-					});
-				} else {
-					ZLog.log("main was null here ?");
-				}
-			}
-		});
+		List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
+		getZWMainActivity().initSendTaskFragment().sendCoins(coin, feePerKb, value, inputs, address, passphrase);
+		this.sendButton.setEnabled(false);
 	}
 	
-	public View getWalletHeaderView(){
-		return this.rootView.findViewById(R.id.walletHeader);
+	public void reEnableSend(){
+		this.sendButton.setEnabled(true);
 	}
-
-
+	
 }

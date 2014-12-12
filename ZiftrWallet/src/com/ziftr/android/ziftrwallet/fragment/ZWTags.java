@@ -25,6 +25,8 @@ public class ZWTags {
 	public static final String DEACTIVATE_WALLET = "confirmation_dialog_deactivate";
 
 	public static final String SET_FIAT = "set_fiat_fragment";
+	
+	public static final String SEND_TASK = "send_task_fragment";
 
 	//DIALOG TAGS
 	public static final String VALIDATE_PASS_RECEIVE = "validate_passphrase_dialog_new_key";
