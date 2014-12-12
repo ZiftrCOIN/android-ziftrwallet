@@ -41,6 +41,8 @@ public class ZWTags {
 	
 	public static final String VALIDATE_PASS_DISABLE = "validate_disable_passphrase_dialog";
 	
+	public static final String CONFIRM_SEND = "confirm_send_dialog";
+	
 	//EDIT TEXT
 	public static final String ZW_EDIT_TEXT = "ow_edit_text";
 

@@ -1203,28 +1203,33 @@ ZiftrNetworkHandler, sendTaskCallback {
 	@Override
 	public void handleConfirmationPositive(int requestCode, Bundle info) {
 		switch (requestCode) {
-		case ZWRequestCodes.DEACTIVATE_WALLET:
-			ZWCoin coin = ZWCoin.valueOf(info.getString(ZWCoin.TYPE_KEY));
-			this.walletManager.deactivateCoin(coin);
-			ZWAccountsFragment frag = (ZWAccountsFragment) getSupportFragmentManager(
-					).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
-			frag.removeFromView(info.getInt("ITEM_LOCATION"));
-			if (this.selectedCoin == coin){
-				this.selectedCoin = null;
+			case ZWRequestCodes.DEACTIVATE_WALLET:
+				ZWCoin coin = ZWCoin.valueOf(info.getString(ZWCoin.TYPE_KEY));
+				this.walletManager.deactivateCoin(coin);
+				ZWAccountsFragment frag = (ZWAccountsFragment) getSupportFragmentManager(
+						).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
+				frag.removeFromView(info.getInt("ITEM_LOCATION"));
+				if (this.selectedCoin == coin){
+					this.selectedCoin = null;
+				}
+				break;
+			case ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
+				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
+						).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
+				receiveFrag.loadNewAddressFromDatabase(null);
+				break;
+			case ZWRequestCodes.DEBUG_MODE_ON:
+				ZWPreferencesUtils.setDebugMode(true);
+				this.initAvailableCoins(); //re-init coins to show testnet in debug mode
+				((ZWSettingsFragment)this.getSupportFragmentManager(
+						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
+				break;
+			case ZWRequestCodes.CONFIRM_SEND_COINS:
+				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager(
+						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
+				sendFrag.onClickSendCoins(null);
+				break;
 			}
-			break;
-		case ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
-			ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
-					).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
-			receiveFrag.loadNewAddressFromDatabase(null);
-			break;
-		case ZWRequestCodes.DEBUG_MODE_ON:
-			ZWPreferencesUtils.setDebugMode(true);
-			this.initAvailableCoins(); //re-init coins to show testnet in debug mode
-			((ZWSettingsFragment)this.getSupportFragmentManager(
-					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
-			break;
-		}
 	}
 
 	@Override
@@ -1334,7 +1339,7 @@ ZiftrNetworkHandler, sendTaskCallback {
 		fiatExchangeRateText.setText(selectedFiat.getFormattedAmount(unitPriceInFiat, true));
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
-		BigInteger atomicUnits = getWalletManager().getWalletBalance(getSelectedCoin(), ZWSQLiteOpenHelper.BalanceType.AVAILABLE);
+		BigInteger atomicUnits =  getWalletManager().getWalletBalance(getSelectedCoin());
 		BigDecimal walletBalance = getSelectedCoin().getAmount(atomicUnits);
 
 		walletBalanceTextView.setText(getSelectedCoin().getFormattedAmount(walletBalance));

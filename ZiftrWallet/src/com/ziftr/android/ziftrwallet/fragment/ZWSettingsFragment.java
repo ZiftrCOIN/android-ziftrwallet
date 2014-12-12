@@ -30,9 +30,11 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	private RelativeLayout resetPassword;
 	private TextView resetPasswordLabel;
 	private CheckBox editableConfirmationFee;
+	private CheckBox enableMempoolSpending;
 	private RelativeLayout setFiatCurrency;
 	private TextView chosenFiat;
 	private RelativeLayout editableConfirmationFeeBar;
+	private RelativeLayout enableMempoolSpendingBar;
 	private RelativeLayout setName;
 	private RelativeLayout disableName;
 	private TextView setNameLabel;
@@ -62,6 +64,9 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.setFiatCurrency.setOnClickListener(this);
 		this.editableConfirmationFeeBar =(RelativeLayout) rootView.findViewById(R.id.editable_confirmation_fees_bar);
 		this.editableConfirmationFeeBar.setOnClickListener(this);
+		this.enableMempoolSpendingBar =(RelativeLayout) rootView.findViewById(R.id.enable_mempool_spending_bar);
+		this.enableMempoolSpendingBar.setOnClickListener(this);
+
 		this.chosenFiat = (TextView) rootView.findViewById(R.id.chosen_fiat);
 		this.chosenFiat.setText(ZWPreferencesUtils.getFiatCurrency().getName());
 		this.resetPassword = (RelativeLayout) rootView.findViewById(R.id.reset_password_button);
@@ -69,15 +74,23 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.resetPasswordLabel = ((TextView) resetPassword.findViewById(R.id.reset_password_text));
 		this.editableConfirmationFee = (CheckBox) rootView.findViewById(R.id.editable_confirmation_fees);
 		this.editableConfirmationFee.setOnClickListener(this);
+		this.enableMempoolSpending = (CheckBox) rootView.findViewById(R.id.enable_mempool_spending);
+		this.enableMempoolSpending.setOnClickListener(this);
 		this.setName = (RelativeLayout) rootView.findViewById(R.id.set_name_button);
 		this.setName.setOnClickListener(this);
 		this.disableName = (RelativeLayout) rootView.findViewById(R.id.disable_name_button);
 		this.disableName.setOnClickListener(this);
 		this.setNameLabel = (TextView) this.setName.findViewById(R.id.set_name_label);
+		
 		if (ZWPreferencesUtils.getFeesAreEditable()) {
 			this.editableConfirmationFee.setChecked(true);
 		} else {
 			this.editableConfirmationFee.setChecked(false);
+		}
+		if (ZWPreferencesUtils.getMempoolIsSpendable()) {
+			this.enableMempoolSpending.setChecked(true);
+		} else {
+			this.enableMempoolSpending.setChecked(false);
 		}
 
 		this.debugButton = (Button) rootView.findViewById(R.id.debug_button);
@@ -187,6 +200,11 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		} else if (v == this.editableConfirmationFeeBar){
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
 			ZWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
+		} else if (v == this.enableMempoolSpending){
+			ZWPreferencesUtils.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
+		} else if (v == this.enableMempoolSpendingBar) {
+			this.enableMempoolSpending.setChecked(!this.enableMempoolSpending.isChecked());
+			ZWPreferencesUtils.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
 		} else if (v == this.disableName){
 			ZWPreferencesUtils.setUserName(null);
 			ZWPreferencesUtils.setDisabledName(true);

@@ -179,5 +179,7 @@
     <string name="ow_no_currency">No Available Currencies</string>
     <string name="ow_zxing_license">This software uses ZXing under the Apache 2 license  http://www.apache.org/licenses/LICENSE-2.0</string>
     <string name="debug_warning">This will enable &quot;testnet&quot; coins and advanced options that may compromise wallet security and/or device performance. Use at your own risk! \n\nAre you sure you want to activate debug mode?</string>
-
+    <string name="send_fee_info">Why is there a fee?\n\nThis fee is NOT paid to Ziftr. The fee goes to the miner that secures your transaction as a reward for their service. 
+        This is standard for all cryptocurrency applications. Without it, your transaction would likely stay as pending for an inconvenient length of time.</string>
+    <string name="mempool_spending">Enable Spending Unconfirmed Transactions</string>
 </resources>

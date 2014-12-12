@@ -122,7 +122,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	 */
 	private ZWCurrencyListItem getItemForCoinType(ZWCoin id) {
 		int resId = R.layout.accounts_currency_list_single_item;
-		BigDecimal amount = id.getAmount(this.walletManager.getWalletBalance(id, ZWSQLiteOpenHelper.BalanceType.AVAILABLE));
+		BigDecimal amount = id.getAmount(this.walletManager.getWalletBalance(id));
 		String balance = id.getFormattedAmount(amount);
 		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
 		String fiatBalance = ZWConverter.convert(amount, id, fiat).setScale(2, RoundingMode.HALF_DOWN).toPlainString();

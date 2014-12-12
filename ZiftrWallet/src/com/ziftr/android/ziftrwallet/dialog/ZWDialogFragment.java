@@ -4,6 +4,7 @@ package com.ziftr.android.ziftrwallet.dialog;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
@@ -226,7 +227,7 @@ public abstract class ZWDialogFragment extends DialogFragment implements View.On
 			((ZWMainFragmentActivity) this.getActivity()).setShowingDialog(false);
 		super.onDetach();
 	}
-
+	
 	/**
 	 * @return the requestCode
 	 */

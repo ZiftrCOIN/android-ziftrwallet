@@ -49,6 +49,10 @@ public abstract class ZWPreferencesUtils {
 	
 	/** Save whether we are in logging to filee or not*/
 	public final static String LOG_TO_FILE_KEY = "log_to_file_key";
+	
+	/** Save whether we can spend unconfirmed txns or not*/
+	public final static String SPENDABLE_MEMPOOL_KEY = "spendable_mempool_key";
+
 
 	/**
 	 * Gets the stored hash of the users passphrase, if there is one.
@@ -144,6 +148,18 @@ public abstract class ZWPreferencesUtils {
 		editor.commit();
 	}
 
+	public static boolean getMempoolIsSpendable() {
+		SharedPreferences prefs = getPrefs();
+		return prefs.getBoolean(SPENDABLE_MEMPOOL_KEY, false);
+	}
+
+	public static void setMempoolIsSpendable(boolean spendable) {
+		SharedPreferences prefs = getPrefs();
+		Editor editor = prefs.edit();
+		editor.putBoolean(SPENDABLE_MEMPOOL_KEY, spendable);
+		editor.commit();
+	}
+	
 	public static boolean getPassphraseWarningDisabled() {
 		SharedPreferences prefs = getPrefs();
 		return prefs.getBoolean(PASSPHRASE_WARNING_KEY, false);

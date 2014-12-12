@@ -69,6 +69,10 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 	private String prefilledAddress;
 	private String prefilledAmount;
 	
+	private TextView totalTextView;
+	private TextView totalFiatEquivTextView;
+
+	
 	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
@@ -198,17 +202,15 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, ZWTags.VALIDATE_PASS_SEND);
 			} else {
-				this.onClickSendCoins(null);
+				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_SEND_COINS, "Are you sure you want to send " + 
+			this.totalTextView.getText() + " " + getSelectedCoin().getShortTitle() + "?"
+			, ZWTags.CONFIRM_SEND, new Bundle());
 			}
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(new ZWSendAddressBookFragment(), R.id.sendCoinBaseFrameLayout);
 		} else if (v == this.helpFeeButton) {
-			getZWMainActivity().alertUser(
-					"Why is there a fee?\n\nThis fee is NOT paid to Ziftr. "
-							+ "The fee goes to the miner that secures your transaction as a reward for their service. "
-							+ "This is standard for all cryptocurrency applications. Without it, your transaction would "
-							+ "likely stay as pending for an inconvenient length of time.", 
-					"fee_help_dialog");
+			String fee_info = getActivity().getResources().getString(R.string.send_fee_info);
+			getZWMainActivity().alertUser(fee_info,	"fee_help_dialog");
 		}
 	}
 
@@ -221,9 +223,12 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		String addressToSendTo = this.addressEditText.getText().toString();
 		String addressName = labelEditText.getText().toString();
 		ZWWalletManager manager = getWalletManager();
+		
+		//set dialog showing false earlier to allow error dialogs to show
+		getZWMainActivity().setShowingDialog(false);
+
 		try {
 			sendCoins(addressToSendTo, amountSending, feeSending, passphrase);
-			
 			if (manager.getAddress(getSelectedCoin(), addressToSendTo, false) != null){
 				manager.updateAddressLabel(getSelectedCoin(), addressToSendTo, addressName, false);
 			} else {
@@ -324,6 +329,8 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		this.fiatFeeLabel = (TextView) this.rootView.findViewById(R.id.fee_fiat_label);
 		this.fiatAmountLabel.setText(selectedFiat.getName());
 		this.fiatFeeLabel.setText(selectedFiat.getName());
+		this.totalTextView = (TextView) this.rootView.findViewById(R.id.sendTotalTextView);
+		this.totalFiatEquivTextView = (TextView) this.rootView.findViewById(R.id.sendTotalFiatEquivTextView);
 
 		if (ZWPreferencesUtils.getFeesAreEditable()) {
 			this.coinFeeEditText.setFocusable(true);
@@ -407,16 +414,12 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		BigDecimal total = this.getTotalAmountToSend();
 
 		// Update the text in the total text view
-		TextView totalTextView = (TextView) this.rootView.findViewById(
-				R.id.sendTotalTextView);
-		totalTextView.setText(getSelectedCoin().getFormattedAmount(total));
+		this.totalTextView.setText(getSelectedCoin().getFormattedAmount(total));
 
 		// Update the text in the total fiat equiv
-		TextView totalEquivTextView = (TextView) this.rootView.findViewById(
-				R.id.sendTotalFiatEquivTextView);
 		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
 		BigDecimal fiatTotal = ZWConverter.convert(total, getSelectedCoin(), selectedFiat);
-		totalEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true) + ")");
+		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true) + ")");
 	}
 
 	/**
@@ -501,7 +504,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			throws ZWAddressFormatException, Exception {
 		
 		final ZWCoin coin = getSelectedCoin();
-		
+		BigInteger spendableBalance = getWalletManager().getWalletBalance(coin);
 		if (!coin.addressIsValid(address)){
 			throw new ZWAddressFormatException();
 		} else if (value.signum() != 1){
@@ -509,7 +512,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			throw new ZWSendAmountException("Error: Cannot send 0 coins!");
 		} else if (feePerKb.compareTo(coin.getDefaultFeePerKb()) == 0 && value.compareTo(feePerKb) == -1){
 			throw new ZWSendAmountException("Error: The desired amount to send is too small!");
-		} else if ((value.add(feePerKb)).compareTo(getWalletManager().getWalletBalance(coin, ZWSQLiteOpenHelper.BalanceType.AVAILABLE)) == 1){
+		} else if ((value.add(feePerKb)).compareTo(spendableBalance) == 1){
 			throw new ZWSendAmountException("Error: You don't have enough coins to send this amount!");
 		}
 

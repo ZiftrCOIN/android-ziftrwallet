@@ -30,5 +30,7 @@ public class ZWRequestCodes {
 	
 	public static final int DISABLE_PASSPHRASE_DIALOG = 14;
 	
+	public static final int CONFIRM_SEND_COINS = 15;
+	
 	
 }

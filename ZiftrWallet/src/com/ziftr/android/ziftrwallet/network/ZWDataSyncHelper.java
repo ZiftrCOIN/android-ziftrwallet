@@ -297,7 +297,6 @@ public class ZWDataSyncHelper {
 			//so just use the current time
 			time = System.currentTimeMillis() / 1000; //server sends us seconds, so our hold over time should be formatted the same way
 		}
-		
 		transaction.setTxTime(time * 1000);
 		transaction.setConfirmationCount(json.optLong("confirmations"));
 		
