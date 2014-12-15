@@ -4,15 +4,14 @@ package com.ziftr.android.ziftrwallet.dialog;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
-import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 

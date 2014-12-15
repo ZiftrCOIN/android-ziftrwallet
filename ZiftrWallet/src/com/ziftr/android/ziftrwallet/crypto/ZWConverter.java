@@ -18,6 +18,7 @@ public class ZWConverter {
 		}
 	}
 	
+	
 	public static BigInteger convert(BigInteger amount, ZWCurrency convertFrom, ZWCurrency convertTo) {
 		
 		BigDecimal convertFromDecimal = convertFrom.getAmount(amount);

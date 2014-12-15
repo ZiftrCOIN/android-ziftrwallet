@@ -73,11 +73,10 @@ import com.ziftr.android.ziftrwallet.fragment.ZWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
-import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.sendTaskCallback;
-import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
+import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
+import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 

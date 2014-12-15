@@ -66,12 +66,14 @@ public class ZWActivationTable {
 	
 	
 	protected void insertDefault(ZWCoin coin, SQLiteDatabase db) {
+		
+		
+		String sql = "INSERT OR IGNORE INTO " + TABLE_NAME + 
+				"(" + COLUMN_COIN_ID + "," + COLUMN_ACTIVATED_STATUS + "," + COLUMN_LATEST_BLOCKCHAIN + 
+				") VALUES (" + coin.getShortTitle() + "," + String.valueOf(UNACTIVATED) + "," + "0)";
+		
 		try {
-			ContentValues values = new ContentValues();
-			values.put(COLUMN_COIN_ID, coin.getShortTitle());
-			values.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
-			values.put(COLUMN_LATEST_BLOCKCHAIN, 0);
-			db.insert(TABLE_NAME, null, values);
+			db.execSQL(sql);
 		}
 		catch(Exception e) {
 			//for now just quietly fail, this whole activation table has to be redone

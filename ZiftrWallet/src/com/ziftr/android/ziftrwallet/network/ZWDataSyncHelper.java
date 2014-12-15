@@ -59,7 +59,7 @@ public class ZWDataSyncHelper {
 				try {
 					JSONObject jsonRes = new JSONObject(response);
 					
-					ZLog.log("Send coins step 1 response: ", jsonRes.toString());
+					ZLog.log("Spend transaction data to sign: ", jsonRes.toString());
 					
 					message = signSentCoins(coin, jsonRes, inputs, passphrase);
 				}
@@ -132,15 +132,20 @@ public class ZWDataSyncHelper {
 						ZWWalletManager.getInstance().updateAddress(address);
 					}
 				}
-				//TODO -this is so in-efficient, but for now, just update transaction history again
-				updateTransactionHistory(coin);
 				
-				/***
-				JSONObject responseJson = new JSONObject(response);
+				try {
+					JSONObject responseJson = new JSONObject(response);
+					ZLog.log("Response from completed signing: ", responseJson);
+					createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
+				}
+				catch(Exception e2) {
+					ZLog.log("Exception parsing successful spend response: ", e2);
+					
+					//if the server said the send was successful, but we couldn't handle the response, 
+					//then we just update our history and hope it's there
+					updateTransactionHistory(coin);
+				}
 				
-				ZWTransaction completedTransaction = createTransaction(coin, responseJson, inputs);
-				ZWWalletManager.getInstance().updateTransaction(completedTransaction); //TODO -we should change it so that the create will automatically do this if needed
-				*****/
 				return "";
 			}
 			catch(Exception e) {
@@ -335,7 +340,7 @@ public class ZWDataSyncHelper {
 							String outputValue = vout.getString("value");
 							if(!usedValue) {
 								usedValue = true;
-								BigInteger outputValueInt = new BigInteger(outputValue);
+								BigInteger outputValueInt = convertToBigIntSafe(coin, outputValue);
 								value = value.subtract(outputValueInt);
 							}
 						}
@@ -358,7 +363,7 @@ public class ZWDataSyncHelper {
 					if(!usedValue) {
 						usedValue = true;
 						String outputValue = output.getString("value");
-						BigInteger outputValueInt = new BigInteger(outputValue); 
+						BigInteger outputValueInt = convertToBigIntSafe(coin, outputValue); 
 						value = value.add(outputValueInt);
 						
 						//add the receiving address to the display if not hidden
@@ -435,6 +440,22 @@ public class ZWDataSyncHelper {
 		return postData;
 	}
 
+	
+	/**
+	 * There seems to be a server bug where sometimes it's sending values as decimals instead of whole satoshis
+	 * @param amount a string representing a number in either satoshis or coins
+	 * @return a {@link BigInteger} for the string in satoshis
+	 */
+	private static BigInteger convertToBigIntSafe(ZWCoin coin, String amount) {
+		
+		if(amount.contains(".")) {
+			return coin.getAtomicUnits(new BigDecimal(amount));
+		}
+		
+		return new BigInteger(amount);
+	}
+	
+	
 }
 
 

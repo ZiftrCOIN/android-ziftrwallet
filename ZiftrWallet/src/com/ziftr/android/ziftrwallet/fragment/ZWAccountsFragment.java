@@ -24,7 +24,6 @@ import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
-import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 
 /**
  * The ZWMainActivity starts this fragment. This fragment is 

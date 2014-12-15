@@ -35,7 +35,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
-import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 
