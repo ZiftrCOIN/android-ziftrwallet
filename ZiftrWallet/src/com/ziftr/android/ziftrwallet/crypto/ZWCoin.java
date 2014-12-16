@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import android.annotation.SuppressLint;
+
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
@@ -36,7 +37,7 @@ public class ZWCoin implements ZWCurrency {
 
 	public static ZWCoin PPC = new ZWCoin("1000000", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin,
 			(byte) 55, (byte) 117, (byte) 183, 6, 600, "PPCoin Signed Message:\n");
-	public static final ZWCoin DOGE = new ZWCoin("100000000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
+	public static  ZWCoin DOGE = new ZWCoin("100000000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
 			(byte) 30, (byte) 22, (byte) 158, 6, 60, "Dogecoin Signed Message:\n");
 
 	public static ZWCoin BTC_TEST = new ZWCoin("10000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
@@ -71,20 +72,21 @@ public class ZWCoin implements ZWCurrency {
 		}
 		return null;
 	}
-
+	
+	private boolean isEnabled = false;
 	private BigInteger defaultFeePerKb;
-	private String shortTitle;
-	private String longTitle;
-	private String type;
-	private String chain;
-	private String scheme; 
-	private int numberOfDigitsOfPrecision; 
-	private int logoResId;
 	private byte pubKeyHashPrefix; 
 	private byte scriptHashPrefix;  
 	private byte privKeyPrefix; // TODO assume its pubKeyHashPrefix + 128
+	private String chain;
 	private int numRecommendedConfirmations; 
 	private int secondsPerAverageBlockSolve;  
+	private String type;
+	private String shortTitle;
+	private String longTitle;
+	private String scheme; 
+	private int numberOfDigitsOfPrecision; 
+	private int logoResId;
 	private String signingMessageMagic;
 
 	private ZWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type, String chain, 
@@ -139,13 +141,12 @@ public class ZWCoin implements ZWCurrency {
 	}
 
 
-
 	/**
 	 * gets which type of coin this is for sending to api/database, eg "btc"
 	 * @return a String used to identify a coin
 	 */
 	public String getType() {
-		return type;
+		return this.type;
 	}
 
 
@@ -154,11 +155,11 @@ public class ZWCoin implements ZWCurrency {
 	 * @return the chain this coin is using as a String
 	 */
 	public String getChain() {
-		return chain;
+		return this.chain;
 	}
 
 	/**
-	 * @return the scheme
+	 * @return the scheme used in uri
 	 */
 	public String getScheme() {
 		return scheme;
@@ -189,28 +190,28 @@ public class ZWCoin implements ZWCurrency {
 	 * @return the pubKeyHashPrefix
 	 */
 	public byte getPubKeyHashPrefix() {
-		return pubKeyHashPrefix;
+		return this.pubKeyHashPrefix;
 	}
 
 	/**
 	 * @return the scriptHashPrefix
 	 */
 	public byte getScriptHashPrefix() {
-		return scriptHashPrefix;
+		return this.scriptHashPrefix;
 	}
 
 	/**
 	 * @return the uncompressedPrivKeyPrefix
 	 */
 	public byte getPrivKeyPrefix() {
-		return privKeyPrefix;
+		return this.privKeyPrefix;
 	}
 
 	/**
 	 * @return the numRecommendedConfirmations
 	 */
 	public int getNumRecommendedConfirmations() {
-		return numRecommendedConfirmations;
+		return this.numRecommendedConfirmations;
 	}
 
 	public byte[] getAcceptableAddressCodes() {
@@ -221,9 +222,22 @@ public class ZWCoin implements ZWCurrency {
 	 * @return the secondsPerAverageBlockSolve
 	 */
 	public int getSecondsPerAverageBlockSolve() {
-		return secondsPerAverageBlockSolve;
+		return this.secondsPerAverageBlockSolve;
 	}
 
+	public boolean getIsEnabled(){
+		return this.isEnabled;
+	}
+	
+	public void updateCoin(int defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime, String chain){
+		this.defaultFeePerKb = BigInteger.valueOf(defaultFee);
+		this.pubKeyHashPrefix = pubKeyPrefix;
+		this.scriptHashPrefix = scriptHashPrefix;
+		this.privKeyPrefix = privKeyPrefix;
+		this.numRecommendedConfirmations = confirmationsNeeded;
+		this.secondsPerAverageBlockSolve = blockGenTime;
+		this.chain = chain;
+	}
 	
 	@Override
 	public String getFormattedAmount(BigDecimal amount) {
@@ -242,7 +256,6 @@ public class ZWCoin implements ZWCurrency {
 		
 		return coins.toPlainString();
 	}
-
 	
 	@Override
 	public String getFormattedAmount(BigInteger atmoicUnits) {
@@ -286,19 +299,7 @@ public class ZWCoin implements ZWCurrency {
 	public String getSigningMessageMagic() {
 		return signingMessageMagic;
 	}
-	
-	public void updateCoin(String defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime, String chain){
-		this.defaultFeePerKb = new BigInteger(defaultFee);
-		this.pubKeyHashPrefix = pubKeyPrefix;
-		this.scriptHashPrefix = scriptHashPrefix;
-		this.privKeyPrefix = privKeyPrefix;
-		this.numRecommendedConfirmations = confirmationsNeeded;
-		this.secondsPerAverageBlockSolve = blockGenTime;
-		this.chain = chain;
-	}
 
-	
-	
 	@Override
 	public BigDecimal getAmount(BigInteger atomicUnits) {
 		return new BigDecimal(atomicUnits, this.getNumberOfDigitsOfPrecision());
@@ -313,16 +314,5 @@ public class ZWCoin implements ZWCurrency {
 		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
 		return amount.multiply(multiplier).toBigInteger();
 	}
-	
-	
-	
-
-	
-	
-	
-	
-	
-	
-	
 	
 }

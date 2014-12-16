@@ -157,10 +157,8 @@ public class ZWDataSyncHelper {
 	}
 
 
-	public static List<ZWCoin> getBlockChainWallets(){
+	public static void getBlockChainWallets(){
 		ZiftrNetworkManager.networkStarted();
-
-		List<ZWCoin> supportedCoins = new ArrayList<ZWCoin>();
 		
 		ZiftrNetRequest request = ZWApi.buildGenericApiRequest(false, "/blockchains");
 		String response = request.sendAndWait();
@@ -170,37 +168,41 @@ public class ZWDataSyncHelper {
 				res = new JSONArray((new JSONObject(response)).getString("blockchains"));
 				for (int i=0; i< res.length(); i++){
 					JSONObject coinJson = res.getJSONObject(i);
-					ZWCoin supportedCoin;
+					ZWCoin coinToUpdate;
 					if (coinJson.getString("chain").contains("test")){
-						supportedCoin = ZWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()) + "_TEST");
+						coinToUpdate = ZWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()) + "_TEST");
 					} else {
-						supportedCoin = ZWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()));
+						coinToUpdate = ZWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()));
 					}
-					supportedCoins.add(supportedCoin);
 					
-					if(supportedCoin != null) {
-						String defaultFee = coinJson.getString("default_fee_per_kb");
+					if(coinToUpdate != null) {
+						int defaultFee = coinJson.getInt("default_fee_per_kb");
 						int pubKeyPrefix = coinJson.getInt("p2pkh_byte");
 						int scriptHashPrefix = coinJson.getInt("p2sh_byte");
 						int privateBytePrefix = coinJson.getInt("priv_byte");
 						int blockTime = coinJson.getInt("seconds_per_block_generated");
 						int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
+						int blockNum = coinJson.getInt("height");
 						String chain = coinJson.getString("chain");
-						ZLog.log(coinJson);
-						supportedCoin.updateCoin(defaultFee, (byte)pubKeyPrefix, (byte)scriptHashPrefix, (byte)privateBytePrefix, confirmationsNeeded, blockTime, chain);
+						String type = coinJson.getString("type");
+						//commented out for testing since server returns false for everything
+						//boolean isEnabled = coinJson.getBoolean("is_enabled");
+						boolean isEnabled = true;
+						ZLog.log("CoinJSON " + coinJson);
+						ZWWalletManager.getInstance().updateCoinDb(coinToUpdate, blockNum, defaultFee, pubKeyPrefix, scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, chain, type, isEnabled);
 					}
-					
-						
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
-			ZLog.log("error getting supported wallets: " + response);
+			ZLog.log("error getting /blockchains wallets: " + response);
+		}
+		for (ZWCoin coin : ZWWalletManager.getInstance().getEnabledCoins()){
+			ZWWalletManager.getInstance().updateCoin(coin);
 		}
 		ZiftrNetworkManager.networkStopped();
-		return supportedCoins;
 	}
 	
 	public static void getMarketValue(){

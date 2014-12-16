@@ -225,7 +225,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				ZWPreferencesUtils.setDebugMode(false);
 				resetLoggerHelper();
 				//re-init coins to not show testnet in non-debug mode
-				this.getZWMainActivity().initAvailableCoins();
+				this.getZWMainActivity().initCoins();
 				this.updateSettingsVisibility(false);
 			} else {
 				String warning = getActivity().getResources().getString(R.string.debug_warning);

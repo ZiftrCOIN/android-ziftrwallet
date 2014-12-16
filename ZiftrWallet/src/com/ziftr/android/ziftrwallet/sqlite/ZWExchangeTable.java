@@ -2,6 +2,7 @@ package com.ziftr.android.ziftrwallet.sqlite;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
@@ -54,12 +55,11 @@ public class ZWExchangeTable {
 		}
 	}
 	
-	protected String getExchangeVal(ZWCurrency currency, ZWCurrency convertTo,SQLiteDatabase db){
+	protected String getExchangeVal(ZWCurrency currency, ZWCurrency convertTo, SQLiteDatabase db){
 		String selectQuery = "SELECT " + COLUMN_EXCHANGE_VALUE + " FROM " + TABLE_NAME + " WHERE " + whereIdentifier(currency, convertTo);
 		Cursor c = db.rawQuery(selectQuery, null);
 		if (c.moveToFirst()) {
 			if (!c.isLast()) {
-
 				
 			} 
 			
@@ -75,7 +75,7 @@ public class ZWExchangeTable {
 	}
 	
 	private String whereIdentifier(ZWCurrency currency, ZWCurrency convertTo){
-		return COLUMN_CURRENCY_NAME + " = '" + currency.getShortTitle() + "' AND " + COLUMN_CURRENCY_TO + " = '" + convertTo.getShortTitle() + "'";
+		return COLUMN_CURRENCY_NAME + " = " + DatabaseUtils.sqlEscapeString(currency.getShortTitle()) + " AND " + COLUMN_CURRENCY_TO + " = " + DatabaseUtils.sqlEscapeString(convertTo.getShortTitle());
 	}
 
 }

@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -93,9 +92,6 @@ ZiftrNetworkHandler, sendTaskCallback {
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
 	
-	/** available coins that the user can generate wallets for */
-	private List<ZWCoin> availCoins;
-
 	/** Use this key to save which section of the drawer menu is open. */
 	private static final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
 
@@ -213,7 +209,7 @@ ZiftrNetworkHandler, sendTaskCallback {
 		this.initializeCoinType(savedInstanceState);
 		
 		//load available coins from API blockchains
-		initAvailableCoins();
+		initCoins();
 		
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
@@ -937,12 +933,21 @@ ZiftrNetworkHandler, sendTaskCallback {
 		}
 		// Here we get all the coins that the user doesn't currently 
 		// have a wallet for because those are the ones we put in the new view.
-		Set<ZWCoin> coinsNotInListCurrently = new HashSet<ZWCoin>(availCoins);
+		Set<ZWCoin> coinsNotInListCurrently = new HashSet<ZWCoin>(this.walletManager.getEnabledCoins());
 		for (ZWCoin type : userCurWallets){
 			if (coinsNotInListCurrently.contains(type)){
 				coinsNotInListCurrently.remove(type);
 			}
 		}
+		
+		if (!ZWPreferencesUtils.getDebugMode()){
+			for (ZWCoin test : ZWCoin.TYPES_TEST){
+				if (coinsNotInListCurrently.contains(test)){
+					coinsNotInListCurrently.remove(test);
+				}
+			}
+		}
+		
 		Bundle b = new Bundle();
 		for (ZWCoin type : coinsNotInListCurrently) {
 			b.putBoolean(type.getShortTitle(), true);
@@ -954,25 +959,17 @@ ZiftrNetworkHandler, sendTaskCallback {
 	}
 	
 	//initialize available coin currencies the user can choose to add
-	public void initAvailableCoins(){
+	public void initCoins(){
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				availCoins = ZWDataSyncHelper.getBlockChainWallets();
-				
-				if (!ZWPreferencesUtils.getDebugMode()){
-					availCoins.removeAll(Arrays.asList(ZWCoin.TYPES_TEST));
-				}
-				updateMarketValues();
+				ZWDataSyncHelper.getBlockChainWallets();
+				//update currency exchange rates
+				ZWDataSyncHelper.getMarketValue();
 			}
 		});
 	}
 	
-	//update currency exchange rates
-	public void updateMarketValues(){
-		ZWDataSyncHelper.getMarketValue();
-	}
-
 	/**
 	 * Open View for selecting fiat currency in settings
 	 */
@@ -1219,7 +1216,7 @@ ZiftrNetworkHandler, sendTaskCallback {
 				break;
 			case ZWRequestCodes.DEBUG_MODE_ON:
 				ZWPreferencesUtils.setDebugMode(true);
-				this.initAvailableCoins(); //re-init coins to show testnet in debug mode
+				this.initCoins(); //re-init coins to show testnet in debug mode
 				((ZWSettingsFragment)this.getSupportFragmentManager(
 						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
 				break;

@@ -65,7 +65,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	private ZWAddressesTable sendingAddressesTable;
 
 	/** The table to keep track of coin activated/deactivated/unactivated status. */
-	private ZWActivationTable coinActivationTable;
+	private ZWCoinTable coinTable;
 
 	/** The table to keep track of transactions. */
 	private ZWTransactionTable transactionsTable;
@@ -83,7 +83,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		this.sendingAddressesTable = new ZWSendingAddressesTable();
 		this.receivingAddressesTable = new ZWReceivingAddressesTable();
-		this.coinActivationTable = new ZWActivationTable();
+		this.coinTable = new ZWCoinTable();
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
 	}
@@ -92,11 +92,11 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		// Make table of coin activation statuses
-		this.coinActivationTable.create(db);
+		this.coinTable.create(db);
 		
 		// Fill in the table with all coin types, using UNACTIVATED as the status
 		for (ZWCoin coin : ZWCoin.values()) {
-			this.coinActivationTable.insertDefault(coin, db);
+			this.coinTable.insertDefault(coin, db);
 		}
 
 		//Make exchange table
@@ -139,16 +139,16 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.create(coin, this.getWritableDatabase());
 
 		// Update table to match activated status
-		this.coinActivationTable.setActivation(coin, ZWActivationTable.ACTIVATED, getWritableDatabase());
+		this.coinTable.setActivation(coin, ZWCoinTable.ACTIVATED, getWritableDatabase());
 	}
 
 	public synchronized boolean isCoinActivated(ZWCoin coin) {
-		return this.coinActivationTable.isCoinActivated(coin, getReadableDatabase());
+		return this.coinTable.isCoinActivated(coin, getReadableDatabase());
 	}
 
 	public synchronized List<ZWCoin> getActivatedCoins() {
 
-		return this.coinActivationTable.getCoinsByStatus(ZWActivationTable.ACTIVATED, getReadableDatabase());
+		return this.coinTable.getCoinsByStatus(ZWCoinTable.ACTIVATED, getReadableDatabase());
 	}
 
 	
@@ -161,15 +161,15 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public synchronized List<ZWCoin> getActivatedAndDeactivatedCoins() {
 		
-		int activationStatus = ZWActivationTable.ACTIVATED | ZWActivationTable.DEACTIVATED;
+		int activationStatus = ZWCoinTable.ACTIVATED | ZWCoinTable.DEACTIVATED;
 		
-		return this.coinActivationTable.getCoinsByStatus(activationStatus, getReadableDatabase());
+		return this.coinTable.getCoinsByStatus(activationStatus, getReadableDatabase());
 	}
 
 	
 	
 	public synchronized void deactivateCoin(ZWCoin coin) {
-		this.coinActivationTable.setActivation(coin, ZWActivationTable.DEACTIVATED, getWritableDatabase());
+		this.coinTable.setActivation(coin, ZWCoinTable.DEACTIVATED, getWritableDatabase());
 	}
 	
 
@@ -539,8 +539,27 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized void upsertExchangeValue(ZWCurrency from, ZWCurrency to, String val){
 		this.exchangeTable.upsert(from, to, val, getWritableDatabase());
 	}
+	
+	////////////////////////////////////////////////////////
+	//////////  Interface for RU coin table  ///////////////
+	////////////////////////////////////////////////////////
+	
+	
+	public synchronized void updateCoinDb(ZWCoin coin, int blockNum, int defaultFee, int pubKeyPrefix, int scriptHashPrefix, int privKeyPrefix, 
+			int confirmationsNeeded, int blockGenTime, String chain, String type, boolean enabled){
+		this.coinTable.updateCoinDb(coin, blockNum, defaultFee, pubKeyPrefix, scriptHashPrefix, privKeyPrefix, 
+				confirmationsNeeded, blockGenTime, chain, type, enabled, getWritableDatabase());
+	}
+	
+	public synchronized List<ZWCoin> getEnabledCoins(){
+		return this.coinTable.getEnabledCoins(getReadableDatabase());
+	}
+	
+	public synchronized void updateCoin(ZWCoin coin){
+		this.coinTable.updateCoin(coin, getReadableDatabase());
+	}
+	
 }
-
 
 
 
