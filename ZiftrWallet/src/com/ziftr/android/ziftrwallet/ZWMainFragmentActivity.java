@@ -74,7 +74,7 @@ import com.ziftr.android.ziftrwallet.fragment.ZWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
-import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.sendTaskCallback;
+import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.SendTaskCallback;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -88,7 +88,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class ZWMainFragmentActivity extends ActionBarActivity 
 implements DrawerListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
 ZWResetPassphraseDialogHandler, ZWConfirmationDialogHandler, ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
-ZiftrNetworkHandler, sendTaskCallback {
+ZiftrNetworkHandler, SendTaskCallback {
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
@@ -1582,6 +1582,8 @@ ZiftrNetworkHandler, sendTaskCallback {
 			}
 		}
 	}
+	
+	
 	@Override
 	public void updateSendStatus(final ZWCoin coin, final String message) {
 		runOnUiThread(new Runnable(){
@@ -1604,6 +1606,7 @@ ZiftrNetworkHandler, sendTaskCallback {
 		});
 		
 	}
+	
 	
 	//call on ui thread only
 	@Override

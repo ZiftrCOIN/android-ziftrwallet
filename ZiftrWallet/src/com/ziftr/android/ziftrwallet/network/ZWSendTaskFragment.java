@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet.network;
 
+import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -22,12 +23,12 @@ public class ZWSendTaskFragment extends Fragment{
 		
 	}
 	
-	public static interface sendTaskCallback {
+	public static interface SendTaskCallback {
 		public void updateSendStatus(ZWCoin coin, String message);
 		public void destroySendTaskFragment();
 	}
 	
-	private sendTaskCallback callback = null;
+	private WeakReference<SendTaskCallback> callback = new WeakReference<SendTaskCallback>(null);
 	private String msg = null;
 	private ZWCoin sentCoin = null;
 	
@@ -43,14 +44,9 @@ public class ZWSendTaskFragment extends Fragment{
 	public void onAttach(Activity activity){
 		ZLog.log("SendTask attached");
 		super.onAttach(activity);
-		this.callback = (sendTaskCallback) activity;
+		this.callback = new WeakReference<SendTaskCallback>((SendTaskCallback) activity);
 		if (done){
-			activity.runOnUiThread(new Runnable(){
-				@Override
-				public void run() {
-					callback.destroySendTaskFragment();					
-				}
-			});
+			callback.get().destroySendTaskFragment();					
 		} else {
 			updateCallback();
 		}
@@ -78,14 +74,15 @@ public class ZWSendTaskFragment extends Fragment{
 		});
 	}
 	
-	public synchronized void setCallBack(sendTaskCallback cb){
-		this.callback = cb;
+	public synchronized void setCallBack(SendTaskCallback cb){
+		this.callback = new WeakReference<SendTaskCallback>(cb);
 		updateCallback();
 	}
 	
 	private synchronized void updateCallback(){
-		if (callback!=null && this.sentCoin != null && this.msg != null){
-			callback.updateSendStatus(this.sentCoin, this.msg);
+		SendTaskCallback currentCallback = callback.get();
+		if (currentCallback!=null && this.sentCoin != null && this.msg != null){
+			currentCallback.updateSendStatus(this.sentCoin, this.msg);
 		}
 	}
 	
