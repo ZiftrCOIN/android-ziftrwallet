@@ -119,7 +119,7 @@ public class ZWCoinTable {
 		if (cursor.moveToFirst()) {
 			do {
 				// Add the coin type to the list
-				ZWCoin coin = ZWCoin.valueOf(cursor.getString(0));
+				ZWCoin coin = ZWCoin.getCoin(cursor.getString(0));
 				coins.add(coin);
 			} while (cursor.moveToNext());
 		}
@@ -201,7 +201,7 @@ public class ZWCoinTable {
 		
 		if(cursor != null && cursor.moveToFirst()) {
 			do {
-				ZWCoin coin = ZWCoin.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_COIN_ID)));
+				ZWCoin coin = ZWCoin.getCoin(cursor.getString(cursor.getColumnIndex(COLUMN_COIN_ID)));
 				enabledCoins.add(coin);
 			}
 			while(cursor.moveToNext());

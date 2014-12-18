@@ -96,7 +96,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 	private void initializeFromBundle(Bundle args) {
 		this.coinsToShow = new ArrayList<ZWCoin>();
 		if (args != null) {
-			for (ZWCoin type : ZWCoin.values()) {
+			for (ZWCoin type : ZWCoin.getAllCoins()) {
 				if (args.getBoolean(type.getShortTitle())) {
 					this.coinsToShow.add(type);
 				}

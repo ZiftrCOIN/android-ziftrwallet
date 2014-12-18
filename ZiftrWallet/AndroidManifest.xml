@@ -76,22 +76,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="bitcoin" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="litecoin" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="dogecoin" />
+                <data android:scheme="litecoin" />
             </intent-filter>
         </activity>
         <activity

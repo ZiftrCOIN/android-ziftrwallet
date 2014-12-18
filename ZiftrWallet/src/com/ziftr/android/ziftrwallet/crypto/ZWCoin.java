@@ -52,7 +52,7 @@ public class ZWCoin implements ZWCurrency {
 	public static final ZWCoin[] TYPES = new ZWCoin[] {BTC, LTC, PPC, DOGE};
 	public static final ZWCoin[] TYPES_TEST = new ZWCoin[] {BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
 	
-	public static final ZWCoin[] values() {
+	public static final ZWCoin[] getAllCoins() {
 		ZWCoin[] all = new ZWCoin[TYPES.length + TYPES_TEST.length];
 		for (int i=0; i<TYPES.length; i++){
 			all[i] = TYPES[i];
@@ -64,9 +64,9 @@ public class ZWCoin implements ZWCurrency {
 	}
 
 	@SuppressLint("DefaultLocale")
-	public static ZWCoin valueOf(String coinStr) {
-		for (ZWCoin coin : ZWCoin.values()) {
-			if (coin.getShortTitle().equals(coinStr) || coin.getLongTitle().toLowerCase().equals(coinStr)) {
+	public static ZWCoin getCoin(String coinName) {
+		for (ZWCoin coin : ZWCoin.getAllCoins()) {
+			if (coin.getShortTitle().equals(coinName) || coin.getLongTitle().toLowerCase().equals(coinName)) {
 				return coin;
 			}
 		}

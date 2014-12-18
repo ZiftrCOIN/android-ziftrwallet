@@ -120,7 +120,9 @@ public class ZWTransactionTable extends ZWCoinRelativeTable {
 		
 		
 		sqlBuilder = new StringBuilder("UPDATE ").append(getTableName(transaction.getCoin())).append(" SET ");
-		sqlBuilder.append(COLUMN_NUM_CONFIRMATIONS).append(" = ").append(transaction.getConfirmationCount());
+		sqlBuilder.append(COLUMN_NUM_CONFIRMATIONS).append(" = ").append(transaction.getConfirmationCount()).append(", ");
+		sqlBuilder.append(COLUMN_FEE).append(" = ").append(transaction.getFee().toString()).append(", ");
+		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString());
 		sqlBuilder.append(" WHERE ").append(COLUMN_HASH).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(";");
 		
 		ZLog.log("Updating transaction: ", sqlBuilder.toString());

@@ -95,7 +95,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.coinTable.create(db);
 		
 		// Fill in the table with all coin types, using UNACTIVATED as the status
-		for (ZWCoin coin : ZWCoin.values()) {
+		for (ZWCoin coin : ZWCoin.getAllCoins()) {
 			this.coinTable.insertDefault(coin, db);
 		}
 

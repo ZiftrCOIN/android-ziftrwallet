@@ -234,7 +234,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (getIntent() != null){
 			//Check if loaded from widget
 			if (getIntent().hasExtra(ZWWalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
-				this.setSelectedCoin(ZWCoin.valueOf(ZWPreferencesUtils.getWidgetCoin()));
+				this.setSelectedCoin(ZWCoin.getCoin(ZWPreferencesUtils.getWidgetCoin()));
 				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)) {
 					if (getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_SEND);
@@ -247,7 +247,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 			//loaded from coin uri
 			} else if (getIntent().getAction() == Intent.ACTION_VIEW){
 				String data = getIntent().getDataString();
-				ZWCoin coin = ZWCoin.valueOf(data.substring(0, data.indexOf(':')));
+				ZWCoin coin = ZWCoin.getCoin(data.substring(0, data.indexOf(':')));
 				this.setSelectedCoin(coin);
 				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)){
 					try {
@@ -608,7 +608,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (args != null) {
 			if (args.getString(ZWCoin.TYPE_KEY) != null) {
 				// Need to do this so that we populate the wallet header view as well
-				this.setSelectedCoin(ZWCoin.valueOf(args.getString(ZWCoin.TYPE_KEY)));
+				this.setSelectedCoin(ZWCoin.getCoin(args.getString(ZWCoin.TYPE_KEY)));
 			}
 		}
 	}
@@ -858,7 +858,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 	 */
 	public void openWalletViewFromBundle(Bundle info) {
 		if (info != null) {
-			this.openWalletView(ZWCoin.valueOf(info.getString(ZWCoin.TYPE_KEY)));
+			this.openWalletView(ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY)));
 		}
 	}
 
@@ -1200,7 +1200,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 	public void handleConfirmationPositive(int requestCode, Bundle info) {
 		switch (requestCode) {
 			case ZWRequestCodes.DEACTIVATE_WALLET:
-				ZWCoin coin = ZWCoin.valueOf(info.getString(ZWCoin.TYPE_KEY));
+				ZWCoin coin = ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY));
 				this.walletManager.deactivateCoin(coin);
 				ZWAccountsFragment frag = (ZWAccountsFragment) getSupportFragmentManager(
 						).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());

@@ -340,7 +340,7 @@ public class ZWAddress implements ZWSearchableListItem {
 
 	@Nullable
 	private static ZWCoin getCoinTypeFromVersionByte(byte version) {
-		for (ZWCoin type : ZWCoin.values()) {
+		for (ZWCoin type : ZWCoin.getAllCoins()) {
 			if (isAcceptableVersion(type, version)) {
 				return type;
 			}

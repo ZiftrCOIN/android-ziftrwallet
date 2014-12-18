@@ -35,17 +35,17 @@ public class ZWDataSyncHelper {
 		
 		//find (or create) an address for change that hasn't been spent from
 		List<String> changeAddresses = ZWWalletManager.getInstance().getHiddenAddressList(coin, false);
-		String refundAddress;
+		String changeAddress;
 		if (changeAddresses.size() <= 0){
 			//create new address for change
-			refundAddress = ZWWalletManager.getInstance().createChangeAddress(passphrase, coin).getAddress();
-			ZLog.log(refundAddress);
+			changeAddress = ZWWalletManager.getInstance().createChangeAddress(passphrase, coin).getAddress();
+			ZLog.log(changeAddress);
 		} else {
 			//or reuse one that hasnt been spent from
-			refundAddress = changeAddresses.get(0);
+			changeAddress = changeAddresses.get(0);
 		}
 		
-		JSONObject spendJson = buildSpendPostData(inputs, output, amount, fee.toString(), refundAddress);
+		JSONObject spendJson = buildSpendPostData(inputs, output, amount, fee.toString(), changeAddress);
 		
 		ZLog.log("Spending coins with json: ", spendJson.toString());
 		
@@ -121,7 +121,7 @@ public class ZWDataSyncHelper {
 		ZLog.log("Response from signing: ", response);
 		if(signingRequest.getResponseCode() == 202){
 			try {
-				//update DB
+				//flag any addresses we spent from as having been spent from (so we don't reuse change addresses)
 				if (addressesSpentFrom.size() <= 0){
 					ZLog.log("addresses we spent from weren't in our db ERROR!");
 				} else {
@@ -133,10 +133,14 @@ public class ZWDataSyncHelper {
 					}
 				}
 				
+				//update the transactions table immediatley with the data from this transaction
 				try {
 					JSONObject responseJson = new JSONObject(response);
 					ZLog.log("Response from completed signing: ", responseJson);
 					createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
+					
+					//TODO -once create transaction works properly remove this
+					updateTransactionHistory(coin);
 				}
 				catch(Exception e2) {
 					ZLog.log("Exception parsing successful spend response: ", e2);
@@ -170,9 +174,9 @@ public class ZWDataSyncHelper {
 					JSONObject coinJson = res.getJSONObject(i);
 					ZWCoin coinToUpdate;
 					if (coinJson.getString("chain").contains("test")){
-						coinToUpdate = ZWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()) + "_TEST");
+						coinToUpdate = ZWCoin.getCoin(coinJson.getString("type").toUpperCase(Locale.getDefault()) + "_TEST");
 					} else {
-						coinToUpdate = ZWCoin.valueOf(coinJson.getString("type").toUpperCase(Locale.getDefault()));
+						coinToUpdate = ZWCoin.getCoin(coinJson.getString("type").toUpperCase(Locale.getDefault()));
 					}
 					
 					if(coinToUpdate != null) {
@@ -241,7 +245,7 @@ public class ZWDataSyncHelper {
 			if (str.split("/")[1].contains("test")){
 				coinType += "_TEST";
 			}
-			return ZWCoin.valueOf(coinType);
+			return ZWCoin.getCoin(coinType);
 		} else {
 			//we are a fiat
 			return ZWFiat.valueOf(str);

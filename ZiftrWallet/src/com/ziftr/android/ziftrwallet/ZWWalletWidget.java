@@ -60,7 +60,7 @@ public class ZWWalletWidget extends AppWidgetProvider{
 				ZWPreferencesUtils.setWidgetCoin(ZWWalletManager.getInstance().getActivatedCoins().get(0).getShortTitle());
 			}
 			
-			int next = (coins.indexOf(ZWCoin.valueOf(ZWPreferencesUtils.getWidgetCoin())) + 1) % coins.size();
+			int next = (coins.indexOf(ZWCoin.getCoin(ZWPreferencesUtils.getWidgetCoin())) + 1) % coins.size();
 			ZWPreferencesUtils.setWidgetCoin(coins.get(next).getShortTitle());
 			ZWCoin selectedCurr = coins.get(next);
 			views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);

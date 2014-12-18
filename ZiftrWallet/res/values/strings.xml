@@ -91,7 +91,7 @@
     <!-- Description here -->
     <string name="ow_tx_details_sent">Sent</string>
     <!-- welcome label -->
-    <string name="ow_tx_routing_address">Routing Address</string>
+    <string name="ow_tx_routing_address">Address</string>
     <!-- Description here -->
     <string name="ow_ok">OK</string>
     <!-- Description here -->
