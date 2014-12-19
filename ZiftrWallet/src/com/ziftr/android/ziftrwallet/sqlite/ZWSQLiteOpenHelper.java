@@ -545,6 +545,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	////////////////////////////////////////////////////////
 	
 	
+	//TODO -rework this, passing way too many variables, it's confusing, and we have coin objects for a reason
 	public synchronized void updateCoinDb(ZWCoin coin, int blockNum, int defaultFee, int pubKeyPrefix, int scriptHashPrefix, int privKeyPrefix, 
 			int confirmationsNeeded, int blockGenTime, String chain, String type, boolean enabled){
 		this.coinTable.updateCoinDb(coin, blockNum, defaultFee, pubKeyPrefix, scriptHashPrefix, privKeyPrefix, 

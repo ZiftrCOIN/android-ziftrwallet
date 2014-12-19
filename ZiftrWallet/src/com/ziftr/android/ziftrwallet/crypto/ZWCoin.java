@@ -89,7 +89,7 @@ public class ZWCoin implements ZWCurrency {
 	private int logoResId;
 	private String signingMessageMagic;
 
-	private ZWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type, String chain, 
+	public ZWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type, String chain, 
 			String scheme, int numberOfDigitsOfPrecision, int logoResId, byte pubKeyHashPrefix, byte scriptHashPrefix, 
 			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve, String signingMessageMagic) {
 		this.shortTitle = shortTitle;
@@ -229,7 +229,7 @@ public class ZWCoin implements ZWCurrency {
 		return this.isEnabled;
 	}
 	
-	public void updateCoin(int defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime, String chain){
+	public void setValues(int defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime, String chain){
 		this.defaultFeePerKb = BigInteger.valueOf(defaultFee);
 		this.pubKeyHashPrefix = pubKeyPrefix;
 		this.scriptHashPrefix = scriptHashPrefix;

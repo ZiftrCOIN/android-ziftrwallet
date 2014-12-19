@@ -161,7 +161,7 @@ public class ZWCoinTable {
 		db.update(TABLE_NAME, values, whereClause, null);
 	}
 	
-	public void updateCoinDb(ZWCoin coinId, int blockNum, int defaultFee, int pubKeyPrefix, int scriptHashPrefix, int privKeyPrefix, 
+	public void updateCoinDb(ZWCoin coin, int blockNum, int defaultFee, int pubKeyPrefix, int scriptHashPrefix, int privKeyPrefix, 
 			int confirmationsNeeded, int blockGenTime, String chain, String type, boolean enabled, SQLiteDatabase db){
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_LATEST_BLOCKCHAIN, blockNum);
@@ -174,7 +174,7 @@ public class ZWCoinTable {
 		values.put(COLUMN_CHAIN, chain);
 		values.put(COLUMN_TYPE, type);
 		values.put(COLUMN_ENABLED, enabled);
-		db.update(TABLE_NAME, values, COLUMN_COIN_ID + " = " + DatabaseUtils.sqlEscapeString(coinId.getShortTitle()), null);
+		db.update(TABLE_NAME, values, COLUMN_COIN_ID + " = " + DatabaseUtils.sqlEscapeString(coin.getShortTitle()), null);
 	}
 	
 	public void updateCoin(ZWCoin coin, SQLiteDatabase db){
@@ -188,7 +188,7 @@ public class ZWCoinTable {
 			int confirmationsNeeded = cursor.getInt(cursor.getColumnIndex(COLUMN_RECOMMENDED_CONFIRMS));
 			int blockGenTime = cursor.getInt(cursor.getColumnIndex(COLUMN_BLOCK_TIME));
 			String chain = cursor.getString(cursor.getColumnIndex(COLUMN_CHAIN));
-			coin.updateCoin(defaultFee, pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, chain);
+			coin.setValues(defaultFee, pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, chain);
 			ZLog.log(coin.getShortTitle() + " " + coin.getChain());
 		}
 	}
