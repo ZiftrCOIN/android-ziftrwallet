@@ -340,9 +340,12 @@ public class ZWAddress implements ZWSearchableListItem {
 
 	@Nullable
 	private static ZWCoin getCoinTypeFromVersionByte(byte version) {
-		for (ZWCoin type : ZWCoin.getAllCoins()) {
-			if (isAcceptableVersion(type, version)) {
-				return type;
+		for (ZWCoin coin : ZWCoin.getAllCoins()) {
+			if (isAcceptableVersion(coin, version)) {
+				if(coin.getChain().equals("main")) {
+					//never attempt to load testnet coins from version bytes (too much ambiguity between different testnets)
+					return coin;
+				}
 			}
 		}
 		return null;

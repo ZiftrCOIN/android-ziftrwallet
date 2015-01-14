@@ -8,9 +8,33 @@ import java.math.BigInteger;
  */
 public interface ZWCurrency {
 	
-	public int getNumberOfDigitsOfPrecision();
 	
+	
+	/**
+	 * returns the number of digits of precision (number of decimal places) for a particular currency,
+	 * eg 100 pennies in USD, so precision = 2
+	 * eg 10^8 satoshis in a bitcoin, so precision = 8
+	 * @return digits of precision
+	 */
+	public int getScale();
+	
+	
+	/**
+	 * returns the {@link String} symbol for a particular currency,
+	 * eg US Dollar = $,
+	 * eg bitcoin = BTC
+	 * @return
+	 */
+	public String getSymbol();
+	
+	/**
+	 * returns a {@link String} for the short version of the name of a currency, 
+	 * eg bitcoin = BTC, 
+	 * eg US Dollar = USD
+	 * @return
+	 */
 	public String getShortTitle();
+	
 	
 	/**
 	 * converts an amount of atomic units to full coin values

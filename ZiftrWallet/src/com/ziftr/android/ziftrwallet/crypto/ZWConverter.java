@@ -10,7 +10,7 @@ public class ZWConverter {
 
 	public static BigDecimal convert(BigDecimal amount, ZWCurrency convertFrom, ZWCurrency convertTo) {
 		try {
-			BigDecimal rate = new BigDecimal (ZWWalletManager.getInstance().getExchangeValue(convertFrom, convertTo), MathContext.DECIMAL64);
+			BigDecimal rate = new BigDecimal (ZWWalletManager.getInstance().getExchangeValue(convertFrom.getShortTitle(), convertTo.getShortTitle()), MathContext.DECIMAL64);
 			return amount.multiply(rate, MathContext.DECIMAL64);
 		} catch (ArithmeticException ae) {
 			//certain test coins can have a value of zero could could cause this

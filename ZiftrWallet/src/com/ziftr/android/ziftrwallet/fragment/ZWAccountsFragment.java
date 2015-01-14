@@ -187,7 +187,7 @@ public class ZWAccountsFragment extends ZWFragment {
 					int position, long id) {
 				ZWCurrencyListItem item = (ZWCurrencyListItem) parent.getItemAtPosition(position);
 				Bundle b = new Bundle();
-				b.putString(ZWCoin.TYPE_KEY, item.getCoinId().getShortTitle());
+				b.putString(ZWCoin.TYPE_KEY, item.getCoinId().getSymbol());
 				b.putInt("ITEM_LOCATION", position);
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to "
 						+ "deactivate this wallet? This will not actually delete any of your stored data, and you can reactivate it at any time.", 

@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,11 +30,8 @@ import android.content.res.Resources;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.google.common.base.Charsets;
 import com.google.common.primitives.UnsignedLongs;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
-import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWVarInt;
 
 public class ZiftrUtils {
 
@@ -335,8 +331,7 @@ public class ZiftrUtils {
 	 * @param toFormat - The big decimal to format
 	 * @return a new big decimal formatted correctly as above.
 	 */
-	public static BigDecimal formatToNDecimalPlaces(int numDecimalPlaces, 
-			BigDecimal toFormat) {
+	public static BigDecimal formatToNDecimalPlaces(int numDecimalPlaces, BigDecimal toFormat) {
 		return toFormat.setScale(numDecimalPlaces, RoundingMode.HALF_UP);
 	}
 
@@ -417,28 +412,6 @@ public class ZiftrUtils {
 		}
 	}
 
-	/**
-	 * <p>Given a textual message, returns a byte buffer formatted as follows:</p>
-	 *
-	 * <tt><p>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
-	 * 
-	 * TODO this is only for bitcoin right now, need to make it general
-	 */
-	public static byte[] formatMessageForSigning(ZWCoin coinId, String message) {
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			byte[] magicBytes = coinId.getSigningMessageMagic().getBytes(Charsets.UTF_8);
-			bos.write(magicBytes.length);
-			bos.write(magicBytes);
-			byte[] messageBytes = message.getBytes(Charsets.UTF_8);
-			ZWVarInt size = new ZWVarInt(messageBytes.length);
-			bos.write(size.encode());
-			bos.write(messageBytes);
-			return bos.toByteArray();
-		} catch (IOException e) {
-			throw new RuntimeException(e);  // Cannot happen.
-		}
-	}
 	
 	/**
      * Work around lack of unsigned types in Java.

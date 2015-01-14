@@ -1,10 +1,15 @@
 package com.ziftr.android.ziftrwallet.crypto;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
-import android.annotation.SuppressLint;
-
+import com.google.common.base.Charsets;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
@@ -26,120 +31,127 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  *     3. privKeyPrefix
  */
 public class ZWCoin implements ZWCurrency {
-
+	
+	
 	/** When using bundles, this can be used to store a specific coin type. */
 	public static final String TYPE_KEY = "ZWCOIN_TYPE_KEY";
 
-	public static ZWCoin BTC = new ZWCoin("10000", "BTC", "Bitcoin", "btc", "main", "bitcoin", 8, R.drawable.logo_bitcoin,
-			(byte) 0, (byte) 5, (byte) 128, 6, 600, "Bitcoin Signed Message:\n");
-	public static ZWCoin LTC = new ZWCoin("100000", "LTC", "Litecoin", "ltc", "main", "litecoin", 8, R.drawable.logo_litecoin,
-			(byte) 48, (byte) 5, (byte) 176, 12, 150, "Litecoin Signed Message:\n");
 
-	public static ZWCoin PPC = new ZWCoin("1000000", "PPC", "Peercoin", "ppc", "main", "peercoin", 8, R.drawable.logo_peercoin,
-			(byte) 55, (byte) 117, (byte) 183, 6, 600, "PPCoin Signed Message:\n");
-	public static  ZWCoin DOGE = new ZWCoin("100000000", "DOGE", "Dogecoin", "doge", "main", "dogecoin", 8, R.drawable.logo_dogecoin,
-			(byte) 30, (byte) 22, (byte) 158, 6, 60, "Dogecoin Signed Message:\n");
-
-	public static ZWCoin BTC_TEST = new ZWCoin("10000", "BTC_TEST", "Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, R.drawable.logo_bitcoin,
-			(byte) 111, (byte) 196, (byte) 239, 6, 600, "Bitcoin Signed Message:\n");
-	public static ZWCoin LTC_TEST = new ZWCoin("100000", "LTC_TEST", "Litecoin Testnet", "ltc", "testnet", "litecoin", 8, R.drawable.logo_litecoin,
-			(byte) 111, (byte) 196, (byte) 239, 12, 150, "Litecoin Signed Message:\n");
-	public static ZWCoin PPC_TEST = new ZWCoin("1000000", "PPC_TEST", "Peercoin Testnet", "ppc", "test", "peercoin", 8, R.drawable.logo_peercoin,
-			(byte) 111, (byte) 196, (byte) 239, 6, 600, "PPCoin Signed Message:\n");
-	public static ZWCoin DOGE_TEST = new ZWCoin("100000000", "DOGE_TEST", "Dogecoin Testnet", "doge", "test", "dogecoin", 8, R.drawable.logo_dogecoin,
-			(byte) 113, (byte) 196, (byte) 241, 6, 60, "Dogecoin Signed Message:\n");
-
-	public static final ZWCoin[] TYPES = new ZWCoin[] {BTC, LTC, PPC, DOGE};
-	public static final ZWCoin[] TYPES_TEST = new ZWCoin[] {BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
+	//public static final ZWCoin[] TYPES = new ZWCoin[] {BTC, LTC, PPC, DOGE};
+	//public static final ZWCoin[] TYPES_TEST = new ZWCoin[] {BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
 	
-	public static final ZWCoin[] getAllCoins() {
-		ZWCoin[] all = new ZWCoin[TYPES.length + TYPES_TEST.length];
-		for (int i=0; i<TYPES.length; i++){
-			all[i] = TYPES[i];
-		}
-		for (int j=0; j<TYPES_TEST.length; j++){
-			all[TYPES.length + j] = TYPES_TEST[j];
-		}
-		return all;
-	}
-
-	@SuppressLint("DefaultLocale")
-	public static ZWCoin getCoin(String coinName) {
-		for (ZWCoin coin : ZWCoin.getAllCoins()) {
-			if (coin.getShortTitle().equals(coinName) || coin.getLongTitle().toLowerCase().equals(coinName)) {
-				return coin;
-			}
-		}
-		return null;
+	private static HashMap<String, ZWCoin> coins = new HashMap<String, ZWCoin>();
+	
+	//use these until server is sending actual images (and for display before images are downloaded)
+	private static HashMap<String, Integer> logoMap = new HashMap<String, Integer>();
+	static {
+		logoMap.put("btc", R.drawable.logo_bitcoin);
+		logoMap.put("ltc", R.drawable.logo_litecoin);
+		logoMap.put("doge", R.drawable.logo_dogecoin);
 	}
 	
-	private boolean isEnabled = false;
-	private BigInteger defaultFeePerKb;
+	public static void loadCoins(List<ZWCoin> loadedCoins) {		
+		for(ZWCoin coin : loadedCoins) {
+			coins.put(coin.getSymbol(), coin);
+		}
+	}
+	
+	public static final Collection<ZWCoin> getAllCoins() {
+		return coins.values();
+	}
+
+	
+	public static ZWCoin getCoin(String coinSymbol) {
+		return coins.get(coinSymbol);
+	}
+	
+	
+	private boolean enabled = false;
+	private BigInteger defaultFeePer;
 	private byte pubKeyHashPrefix; 
 	private byte scriptHashPrefix;  
 	private byte privKeyPrefix; // TODO assume its pubKeyHashPrefix + 128
 	private String chain;
-	private int numRecommendedConfirmations; 
-	private int secondsPerAverageBlockSolve;  
+	private int confirmationsNeeded; 
+	private int blockTime;  
 	private String type;
-	private String shortTitle;
-	private String longTitle;
+	private String name;
 	private String scheme; 
-	private int numberOfDigitsOfPrecision; 
-	private int logoResId;
-	private String signingMessageMagic;
+	private int scale;
+	private String logoUrl;
+	
+	
+	public ZWCoin(String name, String type, String chain, String scheme, int scale, 
+			String defaultFee, String logoUrl, byte pubKeyHashPrefix, byte scriptHashPrefix, 
+			byte privKeyPrefix, int confirmationsNeeded, int blockTime, boolean enabled) {
 
-	public ZWCoin(String defaultFeePerKb, String shortTitle, String longTitle, String type, String chain, 
-			String scheme, int numberOfDigitsOfPrecision, int logoResId, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int numRecommendedConfirmations, int secondsPerAverageBlockSolve, String signingMessageMagic) {
-		this.shortTitle = shortTitle;
-		this.longTitle = longTitle;
+		this.name = name;
 		this.type = type;
 		this.chain = chain;
 		this.scheme = scheme;
-		this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
-		this.logoResId = logoResId;
+		this.scale = scale;
+		this.logoUrl = logoUrl;
 		this.pubKeyHashPrefix = pubKeyHashPrefix;
 		this.scriptHashPrefix = scriptHashPrefix;
 		this.privKeyPrefix = privKeyPrefix;
-		this.numRecommendedConfirmations = numRecommendedConfirmations;
-		this.secondsPerAverageBlockSolve = secondsPerAverageBlockSolve;
-		this.signingMessageMagic = signingMessageMagic;
+		this.confirmationsNeeded = confirmationsNeeded;
+		this.blockTime = blockTime;
+		this.enabled = enabled;
+
 		try {
-			this.defaultFeePerKb = new BigInteger(defaultFeePerKb);
+			this.defaultFeePer = new BigInteger(defaultFee);
 		}
 		catch(Exception e) {
-			ZLog.log("Exception setting default fee of ", defaultFeePerKb, "to coin ", longTitle);
-			this.defaultFeePerKb = BigInteger.ZERO;
+			ZLog.log("Exception setting default fee of ", defaultFee, "to coin ", name);
+			this.defaultFeePer = BigInteger.ZERO;
 		}
 	}
 
 
 
 	/**
-	 * As the name describes, this gets the default fee per kb in satoshis for the
-	 * coin. 
-	 * 
-	 * @return as above
+	 * gets the default fee per kb for a transaction for this coin
+	 * @return the default fee per kb
 	 */
-	public BigInteger getDefaultFeePerKb() {
-		return this.defaultFeePerKb;
-	}
-	
-	/**
-	 * @return the shortTitle
-	 */
-	public String getShortTitle() {
-		return shortTitle;
+	public BigInteger getDefaultFee() {
+		return this.defaultFeePer;
 	}
 
+	
+	@Override
+	public String getSymbol() {
+		//for all known coins the symbol/ticker is just an all uppercase version of what the apis call type
+		//for example btc =  BTC
+		//we also appened _TEST for testnet coins
+		String symbol = this.type.toUpperCase(Locale.US);
+		
+		if(!chain.equals("main")) {
+			symbol = symbol + "_TEST";
+		}
+		
+		return symbol;
+	}
+	
+
+	@Override
+	public String getShortTitle() {
+		//just use symbol for short title
+		return this.getSymbol();
+	}
+
+	
 	/**
 	 * @return the longTitle
 	 */
-	public String getLongTitle() {
-		return longTitle;
+	public String getName() {
+		return name;
 	}
 
+	
+	public String getLogoUrl() {
+		return this.logoUrl;
+	}
+	
 
 	/**
 	 * gets which type of coin this is for sending to api/database, eg "btc"
@@ -159,30 +171,47 @@ public class ZWCoin implements ZWCurrency {
 	}
 
 	/**
+	 * gets the scheme used for this coin, this is how the app knows which coin to use when 
+	 * a user clicks on a supported bitcoin uri link
 	 * @return the scheme used in uri
 	 */
 	public String getScheme() {
 		return scheme;
 	}
 
-	/**
-	 * This is an okay place to get this information for now, but will likely 
-	 * want to get this info somewhere else eventually. This gets the number of 
-	 * decimal places of precision, just in case coins have different precision
-	 * amounts. For exmaple, for Bitcoin this returns 8 because 1/10^8 is the 
-	 * smallest unit of bitcoin.
-	 * 
-	 * @return as above
-	 */
-	public int getNumberOfDigitsOfPrecision() {
-		return this.numberOfDigitsOfPrecision;
+	
+	@Override
+	public int getScale() {
+		return this.scale;
 	}
 
+	
+	public int getBlockTime() {
+		return this.blockTime;
+	}
+	
+	
 	/**
-	 * @return the logoResId
+	 * is the server able to give proper information about this coin?
+	 * meaning is the api enabled, is the blockchain up to date, etc
+	 * @return true if the coin is fully enabled, false if there may be coin specific functionality issues
+	 */
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+	
+	
+	/**
+	 * gets the hard coded resource id for the logo for this coin
+	 * @return 
 	 */
 	public int getLogoResId() {
-		return logoResId;
+		Integer resId = logoMap.get(this.type);
+		if(resId == null) {
+			return 0;
+		}
+		
+		return resId; 
 	}
 
 	
@@ -211,7 +240,7 @@ public class ZWCoin implements ZWCurrency {
 	 * @return the numRecommendedConfirmations
 	 */
 	public int getNumRecommendedConfirmations() {
-		return this.numRecommendedConfirmations;
+		return this.confirmationsNeeded;
 	}
 
 	public byte[] getAcceptableAddressCodes() {
@@ -222,27 +251,14 @@ public class ZWCoin implements ZWCurrency {
 	 * @return the secondsPerAverageBlockSolve
 	 */
 	public int getSecondsPerAverageBlockSolve() {
-		return this.secondsPerAverageBlockSolve;
+		return this.blockTime;
 	}
 
-	public boolean getIsEnabled(){
-		return this.isEnabled;
-	}
-	
-	public void setValues(int defaultFee, byte pubKeyPrefix, byte scriptHashPrefix, byte privKeyPrefix, int confirmationsNeeded, int blockGenTime, String chain){
-		this.defaultFeePerKb = BigInteger.valueOf(defaultFee);
-		this.pubKeyHashPrefix = pubKeyPrefix;
-		this.scriptHashPrefix = scriptHashPrefix;
-		this.privKeyPrefix = privKeyPrefix;
-		this.numRecommendedConfirmations = confirmationsNeeded;
-		this.secondsPerAverageBlockSolve = blockGenTime;
-		this.chain = chain;
-	}
 	
 	@Override
 	public String getFormattedAmount(BigDecimal amount) {
 		
-		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), amount);
+		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getScale(), amount);
 		
 		coins = coins.stripTrailingZeros();
 		if(coins.scale() < 2 || coins.compareTo(BigDecimal.ZERO) == 0) {
@@ -261,7 +277,7 @@ public class ZWCoin implements ZWCurrency {
 	public String getFormattedAmount(BigInteger atmoicUnits) {
 		
 		BigDecimal toFormatAsDecimal = this.getAmount(atmoicUnits);
-		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), toFormatAsDecimal);
+		BigDecimal coins = ZiftrUtils.formatToNDecimalPlaces(this.getScale(), toFormatAsDecimal);
 		
 		return this.getFormattedAmount(coins);
 	}
@@ -293,26 +309,61 @@ public class ZWCoin implements ZWCurrency {
 		}
 	}
 
-	/**
-	 * @return the signingMessageMagic
-	 */
-	public String getSigningMessageMagic() {
-		return signingMessageMagic;
-	}
 
 	@Override
 	public BigDecimal getAmount(BigInteger atomicUnits) {
-		return new BigDecimal(atomicUnits, this.getNumberOfDigitsOfPrecision());
+		return new BigDecimal(atomicUnits, this.getScale());
 	}
 
 	
 	@Override
 	public BigInteger getAtomicUnits(BigDecimal amount) {
-		int precision = -1*this.getNumberOfDigitsOfPrecision();
+		int precision = -1*this.getScale();
 		
 		//note, this constructor is weird to me, but RTFM, it's for making small numbers and makes the scale negative
 		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
 		return amount.multiply(multiplier).toBigInteger();
 	}
+	
+	
+	
+	/**
+	 * <p>Given a textual message, returns a byte buffer formatted as follows:</p>
+	 *
+	 * <tt><p>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
+	 * 
+	 */
+	public byte[] formatMessageForSigning(String message) {
+		try {
+			//build the magic value for messaging from the coin title
+			String magicValue;
+			if(this.name.contains(" Test")) {
+				//server adds "Test" or "Testnet" to the coin title, strip that for magic message
+				magicValue = this.name.substring(0, this.name.indexOf(" Test")) + " Signed Message:\n";
+			}
+			else {
+				magicValue = this.name + " Signed Message:\n";
+			}
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] magicBytes = magicValue.getBytes(Charsets.UTF_8);
+			bos.write(magicBytes.length);
+			bos.write(magicBytes);
+			byte[] messageBytes = message.getBytes(Charsets.UTF_8);
+			ZWVarInt size = new ZWVarInt(messageBytes.length);
+			bos.write(size.encode());
+			bos.write(messageBytes);
+			return bos.toByteArray();
+		} 
+		catch (IOException e) {
+			ZLog.log("Exception trying to format message for signing", e);
+		}
+		
+		return new byte[0];
+	}
+
+	
+	
+	
 	
 }

@@ -197,12 +197,12 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		} else if (v == sendButton) {
 			if (ZWPreferencesUtils.userHasPassphrase()) {
 				Bundle b = new Bundle();
-				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getShortTitle());
+				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, ZWTags.VALIDATE_PASS_SEND);
 			} else {
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_SEND_COINS, "Are you sure you want to send " + 
-			this.totalTextView.getText() + " " + getSelectedCoin().getShortTitle() + "?"
+			this.totalTextView.getText() + " " + getSelectedCoin().getSymbol() + "?"
 			, ZWTags.CONFIRM_SEND, new Bundle());
 			}
 		} else if (v == this.getAddressBookImageView()) {
@@ -388,7 +388,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		// Add the listener to the fee text view
 		feeEditText.addTextChangedListener(refreshTotalTextWatcher);
 
-		feeEditText.setText(getSelectedCoin().getFormattedAmount(getSelectedCoin().getDefaultFeePerKb()));
+		feeEditText.setText(getSelectedCoin().getFormattedAmount(getSelectedCoin().getDefaultFee()));
 
 	}
 
@@ -509,7 +509,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		} else if (value.signum() != 1){
 			//user wants to send <=0 coins
 			throw new ZWSendAmountException("Error: Cannot send 0 coins!");
-		} else if (feePerKb.compareTo(coin.getDefaultFeePerKb()) == 0 && value.compareTo(feePerKb) == -1){
+		} else if (feePerKb.compareTo(coin.getDefaultFee()) == 0 && value.compareTo(feePerKb) == -1){
 			throw new ZWSendAmountException("Error: The desired amount to send is too small!");
 		} else if ((value.add(feePerKb)).compareTo(spendableBalance) == 1){
 			throw new ZWSendAmountException("Error: You don't have enough coins to send this amount!");

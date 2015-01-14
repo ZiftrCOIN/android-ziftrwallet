@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
+import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
@@ -94,10 +94,20 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		// Make table of coin activation statuses
 		this.coinTable.create(db);
 		
-		// Fill in the table with all coin types, using UNACTIVATED as the status
-		for (ZWCoin coin : ZWCoin.getAllCoins()) {
-			this.coinTable.insertDefault(coin, db);
+		//if we have any coins in our table load them into the ZWCoin class
+		//otherwise load insert the default hardcoded coins into the table and load them into the ZWCoin class
+		List<ZWCoin> coins = coinTable.getAllCoins(db);
+		if(coins.size() == 0) {
+			
+			// fill in table with default coin, using UNACTIVATED as the status
+			coins = ZWDefaultCoins.getDefaultCoins();
+			for (ZWCoin coin : coins) {
+				this.coinTable.insertDefault(coin, db);
+			}
 		}
+		
+		ZWCoin.loadCoins(coins);
+		
 
 		//Make exchange table
 		this.exchangeTable.create(db);
@@ -116,71 +126,10 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		// Nothing to do for Version 1
 	}
 
-	////////////////////////////////////////////////////////////////////
-	//////////  Interface for CRUDing ActivatedTables table  ///////////
-	////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Call this method to activate a coin type if it is not already activated.
-	 * If it has not been activated then this method will create the necessary tables 
-	 * for the coin type given and update the activated statuses table appropriately.
-	 * 
-	 * @param coinId
-	 */
-	public synchronized void activateCoin(ZWCoin coin) {
-		// Safety check
-		if (isCoinActivated(coin)) {
-			return;
-		}
-
-		// TODO create tables for coin type
-		this.receivingAddressesTable.create(coin, this.getWritableDatabase());
-		this.sendingAddressesTable.create(coin, this.getWritableDatabase());
-		this.transactionsTable.create(coin, this.getWritableDatabase());
-
-		// Update table to match activated status
-		this.coinTable.setActivation(coin, ZWCoinTable.ACTIVATED, getWritableDatabase());
-	}
-
-	public synchronized boolean isCoinActivated(ZWCoin coin) {
-		return this.coinTable.isCoinActivated(coin, getReadableDatabase());
-	}
-
-	public synchronized List<ZWCoin> getActivatedCoins() {
-
-		return this.coinTable.getCoinsByStatus(ZWCoinTable.ACTIVATED, getReadableDatabase());
-	}
-
 	
-	/**
-	 * gets a list of every coin that has been, or currently is, activated,
-	 * basically excluded coins that are "un-activated",
-	 * the current usecase for this is changing passwords, where private keys 
-	 * that are in deactivated coin's databases must also be updated
-	 * @return a list of activated and deactivated coins
-	 */
-	public synchronized List<ZWCoin> getActivatedAndDeactivatedCoins() {
-		
-		int activationStatus = ZWCoinTable.ACTIVATED | ZWCoinTable.DEACTIVATED;
-		
-		return this.coinTable.getCoinsByStatus(activationStatus, getReadableDatabase());
-	}
-
-	
-	
-	public synchronized void deactivateCoin(ZWCoin coin) {
-		this.coinTable.setActivation(coin, ZWCoinTable.DEACTIVATED, getWritableDatabase());
-	}
-	
-
-	/*
-	 * NOTE:
-	 * Shouldn't ever insert/delete from activated status table, so we don't
-	 * supply insert/delete convenience methods here, only an update.
-	 */
 
 	//////////////////////////////////////////////////////////////////
-	//////////  Interface for CRUDing receiving addresses  ///////////
+	//////////  Interface for receiving addresses table  ///////////
 	//////////////////////////////////////////////////////////////////
 
 	private synchronized ZWAddressesTable getTable(boolean receivingNotSending) {
@@ -342,7 +291,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 
 	///////////////////////////////////////////////////////////
-	//////////  Interface for CRUDing transactions  ///////////
+	//////////  Interface for  transactions  ///////////
 	///////////////////////////////////////////////////////////
 
 	
@@ -529,36 +478,97 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/////////////////////////////////////////////////////////////
-	//////////  Interface for CRUDing exchange table  ///////////
+	//////////  Interface for exchange table  ///////////
 	/////////////////////////////////////////////////////////////
 	
-	public synchronized String getExchangeValue(ZWCurrency from, ZWCurrency to){
+	public synchronized String getExchangeValue(String from, String to){
 		return this.exchangeTable.getExchangeVal(from, to, getReadableDatabase());
 	}
 	
-	public synchronized void upsertExchangeValue(ZWCurrency from, ZWCurrency to, String val){
+	public synchronized void upsertExchangeValue(String from, String to, String val){
 		this.exchangeTable.upsert(from, to, val, getWritableDatabase());
 	}
 	
 	////////////////////////////////////////////////////////
-	//////////  Interface for RU coin table  ///////////////
+	//////////  Interface for coin table  ///////////////
 	////////////////////////////////////////////////////////
-	
-	
-	//TODO -rework this, passing way too many variables, it's confusing, and we have coin objects for a reason
-	public synchronized void updateCoinDb(ZWCoin coin, int blockNum, int defaultFee, int pubKeyPrefix, int scriptHashPrefix, int privKeyPrefix, 
-			int confirmationsNeeded, int blockGenTime, String chain, String type, boolean enabled){
-		this.coinTable.updateCoinDb(coin, blockNum, defaultFee, pubKeyPrefix, scriptHashPrefix, privKeyPrefix, 
-				confirmationsNeeded, blockGenTime, chain, type, enabled, getWritableDatabase());
+
+	/***
+	public synchronized void updateCoinTWO(ZWCoin coin) {
+		this.coinTable.updateCoin(coin, getWritableDatabase());
 	}
+	***/
 	
-	public synchronized List<ZWCoin> getEnabledCoins(){
+	
+	/**
+	public synchronized List<ZWCoin> getEnabledCoins(boolean includeTestnet){
 		return this.coinTable.getEnabledCoins(getReadableDatabase());
 	}
+	**/
+	
 	
 	public synchronized void updateCoin(ZWCoin coin){
-		this.coinTable.updateCoin(coin, getReadableDatabase());
+		this.coinTable.updateCoin(coin, getWritableDatabase());
 	}
+	
+	public synchronized List<ZWCoin> getCoins() {
+		return this.coinTable.getAllCoins(getReadableDatabase());
+	}
+
+	/**
+	* Call this method to activate a coin type if it is not already activated.
+	* If it has not been activated then this method will create the necessary tables 
+	* for the coin type given and update the activated statuses table appropriately.
+	* 
+	* @param coinId
+	*/
+	public synchronized void activateCoin(ZWCoin coin) {
+		// Safety check
+		if (isCoinActivated(coin)) {
+			return;
+		}
+		
+		// TODO create tables for coin type
+		this.receivingAddressesTable.create(coin, this.getWritableDatabase());
+		this.sendingAddressesTable.create(coin, this.getWritableDatabase());
+		this.transactionsTable.create(coin, this.getWritableDatabase());
+		
+		// Update table to match activated status
+		this.coinTable.setActivation(coin, ZWCoinTable.ACTIVATED, getWritableDatabase());
+	}
+	
+	
+	public synchronized boolean isCoinActivated(ZWCoin coin) {
+		return this.coinTable.isCoinActivated(coin, getReadableDatabase());
+	}
+	
+	
+	public synchronized List<ZWCoin> getActivatedCoins() {
+		return this.coinTable.getCoinsByStatus(ZWCoinTable.ACTIVATED, getReadableDatabase(), true);
+	}
+	
+	public synchronized List<ZWCoin> getInactiveCoins(boolean includeTestnets) {
+		return this.coinTable.getCoinsByStatus(ZWCoinTable.DEACTIVATED | ZWCoinTable.UNACTIVATED, getReadableDatabase(), includeTestnets);
+	}
+	
+	
+	/**
+	* gets a list of every coin that has been, or currently is, activated,
+	* basically excluded coins that are "un-activated",
+	* the current usecase for this is changing passwords, where private keys 
+	* that are in deactivated coin's databases must also be updated
+	* @return a list of activated and deactivated coins
+	*/
+	public synchronized List<ZWCoin> getActivatedAndDeactivatedCoins() {
+		int activationStatus = ZWCoinTable.ACTIVATED | ZWCoinTable.DEACTIVATED;		
+		return this.coinTable.getCoinsByStatus(activationStatus, getReadableDatabase(), true);
+	}
+	
+	
+	public synchronized void deactivateCoin(ZWCoin coin) {
+		this.coinTable.setActivation(coin, ZWCoinTable.DEACTIVATED, getWritableDatabase());
+	}
+
 	
 }
 

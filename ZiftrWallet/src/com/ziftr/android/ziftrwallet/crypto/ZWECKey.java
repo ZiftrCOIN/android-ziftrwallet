@@ -511,11 +511,11 @@ public class ZWECKey {
 	 * @throws IllegalStateException if this ECKey does not have the private part.
 	 * @throws ZWKeyCrypterException if this ECKey is encrypted and no AESKey is provided or it does not decrypt the ECKey.
 	 */
-	public String signMessage(ZWCoin coinId, String message) throws ZWKeyCrypterException {
+	public String signMessage(ZWCoin coin, String message) throws ZWKeyCrypterException {
 		if (priv == null) {
 			throw new IllegalStateException("This ECKey does not have the private key necessary for signing.");
 		}
-		byte[] data = ZiftrUtils.formatMessageForSigning(coinId, message);
+		byte[] data = coin.formatMessageForSigning(message);
 		ZWSha256Hash hash = ZWSha256Hash.createDouble(data);
 		ZWECDSASignature sig = sign(hash);
 		// Now we have to work backwards to figure out the recId needed to recover the signature.

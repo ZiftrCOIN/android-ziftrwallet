@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 
 /**
  * In the accounts section of the app there is a list of currencies that opens
@@ -20,15 +21,15 @@ import com.ziftr.android.ziftrwallet.R;
  * of currencies the user can choose from. This adapts each option to form
  * a view for each currency, reusing old views to improve efficiency. 
  */
-public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWNewCurrencyListItem> {
-	private int resourceId;
+public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
+	
+	private static final int VIEW_RES_ID = R.layout.accounts_new_currency_list_item;
+	
 	private LayoutInflater inflater;
 	private Context context;
 
-	public ZWNewCurrencyListAdapter(Context ctx, int resourceId, 
-			List<ZWNewCurrencyListItem> coins) {
-		super(ctx, resourceId, coins);
-		this.resourceId = resourceId;
+	public ZWNewCurrencyListAdapter(Context ctx, List<ZWCoin> coins) {
+		super(ctx, VIEW_RES_ID, coins);
 		this.inflater = LayoutInflater.from(ctx);
 		this.context = ctx;
 	}
@@ -37,10 +38,10 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWNewCurrencyListItem
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// The convertView is an oldView that android is recycling.
 
-		final ZWNewCurrencyListItem newCurrencyListItem = getItem(position);
+		final ZWCoin coin = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-			convertView = (LinearLayout) this.inflater.inflate(this.resourceId, null);
+			convertView = (LinearLayout) this.inflater.inflate(this.VIEW_RES_ID, null);
 		}
 
 		// Whether or not we just created one, we reset all the resources
@@ -48,12 +49,12 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWNewCurrencyListItem
 
 		// Set the coin logo image view
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
-		Drawable image = context.getResources().getDrawable(newCurrencyListItem.getCoinId().getLogoResId());
+		Drawable image = context.getResources().getDrawable(coin.getLogoResId());
 		coinLogo.setImageDrawable(image);
 
 		// Set the text next to logo
 		TextView coinName = (TextView) convertView.findViewById(R.id.topLeftTextView);
-		coinName.setText(newCurrencyListItem.getCoinId().getLongTitle());
+		coinName.setText(coin.getName());
 
 		return convertView;
 	}

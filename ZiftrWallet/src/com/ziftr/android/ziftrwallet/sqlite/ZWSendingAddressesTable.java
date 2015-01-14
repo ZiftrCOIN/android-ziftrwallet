@@ -15,7 +15,7 @@ public class ZWSendingAddressesTable extends ZWAddressesTable {
 	
 	@Override
 	protected String getTableName(ZWCoin coin) {
-		return coin.getShortTitle() + TABLE_NAME_BASE;
+		return coin.getSymbol() + TABLE_NAME_BASE;
 	}
 
 	

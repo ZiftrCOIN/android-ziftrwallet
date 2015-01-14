@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
@@ -58,7 +56,6 @@ import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyFragment;
-import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyListItem;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListAdapter;
@@ -314,7 +311,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
 		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
 		if (this.getSelectedCoin() != null) {
-			outState.putString(ZWCoin.TYPE_KEY, this.getSelectedCoin().getShortTitle());
+			outState.putString(ZWCoin.TYPE_KEY, this.getSelectedCoin().getSymbol());
 		}
 	}
 
@@ -810,21 +807,18 @@ ZiftrNetworkHandler, SendTaskCallback {
 	 * 
 	 * @param bundle with ZWCoin of wallet to add
 	 */
-	public void addNewCurrency(ZWNewCurrencyListItem item) {
-		ZWCoin newItem = item.getCoinId();
+	public void addNewCurrency(ZWCoin newCoin) {
 		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
 		// Make sure that this view only has wallets
 		// in it which the user do
-		for (ZWCoin type : this.walletManager.getActivatedCoins()) {
-			if (type == newItem) {
-				// Already in list, shouldn't ever get here though because
-				// we only show currencies in the dialog which we don't have
-				this.onBackPressed();
-				return;
-			}
+		if(this.walletManager.isCoinActivated(newCoin)) {
+			// Already in list, shouldn't ever get here though because
+			// we only show currencies in the dialog which we don't have
+			this.onBackPressed();
+			return;
 		}
 		
-		walletManager.activateCoin(newItem);
+		walletManager.activateCoin(newCoin);
 		
 		Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
 		this.onBackPressed();
@@ -922,7 +916,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 	/**
 	 * Open view for add new currency
 	 */
-	public void openAddCurrency(List<ZWCoin> userCurWallets) {
+	public void openAddCurrency() {
 		if (drawerMenuIsOpen()){
 			this.menuDrawer.closeDrawer(Gravity.LEFT);
 		}
@@ -931,28 +925,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (fragToShow == null) {
 			fragToShow = new ZWNewCurrencyFragment();
 		}
-		// Here we get all the coins that the user doesn't currently 
-		// have a wallet for because those are the ones we put in the new view.
-		Set<ZWCoin> coinsNotInListCurrently = new HashSet<ZWCoin>(this.walletManager.getEnabledCoins());
-		for (ZWCoin type : userCurWallets){
-			if (coinsNotInListCurrently.contains(type)){
-				coinsNotInListCurrently.remove(type);
-			}
-		}
-		
-		if (!ZWPreferencesUtils.getDebugMode()){
-			for (ZWCoin test : ZWCoin.TYPES_TEST){
-				if (coinsNotInListCurrently.contains(test)){
-					coinsNotInListCurrently.remove(test);
-				}
-			}
-		}
-		
-		Bundle b = new Bundle();
-		for (ZWCoin type : coinsNotInListCurrently) {
-			b.putBoolean(type.getShortTitle(), true);
-		}
-		fragToShow.setArguments(b);
+
 		this.showFragment(fragToShow, ZWTags.ADD_CURRENCY, R.id.oneWalletBaseFragmentHolder, true, 
 				ZWTags.ACCOUNTS_INNER);
 
@@ -963,7 +936,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				ZWDataSyncHelper.getBlockChainWallets();
+				ZWDataSyncHelper.downloadCoinData();
 				//update currency exchange rates
 				ZWDataSyncHelper.getMarketValue();
 			}
@@ -1314,7 +1287,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 		headerView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
 		
 		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
-		coinTitle.setText(this.selectedCoin.getLongTitle());
+		coinTitle.setText(this.selectedCoin.getName());
 		
 		updateWalletHeaderView(headerView);
 		
@@ -1431,11 +1404,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 
 				@Override
 				public void onClick(View v) {
-					List<ZWCoin> usersCurWallets = new ArrayList<ZWCoin>();
-					for (ZWCoin newItem : getWalletManager().getActivatedCoins()) {
-						usersCurWallets.add(newItem);
-					}
-					openAddCurrency(usersCurWallets);
+					openAddCurrency();
 				}
 			});
 		} else {
@@ -1589,12 +1558,12 @@ ZiftrNetworkHandler, SendTaskCallback {
 				ZLog.log("sendTask beginning update ui");
 				destroySendTaskFragment();
 					if (!message.isEmpty()){
-						alertUser("Sending " + coin.getShortTitle()+ " " + message, "error_sending_coins");
+						alertUser("Sending " + coin.getSymbol()+ " " + message, "error_sending_coins");
 						if (ZWMainFragmentActivity.this.getTopDisplayedFragment().getTag().equals(ZWTags.SEND_FRAGMENT)){
 							((ZWSendCoinsFragment)ZWMainFragmentActivity.this.getTopDisplayedFragment()).reEnableSend();
 						}
 					} else {
-					Toast.makeText(ZWMainFragmentActivity.this, coin.getShortTitle() + " sent!", Toast.LENGTH_LONG).show();
+					Toast.makeText(ZWMainFragmentActivity.this, coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
 					if (ZWMainFragmentActivity.this.getTopDisplayedFragment().getTag().equals(ZWTags.SEND_FRAGMENT)){
 						ZWMainFragmentActivity.this.onBackPressed();
 					}

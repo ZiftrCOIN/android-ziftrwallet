@@ -17,16 +17,13 @@ import org.json.JSONObject;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
-import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWDataSyncHelper {
-
 	
 	public static String sendCoins(ZWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
 		String message = "";
@@ -161,40 +158,59 @@ public class ZWDataSyncHelper {
 	}
 
 
-	public static void getBlockChainWallets(){
+	
+	public static void downloadCoinData(){
 		ZiftrNetworkManager.networkStarted();
 		
 		ZiftrNetRequest request = ZWApi.buildGenericApiRequest(false, "/blockchains");
 		String response = request.sendAndWait();
 		if (request.getResponseCode() == 200){
-			JSONArray res;
+
 			try {
-				res = new JSONArray((new JSONObject(response)).getString("blockchains"));
-				for (int i=0; i< res.length(); i++){
-					JSONObject coinJson = res.getJSONObject(i);
-					ZWCoin coinToUpdate;
-					if (coinJson.getString("chain").contains("test")){
-						coinToUpdate = ZWCoin.getCoin(coinJson.getString("type").toUpperCase(Locale.getDefault()) + "_TEST");
-					} else {
-						coinToUpdate = ZWCoin.getCoin(coinJson.getString("type").toUpperCase(Locale.getDefault()));
+				JSONObject jsonResponse = new JSONObject(response);
+				JSONArray coinsArray = jsonResponse.getJSONArray("blockchains");
+				
+				for (int i=0; i< coinsArray.length(); i++){
+					JSONObject coinJson = coinsArray.getJSONObject(i);
+	
+					String name = coinJson.optString("name");
+	
+					long defaultFee = coinJson.getLong("default_fee_per_kb");
+					String feeString = String.valueOf(defaultFee);
+					
+					byte pubKeyPrefix = (byte) coinJson.getInt("p2pkh_byte");
+					byte scriptHashPrefix = (byte) coinJson.getInt("p2sh_byte");
+					byte privateBytePrefix = (byte) coinJson.getInt("priv_byte");
+					int blockTime = coinJson.getInt("seconds_per_block_generated");
+					int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
+					int blockNum = coinJson.getInt("height");
+					String chain = coinJson.getString("chain");
+					String type = coinJson.getString("type");
+					boolean isEnabled = coinJson.getBoolean("is_enabled");
+					
+					
+					String scheme = coinJson.optString("scheme");
+					if(scheme == null || scheme.length() == 0) {
+						//TODO -temp hack until api gives us coin scheme (maybe this is just always true?)
+						if(type.equals("main")) {
+							scheme = name.toLowerCase(Locale.US); 
+						}
 					}
 					
-					if(coinToUpdate != null) {
-						int defaultFee = coinJson.getInt("default_fee_per_kb");
-						int pubKeyPrefix = coinJson.getInt("p2pkh_byte");
-						int scriptHashPrefix = coinJson.getInt("p2sh_byte");
-						int privateBytePrefix = coinJson.getInt("priv_byte");
-						int blockTime = coinJson.getInt("seconds_per_block_generated");
-						int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
-						int blockNum = coinJson.getInt("height");
-						String chain = coinJson.getString("chain");
-						String type = coinJson.getString("type");
-						//commented out for testing since server returns false for everything
-						//boolean isEnabled = coinJson.getBoolean("is_enabled");
-						boolean isEnabled = true;
-						ZLog.log("CoinJSON " + coinJson);
-						ZWWalletManager.getInstance().updateCoinDb(coinToUpdate, blockNum, defaultFee, pubKeyPrefix, scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, chain, type, isEnabled);
+					int scale = coinJson.optInt("scale");
+					if(scale == 0) {
+						//TODO -temp hack until api sends us proper coin scale
+						scale = 8;
 					}
+
+					String logoUrl = null; //TODO -server doesn't send us logos yet (coins handle this by using backup resource ids instead)
+					
+					if(name != null && name.length() > 0) {
+						ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, feeString, logoUrl, pubKeyPrefix, 
+								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, isEnabled);
+						ZWWalletManager.getInstance().updateCoin(coin);
+					}
+				
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -203,9 +219,10 @@ public class ZWDataSyncHelper {
 		} else {
 			ZLog.log("error getting /blockchains wallets: " + response);
 		}
-		for (ZWCoin coin : ZWWalletManager.getInstance().getEnabledCoins()){
-			ZWWalletManager.getInstance().updateCoin(coin);
-		}
+		
+		//now load any coin changes into the coins class for faster access later
+		ZWCoin.loadCoins(ZWWalletManager.getInstance().getCoins());
+		
 		ZiftrNetworkManager.networkStopped();
 	}
 	
@@ -219,13 +236,16 @@ public class ZWDataSyncHelper {
 				JSONArray marketRes = new JSONArray(response);
 				for (int i=0; i< marketRes.length(); i++){
 					JSONObject marketVal = new JSONObject(marketRes.getString(i));
-					ZWCurrency convertingFrom = parseCurrencyHelper(marketVal.getString("currency_from"));
-					ZWCurrency convertingTo = parseCurrencyHelper(marketVal.getString("currency_to"));
+					String convertingFrom = parseCurrency(marketVal.getString("currency_from"));
+					String convertingTo = parseCurrency(marketVal.getString("currency_to"));
 
 					BigDecimal rate = new BigDecimal(marketVal.getLong("exchange_rate")).divide(new BigDecimal(marketVal.getLong("exchange_rate_divisor")), MathContext.DECIMAL64);
 					
-					ZLog.log("Market value of " + convertingFrom.getShortTitle() + " is : " + rate.toString() + " " + convertingTo.getShortTitle());
+					
+					//only add exchange data if we know 
+					ZLog.log("Market value of " + convertingFrom + " is : " + rate.toString() + " " + convertingTo);
 					ZWWalletManager.getInstance().upsertExchangeValue(convertingFrom, convertingTo, rate.toString());
+				
 				}
 			} catch (JSONException e) {
 				ZLog.log("Market Value Response wasn't json array?!");
@@ -238,19 +258,22 @@ public class ZWDataSyncHelper {
 	}
 	
 	//helper method to convert server market value string to ZWCurrency
-	private static ZWCurrency parseCurrencyHelper(String str){
-		if (str.split("/").length > 1){
-			//we are a coin
-			String coinType = str.split("/")[0].toUpperCase(Locale.ENGLISH);
-			if (str.split("/")[1].contains("test")){
-				coinType += "_TEST";
+	private static String parseCurrency(String currencyString){
+		
+		if(currencyString.contains("/")) {
+			//coin type
+			String coinString = currencyString.split("/")[0];
+			if(currencyString.contains("test")) {
+				coinString += "_TEST";
 			}
-			return ZWCoin.getCoin(coinType);
-		} else {
-			//we are a fiat
-			return ZWFiat.valueOf(str);
+			return coinString.toUpperCase(Locale.US);
+		}
+		else {
+			//fiat type
+			return currencyString.toUpperCase(Locale.ENGLISH);
 		}
 	}
+
 
 	public static void updateTransactionHistory(ZWCoin coin) {
 		List<String> addresses = ZWWalletManager.getInstance().getAddressList(coin, true);

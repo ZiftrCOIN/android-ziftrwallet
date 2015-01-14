@@ -21,7 +21,7 @@ import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyListItem;
+import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 
 public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFragmentActivity> {
@@ -45,8 +45,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		editor.clear();
 		editor.commit();
 		//clear all wallets
-		for (ZWCoin type : ZWCoin.TYPES){
-			manager.deactivateCoin(type);
+		for (ZWCoin coin : ZWCoin.getAllCoins()){
+			manager.deactivateCoin(coin);
 		}
 	}
 
@@ -73,10 +73,11 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	@UiThreadTest
 	public void testAddWallet() {
 		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 0);
-		createWallet(ZWCoin.BTC);
+		ZWCoin btcDefault = ZWDefaultCoins.getDefaultCoins().get(0);
+		createWallet(btcDefault);
 		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 1);
 		//remove wallet
-		mActivity.getWalletManager().deactivateCoin(ZWCoin.BTC);
+		mActivity.getWalletManager().deactivateCoin(btcDefault);
 		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 0);
 
 	}
@@ -124,8 +125,9 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	@SuppressLint("NewApi")
 	@UiThreadTest
 	public void testQRCodeVisiblity() throws InterruptedException{
-		createWallet(ZWCoin.BTC_TEST);
-		mActivity.openWalletView(ZWCoin.BTC_TEST);
+		ZWCoin btcTestDefault = ZWDefaultCoins.getDefaultCoins().get(3);
+		createWallet(btcTestDefault);
+		mActivity.openWalletView(btcTestDefault);
 		mActivity.openReceiveCoinsView(null);
 		mActivity.getSupportFragmentManager().executePendingTransactions();
 		View receiveScreen  = mActivity.getSupportFragmentManager().findFragmentByTag(ZWTags.RECIEVE_FRAGMENT).getView();
@@ -219,9 +221,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	}
 	***/
 
-	private void createWallet(ZWCoin type){
+	private void createWallet(ZWCoin coin){
 		//add wallet
-		ZWNewCurrencyListItem coin = new ZWNewCurrencyListItem(type);
 		mActivity.addNewCurrency(coin);
 	}
 

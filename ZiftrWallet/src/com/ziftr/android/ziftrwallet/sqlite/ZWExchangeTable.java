@@ -5,8 +5,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ziftr.android.ziftrwallet.crypto.ZWCurrency;
-
 
 public class ZWExchangeTable {
 	
@@ -45,17 +43,17 @@ public class ZWExchangeTable {
 		}
 	}
 	
-	protected void upsert(ZWCurrency currency, ZWCurrency convertTo , String val, SQLiteDatabase db) {
+	protected void upsert(String currency, String convertTo , String val, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
-		values.put(COLUMN_CURRENCY_NAME, currency.getShortTitle());
-		values.put(COLUMN_CURRENCY_TO, convertTo.getShortTitle());
+		values.put(COLUMN_CURRENCY_NAME, currency);
+		values.put(COLUMN_CURRENCY_TO, convertTo);
 		values.put(COLUMN_EXCHANGE_VALUE, val);
 		if (db.update(TABLE_NAME, values, whereIdentifier(currency, convertTo), null) == 0){
 			db.insert(TABLE_NAME, null, values);
 		}
 	}
 	
-	protected String getExchangeVal(ZWCurrency currency, ZWCurrency convertTo, SQLiteDatabase db){
+	protected String getExchangeVal(String currency, String convertTo, SQLiteDatabase db){
 		String selectQuery = "SELECT " + COLUMN_EXCHANGE_VALUE + " FROM " + TABLE_NAME + " WHERE " + whereIdentifier(currency, convertTo);
 		Cursor c = db.rawQuery(selectQuery, null);
 		if (c.moveToFirst()) {
@@ -74,8 +72,8 @@ public class ZWExchangeTable {
 		}
 	}
 	
-	private String whereIdentifier(ZWCurrency currency, ZWCurrency convertTo){
-		return COLUMN_CURRENCY_NAME + " = " + DatabaseUtils.sqlEscapeString(currency.getShortTitle()) + " AND " + COLUMN_CURRENCY_TO + " = " + DatabaseUtils.sqlEscapeString(convertTo.getShortTitle());
+	private String whereIdentifier(String currency, String convertTo){
+		return COLUMN_CURRENCY_NAME + " = " + DatabaseUtils.sqlEscapeString(currency) + " AND " + COLUMN_CURRENCY_TO + " = " + DatabaseUtils.sqlEscapeString(convertTo);
 	}
 
 }

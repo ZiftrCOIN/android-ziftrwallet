@@ -22,7 +22,7 @@ public class ZWFiat implements ZWCurrency {
 
 	public static ZWFiat valueOf(String fiatStr) {
 		for (ZWFiat fiat : ZWFiat.values()) {
-			if (fiat.getName().equals(fiatStr) || fiat.getShortTitle().equals(fiatStr.toUpperCase())) {
+			if (fiat.getName().equals(fiatStr) || fiat.getSymbol().equals(fiatStr.toUpperCase())) {
 				return fiat;
 			}
 		}
@@ -49,9 +49,7 @@ public class ZWFiat implements ZWCurrency {
 		this.numberOfDigitsOfPrecision = numberOfDigitsOfPrecision;
 	}
 
-	/**
-	 * @return the symbol
-	 */
+	@Override
 	public String getSymbol() {
 		return symbol;
 	}
@@ -66,7 +64,7 @@ public class ZWFiat implements ZWCurrency {
 	 * @return the numberOfDigitsOfPrecision
 	 */
 	@Override
-	public int getNumberOfDigitsOfPrecision() {
+	public int getScale() {
 		return numberOfDigitsOfPrecision;
 	}
 
@@ -86,13 +84,13 @@ public class ZWFiat implements ZWCurrency {
 
 	@Override
 	public BigDecimal getAmount(BigInteger atomicUnits) {
-		return new BigDecimal(atomicUnits, this.getNumberOfDigitsOfPrecision());
+		return new BigDecimal(atomicUnits, this.getScale());
 	}
 
 	
 	@Override
 	public BigInteger getAtomicUnits(BigDecimal amount) {
-		int precision = -1*this.getNumberOfDigitsOfPrecision();
+		int precision = -1*this.getScale();
 		
 		//note, this constructor is weird to me, but RTFM, it's for making small numbers and makes the scale negative
 		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
@@ -109,7 +107,7 @@ public class ZWFiat implements ZWCurrency {
 			formattedString += this.getSymbol();
 		}
 
-		BigDecimal formatted = ZiftrUtils.formatToNDecimalPlaces(getNumberOfDigitsOfPrecision(), amount);
+		BigDecimal formatted = ZiftrUtils.formatToNDecimalPlaces(getScale(), amount);
 		
 		formattedString += formatted.toPlainString();
 
@@ -129,7 +127,7 @@ public class ZWFiat implements ZWCurrency {
 	
 	public String getFormattedAmount(BigInteger atmoicUnits, boolean addSymbol) {
 		BigDecimal toFormatAsDecimal = this.getAmount(atmoicUnits);
-		BigDecimal dollars = ZiftrUtils.formatToNDecimalPlaces(this.getNumberOfDigitsOfPrecision(), toFormatAsDecimal);
+		BigDecimal dollars = ZiftrUtils.formatToNDecimalPlaces(this.getScale(), toFormatAsDecimal);
 		
 		return this.getFormattedAmount(dollars, addSymbol);
 	}
@@ -138,6 +136,7 @@ public class ZWFiat implements ZWCurrency {
 	public String getFormattedAmount(BigInteger atmoicUnits) {
 		return this.getFormattedAmount(atmoicUnits, false);
 	}
+
 
 }
 
