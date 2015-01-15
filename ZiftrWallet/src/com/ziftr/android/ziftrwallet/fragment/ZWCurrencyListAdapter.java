@@ -83,7 +83,11 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 			// to match the currencyListItem.
 			TextView coinName = (TextView) 
 					convertView.findViewById(R.id.topLeftTextView);
-			coinName.setText(currencyListItem.getCoinId().getName());
+			String nameText = currencyListItem.getCoinId().getName(); 
+			if(!currencyListItem.getCoinId().isEnabled()) {
+				nameText += " (server unavailable)";
+			}
+			coinName.setText(nameText);
 
 			TextView coinValue = (TextView) 
 					convertView.findViewById(R.id.bottomLeftTextView);

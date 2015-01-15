@@ -55,22 +55,25 @@
         android:text="@string/ow_empty_string" />
 
     <TextView
-        android:id="@+id/topLeftTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/leftIcon"
-        android:layout_toRightOf="@+id/leftIcon"
-        android:text="@string/ow_empty_string"
-        android:textSize="15sp"
-        android:textStyle="bold" />
-
-
-    <TextView
         android:id="@+id/bottomLeftTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/leftIcon"
         android:layout_toRightOf="@id/market_graph_icon"
         android:text="@string/ow_empty_string" />
+    
+    <TextView
+        android:id="@+id/topLeftTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottomLeftTextView"
+        android:layout_alignTop="@id/leftIcon"
+        android:layout_toLeftOf="@id/topRightTextView"
+        android:layout_toRightOf="@+id/leftIcon"
+        android:ellipsize="marquee"
+        android:maxLines="1"
+        android:text="@string/ow_empty_string"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

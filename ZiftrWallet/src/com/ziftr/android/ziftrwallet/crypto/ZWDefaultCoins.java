@@ -11,16 +11,16 @@ import java.util.ArrayList;
 public class ZWDefaultCoins {
 
 	public ZWCoin BTC = new ZWCoin("Bitcoin", "btc", "main", "bitcoin", 8, "10000", null,
-			(byte) 0, (byte) 5, (byte) 128, 6, 600, true);
+			(byte) 0, (byte) 5, (byte) 128, 6, 600, false);
 	public ZWCoin LTC = new ZWCoin("Litecoin", "ltc", "main", "litecoin", 8, "100000", null,
-			(byte) 48, (byte) 5, (byte) 176, 12, 150, true);
+			(byte) 48, (byte) 5, (byte) 176, 12, 150, false);
 	public  ZWCoin DOGE = new ZWCoin("Dogecoin", "doge", "main", "dogecoin", 8, "100000000", null,
-			(byte) 30, (byte) 22, (byte) 158, 6, 60, true);
+			(byte) 30, (byte) 22, (byte) 158, 6, 60, false);
 
 	public ZWCoin BTC_TEST = new ZWCoin("Bitcoin Testnet", "btc", "testnet3", "bitcoin", 8, "10000", null,
-			(byte) 111, (byte) 196, (byte) 239, 6, 600, true);
+			(byte) 111, (byte) 196, (byte) 239, 6, 600, false);
 	public ZWCoin LTC_TEST = new ZWCoin("Litecoin Testnet", "ltc", "testnet", "litecoin", 8, "100000", null,
-			(byte) 111, (byte) 196, (byte) 239, 12, 150, true);
+			(byte) 111, (byte) 196, (byte) 239, 12, 150, false);
 	
 	
 	/****

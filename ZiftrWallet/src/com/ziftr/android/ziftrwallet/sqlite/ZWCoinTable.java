@@ -83,15 +83,20 @@ public class ZWCoinTable {
 	
 	protected void insertDefault(ZWCoin defaultCoin, SQLiteDatabase db) {
 	
-		ContentValues baseCoinValues = getContentValues(defaultCoin);
-		db.insert(TABLE_NAME, null, baseCoinValues); //this may fail, that's ok
-		
-		ContentValues defaults = new ContentValues(2);
-		defaults.put(COLUMN_BLOCK_HEIGHT, 0);
-		defaults.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
-		String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(defaultCoin.getSymbol());
-		
-		db.update(TABLE_NAME, defaults, where, null);
+		try {
+			ContentValues baseCoinValues = getContentValues(defaultCoin);
+			db.insertOrThrow(TABLE_NAME, null, baseCoinValues); //this may fail, that's ok
+			
+			ContentValues defaults = new ContentValues(2);
+			defaults.put(COLUMN_BLOCK_HEIGHT, 0);
+			defaults.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
+			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(defaultCoin.getSymbol());
+			
+			db.update(TABLE_NAME, defaults, where, null);
+		}
+		catch(Exception e) {
+			//quietly fail if these defaults already exist
+		}
 	}
 	
 	
@@ -186,11 +191,13 @@ public class ZWCoinTable {
 		ContentValues cv = getContentValues(coin);
 		
 		long insertRow = db.insert(TABLE_NAME, null, cv);
+		
 		if(insertRow < 0) {
 			//failed to insert, likely because the coin already exists in the database, so just update it
 			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
 			db.update(TABLE_NAME, cv, where, null);
 		}
+	
 		
 	}
 

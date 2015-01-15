@@ -212,9 +212,8 @@ public class ZWDataSyncHelper {
 					}
 				
 				}
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				ZLog.log("Exception parsing coin data: ", e);
 			}
 		} else {
 			ZLog.log("error getting /blockchains wallets: " + response);

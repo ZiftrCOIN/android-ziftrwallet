@@ -54,7 +54,12 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 
 		// Set the text next to logo
 		TextView coinName = (TextView) convertView.findViewById(R.id.topLeftTextView);
-		coinName.setText(coin.getName());
+		
+		String nameText = coin.getName();
+		if(!coin.isEnabled()) {
+			nameText += " (server unavailable)";
+		}
+		coinName.setText(nameText);
 
 		return convertView;
 	}

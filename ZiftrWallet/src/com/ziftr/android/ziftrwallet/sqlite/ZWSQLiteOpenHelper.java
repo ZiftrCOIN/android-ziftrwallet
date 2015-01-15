@@ -548,7 +548,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 	
 	public synchronized List<ZWCoin> getInactiveCoins(boolean includeTestnets) {
-		return this.coinTable.getCoinsByStatus(ZWCoinTable.DEACTIVATED | ZWCoinTable.UNACTIVATED, getReadableDatabase(), includeTestnets);
+		return this.coinTable.getCoinsByStatus(ZWCoinTable.DEACTIVATED | ZWCoinTable.DEACTIVATED, getReadableDatabase(), includeTestnets);
 	}
 	
 	
