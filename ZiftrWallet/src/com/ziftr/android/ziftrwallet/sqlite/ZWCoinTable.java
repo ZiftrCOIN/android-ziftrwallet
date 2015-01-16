@@ -190,9 +190,10 @@ public class ZWCoinTable {
 		
 		ContentValues cv = getContentValues(coin);
 		
-		long insertRow = db.insert(TABLE_NAME, null, cv);
-		
-		if(insertRow < 0) {
+		try {
+			db.insertOrThrow(TABLE_NAME, null, cv);
+		}
+		catch(Exception e) {
 			//failed to insert, likely because the coin already exists in the database, so just update it
 			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
 			db.update(TABLE_NAME, cv, where, null);
@@ -221,6 +222,10 @@ public class ZWCoinTable {
 		
 		int enabledInt = cursor.getInt(cursor.getColumnIndex(COLUMN_ENABLED));
 		boolean enabled = enabledInt > 0;
+		
+		//activationStatus isn't stored as part of a ZWCoin object, so don't load that here
+		//maybe it should be?
+		//Integer activationStatus = cursor.getInt(cursor.getColumnIndex(COLUMN_ACTIVATED_STATUS));
 		
 		ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, String.valueOf(defaultFee), logoUrl, 
 				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, enabled);

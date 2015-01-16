@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ziftr.android.ziftrwallet"
-    android:versionCode="396"
-    android:versionName="0.0.3 (beta)" >
+    android:versionCode="397"
+    android:versionName="0.0.4 (beta)" >
 
     <instrumentation
         android:name="android.test.InstrumentationTestRunner"
