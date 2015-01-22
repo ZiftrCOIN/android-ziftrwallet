@@ -121,9 +121,8 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 			}
 		}
-		Drawable coinImage = this.getResources().getDrawable(
-				this.getSelectedCoin().getLogoResId());
-		this.coinLogo.setImageDrawable(coinImage);
+		
+		this.coinLogo.setImageResource(this.getSelectedCoin().getLogoResId());
 
 		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
 		this.populateAmount();

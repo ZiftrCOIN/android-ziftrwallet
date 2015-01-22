@@ -81,7 +81,7 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> {
 		});
 
 		ImageView inOutImage = (ImageView) convertView.findViewById(R.id.rightIcon);
-		inOutImage.setImageDrawable(this.getContext().getResources().getDrawable(this.getImgResIdForItem(address)));
+		inOutImage.setImageResource(this.getImgResIdForItem(address));
 
 		TextView addressLabelTextView = (TextView) convertView.findViewById(R.id.topLeftTextView);
 		addressLabelTextView.setText(address.getLabel());

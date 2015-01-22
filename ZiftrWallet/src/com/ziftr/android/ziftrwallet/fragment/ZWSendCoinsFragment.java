@@ -125,6 +125,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				}
 
 			} catch (ZWCoinURIParseException e) {
+				ZLog.log("Excpetion parsing QR code: ", e);
 				// Maybe it's just a straight non-encoded address? 
 				if (this.getSelectedCoin().addressIsValid(dataFromQRScan)) {
 					address = dataFromQRScan;

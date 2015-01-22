@@ -109,7 +109,7 @@ public class ZWTransactionTable extends ZWCoinRelativeTable {
 		sqlBuilder.append(COLUMN_CREATION_TIMESTAMP).append(", ");
 		sqlBuilder.append(COLUMN_DISPLAY_ADDRESSES);
 		sqlBuilder.append(") VALUES (").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(", ");
-		sqlBuilder.append(transaction.getAmount().toString()).append(", ");
+		sqlBuilder.append(DatabaseUtils.sqlEscapeString(transaction.getAmount().toString())).append(", ");
 		sqlBuilder.append(transaction.getFee().toString()).append(", ");
 		sqlBuilder.append(DatabaseUtils.sqlEscapeString(transaction.getNote())).append(", ");
 		sqlBuilder.append(transaction.getTxTime()).append(", ");
@@ -351,7 +351,16 @@ public class ZWTransactionTable extends ZWCoinRelativeTable {
 
 		tx.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
 		tx.setTxTime(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
-		tx.setAmount(new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))));
+		
+		try {
+			tx.setAmount(new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))));
+		}
+		catch(Exception e) {
+			ZLog.log("Exception loading transaction amount: ", e);
+			tx.setAmount(BigInteger.ZERO);
+		}
+		
+		
 		tx.setFee(new BigInteger(c.getString(c.getColumnIndex(COLUMN_FEE))));
 		tx.setConfirmationCount(c.getInt(c.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
 

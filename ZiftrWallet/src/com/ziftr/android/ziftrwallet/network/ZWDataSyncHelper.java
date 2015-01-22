@@ -166,6 +166,7 @@ public class ZWDataSyncHelper {
 		String response = request.sendAndWait();
 		if (request.getResponseCode() == 200){
 
+			ZLog.log("Coin data response: ", response);
 			try {
 				JSONObject jsonResponse = new JSONObject(response);
 				JSONArray coinsArray = jsonResponse.getJSONArray("blockchains");
@@ -183,7 +184,7 @@ public class ZWDataSyncHelper {
 					byte privateBytePrefix = (byte) coinJson.getInt("priv_byte");
 					int blockTime = coinJson.getInt("seconds_per_block_generated");
 					int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
-					int blockNum = coinJson.getInt("height");
+					int blockNum = coinJson.optInt("height");
 					String chain = coinJson.getString("chain");
 					String type = coinJson.getString("type");
 					boolean isEnabled = coinJson.getBoolean("is_enabled");
@@ -192,9 +193,11 @@ public class ZWDataSyncHelper {
 					String scheme = coinJson.optString("scheme");
 					if(scheme == null || scheme.length() == 0) {
 						//TODO -temp hack until api gives us coin scheme (maybe this is just always true?)
-						if(type.equals("main")) {
-							scheme = name.toLowerCase(Locale.US); 
+						String schemeBase = name;
+						if(schemeBase.contains(" ")) {
+							schemeBase = schemeBase.substring(0, schemeBase.indexOf(" "));
 						}
+						scheme = schemeBase.toLowerCase(Locale.US); 
 					}
 					
 					int scale = coinJson.optInt("scale");
@@ -477,7 +480,13 @@ public class ZWDataSyncHelper {
 	private static BigInteger convertToBigIntSafe(ZWCoin coin, String amount) {
 		
 		if(amount.contains(".")) {
-			return coin.getAtomicUnits(new BigDecimal(amount));
+			if(amount.contains("e")) {
+				BigInteger scinTest = new BigInteger(amount);
+				return scinTest;
+			}
+			else {
+				return coin.getAtomicUnits(new BigDecimal(amount));
+			}
 		}
 		
 		return new BigInteger(amount);

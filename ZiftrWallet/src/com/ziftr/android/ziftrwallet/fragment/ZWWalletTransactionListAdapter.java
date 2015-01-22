@@ -120,9 +120,8 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 			txAmountFiatEquiv.setText(fiat.getFormattedAmount(fiatAmt, true));
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
-			Drawable image = this.getContext().getResources().getDrawable(
-					getImgResIdForItem(txListItem));
-			txIOIcon.setImageDrawable(image);
+			txIOIcon.setImageResource(getImgResIdForItem(txListItem));
+			
 			if (txListItem.isPending()){
 				txTitleTextView.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
 				txTimeTextView.setTextColor(this.getContext().getResources().getColor(R.color.Crimson));
