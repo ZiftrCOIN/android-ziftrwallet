@@ -62,6 +62,7 @@ public class ZWDataSyncHelper {
 				}
 				catch(Exception e) {
 					ZLog.log("Exception send coin request: ", e);
+					message = "Error, something went wrong! " + request.getResponseCode() + " " + request.getResponseMessage();
 				}
 				break;
 			case 0:
@@ -103,13 +104,13 @@ public class ZWDataSyncHelper {
 				String sHex = ZiftrUtils.bigIntegerToString(signature.s, 32);
 				toSign.put("s", sHex);
 				
-				ZLog.log("Sending this signed send request to server: " + toSign);
+				//ZLog.log("Sending this signed send request to server: " + toSign);
 			}
 		}
 		catch(Exception e) {
 			ZLog.log("Exeption attemting to sign transactions: ", e);
 		}
-		ZLog.log("sending  this signed txn to server :" + serverResponse);
+		ZLog.log("sending  this signed tx to server :" + serverResponse);
 		//now that we've packed all the signing into a json object send it off to the server
 		ZiftrNetRequest signingRequest = ZWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), serverResponse);
 		
@@ -481,8 +482,8 @@ public class ZWDataSyncHelper {
 		
 		if(amount.contains(".")) {
 			if(amount.contains("e")) {
-				BigInteger scinTest = new BigInteger(amount);
-				return scinTest;
+				BigInteger sciNotationFix = new BigDecimal(amount).toBigInteger();
+				return sciNotationFix;
 			}
 			else {
 				return coin.getAtomicUnits(new BigDecimal(amount));
