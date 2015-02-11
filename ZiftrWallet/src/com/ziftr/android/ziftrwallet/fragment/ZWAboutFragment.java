@@ -42,7 +42,7 @@ public class ZWAboutFragment extends ZWFragment implements OnClickListener{
 	public void onClick(View v) {
 		if (v == this.feedbackButton){
 			Intent intent = new Intent(Intent.ACTION_SEND);
-			intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"customerservice@ziftr.com"});
+			intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@ziftr.com"});
 			intent.setType("message/rfc822");
 			startActivity(Intent.createChooser(intent, "Send feedback"));
 		}
