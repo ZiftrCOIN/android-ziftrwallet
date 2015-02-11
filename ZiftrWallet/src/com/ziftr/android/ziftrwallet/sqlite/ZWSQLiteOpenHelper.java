@@ -186,7 +186,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		try {
 			ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
 
-			for (ZWCoin coin : this.getActivatedAndDeactivatedCoins()) {
+			for (ZWCoin coin : this.getNotUnactivatedCoins()) {
 				receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
 			}
 			db.setTransactionSuccessful();
@@ -534,7 +534,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.create(coin, this.getWritableDatabase());
 		
 		// Update table to match activated status
-		this.coinTable.setActivation(coin, ZWCoinTable.ACTIVATED, getWritableDatabase());
+		this.coinTable.activateCoin(coin, this.getWritableDatabase());
 	}
 	
 	
@@ -544,29 +544,28 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	
 	public synchronized List<ZWCoin> getActivatedCoins() {
-		return this.coinTable.getCoinsByStatus(ZWCoinTable.ACTIVATED, getReadableDatabase(), true);
+		return this.coinTable.getActiveCoins(getReadableDatabase());
 	}
 	
 	public synchronized List<ZWCoin> getInactiveCoins(boolean includeTestnets) {
-		return this.coinTable.getCoinsByStatus(ZWCoinTable.DEACTIVATED | ZWCoinTable.UNACTIVATED, getReadableDatabase(), includeTestnets);
+		return this.coinTable.getInactiveCoins(getReadableDatabase(), includeTestnets);
 	}
 	
 	
 	/**
 	* gets a list of every coin that has been, or currently is, activated,
 	* basically excluded coins that are "un-activated",
-	* the current usecase for this is changing passwords, where private keys 
+	* the current use case for this is changing passwords, where private keys 
 	* that are in deactivated coin's databases must also be updated
 	* @return a list of activated and deactivated coins
 	*/
-	public synchronized List<ZWCoin> getActivatedAndDeactivatedCoins() {
-		int activationStatus = ZWCoinTable.ACTIVATED | ZWCoinTable.DEACTIVATED;		
-		return this.coinTable.getCoinsByStatus(activationStatus, getReadableDatabase(), true);
+	public synchronized List<ZWCoin> getNotUnactivatedCoins() {
+		return this.coinTable.getNotUnactiveCoins(getReadableDatabase());
 	}
 	
 	
 	public synchronized void deactivateCoin(ZWCoin coin) {
-		this.coinTable.setActivation(coin, ZWCoinTable.DEACTIVATED, getWritableDatabase());
+		this.coinTable.deactivateCoin(coin, getWritableDatabase());
 	}
 
 	

@@ -7,15 +7,14 @@ import java.util.Date;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -121,9 +120,8 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 			}
 		}
-		Drawable coinImage = this.getResources().getDrawable(
-				this.getSelectedCoin().getLogoResId());
-		this.coinLogo.setImageDrawable(coinImage);
+		
+		this.coinLogo.setImageResource(this.getSelectedCoin().getLogoResId());
 
 		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
 		this.populateAmount();

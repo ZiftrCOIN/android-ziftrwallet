@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet.fragment;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,8 +48,7 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 
 		// Set the coin logo image view
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
-		Drawable image = context.getResources().getDrawable(coin.getLogoResId());
-		coinLogo.setImageDrawable(image);
+		coinLogo.setImageResource(coin.getLogoResId());
 
 		// Set the text next to logo
 		TextView coinName = (TextView) convertView.findViewById(R.id.topLeftTextView);

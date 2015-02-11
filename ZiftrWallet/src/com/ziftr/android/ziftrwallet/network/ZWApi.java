@@ -31,6 +31,12 @@ public class ZWApi {
 		return buildBaseUrl(type, chain, false);
 	}
 	
+	
+	private static String getAuthorization() {
+		return AUTHORIZATION;
+	}
+	
+	
 	private static String buildBaseUrl(String type, String chain, boolean secure) {
 		String protocol;
 		if(secure) {
@@ -48,7 +54,7 @@ public class ZWApi {
 		Map<String, String> headers = new HashMap<String, String>(2);
 		
 		headers.put("Accept", ACCEPT);
-		headers.put("Authorization", AUTHORIZATION);
+		headers.put("Authorization", getAuthorization());
 		
 		return headers;
 	}

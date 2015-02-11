@@ -38,9 +38,9 @@ public class ZWCoinTable {
 	public static final String COLUMN_LOGO_URL = "logo_url";
 	
 	
-	public static final int UNACTIVATED = 1; //Used for table types that just haven't been used yet.
-	public static final int ACTIVATED = 2; //Used for table types that are activated and in use by user.
-	public static final int DEACTIVATED = 4; //Used for table types that used to be ACTIVATED, but now user deactivated them.
+	private static final int UNACTIVATED = 0; //Used for table types that just haven't been used yet.
+	private static final int DEACTIVATED = 1; //Used for table types that used to be ACTIVATED, but now user deactivated them.
+	private static final int ACTIVATED = 2; //Used for table types that are activated and in use by user (should always be largest value when adding other types).
 	
 
 	protected void create(SQLiteDatabase db) {
@@ -100,23 +100,32 @@ public class ZWCoinTable {
 	}
 	
 	
-	/**
-	 * query the activation database for a list of coins with specific status,
-	 * will use bitwise operators allowing querying for multiple status,
-	 * eg ACTIVATED | DEACTIVATED
-	 * @param activationStatus the activation status (or bitwise of multiple status) to query for
-	 * @param db the db to query
-	 * @return list of {@link ZWCoin} with the matching status(es)
-	 */
-	protected List<ZWCoin> getCoinsByStatus(int activationStatus, SQLiteDatabase db, boolean includeTestnet) {
+	public synchronized List<ZWCoin> getNotUnactiveCoins(SQLiteDatabase db) {
+		String whereClause = COLUMN_ACTIVATED_STATUS + " != " + String.valueOf(UNACTIVATED);
+		return this.getCoins(whereClause, db);
+	}
+	
+	
+	protected List<ZWCoin> getActiveCoins(SQLiteDatabase db) {
+		String whereClause = COLUMN_ACTIVATED_STATUS + " >= " + String.valueOf(ACTIVATED);
+		return getCoins(whereClause, db);
+	}
+	
+	
+	protected List<ZWCoin> getInactiveCoins(SQLiteDatabase db, boolean includeTestnet) {
+		String whereClause = COLUMN_ACTIVATED_STATUS + " IS NULL OR " + COLUMN_ACTIVATED_STATUS + " < " + String.valueOf(ACTIVATED);
+		if(!includeTestnet) {
+			whereClause += " AND " + COLUMN_CHAIN + " = 'main'";
+		}
+		
+		return getCoins(whereClause, db);
+	}
+	
+	
+	private List<ZWCoin> getCoins(String whereClause, SQLiteDatabase db) {
 		ArrayList<ZWCoin> coins = new ArrayList<ZWCoin>();
 		
-		String sql = "SELECT * FROM " + TABLE_NAME + 
-				" WHERE (" + COLUMN_ACTIVATED_STATUS + " & " + String.valueOf(activationStatus) +
-				") != 0";
-		if(!includeTestnet) {
-			sql += " AND " + COLUMN_CHAIN + " = 'main'";
-		}
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + whereClause;
 		
 		Cursor cursor = db.rawQuery(sql, null);
 		
@@ -132,7 +141,6 @@ public class ZWCoinTable {
 		
 		return coins;
 	}
-	
 	
 	
 	protected List<ZWCoin> getAllCoins(SQLiteDatabase database) {
@@ -178,7 +186,16 @@ public class ZWCoinTable {
 		return isActivated;
 	}
 
-	protected void setActivation(ZWCoin coin, int activationStatus, SQLiteDatabase db) {
+	
+	protected void activateCoin(ZWCoin coin, SQLiteDatabase db) {
+		this.setActivation(coin, ACTIVATED, db);
+	}
+	
+	protected void deactivateCoin(ZWCoin coin, SQLiteDatabase db) {
+		this.setActivation(coin, DEACTIVATED, db);
+	}
+	
+	private void setActivation(ZWCoin coin, int activationStatus, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ACTIVATED_STATUS, activationStatus);
 		String whereClause = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());

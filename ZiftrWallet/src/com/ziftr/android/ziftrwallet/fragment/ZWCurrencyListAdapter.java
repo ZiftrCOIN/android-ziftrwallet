@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,44 +73,42 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 			// If it doesn't have an old view then we make a new one 
 			convertView = this.inflater.inflate(currencyListItem.getResId(), null);
 		}
-			ZWFiat fiatType =ZWPreferencesUtils.getFiatCurrency();
-			String fiatSymbol = fiatType.getSymbol();
-			
-			convertView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
-			
-			// Whether or not we just created one, we reset all the resources
-			// to match the currencyListItem.
-			TextView coinName = (TextView) 
-					convertView.findViewById(R.id.topLeftTextView);
-			String nameText = currencyListItem.getCoinId().getName(); 
-			if(!currencyListItem.getCoinId().isEnabled()) {
-				nameText += " (server unavailable)";
-			}
-			coinName.setText(nameText);
+		
+		ZWFiat fiatType =ZWPreferencesUtils.getFiatCurrency();
+		String fiatSymbol = fiatType.getSymbol();
+		
+		convertView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
+		
+		// Whether or not we just created one, we reset all the resources
+		// to match the currencyListItem.
+		TextView coinName = (TextView) 
+				convertView.findViewById(R.id.topLeftTextView);
+		String nameText = currencyListItem.getCoinId().getName(); 
+		if(!currencyListItem.getCoinId().isEnabled()) {
+			nameText += " (server unavailable)";
+		}
+		coinName.setText(nameText);
 
-			TextView coinValue = (TextView) 
-					convertView.findViewById(R.id.bottomLeftTextView);
-			BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
-			coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true));
+		TextView coinValue = (TextView) 
+				convertView.findViewById(R.id.bottomLeftTextView);
+		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
+		coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true));
 
-			TextView walletTotal = (TextView) 
-					convertView.findViewById(R.id.topRightTextView);
-			walletTotal.setText(currencyListItem.getWalletTotal());
+		TextView walletTotal = (TextView) 
+				convertView.findViewById(R.id.topRightTextView);
+		walletTotal.setText(currencyListItem.getWalletTotal());
 
-			TextView walletTotalFiatEquiv = (TextView) 
-					convertView.findViewById(R.id.bottomRightTextView);
-			walletTotalFiatEquiv.setText(
-					fiatSymbol + currencyListItem.getWalletTotalFiatEquiv());
+		TextView walletTotalFiatEquiv = (TextView) 
+				convertView.findViewById(R.id.bottomRightTextView);
+		walletTotalFiatEquiv.setText(
+				fiatSymbol + currencyListItem.getWalletTotalFiatEquiv());
 
-			ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
-			Drawable image = context.getResources().getDrawable(
-					currencyListItem.getCoinId().getLogoResId());
-			coinLogo.setImageDrawable(image);
+		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
+		coinLogo.setImageResource(currencyListItem.getCoinId().getLogoResId());
 
-			ImageView nextArrow = (ImageView) convertView.findViewById(R.id.rightIcon);
-			Drawable image2 = context.getResources().getDrawable(R.drawable.next_down_2);
-			nextArrow.setImageDrawable(image2);
-//		}
+		ImageView nextArrow = (ImageView) convertView.findViewById(R.id.rightIcon);
+		nextArrow.setImageResource(R.drawable.next_down_2);
+
 		return convertView;
 
 	}
