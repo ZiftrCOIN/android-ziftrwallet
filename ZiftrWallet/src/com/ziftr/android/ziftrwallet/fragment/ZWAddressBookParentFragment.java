@@ -131,7 +131,9 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		// If the order were reversed here then we might changed the note on an 
 		// address that doesn't correspond.
 		addressEditText.setText(address);
-		labelEditText.setText(label);
+		if (label != null && !label.isEmpty()){
+			labelEditText.setText(label);
+		}
 	}
 
 	public boolean fragmentHasAddress() {

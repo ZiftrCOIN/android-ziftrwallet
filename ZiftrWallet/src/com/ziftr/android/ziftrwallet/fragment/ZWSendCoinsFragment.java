@@ -70,7 +70,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 	
 	private TextView totalTextView;
 	private TextView totalFiatEquivTextView;
-
 	
 	/**
 	 * Inflate, initialize, and return the send coins layout.
