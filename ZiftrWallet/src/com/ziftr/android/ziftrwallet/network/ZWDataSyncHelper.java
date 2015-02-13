@@ -58,7 +58,7 @@ public class ZWDataSyncHelper {
 					
 					ZLog.log("Spend transaction data to sign: ", jsonRes.toString());
 					
-					message = signSentCoins(coin, jsonRes, inputs, passphrase);
+					message = signSentCoins(coin, jsonRes, inputs, output, passphrase);
 				}
 				catch(Exception e) {
 					ZLog.log("Exception send coin request: ", e);
@@ -79,7 +79,7 @@ public class ZWDataSyncHelper {
 	}
 	
 	
-	private static String signSentCoins(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
+	private static String signSentCoins(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String output, String passphrase) {
 		Set<String> addressesSpentFrom = new HashSet<String>();
 		ZLog.log("signSentCoins called");
 		try {
@@ -108,7 +108,7 @@ public class ZWDataSyncHelper {
 			}
 		}
 		catch(Exception e) {
-			ZLog.log("Exeption attemting to sign transactions: ", e);
+			ZLog.log("Exception attempting to sign transactions: ", e);
 		}
 		ZLog.log("sending  this signed tx to server :" + serverResponse);
 		//now that we've packed all the signing into a json object send it off to the server
@@ -135,7 +135,14 @@ public class ZWDataSyncHelper {
 				try {
 					JSONObject responseJson = new JSONObject(response);
 					ZLog.log("Response from completed signing: ", responseJson);
-					createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
+					
+					/*This doesn't work because the parsed transactions is empty so in the createTransaction code it will not detect 
+					 * this as a spend transaction. If the transaction has a change address this will be seen as a receive transaction
+					 * with the received change amount instead */
+					//createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
+					
+					createTransactionFromSpendResponse(coin, responseJson, output);
+					
 					
 					//TODO -once create transaction works properly remove this
 					updateTransactionHistory(coin);
@@ -198,7 +205,8 @@ public class ZWDataSyncHelper {
 						if(schemeBase.contains(" ")) {
 							schemeBase = schemeBase.substring(0, schemeBase.indexOf(" "));
 						}
-						scheme = schemeBase.toLowerCase(Locale.US); 
+						scheme = schemeBase.toLowerCase(Locale.US);
+
 					}
 					
 					int scale = coinJson.optInt("scale");
@@ -356,7 +364,6 @@ public class ZWDataSyncHelper {
 			//the json doesn't have an input address or value, so we have to look at previously parsed transactions
 			//and see if this input is the output of another, which would indicate that it is us spending coins
 			String inputTxid = input.getString("txid");
-			
 			JSONObject matchingTransaction = parsedTransactions.get(inputTxid);
 			if(matchingTransaction != null) {
 				//this means we're spending coins in this transaction
@@ -397,7 +404,7 @@ public class ZWDataSyncHelper {
 						String outputValue = output.getString("value");
 						BigInteger outputValueInt = convertToBigIntSafe(coin, outputValue); 
 						value = value.add(outputValueInt);
-						
+
 						//add the receiving address to the display if not hidden
 						ZWAddress receivedOn = ZWWalletManager.getInstance().getAddress(coin, outputAddress,true);
 						if(receivedOn != null){
@@ -427,7 +434,6 @@ public class ZWDataSyncHelper {
 			}
 		}
 
-		
 		transaction.setAmount(value);
 		transaction.setFee(fees);
 		if (displayAddresses.size() > 0){
@@ -446,7 +452,55 @@ public class ZWDataSyncHelper {
 		//return transaction;
 	}
 	
+	//create transaction immediately after sending
+	private static void createTransactionFromSpendResponse(ZWCoin coin, JSONObject json, String sentTo) throws JSONException{
+		String hash = json.getString("txid");
+		ZWTransaction transaction = new ZWTransaction(coin, hash);
+		
+		//send transaction just happened
+		long time = System.currentTimeMillis() / 1000;
+		transaction.setTxTime(time * 1000);
+		transaction.setConfirmationCount(json.optLong("confirmations"));
+		
+		BigInteger fees = new BigInteger("0");
+		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs
+		
+		//set the display address to the address we sent to
+		ArrayList<String> displayAddresses = new ArrayList<String>();
+		displayAddresses.add(sentTo);
+		
+		ZWAddress sentToAddress = ZWWalletManager.getInstance().getAddress(coin, sentTo, false);
+		if(sentTo != null) {
+			if(transaction.getNote() == null || transaction.getNote().length() == 0){
+				transaction.setNote(sentToAddress.getLabel());
+			}
+		}
 
+		//we know this is a sending txn
+		JSONArray outputs = json.getJSONArray("vout");
+		for(int x = 0; x < outputs.length(); x++) {
+			JSONObject output = outputs.getJSONObject(x);
+			JSONObject scriptPubKey = output.getJSONObject("scriptPubKey");
+			JSONArray outputAddresses = scriptPubKey.getJSONArray("addresses");
+			boolean usedValue = false;
+			for(int y = 0; y < outputAddresses.length(); y++) {
+				String outputAddress = outputAddresses.getString(y);
+				//if this output is to the address we sent to then minus it from the txn val
+				if(outputAddress.equals(sentTo)) {
+					if(!usedValue) {
+						usedValue = true;
+						String outputValue = output.getString("value");
+						BigInteger outputValueInt = convertToBigIntSafe(coin, outputValue); 
+						value = value.add(outputValueInt);
+					}
+				}
+			} //endy
+		} //end x
+		transaction.setAmount(value);
+		transaction.setFee(fees);
+		transaction.setDisplayAddresses(displayAddresses);
+		ZWWalletManager.getInstance().addTransaction(transaction);
+	}
 	
 	private static JSONObject buildSpendPostData(List<String> inputs, String output, BigInteger amount, String fee, String changeAddress) {
 		JSONObject postData = new JSONObject();
