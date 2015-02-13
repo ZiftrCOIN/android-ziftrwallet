@@ -135,13 +135,10 @@ public class ZWDataSyncHelper {
 				try {
 					JSONObject responseJson = new JSONObject(response);
 					ZLog.log("Response from completed signing: ", responseJson);
+									
 					
-					/*This doesn't work because the parsed transactions is empty so in the createTransaction code it will not detect 
-					 * this as a spend transaction. If the transaction has a change address this will be seen as a receive transaction
-					 * with the received change amount instead */
-					//createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
-					
-					createTransactionFromSpendResponse(coin, responseJson, output);
+					//this doesnt have access to fee yet so better to have the transaction appear later than wrong
+					//createTransactionFromSpendResponse(coin, responseJson, output);
 					
 					
 					//TODO -once create transaction works properly remove this
