@@ -55,7 +55,8 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		
 		String nameText = coin.getName();
 		if(!coin.isEnabled()) {
-			nameText += " (server unavailable)";
+			TextView unavail = (TextView) convertView.findViewById(R.id.bottomLeftTextView);
+			unavail.setText("(Server Unavailable)");
 		}
 		coinName.setText(nameText);
 

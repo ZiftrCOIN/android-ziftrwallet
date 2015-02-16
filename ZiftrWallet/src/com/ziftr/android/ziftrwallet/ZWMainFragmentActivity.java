@@ -229,15 +229,12 @@ ZiftrNetworkHandler, SendTaskCallback {
 			//Check if loaded from widget
 			if (getIntent().hasExtra(ZWWalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
 				this.setSelectedCoin(ZWWalletManager.getInstance().getCoin(ZWPreferencesUtils.getWidgetCoin()));
-				ZLog.log("AAAA");
 				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)) {
 					if (getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
-						ZLog.log("@@@SEND WIDGET");
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_SEND);
 						openSendCoinsView(null);
 					} else{
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_RECEIVE);
-						ZLog.log("@@@RECEIVE WIDGET");
 						openReceiveCoinsView(null);
 					}
 				}

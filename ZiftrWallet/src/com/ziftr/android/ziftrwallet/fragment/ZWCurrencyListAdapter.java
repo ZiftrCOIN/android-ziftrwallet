@@ -84,15 +84,17 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 		TextView coinName = (TextView) 
 				convertView.findViewById(R.id.topLeftTextView);
 		String nameText = currencyListItem.getCoinId().getName(); 
-		if(!currencyListItem.getCoinId().isEnabled()) {
-			nameText += " (server unavailable)";
-		}
 		coinName.setText(nameText);
 
 		TextView coinValue = (TextView) 
 				convertView.findViewById(R.id.bottomLeftTextView);
+
 		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
-		coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true));
+		if(!currencyListItem.getCoinId().isEnabled()) {
+			coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true) + " (server unavailable)");
+		} else {
+			coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true));
+		}
 
 		TextView walletTotal = (TextView) 
 				convertView.findViewById(R.id.topRightTextView);
