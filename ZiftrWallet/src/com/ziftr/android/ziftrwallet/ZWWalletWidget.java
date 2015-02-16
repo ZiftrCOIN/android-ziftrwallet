@@ -14,6 +14,7 @@ import android.widget.RemoteViews;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWWalletWidget extends AppWidgetProvider{
 	
@@ -59,15 +60,24 @@ public class ZWWalletWidget extends AppWidgetProvider{
 			if (ZWPreferencesUtils.getWidgetCoin() == null){
 				ZWPreferencesUtils.setWidgetCoin(ZWWalletManager.getInstance().getActivatedCoins().get(0).getSymbol());
 			}
-			
-			int next = (coins.indexOf(ZWCoin.getCoin(ZWPreferencesUtils.getWidgetCoin())) + 1) % coins.size();
-			ZWPreferencesUtils.setWidgetCoin(coins.get(next).getSymbol());
-			ZWCoin selectedCurr = coins.get(next);
-			views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
-			views.setImageViewResource(R.id.widget_select_coin, selectedCurr.getLogoResId());
-			views.setTextViewText(R.id.widget_coin, selectedCurr.getName());
-			BigDecimal balance = selectedCurr.getAmount(ZWWalletManager.getInstance().getWalletBalance(selectedCurr, ZWSQLiteOpenHelper.BalanceType.AVAILABLE));
-			views.setTextViewText(R.id.widget_balance, selectedCurr.getFormattedAmount(balance));
+			ZWCoin selectedCoin = null;
+			for (ZWCoin coin : coins){
+				if (coin.getSymbol().equals(ZWPreferencesUtils.getWidgetCoin())){
+					selectedCoin = coin;
+					break;
+				}
+			}
+
+			if (selectedCoin != null){
+				int next = (coins.indexOf(selectedCoin) + 1) % coins.size();
+				ZWPreferencesUtils.setWidgetCoin(coins.get(next).getSymbol());
+				ZWCoin selectedCurr = coins.get(next);
+				views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
+				views.setImageViewResource(R.id.widget_select_coin, selectedCurr.getLogoResId());
+				views.setTextViewText(R.id.widget_coin, selectedCurr.getName());
+				BigDecimal balance = selectedCurr.getAmount(ZWWalletManager.getInstance().getWalletBalance(selectedCurr, ZWSQLiteOpenHelper.BalanceType.AVAILABLE));
+				views.setTextViewText(R.id.widget_balance, selectedCurr.getFormattedAmount(balance));
+			}
 		} else {
 			ZWPreferencesUtils.setWidgetCoin(null);
 			views.setViewVisibility(R.id.widget_select_coin, View.INVISIBLE);
@@ -82,14 +92,13 @@ public class ZWWalletWidget extends AppWidgetProvider{
 		Intent intent_send = new Intent(context, ZWMainFragmentActivity.class);
 		intent_send.putExtra(WIDGET_SEND, true);
 		intent_send.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		PendingIntent pendingIntent_send = PendingIntent.getActivity(context, send_intent_requestcode, intent_send, PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent pendingIntent_send = PendingIntent.getActivity(context, send_intent_requestcode, intent_send, 0);
 		views.setOnClickPendingIntent(R.id.widget_send, pendingIntent_send);
 
 		Intent intent_receive = new Intent(context, ZWMainFragmentActivity.class);
 		intent_receive.putExtra(WIDGET_RECEIVE, true);
 		intent_receive.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-		PendingIntent pendingIntent_receive = PendingIntent.getActivity(context, receive_intent_requestcode, intent_receive, PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent pendingIntent_receive = PendingIntent.getActivity(context, receive_intent_requestcode, intent_receive, 0);
 		views.setOnClickPendingIntent(R.id.widget_receive, pendingIntent_receive);
 
 		Intent intent = new Intent(context, ZWWalletWidget.class);

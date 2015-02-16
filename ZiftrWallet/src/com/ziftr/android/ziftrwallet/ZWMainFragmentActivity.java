@@ -227,17 +227,19 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (this.sendTaskFragment == null){
 			this.sendTaskFragment = (ZWSendTaskFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
 		}
-		
 		if (getIntent() != null){
 			//Check if loaded from widget
 			if (getIntent().hasExtra(ZWWalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
-				this.setSelectedCoin(ZWCoin.getCoin(ZWPreferencesUtils.getWidgetCoin()));
+				this.setSelectedCoin(ZWWalletManager.getInstance().getCoin(ZWPreferencesUtils.getWidgetCoin()));
+				ZLog.log("AAAA");
 				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)) {
 					if (getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
+						ZLog.log("@@@SEND WIDGET");
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_SEND);
 						openSendCoinsView(null, null);
-					} else{
+					} else {
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_RECEIVE);
+						ZLog.log("@@@RECEIVE WIDGET");
 						openReceiveCoinsView(null);
 					}
 				}

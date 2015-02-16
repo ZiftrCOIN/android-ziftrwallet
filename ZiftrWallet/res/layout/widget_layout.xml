@@ -1,74 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg_shape"
-    android:padding="@dimen/widget_margin"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:padding="@dimen/widget_margin" >
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/widget_change_coin"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="@drawable/widget_click_color"
         android:clickable="true"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
 
         <ImageView
             android:id="@+id/widget_select_coin"
             android:layout_width="@dimen/ow_medium_icon_side_length"
             android:layout_height="@dimen/ow_medium_icon_side_length"
-            android:layout_centerVertical="true"
             android:layout_marginLeft="6dp"
             android:layout_marginRight="6dp" />
 
-        <TextView
-            android:id="@+id/widget_coin"
-            style="@style/widget_text"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/widget_select_coin"
-            android:layout_toRightOf="@id/widget_select_coin"
-            android:textSize="@dimen/ow_txt_mediumsmall" />
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/widget_balance"
-            style="@style/widget_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/widget_coin"
-            android:layout_below="@id/widget_coin"
-            android:textSize="@dimen/ow_txt_small" />
+            <TextView
+                android:id="@+id/widget_coin"
+                style="@style/widget_text"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textSize="@dimen/ow_txt_mediumsmall" />
+
+            <TextView
+                android:id="@+id/widget_balance"
+                style="@style/widget_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/ow_txt_small" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/no_wallets"
             style="@style/widget_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_marginLeft="12dp"
             android:text="No Wallets"
             android:textSize="@dimen/ow_txt_mediumsmall" />
-    </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/widget_send"
-        android:layout_width="@dimen/ow_total_icon_side_length"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/widget_click_color"
-        android:clickable="true"
-        android:padding="10dp"
-        android:src="@drawable/send_button_icon" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/widget_receive"
         android:layout_width="@dimen/ow_total_icon_side_length"
         android:layout_height="match_parent"
-        android:layout_toLeftOf="@id/widget_send"
         android:background="@drawable/widget_click_color"
         android:clickable="true"
         android:padding="10dp"
         android:src="@drawable/receive_button_icon" />
 
-</RelativeLayout>
+    <ImageView
+        android:id="@+id/widget_send"
+        android:layout_width="@dimen/ow_total_icon_side_length"
+        android:layout_height="match_parent"
+        android:background="@drawable/widget_click_color"
+        android:clickable="true"
+        android:padding="10dp"
+        android:src="@drawable/send_button_icon" />
+
+</LinearLayout>

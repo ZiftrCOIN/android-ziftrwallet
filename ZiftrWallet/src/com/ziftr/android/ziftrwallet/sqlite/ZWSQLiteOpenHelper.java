@@ -514,6 +514,10 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized List<ZWCoin> getCoins() {
 		return this.coinTable.getAllCoins(getReadableDatabase());
 	}
+	
+	public synchronized ZWCoin getCoin(String coinSymbol){
+		return this.coinTable.getCoin(coinSymbol, getReadableDatabase());
+	}
 
 	/**
 	* Call this method to activate a coin type if it is not already activated.

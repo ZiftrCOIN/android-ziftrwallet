@@ -40,7 +40,7 @@ public class ZWCoin implements ZWCurrency {
 	//public static final ZWCoin[] TYPES = new ZWCoin[] {BTC, LTC, PPC, DOGE};
 	//public static final ZWCoin[] TYPES_TEST = new ZWCoin[] {BTC_TEST, LTC_TEST, PPC_TEST, DOGE_TEST};
 	
-	private static HashMap<String, ZWCoin> coins = new HashMap<String, ZWCoin>();
+	public static HashMap<String, ZWCoin> coins = new HashMap<String, ZWCoin>();
 	
 	//use these until server is sending actual images (and for display before images are downloaded)
 	private static HashMap<String, Integer> logoMap = new HashMap<String, Integer>();

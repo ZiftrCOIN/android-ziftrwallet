@@ -160,6 +160,16 @@ public class ZWCoinTable {
 		return coins;
 	}
 	
+	protected ZWCoin getCoin(String coinSymbol, SQLiteDatabase db){
+		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coinSymbol);
+		Cursor cursor = db.rawQuery(sql, null);
+		if(cursor.moveToFirst()) {
+			ZWCoin coin = cursorToCoin(cursor);
+			return coin;
+		}
+		return null;
+	}
+	
 	
 	
 	protected boolean isCoinActivated(ZWCoin coin, SQLiteDatabase db) {
