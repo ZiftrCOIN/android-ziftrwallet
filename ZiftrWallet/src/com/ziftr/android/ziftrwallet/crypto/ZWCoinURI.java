@@ -105,9 +105,9 @@ public class ZWCoinURI {
 	 *               any expectation about what network the URI is for and wish to check yourself.
 	 * @param input The raw URI data to be parsed (see class comments for accepted formats)
 	 */
-	public ZWCoinURI(ZWCoin params, String input) throws ZWCoinURIParseException, ZWAddressFormatException {
+	public ZWCoinURI(ZWCoin coin, String input) throws ZWCoinURIParseException, ZWAddressFormatException {
 		try {
-			this.scheme = params.getScheme();
+			this.scheme = coin.getScheme();
 		} catch(NullPointerException npe) {
 			throw new ZWCoinURIParseException("The coin id may not be null. ");
 		}
@@ -139,7 +139,7 @@ public class ZWCoinURI {
 		}
 
 		if (uri.getAuthority() != null && !uri.getAuthority().isEmpty()) {
-			if (params.addressIsValid(uri.getAuthority())) {
+			if (coin.addressIsValid(uri.getAuthority())) {
 				this.parameterMap.put(FIELD_ADDRESS, uri.getAuthority());
 			} else {
 				throw new ZWAddressFormatException("The address does not validate. ");

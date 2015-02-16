@@ -25,7 +25,6 @@ import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
@@ -65,12 +64,11 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 
 	private View sendCoinsContainingView;
 
-	private String prefilledAddress;
-	private String prefilledAmount;
-	
 	private TextView totalTextView;
 	private TextView totalFiatEquivTextView;
 
+	private ZWCoinURI preloadedCoinUri;
+	private String preloadAddress;
 	
 	/**
 	 * Inflate, initialize, and return the send coins layout.
@@ -83,10 +81,17 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		this.rootView = inflater.inflate(R.layout.accounts_send_coins, container, false);
 
 		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
-
 		this.initializeViewFields();
-
 		this.initializeEditText();
+		
+		if(preloadedCoinUri != null) {
+			this.setupViews(preloadedCoinUri);
+			preloadedCoinUri = null;
+			preloadAddress = null;
+		}
+		else if(preloadAddress != null) {
+			this.updateAddress(preloadAddress, null);
+		}
 		
 		return this.rootView;
 	}
@@ -109,26 +114,18 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		if (data != null && data.hasExtra("SCAN_RESULT") && requestCode == ZWRequestCodes.SCAN_QR_CODE) {
 			// If we have scanned this address before then we get the label for it here
 			String dataFromQRScan = data.getExtras().getCharSequence("SCAN_RESULT").toString();
-			String address = null;
-			String txNote = null; // (Not the address label)
-			String amount = null;
+			
+			ZWCoinURI coinUri = null;
+			
 			try {
-				ZWCoinURI coinUri = new ZWCoinURI(this.getSelectedCoin(), dataFromQRScan);
-				address = coinUri.getAddress();
-				txNote = coinUri.getLabel();
-				amount = coinUri.getAmount();
-
-				if (txNote == null) {
-					txNote = coinUri.getMessage();
-				} else if (txNote != null && coinUri.getMessage() != null) {
-					txNote += " - " + coinUri.getMessage();
-				}
+				coinUri = new ZWCoinURI(this.getSelectedCoin(), dataFromQRScan);
 
 			} catch (ZWCoinURIParseException e) {
 				ZLog.log("Excpetion parsing QR code: ", e);
 				// Maybe it's just a straight non-encoded address? 
 				if (this.getSelectedCoin().addressIsValid(dataFromQRScan)) {
-					address = dataFromQRScan;
+					String address = dataFromQRScan;
+					this.updateAddress(address, null);
 				} else {
 					this.getZWMainActivity().alertUser("There was an error in the scanned data.", "error_in_request");
 				}
@@ -136,29 +133,41 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				this.getZWMainActivity().alertUser("The scanned address is not valid.", "invalid_scanned_address_dialog");
 			}
 
-			if (address != null) {
-				ZWAddress owAddress = this.getWalletManager().getAddress(this.getSelectedCoin(), address, false);
-				if (owAddress != null) {
-					// If there wasn't a note given in URI then we pre-fill from address
-					txNote = txNote == null ? owAddress.getLabel() : txNote;
-				}
+			if(coinUri != null) {
+				setupViews(coinUri);
 			}
-
-			if (amount != null) {
-				try {
-					// Just to check that it's formatted correctly
-					new BigDecimal(amount);
-					this.coinAmountEditText.setText(amount);
-				} catch(NumberFormatException nfe) {
-					// Just don't set the amount if not formatted correctly
-				}
-			}
-			this.acceptAddress(address, txNote);
 
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	
+	private void setupViews(ZWCoinURI coinUri) {
+	
+		String address = coinUri.getAddress();
+		String label = coinUri.getLabel();
+		String amount = coinUri.getAmount();
+
+		if (label == null) {
+			label = coinUri.getMessage();
+		} else if (label != null && coinUri.getMessage() != null) {
+			label += " - " + coinUri.getMessage();
+		}
+	
+		if (amount != null) {
+			try {
+				// Just to check that it's formatted correctly
+				new BigDecimal(amount);
+				this.coinAmountEditText.setText(amount);
+			} catch(NumberFormatException nfe) {
+				// Just don't set the amount if not formatted correctly
+			}
+		}
+		
+		this.updateAddress(address, label);
+	}
+	
+	
 	@Override
 	public void onClick(View v) {
 		if (v == getQRCodeButton) {
@@ -312,17 +321,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		this.sendButton = (ImageView) this.rootView.findViewById(R.id.send_button);
 		this.sendButton.setOnClickListener(this);
 
-
-		if (this.prefilledAddress != null) {
-			String loadedLabel = this.getWalletManager().getAddress(this.getSelectedCoin(), this.prefilledAddress, false).getLabel();
-			addressEditText.setText(this.prefilledAddress);
-			labelEditText.setText(loadedLabel);
-		}
-		if (this.prefilledAmount != null) {
-			coinAmountEditText.setText(this.prefilledAmount);
-			fiatAmountEditText.setText(ZWConverter.convert(new BigDecimal(this.prefilledAmount), this.getSelectedCoin(), 
-					ZWPreferencesUtils.getFiatCurrency()).toPlainString());
-		}
+		
 		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
 
 		this.fiatAmountLabel = (TextView) this.rootView.findViewById(R.id.amount_fiat_label);
@@ -452,6 +451,17 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		return basicAmount;
 	}
 
+	
+	
+	public void preloadSendData(ZWCoinURI coinUri) {
+		this.preloadedCoinUri = coinUri;
+	}
+	
+	public void preloadAddress(String address) {
+		this.preloadAddress = address;
+	}
+	
+	
 	/**
 	 * Gets the amount that is in the fee text box. This will be set in the 
 	 * text box to the default of this coin type if the user has not 
@@ -482,13 +492,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		return this.sendCoinsContainingView;
 	}
 
-	public void setSendToAddress(String address) {
-		this.prefilledAddress = address;
-	}
-	
-	public void setAmount(String amount){
-		this.prefilledAmount = amount;
-	}
 	
 	/**
 	 * Sends the type of coin that this thread actually represents to 
@@ -524,5 +527,5 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 	public void reEnableSend(){
 		this.sendButton.setEnabled(true);
 	}
-	
+
 }

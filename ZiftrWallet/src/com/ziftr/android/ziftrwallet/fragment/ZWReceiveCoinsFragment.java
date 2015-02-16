@@ -325,8 +325,8 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	}
 
 	@Override
-	public void acceptAddress(String address, String label) {
-		super.acceptAddress(address, label);
+	public void updateAddress(String address, String label) {
+		super.updateAddress(address, label);
 		this.setQrCodeGenerated(false);
 	}
 

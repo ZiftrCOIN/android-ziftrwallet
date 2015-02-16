@@ -7,6 +7,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -124,13 +125,21 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 	//////////  Methods for Address/Label  //////////
 	/////////////////////////////////////////////////
 
-	public void acceptAddress(String address, String label) {
+	protected void updateAddress(String address, String label) {
 		// The order that the next two steps are done is actually important because the 
 		// label text box has this as a textwatcher which updates the database, and the 
 		// address has to be set before we know which address to update in the db.
 		// If the order were reversed here then we might changed the note on an 
 		// address that doesn't correspond.
 		addressEditText.setText(address);
+		
+		if(label == null) {
+			ZWAddress addressFromDatabase = this.getWalletManager().getAddress(this.getSelectedCoin(), address, false);
+			if(addressFromDatabase != null) {
+				label = addressFromDatabase.getLabel();
+			}
+			
+		}
 		labelEditText.setText(label);
 	}
 

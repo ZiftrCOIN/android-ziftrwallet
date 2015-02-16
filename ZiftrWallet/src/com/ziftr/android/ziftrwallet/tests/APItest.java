@@ -18,7 +18,7 @@ public class APItest extends ActivityInstrumentationTestCase2<ZWMainFragmentActi
 	
 	public void testPreconditions() {
 		//server is online and we can successfully communicate with it
-		ZiftrNetRequest request = ZWApi.buildGenericApiRequest(true, "blockchains");
+		ZiftrNetRequest request = ZWApi.buildBlockchainsRequest();
 		String response = request.sendAndWait();
 		assertEquals(200, request.getResponseCode());
 		assertFalse(response.isEmpty());
