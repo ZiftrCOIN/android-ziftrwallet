@@ -167,7 +167,7 @@ public class ZWDataSyncHelper {
 	public static void downloadCoinData(){
 		ZiftrNetworkManager.networkStarted();
 		
-		ZiftrNetRequest request = ZWApi.buildGenericApiRequest(false, "/blockchains");
+		ZiftrNetRequest request = ZWApi.buildBlockchainsRequest();
 		String response = request.sendAndWait();
 		if (request.getResponseCode() == 200){
 

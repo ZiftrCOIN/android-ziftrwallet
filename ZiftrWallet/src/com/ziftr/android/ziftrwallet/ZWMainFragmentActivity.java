@@ -36,7 +36,6 @@ import android.widget.Toast;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
-import com.ziftr.android.ziftrwallet.crypto.ZWCoinURIParseException;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
@@ -51,7 +50,6 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWResetPassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWSetNameDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
-import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
@@ -236,8 +234,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 					if (getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
 						ZLog.log("@@@SEND WIDGET");
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_SEND);
-						openSendCoinsView(null, null);
-					} else {
+						openSendCoinsView(null);
+					} else{
 						getIntent().removeExtra(ZWWalletWidget.WIDGET_RECEIVE);
 						ZLog.log("@@@RECEIVE WIDGET");
 						openReceiveCoinsView(null);
@@ -246,18 +244,34 @@ ZiftrNetworkHandler, SendTaskCallback {
 			//loaded from coin uri
 			} else if (getIntent().getAction() == Intent.ACTION_VIEW){
 				String data = getIntent().getDataString();
-				ZWCoin coin = ZWCoin.getCoin(data.substring(0, data.indexOf(':')));
-				this.setSelectedCoin(coin);
-				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)){
+				String[] dataStrings = data.split(":");
+				String scheme = dataStrings[0];
+				String address = dataStrings[1];
+				if(address.contains("?")) {
+					address = address.substring(0, address.indexOf("?"));
+				}
+				
+				
+				ZWCoin coin = ZWCoin.getCoin(scheme, address);
+				if(coin == null) {
+					this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
+				}
+				else if(!getWalletManager().isCoinActivated(coin)) {
+					this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", "invalid_uri_address_dialog");
+				}
+				else {
+					this.setSelectedCoin(coin);
 					try {
 						ZWCoinURI uri = new ZWCoinURI(coin, data);
-						openSendCoinsView(uri.getAddress(), uri.getAmount());
-					} catch (ZWCoinURIParseException e) {
-						e.printStackTrace();
-					} catch (ZWAddressFormatException e) {
+						
+						openSendCoinsView(uri);
+					} 
+					catch (Exception e) {
+						ZLog.log("Exception open send coins view: ", e);
 						this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
 					}
 				}
+				
 			}
 		}
 		ZiftrNetworkManager.registerNetworkHandler(this);
@@ -882,23 +896,29 @@ ZiftrNetworkHandler, SendTaskCallback {
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openSendCoinsView(String address, String amount) {
+	public void openSendCoinsView(Object preloadData) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new ZWSendCoinsFragment();
 		}
+		
+		if(preloadData != null) {
+			//note, insteadof is a bit hacky, but best to keep all this fragment loading code in one method
+			if(preloadData instanceof ZWCoinURI) {
+				((ZWSendCoinsFragment) fragToShow).preloadSendData((ZWCoinURI) preloadData);
+			}
+			else {
+				((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
+			}
+		}
+		
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, ZWTags.ACCOUNTS_INNER);
-
-		if (address!=null){
-			((ZWSendCoinsFragment) fragToShow).setSendToAddress(address);		
-		}
-		if (amount!=null){
-			((ZWSendCoinsFragment) fragToShow).setAmount(amount);		
-		}
 	}
+	
 
+	
 	/**
 	 * Open the view for transaction details
 	 */

@@ -187,7 +187,7 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 		sendButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				getZWMainActivity().openSendCoinsView(null, null);
+				getZWMainActivity().openSendCoinsView(null);
 			}
 		});
 

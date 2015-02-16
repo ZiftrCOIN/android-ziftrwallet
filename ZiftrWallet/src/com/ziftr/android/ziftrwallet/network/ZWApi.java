@@ -27,8 +27,8 @@ public class ZWApi {
 	private static final String ACCEPT = "application/vnd.ziftr.fpa.v1+json";
 	
 	
-	private static String buildBaseUrl(String type, String chain) {
-		return buildBaseUrl(type, chain, false);
+	private static String buildUrl(String type, String chain, String endPoint) {
+		return buildUrl(type, chain, endPoint, true);
 	}
 	
 	
@@ -37,7 +37,7 @@ public class ZWApi {
 	}
 	
 	
-	private static String buildBaseUrl(String type, String chain, boolean secure) {
+	private static String buildUrl(String type, String chain, String endPoint, boolean secure) {
 		String protocol;
 		if(secure) {
 			protocol = "https";
@@ -46,7 +46,19 @@ public class ZWApi {
 			protocol = "http";
 		}
 		
-		return protocol + "://" + BASE_URL + "/blockchains/" + type + "/" + chain + "/";
+		StringBuilder url = new StringBuilder(protocol).append("://").append(BASE_URL).append("/blockchains/"); //  + type + "/" + chain + "/";
+		
+		if(type != null) {
+			url.append(type).append("/");
+		}
+		if(chain != null) {
+			url.append(chain).append("/");
+		}
+		if(endPoint != null) {
+			url.append(endPoint).append("/");
+		}
+		
+		return url.toString();
 	}
 	
 	
@@ -80,7 +92,7 @@ public class ZWApi {
 		ZiftrParamList query = new ZiftrParamList();
 		query.add("addresses", addressesList);
 		
-		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions";
+		String url = buildUrl(type.toLowerCase(), chain, "transactions");
 		ZLog.log("Transaction request url: ", url);
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), query);
 		return request;
@@ -97,7 +109,7 @@ public class ZWApi {
 	 */
 	public static ZiftrNetRequest buildSpendRequest(String type, String chain, JSONObject spendPostData){
 		
-		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions/requests";
+		String url = buildUrl(type.toLowerCase(), chain, "transactions/requests");
 		
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null,  spendPostData);
 		return request;
@@ -105,32 +117,31 @@ public class ZWApi {
 	
 	// POST signed txn /blockchains /{type} /{chain} /transactions
 	public static ZiftrNetRequest buildSpendSigningRequest(String type, String chain, JSONObject signedTxn){
-		String url = buildBaseUrl(type.toLowerCase(), chain) + "transactions";
+		String url = buildUrl(type.toLowerCase(), chain, "transactions");
 		
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null,  signedTxn);
 		return request;
 	}
 
+	
 	//GET /blockchains /market_value
 	public static ZiftrNetRequest buildMarketValueRequest(){
-		String url = "http://" + BASE_URL + "/blockchains/market_values";
+		String url = buildUrl(null, null, "market_values");
 
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null);
 		return request;
 	}
 	
 	
-	
-	/**
-	 * builds a network request for any url by appending the passed in string to the API's base url
-	 * @param urlPart the part of the url to append to the base api url to create the network request
-	 * @return a network request object for the full url, will be a GET and have no additional parameters
-	 */
-	public static ZiftrNetRequest buildGenericApiRequest(boolean secure, String urlPart) {
-		String protocol;
-		protocol = secure ? "https" : "http";
-		ZiftrNetRequest request = ZiftrNetRequest.createRequest(buildGenericHeaders() ,protocol + "://" + BASE_URL + urlPart);
+	//GET /blockchains
+	public static ZiftrNetRequest buildBlockchainsRequest() {
+		String url = buildUrl(null, null, null); //blockchains is actually the base endpoint for the wallet api, so add nothing to url
+		
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders());
 		return request;
 	}
+	
 
 }
+
+

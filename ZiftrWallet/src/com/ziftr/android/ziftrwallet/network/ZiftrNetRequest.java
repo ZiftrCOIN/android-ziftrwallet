@@ -70,7 +70,7 @@ public class ZiftrNetRequest {
 	 * @param url the url this network request is for
 	 * @return a network request object with default settings pointing to the url
 	 */
-	public static ZiftrNetRequest createRequest( Map<String,String> headers, String url) {
+	public static ZiftrNetRequest createRequest(String url, Map<String,String> headers) {
 		ZiftrNetRequest request = new ZiftrNetRequest(url);
 		request.sentHeaders = headers;
 		return request;

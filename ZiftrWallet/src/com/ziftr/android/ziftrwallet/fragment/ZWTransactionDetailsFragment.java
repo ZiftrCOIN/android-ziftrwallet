@@ -330,7 +330,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		if (v==this.reuseAddress){
 			if (this.txItem.getAmount().compareTo(BigInteger.ZERO) < 0) {
 				//sent to this address
-				getZWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0), null);
+				getZWMainActivity().openSendCoinsView(txItem.getDisplayAddresses().get(0));
 			} else {
 				//received on this address
 				try {

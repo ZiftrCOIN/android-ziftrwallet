@@ -106,7 +106,7 @@ implements TextWatcher, OnClickListener {
 					int position, long id) {
 				ZWAddress address = (ZWAddress) addressListView.getItemAtPosition(position);
 				ZWAddressBookParentFragment parentFragment = getAddressBookParentFragment();
-				parentFragment.acceptAddress(address.getAddress(), address.getLabel());
+				parentFragment.updateAddress(address.getAddress(), address.getLabel());
 				parentFragment.returnToParentFragment();
 			}
 		});

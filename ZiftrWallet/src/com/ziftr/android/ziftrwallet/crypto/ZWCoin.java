@@ -67,6 +67,31 @@ public class ZWCoin implements ZWCurrency {
 	}
 	
 	
+	public static ZWCoin getCoin(String scheme, String address) {
+		
+		for(ZWCoin coin : getAllCoins()) {
+			if(coin.scheme.equals(scheme)) {
+				//if the schemes are equal we found the right coin
+				//now check if it's regular or testnet (or the address is messed up)
+				try {
+					byte[] decodedAddress = Base58.decodeChecked(address);
+					byte prefix = decodedAddress[0];
+					if(prefix == coin.pubKeyHashPrefix || prefix == coin.scriptHashPrefix) {
+						return coin;
+					}
+				} 
+				catch (ZWAddressFormatException e) {
+					ZLog.log("Failed to determine coin from scheme and address: ", e);
+					break;
+				}
+			}
+		}
+		
+		return null;
+		
+	}
+	
+	
 	private boolean enabled = false;
 	private BigInteger defaultFeePer;
 	private byte pubKeyHashPrefix; 
