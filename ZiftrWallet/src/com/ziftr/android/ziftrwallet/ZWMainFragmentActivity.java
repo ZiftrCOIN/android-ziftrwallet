@@ -115,6 +115,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 	private ImageView syncButton; //the button in various fragments users can press to sync their data
 	private boolean isSyncing = false;
 	
+	private boolean consumedIntent = false;
+	
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -194,6 +196,11 @@ ZiftrNetworkHandler, SendTaskCallback {
 		}
 		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
 
+		if(savedInstanceState != null) {
+			consumedIntent = savedInstanceState.getBoolean("consumedIntent");
+		}
+		
+		
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
 
@@ -225,62 +232,9 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (this.sendTaskFragment == null){
 			this.sendTaskFragment = (ZWSendTaskFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
 		}
-		if (getIntent() != null){
-			//Check if loaded from widget
-			if (getIntent().hasExtra(ZWWalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
-				this.setSelectedCoin(ZWWalletManager.getInstance().getCoin(ZWPreferencesUtils.getWidgetCoin()));
-				if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)) {
-					if (getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
-						getIntent().removeExtra(ZWWalletWidget.WIDGET_SEND);
-						openSendCoinsView(null);
-					} else{
-						getIntent().removeExtra(ZWWalletWidget.WIDGET_RECEIVE);
-						openReceiveCoinsView(null);
-					}
-				}
-			//loaded from coin uri
-			} else if (getIntent().getAction() == Intent.ACTION_VIEW){
-				String data = getIntent().getDataString();
-				String[] dataStrings = data.split(":");
-				String scheme = dataStrings[0];
-				String address = dataStrings[1];
-				if(address.contains("?")) {
-					address = address.substring(0, address.indexOf("?"));
-				}
-				
-				
-				ZWCoin coin = ZWCoin.getCoin(scheme, address);
-				if(coin == null) {
-					this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
-				}
-				else if(!getWalletManager().isCoinActivated(coin)) {
-					this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", "invalid_uri_address_dialog");
-				}
-				else {
-					this.setSelectedCoin(coin);
-					try {
-						ZWCoinURI uri = new ZWCoinURI(coin, data);
-						
-						openSendCoinsView(uri);
-					} 
-					catch (Exception e) {
-						ZLog.log("Exception open send coins view: ", e);
-						this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
-					}
-				}
-				
-			}
-		}
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
-	@Override
-	public void onResume(){
-		super.onResume();
-		if (this.sendTaskFragment != null){
-			this.sendTaskFragment.setCallBack(this);
-		}
-	}
 	
 	@Override
 	public void onPause(){
@@ -289,6 +243,92 @@ ZiftrNetworkHandler, SendTaskCallback {
 			this.sendTaskFragment.setCallBack(null);
 		}
 	}
+
+	
+	@Override
+	protected void onNewIntent (Intent intent) {
+		consumedIntent = false;
+		this.setIntent(intent);
+	}
+	
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		if (this.sendTaskFragment != null){
+			this.sendTaskFragment.setCallBack(this);
+		}
+		
+		
+
+		this.handleIntent(getIntent());
+		
+	}
+	
+	
+	private void handleIntent(Intent intent) {
+		
+		
+		//Check if loaded from widget
+		//TODO -removing incomplete widget features for first release
+		/***
+		if (getIntent().hasExtra(ZWWalletWidget.WIDGET_RECEIVE) || getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
+			this.setSelectedCoin(ZWCoin.getCoin(ZWPreferencesUtils.getWidgetCoin()));
+			if (this.selectedCoin != null && this.getWalletManager().isCoinActivated(this.selectedCoin)) {
+				if (getIntent().hasExtra(ZWWalletWidget.WIDGET_SEND)){
+					getIntent().removeExtra(ZWWalletWidget.WIDGET_SEND);
+					openSendCoinsView(null);
+				} else{
+					getIntent().removeExtra(ZWWalletWidget.WIDGET_RECEIVE);
+					openReceiveCoinsView(null);
+				}
+			}
+		
+		} 
+		***/
+		
+		
+		if (intent != null && !consumedIntent && intent.getAction() == Intent.ACTION_VIEW){
+			//loaded from coin uri
+			
+			String data = intent.getDataString();
+			
+			//clear the intent so it doesn't keep doing this
+			consumedIntent = true;
+			this.setIntent(null);
+			
+			
+			String[] dataStrings = data.split(":");
+			String scheme = dataStrings[0];
+			String address = dataStrings[1];
+			if(address.contains("?")) {
+				address = address.substring(0, address.indexOf("?"));
+			}
+			
+			
+			ZWCoin coin = ZWCoin.getCoin(scheme, address);
+			if(coin == null) {
+				this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
+			}
+			else if(!getWalletManager().isCoinActivated(coin)) {
+				this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", "invalid_uri_address_dialog");
+			}
+			else {
+				this.setSelectedCoin(coin);
+				try {
+					ZWCoinURI uri = new ZWCoinURI(coin, data);
+					
+					openSendCoinsView(uri);
+				} 
+				catch (Exception e) {
+					ZLog.log("Exception open send coins view: ", e);
+					this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
+				}
+			}
+			
+		}
+	}
+	
 	
 	/**
 	 * Create the options menu.
@@ -326,6 +366,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (this.getSelectedCoin() != null) {
 			outState.putString(ZWCoin.TYPE_KEY, this.getSelectedCoin().getSymbol());
 		}
+		
+		outState.putBoolean("consumedIntent", consumedIntent);
 	}
 
 	/**
@@ -700,6 +742,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 		});
 	}
 
+	
+	
 	/**
 	 * Should be called whenever any of the menu items in the
 	 * drawer menu are selected. Basically just contains code 
@@ -856,18 +900,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 				R.id.oneWalletBaseFragmentHolder, true, ZWTags.ACCOUNTS_INNER);
 	}
 
-	/**
-	 * A convenience method that we can use to start a dialog from this bundle.
-	 * The bundle should contain one string ZWCoin.___.toString() which 
-	 * can be extracted by getting from the bundle with the key ZWCoin.TYPE_KEY.
-	 * 
-	 * @param info - The bundle used to tell which wallet to open.
-	 */
-	public void openWalletViewFromBundle(Bundle info) {
-		if (info != null) {
-			this.openWalletView(ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY)));
-		}
-	}
+	
 
 	/**
 	 * Only works for enabled types right now. 

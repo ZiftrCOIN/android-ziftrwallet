@@ -29,7 +29,6 @@ import javax.annotation.Nullable;
 import android.net.Uri;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * <p>Provides a standard implementation of a Bitcoin URI with support for the following:</p>

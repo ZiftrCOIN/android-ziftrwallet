@@ -7,6 +7,7 @@ import java.util.Map;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
+import android.util.Base64;
 
 import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -23,8 +24,8 @@ public class ZWApi {
 	private static final String BASE_URL = SANDBOX_BASE_URL;
 	
 	
-	private static final String AUTHORIZATION = "Basic dGVzdGtleTo=";
-	private static final String ACCEPT = "application/vnd.ziftr.fpa.v1+json";
+	private static final String AUTHORIZATION = "Basic " + Base64.encodeToString("pub_44ed4e5549a373155e66ccfa5043320c:".getBytes(), Base64.DEFAULT);
+	private static final String ACCEPT = "application/vnd.ziftr.fpa-0-1+json";
 	
 	
 	private static String buildUrl(String type, String chain, String endPoint) {
