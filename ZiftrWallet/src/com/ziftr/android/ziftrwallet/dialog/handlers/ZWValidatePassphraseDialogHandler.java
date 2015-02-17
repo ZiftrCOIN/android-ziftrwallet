@@ -17,6 +17,7 @@ public interface ZWValidatePassphraseDialogHandler {
 	 * dialog is returning.
 	 * @param passPhrase - The passphrase is given to the activity/fragment
 	 * so that they can use the result appropriately.
+	 * 
 	 */
 	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info);
 	

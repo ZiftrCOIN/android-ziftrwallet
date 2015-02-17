@@ -1143,6 +1143,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 				break;
 			}
 		} else {
+			//manually toggle showing false to allow alert to show
+			this.showingDialog = false;
 			this.alertUser("Error: Passphrases don't match. ", "wrong_passphrase");
 		}
 
@@ -1176,12 +1178,18 @@ ZiftrNetworkHandler, SendTaskCallback {
 					}
 				}
 			} else {
+				//manually toggle showing false to allow alert to show
+				this.showingDialog = false;
+
 				// If don't match, tell user. 
 				this.alertUser("The passphrase you entered doesn't match your "
 						+ "previous passphrase. Your previous passphrase is "
 						+ "still in place.", "passphrases_dont_match");
 			} 
 		} else {
+			//manually toggle showing false to allow alert to show
+			this.showingDialog = false;
+
 			this.alertUser("The passphrases you entered don't match. Your previous "
 					+ "passphrase is still in place.", "wrong_re-enter_passphrase");
 		}

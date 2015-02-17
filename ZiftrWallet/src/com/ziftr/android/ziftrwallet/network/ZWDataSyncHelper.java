@@ -450,6 +450,7 @@ public class ZWDataSyncHelper {
 	}
 	
 	//create transaction immediately after sending
+	//need fee before we can use
 	private static void createTransactionFromSpendResponse(ZWCoin coin, JSONObject json, String sentTo) throws JSONException{
 		String hash = json.getString("txid");
 		ZWTransaction transaction = new ZWTransaction(coin, hash);

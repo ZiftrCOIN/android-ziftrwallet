@@ -75,7 +75,7 @@ public class ZWTransaction implements ZWSearchableListItem {
 
 	/** Which coin this transaction is for */
 	private ZWCoin coin;
-
+	
 	// TODO figure out what really needs to be in this constructor.
 	/**
 	public ZWTransaction(ZWCoin coin, String txNote, long txTime, BigInteger txAmount) {
