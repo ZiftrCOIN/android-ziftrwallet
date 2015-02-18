@@ -27,6 +27,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -258,9 +259,6 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (this.sendTaskFragment != null){
 			this.sendTaskFragment.setCallBack(this);
 		}
-		
-		
-
 		this.handleIntent(getIntent());
 		
 	}
@@ -725,6 +723,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
 		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		this.searchEditText.clearFocus();
+		this.searchEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+		this.searchEditText.setHint(getResources().getString(R.string.zw_searchbar_hint));
 		this.searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
@@ -1478,7 +1478,11 @@ ZiftrNetworkHandler, SendTaskCallback {
 			clearbutton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					searchEditText.setText("");
+					if (searchEditText.getText().toString().isEmpty()){
+						searchBar.setVisibility(View.GONE);
+					} else {
+						searchEditText.setText("");
+					}
 				}
 
 			});

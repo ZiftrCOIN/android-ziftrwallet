@@ -6,11 +6,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
+import android.view.WindowManager;
 
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDialogHandler {
 
@@ -18,6 +20,9 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		//prevent keyboard from popping up automatically
+		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		
 		// To make activity fullscreen
 		// Have to do this before setContentView so that we don't get a AndroidRuntimeException
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -29,7 +34,7 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 			} else if (!ZWPreferencesUtils.userHasSetName() && !ZWPreferencesUtils.getDisabledName()) {
 				this.openNameFragment(false);
 			} else {
-				throw new RuntimeException(
+				ZLog.log(
 						"Shouldn't be in the welcome screen if user already has passphrase and set name!");
 			}
 		}

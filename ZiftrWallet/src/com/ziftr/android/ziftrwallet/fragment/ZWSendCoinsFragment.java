@@ -17,6 +17,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -398,6 +399,12 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		
+		this.coinAmountEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+		if (ZWPreferencesUtils.getFeesAreEditable()){
+			this.fiatAmountEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+			this.coinFeeEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+		}
 		this.fiatFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 	}
 

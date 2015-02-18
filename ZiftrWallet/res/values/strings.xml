@@ -187,5 +187,6 @@
     <string name="zw_incorrect_reset_passphrase">"The passphrase you entered doesn't match your previous passphrase. Your previous passphrase is still in place.</string>
     <string name="zw_set_empty_name">Looks like you wanted to disable your name instead!</string>
     <string name="zw_invalid_address_uri">The address is not valid.</string>
-
+    <string name="zw_searchbar_hint">search</string>
+    
 </resources>
