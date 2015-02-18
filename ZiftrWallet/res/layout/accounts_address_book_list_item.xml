@@ -15,7 +15,7 @@
         android:layout_height="@dimen/ow_medium_icon_side_length"
         android:layout_alignParentLeft="true"
         android:clickable="true"
-        android:contentDescription="@string/ow_empty_string"
+        android:contentDescription="@string/zw_empty_string"
         android:gravity="center_vertical"
         android:padding="@dimen/ow_borderless_icon_margin"
         android:src="@drawable/button_edit_pencil_clickable" />
@@ -25,7 +25,7 @@
         android:layout_width="@dimen/ow_medium_icon_side_length"
         android:layout_height="@dimen/ow_medium_icon_side_length"
         android:layout_alignParentRight="true"
-        android:contentDescription="@string/ow_empty_string"
+        android:contentDescription="@string/zw_empty_string"
         android:gravity="center_vertical"
         android:padding="@dimen/ow_bordered_icon_margin"
         android:src="@drawable/received_yellow" />
@@ -46,7 +46,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:singleLine="true"
-            android:text="@string/ow_empty_string"
+            android:text="@string/zw_empty_string"
             android:textSize="@dimen/ow_txt_mediumsmall"
             android:textStyle="bold" />
 
@@ -58,7 +58,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:singleLine="true"
-            android:text="@string/ow_empty_string" />
+            android:text="@string/zw_empty_string" />
     </LinearLayout>
 
 </RelativeLayout>

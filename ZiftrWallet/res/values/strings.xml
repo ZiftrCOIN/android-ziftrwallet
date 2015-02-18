@@ -5,181 +5,187 @@
 
 
     <!-- Description here -->
-    <string name="ow_empty_string"></string>
+    <string name="zw_empty_string"></string>
     <!-- Description here -->
-    <string name="ow_app_name">ziftrWALLET</string>
+    <string name="zw_app_name">ziftrWALLET</string>
     <!-- Description here -->
-    <string name="ow_hello_world">Hello world!</string>
+    <string name="zw_hello_world">Hello world!</string>
     <!-- Description here -->
-    <string name="ow_action_settings">Settings</string>
+    <string name="zw_action_settings">Settings</string>
     <!-- Description here -->
-    <string name="ow_passphrase_hint">Enter your passphrase</string>
+    <string name="zw_passphrase_hint">Enter your passphrase</string>
     <!-- Description here -->
-    <string name="ow_old_passphrase_hint">Enter your old passphrase</string>
+    <string name="zw_old_passphrase_hint">Enter your old passphrase</string>
     <!-- Description here -->
-    <string name="ow_new_passphrase_hint">Enter your new passphrase</string>
+    <string name="zw_new_passphrase_hint">Enter your new passphrase</string>
     <!-- Description here -->
-    <string name="ow_confirm_passphrase_hint">Re-enter your passphrase</string>
+    <string name="zw_confirm_passphrase_hint">Re-enter your passphrase</string>
     <!-- Description here -->
-    <string name="ow_menu_text_accounts">ACCOUNTS</string>
+    <string name="zw_menu_text_accounts">ACCOUNTS</string>
     <!-- Description here -->
-    <string name="ow_menu_text_terms">TERMS</string>
+    <string name="zw_menu_text_terms">TERMS</string>
     <!-- Description here -->
-    <string name="ow_menu_text_settings">SETTINGS</string>
+    <string name="zw_menu_text_settings">SETTINGS</string>
     <!-- Description here -->
-    <string name="ow_menu_text_about">ABOUT</string>
+    <string name="zw_menu_text_about">ABOUT</string>
     <!-- Description here -->
-    <string name="ow_menu_text_security">SECURITY</string>
+    <string name="zw_menu_text_security">SECURITY</string>
     <!-- Description here -->
-    <string name="ow_cancel_button_text">CANCEL</string>
+    <string name="zw_cancel_button_text">CANCEL</string>
     <!-- Description here -->
-    <string name="ow_send_button_text">SEND</string>
+    <string name="zw_send_button_text">SEND</string>
     <!-- Description here -->
-    <string name="ow_send_to_address">SEND TO: </string>
+    <string name="zw_send_to_address">SEND TO: </string>
     <!-- Description here -->
-    <string name="ow_send_to_address_name">NAME: </string>
+    <string name="zw_send_to_address_name">NAME: </string>
     <!-- Description here -->
-    <string name="ow_receive_message_title">MESSAGE: </string>
+    <string name="zw_receive_message_title">MESSAGE: </string>
     <!-- Description here -->
-    <string name="ow_send_amount">AMOUNT: </string>
+    <string name="zw_send_amount">AMOUNT: </string>
     <!-- Description here -->
-    <string name="ow_send_amount_equivalent">USD</string>
+    <string name="zw_send_amount_equivalent">USD</string>
     <!-- Description here -->
-    <string name="ow_send_transaction_fee">FEE/KB: </string>
+    <string name="zw_send_transaction_fee">FEE/KB: </string>
     <!-- Description here -->
-    <string name="ow_send_total">TOTAL: </string>
+    <string name="zw_send_total">TOTAL: </string>
     <!-- Description here -->
-    <string name="ow_send_default_total">0.00</string>
+    <string name="zw_send_default_total">0.00</string>
     <!-- Description here -->
-    <string name="ow_send_default_total_fiat_equiv">($0.00)</string>
+    <string name="zw_send_default_total_fiat_equiv">($0.00)</string>
     <!-- Description here -->
-    <string name="ow_splash_screen_description">Splash Screen</string>
+    <string name="zw_splash_screen_description">Splash Screen</string>
     <!-- Description here -->
-    <string name="ow_splash_screen_activity_title">Splash</string>
+    <string name="zw_splash_screen_activity_title">Splash</string>
     <!-- Description here -->
-    <string name="ow_add_new_wallet_content_description">Add New Wallet</string>
+    <string name="zw_add_new_wallet_content_description">Add New Wallet</string>
     <!-- Description here -->
-    <string name="ow_add_currency">ADD CURRENCY</string>
+    <string name="zw_add_currency">ADD CURRENCY</string>
     <!-- Description here -->
-    <string name="ow_bitcoin">Bitcoin</string>
+    <string name="zw_bitcoin">Bitcoin</string>
     <!-- Description here -->
-    <string name="ow_bitcoin_caps">BITCOIN</string>
+    <string name="zw_bitcoin_caps">BITCOIN</string>
     <!-- Description here -->
-    <string name="ow_right_caret_content_description"></string>
+    <string name="zw_right_caret_content_description"></string>
     <!-- Description here -->
-    <string name="ow_tx_list_divider_default">PENDING</string>
+    <string name="zw_tx_list_divider_default">PENDING</string>
     <!-- Description here -->
-    <string name="ow_tx_list_title_default">REI</string>
+    <string name="zw_tx_list_title_default">REI</string>
     <!-- Description here -->
-    <string name="ow_tx_list_time_default">June 30, 2014  5:03 pm</string>
+    <string name="zw_tx_list_time_default">June 30, 2014  5:03 pm</string>
     <!-- Description here -->
-    <string name="ow_receive_coins_address_label_box_title">ADDRESS LABEL</string>
+    <string name="zw_receive_coins_address_label_box_title">ADDRESS LABEL</string>
     <!-- Description here -->
-    <string name="ow_receive_coins_address_value_box_title">ADDRESS</string>
+    <string name="zw_receive_coins_address_value_box_title">ADDRESS</string>
     <!-- Description here -->
-    <string name="ow_receive_coins_address_value_default">1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU</string>
+    <string name="zw_receive_coins_address_value_default">1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU</string>
     <!-- Description here -->
-    <string name="ow_tx_details_pending_label">(Pending)</string>
+    <string name="zw_tx_details_pending_label">(Pending)</string>
     <!-- Description here -->
-    <string name="ow_tx_details_amount_sent_label">Amount Sent</string>
+    <string name="zw_tx_details_amount_sent_label">Amount Sent</string>
     <!-- Description here -->
     <string name="Placeholder">Placeholder</string>
     <!-- Description here -->
-    <string name="ow_tx_details_confirmation_fee_label">Confirmation Fee</string>
+    <string name="zw_tx_details_confirmation_fee_label">Confirmation Fee</string>
     <!-- Description here -->
-    <string name="ow_tx_label">Transaction Note</string>
+    <string name="zw_tx_label">Transaction Note</string>
     <!-- Description here -->
-    <string name="ow_tx_details_sent">Sent</string>
+    <string name="zw_tx_details_sent">Sent</string>
     <!-- welcome label -->
-    <string name="ow_tx_routing_address">Address</string>
+    <string name="zw_tx_routing_address">Address</string>
     <!-- Description here -->
-    <string name="ow_ok">OK</string>
+    <string name="ok">OK</string>
     <!-- Description here -->
-    <string name="ow_dialog_cancel">Cancel</string>
+    <string name="zw_dialog_cancel">Cancel</string>
     <!-- Description here -->
-    <string name="ow_dialog_select">Select</string>
+    <string name="zw_dialog_select">Select</string>
     <!-- Description here -->
-    <string name="ow_dialog_continue">Continue</string>
+    <string name="zw_dialog_continue">Continue</string>
     <!-- Description here -->
-    <string name="ow_ab_menu_description">Menu</string>
+    <string name="zw_ab_menu_description">Menu</string>
     <!-- Description here -->
-    <string name="ow_ab_home_description">Home</string>
+    <string name="zw_ab_home_description">Home</string>
     <!-- Description here -->
-    <string name="ow_ab_back_description">Back</string>
+    <string name="zw_ab_back_description">Back</string>
     <!-- Description here -->
-    <string name="ow_ab_search_description">Search</string>
+    <string name="zw_ab_search_description">Search</string>
     <!-- Description here -->
-    <string name="ow_add_a_currency">Add a Currency</string>
+    <string name="zw_add_a_currency">Add a Currency</string>
     <!-- string with link for website -->
-    <string name="ow_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
+    <string name="zw_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
     <!-- label for reset password -->
-    <string name="ow_reset_password">Reset Password</string>
+    <string name="zw_reset_password">Reset Password</string>
     <!-- Description here -->
-    <string name="ow_about">About</string>
+    <string name="zw_about">About</string>
     <!-- Description here -->
-    <string name="ow_disable_passphrase">Disable Passphrase</string>
+    <string name="zw_disable_passphrase">Disable Passphrase</string>
     <!-- Description here -->
-    <string name="ow_fiat_currency">Fiat Currency</string>
+    <string name="zw_fiat_currency">Fiat Currency</string>
     <!-- Description here -->
-    <string name="ow_editable_confirmation_fees">Editable Confirmation Fees</string>
+    <string name="zw_editable_confirmation_fees">Editable Confirmation Fees</string>
     <!-- Description here -->
-    <string name="ow_currency">CURRENCY</string>
+    <string name="zw_currency">CURRENCY</string>
     <!-- Description here -->
-    <string name="ow_passphrase">PASSPHRASE</string>
+    <string name="zw_passphrase">PASSPHRASE</string>
     <!-- Description here -->
-    <string name="ow_confirmation_fee">CONFIRMATION FEES</string>
+    <string name="zw_confirmation_fee">CONFIRMATION FEES</string>
     <!-- ello -->
-    <string name="ow_hello">Hello!</string>
+    <string name="hello">Hello!</string>
     <!-- welcome label -->
-    <string name="ow_welcome">Welcome to ziftrWALLET!</string>
+    <string name="zw_welcome">Welcome to ziftrWALLET!</string>
     <!-- message in passphrase welcome screen -->
-    <string name="ow_welcome_passphrase_message">Please take a moment to set your passphrase below. 
+    <string name="zw_welcome_passphrase_message">Please take a moment to set your passphrase below. 
         This will ensure that your coins are secure in the unfortunate event that someone steals or hacks your phone. 
         We recommend using a few words that you are sure to remember and that only you will know.\n\nOnce you\'ve set your 
         passphrase, DO NOT FORGET IT! You will not be able to spend your coins without it.</string>
     <!-- message in name welcome screen -->
-    <string name="ow_welcome_name_message">Please also take a moment to provide your name below. This value is only 
+    <string name="zw_welcome_name_message">Please also take a moment to provide your name below. This value is only 
         stored on your device and, if provided, persons sending you coins will not need to type your name every 
         time they transact with you. We suggest you use your first name, or the name you commonly use.</string>
     <!-- Description here -->
-    <string name="ow_receive_button_text">RECEIVE</string>
+    <string name="zw_receive_button_text">RECEIVE</string>
     <!-- Description here -->
-    <string name="ow_create_passphrase">CREATE PASSPHRASE</string>
+    <string name="zw_create_passphrase">CREATE PASSPHRASE</string>
     <!-- Description here -->
-    <string name="ow_save_passphrase">SAVE PASSPHRASE</string>
+    <string name="zw_save_passphrase">SAVE PASSPHRASE</string>
     <!-- Description here -->
-    <string name="ow_ask_me_later">ASK ME LATER</string>
+    <string name="zw_ask_me_later">ASK ME LATER</string>
     <!-- Description here -->
-    <string name="ow_save_name">SAVE NAME</string>
+    <string name="zw_save_name">SAVE NAME</string>
     <!-- Description here -->
-    <string name="ow_set_name">SET NAME</string>
+    <string name="zw_set_name">SET NAME</string>
     <!-- Description here -->
-    <string name="ow_name_label">NAME</string>
+    <string name="zw_name_label">NAME</string>
     <!-- Description here -->
-    <string name="ow_set_name_settings">Set Name</string>
+    <string name="zw_set_name_settings">Set Name</string>
     <!-- Description here -->
-    <string name="ow_disable_name">Disable Name</string>
+    <string name="zw_disable_name">Disable Name</string>
     <!-- Description here -->
-    <string name="ow_create_new_address">CREATE NEW ADDRESS</string>
+    <string name="zw_create_new_address">CREATE NEW ADDRESS</string>
     <!-- Description here -->
-    <string name="ow_total_label">Total</string>
+    <string name="zw_total_label">Total</string>
     <!-- Description here -->
-    <string name="ow_add_currency_description">This is your home screen where you can navigate between all of your different wallets. Click the + icon above to begin adding currencies to your ziftrWALLET.</string>
+    <string name="zw_add_currency_description">This is your home screen where you can navigate between all of your different wallets. Click the + icon above to begin adding currencies to your ziftrWALLET.</string>
     <!-- Description here -->
-    <string name="ow_about_text">ziftrWALLET streamlines the process of sending, receiving and storing different types of cryptocurrency.\n\n
+    <string name="zw_about_text">ziftrWALLET streamlines the process of sending, receiving and storing different types of cryptocurrency.\n\n
         ziftrWALLET was created by the talented entrepreneurs, software developers and marketers behind Ziftr, a suite of shopping tools that has helped more than 2 million users find the best deals at their favorite online retailers.\n\n
 		To learn more about Ziftr, go to www.ziftr.com.\n\n
 		Coming Soon: ziftrCOIN!\n\n
 		ziftrCOIN, the first digital currency developed for online shoppers, aims to revolutionize shopping by putting cryptocurrency into the hands of consumers and enabling them to conduct simple, secure transactions at their favorite online retailers.\n\n
 		To learn more about ziftrCOIN, go to www.ziftrCOIN.com.</string>
-    <string name="ow_security_text"><b>ZiftrWallet</b> is a decentralized mobile wallet in that addresses and keys are stored on your phone. This way your wallet is safe from server-side attacks, however it is necessary for the user to keep the phone physically secure. 
-	    \n\nBe wary of allowing untrusted people or apps access to your phone. \n\nIt is recommended to store a spendable amount of cryptocurrency on ziftrWallet rather than your entire balance.
+    <string name="zw_security_text"><b>ZiftrWallet</b> is a decentralized mobile wallet in that addresses and keys are stored on your phone. This way your wallet is safe from server-side attacks, however it is necessary for the user to keep the phone physically secure. 
+	    \n\nBe wary of allowing untrusted people or apps access to your phone and be sure to set your passphrase. \n\nIt is recommended to store a spendable amount of cryptocurrency on ziftrWallet rather than your entire balance.
 	   \n\n<b>WARNING: Remember to transfer your coins to other wallets before uninstalling.</b></string>
-    <string name="ow_no_currency_description">No more wallets to add! Ensure you have wifi for this list to populate.</string>
-    <string name="ow_no_currency">No Available Currencies</string>
-    <string name="ow_zxing_license">This software uses ZXing under the Apache 2 license  http://www.apache.org/licenses/LICENSE-2.0</string>
+    <string name="zw_no_currency_description">No more wallets to add! Ensure you have wifi for this list to populate.</string>
+    <string name="zw_no_currency">No Available Currencies</string>
+    <string name="zw_zxing_license">This software uses ZXing under the Apache 2 license  http://www.apache.org/licenses/LICENSE-2.0</string>
     <string name="debug_warning">This will enable &quot;testnet&quot; coins and advanced options that may compromise wallet security and/or device performance. Use at your own risk! \n\nAre you sure you want to activate debug mode?</string>
     <string name="send_fee_info">Why is there a fee?\n\nThis fee is NOT paid to Ziftr. The fee goes to the miner that secures your transaction as a reward for their service. 
         This is standard for all cryptocurrency applications. Without it, your transaction would likely stay as pending for an inconvenient length of time.</string>
     <string name="mempool_spending">Spend Unconfirmed Transactions</string>
+    <string name="zw_incorrect_passphrase">Error: Passphrases don\'t match.</string>
+    <string name="zw_incorrect_reset_passphrase_match">"The passphrases you entered don't match. Your previous passphrase is still in place.</string>
+    <string name="zw_incorrect_reset_passphrase">"The passphrase you entered doesn't match your previous passphrase. Your previous passphrase is still in place.</string>
+    <string name="zw_set_empty_name">Looks like you wanted to disable your name instead!</string>
+    <string name="zw_invalid_address_uri">The address is not valid.</string>
+
 </resources>

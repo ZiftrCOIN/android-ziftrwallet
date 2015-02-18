@@ -87,7 +87,7 @@
         <item name="android:paddingLeft">@dimen/ow_tx_list_divider_padding</item>
         <item name="android:paddingBottom">@dimen/ow_tx_list_divider_padding</item>
         <item name="android:paddingRight">@dimen/ow_tx_list_divider_padding</item>
-        <item name="android:text">@string/ow_tx_list_divider_default</item>
+        <item name="android:text">@string/zw_tx_list_divider_default</item>
         <item name="android:textColor">@color/ow_default_text</item>
     </style>
 

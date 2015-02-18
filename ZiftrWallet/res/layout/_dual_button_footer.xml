@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="@string/ow_receive_button_text"
+            android:text="@string/zw_receive_button_text"
             android:textColor="@color/White"
             android:textSize="@dimen/ow_txt_mediumsmall" />
     </LinearLayout>
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="@string/ow_send_button_text"
+            android:text="@string/zw_send_button_text"
             android:textColor="@color/White"
             android:textSize="@dimen/ow_txt_mediumsmall" />
 

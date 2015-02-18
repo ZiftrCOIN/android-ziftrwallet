@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="left"
-            android:text="@string/ow_send_amount" >
+            android:text="@string/zw_send_amount" >
         </TextView>
 
         <include
@@ -49,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left"
-            android:text="@string/ow_send_amount_equivalent" >
+            android:text="@string/zw_send_amount_equivalent" >
         </TextView>
 
         <include

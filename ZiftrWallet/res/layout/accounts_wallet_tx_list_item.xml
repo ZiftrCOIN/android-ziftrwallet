@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/txIOIcon"
             android:layout_toLeftOf="@id/txIOIcon"
-            android:text="@string/ow_send_default_total" />
+            android:text="@string/zw_send_default_total" />
 
         <TextView
             android:id="@+id/txAmountFiatEquiv"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/txIOIcon"
             android:layout_toLeftOf="@id/txIOIcon"
-            android:text="@string/ow_send_default_total_fiat_equiv" />
+            android:text="@string/zw_send_default_total_fiat_equiv" />
 
         <TextView
             android:id="@+id/txTitle"
@@ -51,7 +51,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:maxWidth="250dp"
-            android:text="@string/ow_tx_list_title_default"
+            android:text="@string/zw_tx_list_title_default"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/txIOIcon"
             android:layout_alignParentLeft="true"
-            android:text="@string/ow_tx_list_time_default" />
+            android:text="@string/zw_tx_list_time_default" />
     </RelativeLayout>
 
     <View

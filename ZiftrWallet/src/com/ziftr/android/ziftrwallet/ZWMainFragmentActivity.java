@@ -251,10 +251,10 @@ ZiftrNetworkHandler, SendTaskCallback {
 				
 				ZWCoin coin = ZWCoin.getCoin(scheme, address);
 				if(coin == null) {
-					this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
+					this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
 				}
 				else if(!getWalletManager().isCoinActivated(coin)) {
-					this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", "invalid_uri_address_dialog");
+					this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", ZWTags.URI_INVALID_ADDRESS);
 				}
 				else {
 					this.setSelectedCoin(coin);
@@ -265,7 +265,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 					} 
 					catch (Exception e) {
 						ZLog.log("Exception open send coins view: ", e);
-						this.alertUser("The address is not valid.", "invalid_uri_address_dialog");
+						this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
 					}
 				}
 				
@@ -1145,7 +1145,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 		} else {
 			//manually toggle showing false to allow alert to show
 			this.showingDialog = false;
-			this.alertUser("Error: Passphrases don't match. ", "wrong_passphrase");
+			this.alertUser(getResources().getString(R.string.zw_incorrect_passphrase), ZWTags.PASSPHRASE_INCORRECT);
 		}
 
 	}
@@ -1182,16 +1182,13 @@ ZiftrNetworkHandler, SendTaskCallback {
 				this.showingDialog = false;
 
 				// If don't match, tell user. 
-				this.alertUser("The passphrase you entered doesn't match your "
-						+ "previous passphrase. Your previous passphrase is "
-						+ "still in place.", "passphrases_dont_match");
+				this.alertUser(getResources().getString(R.string.zw_incorrect_reset_passphrase), ZWTags.PASSPHRASE_INCORRECT);
 			} 
 		} else {
 			//manually toggle showing false to allow alert to show
 			this.showingDialog = false;
 
-			this.alertUser("The passphrases you entered don't match. Your previous "
-					+ "passphrase is still in place.", "wrong_re-enter_passphrase");
+			this.alertUser(getResources().getString(R.string.zw_incorrect_reset_passphrase_match), "wrong_re-enter_passphrase");
 		}
 	}
 
@@ -1251,7 +1248,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 	@Override
 	public void handleSetNamePositive(int requestCode, String newName){
 		if (newName.isEmpty()){
-			this.alertUser("Looks like you wanted to disable your name instead!", "set name is empty");
+			this.alertUser(getResources().getString(R.string.zw_set_empty_name), ZWTags.TRIED_SETTING_NAME_TO_EMPTY);
 		} else {
 			ZWPreferencesUtils.setUserName(newName);
 			((ZWSettingsFragment)this.getSupportFragmentManager(

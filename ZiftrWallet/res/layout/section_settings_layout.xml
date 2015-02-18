@@ -17,7 +17,7 @@
             style="@style/divider_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_currency" />
+            android:text="@string/zw_currency" />
 
         <RelativeLayout
             android:id="@+id/select_fiat_currency"
@@ -31,7 +31,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/ow_fiat_currency" />
+                android:text="@string/zw_fiat_currency" />
 
             <ImageView
                 android:id="@+id/fiat_arrow"
@@ -61,7 +61,7 @@
             style="@style/divider_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_confirmation_fee" />
+            android:text="@string/zw_confirmation_fee" />
 
         <RelativeLayout
             android:id="@+id/editable_confirmation_fees_bar"
@@ -73,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/ow_editable_confirmation_fees" />
+                android:text="@string/zw_editable_confirmation_fees" />
 
             <CheckBox
                 android:id="@+id/editable_confirmation_fees"
@@ -84,7 +84,7 @@
                 android:button="@null"
                 android:paddingBottom="@dimen/ow_quarter_icon_size"
                 android:paddingTop="@dimen/ow_quarter_icon_size"
-                android:text="@string/ow_empty_string" />
+                android:text="@string/zw_empty_string" />
         </RelativeLayout>
         
         <RelativeLayout
@@ -109,7 +109,7 @@
                 android:button="@null"
                 android:paddingBottom="@dimen/ow_quarter_icon_size"
                 android:paddingTop="@dimen/ow_quarter_icon_size"
-                android:text="@string/ow_empty_string" />
+                android:text="@string/zw_empty_string" />
         </RelativeLayout>
         
         <View
@@ -121,7 +121,7 @@
             style="@style/divider_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_passphrase" />
+            android:text="@string/zw_passphrase" />
 
         <RelativeLayout
             android:id="@+id/reset_password_button"
@@ -134,7 +134,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/ow_reset_password" />
+                android:text="@string/zw_reset_password" />
 
             <ImageView
                 android:layout_width="@dimen/ow_total_icon_side_length"
@@ -155,7 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/ow_disable_passphrase" />
+                android:text="@string/zw_disable_passphrase" />
 
             <ImageView
                 android:layout_width="@dimen/ow_total_icon_side_length"
@@ -174,7 +174,7 @@
             style="@style/divider_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_name_label" />
+            android:text="@string/zw_name_label" />
 
         <RelativeLayout
             android:id="@+id/set_name_button"
@@ -187,7 +187,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/ow_set_name_settings" />
+                android:text="@string/zw_set_name_settings" />
 
             <ImageView
                 android:layout_width="@dimen/ow_total_icon_side_length"
@@ -208,7 +208,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/ow_disable_name" />
+                android:text="@string/zw_disable_name" />
 
             <ImageView
                 android:layout_width="@dimen/ow_total_icon_side_length"

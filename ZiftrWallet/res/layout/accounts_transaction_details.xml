@@ -42,7 +42,7 @@
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_tx_details_amount_sent_label" />
+            android:text="@string/zw_tx_details_amount_sent_label" />
 
         <TextView
             android:id="@+id/currencyValue"
@@ -68,7 +68,7 @@
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_tx_details_confirmation_fee_label" />
+            android:text="@string/zw_tx_details_confirmation_fee_label" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -104,7 +104,7 @@
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_tx_label" />
+            android:text="@string/zw_tx_label" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -136,7 +136,7 @@
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_tx_routing_address" />
+            android:text="@string/zw_tx_routing_address" />
 
         <TextView
             android:id="@+id/date"
@@ -150,7 +150,7 @@
             style="@style/txn_labels"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_tx_details_sent" />
+            android:text="@string/zw_tx_details_sent" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -171,7 +171,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@id/progress_bar"
                 android:layout_below="@id/progress_bar"
-                android:text="@string/ow_tx_details_sent"
+                android:text="@string/zw_tx_details_sent"
                 android:textColor="@color/Gray"
                 android:textSize="@dimen/ow_txt_mediumsmall" />
 
@@ -181,7 +181,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignRight="@id/progress_bar"
                 android:layout_below="@id/progress_bar"
-                android:text="@string/ow_empty_string"
+                android:text="@string/zw_empty_string"
                 android:textColor="@color/Gray"
                 android:textSize="@dimen/ow_txt_mediumsmall" />
         </RelativeLayout>

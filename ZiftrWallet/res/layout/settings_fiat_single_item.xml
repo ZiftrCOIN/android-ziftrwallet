@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:text="@string/ow_fiat_currency" />
+            android:text="@string/zw_fiat_currency" />
 
         <ImageView
             android:layout_width="@dimen/ow_total_icon_side_length"
