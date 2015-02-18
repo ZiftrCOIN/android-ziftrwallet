@@ -14,7 +14,6 @@ import android.widget.RemoteViews;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWWalletWidget extends AppWidgetProvider{
 	

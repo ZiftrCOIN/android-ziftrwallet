@@ -10,7 +10,7 @@
         android:targetPackage="com.ziftr.android.ziftrwallet" />
 
     <uses-sdk
-        android:minSdkVersion="11"
+        android:minSdkVersion="15"
         android:targetSdkVersion="19" />
 
     <supports-screens
@@ -68,6 +68,7 @@
         <activity
             android:name="com.ziftr.android.ziftrwallet.ZWMainFragmentActivity"
             android:label="ziftrWALLET"
+            android:launchMode="singleInstance"
             android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -88,6 +89,7 @@
 
         <uses-library android:name="android.test.runner" />
 
+        <!-- 
         <receiver
             android:name="ZWWalletWidget"
             android:label="ziftrWALLET" >
@@ -99,6 +101,8 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/ziftrwallet_widget" />
         </receiver>
+         -->
+         
     </application>
 
 </manifest>
