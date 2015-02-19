@@ -236,7 +236,6 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (this.sendTaskFragment == null){
 			this.sendTaskFragment = (ZWSendTaskFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
 		}
-		
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
@@ -309,10 +308,10 @@ ZiftrNetworkHandler, SendTaskCallback {
 			
 			ZWCoin coin = ZWCoin.getCoin(scheme, address);
 			if(coin == null) {
-				this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
+					this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
 			}
 			else if(!getWalletManager().isCoinActivated(coin)) {
-				this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", ZWTags.URI_INVALID_ADDRESS);
+					this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", ZWTags.URI_INVALID_ADDRESS);
 			}
 			else {
 				this.setSelectedCoin(coin);
@@ -323,7 +322,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 				} 
 				catch (Exception e) {
 					ZLog.log("Exception open send coins view: ", e);
-					this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
+						this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
 				}
 			}
 			

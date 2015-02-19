@@ -96,10 +96,13 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
 		SpannableString displayMarketFiat = fiatType.getDisplayString(unitPriceInFiat, true);
 
-		if(!currencyListItem.getCoinId().isEnabled()) {
-			coinValue.setText(TextUtils.concat(displayMarketFiat, "(server unavailable)"));
-		} else {
 			coinValue.setText(displayMarketFiat);
+		
+		ImageView noServerImage = (ImageView) convertView.findViewById(R.id.imageViewNoServer);
+		if(currencyListItem.getCoinId().isEnabled()) {
+			noServerImage.setVisibility(View.GONE);
+		} else {
+			noServerImage.setVisibility(View.VISIBLE);
 		}
 		TextView walletTotal = (TextView) 
 				convertView.findViewById(R.id.topRightTextView);

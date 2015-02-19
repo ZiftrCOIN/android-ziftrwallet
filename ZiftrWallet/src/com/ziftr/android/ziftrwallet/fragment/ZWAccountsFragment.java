@@ -119,14 +119,14 @@ public class ZWAccountsFragment extends ZWFragment {
 	 * @param id - The type of coin to get a new {@link ZWCurrencyListItem} for. 
 	 * @return as above
 	 */
-	private ZWCurrencyListItem getItemForCoinType(ZWCoin id) {
-		int resId = R.layout.accounts_currency_list_single_item;
-		BigDecimal amount = id.getAmount(this.walletManager.getWalletBalance(id));
-		String balance = id.getFormattedAmount(amount);
+	private ZWCurrencyListItem getItemForCoinType(ZWCoin coin) {
+		int resId = R.layout.coin_list_item;
+		BigDecimal amount = coin.getAmount(this.walletManager.getWalletBalance(coin));
+		String balance = coin.getFormattedAmount(amount);
 		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
-		String fiatBalance = ZWConverter.convert(amount, id, fiat).setScale(2, RoundingMode.HALF_DOWN).toPlainString();
-		String fiatVal = ZWConverter.convert(BigDecimal.ONE, id, fiat).toString();
-		return new ZWCurrencyListItem(id, fiatVal, balance, fiatBalance, resId);
+		String fiatBalance = ZWConverter.convert(amount, coin, fiat).setScale(2, RoundingMode.HALF_UP).toPlainString();
+		String fiatVal = ZWConverter.convert(BigDecimal.ONE, coin, fiat).toString();
+		return new ZWCurrencyListItem(coin, fiatVal, balance, fiatBalance, resId);
 	}
 
 
