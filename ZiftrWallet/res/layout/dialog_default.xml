@@ -30,7 +30,7 @@
             android:layout_weight="1"
             android:maxLines="2"
             android:minHeight="45dp"
-            android:text="@string/ow_ok"
+            android:text="@string/ok"
             android:textSize="14sp" >
         </Button>
     </LinearLayout>

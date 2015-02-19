@@ -16,7 +16,7 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginTop="8dp"
-        android:hint="@string/ow_new_passphrase_hint"
+        android:hint="@string/zw_new_passphrase_hint"
         android:inputType="textPassword" >
 
         <requestFocus />
@@ -30,7 +30,7 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginTop="8dp"
-        android:hint="@string/ow_new_passphrase_hint"
+        android:hint="@string/zw_new_passphrase_hint"
         android:inputType="textPassword" >
     </EditText>
 

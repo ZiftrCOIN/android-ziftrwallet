@@ -79,9 +79,9 @@ public class ZWWalletWidget extends AppWidgetProvider{
 			}
 		} else {
 			ZWPreferencesUtils.setWidgetCoin(null);
-			views.setViewVisibility(R.id.widget_select_coin, View.INVISIBLE);
-			views.setViewVisibility(R.id.widget_coin, View.INVISIBLE);
-			views.setViewVisibility(R.id.widget_balance, View.INVISIBLE);
+			views.setViewVisibility(R.id.widget_select_coin, View.GONE);
+			views.setViewVisibility(R.id.widget_coin, View.GONE);
+			views.setViewVisibility(R.id.widget_balance, View.GONE);
 			views.setViewVisibility(R.id.no_wallets, View.VISIBLE);
 		}
 	}

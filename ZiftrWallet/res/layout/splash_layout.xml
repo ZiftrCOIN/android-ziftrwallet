@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleType="centerInside"
-        android:contentDescription="@string/ow_splash_screen_description"
+        android:contentDescription="@string/zw_splash_screen_description"
         android:src="@drawable/logo_ziftrwallet_orange" />
 
 </LinearLayout>

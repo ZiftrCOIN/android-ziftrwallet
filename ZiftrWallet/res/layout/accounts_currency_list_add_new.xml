@@ -11,7 +11,7 @@
         android:layout_height="40dp"
         android:layout_gravity="center_vertical"
         android:layout_margin="@dimen/ow_bordered_icon_margin"
-        android:contentDescription="@string/ow_add_new_wallet_content_description"
+        android:contentDescription="@string/zw_add_new_wallet_content_description"
         android:src="@drawable/add_white_enabled" />
 
     <TextView
@@ -19,6 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="5dp"
-        android:text="@string/ow_add_currency" />
+        android:text="@string/zw_add_currency" />
 
 </LinearLayout>

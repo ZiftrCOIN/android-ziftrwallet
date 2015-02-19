@@ -15,7 +15,7 @@
             android:layout_weight="1"
             android:maxLines="2"
             android:minHeight="45dp"
-            android:text="@string/ow_dialog_cancel"
+            android:text="@string/zw_dialog_cancel"
             android:textSize="14sp" >
         </Button>
 
@@ -28,7 +28,7 @@
             android:layout_weight="1"
             android:maxLines="2"
             android:minHeight="45dp"
-            android:text="@string/ow_dialog_continue"
+            android:text="@string/zw_dialog_continue"
             android:textSize="14sp" >
         </Button>
 

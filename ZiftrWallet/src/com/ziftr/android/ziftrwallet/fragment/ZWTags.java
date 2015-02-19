@@ -43,6 +43,14 @@ public class ZWTags {
 	
 	public static final String CONFIRM_SEND = "confirm_send_dialog";
 	
+	public static final String TRIED_SETTING_NAME_TO_EMPTY = "set name is empty";
+	
+	public static final String PASSPHRASE_INCORRECT = "wrong_passphrase";
+	
+	public static final String SET_PASSPHRASE_NOT_MATCH = "non-matching_passphrase";
+
+	public static final String URI_INVALID_ADDRESS = "invalid_uri_address_dialog";
+	
 	//EDIT TEXT
 	public static final String ZW_EDIT_TEXT = "ow_edit_text";
 

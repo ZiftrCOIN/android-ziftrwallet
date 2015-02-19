@@ -17,14 +17,14 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/ow_add_a_currency"
+            android:text="@string/zw_add_a_currency"
             android:textColor="@color/ow_default_text"
             android:textSize="@dimen/ow_txt_mediumlarge" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/ow_add_currency_description"
+            android:text="@string/zw_add_currency_description"
             android:textColor="@color/ow_default_text"
             android:textSize="@dimen/ow_txt_mediumsmall" />
     </LinearLayout>
@@ -42,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/ow_horizontal_margin"
         android:layout_marginTop="10dp"
-        android:text="@string/ow_total_label"
+        android:text="@string/zw_total_label"
         android:textColor="@color/ow_default_text"
         android:textSize="@dimen/ow_txt_medium" />
 

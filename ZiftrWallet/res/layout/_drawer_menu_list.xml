@@ -44,7 +44,7 @@
                     style="@style/drawer_menu_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ow_menu_text_accounts" />
+                    android:text="@string/zw_menu_text_accounts" />
             </LinearLayout>
         </TableRow>
 
@@ -88,7 +88,7 @@
                     style="@style/drawer_menu_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ow_menu_text_terms" />
+                    android:text="@string/zw_menu_text_terms" />
             </LinearLayout>
         </TableRow>
 
@@ -132,7 +132,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="@style/drawer_menu_text"
-                    android:text="@string/ow_menu_text_settings" />
+                    android:text="@string/zw_menu_text_settings" />
             </LinearLayout>
         </TableRow>
 
@@ -176,7 +176,7 @@
                     style="@style/drawer_menu_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ow_menu_text_about" />
+                    android:text="@string/zw_menu_text_about" />
             </LinearLayout>
         </TableRow>
 
@@ -220,7 +220,7 @@
                     style="@style/drawer_menu_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ow_menu_text_security" />
+                    android:text="@string/zw_menu_text_security" />
             </LinearLayout>
         </TableRow>
 

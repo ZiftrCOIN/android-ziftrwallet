@@ -8,14 +8,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ow_hello"
+        android:text="@string/hello"
         android:textColor="@color/White"
         android:textSize="@dimen/ow_txt_mediumlarge" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ow_welcome_name_message"
+        android:text="@string/zw_welcome_name_message"
         android:textColor="@color/White"
         android:textSize="@dimen/ow_txt_small" />
 
@@ -27,7 +27,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/ow_set_name"
+        android:text="@string/zw_set_name"
         android:textColor="@color/White"
         android:textSize="@dimen/ow_txt_small" />
 
@@ -44,7 +44,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="5dp"
         android:background="@drawable/clickable_button_color"
-        android:text="@string/ow_save_name"
+        android:text="@string/zw_save_name"
         android:textColor="@color/White"
         android:textSize="@dimen/ow_txt_small" />
 
@@ -58,7 +58,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@drawable/clickable_button_color"
-        android:text="@string/ow_ask_me_later"
+        android:text="@string/zw_ask_me_later"
         android:textColor="@color/White"
         android:textSize="@dimen/ow_txt_small" />
 

@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/ow_horizontal_margin"
                 android:layout_marginRight="@dimen/ow_horizontal_margin"
-                android:text="@string/ow_receive_coins_address_label_box_title" />
+                android:text="@string/zw_receive_coins_address_label_box_title" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -56,7 +56,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
                     android:clickable="true"
-                    android:contentDescription="@string/ow_empty_string"
+                    android:contentDescription="@string/zw_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
                     android:src="@drawable/address_book_icon_clickable" />
             </RelativeLayout>
@@ -70,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/ow_horizontal_margin"
                 android:layout_marginRight="@dimen/ow_horizontal_margin"
-                android:text="@string/ow_receive_coins_address_value_box_title" />
+                android:text="@string/zw_receive_coins_address_value_box_title" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -89,7 +89,7 @@
                     android:minHeight="@dimen/ow_edit_text_height"
                     android:paddingLeft="@dimen/ow_edit_text_padding"
                     android:paddingRight="@dimen/ow_edit_text_padding"
-                    android:text="@string/ow_empty_string" >
+                    android:text="@string/zw_empty_string" >
                 </EditText>
 
                 <ImageView
@@ -97,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@id/addressValueTextView"
                     android:layout_below="@id/addressValueTextView"
-                    android:contentDescription="@string/ow_empty_string"
+                    android:contentDescription="@string/zw_empty_string"
                     android:src="@drawable/shadow_paper_left" />
 
                 <ImageView
@@ -105,7 +105,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignRight="@id/addressValueTextView"
                     android:layout_below="@id/addressValueTextView"
-                    android:contentDescription="@string/ow_empty_string"
+                    android:contentDescription="@string/zw_empty_string"
                     android:src="@drawable/shadow_paper_right" />
 
                 <ImageView
@@ -116,7 +116,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginRight="@dimen/ow_borderless_icon_margin"
                     android:clickable="true"
-                    android:contentDescription="@string/ow_empty_string"
+                    android:contentDescription="@string/zw_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
                     android:src="@drawable/copy_icon_clickable" />
 
@@ -128,7 +128,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
                     android:clickable="true"
-                    android:contentDescription="@string/ow_empty_string"
+                    android:contentDescription="@string/zw_empty_string"
                     android:padding="@dimen/ow_bordered_icon_margin"
                     android:src="@drawable/button_plus_address_clickable" />
             </RelativeLayout>
@@ -141,7 +141,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                android:text="@string/ow_receive_message_title" >
+                android:text="@string/zw_receive_message_title" >
             </TextView>
 
             <RelativeLayout
@@ -197,7 +197,7 @@
                         android:layout_gravity="center"
                         android:adjustViewBounds="true"
                         android:clickable="false"
-                        android:contentDescription="@string/ow_empty_string"
+                        android:contentDescription="@string/zw_empty_string"
                         android:padding="@dimen/ow_total_icon_side_length"
                         android:scaleType="center"
                         android:src="@drawable/add_address_clickable" />
@@ -208,7 +208,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@id/generateAddressQrCodeContainer"
                     android:layout_below="@id/generateAddressQrCodeContainer"
-                    android:contentDescription="@string/ow_empty_string"
+                    android:contentDescription="@string/zw_empty_string"
                     android:src="@drawable/shadow_paper_left" />
 
                 <ImageView
@@ -216,7 +216,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignRight="@id/generateAddressQrCodeContainer"
                     android:layout_below="@id/generateAddressQrCodeContainer"
-                    android:contentDescription="@string/ow_empty_string"
+                    android:contentDescription="@string/zw_empty_string"
                     android:src="@drawable/shadow_paper_right" />
             </RelativeLayout>
         </LinearLayout>

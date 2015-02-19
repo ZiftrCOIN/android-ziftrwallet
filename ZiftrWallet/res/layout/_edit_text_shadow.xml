@@ -24,7 +24,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/ow_empty_string"
+            android:contentDescription="@string/zw_empty_string"
             android:src="@drawable/shadow_paper_left" />
 
         <View
@@ -35,7 +35,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/ow_empty_string"
+            android:contentDescription="@string/zw_empty_string"
             android:src="@drawable/shadow_paper_right" />
     </LinearLayout>
 

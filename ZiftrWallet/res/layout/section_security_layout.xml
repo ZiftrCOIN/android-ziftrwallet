@@ -16,7 +16,7 @@
             android:id="@+id/contactPlaceholderText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ow_security_text"
+            android:text="@string/zw_security_text"
             android:textColor="@color/ow_default_text"
             android:textSize="@dimen/ow_txt_mediumsmall" />
     </LinearLayout>

@@ -192,7 +192,6 @@ public class ZWAddress implements ZWSearchableListItem {
 		} else {
 			// If null then we need to infer what the coinType is 
 			coinId = getCoinTypeFromVersionByte(versionByte);
-			ZLog.log("Avatar" + coinId);
 		}
 
 		if (coinId == null) {

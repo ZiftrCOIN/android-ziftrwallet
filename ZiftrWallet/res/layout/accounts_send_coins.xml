@@ -41,7 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:text="@string/ow_send_to_address_name" >
+                    android:text="@string/zw_send_to_address_name" >
                 </TextView>
 
                 <include
@@ -60,7 +60,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/ow_horizontal_margin"
                     android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:text="@string/ow_send_to_address" >
+                    android:text="@string/zw_send_to_address" >
                 </TextView>
 
                 <RelativeLayout
@@ -86,7 +86,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignLeft="@id/sendEditTextReceiverAddress"
                         android:layout_below="@id/sendEditTextReceiverAddress"
-                        android:contentDescription="@string/ow_empty_string"
+                        android:contentDescription="@string/zw_empty_string"
                         android:src="@drawable/shadow_paper_left" />
 
                     <ImageView
@@ -94,7 +94,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignRight="@id/sendEditTextReceiverAddress"
                         android:layout_below="@id/sendEditTextReceiverAddress"
-                        android:contentDescription="@string/ow_empty_string"
+                        android:contentDescription="@string/zw_empty_string"
                         android:src="@drawable/shadow_paper_right" />
 
                     <ImageView
@@ -104,7 +104,7 @@
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
+                        android:contentDescription="@string/zw_old_passphrase_hint"
                         android:padding="@dimen/ow_bordered_icon_margin"
                         android:src="@drawable/address_book_icon_clickable" />
 
@@ -116,7 +116,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginRight="@dimen/ow_borderless_icon_margin"
                         android:clickable="true"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
+                        android:contentDescription="@string/zw_old_passphrase_hint"
                     	android:padding="@dimen/ow_bordered_icon_margin"
                         android:src="@drawable/copy_icon_clickable" />
 
@@ -127,7 +127,7 @@
                         android:layout_alignRight="@+id/sendEditTextReceiverAddress"
                         android:layout_centerVertical="true"
                         android:clickable="true"
-                        android:contentDescription="@string/ow_old_passphrase_hint"
+                        android:contentDescription="@string/zw_old_passphrase_hint"
                         android:padding="@dimen/ow_bordered_icon_margin"
                         android:src="@drawable/qr_code_clickable" />
                 </RelativeLayout>
@@ -154,7 +154,7 @@
                         android:layout_marginLeft="@dimen/ow_horizontal_margin"
                         android:layout_weight="1"
                         android:gravity="left"
-                        android:text="@string/ow_send_transaction_fee" >
+                        android:text="@string/zw_send_transaction_fee" >
                     </TextView>
 
                     <View
@@ -171,7 +171,7 @@
                         android:layout_gravity="center"
                         android:layout_weight="1"
                         android:gravity="left"
-                        android:text="@string/ow_send_amount_equivalent" >
+                        android:text="@string/zw_send_amount_equivalent" >
                     </TextView>
                 </LinearLayout>
 
@@ -252,7 +252,7 @@
                         android:layout_alignParentTop="true"
                         android:layout_gravity="center"
                         android:gravity="left"
-                        android:text="@string/ow_send_total" >
+                        android:text="@string/zw_send_total" >
                     </TextView>
 
                     <TextView
@@ -263,7 +263,7 @@
                         android:layout_below="@id/sendTotalTitleTextView"
                         android:layout_gravity="bottom"
                         android:gravity="bottom"
-                        android:text="@string/ow_send_default_total"
+                        android:text="@string/zw_send_default_total"
                         android:textColor="@color/White"
                         android:textSize="40sp" >
                     </TextView>
@@ -274,7 +274,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/sendTotalTextView"
                         android:layout_margin="5dp"
-                        android:text="@string/ow_send_default_total_fiat_equiv"
+                        android:text="@string/zw_send_default_total_fiat_equiv"
                         android:textColor="@color/White"
                         android:textSize="@dimen/ow_txt_medium" >
                     </TextView>

@@ -22,7 +22,7 @@
         android:layout_height="@dimen/ow_total_icon_side_length"
         android:layout_marginLeft="@dimen/ow_quarter_icon_size"
         android:clickable="true"
-        android:contentDescription="@string/ow_empty_string"
+        android:contentDescription="@string/zw_empty_string"
         android:padding="@dimen/ow_borderless_icon_margin"
         android:src="@drawable/button_cancel" />
 
