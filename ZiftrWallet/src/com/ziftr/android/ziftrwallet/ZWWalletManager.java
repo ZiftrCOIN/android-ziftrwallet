@@ -57,25 +57,29 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 
 	public static synchronized ZWWalletManager getInstance() {
 		if (instance == null) {
-			Application applicationContext = ZWApplication.getApplication();
-
-			// Here we build the path for the first time if have not yet already
-			if (databasePath == null) {
-				File externalDirectory = applicationContext.getExternalFilesDir(null);
-				if (externalDirectory != null) {
-					databasePath = new File(externalDirectory, DATABASE_NAME).getAbsolutePath();
-				} else {
-					// If we couldn't get the external directory the user is doing something weird with their sd card
-					// Leaving databaseName as null will let the database exist in memory
-
-					//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
-					log("CANNOT ACCESS LOCAL STORAGE!");
-				}
+			try {
+				Application applicationContext = ZWApplication.getApplication();
+					// Here we build the path for the first time if have not yet already
+					if (databasePath == null) {
+						File externalDirectory = applicationContext.getExternalFilesDir(null);
+						if (externalDirectory != null) {
+							databasePath = new File(externalDirectory, DATABASE_NAME).getAbsolutePath();
+						} else {
+							// If we couldn't get the external directory the user is doing something weird with their sd card
+							// Leaving databaseName as null will let the database exist in memory
+		
+							//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
+							log("CANNOT ACCESS LOCAL STORAGE!");
+						}
+					}
+		
+					instance = new ZWWalletManager(applicationContext);
+			} catch (NullPointerException e){
+				ZLog.log("applicationContext was null");
+				return null;
 			}
-
-			instance = new ZWWalletManager(applicationContext);
 		}
-		return instance;
+			return instance;
 	}
 
 	/**

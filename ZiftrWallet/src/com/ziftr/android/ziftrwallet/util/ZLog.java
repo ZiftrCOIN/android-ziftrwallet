@@ -176,21 +176,25 @@ public abstract class ZLog {
 					}
 				}
 				Log.e(tag, logMessage.toString());
-
-				File dir = new File(ZWApplication.getApplication().getExternalFilesDir(null) + "/logs");
-				if (!dir.exists()){
-					dir.mkdirs();
-				}
-				File logfile = new File(dir, "Zlog.txt");
-				FileOutputStream f;
 				try {
-					f = new FileOutputStream(logfile, true);
-					OutputStreamWriter writer = new OutputStreamWriter(f);
-					writer.write(logMessage.toString() + "\n");
-					writer.flush();
-					writer.close();
-				} catch (Exception e) {
-					e.printStackTrace();
+					File dir = new File(ZWApplication.getApplication().getExternalFilesDir(null) + "/logs");
+					if (!dir.exists()){
+						dir.mkdirs();
+					}
+					File logfile = new File(dir, "Zlog.txt");
+					FileOutputStream f;
+					try {
+						f = new FileOutputStream(logfile, true);
+						OutputStreamWriter writer = new OutputStreamWriter(f);
+						writer.write(logMessage.toString() + "\n");
+						writer.flush();
+						writer.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} catch (NullPointerException e) {
+					ZLog.log("null app");
+					return;
 				}
 			}
 		}

@@ -305,7 +305,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 
 		this.addressEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextReceiverAddress);
-
 		this.getQRCodeButton = this.rootView.findViewById(R.id.send_qr_icon);
 		this.getQRCodeButton.setOnClickListener(this);
 
@@ -406,7 +405,14 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			this.coinFeeEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 		}
 		this.fiatFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		
+		//line wrapping edittext with next button instead of return button on keyboard
+		this.addressEditText.setSingleLine(true);
+		this.addressEditText.setLines(3);
+		this.addressEditText.setHorizontallyScrolling(false);
+		this.addressEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 	}
+	
 
 	/**
 	 * Updates the two text view that contain to the total and the 

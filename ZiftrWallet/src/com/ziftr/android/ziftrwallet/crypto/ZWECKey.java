@@ -257,7 +257,7 @@ public class ZWECKey {
 			seq.close();
 			return baos.toByteArray();
 		} catch (IOException e) {
-			throw new RuntimeException(e);  // Cannot happen, writing to memory stream.
+			throw new RuntimeException(e);  // Cannot happen, writing to memory stream
 		}
 	}
 
@@ -431,8 +431,12 @@ public class ZWECKey {
 	 * @param pub       The public key bytes to use.
 	 */
 	public static boolean verify(byte[] data, byte[] signature, byte[] pub) {
-		
-		return verify(data, ZWECDSASignature.decodeFromDER(signature), pub);
+		ZWECDSASignature decoded = ZWECDSASignature.decodeFromDER(signature);
+		if (decoded != null){
+			return verify(data, decoded, pub);
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -529,7 +533,8 @@ public class ZWECKey {
 			}
 		}
 		if (recId == -1) {
-			throw new RuntimeException("Could not construct a recoverable key. This should never happen.");
+			ZLog.log("Could not construct a recoverable key. This should never happen.");
+			return null;
 		}
 		int headerByte = recId + 27 + (isCompressed() ? 4 : 0);
 		byte[] sigData = new byte[65];  // 1 header + 32 bytes for R + 32 bytes for S

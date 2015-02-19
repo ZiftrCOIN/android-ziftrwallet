@@ -9,6 +9,8 @@ import org.spongycastle.asn1.ASN1Integer;
 import org.spongycastle.asn1.DERSequenceGenerator;
 import org.spongycastle.asn1.DLSequence;
 
+import com.ziftr.android.ziftrwallet.util.ZLog;
+
 
 /**
  * Groups the two components that make up a signature, and provides a way to encode to DER form, which is
@@ -54,7 +56,8 @@ public class ZWECDSASignature {
 		try {
 			return derByteStream().toByteArray();
 		} catch (IOException e) {
-			throw new RuntimeException(e);  // Cannot happen.
+			ZLog.log("Exception encoding to DER " + e);  // Cannot happen.
+			return null;
 		}
 	}
 
@@ -66,17 +69,18 @@ public class ZWECDSASignature {
 			try {
 				r = (ASN1Integer) seq.getObjectAt(0);
 				s = (ASN1Integer) seq.getObjectAt(1);
+				// OpenSSL deviates from the DER spec by interpreting these values as unsigned, though they should not be
+				// Thus, we always use the positive versions. See: http://r6.ca/blog/20111119T211504Z.html
+				return new ZWECDSASignature(r.getPositiveValue(), s.getPositiveValue());
 			} catch (ClassCastException e) {
-				throw new IllegalArgumentException(e);
+				ZLog.log("decoding DER exception " + e);
 			} finally {
 				decoder.close();
 			}
-			// OpenSSL deviates from the DER spec by interpreting these values as unsigned, though they should not be
-			// Thus, we always use the positive versions. See: http://r6.ca/blog/20111119T211504Z.html
-			return new ZWECDSASignature(r.getPositiveValue(), s.getPositiveValue());
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			ZLog.log("decoding DER IO exception " + e);
 		}
+		return null;
 	}
 
 	protected ByteArrayOutputStream derByteStream() throws IOException {

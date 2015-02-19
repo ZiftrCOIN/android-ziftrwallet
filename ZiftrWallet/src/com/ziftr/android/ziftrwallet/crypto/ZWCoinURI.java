@@ -29,6 +29,7 @@ import javax.annotation.Nullable;
 import android.net.Uri;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * <p>Provides a standard implementation of a Bitcoin URI with support for the following:</p>
@@ -247,7 +248,12 @@ public class ZWCoinURI {
 	}
 
 	public static String convertToCoinURI(ZWAddress address, BigInteger amount, String label, String message) {
-		return convertToCoinURI(address.getCoinId(), address.getAddress(), amount, label, message);
+		try {
+		 return convertToCoinURI(address.getCoinId(), address.getAddress(), amount, label, message);
+		} catch (IllegalArgumentException e) {
+			ZLog.log("error converting to coinuri" + e);
+			return null;
+		}
 	}
 
 	/**
@@ -307,7 +313,8 @@ public class ZWCoinURI {
 			return java.net.URLEncoder.encode(stringToEncode, "UTF-8").replace("+", ENCODED_SPACE_CHARACTER);
 		} catch (UnsupportedEncodingException e) {
 			// should not happen - UTF-8 is a valid encoding
-			throw new RuntimeException(e);
+			ZLog.log("encodeURLstring error " + e);
+			return null;
 		}
 	}
 

@@ -296,7 +296,7 @@ public class ZiftrNetRequest {
 	
 	public void downloadToFile(ZiftrNetworkCallback callback) {
 		//TODO -implement this when/if we need to download files for our application to use
-		throw new RuntimeException("Direct file downloading using ZiftrNetRequest not yet implemented.");
+		ZLog.log("Direct file downloading using ZiftrNetRequest not yet implemented.");
 	}
 	
 	

@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet.fragment;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
@@ -116,7 +117,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 			BigInteger fiatAmt = ZWConverter.convert(txListItem.getAmount(), 
 					txListItem.getCoin(), fiat);
 			
-			txAmountFiatEquiv.setText(fiat.getFormattedAmount(fiatAmt, true));
+			txAmountFiatEquiv.setText(fiat.getDisplayString(new BigDecimal(fiatAmt), true));
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
 			txIOIcon.setImageResource(getImgResIdForItem(txListItem));

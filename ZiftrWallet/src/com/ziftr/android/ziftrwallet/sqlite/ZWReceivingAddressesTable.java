@@ -195,7 +195,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		}
 		
 		if (newKey == null) {
-			throw new RuntimeException("Ruh roh, why couldn't we make a key? First char: " + dataInPrivColumn.charAt(0));
+			ZLog.log("Ruh roh, why couldn't we make a key? First char: " + dataInPrivColumn.charAt(0));
 		}
 		
 		return newKey;

@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,20 +94,22 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 				convertView.findViewById(R.id.bottomLeftTextView);
 
 		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
-		if(!currencyListItem.getCoinId().isEnabled()) {
-			coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true) + " (server unavailable)");
-		} else {
-			coinValue.setText(fiatType.getFormattedAmount(unitPriceInFiat, true));
-		}
+		SpannableString displayMarketFiat = fiatType.getDisplayString(unitPriceInFiat, true);
 
+		if(!currencyListItem.getCoinId().isEnabled()) {
+			coinValue.setText(TextUtils.concat(displayMarketFiat, "(server unavailable)"));
+		} else {
+			coinValue.setText(displayMarketFiat);
+		}
 		TextView walletTotal = (TextView) 
 				convertView.findViewById(R.id.topRightTextView);
 		walletTotal.setText(currencyListItem.getWalletTotal());
 
 		TextView walletTotalFiatEquiv = (TextView) 
 				convertView.findViewById(R.id.bottomRightTextView);
-		walletTotalFiatEquiv.setText(
-				fiatSymbol + currencyListItem.getWalletTotalFiatEquiv());
+		
+		SpannableString displayWalletTotalFiat = fiatType.getDisplayString(new BigDecimal(currencyListItem.getWalletTotalFiatEquiv()), true);
+		walletTotalFiatEquiv.setText(displayWalletTotalFiat);
 
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
 		coinLogo.setImageResource(currencyListItem.getCoinId().getLogoResId());

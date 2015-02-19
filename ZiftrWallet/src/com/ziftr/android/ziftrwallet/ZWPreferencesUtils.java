@@ -62,27 +62,32 @@ public abstract class ZWPreferencesUtils {
 	static byte[] getStoredPassphraseHash() {
 		// Get the preferences
 		SharedPreferences prefs = getPrefs();
-		// Get the passphrase hash
-		String storedPassphrase = prefs.getString(PREFS_PASSPHRASE_KEY, null);
-		
-		byte[] storedHash;
-		if(storedPassphrase == null || storedPassphrase.isEmpty()) {
-			storedHash = null;
+		if (prefs != null){
+			// Get the passphrase hash
+			String storedPassphrase = prefs.getString(PREFS_PASSPHRASE_KEY, null);
+			
+			byte[] storedHash;
+			if(storedPassphrase == null || storedPassphrase.isEmpty()) {
+				storedHash = null;
+			}
+			else {
+				// If it's not null, convert it back to a byte array
+				storedHash = ZiftrUtils.hexStringToBytes(storedPassphrase);
+			}
+			
+			// Return the result
+			return storedHash;
 		}
-		else {
-			// If it's not null, convert it back to a byte array
-			storedHash = ZiftrUtils.hexStringToBytes(storedPassphrase);
-		}
-		
-		// Return the result
-		return storedHash;
+		return null;
 	}
 	
 	static void setStoredPassphraseHash(String saltedHash) {
 		SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
-		Editor editor = prefs.edit();
-		editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
+			editor.commit();
+		}
 	}
 
 	/**
@@ -117,86 +122,113 @@ public abstract class ZWPreferencesUtils {
 
 	public static String getSalt() {
 		SharedPreferences prefs = getPrefs();
-		String salt = prefs.getString(PREFS_SALT_KEY, null);
-		if (salt != null && !salt.isEmpty()) {
-			return salt;
+		String salt = null;
+		if (prefs != null){
+			salt = prefs.getString(PREFS_SALT_KEY, null);
+			if (salt != null && !salt.isEmpty()) {
+				return salt;
+			}
+	
+			try {
+				salt = ZWPbeAesCrypter.generateSalt();
+			} catch (ZWKeyCrypterException e) {
+				ZLog.log("error: " + e.getMessage());
+				return null;
+			}
+	
+			Editor editor = prefs.edit();
+			editor.putString(PREFS_SALT_KEY, salt);
+			editor.commit();
 		}
-
-		try {
-			salt = ZWPbeAesCrypter.generateSalt();
-		} catch (ZWKeyCrypterException e) {
-			ZLog.log("error: " + e.getMessage());
-			return null;
-		}
-
-		Editor editor = prefs.edit();
-		editor.putString(PREFS_SALT_KEY, salt);
-		editor.commit();
 
 		return salt;
 	}
 
 	public static boolean getFeesAreEditable() {
 		SharedPreferences prefs = getPrefs();
-		return prefs.getBoolean(EDITABLE_FEES_KEY, false);
+		if (prefs != null){
+			return prefs.getBoolean(EDITABLE_FEES_KEY, false);
+		}
+		return false;
 	}
 
 	public static void setFeesAreEditable(boolean feesAreEditable) {
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putBoolean(EDITABLE_FEES_KEY, feesAreEditable);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putBoolean(EDITABLE_FEES_KEY, feesAreEditable);
+			editor.commit();
+		}
 	}
 
 	public static boolean getMempoolIsSpendable() {
 		SharedPreferences prefs = getPrefs();
-		return prefs.getBoolean(SPENDABLE_MEMPOOL_KEY, false);
+		if (prefs != null){
+			return prefs.getBoolean(SPENDABLE_MEMPOOL_KEY, false);
+		}
+		return false;
 	}
 
 	public static void setMempoolIsSpendable(boolean spendable) {
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putBoolean(SPENDABLE_MEMPOOL_KEY, spendable);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putBoolean(SPENDABLE_MEMPOOL_KEY, spendable);
+			editor.commit();
+		}
 	}
 	
 	public static boolean getPassphraseWarningDisabled() {
 		SharedPreferences prefs = getPrefs();
-		return prefs.getBoolean(PASSPHRASE_WARNING_KEY, false);
+		if (prefs != null){
+			return prefs.getBoolean(PASSPHRASE_WARNING_KEY, false);
+		}
+		return false;
 	}
 
 	
 	public static void setPassphraseWarningDisabled(boolean isDisabled) {
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putBoolean(PASSPHRASE_WARNING_KEY, isDisabled);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putBoolean(PASSPHRASE_WARNING_KEY, isDisabled);
+			editor.commit();
+		}
 	}
 	
 	public static void disablePassphrase(){
 		SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
-		Editor editor = prefs.edit();
-		editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, null);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, null);
+			editor.commit();
+		}
 	}
 
 	
 	public static ZWFiat getFiatCurrency(){
 		SharedPreferences prefs = getPrefs();
-		return ZWFiat.valueOf(prefs.getString(FIAT_CURRENCY_KEY, "US Dollars"));
-
+		if (prefs != null) {
+			return ZWFiat.valueOf(prefs.getString(FIAT_CURRENCY_KEY, "US Dollars"));
+		}
+		return ZWFiat.valueOf("US Dollars");
 	}
 
 	public static void setFiatCurrency(String fiatSelected){
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putString(FIAT_CURRENCY_KEY, fiatSelected);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putString(FIAT_CURRENCY_KEY, fiatSelected);
+			editor.commit();
+		}
 	}
 	
 	public static String getUserName() {
 		SharedPreferences prefs = getPrefs();
-		return prefs.getString(PREFS_USER_NAME_KEY, null);
+		if (prefs != null){
+			return prefs.getString(PREFS_USER_NAME_KEY, null);
+		}
+		return null;
 	}
 	
 	public static boolean userHasSetName() {
@@ -205,61 +237,90 @@ public abstract class ZWPreferencesUtils {
 	
 	public static void setUserName(String userName) {
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putString(PREFS_USER_NAME_KEY, userName);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putString(PREFS_USER_NAME_KEY, userName);
+			editor.commit();
+		}
 	}
 	
 	public static void setDisabledName(boolean isDisabled){
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putBoolean(NAME_DISABLED_KEY, isDisabled);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putBoolean(NAME_DISABLED_KEY, isDisabled);
+			editor.commit();
+		}
 	}
 	
 	public static boolean getDisabledName(){
 		SharedPreferences prefs = getPrefs();
-		return prefs.getBoolean(NAME_DISABLED_KEY, false);
+		if (prefs != null){
+			return prefs.getBoolean(NAME_DISABLED_KEY, false);
+		}
+		return false;
 	}
 
 	public static String getWidgetCoin(){
 		SharedPreferences prefs = getPrefs();
-		return prefs.getString(ZWWalletWidget.WIDGET_CURR, null);
+		if (prefs != null){
+			return prefs.getString(ZWWalletWidget.WIDGET_CURR, null);
+		}
+		return null;
 	}
 	
 	public static void setWidgetCoin(String coin){
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putString(ZWWalletWidget.WIDGET_CURR, coin);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putString(ZWWalletWidget.WIDGET_CURR, coin);
+			editor.commit();
+		}
 	}
 
 	public static boolean getDebugMode(){
 		SharedPreferences prefs = getPrefs();
-		return prefs.getBoolean(DEBUG_SETTING_KEY, false);
+		if (prefs != null){
+			return prefs.getBoolean(DEBUG_SETTING_KEY, false);
+		}
+		return false;
 	}
 	
 	public static void setDebugMode(boolean enabled){
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putBoolean(DEBUG_SETTING_KEY, enabled);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putBoolean(DEBUG_SETTING_KEY, enabled);
+			editor.commit();
+		}
 	}
 	
 	public static boolean getLogToFile(){
 		SharedPreferences prefs = getPrefs();
-		return prefs.getBoolean(LOG_TO_FILE_KEY, false);
+		if (prefs != null){
+			return prefs.getBoolean(LOG_TO_FILE_KEY, false);	
+		}
+		return false;
 	}
 	
 	public static void setLogToFile(boolean enabled){
 		SharedPreferences prefs = getPrefs();
-		Editor editor = prefs.edit();
-		editor.putBoolean(LOG_TO_FILE_KEY, enabled);
-		editor.commit();
+		if (prefs != null){
+			Editor editor = prefs.edit();
+			editor.putBoolean(LOG_TO_FILE_KEY, enabled);
+			editor.commit();
+		}
 	}
 
 	private static SharedPreferences getPrefs() {
-		return ZWApplication.getApplication().getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
+		try {
+			Context app = ZWApplication.getApplication();
+			return ZWApplication.getApplication().getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
+		} catch (NullPointerException e){
+			return null;	
+		}
 	}
+	
+	
 
 }

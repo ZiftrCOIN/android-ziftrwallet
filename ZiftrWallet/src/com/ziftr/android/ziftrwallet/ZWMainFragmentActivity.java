@@ -11,13 +11,16 @@ import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBarActivity;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.StyleSpan;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
@@ -233,10 +236,10 @@ ZiftrNetworkHandler, SendTaskCallback {
 		if (this.sendTaskFragment == null){
 			this.sendTaskFragment = (ZWSendTaskFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
 		}
+		
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
-	
 	@Override
 	public void onPause(){
 		super.onPause();
@@ -1362,7 +1365,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 		
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
 		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, getSelectedCoin(), selectedFiat);
-		fiatExchangeRateText.setText(selectedFiat.getFormattedAmount(unitPriceInFiat, true));
+		SpannableString displayMarketFiat = selectedFiat.getDisplayString(unitPriceInFiat, true);
+		fiatExchangeRateText.setText(displayMarketFiat);
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits =  getWalletManager().getWalletBalance(getSelectedCoin());
@@ -1372,7 +1376,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, getSelectedCoin(), selectedFiat);
-		walletBalanceInFiatText.setText(selectedFiat.getFormattedAmount(walletBalanceInFiat, true));
+		SpannableString displayWalletTotalFiat = selectedFiat.getDisplayString(walletBalanceInFiat, true);
+		walletBalanceInFiatText.setText(displayWalletTotalFiat);
 	}
 	
 

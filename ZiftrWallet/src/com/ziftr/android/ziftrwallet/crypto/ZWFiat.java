@@ -5,6 +5,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
+
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWFiat implements ZWCurrency {
@@ -97,14 +101,18 @@ public class ZWFiat implements ZWCurrency {
 		return amount.multiply(multiplier).toBigInteger();
 	}
 
-	
+	public SpannableString getDisplayString(BigDecimal amount, boolean addSymbol){
+		SpannableString display = new SpannableString(this.getFormattedAmount(amount, addSymbol));
+		display.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
+		return display;
+	}
 
 	public String getFormattedAmount(BigDecimal amount, boolean addSymbol) {
 
-		String formattedString = "";
+		String formattedString = " ";
 
 		if(addSymbol && symbolBeforeNumber) {
-			formattedString += this.getSymbol();
+			formattedString += this.getSymbol() + " ";
 		}
 
 		BigDecimal formatted = ZiftrUtils.formatToNDecimalPlaces(getScale(), amount);
@@ -118,13 +126,11 @@ public class ZWFiat implements ZWCurrency {
 		return formattedString;
 	}
 	
-	
 	@Override
 	public String getFormattedAmount(BigDecimal amount) {
 		return this.getFormattedAmount(amount, false);
 	}
 
-	
 	public String getFormattedAmount(BigInteger atmoicUnits, boolean addSymbol) {
 		BigDecimal toFormatAsDecimal = this.getAmount(atmoicUnits);
 		BigDecimal dollars = ZiftrUtils.formatToNDecimalPlaces(this.getScale(), toFormatAsDecimal);
@@ -136,10 +142,5 @@ public class ZWFiat implements ZWCurrency {
 	public String getFormattedAmount(BigInteger atmoicUnits) {
 		return this.getFormattedAmount(atmoicUnits, false);
 	}
-
-
 }
-
-
-
 

@@ -355,7 +355,11 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	public synchronized void updateTransaction(ZWTransaction tx) {
-		this.transactionsTable.updateTransaction(tx, getWritableDatabase());
+		try {
+			this.transactionsTable.updateTransaction(tx, getWritableDatabase());
+		} catch (ZWNoTransactionFoundException t) {
+			ZLog.log("no transaction found exception" + t);
+		}
 	}
 	
 	public synchronized void updateTransactionNumConfirmations(ZWTransaction tx) {

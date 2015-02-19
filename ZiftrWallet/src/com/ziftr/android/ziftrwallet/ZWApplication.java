@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTypefaceUtil;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -51,9 +52,9 @@ public class ZWApplication extends Application {
 	 * can use lazy initialization.
 	 * @return An instance of the Application, which can be used as a Context
 	 */
-	public static ZWApplication getApplication() {
+	public static ZWApplication getApplication() throws NullPointerException {
 		if(self == null) {
-			throw new RuntimeException("Attempting to access Application Context before it's been set. " +
+			throw new NullPointerException("Attempting to access Application Context before it's been set. " +
 					"Make sure ZWApplication class isn't accessing anything statically that might cause a loop back.");
 		}
 		return self;
