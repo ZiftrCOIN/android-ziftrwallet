@@ -120,7 +120,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	 * @return as above
 	 */
 	private ZWCurrencyListItem getItemForCoinType(ZWCoin coin) {
-		int resId = R.layout.accounts_currency_list_single_item;
+		int resId = R.layout.coin_list_item;
 		BigDecimal amount = coin.getAmount(this.walletManager.getWalletBalance(coin));
 		String balance = coin.getFormattedAmount(amount);
 		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();

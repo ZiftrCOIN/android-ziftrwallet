@@ -22,7 +22,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
  */
 public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 	
-	private static final int VIEW_RES_ID = R.layout.accounts_new_currency_list_item;
+	private static final int VIEW_RES_ID = R.layout.coin_list_item;
 	
 	private LayoutInflater inflater;
 	private Context context;
@@ -40,7 +40,7 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		final ZWCoin coin = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-			convertView = (LinearLayout) this.inflater.inflate(this.VIEW_RES_ID, null);
+			convertView = this.inflater.inflate(this.VIEW_RES_ID, null);
 		}
 
 		// Whether or not we just created one, we reset all the resources
@@ -49,16 +49,24 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		// Set the coin logo image view
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
 		coinLogo.setImageResource(coin.getLogoResId());
+		
+		ImageView addIcon = (ImageView) convertView.findViewById(R.id.rightIcon);
+		addIcon.setImageResource(R.drawable.add_currency_item);
 
 		// Set the text next to logo
-		TextView coinName = (TextView) convertView.findViewById(R.id.topTextView);
+		TextView coinName = (TextView) convertView.findViewById(R.id.topLeftTextView);
 		
 		String nameText = coin.getName();
-		if(!coin.isEnabled()) {
-			TextView unavail = (TextView) convertView.findViewById(R.id.bottomTextView);
-			unavail.setText("(Server Unavailable)");
-		}
 		coinName.setText(nameText);
+		
+		ImageView noServerImage = (ImageView) convertView.findViewById(R.id.imageViewNoServer);
+		if(coin.isEnabled()) {
+			noServerImage.setVisibility(View.GONE);
+		}
+		else {
+			noServerImage.setVisibility(View.VISIBLE);
+		}
+		
 
 		return convertView;
 	}

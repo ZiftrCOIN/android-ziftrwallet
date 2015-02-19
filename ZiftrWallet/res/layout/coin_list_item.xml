@@ -48,7 +48,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
                 android:maxWidth="180dp"
-                android:text="Coin Namelong (testnet)"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -63,7 +62,8 @@
                 android:adjustViewBounds="true"
                 android:minWidth="18dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/icon_server_unavailable" />
+                android:src="@drawable/icon_server_unavailable"
+                android:visibility="gone" />
 
             <View
                 android:id="@+id/spacer"
@@ -76,8 +76,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:gravity="end"
-                android:text="numCoins" />
+                android:gravity="end" />
+
         </LinearLayout>
 
         <View
@@ -102,8 +102,8 @@
                 android:id="@+id/bottomLeftTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight=".7"
-                android:text="$Value" />
+                android:layout_weight=".7" />
+
         android:text="num-coins" />
 
             <TextView
@@ -111,8 +111,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight=".3"
-                android:gravity="end"
-        android:text="$0.00" />
+                android:gravity="end" />
+
         </LinearLayout>
         android:text="$Value" />
 
