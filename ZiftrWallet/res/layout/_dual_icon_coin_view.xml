@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/rightIcon"
         android:layout_toLeftOf="@id/rightIcon"
-        android:text="@string/ow_empty_string" />
+        android:text="num-coins" />
 
     <TextView
         android:id="@+id/bottomRightTextView"
@@ -53,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/rightIcon"
         android:layout_toLeftOf="@id/rightIcon"
-        android:text="@string/ow_empty_string" />
+        android:text="$0.00" />
 
     <TextView
         android:id="@+id/bottomLeftTextView"
@@ -64,7 +64,7 @@
         android:layout_toRightOf="@id/market_graph_icon"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="@string/ow_empty_string" />
+        android:text="$Value" />
 
     <TextView
         android:id="@+id/topLeftTextView"
@@ -73,7 +73,7 @@
         android:layout_above="@id/bottomLeftTextView"
         android:layout_alignTop="@id/leftIcon"
         android:layout_toRightOf="@+id/leftIcon"
-        android:text="@string/ow_empty_string"
+        android:text="Coin Name"
         android:textSize="15sp"
         android:textStyle="bold" />
 

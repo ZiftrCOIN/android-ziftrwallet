@@ -49,6 +49,7 @@ public class ZWCoin implements ZWCurrency {
 		logoMap.put("ltc", R.drawable.logo_litecoin);
 		logoMap.put("doge", R.drawable.logo_dogecoin);
 		logoMap.put("ppc", R.drawable.logo_peercoin);
+		logoMap.put("zrc", R.drawable.logo_ziftrcoin);
 	}
 	
 	public static void loadCoins(List<ZWCoin> loadedCoins) {		
