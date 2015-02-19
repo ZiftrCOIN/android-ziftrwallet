@@ -58,7 +58,7 @@ public class ZWDataSyncHelper {
 					
 					ZLog.log("Spend transaction data to sign: ", jsonRes.toString());
 					
-					message = signSentCoins(coin, jsonRes, inputs, output, passphrase);
+					message = signSentCoins(coin, jsonRes, inputs, passphrase);
 				}
 				catch(Exception e) {
 					ZLog.log("Exception send coin request: ", e);
@@ -79,7 +79,7 @@ public class ZWDataSyncHelper {
 	}
 	
 	
-	private static String signSentCoins(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String output, String passphrase) {
+	private static String signSentCoins(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
 		Set<String> addressesSpentFrom = new HashSet<String>();
 		ZLog.log("signSentCoins called");
 		try {
@@ -135,11 +135,9 @@ public class ZWDataSyncHelper {
 				try {
 					JSONObject responseJson = new JSONObject(response);
 					ZLog.log("Response from completed signing: ", responseJson);
-									
 					
-					//this doesnt have access to fee yet so better to have the transaction appear later than wrong
-					//createTransactionFromSpendResponse(coin, responseJson, output);
-					
+					//createTransactionFromSpendResponse(coin, responseJson, null);
+					//createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
 					
 					//TODO -once create transaction works properly remove this
 					updateTransactionHistory(coin);
@@ -359,7 +357,7 @@ public class ZWDataSyncHelper {
 			
 			boolean usedValue = false;
 			//the json doesn't have an input address or value, so we have to look at previously parsed transactions
-			//and see if this input is the output of another, which would indicate that it is us spending coins
+			//and see if this input is the output of another transaction that we know about, which might indicate that it is us spending coins
 			String inputTxid = input.getString("txid");
 			JSONObject matchingTransaction = parsedTransactions.get(inputTxid);
 			if(matchingTransaction != null) {
