@@ -11,7 +11,6 @@ import android.app.ActionBar;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -20,7 +19,6 @@ import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBarActivity;
 import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.text.style.StyleSpan;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
@@ -71,8 +69,6 @@ import com.ziftr.android.ziftrwallet.fragment.ZWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
-import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.SendTaskCallback;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -86,7 +82,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class ZWMainFragmentActivity extends ActionBarActivity 
 implements DrawerListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
 ZWResetPassphraseDialogHandler, ZWConfirmationDialogHandler, ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
-ZiftrNetworkHandler, SendTaskCallback {
+ZiftrNetworkHandler {
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
@@ -112,8 +108,6 @@ ZiftrNetworkHandler, SendTaskCallback {
 	/** reference to searchBarEditText */
 	private EditText searchEditText;
 	
-	/** non-ui fragment retaining send response from server */
-	private ZWSendTaskFragment sendTaskFragment;
 
 	private ZWCoin selectedCoin;
 	private ImageView syncButton; //the button in various fragments users can press to sync their data
@@ -232,19 +226,12 @@ ZiftrNetworkHandler, SendTaskCallback {
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
 		
-		//restore retained sendtaskfragment
-		if (this.sendTaskFragment == null){
-			this.sendTaskFragment = (ZWSendTaskFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
-		}
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
 	@Override
 	public void onPause(){
 		super.onPause();
-		if (this.sendTaskFragment != null){
-			this.sendTaskFragment.setCallBack(null);
-		}
 	}
 
 	
@@ -258,11 +245,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 	@Override
 	public void onResume(){
 		super.onResume();
-		if (this.sendTaskFragment != null){
-			this.sendTaskFragment.setCallBack(this);
-		}
 		this.handleIntent(getIntent());
-		
 	}
 	
 	
@@ -1171,9 +1154,12 @@ ZiftrNetworkHandler, SendTaskCallback {
 				ZWPreferencesUtils.disablePassphrase();
 				ZWPreferencesUtils.setPassphraseWarningDisabled(true);
 				
-				
 				((ZWSettingsFragment)this.getSupportFragmentManager(
 						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
+				
+				//manually toggle showing false to allow alert to show
+				this.showingDialog = false;
+				this.alertUser(getResources().getString(R.string.zw_disabled_passphrase), ZWTags.PASSPHRASE_DISABLED);
 
 				break;
 			}
@@ -1203,7 +1189,7 @@ ZiftrNetworkHandler, SendTaskCallback {
 			// In that case, input hash matches the stored hash because they are both null
 			if (ZWPreferencesUtils.inputHashMatchesStoredHash(oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
-				if (this.changePassphrase(oldPassphrase, newPassphrase)) { 
+				if (this.changePassphrase(oldPassphrase, newPassphrase)) {
 					//if the password was changed
 					if (requestCode == ZWRequestCodes.CREATE_PASSPHRASE_DIALOG) { 
 						//if we were setting the passphrase, turn disabled passphrase off
@@ -1211,6 +1197,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 						((ZWSettingsFragment)this.getSupportFragmentManager(
 								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 					}
+					this.showingDialog = false;
+					this.alertUser(getResources().getString(R.string.zw_set_pass_complete), ZWTags.SET_PASS_COMPLETE);
 				}
 			} else {
 				//manually toggle showing false to allow alert to show
@@ -1286,6 +1274,8 @@ ZiftrNetworkHandler, SendTaskCallback {
 			this.alertUser(getResources().getString(R.string.zw_set_empty_name), ZWTags.TRIED_SETTING_NAME_TO_EMPTY);
 		} else {
 			ZWPreferencesUtils.setUserName(newName);
+			this.showingDialog = false;
+			this.alertUser(getResources().getString(R.string.zw_set_name_complete) + newName, ZWTags.SET_NAME_COMPLETE);
 			((ZWSettingsFragment)this.getSupportFragmentManager(
 					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
 		}
@@ -1614,51 +1604,5 @@ ZiftrNetworkHandler, SendTaskCallback {
 		}
 	}
 	
-	
-	@Override
-	public void updateSendStatus(final ZWCoin coin, final String message) {
-		runOnUiThread(new Runnable(){
-			@Override
-			public void run() {
-				ZLog.log("sendTask beginning update ui");
-				destroySendTaskFragment();
-					if (!message.isEmpty()){
-						alertUser("Sending " + coin.getSymbol()+ " " + message, "error_sending_coins");
-						if (ZWMainFragmentActivity.this.getTopDisplayedFragment().getTag().equals(ZWTags.SEND_FRAGMENT)){
-							((ZWSendCoinsFragment)ZWMainFragmentActivity.this.getTopDisplayedFragment()).reEnableSend();
-						}
-					} else {
-					Toast.makeText(ZWMainFragmentActivity.this, coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
-					if (ZWMainFragmentActivity.this.getTopDisplayedFragment().getTag().equals(ZWTags.SEND_FRAGMENT)){
-						ZWMainFragmentActivity.this.onBackPressed();
-					}
-				}
-			}
-		});
-		
-	}
-	
-	
-	//call on ui thread only
-	@Override
-	public void destroySendTaskFragment() {
-		ZLog.log("sendTask fragment Destroy");
-		if (sendTaskFragment != null){
-			sendTaskFragment.setDone(true);
-			FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.remove(sendTaskFragment).commitAllowingStateLoss();
-			sendTaskFragment= null;
-		}
-	}
-	
-	public ZWSendTaskFragment initSendTaskFragment(){
-		ZWSendTaskFragment frag = new ZWSendTaskFragment();
-		FragmentTransaction fragmentTransaction =  this.getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.add(0, frag, ZWTags.SEND_TASK).commit();
-        this.sendTaskFragment = frag;
-		this.sendTaskFragment.setCallBack(this);
-		return this.sendTaskFragment;
-	}
-	
-	
+
 }

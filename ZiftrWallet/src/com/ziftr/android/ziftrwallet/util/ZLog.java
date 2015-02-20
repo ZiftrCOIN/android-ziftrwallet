@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import android.util.Log;
 
 import com.ziftr.android.ziftrwallet.ZWApplication;
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 
 public abstract class ZLog {
 	
@@ -33,7 +34,7 @@ public abstract class ZLog {
 	}
 	
 	private static ZLog initLogger() {
-		if (ZWApplication.isDebuggable()) {
+		if (ZWApplication.isDebuggable() || ZWPreferencesUtils.getDebugMode()) {
 			
 			return new AndroidLogger();
 		}
@@ -193,7 +194,7 @@ public abstract class ZLog {
 						e.printStackTrace();
 					}
 				} catch (NullPointerException e) {
-					ZLog.log("null app");
+					Log.e(tag, "null application, shouldn't happen: " + e);
 					return;
 				}
 			}

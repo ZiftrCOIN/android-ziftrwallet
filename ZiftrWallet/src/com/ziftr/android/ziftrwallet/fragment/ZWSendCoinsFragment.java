@@ -11,6 +11,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -21,6 +22,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.R;
@@ -35,6 +37,8 @@ import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
+import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
+import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.SendTaskCallback;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 
@@ -45,7 +49,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
  * TODO make sure that we stop correctly when the user
  * enters non-sensical values in fields.
  */
-public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
+public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements SendTaskCallback {
 
 	/** The view container for this fragment. */
 	private View rootView;
@@ -69,6 +73,36 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 	private TextView totalFiatEquivTextView;
 	private ZWCoinURI preloadedCoinUri;
 	private String preloadAddress;
+	
+	/** non-ui fragment retaining send response from server */
+	private ZWSendTaskFragment sendTaskFragment;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState){
+		super.onCreate(savedInstanceState);
+
+		//restore retained sendtaskfragment
+		if (this.sendTaskFragment == null){
+			this.sendTaskFragment = (ZWSendTaskFragment) getZWMainActivity().getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
+		}
+	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		if (this.sendTaskFragment != null){
+			this.sendTaskFragment.setCallBack(this);
+			this.sendButton.setEnabled(false);
+		}
+	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		if (this.sendTaskFragment != null){
+			this.sendTaskFragment.setCallBack(null);
+		}
+	}
 	
 	/**
 	 * Inflate, initialize, and return the send coins layout.
@@ -532,12 +566,51 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		}
 
 		List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
-		getZWMainActivity().initSendTaskFragment().sendCoins(coin, feePerKb, value, inputs, address, passphrase);
+		this.initSendTaskFragment().sendCoins(coin, feePerKb, value, inputs, address, passphrase);
 		this.sendButton.setEnabled(false);
 	}
 	
 	public void reEnableSend(){
 		this.sendButton.setEnabled(true);
+	}
+	
+
+	public void updateSendStatus(final ZWCoin coin, final String message) {
+		getZWMainActivity().runOnUiThread(new Runnable(){
+			@Override
+			public void run() {
+				ZLog.log("sendTask beginning update ui");
+				destroySendTaskFragment();
+					if (!message.isEmpty()){
+						getZWMainActivity().alertUser("Sending " + coin.getSymbol()+ " " + message, "error_sending_coins");
+						reEnableSend();
+					} else {
+					Toast.makeText(getZWMainActivity(), coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
+					getZWMainActivity().onBackPressed();
+				}
+			}
+		});
+		
+	}
+	
+	//call on ui thread only
+	public void destroySendTaskFragment() {
+		ZLog.log("sendTask fragment Destroy");
+		if (sendTaskFragment != null){
+			sendTaskFragment.setDone(true);
+			FragmentTransaction fragmentTransaction = getZWMainActivity().getSupportFragmentManager().beginTransaction();
+			fragmentTransaction.remove(sendTaskFragment).commitAllowingStateLoss();
+			sendTaskFragment= null;
+		}
+	}
+	
+	public ZWSendTaskFragment initSendTaskFragment(){
+		ZWSendTaskFragment frag = new ZWSendTaskFragment();
+		FragmentTransaction fragmentTransaction =  getZWMainActivity().getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.add(0, frag, ZWTags.SEND_TASK).commit();
+        this.sendTaskFragment = frag;
+		this.sendTaskFragment.setCallBack(this);
+		return this.sendTaskFragment;
 	}
 
 }
