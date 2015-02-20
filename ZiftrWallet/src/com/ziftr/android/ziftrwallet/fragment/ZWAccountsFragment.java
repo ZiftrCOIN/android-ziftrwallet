@@ -1,8 +1,7 @@
 package com.ziftr.android.ziftrwallet.fragment;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.List;
 
 import android.app.Activity;
@@ -40,13 +39,12 @@ public class ZWAccountsFragment extends ZWFragment {
 
 	/** The list view which shows a link to open each of the wallets/currency types. */
 	private ListView currencyListView;
-	/** The data set that the currencyListView uses. */
-	private List<ZWCurrencyListItem> userWallets;
 
 	/** The wallet manager. This fragment works with */
 	private ZWWalletManager walletManager;
 
-	private ArrayAdapter<ZWCurrencyListItem> walletAdapter;
+	private List<ZWCoin> activatedCoins;
+	private ArrayAdapter<ZWCoin> walletAdapter;
 
 	private View footer;
 	
@@ -111,24 +109,6 @@ public class ZWAccountsFragment extends ZWFragment {
 		this.mContext = (FragmentActivity) activity;
 	}
 
-	/**
-	 * A messy method which is just used to not have huge if else
-	 * blocks elsewhere. Gets the item that we will add to the currency
-	 * list when the user adds a new currency.
-	 * 
-	 * @param id - The type of coin to get a new {@link ZWCurrencyListItem} for. 
-	 * @return as above
-	 */
-	private ZWCurrencyListItem getItemForCoinType(ZWCoin coin) {
-		int resId = R.layout.coin_list_item;
-		BigDecimal amount = coin.getAmount(this.walletManager.getWalletBalance(coin));
-		String balance = coin.getFormattedAmount(amount);
-		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
-		String fiatBalance = ZWConverter.convert(amount, coin, fiat).setScale(2, RoundingMode.HALF_UP).toPlainString();
-		String fiatVal = ZWConverter.convert(BigDecimal.ONE, coin, fiat).toString();
-		return new ZWCurrencyListItem(coin, fiatVal, balance, fiatBalance, resId);
-	}
-
 
 	/**
 	 * Notifies the list view adapter that the data set has changed
@@ -139,7 +119,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	 */
 	public void refreshListOfUserWallets() {
 		this.walletAdapter.notifyDataSetChanged();
-		if (this.userWallets.size() == 0){
+		if (this.activatedCoins.size() == 0){
 			this.currencyListView.removeFooterView(this.footer);
 		}
 	}
@@ -151,30 +131,30 @@ public class ZWAccountsFragment extends ZWFragment {
 	 */
 	private void initializeCurrencyListView() {
 		// Get the values from the manager and initialize the list view from them
-		this.userWallets = new ArrayList<ZWCurrencyListItem>();
-		for (ZWCoin coin : this.walletManager.getActivatedCoins()) {
-			this.userWallets.add(this.getItemForCoinType(coin));
-		}
+		
+		
+		this.activatedCoins = this.walletManager.getActivatedCoins();
+		
 		this.currencyListView = (ListView) 
 		this.rootView.findViewById(R.id.listOfUserWallets);
 
 		// The dropshadow at the bottom
-		if (this.userWallets.size() > 0){
+		if (this.activatedCoins.size() > 0){
 			this.currencyListView.addFooterView(this.footer, null ,false);
 		}
 		this.currencyListView.setFooterDividersEnabled(false);
 
-		this.walletAdapter = new ZWCurrencyListAdapter(this.mContext, this.userWallets);
+		this.walletAdapter = new ZWCurrencyListAdapter(this.mContext, this.activatedCoins);
 		this.currencyListView.setAdapter(this.walletAdapter);
 
 		this.currencyListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, 
 					int position, long id) {
-				ZWCurrencyListItem item = (ZWCurrencyListItem) 
+				ZWCoin coin = (ZWCoin) 
 						parent.getItemAtPosition(position);
 
-				getZWMainActivity().openWalletView(item.getCoinId());
+				getZWMainActivity().openWalletView(coin);
 
 			}
 		});
@@ -185,9 +165,9 @@ public class ZWAccountsFragment extends ZWFragment {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				ZWCurrencyListItem item = (ZWCurrencyListItem) parent.getItemAtPosition(position);
+				ZWCoin coin = (ZWCoin) parent.getItemAtPosition(position);
 				Bundle b = new Bundle();
-				b.putString(ZWCoin.TYPE_KEY, item.getCoinId().getSymbol());
+				b.putString(ZWCoin.TYPE_KEY, coin.getSymbol());
 				b.putInt("ITEM_LOCATION", position);
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to "
 						+ "deactivate this wallet? This will not actually delete any of your stored data, and you can reactivate it at any time.", 
@@ -200,13 +180,13 @@ public class ZWAccountsFragment extends ZWFragment {
 	}
 
 	public void removeFromView(int pos){
-		this.userWallets.remove(pos);
+		this.activatedCoins.remove(pos);
 		this.refreshListOfUserWallets();
 		this.toggleAddCurrencyMessage();
 	}
 	
 	public void toggleAddCurrencyMessage(){
-		if (this.userWallets.size() <=0){
+		if (this.activatedCoins.size() <=0){
 			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.VISIBLE);
 			this.rootView.findViewById(R.id.total_label).setVisibility(View.GONE);
 			this.totalBalance.setVisibility(View.GONE);
@@ -220,11 +200,14 @@ public class ZWAccountsFragment extends ZWFragment {
 	
 	private void calculateTotal(){
 		BigDecimal total = BigDecimal.ZERO;
-		for (int i=0; i< this.walletAdapter.getCount(); i++){
-			ZWCurrencyListItem wallet = this.walletAdapter.getItem(i);
-			BigDecimal amount = new BigDecimal(wallet.getWalletTotalFiatEquiv());
-			total = total.add(amount);
+		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
+		
+		for(ZWCoin coin : this.activatedCoins) {
+			BigInteger balanceAtomic = walletManager.getWalletBalance(coin);
+			BigDecimal balance = coin.getAmount(balanceAtomic);
+			total.add(ZWConverter.convert(balance, coin, fiat));
 		}
+
 		this.totalBalance.setText(this.fiatType.getSymbol() + total.toPlainString());
 	}
 	

@@ -5,7 +5,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTypefaceUtil;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -30,8 +29,8 @@ public class ZWApplication extends Application {
 		super.onCreate();
 		self = this;
 	    ZiftrTypefaceUtil.overrideFont(getApplicationContext());
-		isDebuggable = (0 != 
-				(getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+		isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+		
 		ZiftrUtils.createTrulySecureRandom(); //just call to initialze fixes here ahead of time
 		
 		try {

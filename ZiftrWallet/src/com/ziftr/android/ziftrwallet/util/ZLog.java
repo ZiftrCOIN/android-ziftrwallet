@@ -193,7 +193,7 @@ public abstract class ZLog {
 						e.printStackTrace();
 					}
 				} catch (NullPointerException e) {
-					ZLog.log("null app");
+					//ZLog.log("null app");
 					return;
 				}
 			}
