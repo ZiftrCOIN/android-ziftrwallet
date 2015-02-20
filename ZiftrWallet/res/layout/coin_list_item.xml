@@ -104,8 +104,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight=".7" />
 
-        android:text="num-coins" />
-
             <TextView
                 android:id="@+id/bottomRightTextView"
                 android:layout_width="0dp"
