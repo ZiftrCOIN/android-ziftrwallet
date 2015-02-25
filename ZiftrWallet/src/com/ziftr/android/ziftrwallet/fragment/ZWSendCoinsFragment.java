@@ -463,7 +463,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		// Update the text in the total fiat equiv
 		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
 		BigDecimal fiatTotal = ZWConverter.convert(total, getSelectedCoin(), selectedFiat);
-		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true) + ")");
+		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true, getSelectedCoin().getFiatEquivPrecision()) + ")");
 	}
 
 	/**

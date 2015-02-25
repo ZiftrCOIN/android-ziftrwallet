@@ -485,7 +485,15 @@ public class ZiftrUtils {
 		return new SecureRandom();
 	}
 	
-	
+	//get number of decimal places in a bigDecimal
+	public static int numDecimalPlaces(BigDecimal num){
+		if (num.compareTo(BigDecimal.ZERO) == 0){
+			return 0;
+		}
+		String numtString = num.stripTrailingZeros().toPlainString();
+		int index = numtString.indexOf(".");
+		return index < 0 ? 0 : numtString.length() - index - 1;
+	}
 	
 	public static long readUint32(byte[] bytes, int offset) {
         return ((bytes[offset++] & 0xFFL) << 0) |

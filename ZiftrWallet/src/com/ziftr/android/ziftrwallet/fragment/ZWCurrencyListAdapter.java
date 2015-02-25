@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.text.SpannableString;
-import android.text.TextUtils;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,7 +91,7 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 				convertView.findViewById(R.id.bottomLeftTextView);
 
 		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, currencyListItem.getCoinId(), fiatType);
-		SpannableString displayMarketFiat = fiatType.getDisplayString(unitPriceInFiat, true);
+		SpannableString displayMarketFiat = fiatType.getDisplayString(unitPriceInFiat, true, currencyListItem.getCoinId().getFiatEquivPrecision());
 
 			coinValue.setText(displayMarketFiat);
 		
@@ -111,7 +108,7 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCurrencyListItem> {
 		TextView walletTotalFiatEquiv = (TextView) 
 				convertView.findViewById(R.id.bottomRightTextView);
 		
-		SpannableString displayWalletTotalFiat = fiatType.getDisplayString(new BigDecimal(currencyListItem.getWalletTotalFiatEquiv()), true);
+		SpannableString displayWalletTotalFiat = fiatType.getDisplayString(new BigDecimal(currencyListItem.getWalletTotalFiatEquiv()), true, currencyListItem.getCoinId().getFiatEquivPrecision());
 		walletTotalFiatEquiv.setText(displayWalletTotalFiat);
 
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);

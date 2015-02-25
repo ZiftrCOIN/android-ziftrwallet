@@ -290,6 +290,11 @@ public class ZWDataSyncHelper {
 					//only add exchange data if we know 
 					ZLog.log("Market value of " + convertingFrom + " is : " + rate.toString() + " " + convertingTo);
 					ZWWalletManager.getInstance().upsertExchangeValue(convertingFrom, convertingTo, rate.toString());
+					//if we got a positive exchange rate and the inverse value is 0 (default) then update the inverse exchange rate
+					if (rate.compareTo(BigDecimal.ZERO) == 1 && ZWWalletManager.getInstance().getExchangeValue(convertingTo, convertingFrom).equals("0")){
+						ZLog.log("Inserted default Market value of " + convertingTo + " is : " + BigDecimal.ONE.divide(rate, MathContext.DECIMAL64).toString() + " " + convertingFrom);
+						ZWWalletManager.getInstance().upsertExchangeValue(convertingTo, convertingFrom, BigDecimal.ONE.divide(rate, MathContext.DECIMAL64).toString());
+					}
 				
 				}
 			} catch (JSONException e) {

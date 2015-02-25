@@ -1376,7 +1376,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
 		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, getSelectedCoin(), selectedFiat);
-		SpannableString displayMarketFiat = selectedFiat.getDisplayString(unitPriceInFiat, true);
+		SpannableString displayMarketFiat = selectedFiat.getDisplayString(unitPriceInFiat, true, getSelectedCoin().getFiatEquivPrecision());
 		fiatExchangeRateText.setText(displayMarketFiat);
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
@@ -1387,7 +1387,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, getSelectedCoin(), selectedFiat);
-		SpannableString displayWalletTotalFiat = selectedFiat.getDisplayString(walletBalanceInFiat, true);
+		SpannableString displayWalletTotalFiat = selectedFiat.getDisplayString(walletBalanceInFiat, true, getSelectedCoin().getFiatEquivPrecision());
 		walletBalanceInFiatText.setText(displayWalletTotalFiat);
 	}
 	

@@ -11,6 +11,7 @@ import java.util.Locale;
 
 import com.google.common.base.Charsets;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -352,7 +353,11 @@ public class ZWCoin implements ZWCurrency {
 		return amount.multiply(multiplier).toBigInteger();
 	}
 	
-	
+	//returns number of decimal places needed to display fiat equivalent of 1 coin without rounding
+	public int getFiatEquivPrecision(){
+		BigDecimal fiatVal = ZWConverter.convert(BigDecimal.ONE, this, ZWPreferencesUtils.getFiatCurrency());
+		return ZiftrUtils.numDecimalPlaces(fiatVal);
+	}
 	
 	/**
 	 * <p>Given a textual message, returns a byte buffer formatted as follows:</p>
