@@ -4,10 +4,15 @@ import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -22,12 +27,11 @@ public class ZWSendTaskFragment extends Fragment{
 	}
 	
 	public static interface SendTaskCallback {
-		public void updateSendStatus(ZWCoin coin, String message);
+		public void updateSendStatus(ZWCoin coin);
 		public void destroySendTaskFragment();
 	}
 	
 	private WeakReference<SendTaskCallback> callback = new WeakReference<SendTaskCallback>(null);
-	private String msg = null;
 	private ZWCoin sentCoin = null;
 	
 	private boolean done = false;
@@ -47,8 +51,13 @@ public class ZWSendTaskFragment extends Fragment{
 
 			@Override
 			public void run() {
-				msg = ZWDataSyncHelper.sendCoins(coin, fee, amount, inputs, output, passphrase);
-				updateCallback();
+				JSONObject jsonRes = ZWDataSyncHelper.sendCoins(coin, fee, amount, inputs, output, passphrase);
+				if (jsonRes != null){
+					if (ZWPreferencesUtils.getMempoolIsSpendable() || !ZWDataSyncHelper.checkSpendingUnconfirmedTxn(coin, jsonRes, inputs, passphrase)){
+						ZWDataSyncHelper.signSentCoins(coin, jsonRes, passphrase);
+						updateCallback();
+					}
+				}
 			}
 		
 		});
@@ -63,10 +72,10 @@ public class ZWSendTaskFragment extends Fragment{
 		}
 	}
 	
-	private synchronized void updateCallback(){
+	public synchronized void updateCallback(){
 		SendTaskCallback currentCallback = callback.get();
-		if (currentCallback!=null && this.sentCoin != null && this.msg != null){
-			currentCallback.updateSendStatus(this.sentCoin, this.msg);
+		if (currentCallback!=null && this.sentCoin != null){
+			currentCallback.updateSendStatus(this.sentCoin);
 		}
 	}
 	

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/currency_list_selector"
-    android:minHeight="@dimen/ow_total_icon_side_length"
+    android:minHeight="@dimen/zw_total_icon_side_length"
     android:orientation="horizontal"
     android:padding="10dp" >
 
@@ -11,23 +11,23 @@
 
     <ImageView
         android:id="@+id/leftIcon"
-        android:layout_width="@dimen/ow_medium_icon_side_length"
-        android:layout_height="@dimen/ow_medium_icon_side_length"
+        android:layout_width="@dimen/zw_medium_icon_side_length"
+        android:layout_height="@dimen/zw_medium_icon_side_length"
         android:layout_alignParentLeft="true"
         android:clickable="true"
         android:contentDescription="@string/zw_empty_string"
         android:gravity="center_vertical"
-        android:padding="@dimen/ow_borderless_icon_margin"
+        android:padding="@dimen/zw_borderless_icon_margin"
         android:src="@drawable/button_edit_pencil_clickable" />
 
     <ImageView
         android:id="@+id/rightIcon"
-        android:layout_width="@dimen/ow_medium_icon_side_length"
-        android:layout_height="@dimen/ow_medium_icon_side_length"
+        android:layout_width="@dimen/zw_medium_icon_side_length"
+        android:layout_height="@dimen/zw_medium_icon_side_length"
         android:layout_alignParentRight="true"
         android:contentDescription="@string/zw_empty_string"
         android:gravity="center_vertical"
-        android:padding="@dimen/ow_bordered_icon_margin"
+        android:padding="@dimen/zw_bordered_icon_margin"
         android:src="@drawable/received_yellow" />
 
     <LinearLayout
@@ -47,7 +47,7 @@
             android:maxLines="1"
             android:singleLine="true"
             android:text="@string/zw_empty_string"
-            android:textSize="@dimen/ow_txt_mediumsmall"
+            android:textSize="@dimen/zw_txt_mediumsmall"
             android:textStyle="bold" />
 
         <TextView

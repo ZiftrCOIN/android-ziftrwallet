@@ -3,12 +3,12 @@
     android:id="@+id/walletTxListDivider"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/ow_tx_list_divider_bottom_margin"
+    android:layout_marginBottom="@dimen/zw_tx_list_divider_bottom_margin"
     android:orientation="vertical" >
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="@dimen/ow_quarter_icon_size"
+        android:layout_height="@dimen/zw_quarter_icon_size"
         android:background="@drawable/dropshadow" />
 
     <TextView

@@ -17,28 +17,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/White"
-                android:padding="@dimen/ow_large_icon_margin"
+                android:padding="@dimen/zw_large_icon_margin"
                 android:src="@drawable/logo_ziftrwallet_orange" />
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/ow_quarter_icon_size"
+                android:layout_height="@dimen/zw_quarter_icon_size"
                 android:layout_marginBottom="20dp"
                 android:background="@drawable/dropshadow" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                android:layout_marginLeft="@dimen/zw_horizontal_margin"
+                android:layout_marginRight="@dimen/zw_horizontal_margin"
                 android:orientation="vertical" >
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/zw_about"
-                    android:textColor="@color/ow_default_text"
-                    android:textSize="@dimen/ow_txt_mediumlarge" />
+                    android:textColor="@color/zw_default_text"
+                    android:textSize="@dimen/zw_txt_mediumlarge" />
 
                 <TextView
                     android:id="@+id/ziftrWalletVersionText"
@@ -48,7 +48,7 @@
                     android:text="v0.0.1"
                     android:textColor="@color/White"
                     android:textColorLink="@color/LemonChiffon"
-                    android:textSize="@dimen/ow_txt_mediumsmall" />
+                    android:textSize="@dimen/zw_txt_mediumsmall" />
 
                 <TextView
                     android:id="@+id/aboutPlaceholderText"
@@ -58,7 +58,7 @@
                     android:text="@string/zw_about_text"
                     android:textColor="@color/White"
                     android:textColorLink="@color/LemonChiffon"
-                    android:textSize="@dimen/ow_txt_mediumsmall" />
+                    android:textSize="@dimen/zw_txt_mediumsmall" />
 
                 <TextView
                     android:id="@+id/zxingText"
@@ -69,7 +69,7 @@
                     android:text="@string/zw_zxing_license"
                     android:textColor="@color/White"
                     android:textColorLink="@color/LemonChiffon"
-                    android:textSize="@dimen/ow_txt_mediumsmall" />
+                    android:textSize="@dimen/zw_txt_mediumsmall" />
 
                 <Button
                     android:id="@+id/send_feedback"
@@ -80,7 +80,7 @@
                     android:background="@drawable/clickable_button_color"
                     android:text="SEND US FEEDBACK"
                     android:textColor="@color/White"
-                    android:textSize="@dimen/ow_txt_small" />
+                    android:textSize="@dimen/zw_txt_small" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

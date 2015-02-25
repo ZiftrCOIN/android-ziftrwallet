@@ -129,8 +129,6 @@ public class ZiftrNetworkManager {
 							}
 						}
 					}
-					
-					
 				}
 			});
 			stopThread.start();
@@ -143,13 +141,6 @@ public class ZiftrNetworkManager {
 
 	
 	
-	
 }
-
-
-
-
-
-
 
 

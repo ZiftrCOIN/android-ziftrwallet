@@ -4,53 +4,53 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="ow_send_receive_list_spacing_top_margin">5dp</dimen>
-    <dimen name="ow_send_receive_list_block_padding_vertical">8dp</dimen>
-    <dimen name="ow_send_receive_label_text_size">13sp</dimen>
+    <dimen name="zw_send_receive_list_spacing_top_margin">5dp</dimen>
+    <dimen name="zw_send_receive_list_block_padding_vertical">8dp</dimen>
+    <dimen name="zw_send_receive_label_text_size">13sp</dimen>
 
     <!-- These are for icons that do have a border built in. -->
-    <dimen name="ow_bordered_icon_margin">4dp</dimen>
+    <dimen name="zw_bordered_icon_margin">4dp</dimen>
 
     <!-- These are for icons that don't have a border built in. -->
-    <dimen name="ow_borderless_icon_margin">6dp</dimen>
+    <dimen name="zw_borderless_icon_margin">6dp</dimen>
 
     <!-- 2*margin + size == empty_space_padding -->
-    <dimen name="ow_total_icon_side_length">45dp</dimen>
-    <dimen name="ow_medium_icon_side_length">38dp</dimen>
+    <dimen name="zw_total_icon_side_length">45dp</dimen>
+    <dimen name="zw_medium_icon_side_length">38dp</dimen>
     <!-- SearchBar edit text height -->
-    <dimen name="ow_searchBarEditText">35dp</dimen>
-    <dimen name="ow_large_icon_size">130dp</dimen>
-    <dimen name="ow_large_icon_margin">20dp</dimen>
-    <dimen name="ow_medium_icon_size">80dp</dimen>
+    <dimen name="zw_searchBarEditText">35dp</dimen>
+    <dimen name="zw_large_icon_size">130dp</dimen>
+    <dimen name="zw_large_icon_margin">20dp</dimen>
+    <dimen name="zw_medium_icon_size">80dp</dimen>
     <!-- Half of the icon size -->
-    <dimen name="ow_half_icon_size">20dp</dimen>
+    <dimen name="zw_half_icon_size">20dp</dimen>
     <!-- icon next to text in wallet header view -->
     <dimen name="zw_market_icon_size">15dp</dimen>
     <!-- Quarter of the icon size -->
-    <dimen name="ow_quarter_icon_size">10dp</dimen>
-    <dimen name="ow_tx_list_divider_padding">10dp</dimen>
-    <dimen name="ow_tx_list_item_padding">10dp</dimen>
-    <dimen name="ow_tx_list_divider_bottom_margin">5dp</dimen>
-    <dimen name="ow_button_footer_height">60dp</dimen>
-    <dimen name="ow_tx_details_vertical_margin">40dp</dimen>
+    <dimen name="zw_quarter_icon_size">10dp</dimen>
+    <dimen name="zw_tx_list_divider_padding">10dp</dimen>
+    <dimen name="zw_tx_list_item_padding">10dp</dimen>
+    <dimen name="zw_tx_list_divider_bottom_margin">5dp</dimen>
+    <dimen name="zw_button_footer_height">60dp</dimen>
+    <dimen name="zw_tx_details_vertical_margin">40dp</dimen>
 
     <!-- ow default text sizes -->
-    <dimen name="ow_txt_largest">40sp</dimen>
-    <dimen name="ow_txt_mediumlarge">26sp</dimen>
-    <dimen name="ow_txt_medium">22sp</dimen>
-    <dimen name="ow_txt_mediumsmall">18sp</dimen>
-    <dimen name="ow_txt_small">16sp</dimen>
-    <dimen name="ow_edit_text_padding">8dp</dimen>
-    <dimen name="ow_edit_text_height">@dimen/ow_total_icon_side_length</dimen>
-    <dimen name="ow_edit_text_heightx2">90dp</dimen>
+    <dimen name="zw_txt_largest">40sp</dimen>
+    <dimen name="zw_txt_mediumlarge">26sp</dimen>
+    <dimen name="zw_txt_medium">22sp</dimen>
+    <dimen name="zw_txt_mediumsmall">18sp</dimen>
+    <dimen name="zw_txt_small">16sp</dimen>
+    <dimen name="zw_edit_text_padding">8dp</dimen>
+    <dimen name="zw_edit_text_height">@dimen/zw_total_icon_side_length</dimen>
+    <dimen name="zw_edit_text_heightx2">90dp</dimen>
 
     <!-- ow screen margin -->
-    <dimen name="ow_horizontal_margin">55dp</dimen>
-    <dimen name="ow_txn_field_with_icon_margin">9dp</dimen>
+    <dimen name="zw_horizontal_margin">55dp</dimen>
+    <dimen name="zw_txn_field_with_icon_margin">9dp</dimen>
     
-    <dimen name="ow_checkbox_size">36dp</dimen>
+    <dimen name="zw_checkbox_size">36dp</dimen>
 	
-    <dimen name="ow_search_bar_height">55dp</dimen>
+    <dimen name="zw_search_bar_height">55dp</dimen>
     
     <dimen name="widget_margin">8dp</dimen>
 </resources>

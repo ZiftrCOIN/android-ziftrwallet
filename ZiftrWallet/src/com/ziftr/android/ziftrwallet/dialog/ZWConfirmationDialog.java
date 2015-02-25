@@ -58,18 +58,17 @@ public class ZWConfirmationDialog extends ZWDialogFragment {
 	public void onClick(View view) {
 		ZWConfirmationDialogHandler handler = 
 				(ZWConfirmationDialogHandler) this.getHandler();
-		
 		switch(view.getId()) {
-		case R.id.left_dialog_button:
-			//CANCEL
-			handler.handleNegative(this.getRequestCode());
-			this.dismiss();
-			break;
-		case R.id.right_dialog_button:
-			//CONTINUE
-			handler.handleConfirmationPositive(this.getRequestCode(), this.getArguments());
-			this.dismiss();
-			break;
+			case R.id.left_dialog_button:
+				//CANCEL
+				handler.handleNegative(this.getRequestCode());
+				this.dismiss();
+				break;
+			case R.id.right_dialog_button:
+				//CONTINUE
+				handler.handleConfirmationPositive(this.getRequestCode(), this.getArguments());
+				this.dismiss();
+				break;
 		}
 	}
 

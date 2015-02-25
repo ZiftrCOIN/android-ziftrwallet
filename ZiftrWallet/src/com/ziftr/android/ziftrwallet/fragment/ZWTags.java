@@ -57,7 +57,11 @@ public class ZWTags {
 	
 	public static final String PASSPHRASE_DISABLED = "disabled_pass_complete";
 
+	public static final String ERROR_MSG = "error_alert";
+
+	public static final String CONTINUE_SPENDING_UNCONFIRMED = "spending_unconfirmed";
+	
 	//EDIT TEXT
-	public static final String ZW_EDIT_TEXT = "ow_edit_text";
+	public static final String ZW_EDIT_TEXT = "zw_edit_text";
 
 }

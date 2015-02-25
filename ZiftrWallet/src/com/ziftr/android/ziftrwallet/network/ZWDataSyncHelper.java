@@ -14,18 +14,27 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Bundle;
+
+import com.ziftr.android.ziftrwallet.ZWMessageManager;
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
+import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
+import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWDataSyncHelper {
 	
-	public static String sendCoins(ZWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
+	//key to save the server response of a send transaction to sign
+	public static final String toSignResponseKey = "SERVER_RESPONSE_TO_SIGN";
+	
+	public static JSONObject sendCoins(ZWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
 		String message = "";
 		ZLog.log("Sending " + amount + " coins to " + output);
 		ZiftrNetworkManager.networkStarted();
@@ -57,8 +66,8 @@ public class ZWDataSyncHelper {
 					JSONObject jsonRes = new JSONObject(response);
 					
 					ZLog.log("Spend transaction data to sign: ", jsonRes.toString());
-					
-					message = signSentCoins(coin, jsonRes, inputs, passphrase);
+					return jsonRes;
+
 				}
 				catch(Exception e) {
 					ZLog.log("Exception send coin request: ", e);
@@ -75,11 +84,44 @@ public class ZWDataSyncHelper {
 		}
 
 		ZiftrNetworkManager.networkStopped();
-		return message;
+		if (!message.isEmpty()) {
+			ZWMessageManager.alertError(message);
+		}
+		return null;
 	}
 	
+	static boolean checkSpendingUnconfirmedTxn(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase){
+		List<ZWTransaction> spendingFromTxns = new ArrayList<ZWTransaction>();
+		try {
+			JSONArray vin = serverResponse.getJSONArray("vin");
+			for (int i=0; i< vin.length(); i++){
+				JSONObject input = vin.optJSONObject(i);
+				String txid = input.optString("txid");
+				ZWTransaction txn = ZWWalletManager.getInstance().readTransactionByHash(coin, txid);
+				spendingFromTxns.add(txn);
+			}
+			
+			for (ZWTransaction txn : spendingFromTxns){
+				if (txn.isPending()){
+					//warn user of spending unconfirmed txn
+					Bundle b = new Bundle();
+					b.putString(toSignResponseKey, serverResponse.toString());
+					b.putString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
+					b.putString(ZWCoin.TYPE_KEY, coin.getSymbol());
+					ZWMessageManager.alertConfirmation(ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED, "Warning: this spend transaction will use" +
+					" unconfirmed coins!", ZWTags.CONTINUE_SPENDING_UNCONFIRMED, b);
+					return true;
+				}
+			}
+		} catch (JSONException e1) {
+			ZLog.log("Exception getting txns spending from before signing: ", e1);
+		}
+		//can't get here unless there are no pending transactions we are spending from
+		signSentCoins(coin, serverResponse, passphrase);
+		return false;
+	}
 	
-	private static String signSentCoins(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase) {
+	public static void signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
 		Set<String> addressesSpentFrom = new HashSet<String>();
 		ZLog.log("signSentCoins called");
 		try {
@@ -103,8 +145,6 @@ public class ZWDataSyncHelper {
 				
 				String sHex = ZiftrUtils.bigIntegerToString(signature.s, 32);
 				toSign.put("s", sHex);
-				
-				//ZLog.log("Sending this signed send request to server: " + toSign);
 			}
 		}
 		catch(Exception e) {
@@ -149,14 +189,13 @@ public class ZWDataSyncHelper {
 					//then we just update our history and hope it's there
 					updateTransactionHistory(coin);
 				}
-				
-				return "";
 			}
 			catch(Exception e) {
 				ZLog.log("Exception saving spend transaction: ", e);
 			}
+		} else {
+			ZWMessageManager.alertError("error: " + signingRequest.getResponseMessage());
 		}
-		return "error: " + signingRequest.getResponseMessage();
 		
 	}
 

@@ -23,18 +23,18 @@
 
             <ImageView
                 android:id="@+id/coin_logo"
-                android:layout_width="@dimen/ow_medium_icon_side_length"
-                android:layout_height="@dimen/ow_medium_icon_side_length"
+                android:layout_width="@dimen/zw_medium_icon_side_length"
+                android:layout_height="@dimen/zw_medium_icon_side_length"
                 android:layout_gravity="center_vertical"
-                android:padding="@dimen/ow_bordered_icon_margin" />
+                android:padding="@dimen/zw_bordered_icon_margin" />
 
             <TextView
                 android:id="@+id/amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/ow_txn_field_with_icon_margin"
+                android:layout_marginLeft="@dimen/zw_txn_field_with_icon_margin"
                 android:textColor="@color/DarkGray"
-                android:textSize="@dimen/ow_txt_largest" />
+                android:textSize="@dimen/zw_txt_largest" />
         </LinearLayout>
 
         <TextView
@@ -77,11 +77,11 @@
 
             <ImageView
                 android:id="@+id/edit_txn_note"
-                android:layout_width="@dimen/ow_medium_icon_side_length"
-                android:layout_height="@dimen/ow_medium_icon_side_length"
+                android:layout_width="@dimen/zw_medium_icon_side_length"
+                android:layout_height="@dimen/zw_medium_icon_side_length"
                 android:adjustViewBounds="true"
                 android:clickable="true"
-                android:padding="@dimen/ow_borderless_icon_margin"
+                android:padding="@dimen/zw_borderless_icon_margin"
                 android:src="@drawable/button_edit_pencil" />
 
             <EditText
@@ -89,15 +89,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/ow_txn_field_with_icon_margin"
-                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                android:layout_marginLeft="@dimen/zw_txn_field_with_icon_margin"
+                android:layout_marginRight="@dimen/zw_horizontal_margin"
                 android:background="@android:color/transparent"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:inputType="textNoSuggestions"
                 android:text="@string/Placeholder"
                 android:textColor="@color/DarkGray"
-                android:textSize="@dimen/ow_txt_medium" />
+                android:textSize="@dimen/zw_txt_medium" />
         </LinearLayout>
 
         <TextView
@@ -113,11 +113,11 @@
 
             <ImageView
                 android:id="@+id/reuse_address"
-                android:layout_width="@dimen/ow_medium_icon_side_length"
-                android:layout_height="@dimen/ow_medium_icon_side_length"
+                android:layout_width="@dimen/zw_medium_icon_side_length"
+                android:layout_height="@dimen/zw_medium_icon_side_length"
                 android:adjustViewBounds="true"
                 android:clickable="true"
-                android:padding="@dimen/ow_bordered_icon_margin"
+                android:padding="@dimen/zw_bordered_icon_margin"
                 android:src="@drawable/received_yellow_clickable" />
 
             <TextView
@@ -125,11 +125,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/ow_txn_field_with_icon_margin"
-                android:layout_marginRight="@dimen/ow_horizontal_margin"
+                android:layout_marginLeft="@dimen/zw_txn_field_with_icon_margin"
+                android:layout_marginRight="@dimen/zw_horizontal_margin"
                 android:text="@string/Placeholder"
                 android:textColor="@color/DarkGray"
-                android:textSize="@dimen/ow_txt_medium" />
+                android:textSize="@dimen/zw_txt_medium" />
         </LinearLayout>
 
         <TextView
@@ -155,8 +155,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/ow_horizontal_margin"
-            android:layout_marginRight="@dimen/ow_horizontal_margin" >
+            android:layout_marginLeft="@dimen/zw_horizontal_margin"
+            android:layout_marginRight="@dimen/zw_horizontal_margin" >
 
             <ProgressBar
                 android:id="@+id/progress_bar"
@@ -173,7 +173,7 @@
                 android:layout_below="@id/progress_bar"
                 android:text="@string/zw_tx_details_sent"
                 android:textColor="@color/Gray"
-                android:textSize="@dimen/ow_txt_mediumsmall" />
+                android:textSize="@dimen/zw_txt_mediumsmall" />
 
             <TextView
                 android:id="@+id/time_left"
@@ -183,7 +183,7 @@
                 android:layout_below="@id/progress_bar"
                 android:text="@string/zw_empty_string"
                 android:textColor="@color/Gray"
-                android:textSize="@dimen/ow_txt_mediumsmall" />
+                android:textSize="@dimen/zw_txt_mediumsmall" />
         </RelativeLayout>
 
         <View

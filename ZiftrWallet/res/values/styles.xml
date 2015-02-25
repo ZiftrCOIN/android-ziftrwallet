@@ -19,10 +19,10 @@
 
     <!-- Action bar theme -->
     <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar">
-        <item name="android:background">@color/ow_action_bar_color</item>
+        <item name="android:background">@color/zw_action_bar_color</item>
 
         <!-- Support library compatibility -->
-        <item name="background">@color/ow_action_bar_color</item>
+        <item name="background">@color/zw_action_bar_color</item>
     </style>
 
     <!-- Application theme. -->
@@ -37,15 +37,15 @@
     <!-- transactions page style -->
     <style name="txn_labels">
         <item name="android:textColor">@color/Gray</item>
-        <item name="android:textSize">@dimen/ow_txt_mediumsmall</item>
-        <item name="android:layout_marginLeft">@dimen/ow_horizontal_margin</item>
-        <item name="android:paddingBottom">@dimen/ow_tx_details_vertical_margin</item>
+        <item name="android:textSize">@dimen/zw_txt_mediumsmall</item>
+        <item name="android:layout_marginLeft">@dimen/zw_horizontal_margin</item>
+        <item name="android:paddingBottom">@dimen/zw_tx_details_vertical_margin</item>
     </style>
 
     <style name="txn_values">
         <item name="android:textColor">@color/DarkGray</item>
-        <item name="android:textSize">@dimen/ow_txt_medium</item>
-        <item name="android:layout_marginLeft">@dimen/ow_horizontal_margin</item>
+        <item name="android:textSize">@dimen/zw_txt_medium</item>
+        <item name="android:layout_marginLeft">@dimen/zw_horizontal_margin</item>
     </style>
 
     <style name="white_divider">
@@ -53,8 +53,8 @@
         <item name="android:layout_height">1.5dp</item>
         <item name="android:layout_marginTop">4dp</item>
         <item name="android:layout_marginBottom">4dp</item>
-        <item name="android:layout_marginLeft">@dimen/ow_total_icon_side_length</item>
-        <item name="android:layout_marginRight">@dimen/ow_total_icon_side_length</item>
+        <item name="android:layout_marginLeft">@dimen/zw_total_icon_side_length</item>
+        <item name="android:layout_marginRight">@dimen/zw_total_icon_side_length</item>
         <item name="android:background">@drawable/gradient_white_divider</item>
     </style>
     <!-- dialog styles -->
@@ -73,26 +73,26 @@
         <item name="android:paddingTop">4dp</item>
         <item name="android:paddingBottom">4dp</item>
         <item name="android:textColor">@color/White</item>
-        <item name="android:textSize">@dimen/ow_send_receive_label_text_size</item>
+        <item name="android:textSize">@dimen/zw_send_receive_label_text_size</item>
     </style>
 
     <style name="send_receive_block">
-        <item name="android:background">@color/ow_edit_text_background_color</item>
-        <item name="android:layout_marginLeft">@dimen/ow_horizontal_margin</item>
-        <item name="android:layout_marginRight">@dimen/ow_horizontal_margin</item>
+        <item name="android:background">@color/zw_edit_text_background_color</item>
+        <item name="android:layout_marginLeft">@dimen/zw_horizontal_margin</item>
+        <item name="android:layout_marginRight">@dimen/zw_horizontal_margin</item>
     </style>
 
     <style name="divider_label">
         <item name="android:layout_gravity">left</item>
-        <item name="android:paddingLeft">@dimen/ow_tx_list_divider_padding</item>
-        <item name="android:paddingBottom">@dimen/ow_tx_list_divider_padding</item>
-        <item name="android:paddingRight">@dimen/ow_tx_list_divider_padding</item>
+        <item name="android:paddingLeft">@dimen/zw_tx_list_divider_padding</item>
+        <item name="android:paddingBottom">@dimen/zw_tx_list_divider_padding</item>
+        <item name="android:paddingRight">@dimen/zw_tx_list_divider_padding</item>
         <item name="android:text">@string/zw_tx_list_divider_default</item>
-        <item name="android:textColor">@color/ow_default_text</item>
+        <item name="android:textColor">@color/zw_default_text</item>
     </style>
 
     <style name="settings_bar">
-        <item name="android:minHeight">@dimen/ow_total_icon_side_length</item>
+        <item name="android:minHeight">@dimen/zw_total_icon_side_length</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:padding">10dp</item>
         <item name="android:layout_width">match_parent</item>
@@ -100,16 +100,16 @@
     </style>
 
     <style name="setting_bar_title">
-        <item name="android:paddingLeft">@dimen/ow_tx_list_divider_padding</item>
-        <item name="android:paddingRight">@dimen/ow_tx_list_divider_padding</item>
-        <item name="android:textSize">@dimen/ow_txt_small</item>
+        <item name="android:paddingLeft">@dimen/zw_tx_list_divider_padding</item>
+        <item name="android:paddingRight">@dimen/zw_tx_list_divider_padding</item>
+        <item name="android:textSize">@dimen/zw_txt_small</item>
     </style>
 
     <style name="drawer_menu_text">
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:layout_margin">20dp</item>
-        <item name="android:textSize">@dimen/ow_txt_mediumsmall</item>
-        <item name="android:textColor">@color/ow_menu_text_color</item>
+        <item name="android:textSize">@dimen/zw_txt_mediumsmall</item>
+        <item name="android:textColor">@color/zw_menu_text_color</item>
     </style>
 
     <style name="widget_text">
@@ -117,8 +117,8 @@
         <item name="android:shadowDx">0</item>
         <item name="android:shadowDy">2</item>
         <item name="android:shadowRadius">1</item>
-        <item name="android:textColor">@color/ow_default_text</item>
-        <item name="android:textSize">@dimen/ow_txt_small</item>
+        <item name="android:textColor">@color/zw_default_text</item>
+        <item name="android:textSize">@dimen/zw_txt_small</item>
     </style>
 
 </resources>

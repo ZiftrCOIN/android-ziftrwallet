@@ -32,5 +32,6 @@ public class ZWRequestCodes {
 	
 	public static final int CONFIRM_SEND_COINS = 15;
 	
-	
+	public static final int CONTINUE_SENDING_UNCONFIRMED = 16;
+
 }

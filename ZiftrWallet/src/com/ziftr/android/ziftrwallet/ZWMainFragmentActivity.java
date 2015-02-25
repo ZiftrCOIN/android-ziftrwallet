@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.FragmentManager;
@@ -69,6 +72,7 @@ import com.ziftr.android.ziftrwallet.fragment.ZWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -82,7 +86,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public class ZWMainFragmentActivity extends ActionBarActivity 
 implements DrawerListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
 ZWResetPassphraseDialogHandler, ZWConfirmationDialogHandler, ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
-ZiftrNetworkHandler {
+ZiftrNetworkHandler, ZWMessageHandler {
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
@@ -227,6 +231,7 @@ ZiftrNetworkHandler {
 		this.initializeSearchBarText();
 		
 		ZiftrNetworkManager.registerNetworkHandler(this);
+		ZWMessageManager.registerMessageHandler(this);
 	}
 
 	@Override
@@ -1128,6 +1133,9 @@ ZiftrNetworkHandler {
 		case ZWRequestCodes.DEACTIVATE_WALLET:
 			// Nothing to do
 			break;
+		case ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED:
+			//Nothing to do
+			break;
 		}
 	}
 	
@@ -1244,6 +1252,20 @@ ZiftrNetworkHandler {
 				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
 				sendFrag.onClickSendCoins(null);
+				break;
+			case ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED:
+				ZWPreferencesUtils.setMempoolIsSpendable(true);
+				JSONObject serverResponse;
+				try {
+					serverResponse = new JSONObject(info.getString(ZWDataSyncHelper.toSignResponseKey));
+					String passphrase = info.getString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY);
+					ZWCoin sendingCoin = ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY));
+					ZWDataSyncHelper.signSentCoins(sendingCoin, serverResponse, passphrase);
+					((ZWSendTaskFragment) getSupportFragmentManager(
+							).findFragmentByTag(ZWTags.SEND_TASK)).updateCallback();
+				} catch (JSONException e) {
+					ZLog.log("Error parsing server Response from bundle in warning for spending mempool: " + e);
+				}
 				break;
 			}
 	}
@@ -1603,6 +1625,15 @@ ZiftrNetworkHandler {
 			}
 		}
 	}
-	
 
+	@Override
+	public void handleErrorMsg(String err) {
+		this.alertUser(err, ZWTags.ERROR_MSG);
+	}
+
+	@Override
+	public void handleConfirmationMsg(int requestCode, String msg, String tag, Bundle b) {
+		this.alertConfirmation(requestCode, msg, tag, b);
+	}
+	
 }

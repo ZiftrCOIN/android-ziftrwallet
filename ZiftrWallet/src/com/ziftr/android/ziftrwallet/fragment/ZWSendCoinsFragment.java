@@ -111,7 +111,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
 
-
 		this.rootView = inflater.inflate(R.layout.accounts_send_coins, container, false);
 
 		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
@@ -138,6 +137,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.initializeTextViewDependencies();
 		this.labelEditText.requestFocus();
 	}
+	
 
 	/** 
 	 * When a barcode is scanned we change the text of the 
@@ -150,7 +150,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 			String dataFromQRScan = data.getExtras().getCharSequence("SCAN_RESULT").toString();
 			
 			ZWCoinURI coinUri = null;
-			
 			try {
 				coinUri = new ZWCoinURI(this.getSelectedCoin(), dataFromQRScan);
 
@@ -319,23 +318,23 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		//otherwise their contents will not be stored automatically during a suspend/resume cycle
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		coinAmountEditText.setId(R.id.ow_send_coin_amount);
+		coinAmountEditText.setId(R.id.zw_send_coin_amount);
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		fiatAmountEditText.setId(R.id.ow_send_fiat_amount);
+		fiatAmountEditText.setId(R.id.zw_send_fiat_amount);
 
 		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextTransactionFeeFiatEquiv).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		fiatFeeEditText.setId(R.id.ow_send_fiat_fee);
+		fiatFeeEditText.setId(R.id.zw_send_fiat_fee);
 
 		this.coinFeeEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextTransactionFee).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		coinFeeEditText.setId(R.id.ow_send_coin_fee);
+		coinFeeEditText.setId(R.id.zw_send_coin_fee);
 
 		this.labelEditText = (EditText) this.rootView.findViewById(
 				R.id.send_edit_text_reciever_name).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		labelEditText.setId(R.id.ow_send_name);
+		labelEditText.setId(R.id.zw_send_name);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextReceiverAddress);
@@ -575,19 +574,15 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	}
 	
 
-	public void updateSendStatus(final ZWCoin coin, final String message) {
+	public void updateSendStatus(final ZWCoin coin) {
 		getZWMainActivity().runOnUiThread(new Runnable(){
 			@Override
 			public void run() {
 				ZLog.log("sendTask beginning update ui");
 				destroySendTaskFragment();
-					if (!message.isEmpty()){
-						getZWMainActivity().alertUser("Sending " + coin.getSymbol()+ " " + message, "error_sending_coins");
-						reEnableSend();
-					} else {
-					Toast.makeText(getZWMainActivity(), coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
-					getZWMainActivity().onBackPressed();
-				}
+				reEnableSend();
+				Toast.makeText(getZWMainActivity(), coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
+				getZWMainActivity().onBackPressed();
 			}
 		});
 		

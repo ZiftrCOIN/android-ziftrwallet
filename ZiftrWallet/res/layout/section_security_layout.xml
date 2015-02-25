@@ -6,8 +6,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/ow_horizontal_margin"
-        android:layout_marginRight="@dimen/ow_horizontal_margin"
+        android:layout_marginLeft="@dimen/zw_horizontal_margin"
+        android:layout_marginRight="@dimen/zw_horizontal_margin"
         android:orientation="vertical"
         android:paddingTop="20dp"
         android:paddingBottom="20dp" >
@@ -17,8 +17,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/zw_security_text"
-            android:textColor="@color/ow_default_text"
-            android:textSize="@dimen/ow_txt_mediumsmall" />
+            android:textColor="@color/zw_default_text"
+            android:textSize="@dimen/zw_txt_mediumsmall" />
     </LinearLayout>
 
 </ScrollView>

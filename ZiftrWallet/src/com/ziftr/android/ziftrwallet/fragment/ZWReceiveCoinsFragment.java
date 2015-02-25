@@ -150,12 +150,12 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		// For the amounts and the binding
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		this.coinAmountEditText.setId(R.id.ow_receive_coin_amount);
+		this.coinAmountEditText.setId(R.id.zw_receive_coin_amount);
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		this.fiatAmountEditText.setId(R.id.ow_receive_fiat_amount);
+		this.fiatAmountEditText.setId(R.id.zw_receive_fiat_amount);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
 		ZWCoinFiatTextWatcher coinTextWatcher = new ZWCoinFiatTextWatcher(getSelectedCoin(), coinAmountEditText, fiatAmountEditText);
@@ -167,7 +167,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		// For the message edit text
 		this.messageEditText = (EditText) this.rootView.findViewById(
 				R.id.receiveMessageContainer).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		this.messageEditText.setId(R.id.ow_receive_message);
+		this.messageEditText.setId(R.id.zw_receive_message);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
 
@@ -185,7 +185,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.generateAddressForLabel.setOnClickListener(this);
 
 		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		this.labelEditText.setId(R.id.ow_receive_address_label);
+		this.labelEditText.setId(R.id.zw_receive_address_label);
 		this.labelEditText.requestFocus();
 		this.labelEditText.addTextChangedListener(new ZiftrTextWatcher() {
 			@Override
