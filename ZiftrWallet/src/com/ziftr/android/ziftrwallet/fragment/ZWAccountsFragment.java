@@ -24,6 +24,8 @@ import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The ZWMainActivity starts this fragment. This fragment is 
@@ -69,6 +71,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	public void onResume() {
 		super.onResume();
 		this.getZWMainActivity().changeActionBar("ziftrWALLET", true, false, true);
+		this.refreshData(true);
 	}
 
 	/**
@@ -227,6 +230,22 @@ public class ZWAccountsFragment extends ZWFragment {
 		}
 		this.totalBalance.setText(this.fiatType.getSymbol() + total.toPlainString());
 	}
+	
+	//this updates transaction history for all activated wallets
+	@Override
+	public void refreshData(final boolean autorefresh) {
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				for (ZWCurrencyListItem item : userWallets) {
+					ZWDataSyncHelper.updateTransactionHistory(item.getCoinId(), autorefresh);
+				}
+			}
+
+		});
+	}
+
 	
 }
 

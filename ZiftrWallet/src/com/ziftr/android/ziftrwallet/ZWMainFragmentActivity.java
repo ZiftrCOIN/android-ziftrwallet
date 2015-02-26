@@ -419,7 +419,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		if (v == syncButton && !isSyncing) {
 			ZWFragment top = this.getTopDisplayedFragment();
 			if (top != null) {
-				top.refreshData();
+				top.refreshData(false);
 			}
 		}
 	}
@@ -1579,7 +1579,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		ZLog.log("Network started.......");
 		
 		this.runOnUiThread( new Runnable() {
-			
 			@Override
 			public void run() {
 				startSyncAnimation();

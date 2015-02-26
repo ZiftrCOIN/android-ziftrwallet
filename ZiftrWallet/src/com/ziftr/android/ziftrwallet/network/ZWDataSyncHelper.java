@@ -34,6 +34,12 @@ public class ZWDataSyncHelper {
 	//key to save the server response of a send transaction to sign
 	public static final String toSignResponseKey = "SERVER_RESPONSE_TO_SIGN";
 	
+	//last time we refreshed transaction history 
+	public static HashMap<String, Long> lastRefreshed = new HashMap();
+	
+	//seconds to wait before autorefreshing
+	public static final long REFRESH_TIME = 60;
+	
 	public static JSONObject sendCoins(ZWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
 		String message = "";
 		ZLog.log("Sending " + amount + " coins to " + output);
@@ -180,14 +186,14 @@ public class ZWDataSyncHelper {
 					//createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
 					
 					//TODO -once create transaction works properly remove this
-					updateTransactionHistory(coin);
+					updateTransactionHistory(coin, false);
 				}
 				catch(Exception e2) {
 					ZLog.log("Exception parsing successful spend response: ", e2);
 					
 					//if the server said the send was successful, but we couldn't handle the response, 
 					//then we just update our history and hope it's there
-					updateTransactionHistory(coin);
+					updateTransactionHistory(coin, false);
 				}
 			}
 			catch(Exception e) {
@@ -325,7 +331,13 @@ public class ZWDataSyncHelper {
 	}
 
 
-	public static void updateTransactionHistory(ZWCoin coin) {
+	public static void updateTransactionHistory(ZWCoin coin, boolean autorefresh) {
+		if (autorefresh && ZWDataSyncHelper.lastRefreshed.containsKey(coin.getSymbol())){
+			if (ZWDataSyncHelper.lastRefreshed.get(coin.getSymbol()) > (System.currentTimeMillis() / 1000) - REFRESH_TIME){
+				ZLog.log("history not refreshed" );
+				return;
+			}
+		}
 		List<String> addresses = ZWWalletManager.getInstance().getAddressList(coin, true);
 		if (addresses.size() <= 0){
 			ZLog.log("No addresses to get transaction history for");
@@ -364,8 +376,8 @@ public class ZWDataSyncHelper {
 		}//end if response code = 200
 
 		ZiftrNetworkManager.networkStopped();
-		
 		ZiftrNetworkManager.dataUpdated();
+		ZWDataSyncHelper.lastRefreshed.put(coin.getSymbol(), System.currentTimeMillis() / 1000);
 	}
 
 	

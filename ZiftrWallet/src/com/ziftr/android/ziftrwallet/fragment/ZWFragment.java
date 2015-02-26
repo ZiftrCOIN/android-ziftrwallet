@@ -32,7 +32,7 @@ public abstract class ZWFragment extends Fragment {
 	 * should START the refresh process, onDataUpdated is called whn the refreshing is finished
 	 * and the UI needs to update itself based on new data
 	 */
-	public /*abstract*/ void refreshData() {
+	public /*abstract*/ void refreshData(final boolean autorefresh) {
 		//TODO -this should be abstract, but don't want to blow up the wholoe project while it's slowly added
 	}
 	

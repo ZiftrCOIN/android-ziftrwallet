@@ -23,15 +23,8 @@ public class ZiftrNetworkManager {
 	 */
 	public static void registerNetworkHandler(ZiftrNetworkHandler networkHandler) {
 		currentHandler = new WeakReference<ZiftrNetworkHandler>(networkHandler);
-		
 		if(pendingExpiredLoginError) {
 			showLoginExpired();
-		}
-		if(networkActive) {
-			networkHandler.networkStarted();
-		}
-		else {
-			networkHandler.networkStopped();
 		}
 	}
 	
