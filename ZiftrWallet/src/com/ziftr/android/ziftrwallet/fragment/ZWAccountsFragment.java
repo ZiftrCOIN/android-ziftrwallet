@@ -221,8 +221,8 @@ public class ZWAccountsFragment extends ZWFragment {
 			
 			@Override
 			public void run() {
-				for (ZWCurrencyListItem item : userWallets) {
-					ZWDataSyncHelper.updateTransactionHistory(item.getCoinId(), autorefresh);
+				for (ZWCoin coin : activatedCoins) {
+					ZWDataSyncHelper.updateTransactionHistory(coin, autorefresh);
 				}
 			}
 
