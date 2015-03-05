@@ -1,10 +1,12 @@
 package com.ziftr.android.ziftrwallet;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Handler;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypterException;
@@ -52,7 +54,16 @@ public abstract class ZWPreferencesUtils {
 	
 	/** Save whether we can spend unconfirmed txns or not*/
 	public final static String SPENDABLE_MEMPOOL_KEY = "spendable_mempool_key";
+	
+	/** save passphrase temporarily */
+	private static WeakReference<String> cachedPassphrase;
+	
+	/** if true we are currently in a state where we should extend the timer and keep the cachedpassphrase*/
+	public static boolean usingCachedPass = false;
 
+	/** interval in milliseconds to check if we can clear the cached passphrase **/
+	private static final int clearPassInterval = 300000;
+	
 
 	/**
 	 * Gets the stored hash of the users passphrase, if there is one.
@@ -311,7 +322,36 @@ public abstract class ZWPreferencesUtils {
 			editor.commit();
 		}
 	}
-
+	
+	public static String getCachedPassphrase(){
+		if (ZWPreferencesUtils.cachedPassphrase != null){
+			return ZWPreferencesUtils.cachedPassphrase.get();
+		} else {
+			return null;
+		}
+	}
+	
+	public static void setCachedPassphrase(String pass){
+		ZWPreferencesUtils.cachedPassphrase = new WeakReference<String>(pass);
+		/** handler that schedules clearing of cachedPassphrase */
+		final Handler cacheHandler = new Handler();
+		/** runnable to clear cached passphrase */
+		Runnable clearPassEvent = new Runnable(){ 
+			@Override
+			public void run() {
+				//if we are using cachedpass, don't clear yet and schedule to clear it later
+				if (ZWPreferencesUtils.usingCachedPass){
+					cacheHandler.postDelayed(this, clearPassInterval);
+				} else {
+					// clear cached passphrase
+					ZWPreferencesUtils.cachedPassphrase = null;
+				}
+			}
+		};
+		
+		cacheHandler.postDelayed(clearPassEvent, ZWPreferencesUtils.clearPassInterval);
+	}
+	
 	private static SharedPreferences getPrefs() {
 		try {
 			Context app = ZWApplication.getApplication();

@@ -152,14 +152,6 @@ public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
 			}
 		}
 	 
-		//TODO -i think this is just not true, we also need to stop passing around this boolean which is essentially a type variable
-		/*
-		if(receivingNotSending) {
-			//if addresses array is null and we ask for receiving addresses then assume we want all visible addresses only
-			sb.append(" WHERE " + ZWReceivingAddressesTable.COLUMN_HIDDEN + " = " + ZWReceivingAddressesTable.VISIBLE_TO_USER);
-		}
-		*/
-
 		sb.append(";");
 		String toQuery = sb.toString();
 		Cursor cursor = db.rawQuery(toQuery, null);

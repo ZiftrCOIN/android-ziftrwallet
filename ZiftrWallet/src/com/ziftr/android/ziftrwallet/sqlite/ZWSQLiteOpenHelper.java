@@ -212,8 +212,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * TODO is there a way to make sure that the new private key matches the old,
 	 * even on encryption state changes?
 	 * 
-	 * @param addess - the address to fully update 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
+	 * @param address - the address to fully update 
 	 */
 	public synchronized void updateAddress(ZWAddress address) {
 		this.getTable(address.isPersonalAddress()).updateAddress(address, getWritableDatabase());

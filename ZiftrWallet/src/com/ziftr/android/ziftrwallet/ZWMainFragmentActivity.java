@@ -209,11 +209,11 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		// Recreate wallet manager
 		this.walletManager = ZWWalletManager.getInstance();
 		
-		// Get the saved cur selected coin type
-		this.initializeCoinType(savedInstanceState);
-		
 		//load available coins from API blockchains
 		initCoins();
+		
+		// Get the saved cur selected coin type
+		this.initializeCoinType(savedInstanceState);
 		
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
@@ -237,6 +237,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	@Override
 	public void onPause(){
 		super.onPause();
+		ZWMessageManager.unregisterMessageHandler(this);
 	}
 
 	
@@ -251,6 +252,14 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	public void onResume(){
 		super.onResume();
 		this.handleIntent(getIntent());
+	}
+	
+	@Override
+	public void onPostResume(){
+		super.onPostResume();
+		//we are now ready to commit transactions without state loss so register the message handler
+		//to see if any alerts were pending
+		ZWMessageManager.registerMessageHandler(this);
 	}
 	
 	
@@ -302,6 +311,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 					this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", ZWTags.URI_INVALID_ADDRESS);
 			}
 			else {
+				
 				this.setSelectedCoin(coin);
 				try {
 					ZWCoinURI uri = new ZWCoinURI(coin, data);
@@ -356,6 +366,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		}
 		
 		outState.putBoolean("consumedIntent", consumedIntent);
+		
 	}
 
 	/**
@@ -878,8 +889,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 * @param typeOfWalletToStart
 	 */
 	public void openWalletView(ZWCoin typeOfWalletToStart) {
+		
 		this.setSelectedCoin(typeOfWalletToStart);
-
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWTags.WALLET_FRAGMENT);
 		if (fragToShow == null) {
 			fragToShow = new ZWWalletFragment();
@@ -1145,6 +1156,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
 		
 		if (ZWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
+			ZWPreferencesUtils.setCachedPassphrase(passphrase);
 			switch(requestCode) {
 			case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
@@ -1240,7 +1252,12 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			case ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
 				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
-				receiveFrag.loadNewAddressFromDatabase(null);
+				if (ZWPreferencesUtils.userHasPassphrase()){
+					receiveFrag.loadNewAddressFromDatabase(ZWPreferencesUtils.getCachedPassphrase());
+					ZWPreferencesUtils.usingCachedPass = false;
+				} else {
+					receiveFrag.loadNewAddressFromDatabase(null);
+				}
 				break;
 			case ZWRequestCodes.DEBUG_MODE_ON:
 				ZWPreferencesUtils.setDebugMode(true);
@@ -1251,7 +1268,12 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			case ZWRequestCodes.CONFIRM_SEND_COINS:
 				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
-				sendFrag.onClickSendCoins(null);
+				if (ZWPreferencesUtils.userHasPassphrase()){
+					sendFrag.onClickSendCoins(ZWPreferencesUtils.getCachedPassphrase());
+					ZWPreferencesUtils.usingCachedPass = false;
+				} else {
+					sendFrag.onClickSendCoins(null);
+				}
 				break;
 			case ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED:
 				ZWPreferencesUtils.setMempoolIsSpendable(true);
@@ -1260,9 +1282,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 					serverResponse = new JSONObject(info.getString(ZWDataSyncHelper.toSignResponseKey));
 					String passphrase = info.getString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY);
 					ZWCoin sendingCoin = ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY));
-					ZWDataSyncHelper.signSentCoins(sendingCoin, serverResponse, passphrase);
 					((ZWSendTaskFragment) getSupportFragmentManager(
-							).findFragmentByTag(ZWTags.SEND_TASK)).updateCallback();
+							).findFragmentByTag(ZWTags.SEND_TASK)).signSentCoins(sendingCoin, serverResponse, passphrase);
 				} catch (JSONException e) {
 					ZLog.log("Error parsing server Response from bundle in warning for spending mempool: " + e);
 				}
@@ -1336,7 +1357,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 * @return the curSelectedCoinType
 	 */
 	public ZWCoin getSelectedCoin() {
-		return selectedCoin;
+		return this.selectedCoin;
 	}
 
 	/**
@@ -1353,6 +1374,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	public void populateWalletHeaderView(View headerView) {
 		//now that a coin type is set, setup the header view for it
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
+
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
 		
 		headerView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);

@@ -35,7 +35,7 @@ public class ZWDataSyncHelper {
 	public static final String toSignResponseKey = "SERVER_RESPONSE_TO_SIGN";
 	
 	//last time we refreshed transaction history 
-	public static HashMap<String, Long> lastRefreshed = new HashMap();
+	public static HashMap<String, Long> lastRefreshed = new HashMap<String, Long>();
 	
 	//seconds to wait before autorefreshing
 	public static final long REFRESH_TIME = 60;
@@ -85,12 +85,13 @@ public class ZWDataSyncHelper {
 				message = "Unable to connect to server. Please check your connection.";
 				break;
 			default:
+				ZLog.log("Default error sending");
 				message = "Error, something went wrong! " + request.getResponseCode() + " " + request.getResponseMessage();
 				break;
 		}
 
 		ZiftrNetworkManager.networkStopped();
-		if (!message.isEmpty()) {
+		if (!message.isEmpty() && request.getResponseCode() != 200) {
 			ZWMessageManager.alertError(message);
 		}
 		return null;
@@ -122,12 +123,10 @@ public class ZWDataSyncHelper {
 		} catch (JSONException e1) {
 			ZLog.log("Exception getting txns spending from before signing: ", e1);
 		}
-		//can't get here unless there are no pending transactions we are spending from
-		signSentCoins(coin, serverResponse, passphrase);
 		return false;
 	}
 	
-	public static void signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
+	public static boolean signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
 		Set<String> addressesSpentFrom = new HashSet<String>();
 		ZLog.log("signSentCoins called");
 		try {
@@ -195,12 +194,13 @@ public class ZWDataSyncHelper {
 					//then we just update our history and hope it's there
 					updateTransactionHistory(coin, false);
 				}
-			}
-			catch(Exception e) {
+			} catch(Exception e) {
 				ZLog.log("Exception saving spend transaction: ", e);
 			}
+			return true;
 		} else {
 			ZWMessageManager.alertError("error: " + signingRequest.getResponseMessage());
+			return false;
 		}
 		
 	}
