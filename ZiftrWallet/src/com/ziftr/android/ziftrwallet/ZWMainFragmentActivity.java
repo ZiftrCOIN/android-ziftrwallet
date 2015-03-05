@@ -197,7 +197,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			ZLog.setLogger(ZLog.FILE_LOGGER);
 		}
 		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
-
 		if(savedInstanceState != null) {
 			consumedIntent = savedInstanceState.getBoolean("consumedIntent");
 		}
@@ -1632,8 +1631,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			Animation rotation = AnimationUtils.loadAnimation(ZWMainFragmentActivity.this, R.anim.rotation);
 			rotation.setRepeatCount(Animation.INFINITE);
 			syncButton.startAnimation(rotation);
-			
-			rotation.setRepeatCount(0);
 		}
 	}
 	

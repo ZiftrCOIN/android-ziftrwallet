@@ -72,6 +72,7 @@ public class ZWDataSyncHelper {
 					JSONObject jsonRes = new JSONObject(response);
 					
 					ZLog.log("Spend transaction data to sign: ", jsonRes.toString());
+					ZiftrNetworkManager.networkStopped();
 					return jsonRes;
 
 				}
@@ -128,7 +129,7 @@ public class ZWDataSyncHelper {
 	
 	public static boolean signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
 		Set<String> addressesSpentFrom = new HashSet<String>();
-		ZLog.log("signSentCoins called");
+		ZiftrNetworkManager.networkStarted();
 		try {
 			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
 			for (int i=0; i< toSignList.length(); i++){
@@ -162,6 +163,7 @@ public class ZWDataSyncHelper {
 		String response = signingRequest.sendAndWait();
 		ZLog.log(signingRequest.getResponseCode());
 		ZLog.log("Response from signing: ", response);
+		ZiftrNetworkManager.networkStopped();
 		if(signingRequest.getResponseCode() == 202){
 			try {
 				//flag any addresses we spent from as having been spent from (so we don't reuse change addresses)
@@ -176,7 +178,7 @@ public class ZWDataSyncHelper {
 					}
 				}
 				
-				//update the transactions table immediatley with the data from this transaction
+				//update the transactions table immediately with the data from this transaction
 				try {
 					JSONObject responseJson = new JSONObject(response);
 					ZLog.log("Response from completed signing: ", responseJson);

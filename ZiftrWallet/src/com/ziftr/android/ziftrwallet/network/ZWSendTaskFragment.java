@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -33,7 +34,7 @@ public class ZWSendTaskFragment extends Fragment{
 	private ZWCoin sentCoin = null;
 	
 	private boolean done = false;
-	private boolean sendCompleted = false;
+	private static boolean sendCompleted = false;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState){
@@ -51,6 +52,7 @@ public class ZWSendTaskFragment extends Fragment{
 	
 	@Override
 	public void onSaveInstanceState(Bundle bundle){
+		ZLog.log("send task save instance called");
 		bundle.putBoolean("done", this.done);
 		bundle.putString("coin", this.sentCoin.getSymbol());
 		super.onSaveInstanceState(bundle);
@@ -67,6 +69,7 @@ public class ZWSendTaskFragment extends Fragment{
 				if (jsonRes != null){
 					if (ZWPreferencesUtils.getMempoolIsSpendable() || !ZWDataSyncHelper.checkSpendingUnconfirmedTxn(coin, jsonRes, inputs, passphrase)){
 						if (ZWDataSyncHelper.signSentCoins(coin, jsonRes, passphrase)) {
+							ZLog.log("sign success");
 							sendCompleted = true;
 							updateCallback();
 						} else {
@@ -101,8 +104,8 @@ public class ZWSendTaskFragment extends Fragment{
 	
 	public synchronized void setCallBack(SendTaskCallback cb){
 		this.callback = new WeakReference<SendTaskCallback>(cb);
-		if (this.done){
-			callback.get().destroySendTaskFragment();					
+		if (this.done && this.callback != null){
+			callback.get().destroySendTaskFragment();
 		} else {
 			updateCallback();
 		}
@@ -110,7 +113,8 @@ public class ZWSendTaskFragment extends Fragment{
 	
 	public synchronized void updateCallback(){
 		SendTaskCallback currentCallback = callback.get();
-		if (currentCallback!=null && this.sentCoin != null && this.sendCompleted){
+		if (currentCallback!=null && this.sentCoin != null && ZWSendTaskFragment.sendCompleted){
+			ZLog.log("updating");
 			currentCallback.updateSendStatus(this.sentCoin);
 		} else if (this.sentCoin == null && this.done){
 			callback.get().destroySendTaskFragment();					
