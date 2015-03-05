@@ -95,9 +95,9 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 				convertView.findViewById(R.id.bottomLeftTextView);
 
 		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, coin, fiatType);
-		SpannableString displayMarketFiat = fiatType.getDisplayString(unitPriceInFiat, true, currencyListItem.getCoinId().getFiatEquivPrecision());
+		SpannableString displayMarketFiat = fiatType.getDisplayString(unitPriceInFiat, true, coin);
 
-			coinValue.setText(displayMarketFiat);
+		coinValue.setText(displayMarketFiat);
 		
 		ImageView noServerImage = (ImageView) convertView.findViewById(R.id.imageViewNoServer);
 		if(coin.isEnabled()) {
@@ -113,7 +113,7 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 
 		TextView walletTotalFiatEquiv = (TextView) convertView.findViewById(R.id.bottomRightTextView);
 		
-		SpannableString displayWalletTotalFiat = fiatType.getDisplayString(ZWConverter.convert(amount, coin, fiatType), true);
+		SpannableString displayWalletTotalFiat = fiatType.getDisplayString(ZWConverter.convert(amount, coin, fiatType), true, coin);
 		
 		walletTotalFiatEquiv.setText(displayWalletTotalFiat);
 

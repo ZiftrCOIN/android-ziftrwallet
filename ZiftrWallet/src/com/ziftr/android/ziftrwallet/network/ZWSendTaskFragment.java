@@ -4,7 +4,6 @@ import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.support.v4.app.Fragment;
 
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**

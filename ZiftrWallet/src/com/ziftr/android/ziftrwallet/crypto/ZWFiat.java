@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -102,13 +103,18 @@ public class ZWFiat implements ZWCurrency {
 		return amount.multiply(multiplier).toBigInteger();
 	}
 
-	public SpannableString getDisplayString(BigDecimal amount, boolean addSymbol, int maxDecimalPlaces){
-		maxDecimalPlaces = maxDecimalPlaces > getScale() ? maxDecimalPlaces : getScale();
-		SpannableString display = new SpannableString(this.getFormattedAmount(amount, addSymbol, maxDecimalPlaces));
+	
+	public SpannableString getDisplayString(BigDecimal amount, boolean addSymbol, ZWCoin coin) { // int maxDecimalPlaces){
+		//maxDecimalPlaces = maxDecimalPlaces > getScale() ? maxDecimalPlaces : getScale();	
+		BigDecimal fiatVal = ZWConverter.convert(BigDecimal.ONE, coin, ZWPreferencesUtils.getFiatCurrency());
+		int decimalPlaces = ZiftrUtils.numDecimalPlaces(fiatVal);
+		
+		SpannableString display = new SpannableString(this.getFormattedAmount(amount, addSymbol, decimalPlaces));
 		display.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
 		return display;
 	}
 
+	
 	public String getFormattedAmount(BigDecimal amount, boolean addSymbol, int maxDecimalPlaces) {
 
 		String formattedString = " ";
@@ -116,10 +122,14 @@ public class ZWFiat implements ZWCurrency {
 		if(addSymbol && symbolBeforeNumber) {
 			formattedString += this.getSymbol() + " ";
 		}
+		
 		BigDecimal formatted = amount.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : amount;
+		
+		
 		if (ZiftrUtils.numDecimalPlaces(formatted) > maxDecimalPlaces){
 			formatted = ZiftrUtils.formatToNDecimalPlaces(maxDecimalPlaces, formatted);
-		} else if (ZiftrUtils.numDecimalPlaces(formatted) < this.getScale()){
+		} 
+		else if (ZiftrUtils.numDecimalPlaces(formatted) < this.getScale()){
 			formatted = ZiftrUtils.formatToNDecimalPlaces(this.getScale(), formatted);
 		}
 		

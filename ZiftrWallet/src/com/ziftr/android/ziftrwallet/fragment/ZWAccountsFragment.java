@@ -214,6 +214,7 @@ public class ZWAccountsFragment extends ZWFragment {
 		this.totalBalance.setText(this.fiatType.getSymbol() + total.toPlainString());
 	}
 	
+	
 	//this updates transaction history for all activated wallets
 	@Override
 	public void refreshData(final boolean autorefresh) {
@@ -221,8 +222,8 @@ public class ZWAccountsFragment extends ZWFragment {
 			
 			@Override
 			public void run() {
-				for (ZWCurrencyListItem item : userWallets) {
-					ZWDataSyncHelper.updateTransactionHistory(item.getCoinId(), autorefresh);
+				for (ZWCoin coin : activatedCoins) {
+					ZWDataSyncHelper.updateTransactionHistory(coin, autorefresh);
 				}
 			}
 

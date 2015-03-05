@@ -353,11 +353,6 @@ public class ZWCoin implements ZWCurrency {
 		return amount.multiply(multiplier).toBigInteger();
 	}
 	
-	//returns number of decimal places needed to display fiat equivalent of 1 coin without rounding
-	public int getFiatEquivPrecision(){
-		BigDecimal fiatVal = ZWConverter.convert(BigDecimal.ONE, this, ZWPreferencesUtils.getFiatCurrency());
-		return ZiftrUtils.numDecimalPlaces(fiatVal);
-	}
 	
 	/**
 	 * <p>Given a textual message, returns a byte buffer formatted as follows:</p>

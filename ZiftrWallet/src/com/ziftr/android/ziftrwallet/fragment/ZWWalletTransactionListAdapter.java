@@ -117,7 +117,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 			BigInteger fiatAmt = ZWConverter.convert(txListItem.getAmount(), 
 					txListItem.getCoin(), fiat);
 			
-			txAmountFiatEquiv.setText(fiat.getDisplayString(new BigDecimal(fiatAmt), true, txListItem.getCoin().getFiatEquivPrecision()));
+			txAmountFiatEquiv.setText(fiat.getDisplayString(new BigDecimal(fiatAmt), true, txListItem.getCoin()));
 
 			ImageView txIOIcon = (ImageView) convertView.findViewById(R.id.txIOIcon);
 			txIOIcon.setImageResource(getImgResIdForItem(txListItem));
