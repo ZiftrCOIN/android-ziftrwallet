@@ -370,8 +370,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.deleteTransaction(tx, getWritableDatabase());
 	}
 	
-	public synchronized BigInteger getWalletBalance(ZWCoin coinId) {
-		return ZWPreferencesUtils.getMempoolIsSpendable() ? getWalletBalance(coinId, BalanceType.ESTIMATED) : getWalletBalance(coinId, BalanceType.AVAILABLE);
+	public synchronized BigInteger getWalletBalance(ZWCoin coin) {
+		return ZWPreferencesUtils.getMempoolIsSpendable() ? getWalletBalance(coin, BalanceType.ESTIMATED) : getWalletBalance(coin, BalanceType.AVAILABLE);
 	}
 
 	public synchronized BigInteger getWalletBalance(ZWCoin coinId, BalanceType bType) {
