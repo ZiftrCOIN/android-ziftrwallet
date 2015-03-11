@@ -155,7 +155,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * to the correct table within our database
 	 * 
 	 * @param crypter
-	 * @param coinId
+	 * @param coin
 	 * @param note
 	 * @param balance
 	 * @param creation
@@ -164,9 +164,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param spentFrom 
 	 * @return
 	 */
-	protected synchronized ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, 
+	protected synchronized ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coin, String note, 
 			long balance, long creation, long modified, boolean hidden, boolean spentFrom) {
-		ZWAddress address = new ZWAddress(coinId);
+		ZWAddress address = new ZWAddress(coin);
 		address.getKey().setKeyCrypter(crypter);
 		address.setLabel(note);
 		address.setLastKnownBalance(balance);

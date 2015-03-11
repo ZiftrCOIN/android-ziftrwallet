@@ -31,7 +31,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * <p>An address looks like 1MsScoe2fTJoq4ZPdQgqyhgWeoNamYPevy and is derived from an 
- * elliptic curve public key plus a coinId. </p>
+ * elliptic curve public key plus a coin. </p>
  *
  * <p>A standard address is built by taking RIPEMD160(SHA256( public key bytes )), 
  * with a version prefix and a checksum suffix, then encoding it textually as base58. 
@@ -81,7 +81,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	public static final int LENGTH = 20;
 
 	/** The type of coin that this is an address for. */
-	private ZWCoin coinId;
+	private ZWCoin coin;
 
 	/** The version byte specifies what type of address it is (P2SH, P2PubKey, etc). */
 	private byte versionByte;
@@ -99,14 +99,14 @@ public class ZWAddress implements ZWSearchableListItem {
 	/**
 	 * <p>Uses a new ECKey to make an Address.</p> 
 	 * 
-	 * @param coinId
+	 * @param coin
 	 * @param key
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(ZWCoin coinId) {
+	public ZWAddress(ZWCoin coin) {
 		try {
 			this.key = new ZWECKey();
-			this.initialize(coinId, coinId.getPubKeyHashPrefix(), this.key.getPubKeyHash());
+			this.initialize(coin, coin.getPubKeyHashPrefix(), this.key.getPubKeyHash());
 		} catch(ZWAddressFormatException afe) {
 			ZLog.log("Error making new address, this should not have happened.");
 		}
@@ -117,12 +117,12 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * to a private key as this class can be used for both sending (non-owned) and 
 	 * receiving (owned) addresses.</p> 
 	 * 
-	 * @param coinId
+	 * @param coin
 	 * @param key
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(ZWCoin coinId, ZWECKey key) throws ZWAddressFormatException {
-		this.initialize(coinId, coinId.getPubKeyHashPrefix(), key.getPubKeyHash());
+	public ZWAddress(ZWCoin coin, ZWECKey key) throws ZWAddressFormatException {
+		this.initialize(coin, coin.getPubKeyHashPrefix(), key.getPubKeyHash());
 		this.key = key;
 	}
 
@@ -139,29 +139,29 @@ public class ZWAddress implements ZWSearchableListItem {
 	/**
 	 * <p>Construct an address from parameters and the standard "human readable" form.</p>
 	 *  
-	 * @param coinId
+	 * @param coin
 	 * @param address
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(ZWCoin coinId, String address) throws ZWAddressFormatException {
+	public ZWAddress(ZWCoin coin, String address) throws ZWAddressFormatException {
 		// Checksum is validated in the decoding
 		byte[] allData = Base58.decodeChecked(address);
 		byte[] hash160 = ZiftrUtils.stripVersionAndChecksum(allData, 20);
 
-		this.initialize(coinId, allData[0], hash160);
+		this.initialize(coin, allData[0], hash160);
 	}
 
 	/**
-	 * <p>Construct an address from coinId, the address version, and the 
+	 * <p>Construct an address from coin, the address version, and the 
 	 * hash160 form.</p>
 	 * 
-	 * @param coinId
+	 * @param coin
 	 * @param versionByte
 	 * @param hash160
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(ZWCoin coinId, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
-		this.initialize(coinId, versionByte, hash160);
+	public ZWAddress(ZWCoin coin, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
+		this.initialize(coin, versionByte, hash160);
 	}
 
 	/** 
@@ -169,36 +169,36 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * 
 	 * @throws ZWAddressFormatException 
 	 */
-	public ZWAddress(ZWCoin coinId, byte[] hash160) throws ZWAddressFormatException {
-		this(coinId, coinId.getPubKeyHashPrefix(), hash160);
+	public ZWAddress(ZWCoin coin, byte[] hash160) throws ZWAddressFormatException {
+		this(coin, coin.getPubKeyHashPrefix(), hash160);
 	}
 
 	/**
 	 * A private helper method for initialization that prevents code duplication. 
 	 * 
-	 * @param coinId
+	 * @param coin
 	 * @param versionByte
 	 * @param hash160
 	 */
-	private void initialize(ZWCoin coinId, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
+	private void initialize(ZWCoin coin, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
 		if (hash160.length != 20) {
 			throw new ZWAddressFormatException("Addresses are 160-bit hashes, so you must provide 20 bytes");
 		}
 
-		if (coinId != null) {
-			if (!isAcceptableVersion(coinId, versionByte)) {
-				throw new ZWWrongNetworkException(versionByte, coinId.getAcceptableAddressCodes());
+		if (coin != null) {
+			if (!isAcceptableVersion(coin, versionByte)) {
+				throw new ZWWrongNetworkException(versionByte, coin.getAcceptableAddressCodes());
 			}
 		} else {
 			// If null then we need to infer what the coinType is 
-			coinId = getCoinTypeFromVersionByte(versionByte);
+			coin = getCoinTypeFromVersionByte(versionByte);
 		}
 
-		if (coinId == null) {
+		if (coin == null) {
 			throw new ZWAddressFormatException("Version byte does not match any supported coin types");
 		}
 
-		this.coinId = coinId;
+		this.coin = coin;
 		this.versionByte = versionByte;
 		this.hash160 = hash160;
 		// Default, should be overridden with the setter method
@@ -221,8 +221,8 @@ public class ZWAddress implements ZWSearchableListItem {
 		this.spentFrom = spentFrom;
 	}
 	
-	public ZWCoin getCoinId() {
-		return this.coinId;
+	public ZWCoin getCoin() {
+		return this.coin;
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * Address Format for pay-to-script-hash.
 	 */
 	public boolean isP2SHAddress() {
-		return coinId != null && this.versionByte == this.coinId.getScriptHashPrefix();
+		return coin != null && this.versionByte == this.coin.getScriptHashPrefix();
 	}
 
 	public boolean isPersonalAddress() {
@@ -317,8 +317,8 @@ public class ZWAddress implements ZWSearchableListItem {
 		this.lastTimeModifiedSeconds = lastTimeModifiedSeconds;
 	}
 	
-	public static boolean isAcceptableVersion(ZWCoin coinId, byte b) {
-		return coinId.getPubKeyHashPrefix() == b || coinId.getScriptHashPrefix() == b;
+	public static boolean isAcceptableVersion(ZWCoin coin, byte b) {
+		return coin.getPubKeyHashPrefix() == b || coin.getScriptHashPrefix() == b;
 	}
 
 	/**
