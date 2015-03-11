@@ -219,7 +219,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			if (!getZWMainActivity().isShowingDialog()) {
 				setNameDialog.show(ZWSettingsFragment.this.getFragmentManager(), 
 						"set_name");
-			}		
+			}
 		} else if (v == this.debugButton) {
 			if (ZWPreferencesUtils.getDebugMode()){
 				ZWPreferencesUtils.setDebugMode(false);
@@ -256,7 +256,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	
 	private void resetLoggerHelper(){
 		ZWPreferencesUtils.setLogToFile(false);
-		if (ZWApplication.isDebuggable()){
+		if (ZWApplication.isDebuggable() || ZWPreferencesUtils.getDebugMode()){
 			ZLog.setLogger(ZLog.ANDROID_LOGGER);
 		} else {
 			ZLog.setLogger(ZLog.NOOP_LOGGER);

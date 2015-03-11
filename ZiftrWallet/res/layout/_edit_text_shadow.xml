@@ -6,12 +6,12 @@
 
     <EditText
         android:layout_width="match_parent"
-        android:layout_height="@dimen/ow_edit_text_height"
+        android:layout_height="@dimen/zw_edit_text_height"
         android:background="@color/White"
         android:inputType="textPersonName"
-        android:paddingLeft="@dimen/ow_edit_text_padding"
-        android:paddingRight="@dimen/ow_edit_text_padding"
-        android:tag="ow_edit_text" >
+        android:paddingLeft="@dimen/zw_edit_text_padding"
+        android:paddingRight="@dimen/zw_edit_text_padding"
+        android:tag="zw_edit_text" >
 
         <requestFocus />
     </EditText>

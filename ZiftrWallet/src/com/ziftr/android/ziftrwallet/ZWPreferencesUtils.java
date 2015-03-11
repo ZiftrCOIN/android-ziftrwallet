@@ -24,25 +24,25 @@ public abstract class ZWPreferencesUtils {
 	public static final String PREFERENCES_FILE_NAME = "ziftrWALLET_Prefs";
 	
 	/** The key for getting the passphrase hash from the preferences. */
-	public static final String PREFS_PASSPHRASE_KEY = "ow_passphrase_key_1";
+	public static final String PREFS_PASSPHRASE_KEY = "zw_passphrase_key_1";
 
 	/** The key for getting the name of the user from the preferences. */
-	public static final String PREFS_USER_NAME_KEY = "ow_name_key";
+	public static final String PREFS_USER_NAME_KEY = "zw_name_key";
 	
 	/** The key to get and save the salt as used by the specific user of the application. */
 	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
 	
 	/** skip the screen for name */
-	public final static String NAME_DISABLED_KEY = "ow_disabled_name_key";
+	public final static String NAME_DISABLED_KEY = "zw_disabled_name_key";
 	
 	/** So we can skip the welcome screen and save the boolean. */
-	public final static String PASSPHRASE_WARNING_KEY = "ow_disabled_passphrase_key";
+	public final static String PASSPHRASE_WARNING_KEY = "zw_disabled_passphrase_key";
 
 	/** So we can save the boolean from settings, whether fees are edititable or not. */
-	public final static String EDITABLE_FEES_KEY = "ow_editable_fees_key";
+	public final static String EDITABLE_FEES_KEY = "zw_editable_fees_key";
 
 	/** Save the selected Fiat Currency of user*/
-	public final static String FIAT_CURRENCY_KEY = "ow_fiat_currency_key";
+	public final static String FIAT_CURRENCY_KEY = "zw_fiat_currency_key";
 	
 	/** Save whether we are in debug mode or not*/
 	public final static String DEBUG_SETTING_KEY = "debug_setting_key";
@@ -315,7 +315,7 @@ public abstract class ZWPreferencesUtils {
 	private static SharedPreferences getPrefs() {
 		try {
 			Context app = ZWApplication.getApplication();
-			return ZWApplication.getApplication().getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
+			return app.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
 		} catch (NullPointerException e){
 			return null;	
 		}

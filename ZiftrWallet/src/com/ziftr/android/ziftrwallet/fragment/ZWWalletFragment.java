@@ -16,6 +16,7 @@ import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type
@@ -51,6 +52,7 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 		super.onResume();
 		// Changes action bar and registers this as the listener for search button clicks
 		this.getZWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
+		this.refreshData(true);
 
 	}
 

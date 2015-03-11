@@ -32,7 +32,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/ow_quarter_icon_size"
+                    android:layout_height="@dimen/zw_quarter_icon_size"
                     android:background="@drawable/dropshadow" />
 
                 <TextView
@@ -40,7 +40,7 @@
                     style="@style/send_receive_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                    android:layout_marginLeft="@dimen/zw_horizontal_margin"
                     android:text="@string/zw_send_to_address_name" >
                 </TextView>
 
@@ -58,8 +58,8 @@
                     style="@style/send_receive_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                    android:layout_marginLeft="@dimen/zw_horizontal_margin"
+                    android:layout_marginTop="@dimen/zw_send_receive_list_spacing_top_margin"
                     android:text="@string/zw_send_to_address" >
                 </TextView>
 
@@ -73,11 +73,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="top|left"
-                        android:minHeight="@dimen/ow_edit_text_heightx2"
-                        android:paddingBottom="@dimen/ow_edit_text_padding"
-                        android:paddingLeft="@dimen/ow_edit_text_padding"
-                        android:paddingRight="@dimen/ow_total_icon_side_length"
-                        android:paddingTop="@dimen/ow_edit_text_padding" >
+                        android:minHeight="@dimen/zw_edit_text_heightx2"
+                        android:paddingBottom="@dimen/zw_edit_text_padding"
+                        android:paddingLeft="@dimen/zw_edit_text_padding"
+                        android:paddingRight="@dimen/zw_total_icon_side_length"
+                        android:paddingTop="@dimen/zw_edit_text_padding" >
                     </EditText>
 
                     <ImageView
@@ -98,36 +98,36 @@
 
                     <ImageView
                         android:id="@+id/sendGetAddressFromHistoryIcon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
+                        android:layout_width="@dimen/zw_total_icon_side_length"
+                        android:layout_height="@dimen/zw_total_icon_side_length"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
+                        android:layout_marginLeft="@dimen/zw_borderless_icon_margin"
                         android:contentDescription="@string/zw_old_passphrase_hint"
-                        android:padding="@dimen/ow_bordered_icon_margin"
+                        android:padding="@dimen/zw_bordered_icon_margin"
                         android:src="@drawable/address_book_icon_clickable" />
 
                     <ImageView
                         android:id="@+id/send_paste_icon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
+                        android:layout_width="@dimen/zw_total_icon_side_length"
+                        android:layout_height="@dimen/zw_total_icon_side_length"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginRight="@dimen/ow_borderless_icon_margin"
+                        android:layout_marginRight="@dimen/zw_borderless_icon_margin"
                         android:clickable="true"
                         android:contentDescription="@string/zw_old_passphrase_hint"
-                    	android:padding="@dimen/ow_bordered_icon_margin"
+                    	android:padding="@dimen/zw_bordered_icon_margin"
                         android:src="@drawable/copy_icon_clickable" />
 
                     <ImageView
                         android:id="@+id/send_qr_icon"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
+                        android:layout_width="@dimen/zw_total_icon_side_length"
+                        android:layout_height="@dimen/zw_total_icon_side_length"
                         android:layout_alignRight="@+id/sendEditTextReceiverAddress"
                         android:layout_centerVertical="true"
                         android:clickable="true"
                         android:contentDescription="@string/zw_old_passphrase_hint"
-                        android:padding="@dimen/ow_bordered_icon_margin"
+                        android:padding="@dimen/zw_bordered_icon_margin"
                         android:src="@drawable/qr_code_clickable" />
                 </RelativeLayout>
 
@@ -142,7 +142,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                    android:layout_marginTop="@dimen/zw_send_receive_list_spacing_top_margin"
                     android:orientation="horizontal" >
 
                     <TextView
@@ -150,7 +150,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                        android:layout_marginLeft="@dimen/zw_horizontal_margin"
                         android:layout_weight="1"
                         android:gravity="left"
                         android:text="@string/zw_send_transaction_fee" >
@@ -181,13 +181,13 @@
 
                     <ImageView
                         android:id="@+id/help_fee_button"
-                        android:layout_width="@dimen/ow_total_icon_side_length"
-                        android:layout_height="@dimen/ow_total_icon_side_length"
+                        android:layout_width="@dimen/zw_total_icon_side_length"
+                        android:layout_height="@dimen/zw_total_icon_side_length"
                         android:layout_alignParentLeft="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginLeft="@dimen/ow_borderless_icon_margin"
+                        android:layout_marginLeft="@dimen/zw_borderless_icon_margin"
                         android:clickable="true"
-                        android:padding="@dimen/ow_bordered_icon_margin"
+                        android:padding="@dimen/zw_bordered_icon_margin"
                         android:src="@drawable/button_help_clickable" />
 
                     <LinearLayout
@@ -198,7 +198,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/ow_horizontal_margin"
+                            android:layout_marginLeft="@dimen/zw_horizontal_margin"
                             android:layout_weight="1"
                             android:orientation="vertical" >
 
@@ -218,7 +218,7 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/ow_horizontal_margin"
+                            android:layout_marginRight="@dimen/zw_horizontal_margin"
                             android:layout_weight="1"
                             android:orientation="vertical" >
 
@@ -236,10 +236,10 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/ow_send_receive_list_spacing_top_margin"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:layout_marginRight="@dimen/ow_horizontal_margin"
-                    android:layout_marginTop="@dimen/ow_send_receive_list_spacing_top_margin"
+                    android:layout_marginBottom="@dimen/zw_send_receive_list_spacing_top_margin"
+                    android:layout_marginLeft="@dimen/zw_horizontal_margin"
+                    android:layout_marginRight="@dimen/zw_horizontal_margin"
+                    android:layout_marginTop="@dimen/zw_send_receive_list_spacing_top_margin"
                     android:orientation="vertical" >
 
                     <TextView
@@ -275,15 +275,15 @@
                         android:layout_margin="5dp"
                         android:text="@string/zw_send_default_total_fiat_equiv"
                         android:textColor="@color/White"
-                        android:textSize="@dimen/ow_txt_medium" >
+                        android:textSize="@dimen/zw_txt_medium" >
                     </TextView>
                 </RelativeLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/ow_large_icon_size"
-                    android:layout_marginLeft="@dimen/ow_horizontal_margin"
-                    android:layout_marginRight="@dimen/ow_horizontal_margin"
+                    android:layout_height="@dimen/zw_large_icon_size"
+                    android:layout_marginLeft="@dimen/zw_horizontal_margin"
+                    android:layout_marginRight="@dimen/zw_horizontal_margin"
                     android:orientation="horizontal" >
 
                     <View
@@ -293,12 +293,12 @@
 
                     <ImageView
                         android:id="@+id/cancel_button"
-                        android:layout_width="@dimen/ow_medium_icon_size"
+                        android:layout_width="@dimen/zw_medium_icon_size"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:adjustViewBounds="true"
                         android:clickable="true"
-                        android:padding="@dimen/ow_borderless_icon_margin"
+                        android:padding="@dimen/zw_borderless_icon_margin"
                         android:scaleType="fitCenter"
                         android:src="@drawable/send_cancel_icon_clickable" />
 
@@ -309,12 +309,12 @@
 
                     <ImageView
                         android:id="@+id/send_button"
-                        android:layout_width="@dimen/ow_medium_icon_size"
+                        android:layout_width="@dimen/zw_medium_icon_size"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:adjustViewBounds="true"
                         android:clickable="true"
-                        android:padding="@dimen/ow_borderless_icon_margin"
+                        android:padding="@dimen/zw_borderless_icon_margin"
                         android:scaleType="fitCenter"
                         android:src="@drawable/send_go_icon_clickable" />
 

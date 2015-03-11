@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:padding="@dimen/ow_borderless_icon_margin"
+            android:padding="@dimen/zw_borderless_icon_margin"
             android:src="@drawable/receive_button_icon" >
         </ImageView>
 
@@ -27,7 +27,7 @@
             android:gravity="center_vertical"
             android:text="@string/zw_receive_button_text"
             android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_mediumsmall" />
+            android:textSize="@dimen/zw_txt_mediumsmall" />
     </LinearLayout>
 
     <View
@@ -52,13 +52,13 @@
             android:gravity="center_vertical"
             android:text="@string/zw_send_button_text"
             android:textColor="@color/White"
-            android:textSize="@dimen/ow_txt_mediumsmall" />
+            android:textSize="@dimen/zw_txt_mediumsmall" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:padding="@dimen/ow_borderless_icon_margin"
+            android:padding="@dimen/zw_borderless_icon_margin"
             android:src="@drawable/send_button_icon" >
         </ImageView>
     </LinearLayout>

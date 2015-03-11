@@ -11,6 +11,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -21,6 +22,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.R;
@@ -35,8 +37,11 @@ import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
+import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
+import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.SendTaskCallback;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The section of the app where users fill out a form and click send 
@@ -45,7 +50,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
  * TODO make sure that we stop correctly when the user
  * enters non-sensical values in fields.
  */
-public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
+public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements SendTaskCallback {
 
 	/** The view container for this fragment. */
 	private View rootView;
@@ -70,13 +75,42 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 	private ZWCoinURI preloadedCoinUri;
 	private String preloadAddress;
 	
+	/** non-ui fragment retaining send response from server */
+	private ZWSendTaskFragment sendTaskFragment;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState){
+		super.onCreate(savedInstanceState);
+
+		//restore retained sendtaskfragment
+		if (this.sendTaskFragment == null){
+			this.sendTaskFragment = (ZWSendTaskFragment) getZWMainActivity().getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
+		}
+	}
+	
+	@Override
+	public void onResume(){
+		super.onResume();
+		if (this.sendTaskFragment != null){
+			this.sendTaskFragment.setCallBack(this);
+			this.sendButton.setEnabled(false);
+		}
+	}
+	
+	@Override
+	public void onPause(){
+		super.onPause();
+		if (this.sendTaskFragment != null){
+			this.sendTaskFragment.setCallBack(null);
+		}
+	}
+	
 	/**
 	 * Inflate, initialize, and return the send coins layout.
 	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, 
 			ViewGroup container, Bundle savedInstanceState) {
-
 
 		this.rootView = inflater.inflate(R.layout.accounts_send_coins, container, false);
 
@@ -104,6 +138,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		this.initializeTextViewDependencies();
 		this.labelEditText.requestFocus();
 	}
+	
 
 	/** 
 	 * When a barcode is scanned we change the text of the 
@@ -116,7 +151,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			String dataFromQRScan = data.getExtras().getCharSequence("SCAN_RESULT").toString();
 			
 			ZWCoinURI coinUri = null;
-			
 			try {
 				coinUri = new ZWCoinURI(this.getSelectedCoin(), dataFromQRScan);
 
@@ -285,23 +319,23 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		//otherwise their contents will not be stored automatically during a suspend/resume cycle
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		coinAmountEditText.setId(R.id.ow_send_coin_amount);
+		coinAmountEditText.setId(R.id.zw_send_coin_amount);
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		fiatAmountEditText.setId(R.id.ow_send_fiat_amount);
+		fiatAmountEditText.setId(R.id.zw_send_fiat_amount);
 
 		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextTransactionFeeFiatEquiv).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		fiatFeeEditText.setId(R.id.ow_send_fiat_fee);
+		fiatFeeEditText.setId(R.id.zw_send_fiat_fee);
 
 		this.coinFeeEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextTransactionFee).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		coinFeeEditText.setId(R.id.ow_send_coin_fee);
+		coinFeeEditText.setId(R.id.zw_send_coin_fee);
 
 		this.labelEditText = (EditText) this.rootView.findViewById(
 				R.id.send_edit_text_reciever_name).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		labelEditText.setId(R.id.ow_send_name);
+		labelEditText.setId(R.id.zw_send_name);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(
 				R.id.sendEditTextReceiverAddress);
@@ -430,7 +464,11 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		// Update the text in the total fiat equiv
 		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
 		BigDecimal fiatTotal = ZWConverter.convert(total, getSelectedCoin(), selectedFiat);
-		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true) + ")");
+		
+		BigDecimal fiatVal = ZWConverter.convert(BigDecimal.ONE, getSelectedCoin(), ZWPreferencesUtils.getFiatCurrency());
+		int decimalPlaces = ZiftrUtils.numDecimalPlaces(fiatVal);
+		
+		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true, decimalPlaces) + ")");
 	}
 
 	/**
@@ -532,12 +570,47 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		}
 
 		List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
-		getZWMainActivity().initSendTaskFragment().sendCoins(coin, feePerKb, value, inputs, address, passphrase);
+		this.initSendTaskFragment().sendCoins(coin, feePerKb, value, inputs, address, passphrase);
 		this.sendButton.setEnabled(false);
 	}
 	
 	public void reEnableSend(){
 		this.sendButton.setEnabled(true);
+	}
+	
+
+	public void updateSendStatus(final ZWCoin coin) {
+		getZWMainActivity().runOnUiThread(new Runnable(){
+			@Override
+			public void run() {
+				ZLog.log("sendTask beginning update ui");
+				destroySendTaskFragment();
+				reEnableSend();
+				Toast.makeText(getZWMainActivity(), coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
+				getZWMainActivity().onBackPressed();
+			}
+		});
+		
+	}
+	
+	//call on ui thread only
+	public void destroySendTaskFragment() {
+		ZLog.log("sendTask fragment Destroy");
+		if (sendTaskFragment != null){
+			sendTaskFragment.setDone(true);
+			FragmentTransaction fragmentTransaction = getZWMainActivity().getSupportFragmentManager().beginTransaction();
+			fragmentTransaction.remove(sendTaskFragment).commitAllowingStateLoss();
+			sendTaskFragment= null;
+		}
+	}
+	
+	public ZWSendTaskFragment initSendTaskFragment(){
+		ZWSendTaskFragment frag = new ZWSendTaskFragment();
+		FragmentTransaction fragmentTransaction =  getZWMainActivity().getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.add(0, frag, ZWTags.SEND_TASK).commit();
+        this.sendTaskFragment = frag;
+		this.sendTaskFragment.setCallBack(this);
+		return this.sendTaskFragment;
 	}
 
 }

@@ -41,7 +41,7 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 		askMeLaterButton = (Button) rootView.findViewById(R.id.skip_name);
 
 		nameEditText = (EditText) rootView.findViewById(R.id.usersName).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		nameEditText.setId(R.id.ow_save_user_name_edit_text);
+		nameEditText.setId(R.id.zw_save_user_name_edit_text);
 		
 		saveNameButton.setOnClickListener(this);
 		askMeLaterButton.setOnClickListener(this);

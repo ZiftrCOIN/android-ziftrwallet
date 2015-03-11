@@ -3,7 +3,7 @@
     android:id="@+id/menuDrawerScrollView"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="@color/ow_menu_default" >
+    android:background="@color/zw_menu_default" >
 
     <!-- use this: android:choiceMode="singleChoice" ??? -->
 
@@ -11,7 +11,7 @@
         android:id="@+id/menuDrawerBaseLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/ow_menu_default"
+        android:background="@color/zw_menu_default"
         android:clickable="true"
         android:orientation="vertical"
         android:shrinkColumns="*" >
@@ -57,7 +57,7 @@
                 android:id="@+id/divider1"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/ow_menu_divider" />
+                android:background="@color/zw_menu_divider" />
         </TableRow>
 
         <!-- The Terms Section -->
@@ -101,7 +101,7 @@
                 android:id="@+id/divider2"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/ow_menu_divider" />
+                android:background="@color/zw_menu_divider" />
         </TableRow>
 
         <!-- The Settings Section -->
@@ -145,7 +145,7 @@
                 android:id="@+id/divider3"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/ow_menu_divider" />
+                android:background="@color/zw_menu_divider" />
         </TableRow>
 
         <!-- The About Section -->
@@ -189,7 +189,7 @@
                 android:id="@+id/divider4"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/ow_menu_divider" />
+                android:background="@color/zw_menu_divider" />
         </TableRow>
 
         <!-- The Contact Section -->
@@ -233,7 +233,7 @@
                 android:id="@+id/divider5"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/ow_menu_divider" />
+                android:background="@color/zw_menu_divider" />
         </TableRow>
     </TableLayout>
 

@@ -11,6 +11,7 @@ import java.util.Locale;
 
 import com.google.common.base.Charsets;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -351,7 +352,6 @@ public class ZWCoin implements ZWCurrency {
 		BigDecimal multiplier = new BigDecimal(BigInteger.ONE, precision); 
 		return amount.multiply(multiplier).toBigInteger();
 	}
-	
 	
 	
 	/**

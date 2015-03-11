@@ -5,7 +5,7 @@
         android:state_enabled="true" 
         android:state_selected="false"> 
     </item>
-    <item android:drawable="@color/ow_pressed_button"
+    <item android:drawable="@color/zw_pressed_button"
         android:state_pressed="true"
         android:state_enabled="true"
         android:state_selected="false"

@@ -74,12 +74,12 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 	}
 	*****/
 	@Override
-	public void refreshData() {
+	public void refreshData(final boolean autorefresh) {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			
 			@Override
 			public void run() {
-				ZWDataSyncHelper.updateTransactionHistory(getZWMainActivity().getSelectedCoin());
+				ZWDataSyncHelper.updateTransactionHistory(getZWMainActivity().getSelectedCoin(), autorefresh);
 			}
 
 		});

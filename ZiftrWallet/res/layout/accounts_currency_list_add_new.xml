@@ -2,15 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/addNewWalletBar"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/ow_total_icon_side_length"
-    android:background="@color/ow_add_currency_list_item_background"
+    android:layout_height="@dimen/zw_total_icon_side_length"
+    android:background="@color/zw_add_currency_list_item_background"
     android:orientation="horizontal" >
 
     <ImageView
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center_vertical"
-        android:layout_margin="@dimen/ow_bordered_icon_margin"
+        android:layout_margin="@dimen/zw_bordered_icon_margin"
         android:contentDescription="@string/zw_add_new_wallet_content_description"
         android:src="@drawable/add_white_enabled" />
 

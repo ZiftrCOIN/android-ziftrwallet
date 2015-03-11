@@ -9,24 +9,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/ow_horizontal_margin"
-        android:paddingRight="@dimen/ow_horizontal_margin"
-        android:paddingTop="@dimen/ow_half_icon_size"
+        android:paddingLeft="@dimen/zw_horizontal_margin"
+        android:paddingRight="@dimen/zw_horizontal_margin"
+        android:paddingTop="@dimen/zw_half_icon_size"
         android:visibility="gone" >
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/zw_no_currency"
-            android:textColor="@color/ow_default_text"
-            android:textSize="@dimen/ow_txt_mediumlarge" />
+            android:textColor="@color/zw_default_text"
+            android:textSize="@dimen/zw_txt_mediumlarge" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/zw_no_currency_description"
-            android:textColor="@color/ow_default_text"
-            android:textSize="@dimen/ow_txt_mediumsmall" />
+            android:textColor="@color/zw_default_text"
+            android:textSize="@dimen/zw_txt_mediumsmall" />
     </LinearLayout>
 
     <ListView

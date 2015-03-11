@@ -46,11 +46,11 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 		skipPassphraseButton = (Button) rootView.findViewById(R.id.skip_password);
 
 		passphraseEditText = (EditText) rootView.findViewById(R.id.new_password).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		passphraseEditText.setId(R.id.ow_welcome_passphrase_1);
+		passphraseEditText.setId(R.id.zw_welcome_passphrase_1);
 		passphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
 		confirmPassphraseEditText = (EditText) rootView.findViewById(R.id.new_confirm_password).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		confirmPassphraseEditText.setId(R.id.ow_welcome_passphrase_2);
+		confirmPassphraseEditText.setId(R.id.zw_welcome_passphrase_2);
 		confirmPassphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		confirmPassphraseEditText.clearFocus();
 

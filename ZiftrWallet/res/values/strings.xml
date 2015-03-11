@@ -188,5 +188,8 @@
     <string name="zw_set_empty_name">Looks like you wanted to disable your name instead!</string>
     <string name="zw_invalid_address_uri">The address is not valid.</string>
     <string name="zw_searchbar_hint">search</string>
+    <string name="zw_set_name_complete">Your name is set to: </string>
+    <string name="zw_set_pass_complete">Your new passphrase is set!</string>
+    <string name="zw_disabled_passphrase">Warning: your passphrase is disabled.</string>
     
 </resources>

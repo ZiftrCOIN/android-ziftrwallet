@@ -51,7 +51,17 @@ public class ZWTags {
 
 	public static final String URI_INVALID_ADDRESS = "invalid_uri_address_dialog";
 	
+	public static final String SET_NAME_COMPLETE = "set_name_complete";
+	
+	public static final String SET_PASS_COMPLETE = "set_pass_complete";
+	
+	public static final String PASSPHRASE_DISABLED = "disabled_pass_complete";
+
+	public static final String ERROR_MSG = "error_alert";
+
+	public static final String CONTINUE_SPENDING_UNCONFIRMED = "spending_unconfirmed";
+	
 	//EDIT TEXT
-	public static final String ZW_EDIT_TEXT = "ow_edit_text";
+	public static final String ZW_EDIT_TEXT = "zw_edit_text";
 
 }

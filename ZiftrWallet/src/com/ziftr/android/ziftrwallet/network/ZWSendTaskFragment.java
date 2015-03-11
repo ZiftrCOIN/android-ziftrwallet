@@ -4,12 +4,13 @@ import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.util.List;
 
-import android.app.Activity;
+import org.json.JSONObject;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -24,12 +25,11 @@ public class ZWSendTaskFragment extends Fragment{
 	}
 	
 	public static interface SendTaskCallback {
-		public void updateSendStatus(ZWCoin coin, String message);
+		public void updateSendStatus(ZWCoin coin);
 		public void destroySendTaskFragment();
 	}
 	
 	private WeakReference<SendTaskCallback> callback = new WeakReference<SendTaskCallback>(null);
-	private String msg = null;
 	private ZWCoin sentCoin = null;
 	
 	private boolean done = false;
@@ -38,24 +38,6 @@ public class ZWSendTaskFragment extends Fragment{
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		this.setRetainInstance(true);
-	}
-	
-	@Override
-	public void onAttach(Activity activity){
-		ZLog.log("SendTask attached");
-		super.onAttach(activity);
-		this.callback = new WeakReference<SendTaskCallback>((SendTaskCallback) activity);
-		if (done){
-			callback.get().destroySendTaskFragment();					
-		} else {
-			updateCallback();
-		}
-	}
-	
-	@Override
-	public void onDetach(){
-		super.onDetach();
-		this.callback = null;
 	}
 	
 	public void sendCoins(final ZWCoin coin, final BigInteger fee, final BigInteger amount, final List<String> inputs, final String output, 
@@ -67,8 +49,13 @@ public class ZWSendTaskFragment extends Fragment{
 
 			@Override
 			public void run() {
-				msg = ZWDataSyncHelper.sendCoins(coin, fee, amount, inputs, output, passphrase);
-				updateCallback();
+				JSONObject jsonRes = ZWDataSyncHelper.sendCoins(coin, fee, amount, inputs, output, passphrase);
+				if (jsonRes != null){
+					if (ZWPreferencesUtils.getMempoolIsSpendable() || !ZWDataSyncHelper.checkSpendingUnconfirmedTxn(coin, jsonRes, inputs, passphrase)){
+						ZWDataSyncHelper.signSentCoins(coin, jsonRes, passphrase);
+						updateCallback();
+					}
+				}
 			}
 		
 		});
@@ -76,13 +63,17 @@ public class ZWSendTaskFragment extends Fragment{
 	
 	public synchronized void setCallBack(SendTaskCallback cb){
 		this.callback = new WeakReference<SendTaskCallback>(cb);
-		updateCallback();
+		if (this.done){
+			callback.get().destroySendTaskFragment();					
+		} else {
+			updateCallback();
+		}
 	}
 	
-	private synchronized void updateCallback(){
+	public synchronized void updateCallback(){
 		SendTaskCallback currentCallback = callback.get();
-		if (currentCallback!=null && this.sentCoin != null && this.msg != null){
-			currentCallback.updateSendStatus(this.sentCoin, this.msg);
+		if (currentCallback!=null && this.sentCoin != null){
+			currentCallback.updateSendStatus(this.sentCoin);
 		}
 	}
 	

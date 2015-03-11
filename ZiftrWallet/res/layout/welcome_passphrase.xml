@@ -2,29 +2,29 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingLeft="@dimen/ow_horizontal_margin"
-    android:paddingRight="@dimen/ow_horizontal_margin" >
+    android:paddingLeft="@dimen/zw_horizontal_margin"
+    android:paddingRight="@dimen/zw_horizontal_margin" >
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/hello"
         android:textColor="@color/White"
-        android:textSize="@dimen/ow_txt_mediumlarge" />
+        android:textSize="@dimen/zw_txt_mediumlarge" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/zw_welcome"
         android:textColor="@color/White"
-        android:textSize="@dimen/ow_txt_small" />
+        android:textSize="@dimen/zw_txt_small" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/zw_welcome_passphrase_message"
         android:textColor="@color/White"
-        android:textSize="@dimen/ow_txt_small" />
+        android:textSize="@dimen/zw_txt_small" />
 
     <View
         style="@style/white_divider"
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:text="@string/zw_create_passphrase"
         android:textColor="@color/White"
-        android:textSize="@dimen/ow_txt_small" />
+        android:textSize="@dimen/zw_txt_small" />
 
     <include
         android:id="@+id/new_password"
@@ -60,7 +60,7 @@
         android:background="@drawable/clickable_button_color"
         android:text="@string/zw_save_passphrase"
         android:textColor="@color/White"
-        android:textSize="@dimen/ow_txt_small" />
+        android:textSize="@dimen/zw_txt_small" />
 
     <View
         style="@style/white_divider"
@@ -74,6 +74,6 @@
         android:background="@drawable/clickable_button_color"
         android:text="@string/zw_ask_me_later"
         android:textColor="@color/White"
-        android:textSize="@dimen/ow_txt_small" />
+        android:textSize="@dimen/zw_txt_small" />
 
 </LinearLayout>

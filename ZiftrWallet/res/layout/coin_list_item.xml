@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/currency_list_selector"
-    android:minHeight="@dimen/ow_total_icon_side_length"
+    android:minHeight="@dimen/zw_total_icon_side_length"
     android:orientation="horizontal"
     android:padding="10dp" >
 
@@ -11,22 +11,22 @@
 
     <ImageView
         android:id="@+id/leftIcon"
-        android:layout_width="@dimen/ow_total_icon_side_length"
-        android:layout_height="@dimen/ow_total_icon_side_length"
+        android:layout_width="@dimen/zw_total_icon_side_length"
+        android:layout_height="@dimen/zw_total_icon_side_length"
         android:layout_alignParentLeft="true"
         android:contentDescription="@string/zw_empty_string"
         android:gravity="center_vertical"
-        android:padding="@dimen/ow_bordered_icon_margin"
+        android:padding="@dimen/zw_bordered_icon_margin"
         android:src="@drawable/logo_bitcoin" />
 
     <ImageView
         android:id="@+id/rightIcon"
-        android:layout_width="@dimen/ow_total_icon_side_length"
-        android:layout_height="@dimen/ow_total_icon_side_length"
+        android:layout_width="@dimen/zw_total_icon_side_length"
+        android:layout_height="@dimen/zw_total_icon_side_length"
         android:layout_alignParentRight="true"
         android:contentDescription="@string/zw_empty_string"
         android:gravity="center_vertical"
-        android:padding="@dimen/ow_bordered_icon_margin"
+        android:padding="@dimen/zw_bordered_icon_margin"
         android:src="@drawable/next_down_2" />
 
     <LinearLayout
@@ -35,6 +35,7 @@
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/rightIcon"
         android:layout_toRightOf="@id/leftIcon"
+        android:layout_alignTop="@id/leftIcon"
         android:orientation="vertical" >
 
         <LinearLayout
@@ -80,14 +81,10 @@
 
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp" >
-        </View>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/zw_quarter_icon_size"
             android:orientation="horizontal" >
 
             <ImageView
@@ -112,13 +109,7 @@
                 android:gravity="end" />
 
         </LinearLayout>
-        android:text="$Value" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp" >
-        </View>
     </LinearLayout>
-        android:text="Coin Name"
 
 </RelativeLayout>

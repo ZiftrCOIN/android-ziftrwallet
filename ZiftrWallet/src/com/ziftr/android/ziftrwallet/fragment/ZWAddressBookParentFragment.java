@@ -140,7 +140,10 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 			}
 			
 		}
-		labelEditText.setText(label);
+		//don't reset name if none found in case user entered a name before updating address
+		if (label != null && !label.isEmpty()){
+			labelEditText.setText(label);
+		}
 	}
 
 	public boolean fragmentHasAddress() {
