@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 
-public abstract class ZWCoinRelativeTable {
+public abstract class ZWCoinSpecificTable {
 	
 	/** The first time that this transaction was seen by the network (ziftr server). */
 	protected static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";

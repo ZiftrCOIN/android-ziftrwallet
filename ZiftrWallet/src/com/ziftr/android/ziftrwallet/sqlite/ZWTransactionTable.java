@@ -14,7 +14,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
-public class ZWTransactionTable extends ZWCoinRelativeTable {
+public class ZWTransactionTable extends ZWCoinSpecificTable {
 
 	private static final String TABLE_NAME_BASE = "_transactions";
 	

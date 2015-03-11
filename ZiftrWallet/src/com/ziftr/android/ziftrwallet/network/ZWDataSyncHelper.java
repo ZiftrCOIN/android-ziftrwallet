@@ -350,18 +350,19 @@ public class ZWDataSyncHelper {
 		//list to display if no non-hidden addresses received coins
 		ArrayList<String> hiddenReceivedOn = new ArrayList<String>();
 		
-		//read through all inputs
+		//go through each input of this transaction to see if it might be from us (a spend)
 		JSONArray inputs = json.getJSONArray("vin");
 		for(int x = 0; x < inputs.length(); x++) {
 			JSONObject input = inputs.getJSONObject(x);
 			
 			boolean usedValue = false;
-			//the json doesn't have an input address or value, so we have to look at previously parsed transactions
+			
+			//the json doesn't have an input address or value for us to compare to, so we have to look at previously parsed transactions
 			//and see if this input is the output of another transaction that we know about, which might indicate that it is us spending coins
 			String inputTxid = input.getString("txid");
 			JSONObject matchingTransaction = parsedTransactions.get(inputTxid);
 			if(matchingTransaction != null) {
-				//this means we're spending coins in this transaction
+				//if there's a match, it means we're spending coins in this transaction
 				int voutIndex = input.getInt("vout");
 				JSONArray vouts = matchingTransaction.getJSONArray("vout");
 				JSONObject vout = vouts.optJSONObject(voutIndex);

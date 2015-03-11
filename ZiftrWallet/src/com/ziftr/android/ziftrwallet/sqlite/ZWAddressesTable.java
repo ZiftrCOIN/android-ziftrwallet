@@ -15,7 +15,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 
 // TODO add a column for isChangeAddress. Many times we want to filter change addresses
 // out so they are never revealed to the user
-public abstract class ZWAddressesTable extends ZWCoinRelativeTable {
+public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 
 	/** 
 	 * The address column. This is the encoded public key, along with coin type
