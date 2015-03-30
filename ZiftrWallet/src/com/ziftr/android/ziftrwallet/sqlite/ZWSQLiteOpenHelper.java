@@ -511,7 +511,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	
 	public synchronized void updateCoin(ZWCoin coin){
-		this.coinTable.updateCoin(coin, getWritableDatabase());
+		this.coinTable.upsertCoin(coin, getWritableDatabase());
 	}
 	
 	public synchronized List<ZWCoin> getCoins() {

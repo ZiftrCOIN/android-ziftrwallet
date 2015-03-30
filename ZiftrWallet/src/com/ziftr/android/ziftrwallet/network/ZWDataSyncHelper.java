@@ -222,7 +222,7 @@ public class ZWDataSyncHelper {
 				JSONArray coinsArray = jsonResponse.getJSONArray("blockchains");
 				
 				for (int i=0; i< coinsArray.length(); i++){
-					JSONObject coinJson = coinsArray.getJSONObject(i);
+					JSONObject coinJson = coinsArray.getJSONObject(i).getJSONObject("blockchain");
 	
 					String name = coinJson.optString("name");
 	
@@ -286,16 +286,15 @@ public class ZWDataSyncHelper {
 		if (request.getResponseCode() == 200){
 			ZLog.log("Market Value Response: ", response);
 			try {
-				JSONArray marketRes = new JSONArray(response);
+				JSONObject marketJson = new JSONObject(response);
+				JSONArray marketRes = marketJson.getJSONArray("market_values");
 				for (int i=0; i< marketRes.length(); i++){
-					JSONObject marketVal = new JSONObject(marketRes.getString(i));
+					JSONObject marketVal = marketRes.getJSONObject(i).getJSONObject("market_value");
 					String convertingFrom = parseCurrency(marketVal.getString("currency_from"));
 					String convertingTo = parseCurrency(marketVal.getString("currency_to"));
 
 					BigDecimal rate = new BigDecimal(marketVal.getLong("exchange_rate")).divide(new BigDecimal(marketVal.getLong("exchange_rate_divisor")), MathContext.DECIMAL64);
-					
-					
-					//only add exchange data if we know 
+									
 					ZLog.log("Market value of " + convertingFrom + " is : " + rate.toString() + " " + convertingTo);
 					ZWWalletManager.getInstance().upsertExchangeValue(convertingFrom, convertingTo, rate.toString());
 					//if we got a positive exchange rate and the inverse value is 0 (default) then update the inverse exchange rate

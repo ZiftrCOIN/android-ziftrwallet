@@ -30,12 +30,10 @@ public class ZWExchangeTable {
 	}
 	
 	protected void create(SQLiteDatabase db) {
-		String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + COLUMN_CURRENCY_NAME + " TEXT NOT NULL, " + COLUMN_CURRENCY_TO + 
-				" TEXT NOT NULL, " + COLUMN_EXCHANGE_VALUE + " TEXT NOT NULL );";
 		db.execSQL(getCreateTableString());
 		
 		try {
-			sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMN_RATE_CHANGE + " INTEGER";
+			String sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COLUMN_RATE_CHANGE + " INTEGER";
 			db.execSQL(sql);
 		}
 		catch(Exception e) {

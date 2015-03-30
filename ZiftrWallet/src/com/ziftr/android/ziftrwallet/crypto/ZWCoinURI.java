@@ -115,7 +115,7 @@ public class ZWCoinURI {
 		if (input == null || input.isEmpty()) {
 			throw new ZWCoinURIParseException("Cannot have null or empty input. ");
 		}
-
+		ZLog.log("uri input : " + input);
 		// Have to do this because of a bug in the android Uri parsing library.
 		// The bug is that if you don't have the "//" after the ":" then it won't be able
 		// to read any query parameters (throws UnsupportedOperationExceptions).

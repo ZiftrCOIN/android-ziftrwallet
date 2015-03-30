@@ -1,5 +1,6 @@
 package com.ziftr.android.ziftrwallet;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWResetPassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWSetNameDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
+import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
@@ -75,6 +77,7 @@ import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
+import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
