@@ -234,10 +234,11 @@ public class ZWDataSyncHelper {
 					byte privateBytePrefix = (byte) coinJson.getInt("priv_byte");
 					int blockTime = coinJson.getInt("seconds_per_block_generated");
 					int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
-					int blockNum = coinJson.optInt("height");
 					String chain = coinJson.getString("chain");
 					String type = coinJson.getString("type");
-					boolean isEnabled = coinJson.getBoolean("is_enabled");
+					
+					int blockNum = coinJson.optInt("height");
+					boolean isEnabled = coinJson.optBoolean("is_enabled");
 					
 					
 					String scheme = coinJson.optString("scheme");
