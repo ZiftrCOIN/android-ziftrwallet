@@ -213,7 +213,7 @@ public class ZWCoinTable {
 	}
 	
 	
-	public void updateCoin(ZWCoin coin, SQLiteDatabase db) {
+	public void upsertCoin(ZWCoin coin, SQLiteDatabase db) {
 		
 		ContentValues cv = getContentValues(coin);
 		

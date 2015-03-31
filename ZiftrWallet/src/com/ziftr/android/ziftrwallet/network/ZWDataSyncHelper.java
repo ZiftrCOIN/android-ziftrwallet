@@ -35,7 +35,7 @@ public class ZWDataSyncHelper {
 	public static final String toSignResponseKey = "SERVER_RESPONSE_TO_SIGN";
 	
 	//last time we refreshed transaction history 
-	public static HashMap<String, Long> lastRefreshed = new HashMap();
+	public static HashMap<String, Long> lastRefreshed = new HashMap<String, Long>();
 	
 	//seconds to wait before autorefreshing
 	public static final long REFRESH_TIME = 60;
@@ -72,6 +72,7 @@ public class ZWDataSyncHelper {
 					JSONObject jsonRes = new JSONObject(response);
 					
 					ZLog.log("Spend transaction data to sign: ", jsonRes.toString());
+					ZiftrNetworkManager.networkStopped();
 					return jsonRes;
 
 				}
@@ -85,12 +86,13 @@ public class ZWDataSyncHelper {
 				message = "Unable to connect to server. Please check your connection.";
 				break;
 			default:
+				ZLog.log("Default error sending");
 				message = "Error, something went wrong! " + request.getResponseCode() + " " + request.getResponseMessage();
 				break;
 		}
 
 		ZiftrNetworkManager.networkStopped();
-		if (!message.isEmpty()) {
+		if (!message.isEmpty() && request.getResponseCode() != 200) {
 			ZWMessageManager.alertError(message);
 		}
 		return null;
@@ -122,14 +124,12 @@ public class ZWDataSyncHelper {
 		} catch (JSONException e1) {
 			ZLog.log("Exception getting txns spending from before signing: ", e1);
 		}
-		//can't get here unless there are no pending transactions we are spending from
-		signSentCoins(coin, serverResponse, passphrase);
 		return false;
 	}
 	
-	public static void signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
+	public static boolean signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
 		Set<String> addressesSpentFrom = new HashSet<String>();
-		ZLog.log("signSentCoins called");
+		ZiftrNetworkManager.networkStarted();
 		try {
 			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
 			for (int i=0; i< toSignList.length(); i++){
@@ -163,6 +163,7 @@ public class ZWDataSyncHelper {
 		String response = signingRequest.sendAndWait();
 		ZLog.log(signingRequest.getResponseCode());
 		ZLog.log("Response from signing: ", response);
+		ZiftrNetworkManager.networkStopped();
 		if(signingRequest.getResponseCode() == 202){
 			try {
 				//flag any addresses we spent from as having been spent from (so we don't reuse change addresses)
@@ -177,7 +178,7 @@ public class ZWDataSyncHelper {
 					}
 				}
 				
-				//update the transactions table immediatley with the data from this transaction
+				//update the transactions table immediately with the data from this transaction
 				try {
 					JSONObject responseJson = new JSONObject(response);
 					ZLog.log("Response from completed signing: ", responseJson);
@@ -195,12 +196,13 @@ public class ZWDataSyncHelper {
 					//then we just update our history and hope it's there
 					updateTransactionHistory(coin, false);
 				}
-			}
-			catch(Exception e) {
+			} catch(Exception e) {
 				ZLog.log("Exception saving spend transaction: ", e);
 			}
+			return true;
 		} else {
 			ZWMessageManager.alertError("error: " + signingRequest.getResponseMessage());
+			return false;
 		}
 		
 	}
@@ -220,7 +222,7 @@ public class ZWDataSyncHelper {
 				JSONArray coinsArray = jsonResponse.getJSONArray("blockchains");
 				
 				for (int i=0; i< coinsArray.length(); i++){
-					JSONObject coinJson = coinsArray.getJSONObject(i);
+					JSONObject coinJson = coinsArray.getJSONObject(i).getJSONObject("blockchain");
 	
 					String name = coinJson.optString("name");
 	
@@ -284,16 +286,15 @@ public class ZWDataSyncHelper {
 		if (request.getResponseCode() == 200){
 			ZLog.log("Market Value Response: ", response);
 			try {
-				JSONArray marketRes = new JSONArray(response);
+				JSONObject marketJson = new JSONObject(response);
+				JSONArray marketRes = marketJson.getJSONArray("market_values");
 				for (int i=0; i< marketRes.length(); i++){
-					JSONObject marketVal = new JSONObject(marketRes.getString(i));
+					JSONObject marketVal = marketRes.getJSONObject(i).getJSONObject("market_value");
 					String convertingFrom = parseCurrency(marketVal.getString("currency_from"));
 					String convertingTo = parseCurrency(marketVal.getString("currency_to"));
 
 					BigDecimal rate = new BigDecimal(marketVal.getLong("exchange_rate")).divide(new BigDecimal(marketVal.getLong("exchange_rate_divisor")), MathContext.DECIMAL64);
-					
-					
-					//only add exchange data if we know 
+									
 					ZLog.log("Market value of " + convertingFrom + " is : " + rate.toString() + " " + convertingTo);
 					ZWWalletManager.getInstance().upsertExchangeValue(convertingFrom, convertingTo, rate.toString());
 					//if we got a positive exchange rate and the inverse value is 0 (default) then update the inverse exchange rate

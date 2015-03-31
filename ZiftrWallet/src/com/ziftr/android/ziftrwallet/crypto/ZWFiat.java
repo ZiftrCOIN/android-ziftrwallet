@@ -10,7 +10,6 @@ import android.text.SpannableString;
 import android.text.style.StyleSpan;
 
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWFiat implements ZWCurrency {

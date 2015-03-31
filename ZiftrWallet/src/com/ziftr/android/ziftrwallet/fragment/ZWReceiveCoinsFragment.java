@@ -67,7 +67,6 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.setQrCodeGenerated(false);
 
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
-
 		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
 
 		this.initializeViewFields(inflater, container);
@@ -123,13 +122,16 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		if(!(requireFragHasAddress && this.fragmentHasAddress()) && !this.labelEditText.getText().toString().isEmpty()) {
 			// TODO make the passphrase diaog have extra information about how they 
 			// won't be able to delete the address they are about to make
-			if (ZWPreferencesUtils.userHasPassphrase()) {
+			if (ZWPreferencesUtils.userHasPassphrase() && ZWPreferencesUtils.getCachedPassphrase() == null) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						ZWTags.VALIDATE_PASS_RECEIVE);
 			} else {
+				if (ZWPreferencesUtils.getCachedPassphrase() != null){
+					ZWPreferencesUtils.usingCachedPass = true;
+				}
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
 						"Addresses cannot be deleted once they are created. Are you sure?", 
 						ZWTags.CONFIRM_NEW_ADDRESS, new Bundle());
@@ -372,7 +374,6 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			messageEditText.setFocusableInTouchMode(false);
 			fiatAmountEditText.setFocusableInTouchMode(false);
 			coinAmountEditText.setFocusableInTouchMode(false);
-
 		}
 	}
 	
@@ -380,6 +381,4 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		return this.rootView.findViewById(R.id.walletHeader);
 	}
 
-
 }
-

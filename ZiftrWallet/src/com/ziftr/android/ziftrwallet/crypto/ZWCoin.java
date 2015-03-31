@@ -11,7 +11,7 @@ import java.util.Locale;
 
 import com.google.common.base.Charsets;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -65,7 +65,16 @@ public class ZWCoin implements ZWCurrency {
 
 	
 	public static ZWCoin getCoin(String coinSymbol) {
-		return coins.get(coinSymbol);
+		if (coins.get(coinSymbol) != null){
+			return coins.get(coinSymbol);
+		} else {
+			//if not found look in database
+			ZWCoin c = ZWWalletManager.getInstance().getCoin(coinSymbol);
+			if (c == null){
+				ZLog.log("Called getCoin in ZWCoin returned null!");
+			}
+			return c;
+		}
 	}
 	
 	
