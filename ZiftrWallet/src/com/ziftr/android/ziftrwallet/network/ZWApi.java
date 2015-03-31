@@ -132,6 +132,10 @@ public class ZWApi {
 		return request;
 	}
 	
+	public static ZiftrNetRequest buildCoinDataRequest() {
+		//coin data just comes from basic block chain request
+		return buildBlockchainsRequest();
+	}
 	
 	//GET /blockchains
 	public static ZiftrNetRequest buildBlockchainsRequest() {
