@@ -96,15 +96,27 @@ public class ZWSplashScreenActivity extends FragmentActivity {
 
 
 	private void loadNoFragmentUi() {
-		if ((!ZWPreferencesUtils.userHasPassphrase() && !ZWPreferencesUtils.getPassphraseWarningDisabled()) || 
-				!ZWPreferencesUtils.userHasSetName() && !ZWPreferencesUtils.getDisabledName()) {
-			Intent noFragmentIntent = new Intent(ZWSplashScreenActivity.this, ZWWelcomeActivity.class);
-			startActivity(noFragmentIntent);
-		} else {
+		
+		boolean existingPassword = ZWPreferencesUtils.userHasPassphrase();
+		boolean passwordWarningDisabled = ZWPreferencesUtils.getPassphraseWarningDisabled();
+		boolean existingUserName = ZWPreferencesUtils.userHasSetName();
+		boolean userNameDisabled = ZWPreferencesUtils.getDisabledName();
+		
+		boolean passwordSetup = existingPassword || passwordWarningDisabled;
+		boolean userNameSetup = existingUserName || userNameDisabled;
+		
+		if(passwordSetup && userNameSetup) {
+			//if the user has both their password and username setup (or properly disabled) go directly to wallet
 			Intent noFragmentIntent = new Intent(ZWSplashScreenActivity.this, ZWMainFragmentActivity.class);
 			noFragmentIntent.setFlags(noFragmentIntent.getFlags() | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 			startActivity(noFragmentIntent);
 		}
+		else {
+			//otherwise, bug them about username/password
+			Intent noFragmentIntent = new Intent(ZWSplashScreenActivity.this, ZWWelcomeActivity.class);
+			startActivity(noFragmentIntent);
+		}
+
 	}
 
 	private void loadFragmentBasedUi() {
