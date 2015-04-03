@@ -38,41 +38,6 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 		}
 	}
 	
-	//Note: at some point we may want to completely handle the header views inside the fragments
-	//leaving this code here for awhile in case we need it
-	/*****
-	void populateWalletHeaderView(View headerView) {
-		
-		ZWCoin selectedCoin = this.getSelectedCoin();
-		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency(this.getZWMainActivity());
-
-		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
-		coinLogo.setImageResource(selectedCoin.getLogoResId());
-
-		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
-		coinTitle.setText(selectedCoin.getLongTitle());
-
-		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, selectedCoin, selectedFiat);
-		fiatExchangeRateText.setText(ZWFiat.formatFiatAmount(selectedFiat, unitPriceInFiat, true));
-
-		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
-		BigInteger atomicUnits = getWalletManager().getWalletBalance(selectedCoin, ZWSQLiteOpenHelper.BalanceType.ESTIMATED);
-		BigDecimal walletBalance = ZiftrUtils.bigIntToBigDec(selectedCoin, atomicUnits);
-
-		walletBalanceTextView.setText(ZWCoin.formatCoinAmount(selectedCoin, walletBalance).toPlainString());
-
-		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
-		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, selectedCoin, selectedFiat);
-		walletBalanceInFiatText.setText(ZWFiat.formatFiatAmount(selectedFiat, walletBalanceInFiat, true));
-
-		ImageView syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
-		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
-		
-		//TODO -this is hacky, if we use this method, fix this
-		syncButton.setOnClickListener((View.OnClickListener)this.getZWMainActivity());
-	}
-	*****/
 	@Override
 	public void refreshData(final boolean autorefresh) {
 		ZiftrUtils.runOnNewThread(new Runnable() {

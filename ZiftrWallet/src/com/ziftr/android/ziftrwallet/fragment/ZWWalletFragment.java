@@ -16,7 +16,6 @@ import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * This is the abstract superclass for all of the individual Wallet type

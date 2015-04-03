@@ -24,7 +24,7 @@ public class ZWApi {
 	private static final String BASE_URL = SANDBOX_BASE_URL;
 	
 	
-	private static final String AUTHORIZATION = "Basic " + Base64.encodeToString("pub_44ed4e5549a373155e66ccfa5043320c:".getBytes(), Base64.DEFAULT);
+	private static final String AUTHORIZATION = "Basic " + Base64.encodeToString("pub_c905a5608ce7ec9b63dbcb60c947921c:".getBytes(), Base64.DEFAULT);
 	private static final String ACCEPT = "application/vnd.ziftr.fpa-0-1+json";
 	
 	
@@ -128,11 +128,14 @@ public class ZWApi {
 	//GET /blockchains /market_value
 	public static ZiftrNetRequest buildMarketValueRequest(){
 		String url = buildUrl(null, null, "market_values");
-
 		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders(), null);
 		return request;
 	}
 	
+	public static ZiftrNetRequest buildCoinDataRequest() {
+		//coin data just comes from basic block chain request
+		return buildBlockchainsRequest();
+	}
 	
 	//GET /blockchains
 	public static ZiftrNetRequest buildBlockchainsRequest() {

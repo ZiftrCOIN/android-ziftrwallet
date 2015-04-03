@@ -92,8 +92,10 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	public void onResume(){
 		super.onResume();
 		if (this.sendTaskFragment != null){
-			this.sendTaskFragment.setCallBack(this);
 			this.sendButton.setEnabled(false);
+			this.sendTaskFragment.setCallBack(this);
+		} else {
+			this.sendButton.setEnabled(true);
 		}
 	}
 	
@@ -239,12 +241,15 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 				a.onBackPressed();
 			}
 		} else if (v == sendButton) {
-			if (ZWPreferencesUtils.userHasPassphrase()) {
+			if (ZWPreferencesUtils.userHasPassphrase() && ZWPreferencesUtils.getCachedPassphrase() == null) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, ZWTags.VALIDATE_PASS_SEND);
 			} else {
+				if (ZWPreferencesUtils.getCachedPassphrase() != null){
+					ZWPreferencesUtils.usingCachedPass = true;
+				}
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_SEND_COINS, "Are you sure you want to send " + 
 			this.totalTextView.getText() + " " + getSelectedCoin().getSymbol() + "?"
 			, ZWTags.CONFIRM_SEND, new Bundle());
@@ -555,7 +560,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	public void sendCoins(final String address, final BigInteger value, 
 			final BigInteger feePerKb, final String passphrase) 
 			throws ZWAddressFormatException, Exception {
-		
 		final ZWCoin coin = getSelectedCoin();
 		BigInteger spendableBalance = getWalletManager().getWalletBalance(coin);
 		if (!coin.addressIsValid(address)){
@@ -585,7 +589,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 			public void run() {
 				ZLog.log("sendTask beginning update ui");
 				destroySendTaskFragment();
-				reEnableSend();
 				Toast.makeText(getZWMainActivity(), coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
 				getZWMainActivity().onBackPressed();
 			}
@@ -596,12 +599,18 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	//call on ui thread only
 	public void destroySendTaskFragment() {
 		ZLog.log("sendTask fragment Destroy");
-		if (sendTaskFragment != null){
-			sendTaskFragment.setDone(true);
-			FragmentTransaction fragmentTransaction = getZWMainActivity().getSupportFragmentManager().beginTransaction();
-			fragmentTransaction.remove(sendTaskFragment).commitAllowingStateLoss();
-			sendTaskFragment= null;
-		}
+		getZWMainActivity().runOnUiThread(new Runnable(){
+			@Override
+			public void run(){
+				if (sendTaskFragment != null){
+					sendTaskFragment.setDone(true);
+					FragmentTransaction fragmentTransaction = getZWMainActivity().getSupportFragmentManager().beginTransaction();
+					fragmentTransaction.remove(sendTaskFragment).commitAllowingStateLoss();
+					sendTaskFragment= null;
+					reEnableSend();
+				}
+			}
+		});
 	}
 	
 	public ZWSendTaskFragment initSendTaskFragment(){
@@ -612,5 +621,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.sendTaskFragment.setCallBack(this);
 		return this.sendTaskFragment;
 	}
+	
 
 }

@@ -47,6 +47,7 @@ public class ZiftrNetRequest {
 	Map<String,String> sentHeaders = null;
 	
 	private String forcedRequestMethod = null;
+	private boolean followRedirects = true;
 	
 	// If the network call should attempt to use the user info for authorization automatically
 	private boolean useAutoAuthorization = true;
@@ -336,6 +337,7 @@ public class ZiftrNetRequest {
 			
 			ZLog.log("Opening http connection to: ", fullUrl);
 			connection = (HttpURLConnection) url.openConnection();
+			connection.setInstanceFollowRedirects(followRedirects);
 			
 			//TODO -short hack for now setting the user-agent to the "default android user agent"
 			String userAgent = System.getProperty("http.agent");
@@ -519,6 +521,15 @@ public class ZiftrNetRequest {
 	
 	public String getResponseData() {
 		return responseData;
+	}
+	
+	
+	/**
+	 * set whether this request should automatically follow redirects or not
+	 * @param followRedirect if true, automatically follow redirects if possible 
+	 */
+	public void setFolowRedirects(boolean followRedirects) {
+		this.followRedirects = followRedirects;
 	}
 	
 	

@@ -50,7 +50,8 @@
         android:name="com.ziftr.android.ziftrwallet.ZWApplication"
         android:allowBackup="true"
         android:icon="@drawable/ziftr_launcher"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme" 
+        android:label="@string/zw_app_name" >
         <activity
             android:name="com.ziftr.android.ziftrwallet.ZWSplashScreenActivity"
             android:label="@string/zw_app_name"
