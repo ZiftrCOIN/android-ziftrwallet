@@ -284,8 +284,12 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		***/
 		
 		
-		if (intent != null && !consumedIntent && intent.getAction() == Intent.ACTION_VIEW){
-			//loaded from coin uri
+		if (intent != null && !consumedIntent && 
+				intent.getAction() == Intent.ACTION_VIEW &&
+				(intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0 ){
+			
+			//if we have an intent, and we haven't consumed it, and it's view type, and it's not from the history
+			//this we were just launched from a coin uri, so handle it appropriately
 			
 			String data = intent.getDataString();
 			
