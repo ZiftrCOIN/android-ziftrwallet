@@ -31,6 +31,8 @@
     <!-- Description here -->
     <string name="zw_menu_text_security">SECURITY</string>
     <!-- Description here -->
+    <string name="zw_continue_button_text">CONTINUE</string>
+    <!-- Description here -->
     <string name="zw_cancel_button_text">CANCEL</string>
     <!-- Description here -->
     <string name="zw_send_button_text">SEND</string>
@@ -191,5 +193,7 @@
     <string name="zw_set_name_complete">Your name is set to: </string>
     <string name="zw_set_pass_complete">Your new passphrase is set!</string>
     <string name="zw_disabled_passphrase">Warning: your passphrase is disabled.</string>
-    
+    <string name="zw_warning">Warning</string>
+    <string name="zw_delete_data_warning">You are about to delete your wallet data! Ensure you have your wallet exported or you will lose all your coins!</string>
+
 </resources>

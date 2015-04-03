@@ -16,6 +16,7 @@ public abstract class ZLog {
 	public static final int FILE_LOGGER = 1;
 	public static final int ANDROID_LOGGER = 2;
 	public static final int NOOP_LOGGER = 3;
+	private static final String LOG_FILE_NAME = "Zlog.txt";
 	
 	private static ZLog logger = initLogger();
 	
@@ -178,11 +179,11 @@ public abstract class ZLog {
 				}
 				Log.e(tag, logMessage.toString());
 				try {
-					File dir = new File(ZWApplication.getApplication().getExternalFilesDir(null) + "/logs");
+					File dir = ZWApplication.getApplication().getExternalFilesDir(null);
 					if (!dir.exists()){
 						dir.mkdirs();
 					}
-					File logfile = new File(dir, "Zlog.txt");
+					File logfile = new File(dir, LOG_FILE_NAME);
 					FileOutputStream f;
 					try {
 						f = new FileOutputStream(logfile, true);

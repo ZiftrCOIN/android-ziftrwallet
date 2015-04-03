@@ -1,6 +1,7 @@
 package com.ziftr.android.ziftrwallet;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -401,6 +402,13 @@ public abstract class ZWPreferencesUtils {
 		} catch (NullPointerException e){
 			return null;	
 		}
+	}
+	
+	//clears and deletes options file and local data
+	public static void clearOptions(){
+		ZWPreferencesUtils.options = null;
+		File options = new File(ZWApplication.getApplication().getFilesDir().getAbsoluteFile(), ZWPreferencesUtils.ZWOPTIONS_KEY);
+		options.delete();
 	}
 
 }

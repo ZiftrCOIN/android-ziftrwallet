@@ -51,7 +51,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ziftr_launcher"
         android:theme="@style/AppTheme" 
-        android:label="@string/zw_app_name" >
+        android:label="@string/zw_app_name"
+        android:manageSpaceActivity="com.ziftr.android.ziftrwallet.ZWManageSpaceActivity" >
         <activity
             android:name="com.ziftr.android.ziftrwallet.ZWSplashScreenActivity"
             android:label="@string/zw_app_name"
@@ -64,8 +65,9 @@
         </activity>
         <activity android:name="com.ziftr.android.ziftrwallet.ZWWelcomeActivity" 
             android:windowSoftInputMode="adjustResize">
-            
         </activity>
+        <activity android:name="com.ziftr.android.ziftrwallet.ZWManageSpaceActivity"
+            ></activity>
         <activity
             android:name="com.ziftr.android.ziftrwallet.ZWMainFragmentActivity"
             android:label="ziftrWALLET"
