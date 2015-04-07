@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.Date;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -304,7 +305,12 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 		// Now that we are done editing 
 		this.isEditing = false;
-		this.getZWMainActivity().closeKeyboard();
+		
+		Activity mainActivity = this.getActivity();
+		if(mainActivity != null) {
+			InputMethodManager inputManager = (InputMethodManager) mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+			inputManager.hideSoftInputFromWindow(mainActivity.getCurrentFocus().getWindowToken(), 0);
+		}
 	}
 
 	@Override

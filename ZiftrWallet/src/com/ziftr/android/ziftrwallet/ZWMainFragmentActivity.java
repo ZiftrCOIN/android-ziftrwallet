@@ -379,7 +379,11 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 */
 	@Override
 	public void onBackPressed() {
-		closeKeyboard();
+		
+		//in case the device has a hardware back button, make sure virtual keyboard is closed
+		InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+		
 		if (drawerMenuIsOpen()){
 			this.menuDrawer.closeDrawer(Gravity.LEFT);
 			return;
@@ -473,14 +477,13 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 * @param tag - The tag of the new fragment.
 	 * @param resId - The view id to show the new fragment in.
 	 */
-	public void showFragment(Fragment fragToShow, String tag, 
-			int resId, boolean addToBackStack, String backStackTag) {
+	public void showFragment(Fragment fragToShow, String tag, int resId, boolean addToBackStack, String backStackTag) {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
 
 		// TODO add animation to transaciton here
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
-		closeKeyboard();
+		
 		if (fragToShow.isVisible()) {
 			// If the fragment is already visible, no need to do anything
 			return;
@@ -492,11 +495,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		}
 
 		transaction.commit();
-	}
-	
-	public void closeKeyboard(){
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
 	}
 
 
@@ -937,7 +935,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		}
 		
 		if(preloadData != null) {
-			//note, insteadof is a bit hacky, but best to keep all this fragment loading code in one method
+			//note, instanceof is a bit hacky, but best to keep all this fragment loading code in one method
 			if(preloadData instanceof ZWCoinURI) {
 				((ZWSendCoinsFragment) fragToShow).preloadSendData((ZWCoinURI) preloadData);
 			}

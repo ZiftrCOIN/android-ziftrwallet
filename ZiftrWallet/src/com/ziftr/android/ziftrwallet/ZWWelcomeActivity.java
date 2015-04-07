@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
-import android.view.WindowManager;
 
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
@@ -20,9 +19,6 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//prevent keyboard from popping up automatically
-		this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		
 		// To make activity fullscreen
 		// Have to do this before setContentView so that we don't get a AndroidRuntimeException
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
