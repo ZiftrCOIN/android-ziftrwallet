@@ -11,8 +11,10 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /** 
  * This class controls all of the wallets and is responsible
@@ -154,11 +156,18 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 * @param curPassphrase - null if no encryption
 	 * @param salt
 	 */
-	public synchronized void changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
-		super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
+	public synchronized reencryptionStatus changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
+		return super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
 	}
 
-	
+	/**
+	 * this is used to test passphrases when trying to recover from a state where a user
+	 * tried to reencrypt already encrypted password and is entering his/her old passphrase
+	 * to decrypt keys
+	 */
+	public synchronized boolean attemptDecrypt(String passphrase){
+		return super.attemptDecrypt(passphraseToCrypter(passphrase));
+	}
 	
 	/**
 	 * gets an {@link ZWECKey} that can be used for signing from the public address,

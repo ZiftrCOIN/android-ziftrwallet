@@ -19,8 +19,8 @@ import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
-import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypterException;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.sqlite.ZWMiscTable;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -41,9 +41,6 @@ public abstract class ZWPreferencesUtils {
 
 	/** The key for getting the name of the user from the preferences. */
 	public static final String PREFS_USER_NAME_KEY = "zw_name_key";
-	
-	/** The key to get and save the salt as used by the specific user of the application. */
-	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
 	
 	/** skip the screen for name */
 	public final static String NAME_DISABLED_KEY = "zw_disabled_name_key";
@@ -88,9 +85,12 @@ public abstract class ZWPreferencesUtils {
 		String storedPassphrase = getOption(PREFS_PASSPHRASE_KEY, null);
 		byte[] storedHash;
 		if(storedPassphrase == null || storedPassphrase.isEmpty()) {
-			storedHash = null;
+			//if not in our options file check database
+			storedPassphrase = ZWWalletManager.getInstance().getMiscVal(ZWMiscTable.PASS_KEY);
 		}
-		else {
+		if (storedPassphrase == null || storedPassphrase.isEmpty()){
+			storedHash = null;
+		} else {
 			// If it's not null, convert it back to a byte array
 			storedHash = ZiftrUtils.hexStringToBytes(storedPassphrase);
 		}
@@ -100,6 +100,7 @@ public abstract class ZWPreferencesUtils {
 	
 	static void setStoredPassphraseHash(String saltedHash) {
 		setOption(PREFS_PASSPHRASE_KEY, saltedHash);
+		ZWWalletManager.getInstance().upsertMiscVal(ZWMiscTable.PASS_KEY, saltedHash);
 	}
 
 	/**
@@ -130,22 +131,6 @@ public abstract class ZWPreferencesUtils {
 			ZLog.log("Error, An hash value was null that shouldn't have been.");
 			return false;
 		}
-	}
-
-	public static String getSalt() {
-		String salt = getOption(PREFS_SALT_KEY, null);
-		if (salt != null && !salt.isEmpty()) {
-			return salt;
-		}
-		//if we have no saved salt, create a new one
-		try {
-			salt = ZWPbeAesCrypter.generateSalt();
-		} catch (ZWKeyCrypterException e) {
-			ZLog.log("error: " + e.getMessage());
-			return null;
-		}
-		setOption(PREFS_SALT_KEY, salt);
-		return salt;
 	}
 
 	public static boolean getFeesAreEditable() {
@@ -237,6 +222,15 @@ public abstract class ZWPreferencesUtils {
 		} else {
 			return null;
 		}
+	}
+	
+	public static String getSalt(){
+		String salt = ZWWalletManager.getInstance().getMiscVal(ZWMiscTable.SALT);
+		if (salt == null){
+			salt = ZWPbeAesCrypter.generateSalt();
+			ZWWalletManager.getInstance().upsertMiscVal(ZWMiscTable.SALT, salt);
+		}
+		return salt;
 	}
 	
 	public static void setCachedPassphrase(String pass){

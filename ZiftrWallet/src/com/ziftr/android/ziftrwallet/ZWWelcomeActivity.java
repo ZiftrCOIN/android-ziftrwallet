@@ -10,11 +10,15 @@ import android.view.WindowManager;
 
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
+import com.ziftr.android.ziftrwallet.dialog.ZWValidatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
+import com.ziftr.android.ziftrwallet.sqlite.ZWMiscTable;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDialogHandler {
+public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDialogHandler, ZWValidatePassphraseDialogHandler {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -94,11 +98,38 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		alertDialog.show(this.getSupportFragmentManager(), tag);
 	}
 	
+	protected void alertPassphraseDialog(int requestcode, Bundle args, String tag, String message){
+		ZWValidatePassphraseDialog passphraseDialog = new ZWValidatePassphraseDialog();
+
+		args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestcode);
+		passphraseDialog.setArguments(args);
+
+		passphraseDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
+		passphraseDialog.show(this.getSupportFragmentManager(), tag);
+	}
+	
 	protected void startZWMainActivity() {
 		Intent main = new Intent(this, ZWMainFragmentActivity.class);
 		main.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		startActivity(main);
 		this.finish();
+	}
+
+	@Override
+	public void handlePassphrasePositive(int requestCode, String passphrase,
+			Bundle info) {
+		switch(requestCode) {
+			case ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING:
+
+				if (ZWWalletManager.getInstance().attemptDecrypt(passphrase)){
+					//the passphrase worked, decrypt all keys now
+					ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(passphrase, null);
+					alert("Your passphrase was correct! Your new passphrase was not set! Please settings to re-encrypt your data", "correct_passphrase");
+				} else {
+					alert("Your passphrase was incorrect. Warning: your database is still encrypted with the old passphrase.", "incorrect_passphrase");
+				}
+			break;
+		}
 	}
 	
 }

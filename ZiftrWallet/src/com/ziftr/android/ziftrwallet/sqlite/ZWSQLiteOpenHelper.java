@@ -17,6 +17,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
@@ -72,6 +73,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	/** Table with market values of currencies */
 	private ZWExchangeTable exchangeTable;
+	
+	private ZWMiscTable miscellaneousTable;
 
 	///////////////////////////////////////////////////////
 	//////////  Boiler plate SQLite Table Stuff ///////////
@@ -86,6 +89,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.coinTable = new ZWCoinTable();
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
+		this.miscellaneousTable = new ZWMiscTable();
 	}
 
 	
@@ -111,6 +115,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		//Make exchange table
 		this.exchangeTable.create(db);
+		//Make misc table
+		this.miscellaneousTable.create(db);
 	}
 	
 	
@@ -179,16 +185,20 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return address;
 	}
 
-	protected synchronized void changeEncryptionOfReceivingAddresses(ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter) {
+	protected synchronized reencryptionStatus changeEncryptionOfReceivingAddresses(ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter) {
 
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		try {
 			ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
-
+			
 			for (ZWCoin coin : this.getNotUnactivatedCoins()) {
-				receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
+				reencryptionStatus status = receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
+				if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
+					return status;
+				}
 			}
+			
 			db.setTransactionSuccessful();
 		} catch (CryptoException e) {
 			ZLog.log("Error trying to change the encryption of receiving address private keys. ", e.getMessage());
@@ -201,7 +211,18 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 			// any of the changes since there was. If it was called then it finalizes everything.
 			db.endTransaction();
 		}
-
+		return reencryptionStatus.success;
+	}
+	
+	protected synchronized boolean attemptDecrypt(ZWKeyCrypter crypter){
+		SQLiteDatabase db = this.getWritableDatabase();
+		ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
+		for (ZWCoin coin: this.getNotUnactivatedCoins()){
+			if (!receiveTable.attemptDecryptAllAddresses(coin, crypter, db)){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	
@@ -575,6 +596,13 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.coinTable.deactivateCoin(coin, getWritableDatabase());
 	}
 
+	public synchronized void upsertMiscVal(String key, String val){
+		this.miscellaneousTable.upsert(key, val, getWritableDatabase());
+	}
+	
+	public synchronized String getMiscVal(String key){
+		return this.miscellaneousTable.getValFromKey(key, getReadableDatabase());
+	}
 	
 }
 
