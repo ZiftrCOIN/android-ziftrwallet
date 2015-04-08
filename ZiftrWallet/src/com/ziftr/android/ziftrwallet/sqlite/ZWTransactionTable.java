@@ -125,8 +125,6 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString());
 		sqlBuilder.append(" WHERE ").append(COLUMN_HASH).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(";");
 		
-		ZLog.log("Updating transaction: ", sqlBuilder.toString());
-		
 		//now update the transaction with all the data
 		int updated = db.compileStatement(sqlBuilder.toString()).executeUpdateDelete();
 		if(updated == 0) {

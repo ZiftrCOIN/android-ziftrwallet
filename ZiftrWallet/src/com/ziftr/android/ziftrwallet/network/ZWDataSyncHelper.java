@@ -363,7 +363,8 @@ public class ZWDataSyncHelper {
 
 				//we now have an array of transactions with a transaction hash and a url to get more data about the transaction
 				for(int x = transactions.length() -1; x >= 0; x--) {
-					JSONObject transactionJson = transactions.getJSONObject(x);
+					JSONObject transactionInfoJson = transactions.getJSONObject(x);
+					JSONObject transactionJson = transactionInfoJson.getJSONObject("transaction");
 					String txid = transactionJson.getString("txid");
 					parsedTransactions.put(txid, transactionJson);
 					createTransaction(coin, transactionJson, addresses, parsedTransactions);
