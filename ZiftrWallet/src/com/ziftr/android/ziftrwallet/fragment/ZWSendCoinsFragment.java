@@ -119,7 +119,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
 		this.initializeViewFields();
 		this.initializeEditText();
-		
 		if(preloadedCoinUri != null) {
 			this.setupViews(preloadedCoinUri);
 			preloadedCoinUri = null;
@@ -507,13 +506,20 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	}
 
 	
-	
+	//call before fragment loads
 	public void preloadSendData(ZWCoinURI coinUri) {
 		this.preloadedCoinUri = coinUri;
+
 	}
-	
+	//call before fragment loads
 	public void preloadAddress(String address) {
 		this.preloadAddress = address;
+	}
+	//call if fragment already showing
+	public void loadSendData(ZWCoinURI coinUri){
+		//refresh header if selected coin changed
+		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
+		this.setupViews(coinUri);
 	}
 	
 	

@@ -75,7 +75,6 @@ import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
-import com.ziftr.android.ziftrwallet.sqlite.ZWMiscTable;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -945,23 +944,28 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 */
 	public void openSendCoinsView(Object preloadData) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_FRAGMENT);
+
 		if (fragToShow == null) {
 			fragToShow = new ZWSendCoinsFragment();
-		}
-		
-		if(preloadData != null) {
-			//note, insteadof is a bit hacky, but best to keep all this fragment loading code in one method
-			if(preloadData instanceof ZWCoinURI) {
-				((ZWSendCoinsFragment) fragToShow).preloadSendData((ZWCoinURI) preloadData);
+			if(preloadData != null) {
+				//note, instanceof is a bit hacky, but best to keep all this fragment loading code in one method
+				if(preloadData instanceof ZWCoinURI) {
+					((ZWSendCoinsFragment) fragToShow).preloadSendData((ZWCoinURI) preloadData);
+				} else {
+					((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
+				}
 			}
-			else {
-				((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
-			}
-		}
-		
-		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
+			
+			// If we did a tablet view this might be different. 
+			this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, ZWTags.ACCOUNTS_INNER);
+		} else {
+			//we are already showing sendcoins fragment
+			if(preloadData instanceof ZWCoinURI) {
+				((ZWSendCoinsFragment) fragToShow).loadSendData((ZWCoinURI) preloadData);
+			}
+		}
+
 	}
 	
 

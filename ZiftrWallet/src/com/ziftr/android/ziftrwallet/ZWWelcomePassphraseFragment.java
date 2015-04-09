@@ -12,7 +12,6 @@ import android.widget.EditText;
 
 import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
-import com.ziftr.android.ziftrwallet.sqlite.ZWMiscTable;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 

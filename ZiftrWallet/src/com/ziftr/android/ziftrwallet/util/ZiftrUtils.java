@@ -32,9 +32,6 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.google.common.primitives.UnsignedLongs;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
-import com.ziftr.android.ziftrwallet.sqlite.ZWMiscTable;
 
 public class ZiftrUtils {
 

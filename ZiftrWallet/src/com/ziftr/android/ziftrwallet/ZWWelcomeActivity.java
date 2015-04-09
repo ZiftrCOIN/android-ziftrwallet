@@ -14,9 +14,7 @@ import com.ziftr.android.ziftrwallet.dialog.ZWValidatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
-import com.ziftr.android.ziftrwallet.sqlite.ZWMiscTable;
 import com.ziftr.android.ziftrwallet.util.ZLog;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDialogHandler, ZWValidatePassphraseDialogHandler {
 
