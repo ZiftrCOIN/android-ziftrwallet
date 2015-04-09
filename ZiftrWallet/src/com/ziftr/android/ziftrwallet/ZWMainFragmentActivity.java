@@ -285,8 +285,12 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		***/
 		
 		
-		if (intent != null && !consumedIntent && intent.getAction() == Intent.ACTION_VIEW){
-			//loaded from coin uri
+		if (intent != null && !consumedIntent && 
+				intent.getAction() == Intent.ACTION_VIEW &&
+				(intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0 ){
+			
+			//if we have an intent, and we haven't consumed it, and it's view type, and it's not from the history
+			//this we were just launched from a coin uri, so handle it appropriately
 			
 			String data = intent.getDataString();
 			
@@ -376,7 +380,11 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 */
 	@Override
 	public void onBackPressed() {
-		closeKeyboard();
+		
+		//in case the device has a hardware back button, make sure virtual keyboard is closed
+		InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+		
 		if (drawerMenuIsOpen()){
 			this.menuDrawer.closeDrawer(Gravity.LEFT);
 			return;
@@ -470,14 +478,13 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 * @param tag - The tag of the new fragment.
 	 * @param resId - The view id to show the new fragment in.
 	 */
-	public void showFragment(Fragment fragToShow, String tag, 
-			int resId, boolean addToBackStack, String backStackTag) {
+	public void showFragment(Fragment fragToShow, String tag, int resId, boolean addToBackStack, String backStackTag) {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = this.getSupportFragmentManager().beginTransaction();
 
 		// TODO add animation to transaciton here
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
-		closeKeyboard();
+		
 		if (fragToShow.isVisible()) {
 			// If the fragment is already visible, no need to do anything
 			return;
@@ -489,11 +496,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		}
 
 		transaction.commit();
-	}
-	
-	public void closeKeyboard(){
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(), 0);
 	}
 
 
@@ -954,8 +956,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 				} else {
 					((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
 				}
-			}
-			
+		}
+		
 			// If we did a tablet view this might be different. 
 			this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, ZWTags.ACCOUNTS_INNER);

@@ -64,7 +64,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.ziftr.android.ziftrwallet.ZWWelcomeActivity" 
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity android:name="com.ziftr.android.ziftrwallet.ZWManageSpaceActivity"
             ></activity>
@@ -72,7 +72,7 @@
             android:name="com.ziftr.android.ziftrwallet.ZWMainFragmentActivity"
             android:label="ziftrWALLET"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustResize" >
+            android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
