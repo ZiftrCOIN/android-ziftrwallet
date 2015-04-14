@@ -33,7 +33,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	/** The current database version, may change in later versions of app. */
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = 3;
 
 	
 	/**
@@ -126,8 +126,17 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		ZLog.log("onUpgrade for helper called");
-		// Nothing to do for Version 1
+		if(oldVersion < 2 && newVersion >= 2) {
+			//upgrading from version 1 to 2+ requires adding new tables for any active coins
+			ZLog.log("Upgrading from local database v1 to v2...");
+			List<ZWCoin> coins = this.coinTable.getNotUnactiveCoins(db);
+			for(ZWCoin coin : coins) {
+				this.receivingAddressesTable.create(coin, db);
+				this.sendingAddressesTable.create(coin, db);
+				this.transactionsTable.create(coin, db);
+				this.transactionOutputsTable.create(coin, db);
+			}
+		}
 	}
 
 	
@@ -539,7 +548,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 			return;
 		}
 		
-		// TODO create tables for coin type
 		this.receivingAddressesTable.create(coin, this.getWritableDatabase());
 		this.sendingAddressesTable.create(coin, this.getWritableDatabase());
 		this.transactionsTable.create(coin, this.getWritableDatabase());
@@ -592,6 +600,14 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.transactionOutputsTable.getTransactionOutputs(coin, transactionId, outputIndex, this.getReadableDatabase());
 	}
 
+	/**
+	 * 
+	 * @param coin
+	 * @param output
+	 */
+	public void addTransactionOutput(ZWCoin coin, ZWTransactionOutput output) {
+		this.transactionOutputsTable.addTransactionOutput(coin, output, this.getWritableDatabase());
+	}
 	
 }
 

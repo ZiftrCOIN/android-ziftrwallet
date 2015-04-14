@@ -29,6 +29,8 @@ public class ZWTransactionOutputsTable extends ZWCoinSpecificTable {
 		sql.append(COLUMN_TRANSACTION_ID).append(" TEXT NOT NULL, ");
 		sql.append(COLUMN_VOUT_INDEX).append(" INTEGER NOT NULL, ");
 		sql.append(COLUMN_VALUE).append(" INTEGER NOT NULL)");
+		
+		database.execSQL(sql.toString());
 	}
 
 	@Override
@@ -42,6 +44,10 @@ public class ZWTransactionOutputsTable extends ZWCoinSpecificTable {
 		return coin.getSymbol().toLowerCase(Locale.US) + TABLE_NAME_BASE;
 	}
 
+	
+	protected void addTransactionOutput(ZWCoin coin, ZWTransactionOutput output, SQLiteDatabase database) {
+		this.addTransactionOutput(coin, output.getAddress(), output.getTransactionId(), output.getIndex(), output.getValueString(), output.isMultiSig(), database);
+	}
 	
 	protected void addTransactionOutput(ZWCoin coin, String address, String txId, int index, String value, boolean isMultiSig, SQLiteDatabase database) {
 	
