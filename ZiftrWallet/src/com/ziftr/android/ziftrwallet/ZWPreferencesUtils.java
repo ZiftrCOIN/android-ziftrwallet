@@ -39,6 +39,9 @@ public abstract class ZWPreferencesUtils {
 	/** The key for getting the passphrase hash from the preferences. */
 	public static final String PREFS_PASSPHRASE_KEY = "zw_passphrase_key_1";
 
+	/** The key to get and save the salt as used by the specific user of the application. */
+	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
+
 	/** The key for getting the name of the user from the preferences. */
 	public static final String PREFS_USER_NAME_KEY = "zw_name_key";
 	
@@ -227,8 +230,13 @@ public abstract class ZWPreferencesUtils {
 	public static String getSalt(){
 		String salt = ZWWalletManager.getInstance().getMiscVal(ZWMiscTable.SALT);
 		if (salt == null){
-			salt = ZWPbeAesCrypter.generateSalt();
-			ZWWalletManager.getInstance().upsertMiscVal(ZWMiscTable.SALT, salt);
+			String oldSalt = getOption(PREFS_SALT_KEY, null);
+			if (oldSalt != null){
+				ZWWalletManager.getInstance().upsertMiscVal(ZWMiscTable.SALT, oldSalt);
+			} else {
+				salt = ZWPbeAesCrypter.generateSalt();
+				ZWWalletManager.getInstance().upsertMiscVal(ZWMiscTable.SALT, salt);
+			}
 		}
 		return salt;
 	}

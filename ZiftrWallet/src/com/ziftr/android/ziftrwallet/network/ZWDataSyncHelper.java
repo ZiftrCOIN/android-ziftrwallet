@@ -262,7 +262,7 @@ public class ZWDataSyncHelper {
 					
 					if(name != null && name.length() > 0) {
 						ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, feeString, logoUrl, pubKeyPrefix, 
-								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, isEnabled);
+								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, blockNum, isEnabled);
 						ZWWalletManager.getInstance().updateCoin(coin);
 					}
 				

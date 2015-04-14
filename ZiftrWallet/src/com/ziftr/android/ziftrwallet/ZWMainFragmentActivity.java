@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.FragmentManager;
+import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -201,11 +202,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		if(savedInstanceState != null) {
 			consumedIntent = savedInstanceState.getBoolean("consumedIntent");
 		}
-		
-		
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
-
 		// Recreate wallet manager
 		this.walletManager = ZWWalletManager.getInstance();
 		
@@ -956,8 +954,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 				} else {
 					((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
 				}
-		}
-		
+			}
 			// If we did a tablet view this might be different. 
 			this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, ZWTags.ACCOUNTS_INNER);
@@ -967,10 +964,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 				((ZWSendCoinsFragment) fragToShow).loadSendData((ZWCoinURI) preloadData);
 			}
 		}
-
 	}
-	
-
 	
 	/**
 	 * Open the view for transaction details
