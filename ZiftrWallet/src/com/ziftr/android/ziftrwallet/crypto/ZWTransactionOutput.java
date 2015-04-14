@@ -1,17 +1,27 @@
 package com.ziftr.android.ziftrwallet.crypto;
 
+import java.math.BigInteger;
+
 public class ZWTransactionOutput {
 	
 	private String address;
 	private String transactionId;
 	private int index;
-	private long value;
+	private BigInteger value;
+	private boolean isMultiSig = false;
+
 	
-	public ZWTransactionOutput(String address, String txId, int index, long value) {
+	public ZWTransactionOutput(String address, String txId, int index, String value, boolean isMultiSig) {
+		this(address, txId, index, new BigInteger(value), isMultiSig);
+	}
+	
+	
+	public ZWTransactionOutput(String address, String txId, int index, BigInteger value, boolean isMultiSig) {
 		this.address = address;
 		this.transactionId = txId;
 		this.index = index;
 		this.value = value;
+		this.isMultiSig = isMultiSig;
 	}
 
 	
@@ -27,8 +37,16 @@ public class ZWTransactionOutput {
 		return index;
 	}
 
-	public long getValue() {
+	public BigInteger getValue() {
 		return value;
+	}
+	
+	public String getValueString() {
+		return value.toString();
+	}
+	
+	public boolean isMultiSig() {
+		return isMultiSig;
 	}
 	
 	

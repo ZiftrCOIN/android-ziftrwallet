@@ -24,6 +24,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
+import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -385,10 +386,17 @@ public class ZWDataSyncHelper {
 
 	
 	//creates transaction in local database from json response
-	private static void createTransaction(ZWCoin coin, JSONObject json, List<String> addresses, HashMap<String, JSONObject> parsedTransactions) throws JSONException {
+	//private static void createTransaction(ZWCoin coin, JSONObject json, List<String> addresses, HashMap<String, JSONObject> parsedTransactions) throws JSONException {
+	private static void createTransaction(ZWCoin coin, JSONObject json) throws JSONException {	
+		String transactionId = json.getString("txid");
+		ZWTransaction transaction = new ZWTransaction(coin, transactionId);
 		
-		String hash = json.getString("txid");
-		ZWTransaction transaction = new ZWTransaction(coin, hash);
+		ArrayList<ZWTransactionOutput> receivedOutputs;
+		ArrayList<ZWTransactionOutput> spentOutputs;
+		
+		BigInteger inputCoin = new BigInteger("0");
+		BigInteger receivedCoins = new BigInteger("0");
+		BigInteger spentCoins = new BigInteger("0");
 		
 		long time = json.optLong("time");
 		if(time == 0) {
@@ -398,12 +406,7 @@ public class ZWDataSyncHelper {
 		}
 		transaction.setTxTime(time * 1000);
 		transaction.setConfirmationCount(json.optLong("confirmations"));
-		
-		//TODO -just setting this as zero for now, need to either get server to send this, or calculate it
-		//BigInteger fees = new BigInteger(json.getString("fee"));
-		BigInteger fees = new BigInteger("0");
-		
-		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs and outputs		
+	
 		ArrayList<String> displayAddresses = new ArrayList<String>();
 		
 		//list to display if no non-hidden addresses received coins
@@ -414,42 +417,100 @@ public class ZWDataSyncHelper {
 		for(int x = 0; x < inputs.length(); x++) {
 			JSONObject input = inputs.getJSONObject(x);
 			
-			boolean usedValue = false;
+			//boolean usedValue = false;
 			
-			//the json doesn't have an input address or value for us to compare to, so we have to look at previously parsed transactions
-			//and see if this input is the output of another transaction that we know about, which might indicate that it is us spending coins
+			
 			String inputTxid = input.getString("txid");
-			JSONObject matchingTransaction = parsedTransactions.get(inputTxid);
-			if(matchingTransaction != null) {
-				//if there's a match, it means we're spending coins in this transaction
-				int voutIndex = input.getInt("vout");
-				JSONArray vouts = matchingTransaction.getJSONArray("vout");
-				JSONObject vout = vouts.optJSONObject(voutIndex);
-				if(vout != null) {
-					JSONObject scriptPubKey = vout.getJSONObject("scriptPubKey");
-					JSONArray inputAddresses = scriptPubKey.getJSONArray("addresses");
-					for(int y = 0; y < inputAddresses.length(); y++) {
-						String inputAddress = inputAddresses.getString(y);
-						if(addresses.contains(inputAddress)) {
-							String outputValue = vout.getString("value");
-							if(!usedValue) {
-								usedValue = true;
-								BigInteger outputValueInt = convertToBigIntSafe(coin, outputValue);
-								value = value.subtract(outputValueInt);
-							}
-						}
-					}//end for y
+			int outputIndex = input.getInt("vout");
+			
+			ArrayList<ZWTransactionOutput> matchingOutputs = ZWWalletManager.getInstance().getTransactionOutputs(coin, inputTxid, outputIndex);
+			if(matchingOutputs.size() > 0) {
+				//this means we have an output that matches this input, so it's a transaction where we are spending coins
+				if(matchingOutputs.size() > 1) {
+					//TODO -if there is more than one then this is some kind of multisig transaction
 				}
+				
+				//these outputs by definition have to have the same value
+				//so if there are more than one outputs, just get the first one and use it 
+				ZWTransactionOutput matchingOutput = matchingOutputs.get(0);
+				
+				inputCoin = inputCoin.add(matchingOutput.getValue());
 			}
+
+			
 		}//end for x
 
 		
 		//read through all outputs
 		JSONArray outputs = json.getJSONArray("vout");
 		for(int x = 0; x < outputs.length(); x++) {
+			
 			JSONObject output = outputs.getJSONObject(x);
 			JSONObject scriptPubKey = output.getJSONObject("scriptPubKey");
 			JSONArray outputAddresses = scriptPubKey.getJSONArray("addresses");
+			
+			boolean usedValue = false;
+			boolean isMultiSig = false;
+		
+			int addressCount = outputAddresses.length();
+			
+			if(outputAddresses.length() > 1) {
+				isMultiSig = true;
+			}
+			
+			for(int addressIndex = 0; addressIndex < addressCount; addressIndex++) {
+				String outputAddressString = outputAddresses.getString(addressIndex);
+				
+				boolean ownedAddress = true;
+				ZWAddress outputAddress = ZWWalletManager.getInstance().getAddress(coin, outputAddressString, true);
+				if(outputAddress == null) {
+					outputAddress = ZWWalletManager.getInstance().getAddress(coin, outputAddressString, false);
+					ownedAddress = false;
+				}
+				
+				if(outputAddress != null) {
+					//this address is in our database, so we need to track the transaction data
+					String valueString = output.getString("value");
+					BigInteger value = convertToBigIntSafe(coin, valueString);
+					
+					int outputIndex = output.getInt("n");
+					
+					if(!outputAddress.isHidden()) {
+						//if this isn't a hidden change address add it to our list of address to display when showing this transaction
+						displayAddresses.add(outputAddressString);
+						
+						//also if we haven't already set some sort of note, use this address's label
+						if(transaction.getNote() == null || transaction.getNote().length() == 0){
+							transaction.setNote(outputAddress.getLabel());
+						}
+					}
+					
+					ZWTransactionOutput transactionOutput = new ZWTransactionOutput(outputAddressString, transactionId, outputIndex, value, isMultiSig);
+					
+					if(ownedAddress) {
+						receivedOutputs.add(transactionOutput);
+						if(!usedValue) {
+							receivedCoins = receivedCoins.add(value);
+						}
+					}
+					else {
+						spentOutputs.add(transactionOutput);
+						if(!usedValue) {
+							spentCoins = receivedCoins.add(value);
+						}
+					}
+				}
+				else {
+					//it's an address we don't know about, probably someone else's change, we don't care
+				}
+				
+			}
+			
+			
+			//TODO by this point we have all the info we need about the given outputs
+			//but we need to figure out note/label of the transaction, as well display addresses
+			
+			/****
 			boolean usedValue = false;
 			for(int y = 0; y < outputAddresses.length(); y++) {
 				String outputAddress = outputAddresses.getString(y);
@@ -487,8 +548,23 @@ public class ZWDataSyncHelper {
 				}
 
 			}
+			*******/
 		}
+		
+		
+		//TODO here calculate total value, fee if possible, check if we have display address, unhide hidden addresses if needed
 
+		if(inputCoin.compareTo(BigInteger.ZERO) > 0) {
+			//if we know of any input coins, then this is us spending coins
+			//we can calculate the fee
+		}
+		else {
+			//we're receiving coins
+			//we have no idea what the fee is
+			transaction.setAmount(receivedCoins);
+			transaction.setf
+		}
+		
 		transaction.setAmount(value);
 		transaction.setFee(fees);
 		if (displayAddresses.size() > 0){

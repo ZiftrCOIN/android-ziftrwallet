@@ -225,7 +225,6 @@ public class ZWCoinTable {
 			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
 			db.update(TABLE_NAME, cv, where, null);
 		}
-	
 		
 	}
 

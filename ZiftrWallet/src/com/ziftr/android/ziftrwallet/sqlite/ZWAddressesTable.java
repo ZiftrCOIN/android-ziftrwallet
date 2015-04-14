@@ -132,7 +132,7 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	protected List<ZWAddress> getAddresses(ZWCoin coin, List<String> addresses, SQLiteDatabase db) {
 
 		if(addresses == null || addresses.size() == 0) {
-			ZLog.log("Trying to get addresses with specifiying public keys. Returning all addresses");
+			ZLog.log("Trying to get addresses without specifiying public keys. Returning all addresses");
 			return getAllAddresses(coin, db);
 		}
 		

@@ -16,6 +16,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
+import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
@@ -64,6 +65,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	/** The helper for doing all things related to the sending addresses table. */
 	private ZWAddressesTable sendingAddressesTable;
 
+	private ZWTransactionOutputsTable transactionOutputsTable;
+	
 	/** The table to keep track of coin activated/deactivated/unactivated status. */
 	private ZWCoinTable coinTable;
 
@@ -83,6 +86,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 		this.sendingAddressesTable = new ZWSendingAddressesTable();
 		this.receivingAddressesTable = new ZWReceivingAddressesTable();
+		this.transactionOutputsTable = new ZWTransactionOutputsTable();
 		this.coinTable = new ZWCoinTable();
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
@@ -423,8 +427,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized ZWAddress getAddress(ZWCoin coinId, String address, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).getAddress(coinId, address, getReadableDatabase());
+	public synchronized ZWAddress getAddress(ZWCoin coin, String address, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).getAddress(coin, address, getReadableDatabase());
 	}
 
 	
@@ -436,8 +440,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	public synchronized List<ZWAddress> getAddresses(ZWCoin coinId, List<String> addresses, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).getAddresses(coinId, addresses, getReadableDatabase());
+	public synchronized List<ZWAddress> getAddresses(ZWCoin coin, List<String> addresses, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).getAddresses(coin, addresses, getReadableDatabase());
 	}
 	
 	
@@ -539,6 +543,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.receivingAddressesTable.create(coin, this.getWritableDatabase());
 		this.sendingAddressesTable.create(coin, this.getWritableDatabase());
 		this.transactionsTable.create(coin, this.getWritableDatabase());
+		this.transactionOutputsTable.create(coin, this.getWritableDatabase());
 		
 		// Update table to match activated status
 		this.coinTable.activateCoin(coin, this.getWritableDatabase());
@@ -573,6 +578,18 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	public synchronized void deactivateCoin(ZWCoin coin) {
 		this.coinTable.deactivateCoin(coin, getWritableDatabase());
+	}
+	
+
+	/**
+	 * Get any outputs that are from the given transaction and index. Most of the time should only return 1
+	 * output, but with multisig it's possible there could be multiple output addresses matching a single index
+	 * @param transactionId the transaction id these outputs are for
+	 * @param outputIndex the index of outputs these outputs are for
+	 * @return 
+	 */
+	public ArrayList<ZWTransactionOutput> getTransactionOutputs(ZWCoin coin, String transactionId, int outputIndex) {
+		return this.transactionOutputsTable.getTransactionOutputs(coin, transactionId, outputIndex, this.getReadableDatabase());
 	}
 
 	

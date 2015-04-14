@@ -20,6 +20,7 @@ public class ZWTransactionOutputsTable extends ZWCoinSpecificTable {
 	private static final String COLUMN_TRANSACTION_ID = "transaction_id";
 	private static final String COLUMN_VOUT_INDEX = "vout_index";
 	private static final String COLUMN_VALUE = "value";
+	private static final String COLUMN_MULTISIG = "multisig";
 	
 	@Override
 	protected void createBaseTable(ZWCoin coin, SQLiteDatabase database) {
@@ -32,21 +33,24 @@ public class ZWTransactionOutputsTable extends ZWCoinSpecificTable {
 
 	@Override
 	protected void createTableColumns(ZWCoin coin, SQLiteDatabase database) {
-		//all the tables added in create table
+		this.addColumn(coin, COLUMN_MULTISIG, "INTEGER", database);
 	}
 
+	
 	@Override
 	protected String getTableName(ZWCoin coin) {
 		return coin.getSymbol().toLowerCase(Locale.US) + TABLE_NAME_BASE;
 	}
 
 	
-	protected void addTransactionOutput(ZWCoin coin, String address, String txId, int index, long value, SQLiteDatabase database) {
+	protected void addTransactionOutput(ZWCoin coin, String address, String txId, int index, String value, boolean isMultiSig, SQLiteDatabase database) {
 	
 		ContentValues contentValues = new ContentValues(4);
 		contentValues.put(COLUMN_ADDRESS, address);
 		contentValues.put(COLUMN_TRANSACTION_ID, txId);
 		contentValues.put(COLUMN_VOUT_INDEX, index);
+		contentValues.put(COLUMN_VALUE, value);
+		contentValues.put(COLUMN_MULTISIG, isMultiSig);
 		
 		String whereClause = COLUMN_TRANSACTION_ID + " = " + DatabaseUtils.sqlEscapeString(txId) + 
 				" AND " + COLUMN_VOUT_INDEX + " = " + String.valueOf(index) +
@@ -91,9 +95,10 @@ public class ZWTransactionOutputsTable extends ZWCoinSpecificTable {
 		String address = cursor.getString(cursor.getColumnIndex(COLUMN_ADDRESS));
 		String transactionId = cursor.getString(cursor.getColumnIndex(COLUMN_TRANSACTION_ID));
 		int index = cursor.getInt(cursor.getColumnIndex(COLUMN_VOUT_INDEX));
-		long value = cursor.getLong(cursor.getColumnIndex(COLUMN_VALUE));
+		String value = cursor.getString(cursor.getColumnIndex(COLUMN_VALUE));
+		boolean isMultiSig = cursor.getInt(cursor.getColumnIndex(COLUMN_MULTISIG)) > 0;
 		
-		ZWTransactionOutput output = new ZWTransactionOutput(address, transactionId, index, value);
+		ZWTransactionOutput output = new ZWTransactionOutput(address, transactionId, index, value, isMultiSig);
 		return output;
 	}
 	

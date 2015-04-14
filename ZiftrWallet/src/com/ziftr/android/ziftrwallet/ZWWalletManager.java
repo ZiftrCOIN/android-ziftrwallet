@@ -1,6 +1,7 @@
 package com.ziftr.android.ziftrwallet;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import javax.crypto.SecretKey;
 
@@ -11,6 +12,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
@@ -172,7 +174,6 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 		key.setKeyCrypter(this.passphraseToCrypter(passphrase));
 		return key;
 	}
-
 
 }
 
