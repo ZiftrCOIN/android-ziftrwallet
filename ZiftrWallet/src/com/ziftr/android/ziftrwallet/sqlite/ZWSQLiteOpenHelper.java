@@ -463,8 +463,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	
 	/**
-	 * As part of the R in CRUD, this method gets an address from the 
-	 * database for the given coin type and table boolean.
+	 * This returns a list of ZWAddress objects
+	 * if addresses is null, returns all address objects
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
 	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 

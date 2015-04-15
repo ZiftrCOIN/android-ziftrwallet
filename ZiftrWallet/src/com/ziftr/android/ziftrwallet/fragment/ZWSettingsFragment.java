@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.dialog.ZWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWResetPassphraseDialog;
@@ -232,7 +233,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				this.getZWMainActivity().alertConfirmation(ZWRequestCodes.DEBUG_MODE_ON, warning, ZWTags.ACTIVATE_DEBUG, new Bundle());
 			}
 		} else if (v == this.exportwalletButton) {
-			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");
+			File wallet = new File(this.getActivity().getExternalFilesDir(null), ZWWalletManager.DATABASE_NAME);
 			Intent intent = new Intent(Intent.ACTION_SEND);
 			intent.setType("plain/text");
 			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(wallet));

@@ -79,7 +79,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 				return null;
 			}
 		}
-			return instance;
+		return instance;
 	}
 
 	/**

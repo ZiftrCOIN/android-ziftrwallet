@@ -259,7 +259,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 	 * @param address
 	 * @return
 	 */
-	private String getPrivDataForInsert(ZWECKey key) {
+	public static String getPrivDataForInsert(ZWECKey key) {
 		// TODO does this use the keyCrypter correctly/at all? 
 		String privData;
 		if (key.isEncrypted()) {
@@ -270,7 +270,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		return getPrivDataForInsert(privData, key.isEncrypted());
 	}
 	
-	private String getPrivDataForInsert(String data, boolean encrypted) {
+	public static String getPrivDataForInsert(String data, boolean encrypted) {
 		return encrypted ? (ZWKeyCrypter.PBE_AES_ENCRYPTION + data) : (ZWKeyCrypter.NO_ENCRYPTION + data);
 	}
 
