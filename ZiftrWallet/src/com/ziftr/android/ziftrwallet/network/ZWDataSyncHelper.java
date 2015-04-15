@@ -470,10 +470,7 @@ public class ZWDataSyncHelper {
 					//this address is in our database, so we need to track the transaction data
 					String valueString = output.getString("value");
 					BigInteger value = convertToBigIntSafe(coin, valueString);
-					
 					int outputIndex = output.getInt("n");
-					
-					
 					
 					if(!outputAddress.isHidden()) {
 						
@@ -483,9 +480,8 @@ public class ZWDataSyncHelper {
 						}
 					}
 					
-					
-					
 					ZWTransactionOutput transactionOutput = new ZWTransactionOutput(outputAddressString, transactionId, outputIndex, value, isMultiSig);
+					transaction.setMultisig(isMultiSig);
 					
 					if(ownedAddress) {
 						receivedOutputs.add(transactionOutput);
@@ -541,9 +537,7 @@ public class ZWDataSyncHelper {
 			transaction.setFee(BigInteger.ZERO);
 		}
 
-		
-		//TODO here check if we have display address, unhide hidden addresses if needed
-		
+		//go through our used addresses and choose the ones to display in the UI
 		ArrayList<String> displayStrings = new ArrayList<String>();
 		for(ZWAddress address : displayAddresses) {
 			
@@ -580,7 +574,7 @@ public class ZWDataSyncHelper {
 			}
 		}
 		
-		//TODO -now we need to save the outputs we're using
+		//now we need to save the outputs we're using
 		for(ZWTransactionOutput output : receivedOutputs) {
 			ZWWalletManager.getInstance().addTransactionOutput(coin, output);
 		}

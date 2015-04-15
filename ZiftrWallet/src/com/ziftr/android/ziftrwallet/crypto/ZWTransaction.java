@@ -71,6 +71,14 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 */
 	private List<String> displayAddresses;
 	
+	
+	/**
+	 * Are the outputs of this transaction multi-signature. Currently the app doesn't support spending outputs that require more than
+	 * one signature, even if the user owns them all. However, it can receive them, so they need to be flagged so the user knows.
+	 * Otherwise another malicious user could send them a 1 of 2 multisig and simply take their coins back later.
+	 */
+	private boolean multisig = false;
+	
 	// Viewing stuff
 
 	/** Which coin this transaction is for */
@@ -249,6 +257,15 @@ public class ZWTransaction implements ZWSearchableListItem {
 			}
 			return sb.toString();
 		}
+	}
+	
+	
+	public boolean isMultisig() {
+		return this.multisig;
+	}
+	
+	public void setMultisig(boolean multisig) {
+		this.multisig = multisig;
 	}
 
 	

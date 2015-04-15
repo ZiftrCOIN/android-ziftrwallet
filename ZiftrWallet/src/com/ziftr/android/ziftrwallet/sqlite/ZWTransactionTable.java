@@ -58,6 +58,9 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 	 */
 	public static final String COLUMN_DISPLAY_ADDRESSES = "display_addresses";
 
+	
+	public static final String COLUMN_MULTISIG = "multisig";
+	
 	protected ZWTransactionTable() {
 
 	}
@@ -97,6 +100,9 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		
 		//add transaction creation timestamp
 		addColumn(coin, COLUMN_CREATION_TIMESTAMP, "INTEGER", database);
+		
+		//add column for whether or not this transaction is multisig
+		addColumn(coin, COLUMN_MULTISIG, "INTEGER", database);
 	}
 
 	protected void addTransaction(ZWTransaction transaction, SQLiteDatabase db) {
@@ -342,16 +348,21 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		db.delete(getTableName(tx.getCoin()), getWhereClaus(tx), null);
 	}
 
-	private ZWTransaction cursorToTransaction(ZWCoin coin, Cursor c, SQLiteDatabase db) {
+	private ZWTransaction cursorToTransaction(ZWCoin coin, Cursor cursor, SQLiteDatabase db) {
 		
-		String hash = c.getString(c.getColumnIndex(COLUMN_HASH));
+		String hash = cursor.getString(cursor.getColumnIndex(COLUMN_HASH));
 		ZWTransaction tx = new ZWTransaction(coin, hash);
 
-		tx.setNote(c.getString(c.getColumnIndex(COLUMN_NOTE)));
-		tx.setTxTime(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+		tx.setNote(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE)));
+		tx.setTxTime(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+		
+		int multisig = cursor.getInt(cursor.getColumnIndex(COLUMN_MULTISIG));
+		if(multisig > 0) {
+			tx.setMultisig(true);
+		}
 		
 		try {
-			tx.setAmount(new BigInteger(c.getString(c.getColumnIndex(COLUMN_AMOUNT))));
+			tx.setAmount(new BigInteger(cursor.getString(cursor.getColumnIndex(COLUMN_AMOUNT))));
 		}
 		catch(Exception e) {
 			ZLog.log("Exception loading transaction amount: ", e);
@@ -359,10 +370,10 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		}
 		
 		
-		tx.setFee(new BigInteger(c.getString(c.getColumnIndex(COLUMN_FEE))));
-		tx.setConfirmationCount(c.getInt(c.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
+		tx.setFee(new BigInteger(cursor.getString(cursor.getColumnIndex(COLUMN_FEE))));
+		tx.setConfirmationCount(cursor.getInt(cursor.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
 
-		String addressesString = c.getString(c.getColumnIndex(COLUMN_DISPLAY_ADDRESSES));
+		String addressesString = cursor.getString(cursor.getColumnIndex(COLUMN_DISPLAY_ADDRESSES));
 		List<String> addressList = new ArrayList<String>();
 		String[] addressArray = addressesString.split(",");
 		for (String address : addressArray) {
@@ -384,6 +395,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		values.put(COLUMN_CREATION_TIMESTAMP, tx.getTxTime());
 		values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
 		values.put(COLUMN_DISPLAY_ADDRESSES, tx.getAddressAsCommaListString());
+		values.put(COLUMN_MULTISIG, tx.isMultisig());
 
 		return values;
 	}
