@@ -33,5 +33,8 @@ public class ZWRequestCodes {
 	public static final int CONFIRM_SEND_COINS = 15;
 	
 	public static final int CONTINUE_SENDING_UNCONFIRMED = 16;
+	
+	//used for when user tries to reencrypt encrypted addresses with new passphrase, ask for old passphrase to decrypt
+	public static final int PASSPHRASE_FOR_DECRYPTING = 17;
 
 }

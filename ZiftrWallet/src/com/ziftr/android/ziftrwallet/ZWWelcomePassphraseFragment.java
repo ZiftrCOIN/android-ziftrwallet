@@ -10,7 +10,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWWelcomePassphraseFragment extends Fragment implements OnClickListener {
@@ -61,7 +63,7 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 	@Override
 	public void onClick(View v) {
 
-		ZWWelcomeActivity welcomeActivity = (ZWWelcomeActivity) this.getActivity();
+		final ZWWelcomeActivity welcomeActivity = (ZWWelcomeActivity) this.getActivity();
 		// Need an activity to do pretty much everything below
 		if (welcomeActivity == null) {
 			return;
@@ -79,9 +81,28 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 					ZiftrUtils.runOnNewThread(new Runnable() {
 						@Override
 						public void run() {
-							ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(null, passphrase);
-							String saltedHash = ZiftrUtils.saltedHashString(passphrase);
-							ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
+							final reencryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(null, passphrase);
+							//tried to set passphrase on encrypted database private keys
+							if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
+								welcomeActivity.runOnUiThread(new Runnable(){
+									@Override
+									public void run() {
+										if (status == reencryptionStatus.encrypted){
+											welcomeActivity.alertPassphraseDialog(ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING, new Bundle(), 
+													"pass_for_old_encrypted_keys", "Your keys have already been encrypted with a passphrase, please enter your old passphrase:");
+										} else {
+											welcomeActivity.alert("We've encountered a fatal error in your database, please contact customer service!",  
+													"inconsistent_encrypted_database");
+										}
+									}
+									
+								});
+
+							} else {
+								//set passphrase
+								String saltedHash = ZiftrUtils.saltedHashString(passphrase);
+								ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
+							}
 						}
 					});
 					this.startNextScreen();
@@ -95,7 +116,7 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 			}
 		}
 	}
-
+	
 	private void startNextScreen() {
 		ZWWelcomeActivity welcomeActivity = (ZWWelcomeActivity) this.getActivity();
 		if (ZWPreferencesUtils.userHasSetName() || ZWPreferencesUtils.getDisabledName()) {

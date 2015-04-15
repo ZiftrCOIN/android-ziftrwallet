@@ -75,6 +75,7 @@ import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -848,15 +849,30 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		// TODO put up a blocking dialog while this is happening
 	
 		//note: null/blank newPassphrase is ok now, it's how password is cleared
-		
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			@Override
-			public void run() {
-				walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
-				String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
-				ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
-			}
-		});
+		final ZWMainFragmentActivity mainActivity = this;
+		final reencryptionStatus status = walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
+		//tried to set passphrase on encrypted database private keys
+		if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
+			this.runOnUiThread(new Runnable(){
+				@Override
+				public void run() {
+					mainActivity.setShowingDialog(false);
+					if (status == reencryptionStatus.encrypted){
+						mainActivity.showGetPassphraseDialog(ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING, new Bundle(), 
+								"pass_for_old_encrypted_keys", "Your keys have already been encrypted with a passphrase, please enter your old passphrase:");
+					} else {
+						mainActivity.alertUser("We've encountered a fatal error in your database, please contact customer service!",  
+								"inconsistent_encrypted_database");
+					}
+				}
+				
+			});
+			return false;
+		} else {
+			//reencryption was successful
+			String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
+			ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
+		}
 		return true;
 	}
 	
@@ -930,23 +946,28 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 */
 	public void openSendCoinsView(Object preloadData) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_FRAGMENT);
+
 		if (fragToShow == null) {
 			fragToShow = new ZWSendCoinsFragment();
+			if(preloadData != null) {
+				//note, instanceof is a bit hacky, but best to keep all this fragment loading code in one method
+				if(preloadData instanceof ZWCoinURI) {
+					((ZWSendCoinsFragment) fragToShow).preloadSendData((ZWCoinURI) preloadData);
+				} else {
+					((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
+				}
 		}
 		
-		if(preloadData != null) {
-			//note, instanceof is a bit hacky, but best to keep all this fragment loading code in one method
-			if(preloadData instanceof ZWCoinURI) {
-				((ZWSendCoinsFragment) fragToShow).preloadSendData((ZWCoinURI) preloadData);
-			}
-			else {
-				((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
-			}
-		}
-		
-		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
+			// If we did a tablet view this might be different. 
+			this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
 				true, ZWTags.ACCOUNTS_INNER);
+		} else {
+			//we are already showing sendcoins fragment
+			if(preloadData instanceof ZWCoinURI) {
+				((ZWSendCoinsFragment) fragToShow).loadSendData((ZWCoinURI) preloadData);
+			}
+		}
+
 	}
 	
 
@@ -1114,19 +1135,20 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 * @param args = bundle with ZWCoinType of currency to add if user is adding currency
 	 */
 	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag) {
+		this.showGetPassphraseDialog(requestcode, args, tag, "Please input your passphrase.");
+	}
+	
+	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag, String message) {
 		if (!isShowingDialog()) {
 			ZWValidatePassphraseDialog passphraseDialog = new ZWValidatePassphraseDialog();
 
 			args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestcode);
 			passphraseDialog.setArguments(args);
 
-			String message = "Please input your passphrase. ";
 			passphraseDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
-
 			passphraseDialog.show(this.getSupportFragmentManager(), tag);
 		}
 	}
-
 	
 	///////////// Handler methods /////////////
 
@@ -1181,13 +1203,25 @@ ZiftrNetworkHandler, ZWMessageHandler {
 				//manually toggle showing false to allow alert to show
 				this.showingDialog = false;
 				this.alertUser(getResources().getString(R.string.zw_disabled_passphrase), ZWTags.PASSPHRASE_DISABLED);
-
 				break;
 			}
 		} else {
-			//manually toggle showing false to allow alert to show
-			this.showingDialog = false;
-			this.alertUser(getResources().getString(R.string.zw_incorrect_passphrase), ZWTags.PASSPHRASE_INCORRECT);
+			//if input doesnt match stored hash we may be entering a passphrase for decrypting
+			if (requestCode == ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING){
+				if (ZWWalletManager.getInstance().attemptDecrypt(passphrase)){
+					//the passphrase worked, decrypt all keys now
+					ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(passphrase, null);
+					this.setShowingDialog(false);
+					alertUser("Your old passphrase was correct and your keys unencrypted, please set your passphrase again.", "correct_passphrase");
+				} else {
+					this.setShowingDialog(false);
+					alertUser("Your passphrase was incorrect, Warning: your database is still encrypted with the old passphrase", "incorrect_passphrase");
+				}
+			} else {
+				//manually toggle showing false to allow alert to show
+				this.showingDialog = false;
+				this.alertUser(getResources().getString(R.string.zw_incorrect_passphrase), ZWTags.PASSPHRASE_INCORRECT);
+			}
 		}
 
 	}
@@ -1220,11 +1254,14 @@ ZiftrNetworkHandler, ZWMessageHandler {
 					}
 					this.showingDialog = false;
 					this.alertUser(getResources().getString(R.string.zw_set_pass_complete), ZWTags.SET_PASS_COMPLETE);
+				} else {
+					//if changepassphrase returned false, the passphrase did not correctly decrypt already encrypted keys
+					return;
 				}
 			} else {
 				//manually toggle showing false to allow alert to show
 				this.showingDialog = false;
-
+				
 				// If don't match, tell user. 
 				this.alertUser(getResources().getString(R.string.zw_incorrect_reset_passphrase), ZWTags.PASSPHRASE_INCORRECT);
 			} 

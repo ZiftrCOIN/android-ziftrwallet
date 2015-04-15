@@ -1,7 +1,17 @@
 package com.ziftr.android.ziftrwallet;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,12 +19,13 @@ import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
-import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypterException;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.sqlite.ZWMiscTable;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class ZWPreferencesUtils {
+	public static final String ZWOPTIONS_KEY = "ziftrwallet_stored_options";
 
 	/** For putting the passphrase into a bundle and/or intent extras. */
 	public static final String BUNDLE_PASSPHRASE_KEY = "bundle_passphrase_key";
@@ -30,9 +41,6 @@ public abstract class ZWPreferencesUtils {
 
 	/** The key for getting the name of the user from the preferences. */
 	public static final String PREFS_USER_NAME_KEY = "zw_name_key";
-	
-	/** The key to get and save the salt as used by the specific user of the application. */
-	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
 	
 	/** skip the screen for name */
 	public final static String NAME_DISABLED_KEY = "zw_disabled_name_key";
@@ -61,8 +69,11 @@ public abstract class ZWPreferencesUtils {
 	/** if true we are currently in a state where we should extend the timer and keep the cachedpassphrase*/
 	public static boolean usingCachedPass = false;
 
-	/** interval in milliseconds to check if we can clear the cached passphrase **/
+	/** interval in milliseconds to check if we can clear the cached passphrase */
 	private static final int clearPassInterval = 300000;
+	
+	/** local in memory copy of options read from file */
+	private static JSONObject options = null;
 	
 
 	/**
@@ -71,34 +82,25 @@ public abstract class ZWPreferencesUtils {
 	 * @return the stored hash of the users passphrase, if there is one.
 	 */
 	static byte[] getStoredPassphraseHash() {
-		// Get the preferences
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			// Get the passphrase hash
-			String storedPassphrase = prefs.getString(PREFS_PASSPHRASE_KEY, null);
-			
-			byte[] storedHash;
-			if(storedPassphrase == null || storedPassphrase.isEmpty()) {
-				storedHash = null;
-			}
-			else {
-				// If it's not null, convert it back to a byte array
-				storedHash = ZiftrUtils.hexStringToBytes(storedPassphrase);
-			}
-			
-			// Return the result
-			return storedHash;
+		String storedPassphrase = getOption(PREFS_PASSPHRASE_KEY, null);
+		byte[] storedHash;
+		if(storedPassphrase == null || storedPassphrase.isEmpty()) {
+			//if not in our options file check database
+			storedPassphrase = ZWWalletManager.getInstance().getMiscVal(ZWMiscTable.PASS_KEY);
 		}
-		return null;
+		if (storedPassphrase == null || storedPassphrase.isEmpty()){
+			storedHash = null;
+		} else {
+			// If it's not null, convert it back to a byte array
+			storedHash = ZiftrUtils.hexStringToBytes(storedPassphrase);
+		}
+		// Return the result
+		return storedHash;
 	}
 	
 	static void setStoredPassphraseHash(String saltedHash) {
-		SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, saltedHash);
-			editor.commit();
-		}
+		setOption(PREFS_PASSPHRASE_KEY, saltedHash);
+		ZWWalletManager.getInstance().upsertMiscVal(ZWMiscTable.PASS_KEY, saltedHash);
 	}
 
 	/**
@@ -131,115 +133,47 @@ public abstract class ZWPreferencesUtils {
 		}
 	}
 
-	public static String getSalt() {
-		SharedPreferences prefs = getPrefs();
-		String salt = null;
-		if (prefs != null){
-			salt = prefs.getString(PREFS_SALT_KEY, null);
-			if (salt != null && !salt.isEmpty()) {
-				return salt;
-			}
-	
-			try {
-				salt = ZWPbeAesCrypter.generateSalt();
-			} catch (ZWKeyCrypterException e) {
-				ZLog.log("error: " + e.getMessage());
-				return null;
-			}
-	
-			Editor editor = prefs.edit();
-			editor.putString(PREFS_SALT_KEY, salt);
-			editor.commit();
-		}
-
-		return salt;
-	}
-
 	public static boolean getFeesAreEditable() {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getBoolean(EDITABLE_FEES_KEY, false);
-		}
-		return false;
+		return getOption(EDITABLE_FEES_KEY, false);
 	}
 
 	public static void setFeesAreEditable(boolean feesAreEditable) {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putBoolean(EDITABLE_FEES_KEY, feesAreEditable);
-			editor.commit();
-		}
+		setOption(EDITABLE_FEES_KEY, feesAreEditable);
 	}
 
 	public static boolean getMempoolIsSpendable() {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getBoolean(SPENDABLE_MEMPOOL_KEY, false);
-		}
-		return false;
+		return getOption(SPENDABLE_MEMPOOL_KEY, false);
 	}
 
 	public static void setMempoolIsSpendable(boolean spendable) {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putBoolean(SPENDABLE_MEMPOOL_KEY, spendable);
-			editor.commit();
-		}
+		setOption(SPENDABLE_MEMPOOL_KEY, spendable);
 	}
 	
 	public static boolean getPassphraseWarningDisabled() {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getBoolean(PASSPHRASE_WARNING_KEY, false);
-		}
-		return false;
+		return getOption(PASSPHRASE_WARNING_KEY, false);
 	}
 
 	
 	public static void setPassphraseWarningDisabled(boolean isDisabled) {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putBoolean(PASSPHRASE_WARNING_KEY, isDisabled);
-			editor.commit();
-		}
+		setOption(PASSPHRASE_WARNING_KEY, isDisabled);
 	}
 	
 	public static void disablePassphrase(){
-		SharedPreferences prefs = ZWPreferencesUtils.getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putString(ZWPreferencesUtils.PREFS_PASSPHRASE_KEY, null);
-			editor.commit();
-		}
+		setStoredPassphraseHash(null);
 	}
 
 	
 	public static ZWFiat getFiatCurrency(){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null) {
-			return ZWFiat.valueOf(prefs.getString(FIAT_CURRENCY_KEY, "US Dollars"));
-		}
-		return ZWFiat.valueOf("US Dollars");
+		String fiatString = getOption(FIAT_CURRENCY_KEY, "US Dollars");
+		return ZWFiat.valueOf(fiatString);
 	}
 
 	public static void setFiatCurrency(String fiatSelected){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putString(FIAT_CURRENCY_KEY, fiatSelected);
-			editor.commit();
-		}
+		setOption(FIAT_CURRENCY_KEY, fiatSelected);
 	}
 	
 	public static String getUserName() {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getString(PREFS_USER_NAME_KEY, null);
-		}
-		return null;
+		return getOption(PREFS_USER_NAME_KEY, null);
 	}
 	
 	public static boolean userHasSetName() {
@@ -247,80 +181,39 @@ public abstract class ZWPreferencesUtils {
 	}
 	
 	public static void setUserName(String userName) {
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putString(PREFS_USER_NAME_KEY, userName);
-			editor.commit();
-		}
+		setOption(PREFS_USER_NAME_KEY, userName);
 	}
 	
 	public static void setDisabledName(boolean isDisabled){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putBoolean(NAME_DISABLED_KEY, isDisabled);
-			editor.commit();
-		}
+		setOption(NAME_DISABLED_KEY, isDisabled);
 	}
 	
 	public static boolean getDisabledName(){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getBoolean(NAME_DISABLED_KEY, false);
-		}
-		return false;
+		return getOption(NAME_DISABLED_KEY, false);
 	}
 
 	public static String getWidgetCoin(){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getString(ZWWalletWidget.WIDGET_CURR, null);
-		}
-		return null;
+		return getOption(ZWWalletWidget.WIDGET_CURR, null);
 	}
 	
 	public static void setWidgetCoin(String coin){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putString(ZWWalletWidget.WIDGET_CURR, coin);
-			editor.commit();
-		}
+		setOption(ZWWalletWidget.WIDGET_CURR, coin);
 	}
 
 	public static boolean getDebugMode(){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getBoolean(DEBUG_SETTING_KEY, false);
-		}
-		return false;
+		return getOption(DEBUG_SETTING_KEY, false);
 	}
 	
 	public static void setDebugMode(boolean enabled){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putBoolean(DEBUG_SETTING_KEY, enabled);
-			editor.commit();
-		}
+		setOption(DEBUG_SETTING_KEY, enabled);
 	}
 	
 	public static boolean getLogToFile(){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			return prefs.getBoolean(LOG_TO_FILE_KEY, false);	
-		}
-		return false;
+		return getOption(LOG_TO_FILE_KEY, false);
 	}
 	
 	public static void setLogToFile(boolean enabled){
-		SharedPreferences prefs = getPrefs();
-		if (prefs != null){
-			Editor editor = prefs.edit();
-			editor.putBoolean(LOG_TO_FILE_KEY, enabled);
-			editor.commit();
-		}
+		setOption(LOG_TO_FILE_KEY, enabled);
 	}
 	
 	public static String getCachedPassphrase(){
@@ -329,6 +222,15 @@ public abstract class ZWPreferencesUtils {
 		} else {
 			return null;
 		}
+	}
+	
+	public static String getSalt(){
+		String salt = ZWWalletManager.getInstance().getMiscVal(ZWMiscTable.SALT);
+		if (salt == null){
+			salt = ZWPbeAesCrypter.generateSalt();
+			ZWWalletManager.getInstance().upsertMiscVal(ZWMiscTable.SALT, salt);
+		}
+		return salt;
 	}
 	
 	public static void setCachedPassphrase(String pass){
@@ -352,6 +254,141 @@ public abstract class ZWPreferencesUtils {
 		cacheHandler.postDelayed(clearPassEvent, ZWPreferencesUtils.clearPassInterval);
 	}
 	
+	private static String getOption(String key, String defaultVal) {
+		if (ZWPreferencesUtils.options == null){
+			ZWPreferencesUtils.loadOptions();
+		}
+		try {
+			if (options.has(key)){
+				return ZWPreferencesUtils.options.getString(key);
+			}
+		} catch (JSONException e) {
+			//no value found return default
+		}
+		
+		//if we have old preferences, set the default value to the old preference so that if we have no 
+		//new settings, we will read from the old prefs.
+		SharedPreferences prefs = getPrefs();
+		if (prefs != null && prefs.contains(key)){
+			defaultVal = prefs.getString(key, defaultVal);
+			//update options file with old pref and then remove from prefs
+			setOption(key, defaultVal);
+			Editor editor = prefs.edit();
+			editor.remove(key);
+		}
+		
+		return defaultVal;
+	}
+	
+	
+	private static boolean getOption(String key, boolean defaultVal) {
+		if (ZWPreferencesUtils.options == null){
+			ZWPreferencesUtils.loadOptions();
+		}
+		try {
+			if (options.has(key)){
+				return ZWPreferencesUtils.options.getBoolean(key);
+			}
+		} catch (JSONException e) {
+			//no value found return default
+		}
+		
+		//if we have old preferences, set the default value to the old preference so that if we have no 
+		//new settings, we will read from the old prefs.
+		SharedPreferences prefs = getPrefs();
+		if (prefs != null && prefs.contains(key)){
+			defaultVal = prefs.getBoolean(key, defaultVal);
+			//update options file with old pref and then remove from prefs
+			setOption(key, defaultVal);
+			Editor editor = prefs.edit();
+			editor.remove(key);
+		}
+		
+		return defaultVal;
+	}
+	
+	private static void setOption(String key, boolean value){
+		if (ZWPreferencesUtils.options == null){
+			ZWPreferencesUtils.loadOptions();
+		}
+		try {
+			ZWPreferencesUtils.options.put(key, value);
+			ZWPreferencesUtils.commitOptions();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void setOption(String key, String value){
+
+		if (ZWPreferencesUtils.options == null){
+			ZWPreferencesUtils.loadOptions();
+		}
+		try {
+			ZWPreferencesUtils.options.put(key, value);
+			ZWPreferencesUtils.commitOptions();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void commitOptions(){
+		Context app = ZWApplication.getApplication();
+		try {
+			FileOutputStream fos = app.openFileOutput(ZWOPTIONS_KEY, Context.MODE_PRIVATE);
+			if (ZWPreferencesUtils.options != null){
+				fos.write(ZWPreferencesUtils.options.toString().getBytes());
+				fos.close();
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			ZLog.log("Error getting options input File not Found: " + e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void loadOptions(){
+		Context app = ZWApplication.getApplication();
+		try {
+			FileInputStream f = app.openFileInput(ZWOPTIONS_KEY);
+			StringBuffer data = new StringBuffer("");
+			InputStreamReader isr = new InputStreamReader(f);
+			BufferedReader reader = new BufferedReader(isr);
+			String readString = reader.readLine();
+			while (readString != null){
+				data.append(readString);
+				readString = reader.readLine();
+			}
+			if (data.toString().isEmpty()){
+				//no data found on internal storage initialize new jsonobject for options
+				ZWPreferencesUtils.options = new JSONObject("{}");
+			} else {
+				ZWPreferencesUtils.options = new JSONObject(data.toString());
+			}
+		} catch (FileNotFoundException e1) {	
+			ZLog.log("Error getting options output File not Found: " + e1 + "\n creating new file");
+			try {
+				app.openFileOutput(ZWOPTIONS_KEY, Context.MODE_PRIVATE | Context.MODE_APPEND);
+				ZWPreferencesUtils.options = new JSONObject("{}");
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	//backwards compatible with old versions using preferences
 	private static SharedPreferences getPrefs() {
 		try {
 			Context app = ZWApplication.getApplication();
@@ -361,6 +398,11 @@ public abstract class ZWPreferencesUtils {
 		}
 	}
 	
-	
+	//clears and deletes options file and local data
+	public static void clearOptions(){
+		ZWPreferencesUtils.options = null;
+		File options = new File(ZWApplication.getApplication().getFilesDir().getAbsoluteFile(), ZWPreferencesUtils.ZWOPTIONS_KEY);
+		options.delete();
+	}
 
 }

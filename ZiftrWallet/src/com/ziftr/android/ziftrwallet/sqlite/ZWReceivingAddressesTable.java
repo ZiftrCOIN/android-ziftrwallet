@@ -10,11 +10,13 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypterException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -43,7 +45,11 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 	public static int UNSPENT_FROM = 0;
 	public static int SPENT_FROM = 1;
 
-	
+	public static enum reencryptionStatus{
+		success,
+		encrypted, //first address was already encrypted
+		error //non-first address was already encrypted
+	};
 	
 	@Override
 	protected String getTableName(ZWCoin coin) {
@@ -117,7 +123,8 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		return values;
 	}
 
-	protected void recryptAllAddresses(ZWCoin coin, ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter, SQLiteDatabase db) throws CryptoException {
+	//called in wrapper with transaction begin and transaction end to ensure atomicity
+	protected reencryptionStatus recryptAllAddresses(ZWCoin coin, ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter, SQLiteDatabase db) throws CryptoException {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT ");
@@ -126,19 +133,29 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		sb.append(getTableName(coin));
 		sb.append(";");
 		Cursor c = db.rawQuery(sb.toString(), null);
-
 		List<String> oldPrivKeysInDb = new ArrayList<String>();
+		//read private keys
 		if (c.moveToFirst()) {
 			do {
 				oldPrivKeysInDb.add(c.getString(c.getColumnIndex(COLUMN_PRIV_KEY)));
 			} while (c.moveToNext());
 		}
 		c.close();
-
-		for (String oldPrivKeyValInDb : oldPrivKeysInDb) {
+		//decrypt private keys
+		for (int i=0; i<oldPrivKeysInDb.size(); i++){
+			String oldPrivKeyValInDb = oldPrivKeysInDb.get(i);
 			String decrypted = oldPrivKeyValInDb.substring(1);
 			if (oldCrypter != null) {
 				decrypted = oldCrypter.decrypt(new ZWEncryptedData(oldPrivKeyValInDb.substring(1)));
+			} else if (oldPrivKeyValInDb.charAt(0) == ZWKeyCrypter.PBE_AES_ENCRYPTION){
+				if (i==0){
+					ZLog.log("ERROR tried to encrypt already encrypted first key possible recovery by entering old passphrase.");
+					return reencryptionStatus.encrypted;
+				} else {
+				//shouldn't happen
+					ZLog.log("ERROR tried to encrypt already non-first encrypted keys, inconsistently encrypted keys uh oh");
+				}
+				return reencryptionStatus.error;
 			}
 			
 			ZLog.log("priv key: ", decrypted);
@@ -162,7 +179,44 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 				throw new CryptoException("Tables were not updated properly");
 			}
 		}
+		return reencryptionStatus.success;
+	}
+	
+	protected boolean attemptDecryptAllAddresses(ZWCoin coin, ZWKeyCrypter crypter, SQLiteDatabase db){
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT ");
+		sb.append(COLUMN_PRIV_KEY);
+		sb.append(",");
+		sb.append(COLUMN_PUB_KEY);
+		sb.append(" FROM ");
+		sb.append(getTableName(coin));
+		sb.append(";");
+		Cursor c = db.rawQuery(sb.toString(), null);
+		//read private keys
+		if (c.moveToFirst()) {
+			do {
+				String encryptedPrivKey = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
+				String storedPubKey = c.getString(c.getColumnIndex(COLUMN_PUB_KEY));
+				if (encryptedPrivKey.charAt(0) != ZWKeyCrypter.PBE_AES_ENCRYPTION){
+					ZLog.log("Error tried to decrypt already decrypted key...");
+				} else {
+					encryptedPrivKey = encryptedPrivKey.substring(1);
+					try {
+						byte[] decryptedPrivKey = crypter.decryptToBytes(new ZWEncryptedData(encryptedPrivKey));
+						//create public address from decrypted and see if it matches the stored one in the database
+						ZWECKey key = new ZWECKey(decryptedPrivKey, null);
+						if (!storedPubKey.equals(ZiftrUtils.bytesToHexString(key.getPubKey()))){
+							return false;
+						}
+					} catch(ZWKeyCrypterException e){
+						ZLog.log("Crypter error " + e);
+						return false;
+					}
 
+				}
+			} while (c.moveToNext());
+		}
+		return true;
 	}
 	
 	public List<String> getHiddenAddresses(ZWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
