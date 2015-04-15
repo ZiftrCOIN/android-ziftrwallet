@@ -32,8 +32,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  */
 public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
-	/** The current database version, may change in later versions of app. */
-	public static final int DATABASE_VERSION = 3;
+	public static final int DATABASE_VERSION = 2;
 
 	
 	/**
