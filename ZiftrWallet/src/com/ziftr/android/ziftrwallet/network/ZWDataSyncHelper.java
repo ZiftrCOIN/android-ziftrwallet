@@ -574,6 +574,8 @@ public class ZWDataSyncHelper {
 			}
 		}
 		
+		transaction.setDisplayAddresses(displayStrings);
+		
 		//now we need to save the outputs we're using
 		for(ZWTransactionOutput output : receivedOutputs) {
 			ZWWalletManager.getInstance().addTransactionOutput(coin, output);

@@ -26,9 +26,6 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  * 
  * To get an instance of this class call ZWSQLiteOpenHelper.getInstance(Context).
  * When finished accessing the database, call ZWSQLiteOpenHelper.closeInstance().
- * 
- * TODO add a long click to list items to delete coin types
- * TODO how does the encrypting of the private keys work into this?
  */
 public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
@@ -365,13 +362,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.transactionsTable.readTransactions(coinId, null, getReadableDatabase());
 	}
 
-	public synchronized void updateTransaction(ZWTransaction tx) {
-		try {
-			this.transactionsTable.updateTransaction(tx, getWritableDatabase());
-		} catch (ZWNoTransactionFoundException t) {
-			ZLog.log("no transaction found exception" + t);
-		}
-	}
 	
 	public synchronized void updateTransactionNumConfirmations(ZWTransaction tx) {
 		this.transactionsTable.updateTransactionNumConfirmations(tx, getReadableDatabase());

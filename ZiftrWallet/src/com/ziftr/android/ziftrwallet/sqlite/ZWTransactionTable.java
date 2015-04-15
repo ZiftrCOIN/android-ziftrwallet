@@ -106,29 +106,27 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 	}
 
 	protected void addTransaction(ZWTransaction transaction, SQLiteDatabase db) {
-		
+
+		//first do an insert, ignoring any errors, with just primary key
 		StringBuilder sqlBuilder = new StringBuilder("INSERT OR IGNORE INTO ");
 		sqlBuilder.append(getTableName(transaction.getCoin())).append(" (").append(COLUMN_HASH).append(", ");
-		sqlBuilder.append(COLUMN_AMOUNT).append(", ");
-		sqlBuilder.append(COLUMN_FEE).append(", ");
-		sqlBuilder.append(COLUMN_NOTE).append(", ");
-		sqlBuilder.append(COLUMN_CREATION_TIMESTAMP).append(", ");
-		sqlBuilder.append(COLUMN_DISPLAY_ADDRESSES);
-		sqlBuilder.append(") VALUES (").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(", ");
-		sqlBuilder.append(DatabaseUtils.sqlEscapeString(transaction.getAmount().toString())).append(", ");
-		sqlBuilder.append(transaction.getFee().toString()).append(", ");
-		sqlBuilder.append(DatabaseUtils.sqlEscapeString(transaction.getNote())).append(", ");
-		sqlBuilder.append(transaction.getTxTime()).append(", ");
-		sqlBuilder.append(DatabaseUtils.sqlEscapeString(transaction.getAddressAsCommaListString()));
-		sqlBuilder.append(")");
-		//first do an insert, ignoring any errors, with just primary key
-		db.execSQL(sqlBuilder.toString());
 		
+		//note isn't a primary key but the user can edit it, so we don't want it changing every time the
+		sqlBuilder.append(COLUMN_NOTE);  
+
+		sqlBuilder.append(") VALUES (").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(", ");
+		sqlBuilder.append(DatabaseUtils.sqlEscapeString(transaction.getNote()));
+		sqlBuilder.append(")");
+
+		db.execSQL(sqlBuilder.toString());
 		
 		sqlBuilder = new StringBuilder("UPDATE ").append(getTableName(transaction.getCoin())).append(" SET ");
 		sqlBuilder.append(COLUMN_NUM_CONFIRMATIONS).append(" = ").append(transaction.getConfirmationCount()).append(", ");
 		sqlBuilder.append(COLUMN_FEE).append(" = ").append(transaction.getFee().toString()).append(", ");
-		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString());
+		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString()).append(", ");;
+		sqlBuilder.append(COLUMN_CREATION_TIMESTAMP).append(" = ").append(transaction.getTxTime()).append(", ");		
+		sqlBuilder.append(COLUMN_DISPLAY_ADDRESSES).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getAddressAsCommaListString()));
+		
 		sqlBuilder.append(" WHERE ").append(COLUMN_HASH).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(";");
 		
 		//now update the transaction with all the data
@@ -292,6 +290,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		return newTxs;
 	}
 
+	/***
 	protected void updateTransaction(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
 		try {
 			ContentValues values = txToContentValues(tx);
@@ -306,6 +305,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 			throw new ZWNoTransactionFoundException("Error: No such entry.");
 		}
 	}
+	***/
 
 	protected void updateTransactionNumConfirmations(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
 		try {
