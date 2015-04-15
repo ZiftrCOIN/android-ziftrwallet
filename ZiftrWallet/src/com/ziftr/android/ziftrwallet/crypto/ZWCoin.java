@@ -116,12 +116,11 @@ public class ZWCoin implements ZWCurrency {
 	private String scheme; 
 	private int scale;
 	private String logoUrl;
-	private int blockHeight;
 	
 	
 	public ZWCoin(String name, String type, String chain, String scheme, int scale, 
 			String defaultFee, String logoUrl, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int confirmationsNeeded, int blockTime, int blockHeight, boolean enabled) {
+			byte privKeyPrefix, int confirmationsNeeded, int blockTime, boolean enabled) {
 
 		this.name = name;
 		this.type = type;
@@ -134,7 +133,6 @@ public class ZWCoin implements ZWCurrency {
 		this.privKeyPrefix = privKeyPrefix;
 		this.confirmationsNeeded = confirmationsNeeded;
 		this.blockTime = blockTime;
-		this.blockHeight = blockHeight;
 		this.enabled = enabled;
 
 		try {
@@ -229,9 +227,6 @@ public class ZWCoin implements ZWCurrency {
 		return this.blockTime;
 	}
 	
-	public int getBlockHeight() {
-		return this.blockHeight;
-	}
 	
 	/**
 	 * is the server able to give proper information about this coin?

@@ -52,12 +52,7 @@
         android:icon="@drawable/ziftr_launcher"
         android:theme="@style/AppTheme" 
         android:label="@string/zw_app_name"
-        android:backupAgent="com.ziftr.android.ziftrwallet.ZWDatabaseBackupHelper"
-        android:restoreAnyVersion="true"
         android:manageSpaceActivity="com.ziftr.android.ziftrwallet.ZWManageSpaceActivity" >
-        <meta-data 
-            android:name="com.google.android.backup.api_key" 
-            android:value="AEdPqrEAAAAICoLW1v3g0LdyahkOA_sXnZCjvC2NfiURPN-jBw" />
         <activity
             android:name="com.ziftr.android.ziftrwallet.ZWSplashScreenActivity"
             android:label="@string/zw_app_name"

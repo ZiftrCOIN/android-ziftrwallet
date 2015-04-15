@@ -248,7 +248,6 @@ public class ZWCoinTable {
 		String chain = cursor.getString(cursor.getColumnIndex(COLUMN_CHAIN));
 		
 		int enabledInt = cursor.getInt(cursor.getColumnIndex(COLUMN_ENABLED));
-		int blockHeight = cursor.getInt(cursor.getColumnIndex(COLUMN_BLOCK_HEIGHT));
 		boolean enabled = enabledInt > 0;
 		
 		//activationStatus isn't stored as part of a ZWCoin object, so don't load that here
@@ -256,7 +255,7 @@ public class ZWCoinTable {
 		//Integer activationStatus = cursor.getInt(cursor.getColumnIndex(COLUMN_ACTIVATED_STATUS));
 		
 		ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, String.valueOf(defaultFee), logoUrl, 
-				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, blockHeight, enabled);
+				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, enabled);
 		
 		return coin;
 	}
@@ -285,8 +284,9 @@ public class ZWCoinTable {
 		content.put(COLUMN_TYPE, coin.getType());
 		content.put(COLUMN_BLOCK_TIME, coin.getBlockTime());
 		content.put(COLUMN_CHAIN, coin.getChain());
-		content.put(COLUMN_BLOCK_HEIGHT, coin.getBlockHeight());
 		content.put(COLUMN_ENABLED, coin.isEnabled());
+		
+		
 		return content;
 	}
 

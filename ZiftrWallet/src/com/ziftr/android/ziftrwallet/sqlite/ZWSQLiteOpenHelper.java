@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.spongycastle.crypto.CryptoException;
 
-import android.app.backup.BackupManager;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -77,8 +76,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	private ZWMiscTable miscellaneousTable;
 
-	private BackupManager dbBackupManager;
-	
 	///////////////////////////////////////////////////////
 	//////////  Boiler plate SQLite Table Stuff ///////////
 	///////////////////////////////////////////////////////
@@ -93,8 +90,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
 		this.miscellaneousTable = new ZWMiscTable();
-		
-		this.dbBackupManager = new BackupManager(context);
 	}
 
 	
@@ -186,7 +181,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		address.setHidden(hidden);
 		address.setSpentFrom(spentFrom);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
-		this.dbBackupManager.dataChanged();
+
 		return address;
 	}
 
@@ -216,7 +211,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 			// any of the changes since there was. If it was called then it finalizes everything.
 			db.endTransaction();
 		}
-		this.dbBackupManager.dataChanged();
 		return reencryptionStatus.success;
 	}
 	
@@ -228,7 +222,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 				return false;
 			}
 		}
-		this.dbBackupManager.dataChanged();
 		return true;
 	}
 
@@ -244,7 +237,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public synchronized void updateAddress(ZWAddress address) {
 		this.getTable(address.isPersonalAddress()).updateAddress(address, getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 
 	/**
@@ -257,7 +249,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public synchronized void updateAddressLabel(ZWCoin coin, String address, String newLabel, boolean receivingNotSending) {
 		this.getTable(receivingNotSending).updateAddressLabel(coin, address, newLabel, getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 
 	/* 
@@ -315,7 +306,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		//address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
 		this.sendingAddressesTable.insert(address, this.getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 		return address;
 	}
 
@@ -332,7 +322,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public synchronized void addTransaction(ZWTransaction transaction) {
 		this.transactionsTable.addTransaction(transaction, getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 
 
@@ -388,7 +377,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized void updateTransaction(ZWTransaction tx) {
 		try {
 			this.transactionsTable.updateTransaction(tx, getWritableDatabase());
-			this.dbBackupManager.dataChanged();
 		} catch (ZWNoTransactionFoundException t) {
 			ZLog.log("no transaction found exception" + t);
 		}
@@ -401,7 +389,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	protected synchronized void deleteTransaction(ZWTransaction tx) {
 		this.transactionsTable.deleteTransaction(tx, getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 	
 	public synchronized BigInteger getWalletBalance(ZWCoin coin) {
@@ -546,7 +533,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	public synchronized void updateCoin(ZWCoin coin){
 		this.coinTable.upsertCoin(coin, getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 	
 	public synchronized List<ZWCoin> getCoins() {
@@ -577,7 +563,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		
 		// Update table to match activated status
 		this.coinTable.activateCoin(coin, this.getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 	
 	
@@ -609,12 +594,10 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	public synchronized void deactivateCoin(ZWCoin coin) {
 		this.coinTable.deactivateCoin(coin, getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 
 	public synchronized void upsertMiscVal(String key, String val){
 		this.miscellaneousTable.upsert(key, val, getWritableDatabase());
-		this.dbBackupManager.dataChanged();
 	}
 	
 	public synchronized String getMiscVal(String key){

@@ -73,6 +73,7 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 							log("CANNOT ACCESS LOCAL STORAGE!");
 						}
 					}
+		
 					instance = new ZWWalletManager(applicationContext);
 			} catch (NullPointerException e){
 				ZLog.log("applicationContext was null");
