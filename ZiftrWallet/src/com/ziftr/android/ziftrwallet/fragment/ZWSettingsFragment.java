@@ -87,6 +87,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		} else {
 			this.editableConfirmationFee.setChecked(false);
 		}
+		
 		if (ZWPreferencesUtils.getMempoolIsSpendable()) {
 			this.enableMempoolSpending.setChecked(true);
 		} else {
@@ -126,10 +127,13 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		//Show/hide options based on name settings
 		if (ZWPreferencesUtils.userHasSetName()){
 			this.setNameLabel.setText("Change Name");
+			this.disableName.setVisibility(View.VISIBLE);
 		} else if (ZWPreferencesUtils.getDisabledName()) {
 			this.setNameLabel.setText("Set Name");
+			this.disableName.setVisibility(View.GONE);
 		} else {
 			this.setNameLabel.setText("Set Name");
+			this.disableName.setVisibility(View.VISIBLE);
 		}
 		
 		//show debug button text based on dis/enabled
