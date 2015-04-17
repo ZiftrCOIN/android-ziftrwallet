@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 
 public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
@@ -63,8 +64,12 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 		} else if (v == saveNameButton) {
 			String name = nameEditText.getText().toString();
 			if (!name.isEmpty()) {
-				ZWPreferencesUtils.setUserName(name);
-				this.startMain();
+				if (ZWPreferencesUtils.setUserName(name) == -1){
+					a.alert("Your name was not set! We've encountered a database error, please restart app.", 
+							"error_set_password", ZWRequestCodes.UPSERT_DB_ERROR);
+				} else {
+					this.startMain();
+				}
 			} else {
 				a.alert("An empty name doesn't give any information about you!", "name_is_empty_string");
 			}

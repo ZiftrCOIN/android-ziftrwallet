@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;

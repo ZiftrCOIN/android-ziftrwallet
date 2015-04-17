@@ -9,6 +9,7 @@ import android.widget.Button;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.handlers.ZWResetPassphraseDialogHandler;
 
 /**
  * A persistent (doesn't go away when the view is destroyed) dialog
@@ -43,9 +44,13 @@ public class ZWSimpleAlertDialog extends ZWDialogFragment {
 	}
 	
 	public void onClick(View view) {
+		ZWNeutralDialogHandler handler = 
+				(ZWNeutralDialogHandler) this.getHandler();
+
 		switch(view.getId()) {
 			case R.id.left_dialog_button:
 				//CANCEL
+				handler.handleNeutral(this.getRequestCode());
 				this.dismiss();
 				break;
 		}

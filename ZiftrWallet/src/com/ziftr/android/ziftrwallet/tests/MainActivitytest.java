@@ -1,6 +1,8 @@
 package com.ziftr.android.ziftrwallet.tests;
 
 
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -20,6 +22,7 @@ import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
@@ -227,22 +230,5 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 	}
 
 	
-	//not used
-	/***
-	private String randomishHexHash(){
-		StringBuilder sb = new StringBuilder();
-		Random r = new Random();
-		for (int i=0; i<64; i++){
-			int rand = r.nextInt(16);
-			if (rand < 6){
-				char c = (char) (rand + 97);
-				sb.append(c);
-			} else {
-				sb.append(r.nextInt(10));
-			}
-		}
-		return sb.toString();
-	}
-	****/
 
 }

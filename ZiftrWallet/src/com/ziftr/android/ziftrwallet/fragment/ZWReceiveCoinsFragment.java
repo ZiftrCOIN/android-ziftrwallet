@@ -34,6 +34,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -220,11 +221,15 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		if (amountVal != null && (amountVal.compareTo(BigInteger.ZERO) < 0)) {
 			amountVal = null;
 		}
-
+		String label = this.labelEditText.getText().toString();
+		if (label.isEmpty()){
+			//if no label, use a user's name
+			label = ZWPreferencesUtils.getUserName();
+		}
 		String message = this.messageEditText.getText().toString();
 		message = message != null && message.isEmpty() ? null : message;
 		String qrCodeData = ZWCoinURI.convertToCoinURI(getSelectedCoin(), addressString, amountVal, 
-				ZWPreferencesUtils.getUserName(), message);
+				label, message);
 		this.qrCodeContainer.setVisibility(View.VISIBLE);
 		this.qrCodeImageView.setScaleType(ScaleType.FIT_XY);
 		this.qrCodeImageView.setPadding(0, 0, 0, 0);

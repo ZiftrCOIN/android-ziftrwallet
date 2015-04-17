@@ -74,7 +74,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	/** Table with market values of currencies */
 	private ZWExchangeTable exchangeTable;
 	
-	private ZWMiscTable miscellaneousTable;
+	private ZWAppDataTable miscellaneousTable;
 
 	///////////////////////////////////////////////////////
 	//////////  Boiler plate SQLite Table Stuff ///////////
@@ -89,7 +89,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.coinTable = new ZWCoinTable();
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
-		this.miscellaneousTable = new ZWMiscTable();
+		this.miscellaneousTable = new ZWAppDataTable();
 	}
 
 	
@@ -112,7 +112,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		
 		ZWCoin.loadCoins(coins);
 		
-
 		//Make exchange table
 		this.exchangeTable.create(db);
 		//Make misc table
@@ -595,13 +594,23 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized void deactivateCoin(ZWCoin coin) {
 		this.coinTable.deactivateCoin(coin, getWritableDatabase());
 	}
-
-	public synchronized void upsertMiscVal(String key, String val){
-		this.miscellaneousTable.upsert(key, val, getWritableDatabase());
+	
+	//returns 1 if successful, -1 if error
+	public synchronized int upsertAppDataVal(String key, String val){
+		return this.miscellaneousTable.upsert(key, val, getWritableDatabase());
 	}
 	
-	public synchronized String getMiscVal(String key){
-		return this.miscellaneousTable.getValFromKey(key, getReadableDatabase());
+	//returns 1 if successful, -1 if error
+	public synchronized int upsertAppDataVal(String key, boolean val){
+		return this.miscellaneousTable.upsert(key, val, getWritableDatabase());
+	}
+	
+	public synchronized String getAppDataString(String key){
+		return this.miscellaneousTable.getStringFromKey(key, getReadableDatabase());
+	}
+	
+	public synchronized Boolean getAppDataBoolean(String key){
+		return this.miscellaneousTable.getBooleanFromKey(key, getReadableDatabase());
 	}
 	
 }
