@@ -41,7 +41,6 @@ import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.SendTaskCallback;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The section of the app where users fill out a form and click send 
@@ -469,10 +468,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
 		BigDecimal fiatTotal = ZWConverter.convert(total, getSelectedCoin(), selectedFiat);
 		
-		BigDecimal fiatVal = ZWConverter.convert(BigDecimal.ONE, getSelectedCoin(), ZWPreferencesUtils.getFiatCurrency());
-		int decimalPlaces = ZiftrUtils.numDecimalPlaces(fiatVal);
-		
-		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true, decimalPlaces) + ")");
+		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true) + ")");
 	}
 
 	/**

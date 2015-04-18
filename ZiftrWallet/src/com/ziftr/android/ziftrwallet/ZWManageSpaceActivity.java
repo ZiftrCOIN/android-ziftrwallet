@@ -17,7 +17,6 @@ import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWManageSpaceActivity extends FragmentActivity implements OnClickListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler{

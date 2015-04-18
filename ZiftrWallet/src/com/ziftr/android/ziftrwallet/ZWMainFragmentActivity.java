@@ -20,7 +20,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.support.v7.app.ActionBarActivity;
-import android.text.SpannableString;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.Menu;
@@ -1435,9 +1434,9 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
 		
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
-		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, getSelectedCoin(), selectedFiat);
-		SpannableString displayMarketFiat = selectedFiat.getDisplayString(unitPriceInFiat, true, getSelectedCoin());
-		fiatExchangeRateText.setText(displayMarketFiat);
+		
+		String fiatString = selectedFiat.getUnitPrice(getSelectedCoin());
+		fiatExchangeRateText.setText(ZiftrUtils.getCurrencyDisplayString(fiatString));
 
 		TextView walletBalanceTextView = (TextView) headerView.findViewById(R.id.topRightTextView);
 		BigInteger atomicUnits =  getWalletManager().getWalletBalance(getSelectedCoin());
@@ -1447,8 +1446,9 @@ ZiftrNetworkHandler, ZWMessageHandler {
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, getSelectedCoin(), selectedFiat);
-		SpannableString displayWalletTotalFiat = selectedFiat.getDisplayString(walletBalanceInFiat, true, getSelectedCoin());
-		walletBalanceInFiatText.setText(displayWalletTotalFiat);
+		
+		String balanceString = selectedFiat.getFormattedAmount(walletBalanceInFiat, true);
+		walletBalanceInFiatText.setText(ZiftrUtils.getCurrencyDisplayString(balanceString));
 	}
 	
 

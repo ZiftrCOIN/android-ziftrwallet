@@ -24,12 +24,10 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 	private static final int VIEW_RES_ID = R.layout.coin_list_item;
 	
 	private LayoutInflater inflater;
-	private Context context;
 
 	public ZWNewCurrencyListAdapter(Context ctx, List<ZWCoin> coins) {
 		super(ctx, VIEW_RES_ID, coins);
 		this.inflater = LayoutInflater.from(ctx);
-		this.context = ctx;
 	}
 
 	@Override

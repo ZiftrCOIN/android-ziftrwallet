@@ -131,7 +131,6 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		String feeString = txItem.getCoin().getFormattedAmount(txItem.getFee());
 		this.confirmationFee.setText(feeString);
 		
-		//TODO -big hack fix later, hardcoding fee display to default value until we can get the proper info from the server
 		feeString = txItem.getCoin().getFormattedAmount(txItem.getFee());
 		this.confirmationFee.setText(feeString);
 		

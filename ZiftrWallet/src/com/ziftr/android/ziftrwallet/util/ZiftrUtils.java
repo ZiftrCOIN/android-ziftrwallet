@@ -27,6 +27,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -549,4 +552,15 @@ public class ZiftrUtils {
         out[offset + 7] = (byte) (0xFF & (val >> 56));
     }
 
+    
+    public static SpannableString getCurrencyDisplayString(String currencyString) {
+    	SpannableString spannableString = new SpannableString(currencyString);
+    	spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
+    	return spannableString;
+    }
+    
 }
+
+
+
+

@@ -6,7 +6,6 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import android.content.Context;
-import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +19,7 @@ import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * In the accounts section of the app there is a list of currencies/accounts
@@ -80,7 +80,6 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		}
 		
 		ZWFiat fiatType =ZWPreferencesUtils.getFiatCurrency();
-		String fiatSymbol = fiatType.getSymbol();
 		
 		convertView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
 		
@@ -91,13 +90,12 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		String nameText = coin.getName(); 
 		coinName.setText(nameText);
 
-		TextView coinValue = (TextView) 
-				convertView.findViewById(R.id.bottomLeftTextView);
+		TextView coinValue = (TextView) convertView.findViewById(R.id.bottomLeftTextView);
 
-		BigDecimal unitPriceInFiat = ZWConverter.convert(BigDecimal.ONE, coin, fiatType);
-		SpannableString displayMarketFiat = fiatType.getDisplayString(unitPriceInFiat, true, coin);
-
-		coinValue.setText(displayMarketFiat);
+		
+		String unitPrice = fiatType.getUnitPrice(coin);
+		
+		coinValue.setText(ZiftrUtils.getCurrencyDisplayString(unitPrice));
 		
 		ImageView noServerImage = (ImageView) convertView.findViewById(R.id.imageViewNoServer);
 		if(coin.isEnabled()) {
@@ -113,9 +111,10 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 
 		TextView walletTotalFiatEquiv = (TextView) convertView.findViewById(R.id.bottomRightTextView);
 		
-		SpannableString displayWalletTotalFiat = fiatType.getDisplayString(ZWConverter.convert(amount, coin, fiatType), true, coin);
+		BigDecimal fiatValue = ZWConverter.convert(amount, coin, fiatType);
+		String formattedValue = fiatType.getFormattedAmount(fiatValue, true);
 		
-		walletTotalFiatEquiv.setText(displayWalletTotalFiat);
+		walletTotalFiatEquiv.setText(ZiftrUtils.getCurrencyDisplayString(formattedValue));
 
 		ImageView coinLogo = (ImageView) convertView.findViewById(R.id.leftIcon);
 		coinLogo.setImageResource(coin.getLogoResId());

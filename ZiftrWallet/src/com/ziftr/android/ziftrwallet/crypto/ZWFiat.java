@@ -4,13 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
-
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
+import java.util.Locale;
 
 public class ZWFiat implements ZWCurrency {
 
@@ -27,7 +21,7 @@ public class ZWFiat implements ZWCurrency {
 
 	public static ZWFiat valueOf(String fiatStr) {
 		for (ZWFiat fiat : ZWFiat.values()) {
-			if (fiat.getName().equals(fiatStr) || fiat.getSymbol().equals(fiatStr.toUpperCase())) {
+			if (fiat.getName().equals(fiatStr) || fiat.getSymbol().equals(fiatStr.toUpperCase(Locale.US))) {
 				return fiat;
 			}
 		}
@@ -103,18 +97,23 @@ public class ZWFiat implements ZWCurrency {
 	}
 
 	
-	public SpannableString getDisplayString(BigDecimal amount, boolean addSymbol, ZWCoin coin) { // int maxDecimalPlaces){
-		//maxDecimalPlaces = maxDecimalPlaces > getScale() ? maxDecimalPlaces : getScale();	
-		BigDecimal fiatVal = ZWConverter.convert(BigDecimal.ONE, coin, ZWPreferencesUtils.getFiatCurrency());
-		int decimalPlaces = ZiftrUtils.numDecimalPlaces(fiatVal);
+	public String getUnitPrice(ZWCoin coin) {
+		String unitPrice = null;
+		BigDecimal fiatVal = ZWConverter.convert(BigDecimal.ONE, coin, this);
 		
-		SpannableString display = new SpannableString(this.getFormattedAmount(amount, addSymbol, decimalPlaces));
-		display.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
-		return display;
+		if(fiatVal.compareTo(BigDecimal.ZERO) > 0 && fiatVal.setScale(getScale(), BigDecimal.ROUND_HALF_UP).compareTo(BigDecimal.ZERO) <= 0) {
+			fiatVal = fiatVal.multiply(new BigDecimal(1000));
+			unitPrice = this.getFormattedAmount(fiatVal, true) + " /k";
+		}
+		else {
+			unitPrice = this.getFormattedAmount(fiatVal, true);
+		}
+		
+		return unitPrice;		
 	}
-
 	
-	public String getFormattedAmount(BigDecimal amount, boolean addSymbol, int maxDecimalPlaces) {
+	
+	public String getFormattedAmount(BigDecimal amount, boolean addSymbol) {
 
 		String formattedString = " ";
 
@@ -122,18 +121,15 @@ public class ZWFiat implements ZWCurrency {
 			formattedString += this.getSymbol() + " ";
 		}
 		
-		BigDecimal formatted = amount.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : amount;
-		
-		
-		if (ZiftrUtils.numDecimalPlaces(formatted) > maxDecimalPlaces){
-			formatted = ZiftrUtils.formatToNDecimalPlaces(maxDecimalPlaces, formatted);
-		} 
-		else if (ZiftrUtils.numDecimalPlaces(formatted) < this.getScale()){
-			formatted = ZiftrUtils.formatToNDecimalPlaces(this.getScale(), formatted);
+		BigDecimal formattedAmount = amount;
+		if(formattedAmount.compareTo(BigDecimal.ZERO) == 0) {
+			formattedAmount = BigDecimal.ZERO;
 		}
 		
-		formattedString += formatted.toPlainString();
+		formattedAmount = formattedAmount.setScale(getScale(), BigDecimal.ROUND_HALF_UP);
 
+		formattedString += formattedAmount.toPlainString();
+		
 		if(addSymbol && !symbolBeforeNumber) {
 			formattedString += this.getSymbol();
 		}
@@ -144,13 +140,15 @@ public class ZWFiat implements ZWCurrency {
 	
 	@Override
 	public String getFormattedAmount(BigDecimal amount) {
-		return this.getFormattedAmount(amount, false, this.getScale());
+		return this.getFormattedAmount(amount, false);
 	}
 
+	
 	public String getFormattedAmount(BigInteger atomicUnits, boolean addSymbol) {
 		BigDecimal toFormatAsDecimal = this.getAmount(atomicUnits);
-		return this.getFormattedAmount(toFormatAsDecimal, addSymbol, this.getScale());
+		return this.getFormattedAmount(toFormatAsDecimal, addSymbol);
 	}
+	
 	
 	@Override
 	public String getFormattedAmount(BigInteger atmoicUnits) {
