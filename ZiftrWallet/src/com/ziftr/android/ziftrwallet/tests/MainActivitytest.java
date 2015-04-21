@@ -1,8 +1,6 @@
 package com.ziftr.android.ziftrwallet.tests;
 
 
-import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -22,7 +20,6 @@ import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;

@@ -37,7 +37,7 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		final ZWCoin coin = getItem(position);
 		if (convertView == null) {
 			// If it doesn't have an old view then we make a new one 
-			convertView = this.inflater.inflate(this.VIEW_RES_ID, null);
+			convertView = this.inflater.inflate(VIEW_RES_ID, null);
 		}
 
 		// Whether or not we just created one, we reset all the resources

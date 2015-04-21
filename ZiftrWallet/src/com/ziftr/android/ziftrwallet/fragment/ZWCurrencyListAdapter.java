@@ -29,7 +29,6 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 	private LayoutInflater inflater;
-	private Context context;
 
 	/** Standard entries for wallets. */
 	public static final int coinType = 0;
@@ -39,7 +38,6 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 	public ZWCurrencyListAdapter(Context ctx, List<ZWCoin> objects) {
 		super(ctx, 0, objects);
 		this.inflater = LayoutInflater.from(ctx);
-		this.context = ctx;
 	}
 
 	/**

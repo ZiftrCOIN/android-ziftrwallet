@@ -14,10 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.Bundle;
-
 import com.ziftr.android.ziftrwallet.ZWMessageManager;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
@@ -25,8 +22,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
-import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
-import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
