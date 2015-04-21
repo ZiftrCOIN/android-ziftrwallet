@@ -37,7 +37,7 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 			}
 		}
 	}
-
+	
 	/**
 	 * 
 	 */
@@ -70,7 +70,10 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 
 	@Override
 	public void handleNeutral(int requestCode) {
-		// Nothing to do
+		if (requestCode == ZWRequestCodes.UPSERT_DB_ERROR){
+			//terminate app if error setting password
+			System.exit(0);
+		}
 	}
 
 	@Override
@@ -78,18 +81,19 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		// Nothing to do
 	}
 	
-	
-	/**
-	 * @param a
-	 */
-	protected void alert(String message, String tag) {
+	protected void alert(String message, String tag, int requestCode) {
 		ZWSimpleAlertDialog alertDialog = new ZWSimpleAlertDialog();
 		Bundle b = new Bundle();
-		b.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.ALERT_USER_DIALOG);
+		b.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestCode);
+		alertDialog.setArguments(b);
 
 		// Set negative text to null to not have negative button
 		alertDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
 		alertDialog.show(this.getSupportFragmentManager(), tag);
+	}
+	
+	protected void alert(String message, String tag) {
+		this.alert(message, tag, ZWRequestCodes.ALERT_USER_DIALOG);
 	}
 	
 	protected void alertPassphraseDialog(int requestcode, Bundle args, String tag, String message){

@@ -74,7 +74,11 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 		} else if (v == setPassphraseButton) {
 			final String passphrase = passphraseEditText.getText().toString();
 			String confirmPassphrase = confirmPassphraseEditText.getText().toString();
-
+			if (ZWPreferencesUtils.userHasPassphrase()){
+				welcomeActivity.alert("New password not set. You already have a password!", "overwriting_password");
+				this.startNextScreen();
+				return;
+			}
 			if (passphrase.equals(confirmPassphrase)) {
 				if (!passphrase.isEmpty()) {
 					
@@ -101,7 +105,11 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 							} else {
 								//set passphrase
 								String saltedHash = ZiftrUtils.saltedHashString(passphrase);
-								ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
+								//if we failed setting passphrase, something could be wrong with db!
+								if (ZWPreferencesUtils.setStoredPassphraseHash(saltedHash) == -1){
+									welcomeActivity.alert("Your password was not set! We've encountered a database error, please restart app.", 
+											"error_set_password", ZWRequestCodes.UPSERT_DB_ERROR);
+								}
 							}
 						}
 					});

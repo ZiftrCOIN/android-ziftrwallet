@@ -61,7 +61,6 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 				new File(externalDirectory, children[i]).delete();
 			}
 		}
-		ZWPreferencesUtils.clearOptions();
 	}
 	
 	public void showContinuePassphraseDialog(){
