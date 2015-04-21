@@ -404,7 +404,7 @@ public class ZWDataSyncHelper {
 		ArrayList<ZWTransactionOutput> receivedOutputs = new ArrayList<ZWTransactionOutput>();
 		//ArrayList<ZWTransactionOutput> spentOutputs = new ArrayList<ZWTransactionOutput>();
 		
-		BigInteger inputCoin = new BigInteger("0");
+		BigInteger inputCoins = new BigInteger("0");
 		boolean unknownInputs = false;
 		boolean isSpending = false;
 		
@@ -440,7 +440,7 @@ public class ZWDataSyncHelper {
 				//so if there are more than one outputs, just get the first one and use it 
 				ZWTransactionOutput matchingOutput = matchingOutputs.get(0);
 				
-				inputCoin = inputCoin.add(matchingOutput.getValue());
+				inputCoins = inputCoins.add(matchingOutput.getValue());
 			}
 			else {
 				unknownInputs = true;
@@ -449,7 +449,7 @@ public class ZWDataSyncHelper {
 		}//end for x
 		
 		//if any of the inputs are ours, then we are spending coins, regardless of what the outputs looks like
-		if(inputCoin.compareTo(BigInteger.ZERO) > 0) {
+		if(inputCoins.compareTo(BigInteger.ZERO) > 0) {
 			isSpending = true;
 		}
 
@@ -502,6 +502,7 @@ public class ZWDataSyncHelper {
 						receivedOutputs.add(transactionOutput);
 						if(!usedValue) {
 							receivedCoins = receivedCoins.add(value);
+							usedValue = true;
 						}
 						if(!isSpending) {
 							//if we're receiving coins, we display our address they're received on
@@ -510,7 +511,8 @@ public class ZWDataSyncHelper {
 					}
 					else {
 						if(!usedValue) {
-							spentCoins = receivedCoins.add(value);
+							spentCoins = spentCoins.add(value);
+							usedValue = true;
 						}
 						if(isSpending) {
 							//if we're spending coins, we display the address we sent to
@@ -529,10 +531,10 @@ public class ZWDataSyncHelper {
 
 		//calculate total value of transaction and fees (if possible)
 		if(isSpending) {
-
+			
 			//if we know about ALL the inputs, then we can calculate the fee
 			if(!unknownInputs) {
-				BigInteger fee = inputCoin.subtract(spentCoins).subtract(receivedCoins);
+				BigInteger fee = inputCoins.subtract(spentCoins).subtract(receivedCoins);
 				transaction.setFee(fee);
 			}
 			else {
@@ -543,7 +545,7 @@ public class ZWDataSyncHelper {
 			}
 			
 			//spending is stored in the database as negative number, so subtract from zero
-			transaction.setAmount(BigInteger.ZERO.subtract(inputCoin)); 
+			transaction.setAmount(BigInteger.ZERO.subtract(spentCoins)); 
 		}
 		else {
 			//we're receiving coins
