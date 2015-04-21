@@ -67,7 +67,9 @@ public class ZWSendTaskFragment extends Fragment{
 			public void run() {
 				JSONObject jsonRes = ZWDataSyncHelper.sendCoins(coin, fee, amount, inputs, output, passphrase);
 				if (jsonRes != null){
-					if (ZWPreferencesUtils.getMempoolIsSpendable() || !ZWDataSyncHelper.checkSpendingUnconfirmedTxn(coin, jsonRes, inputs, passphrase)){
+					
+					//TODO -redo checking for mempool spending in a more sane way
+					//if (ZWPreferencesUtils.getMempoolIsSpendable() || !ZWDataSyncHelper.checkSpendingUnconfirmedTxn(coin, jsonRes, inputs, passphrase)){
 						if (ZWDataSyncHelper.signSentCoins(coin, jsonRes, passphrase)) {
 							ZLog.log("sign success");
 							sendCompleted = true;
@@ -75,7 +77,7 @@ public class ZWSendTaskFragment extends Fragment{
 						} else {
 							cancelCallback();
 						}
-					}
+					//}
 				} else {
 					cancelCallback();
 				}

@@ -99,10 +99,13 @@ public class ZWDataSyncHelper {
 		return null;
 	}
 	
+	
+	/***
 	static boolean checkSpendingUnconfirmedTxn(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase){
 		List<ZWTransaction> spendingFromTxns = new ArrayList<ZWTransaction>();
 		try {
-			JSONArray vin = serverResponse.getJSONArray("vin");
+			JSONObject transaction = serverResponse.getJSONObject("transaction");
+			JSONArray vin = transaction.getJSONArray("vin");
 			for (int i=0; i< vin.length(); i++){
 				JSONObject input = vin.optJSONObject(i);
 				String txid = input.optString("txid");
@@ -127,12 +130,21 @@ public class ZWDataSyncHelper {
 		}
 		return false;
 	}
+	**/
+	
+	
+	
 	
 	public static boolean signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
-		Set<String> addressesSpentFrom = new HashSet<String>();
+		
 		ZiftrNetworkManager.networkStarted();
+		
+		Set<String> addressesSpentFrom = new HashSet<String>();
+		JSONObject signedData = new JSONObject();
+		
 		try {
-			JSONArray toSignList = serverResponse.getJSONArray("to_sign");
+			JSONObject transaction = serverResponse.getJSONObject("transaction");
+			JSONArray toSignList = transaction.getJSONArray("to_sign");
 			for (int i=0; i< toSignList.length(); i++){
 				JSONObject toSign = toSignList.getJSONObject(i);
 	
@@ -153,18 +165,26 @@ public class ZWDataSyncHelper {
 				String sHex = ZiftrUtils.bigIntegerToString(signature.s, 32);
 				toSign.put("s", sHex);
 			}
+			
+
+			//now pack all the signing into a json object to send it off to the server
+			signedData.put("transaction", transaction);
+			ZLog.log("sending  this signed tx to server :" + signedData);
 		}
 		catch(Exception e) {
 			ZLog.log("Exception attempting to sign transactions: ", e);
 		}
-		ZLog.log("sending  this signed tx to server :" + serverResponse);
-		//now that we've packed all the signing into a json object send it off to the server
-		ZiftrNetRequest signingRequest = ZWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), serverResponse);
+		
+		
+		ZiftrNetRequest signingRequest = ZWApi.buildSpendSigningRequest(coin.getType(), coin.getChain(), signedData);
 		
 		String response = signingRequest.sendAndWait();
+		
 		ZLog.log(signingRequest.getResponseCode());
 		ZLog.log("Response from signing: ", response);
+		
 		ZiftrNetworkManager.networkStopped();
+		
 		if(signingRequest.getResponseCode() == 202){
 			try {
 				//flag any addresses we spent from as having been spent from (so we don't reuse change addresses)
@@ -444,7 +464,7 @@ public class ZWDataSyncHelper {
 		for(int x = 0; x < outputs.length(); x++) {
 			
 			JSONObject output = outputs.getJSONObject(x);
-			JSONObject scriptPubKey = output.getJSONObject("scriptPubKey");
+			JSONObject scriptPubKey = output.getJSONObject("script_pub_key");
 			JSONArray outputAddresses = scriptPubKey.getJSONArray("addresses");
 			
 			boolean usedValue = false;
@@ -613,7 +633,7 @@ public class ZWDataSyncHelper {
 		JSONArray outputs = json.getJSONArray("vout");
 		for(int x = 0; x < outputs.length(); x++) {
 			JSONObject output = outputs.getJSONObject(x);
-			JSONObject scriptPubKey = output.getJSONObject("scriptPubKey");
+			JSONObject scriptPubKey = output.getJSONObject("script_pub_key");
 			JSONArray outputAddresses = scriptPubKey.getJSONArray("addresses");
 			boolean usedValue = false;
 			for(int y = 0; y < outputAddresses.length(); y++) {
@@ -637,20 +657,24 @@ public class ZWDataSyncHelper {
 	
 	private static JSONObject buildSpendPostData(List<String> inputs, String output, BigInteger amount, String fee, String changeAddress) {
 		JSONObject postData = new JSONObject();
+		JSONObject transaction = new JSONObject();
 		try {
-			postData.put("fee_per_kb", fee);
-			postData.put("surplus_refund_address", changeAddress);
+			transaction.put("fee_per_kb", fee);
+			transaction.put("surplus_refund_address", changeAddress);
 			JSONArray inputAddresses = new JSONArray();
 			for (String addr : inputs){
 				inputAddresses.put(addr);
 			}
 			
-			postData.put("input_addresses", inputAddresses);
+			transaction.put("input_addresses", inputAddresses);
 			JSONObject outputAddresses = new JSONObject();
 			
 			outputAddresses.put(output, amount.longValue());
 			
-			postData.put("output_addresses", outputAddresses);
+			transaction.put("output_addresses", outputAddresses);
+			
+			//now put the entire transaction object into the jsonData object to be sent to the server
+			postData.put("transaction", transaction);
 		}
 		catch(Exception e) {
 			ZLog.log("Exception build spend JSON: ", e);
