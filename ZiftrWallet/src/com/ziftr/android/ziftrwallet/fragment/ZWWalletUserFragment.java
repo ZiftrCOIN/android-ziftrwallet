@@ -1,5 +1,8 @@
 package com.ziftr.android.ziftrwallet.fragment;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
@@ -49,4 +52,5 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 
 		});
 	}
+
 }

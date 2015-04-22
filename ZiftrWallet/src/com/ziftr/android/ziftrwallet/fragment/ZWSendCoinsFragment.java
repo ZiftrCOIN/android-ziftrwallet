@@ -49,7 +49,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
  * TODO make sure that we stop correctly when the user
  * enters non-sensical values in fields.
  */
-public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements SendTaskCallback {
+public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 
 	/** The view container for this fragment. */
 	private View rootView;
@@ -74,36 +74,24 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	private ZWCoinURI preloadedCoinUri;
 	private String preloadAddress;
 	
-	/** non-ui fragment retaining send response from server */
-	private ZWSendTaskFragment sendTaskFragment;
+	private ZWSendTaskFragment sendHelperFragment;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
-		//restore retained sendtaskfragment
-		if (this.sendTaskFragment == null){
-			this.sendTaskFragment = (ZWSendTaskFragment) getZWMainActivity().getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_TASK);
-		}
+		sendHelperFragment = (ZWSendTaskFragment) this.getFragment(ZWSendTaskFragment.FRAGMENT_TAG);
 	}
 	
 	@Override
 	public void onResume(){
 		super.onResume();
-		if (this.sendTaskFragment != null){
-			this.sendButton.setEnabled(false);
-			this.sendTaskFragment.setCallBack(this);
-		} else {
-			this.sendButton.setEnabled(true);
-		}
+
 	}
 	
 	@Override
 	public void onPause(){
 		super.onPause();
-		if (this.sendTaskFragment != null){
-			this.sendTaskFragment.setCallBack(null);
-		}
 	}
 	
 	/**
@@ -556,25 +544,29 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 	 * @throws AddressFormatException
 	 * @throws InsufficientMoneyException
 	 */
-	public void sendCoins(final String address, final BigInteger value, 
-			final BigInteger feePerKb, final String passphrase) 
-			throws ZWAddressFormatException, Exception {
+	public void sendCoins(String address, BigInteger value, BigInteger feePerKb, String password) throws ZWAddressFormatException, Exception {
 		final ZWCoin coin = getSelectedCoin();
 		BigInteger spendableBalance = getWalletManager().getWalletBalance(coin);
 		if (!coin.addressIsValid(address)){
 			throw new ZWAddressFormatException();
-		} else if (value.signum() != 1){
+		} 
+		else if (value.signum() != 1){
 			//user wants to send <=0 coins
 			throw new ZWSendAmountException("Error: Cannot send 0 coins!");
-		} else if (feePerKb.compareTo(coin.getDefaultFee()) == 0 && value.compareTo(feePerKb) == -1){
+		}
+		
+		//TODO -we don't know the fee here, we know the fee PER kb, so we can't do this error checking here
+		/**
+		else if (feePerKb.compareTo(coin.getDefaultFee()) == 0 && value.compareTo(feePerKb) == -1){
 			throw new ZWSendAmountException("Error: The desired amount to send is too small!");
 		} else if ((value.add(feePerKb)).compareTo(spendableBalance) == 1){
 			throw new ZWSendAmountException("Error: You don't have enough coins to send this amount!");
 		}
+		**/
 
 		List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
-		this.initSendTaskFragment().sendCoins(coin, feePerKb, value, inputs, address, passphrase);
-		this.sendButton.setEnabled(false);
+		//this.initSendTaskFragment().sendCoins(coin, feePerKb, value, inputs, address, password);
+		//this.sendButton.setEnabled(false);
 	}
 	
 	public void reEnableSend(){
@@ -587,7 +579,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 			@Override
 			public void run() {
 				ZLog.log("sendTask beginning update ui");
-				destroySendTaskFragment();
+				//destroySendTaskFragment();
 				Toast.makeText(getZWMainActivity(), coin.getSymbol() + " sent!", Toast.LENGTH_LONG).show();
 				getZWMainActivity().onBackPressed();
 			}
@@ -595,6 +587,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		
 	}
 	
+	/***
 	//call on ui thread only
 	public void destroySendTaskFragment() {
 		ZLog.log("sendTask fragment Destroy");
@@ -620,6 +613,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.sendTaskFragment.setCallBack(this);
 		return this.sendTaskFragment;
 	}
+	***/
 	
 
 }

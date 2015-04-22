@@ -12,8 +12,6 @@ public class ZWRequestCodes {
 	
 	public static final int NEW_CURRENCY_DIALOG = 5;
 	
-	//not used anymore public static final int VALIDATE_PASSPHRASE_DIALOG_NEW_CURRENCY = 6;
-	
 	public static final int VALIDATE_PASSPHRASE_DIALOG_NEW_KEY = 7;
 	
 	public static final int DEACTIVATE_WALLET = 8;
@@ -28,12 +26,12 @@ public class ZWRequestCodes {
 	
 	public static final int DEBUG_MODE_ON = 13;
 	
-	public static final int DISABLE_PASSPHRASE_DIALOG = 14;
+	public static final int DISABLE_PASSWORD_DIALOG = 14;
 	
 	public static final int CONFIRM_SEND_COINS = 15;
 	
 	//used for when user tries to reencrypt encrypted addresses with new passphrase, ask for old passphrase to decrypt
-	public static final int PASSPHRASE_FOR_DECRYPTING = 17;
+	public static final int PASSWORD_FOR_DECRYPTING = 17;
 	
 	public static final int UPSERT_DB_ERROR = 18;
 	

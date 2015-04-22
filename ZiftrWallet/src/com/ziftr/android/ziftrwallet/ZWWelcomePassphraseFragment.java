@@ -92,7 +92,7 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 									@Override
 									public void run() {
 										if (status == reencryptionStatus.encrypted){
-											welcomeActivity.alertPassphraseDialog(ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING, new Bundle(), 
+											welcomeActivity.alertPassphraseDialog(ZWRequestCodes.PASSWORD_FOR_DECRYPTING, new Bundle(), 
 													"pass_for_old_encrypted_keys", "Your keys have already been encrypted with a passphrase, please enter your old passphrase:");
 										} else {
 											welcomeActivity.alert("We've encountered a fatal error in your database, please contact customer service!",  

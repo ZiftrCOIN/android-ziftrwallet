@@ -116,7 +116,7 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase) {
 		switch(requestCode) {
-			case ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING:
+			case ZWRequestCodes.PASSWORD_FOR_DECRYPTING:
 
 				if (ZWWalletManager.getInstance().attemptDecrypt(passphrase)){
 					//the passphrase worked, decrypt all keys now

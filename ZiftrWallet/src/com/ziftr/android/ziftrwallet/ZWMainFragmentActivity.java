@@ -853,7 +853,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 				public void run() {
 					mainActivity.setShowingDialog(false);
 					if (status == reencryptionStatus.encrypted){
-						mainActivity.showGetPassphraseDialog(ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING, new Bundle(), 
+						mainActivity.showGetPassphraseDialog(ZWRequestCodes.PASSWORD_FOR_DECRYPTING, new Bundle(), 
 								"pass_for_old_encrypted_keys", "Your keys have already been encrypted with a passphrase, please enter your old passphrase:");
 					} else {
 						mainActivity.alertUser("We've encountered a fatal error in your database, please contact customer service!",  
@@ -1183,7 +1183,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
 				sendFrag.onClickSendCoins(passphrase);
 				break;
-			case ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG:
+			case ZWRequestCodes.DISABLE_PASSWORD_DIALOG:
 				this.changePassphrase(passphrase, null);
 				
 				ZWPreferences.disablePassword();
@@ -1199,7 +1199,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			}
 		} else {
 			//if input doesnt match stored hash we may be entering a passphrase for decrypting
-			if (requestCode == ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING){
+			if (requestCode == ZWRequestCodes.PASSWORD_FOR_DECRYPTING){
 				if (ZWWalletManager.getInstance().attemptDecrypt(passphrase)){
 					//the passphrase worked, decrypt all keys now
 					ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(passphrase, null);

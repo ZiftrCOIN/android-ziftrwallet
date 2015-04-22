@@ -192,7 +192,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
 			if (ZWPreferences.userHasPassword()){
-				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
+				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSWORD_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
 			} else {
 				ZWPreferences.setPasswordWarningDisabled(true);
 				//update settings visibility too slow with recognizing disabled password so update here

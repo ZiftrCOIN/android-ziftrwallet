@@ -3,6 +3,8 @@ package com.ziftr.android.ziftrwallet.fragment;
 import java.lang.reflect.Field;
 
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -59,6 +61,27 @@ public abstract class ZWFragment extends Fragment {
 		} catch (Exception e) {
 			ZLog.log("Exception using reflection to clean up settings fragments: ", e);
 		}
+	}
+	
+	
+	/**
+	 * Gets another fragment contained in the same fragment manager as this fragment (a sibling fragment)
+	 * Typically would be used for helper (non-UI) fragments used to handle long running tasks.
+	 * @param tag The tag of the Fragment to get
+	 * @return The fragment with the passed in tag, or null if no such fragment is currently added to the manager
+	 */
+	public Fragment getFragment(String tag) {
+		Fragment fragment = null;
+		FragmentActivity activity = this.getActivity();
+		if(activity != null) {
+			FragmentManager fragmentManager = activity.getSupportFragmentManager();
+			if(fragmentManager != null) {
+				fragment = fragmentManager.findFragmentByTag(tag);
+				
+			}
+		}
+		
+		return fragment;
 	}
 
 }

@@ -14,11 +14,13 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
- * non-UI fragment for sending coins
- * @author henryphu
+ * Helper fragment for managing sending coins
  *
  */
 public class ZWSendTaskFragment extends Fragment{
+	
+	
+	public static final String FRAGMENT_TAG = "send_coins_helper";
 	
 	public ZWSendTaskFragment(){
 		
