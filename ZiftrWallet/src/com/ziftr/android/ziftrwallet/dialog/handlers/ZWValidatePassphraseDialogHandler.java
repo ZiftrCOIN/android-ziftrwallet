@@ -1,6 +1,5 @@
 package com.ziftr.android.ziftrwallet.dialog.handlers;
 
-import android.os.Bundle;
 
 /**
  *  A simple handler for handling a dialog where the
@@ -19,7 +18,7 @@ public interface ZWValidatePassphraseDialogHandler {
 	 * so that they can use the result appropriately.
 	 * 
 	 */
-	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info);
+	public void handlePassphrasePositive(int requestCode, String passphrase);
 	
 	/**
 	 * Implement this method to determine what the app does when

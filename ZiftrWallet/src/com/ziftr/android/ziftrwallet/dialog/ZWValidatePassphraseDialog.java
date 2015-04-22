@@ -74,9 +74,7 @@ public class ZWValidatePassphraseDialog extends ZWDialogFragment {
 			break;
 		case R.id.right_dialog_button:
 			//CONTINUE
-			handler.handlePassphrasePositive(this.getRequestCode(), 
-					this.getStringFromTextView(R.id.textbox_passphrase),
-					this.getArguments());
+			handler.handlePassphrasePositive(this.getRequestCode(), this.getStringFromTextView(R.id.textbox_passphrase) );
 			this.dismiss();
 			break;
 		}

@@ -601,8 +601,10 @@ public class ZWDataSyncHelper {
 		ZWWalletManager.getInstance().addTransaction(transaction);
 	}
 	
+	
 	//create transaction immediately after sending
 	//need fee before we can use
+	/**********
 	private static void createTransactionFromSpendResponse(ZWCoin coin, JSONObject json, String sentTo) throws JSONException{
 		String hash = json.getString("txid");
 		ZWTransaction transaction = new ZWTransaction(coin, hash);
@@ -651,6 +653,7 @@ public class ZWDataSyncHelper {
 		transaction.setDisplayAddresses(displayAddresses);
 		ZWWalletManager.getInstance().addTransaction(transaction);
 	}
+	***********/
 	
 	private static JSONObject buildSpendPostData(List<String> inputs, String output, BigInteger amount, String fee, String changeAddress) {
 		JSONObject postData = new JSONObject();

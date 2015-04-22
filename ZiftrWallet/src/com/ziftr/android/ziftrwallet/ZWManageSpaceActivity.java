@@ -83,8 +83,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 	}
 
 	@Override
-	public void handlePassphrasePositive(int requestCode, String passphrase,
-			Bundle info) {
+	public void handlePassphrasePositive(int requestCode, String passphrase) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
 		if (ZWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
 			this.clearAppData();

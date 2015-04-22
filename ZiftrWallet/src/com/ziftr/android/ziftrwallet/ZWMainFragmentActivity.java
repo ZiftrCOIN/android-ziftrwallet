@@ -1174,7 +1174,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	
 	
 	@Override
-	public void handlePassphrasePositive(int requestCode, String passphrase, Bundle info) {
+	public void handlePassphrasePositive(int requestCode, String passphrase) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
 		
 		if (ZWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {

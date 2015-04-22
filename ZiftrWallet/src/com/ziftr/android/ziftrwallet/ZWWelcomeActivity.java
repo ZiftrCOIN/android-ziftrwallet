@@ -114,8 +114,7 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 	}
 
 	@Override
-	public void handlePassphrasePositive(int requestCode, String passphrase,
-			Bundle info) {
+	public void handlePassphrasePositive(int requestCode, String passphrase) {
 		switch(requestCode) {
 			case ZWRequestCodes.PASSPHRASE_FOR_DECRYPTING:
 
