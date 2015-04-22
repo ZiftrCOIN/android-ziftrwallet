@@ -27,7 +27,7 @@ public class ZWWelcomeActivity extends FragmentActivity implements ZWNeutralDial
 		this.setContentView(R.layout.welcome);
 		
 		if (savedInstanceState == null) {
-			if (!ZWPreferences.userHasPassphrase() && !ZWPreferences.getPassphraseWarningDisabled()) {
+			if (!ZWPreferences.userHasPassword() && !ZWPreferences.getPasswordWarningDisabled()) {
 				this.openPassphraseFragment();
 			} else if (!ZWPreferences.userHasSetName() && !ZWPreferences.getDisabledName()) {
 				this.openNameFragment(false);

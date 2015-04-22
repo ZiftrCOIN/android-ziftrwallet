@@ -39,7 +39,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 	@Override
 	public void onClick(View v) {
 		if (v == continueButton){
-			if (ZWPreferences.userHasPassphrase()){
+			if (ZWPreferences.userHasPassword()){
 				this.showContinuePassphraseDialog();
 			} else {
 				this.clearAppData();

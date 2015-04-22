@@ -122,16 +122,13 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		if(!(requireFragHasAddress && this.fragmentHasAddress()) && !this.labelEditText.getText().toString().isEmpty()) {
 			// TODO make the passphrase diaog have extra information about how they 
 			// won't be able to delete the address they are about to make
-			if (ZWPreferences.userHasPassphrase() && ZWPreferences.getCachedPassphrase() == null) {
+			if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						ZWTags.VALIDATE_PASS_RECEIVE);
 			} else {
-				if (ZWPreferences.getCachedPassphrase() != null){
-					ZWPreferences.usingCachedPass = true;
-				}
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
 						"Addresses cannot be deleted once they are created. Are you sure?", 
 						ZWTags.CONFIRM_NEW_ADDRESS, new Bundle());

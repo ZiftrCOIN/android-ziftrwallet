@@ -239,15 +239,12 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 				a.onBackPressed();
 			}
 		} else if (v == sendButton) {
-			if (ZWPreferences.userHasPassphrase() && ZWPreferences.getCachedPassphrase() == null) {
+			if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, ZWTags.VALIDATE_PASS_SEND);
 			} else {
-				if (ZWPreferences.getCachedPassphrase() != null){
-					ZWPreferences.usingCachedPass = true;
-				}
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_SEND_COINS, "Are you sure you want to send " + 
 			this.totalTextView.getText() + " " + getSelectedCoin().getSymbol() + "?"
 			, ZWTags.CONFIRM_SEND, new Bundle());

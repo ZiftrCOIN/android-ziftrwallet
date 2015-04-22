@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.FragmentManager;
@@ -71,7 +68,6 @@ import com.ziftr.android.ziftrwallet.fragment.ZWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
@@ -870,7 +866,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		} else {
 			//reencryption was successful
 			String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
-			ZWPreferences.setStoredPassphraseHash(saltedHash);
+			ZWPreferences.setStoredPasswordHash(saltedHash);
 		}
 		return true;
 	}
@@ -1166,9 +1162,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		case ZWRequestCodes.DEACTIVATE_WALLET:
 			// Nothing to do
 			break;
-		case ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED:
-			//Nothing to do
-			break;
 		}
 	}
 	
@@ -1178,7 +1171,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
 		
 		if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
-			ZWPreferences.setCachedPassphrase(passphrase);
+			ZWPreferences.setCachedPassword(passphrase);
 			switch(requestCode) {
 			case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
@@ -1193,8 +1186,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			case ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG:
 				this.changePassphrase(passphrase, null);
 				
-				ZWPreferences.disablePassphrase();
-				ZWPreferences.setPassphraseWarningDisabled(true);
+				ZWPreferences.disablePassword();
+				ZWPreferences.setPasswordWarningDisabled(true);
 				
 				((ZWSettingsFragment)this.getSupportFragmentManager(
 						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
@@ -1247,7 +1240,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 					//if the password was changed
 					if (requestCode == ZWRequestCodes.CREATE_PASSPHRASE_DIALOG) { 
 						//if we were setting the passphrase, turn disabled passphrase off
-						ZWPreferences.setPassphraseWarningDisabled(false);
+						ZWPreferences.setPasswordWarningDisabled(false);
 						((ZWSettingsFragment)this.getSupportFragmentManager(
 								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 					}
@@ -1289,9 +1282,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			case ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
 				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
-				if (ZWPreferences.userHasPassphrase()){
-					receiveFrag.loadNewAddressFromDatabase(ZWPreferences.getCachedPassphrase());
-					ZWPreferences.usingCachedPass = false;
+				if (ZWPreferences.userHasPassword()){
+					receiveFrag.loadNewAddressFromDatabase(ZWPreferences.getCachedPassword());
 				} else {
 					receiveFrag.loadNewAddressFromDatabase(null);
 				}
@@ -1303,26 +1295,11 @@ ZiftrNetworkHandler, ZWMessageHandler {
 						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
 				break;
 			case ZWRequestCodes.CONFIRM_SEND_COINS:
-				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager(
-						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
-				if (ZWPreferences.userHasPassphrase()){
-					sendFrag.onClickSendCoins(ZWPreferences.getCachedPassphrase());
-					ZWPreferences.usingCachedPass = false;
+				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_FRAGMENT);
+				if (ZWPreferences.userHasPassword()){
+					sendFrag.onClickSendCoins(ZWPreferences.getCachedPassword());
 				} else {
 					sendFrag.onClickSendCoins(null);
-				}
-				break;
-			case ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED:
-				ZWPreferences.setMempoolIsSpendable(true);
-				JSONObject serverResponse;
-				try {
-					serverResponse = new JSONObject(info.getString(ZWDataSyncHelper.toSignResponseKey));
-					String passphrase = info.getString(ZWPreferences.BUNDLE_PASSPHRASE_KEY);
-					ZWCoin sendingCoin = ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY));
-					((ZWSendTaskFragment) getSupportFragmentManager(
-							).findFragmentByTag(ZWTags.SEND_TASK)).signSentCoins(sendingCoin, serverResponse, passphrase);
-				} catch (JSONException e) {
-					ZLog.log("Error parsing server Response from bundle in warning for spending mempool: " + e);
 				}
 				break;
 			}

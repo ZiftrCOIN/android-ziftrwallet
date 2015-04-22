@@ -13,7 +13,7 @@ public class ZWAppDataTable {
 	public static final String COLUMN_KEY = "key";
 	public static final String COLUMN_VALUE = "value";
 	public static final String SALT = "salt";
-	public static final String PASS_KEY = "passphrase_hash";
+	public static final String PASS_KEY = "password_hash";
 
 	
 	protected void create(SQLiteDatabase db) {

@@ -1,12 +1,10 @@
 package com.ziftr.android.ziftrwallet;
 
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.Handler;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
@@ -16,18 +14,12 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class ZWPreferences {
 	public static final String ZWOPTIONS_KEY = "ziftrwallet_stored_options";
-
-	/** For putting the passphrase into a bundle and/or intent extras. */
-	public static final String BUNDLE_PASSPHRASE_KEY = "bundle_passphrase_key";
 	
-	/** For putting the passphrase into a bundle and/or intent extras. */
-	public static final String BUNDLE_NAME_KEY = "bundle_name_key";
-
 	/** Used for getting the preferences */
 	public static final String PREFERENCES_FILE_NAME = "ziftrWALLET_Prefs";
 	
-	/** The key for getting the passphrase hash from the preferences. */
-	public static final String PREFS_PASSPHRASE_KEY = "zw_passphrase_key_1";
+	/** The key for getting the password hash from the preferences. */
+	public static final String PREFS_PASSWORD_KEY = "zw_passpword_key_1";
 	
 	/** key for getting and saving salt in the options file */
 	static final String PREFS_SALT_KEY = "ziftrWALLET_salt_key";
@@ -39,7 +31,7 @@ public abstract class ZWPreferences {
 	public final static String NAME_DISABLED_KEY = "zw_disabled_name_key";
 	
 	/** So we can skip the welcome screen and save the boolean. */
-	public final static String PASSPHRASE_WARNING_KEY = "zw_disabled_passphrase_key";
+	public final static String PASSWORD_WARNING_KEY = "zw_disabled_password_key";
 
 	/** So we can save the boolean from settings, whether fees are edititable or not. */
 	public final static String EDITABLE_FEES_KEY = "zw_editable_fees_key";
@@ -55,64 +47,127 @@ public abstract class ZWPreferences {
 	
 	/** Save whether we can spend unconfirmed txns or not*/
 	public final static String SPENDABLE_MEMPOOL_KEY = "spendable_mempool_key";
-	
-	/** save passphrase temporarily */
-	private static WeakReference<String> cachedPassphrase;
-	
-	/** if true we are currently in a state where we should extend the timer and keep the cachedpassphrase*/
-	public static boolean usingCachedPass = false;
 
-	/** interval in milliseconds to check if we can clear the cached passphrase */
-	private static final int clearPassInterval = 300000;
+	
+	/**
+	 * A simple thread implementation that will keep a string in memory for a certain period of time.
+	 * Thread simply checks the time, and sleeps longer if it's not ready yet.
+	 * Reading or writing the string will reset the timer.
+	 * Static setter/getter protect against null/dead thread and start new thread if needed
+	 *
+	 */
+	private static final class CacheThread extends Thread {
+
+		private static CacheThread cacheThread = null;
+		private static final int cacheTime = 300000;
+		
+		long cacheCleanupTime = 0;
+		String cache = null;
+
+		private CacheThread() {}
+
+		@Override
+		public void run() {
+			
+			while(true) {
+				synchronized(CacheThread.class) {
+					if(System.currentTimeMillis() < cacheCleanupTime) {
+						try {
+							//just wait on the class object, since we've already aquired the lock for 
+							//other synchronization reasons
+							CacheThread.class.wait(cacheCleanupTime - System.currentTimeMillis());
+						} 
+						catch (InterruptedException e) {
+							//do nothing, if the thread gets woken up
+							//then just check time again and go back to sleep
+						}
+					}
+					else {
+						cache = null;
+						cacheThread = null;
+						break;
+					}
+					
+				}
+			}
+			
+		}
+
+		
+		public static synchronized void setCache(String cacheString) {
+			if(cacheThread == null) {
+				cacheThread = new CacheThread();
+				cacheThread.cache = cacheString;
+				cacheThread.cacheCleanupTime = System.currentTimeMillis() + cacheTime;
+				cacheThread.start();
+			}
+			else {
+				cacheThread.cache = cacheString;
+				cacheThread.cacheCleanupTime = System.currentTimeMillis() + cacheTime;
+			}
+
+		}
+		
+		public static synchronized String getCache() {
+			if(cacheThread != null) {
+				//getting the cache also extends the timer
+				cacheThread.cacheCleanupTime = System.currentTimeMillis() + cacheTime;
+				return cacheThread.cache;
+			}
+			
+			return null;
+		}
+		
+	}
 	
 
 	/**
-	 * Gets the stored hash of the users passphrase, if there is one.
+	 * Gets the stored hash of the users password, if there is one.
 	 * 
-	 * @return the stored hash of the users passphrase, if there is one.
+	 * @return the stored hash of the users password, if there is one.
 	 */
-	static byte[] getStoredPassphraseHash() {
-		String storedPassphrase = ZWWalletManager.getInstance().getAppDataString(ZWAppDataTable.PASS_KEY);
+	static byte[] getStoredPasswordHash() {
+		String storedPassword = ZWWalletManager.getInstance().getAppDataString(ZWAppDataTable.PASS_KEY);
 		
-		if (storedPassphrase == null || storedPassphrase.isEmpty()){
+		if (storedPassword == null || storedPassword.isEmpty()){
 			//check old preferences since none in db
-			storedPassphrase = getPrefString(PREFS_PASSPHRASE_KEY);
-			if (storedPassphrase == null || storedPassphrase.isEmpty()){
+			storedPassword = getPrefString(PREFS_PASSWORD_KEY);
+			if (storedPassword == null || storedPassword.isEmpty()){
 				return null;
 			} else {
-				ZWWalletManager.getInstance().upsertAppDataVal(ZWAppDataTable.PASS_KEY, storedPassphrase);
-				return ZiftrUtils.hexStringToBytes(storedPassphrase);
+				ZWWalletManager.getInstance().upsertAppDataVal(ZWAppDataTable.PASS_KEY, storedPassword);
+				return ZiftrUtils.hexStringToBytes(storedPassword);
 			}
 		} else {
 			// If it's not null, convert it back to a byte array
-			return ZiftrUtils.hexStringToBytes(storedPassphrase);
+			return ZiftrUtils.hexStringToBytes(storedPassword);
 		}
 	}
 	
-	static int setStoredPassphraseHash(String saltedHash) {
+	static int setStoredPasswordHash(String saltedHash) {
 		return ZWWalletManager.getInstance().upsertAppDataVal(ZWAppDataTable.PASS_KEY, saltedHash);
 	}
 
 	/**
 	 * Get a boolean describing whether or not the user 
-	 * has entered a passphrase before.
+	 * has entered a password before.
 	 * 
 	 * @return a boolean describing whether or not the user 
-	 * has entered a passphrase before.
+	 * has entered a password before.
 	 */
-	public static boolean userHasPassphrase() {
-		return getStoredPassphraseHash() != null;
+	public static boolean userHasPassword() {
+		return getStoredPasswordHash() != null;
 	}
 
 	/**
-	 * Tells if the given hash matches the stored passphrase
+	 * Tells if the given hash matches the stored password
 	 * hash.
 	 * 
 	 * @param inputHash - the hash to check agains
 	 * @return as above
 	 */
 	public static boolean inputHashMatchesStoredHash(byte[] inputHash) {
-		byte[] storedHash = getStoredPassphraseHash();
+		byte[] storedHash = getStoredPasswordHash();
 		if (storedHash != null && inputHash != null) {
 			return Arrays.equals(storedHash, inputHash); 
 		} else if (storedHash == null && inputHash == null) {
@@ -139,17 +194,17 @@ public abstract class ZWPreferences {
 		ZWWalletManager.getInstance().upsertAppDataVal(SPENDABLE_MEMPOOL_KEY, spendable);
 	}
 	
-	public static boolean getPassphraseWarningDisabled() {
-		return getOption(PASSPHRASE_WARNING_KEY, false);
+	public static boolean getPasswordWarningDisabled() {
+		return getOption(PASSWORD_WARNING_KEY, false);
 	}
 
 	
-	public static void setPassphraseWarningDisabled(boolean isDisabled) {
-		ZWWalletManager.getInstance().upsertAppDataVal(PASSPHRASE_WARNING_KEY, isDisabled);
+	public static void setPasswordWarningDisabled(boolean isDisabled) {
+		ZWWalletManager.getInstance().upsertAppDataVal(PASSWORD_WARNING_KEY, isDisabled);
 	}
 	
-	public static void disablePassphrase(){
-		setStoredPassphraseHash(null);
+	public static void disablePassword(){
+		setStoredPasswordHash(null);
 	}
 
 	
@@ -206,12 +261,8 @@ public abstract class ZWPreferences {
 		ZWWalletManager.getInstance().upsertAppDataVal(LOG_TO_FILE_KEY, enabled);
 	}
 	
-	public static String getCachedPassphrase(){
-		if (ZWPreferences.cachedPassphrase != null){
-			return ZWPreferences.cachedPassphrase.get();
-		} else {
-			return null;
-		}
+	public static String getCachedPassword(){
+		return CacheThread.getCache();
 	}
 	
 	public static String getSalt(){
@@ -228,25 +279,8 @@ public abstract class ZWPreferences {
 		return salt;
 	}
 	
-	public static void setCachedPassphrase(String pass){
-		ZWPreferences.cachedPassphrase = new WeakReference<String>(pass);
-		/** handler that schedules clearing of cachedPassphrase */
-		final Handler cacheHandler = new Handler();
-		/** runnable to clear cached passphrase */
-		Runnable clearPassEvent = new Runnable(){ 
-			@Override
-			public void run() {
-				//if we are using cachedpass, don't clear yet and schedule to clear it later
-				if (ZWPreferences.usingCachedPass){
-					cacheHandler.postDelayed(this, clearPassInterval);
-				} else {
-					// clear cached passphrase
-					ZWPreferences.cachedPassphrase = null;
-				}
-			}
-		};
-		
-		cacheHandler.postDelayed(clearPassEvent, ZWPreferences.clearPassInterval);
+	public static synchronized void setCachedPassword(String password){
+		CacheThread.setCache(password);
 	}
 	
 	//reads option from appdata table in database, if none found, checks preferences for old settings

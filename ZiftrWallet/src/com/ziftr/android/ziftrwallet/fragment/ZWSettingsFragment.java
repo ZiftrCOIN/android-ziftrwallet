@@ -114,10 +114,10 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
 	public void updateSettingsVisibility(boolean justSetPass) {
 		//Show/hide options based on password settings
-		if (ZWPreferences.userHasPassphrase() || justSetPass) {
+		if (ZWPreferences.userHasPassword() || justSetPass) {
 			this.resetPasswordLabel.setText("Reset Passphrase");
 			this.disablePassphrase.setVisibility(View.VISIBLE);
-		} else if (!ZWPreferences.getPassphraseWarningDisabled()){
+		} else if (!ZWPreferences.getPasswordWarningDisabled()){
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		} else {
@@ -160,7 +160,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		if (v==this.resetPassword){
-			if (ZWPreferences.userHasPassphrase()) {
+			if (ZWPreferences.userHasPassword()) {
 				ZWResetPassphraseDialog passphraseDialog = 
 						new ZWResetPassphraseDialog();
 				// Set the target fragment
@@ -191,10 +191,10 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		} else if (v==this.editableConfirmationFee){
 			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
-			if (ZWPreferences.userHasPassphrase()){
+			if (ZWPreferences.userHasPassword()){
 				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
 			} else {
-				ZWPreferences.setPassphraseWarningDisabled(true);
+				ZWPreferences.setPasswordWarningDisabled(true);
 				//update settings visibility too slow with recognizing disabled password so update here
 				this.disablePassphrase.setVisibility(View.GONE);
 				this.resetPasswordLabel.setText("Set Passphrase");
