@@ -14,7 +14,7 @@ import com.ziftr.android.ziftrwallet.sqlite.ZWAppDataTable;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public abstract class ZWPreferencesUtils {
+public abstract class ZWPreferences {
 	public static final String ZWOPTIONS_KEY = "ziftrwallet_stored_options";
 
 	/** For putting the passphrase into a bundle and/or intent extras. */
@@ -207,8 +207,8 @@ public abstract class ZWPreferencesUtils {
 	}
 	
 	public static String getCachedPassphrase(){
-		if (ZWPreferencesUtils.cachedPassphrase != null){
-			return ZWPreferencesUtils.cachedPassphrase.get();
+		if (ZWPreferences.cachedPassphrase != null){
+			return ZWPreferences.cachedPassphrase.get();
 		} else {
 			return null;
 		}
@@ -229,7 +229,7 @@ public abstract class ZWPreferencesUtils {
 	}
 	
 	public static void setCachedPassphrase(String pass){
-		ZWPreferencesUtils.cachedPassphrase = new WeakReference<String>(pass);
+		ZWPreferences.cachedPassphrase = new WeakReference<String>(pass);
 		/** handler that schedules clearing of cachedPassphrase */
 		final Handler cacheHandler = new Handler();
 		/** runnable to clear cached passphrase */
@@ -237,16 +237,16 @@ public abstract class ZWPreferencesUtils {
 			@Override
 			public void run() {
 				//if we are using cachedpass, don't clear yet and schedule to clear it later
-				if (ZWPreferencesUtils.usingCachedPass){
+				if (ZWPreferences.usingCachedPass){
 					cacheHandler.postDelayed(this, clearPassInterval);
 				} else {
 					// clear cached passphrase
-					ZWPreferencesUtils.cachedPassphrase = null;
+					ZWPreferences.cachedPassphrase = null;
 				}
 			}
 		};
 		
-		cacheHandler.postDelayed(clearPassEvent, ZWPreferencesUtils.clearPassInterval);
+		cacheHandler.postDelayed(clearPassEvent, ZWPreferences.clearPassInterval);
 	}
 	
 	//reads option from appdata table in database, if none found, checks preferences for old settings

@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
@@ -77,7 +77,7 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 			convertView = this.inflater.inflate(R.layout.coin_list_item, null);
 		}
 		
-		ZWFiat fiatType =ZWPreferencesUtils.getFiatCurrency();
+		ZWFiat fiatType =ZWPreferences.getFiatCurrency();
 		
 		convertView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
 		

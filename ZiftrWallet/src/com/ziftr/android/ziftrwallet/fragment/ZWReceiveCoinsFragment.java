@@ -27,7 +27,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
@@ -122,15 +122,15 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		if(!(requireFragHasAddress && this.fragmentHasAddress()) && !this.labelEditText.getText().toString().isEmpty()) {
 			// TODO make the passphrase diaog have extra information about how they 
 			// won't be able to delete the address they are about to make
-			if (ZWPreferencesUtils.userHasPassphrase() && ZWPreferencesUtils.getCachedPassphrase() == null) {
+			if (ZWPreferences.userHasPassphrase() && ZWPreferences.getCachedPassphrase() == null) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
 						ZWTags.VALIDATE_PASS_RECEIVE);
 			} else {
-				if (ZWPreferencesUtils.getCachedPassphrase() != null){
-					ZWPreferencesUtils.usingCachedPass = true;
+				if (ZWPreferences.getCachedPassphrase() != null){
+					ZWPreferences.usingCachedPass = true;
 				}
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
 						"Addresses cannot be deleted once they are created. Are you sure?", 
@@ -223,7 +223,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		String label = this.labelEditText.getText().toString();
 		if (label.isEmpty()){
 			//if no label, use a user's name
-			label = ZWPreferencesUtils.getUserName();
+			label = ZWPreferences.getUserName();
 		}
 		String message = this.messageEditText.getText().toString();
 		message = message != null && message.isEmpty() ? null : message;

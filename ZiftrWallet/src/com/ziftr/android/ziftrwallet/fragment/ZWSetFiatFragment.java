@@ -9,7 +9,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 
 public class ZWSetFiatFragment extends ZWFragment implements OnItemClickListener{
@@ -46,7 +46,7 @@ public class ZWSetFiatFragment extends ZWFragment implements OnItemClickListener
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		ZWFiat fiatType = (ZWFiat) parent.getItemAtPosition(position);
-		ZWPreferencesUtils.setFiatCurrency(fiatType.getName());
+		ZWPreferences.setFiatCurrency(fiatType.getName());
 		getZWMainActivity().onBackPressed();
 	}
 

@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
@@ -57,8 +57,8 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 
 	public void testPreconditions(){
 		assertTrue(mActivity.getWalletManager().getActivatedCoins().size() == 0);
-		assertFalse(ZWPreferencesUtils.getDisabledName());
-		assertNull(ZWPreferencesUtils.getUserName());
+		assertFalse(ZWPreferences.getDisabledName());
+		assertNull(ZWPreferences.getUserName());
 		assertTrue(mActivity.getSupportFragmentManager().getBackStackEntryCount() == 0);
 	}
 

@@ -2,7 +2,7 @@ package com.ziftr.android.ziftrwallet.crypto;
 
 import java.math.BigDecimal;
 
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 import android.text.Editable;
@@ -36,7 +36,7 @@ public class ZWCoinFiatTextWatcher implements TextWatcher {
 	public void afterTextChanged(Editable s) {
 		if(s == coinEdit.getEditableText()) {
 			//user edited the coin edit, so update the fiat edit accordingly
-			ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
+			ZWFiat selectedFiat = ZWPreferences.getFiatCurrency();
 			
 			if(userEdited) {
 				try {
@@ -62,7 +62,7 @@ public class ZWCoinFiatTextWatcher implements TextWatcher {
 		else if(s == fiatEdit.getEditableText()) {
 			if(userEdited) {
 				try {
-					ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
+					ZWFiat selectedFiat = ZWPreferences.getFiatCurrency();
 					String fiatValueString = s.toString();
 					BigDecimal fiatValue = new BigDecimal(fiatValueString);
 					BigDecimal coinValue = ZWConverter.convert(fiatValue, selectedFiat, coin);

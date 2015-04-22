@@ -97,10 +97,10 @@ public class ZWSplashScreenActivity extends FragmentActivity {
 
 	private void loadNoFragmentUi() {
 		
-		boolean existingPassword = ZWPreferencesUtils.userHasPassphrase();
-		boolean passwordWarningDisabled = ZWPreferencesUtils.getPassphraseWarningDisabled();
-		boolean existingUserName = ZWPreferencesUtils.userHasSetName();
-		boolean userNameDisabled = ZWPreferencesUtils.getDisabledName();
+		boolean existingPassword = ZWPreferences.userHasPassphrase();
+		boolean passwordWarningDisabled = ZWPreferences.getPassphraseWarningDisabled();
+		boolean existingUserName = ZWPreferences.userHasSetName();
+		boolean userNameDisabled = ZWPreferences.getDisabledName();
 		
 		boolean passwordSetup = existingPassword || passwordWarningDisabled;
 		boolean userNameSetup = existingUserName || userNameDisabled;

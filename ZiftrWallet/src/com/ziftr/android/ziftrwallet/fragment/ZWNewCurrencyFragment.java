@@ -11,7 +11,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 
 public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickListener{
@@ -35,7 +35,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 
 		this.rootView = inflater.inflate(R.layout.currency_get_new_list, container, false);
 
-		boolean includeTestnet = ZWPreferencesUtils.getDebugMode();
+		boolean includeTestnet = ZWPreferences.getDebugMode();
 		List<ZWCoin> unactivatedCoins = this.getZWMainActivity().getWalletManager().getInactiveCoins(includeTestnet);
 		
 		if (unactivatedCoins.size() <= 0){

@@ -22,7 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
@@ -124,7 +124,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		
 		this.coinLogo.setImageResource(this.getSelectedCoin().getLogoResId());
 
-		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
+		ZWFiat fiat = ZWPreferences.getFiatCurrency();
 		this.populateAmount();
 		this.populateCurrency();
 		
@@ -173,7 +173,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	}
 
 	private void populateCurrency() {
-		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
+		ZWFiat fiat = ZWPreferences.getFiatCurrency();
 		
 		BigInteger fiatAmt = ZWConverter.convert(txItem.getAmount(), 
 				txItem.getCoin(), fiat);

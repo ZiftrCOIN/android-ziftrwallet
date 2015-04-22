@@ -26,7 +26,7 @@ import android.widget.Toast;
 
 import com.google.zxing.client.android.CaptureActivity;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
@@ -239,14 +239,14 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 				a.onBackPressed();
 			}
 		} else if (v == sendButton) {
-			if (ZWPreferencesUtils.userHasPassphrase() && ZWPreferencesUtils.getCachedPassphrase() == null) {
+			if (ZWPreferences.userHasPassphrase() && ZWPreferences.getCachedPassphrase() == null) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
 				getZWMainActivity().showGetPassphraseDialog(
 						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND, b, ZWTags.VALIDATE_PASS_SEND);
 			} else {
-				if (ZWPreferencesUtils.getCachedPassphrase() != null){
-					ZWPreferencesUtils.usingCachedPass = true;
+				if (ZWPreferences.getCachedPassphrase() != null){
+					ZWPreferences.usingCachedPass = true;
 				}
 				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_SEND_COINS, "Are you sure you want to send " + 
 			this.totalTextView.getText() + " " + getSelectedCoin().getSymbol() + "?"
@@ -358,7 +358,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.sendButton.setOnClickListener(this);
 
 		
-		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
+		ZWFiat selectedFiat = ZWPreferences.getFiatCurrency();
 
 		this.fiatAmountLabel = (TextView) this.rootView.findViewById(R.id.amount_fiat_label);
 		this.fiatFeeLabel = (TextView) this.rootView.findViewById(R.id.fee_fiat_label);
@@ -367,7 +367,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.totalTextView = (TextView) this.rootView.findViewById(R.id.sendTotalTextView);
 		this.totalFiatEquivTextView = (TextView) this.rootView.findViewById(R.id.sendTotalFiatEquivTextView);
 
-		if (ZWPreferencesUtils.getFeesAreEditable()) {
+		if (ZWPreferences.getFeesAreEditable()) {
 			this.coinFeeEditText.setFocusable(true);
 			this.coinFeeEditText.setFocusableInTouchMode(true);
 			this.coinFeeEditText.setClickable(true);
@@ -401,7 +401,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		fiatAmountEditText.addTextChangedListener(coinTextWatcher);
 		
 		//set the hint text to zeros
-		fiatAmountEditText.setHint(ZWPreferencesUtils.getFiatCurrency().getFormattedAmount(BigDecimal.ZERO));
+		fiatAmountEditText.setHint(ZWPreferences.getFiatCurrency().getFormattedAmount(BigDecimal.ZERO));
 		coinAmountEditText.setHint(getSelectedCoin().getFormattedAmount(BigDecimal.ZERO));
 
 		// Bind the fee values so that when one changes the other changes
@@ -437,7 +437,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.coinFeeEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		
 		this.coinAmountEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
-		if (ZWPreferencesUtils.getFeesAreEditable()){
+		if (ZWPreferences.getFeesAreEditable()){
 			this.fiatAmountEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 			this.coinFeeEditText.setImeOptions(EditorInfo.IME_ACTION_NEXT);
 		}
@@ -465,7 +465,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment implements 
 		this.totalTextView.setText(getSelectedCoin().getFormattedAmount(total));
 
 		// Update the text in the total fiat equiv
-		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
+		ZWFiat selectedFiat = ZWPreferences.getFiatCurrency();
 		BigDecimal fiatTotal = ZWConverter.convert(total, getSelectedCoin(), selectedFiat);
 		
 		this.totalFiatEquivTextView.setText("(" + selectedFiat.getFormattedAmount(fiatTotal, true) + ")");

@@ -39,7 +39,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 	@Override
 	public void onClick(View v) {
 		if (v == continueButton){
-			if (ZWPreferencesUtils.userHasPassphrase()){
+			if (ZWPreferences.userHasPassphrase()){
 				this.showContinuePassphraseDialog();
 			} else {
 				this.clearAppData();
@@ -85,7 +85,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 	@Override
 	public void handlePassphrasePositive(int requestCode, String passphrase) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
-		if (ZWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
+		if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
 			this.clearAppData();
 			this.finish();
 

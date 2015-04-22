@@ -64,7 +64,7 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 		} else if (v == saveNameButton) {
 			String name = nameEditText.getText().toString();
 			if (!name.isEmpty()) {
-				if (ZWPreferencesUtils.setUserName(name) == -1){
+				if (ZWPreferences.setUserName(name) == -1){
 					a.alert("Your name was not set! We've encountered a database error, please restart app.", 
 							"error_set_password", ZWRequestCodes.UPSERT_DB_ERROR);
 				} else {

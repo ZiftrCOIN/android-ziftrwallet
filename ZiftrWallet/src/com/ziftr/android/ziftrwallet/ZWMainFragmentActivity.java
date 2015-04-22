@@ -193,7 +193,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (ZWPreferencesUtils.getLogToFile()){
+		if (ZWPreferences.getLogToFile()){
 			ZLog.setLogger(ZLog.FILE_LOGGER);
 		}
 		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
@@ -870,7 +870,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		} else {
 			//reencryption was successful
 			String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
-			ZWPreferencesUtils.setStoredPassphraseHash(saltedHash);
+			ZWPreferences.setStoredPassphraseHash(saltedHash);
 		}
 		return true;
 	}
@@ -1177,8 +1177,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	public void handlePassphrasePositive(int requestCode, String passphrase) {
 		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
 		
-		if (ZWPreferencesUtils.inputHashMatchesStoredHash(inputHash)) {
-			ZWPreferencesUtils.setCachedPassphrase(passphrase);
+		if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
+			ZWPreferences.setCachedPassphrase(passphrase);
 			switch(requestCode) {
 			case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
 				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
@@ -1193,8 +1193,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			case ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG:
 				this.changePassphrase(passphrase, null);
 				
-				ZWPreferencesUtils.disablePassphrase();
-				ZWPreferencesUtils.setPassphraseWarningDisabled(true);
+				ZWPreferences.disablePassphrase();
+				ZWPreferences.setPassphraseWarningDisabled(true);
 				
 				((ZWSettingsFragment)this.getSupportFragmentManager(
 						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
@@ -1241,13 +1241,13 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			// It is possible that oldPassphraseHash and the value stored in prefs are both null
 			// if the user didn't have a passphrase when this was called. 
 			// In that case, input hash matches the stored hash because they are both null
-			if (ZWPreferencesUtils.inputHashMatchesStoredHash(oldPassphraseHash)) {
+			if (ZWPreferences.inputHashMatchesStoredHash(oldPassphraseHash)) {
 				// If the old matches, set the new passphrase hash
 				if (this.changePassphrase(oldPassphrase, newPassphrase)) {
 					//if the password was changed
 					if (requestCode == ZWRequestCodes.CREATE_PASSPHRASE_DIALOG) { 
 						//if we were setting the passphrase, turn disabled passphrase off
-						ZWPreferencesUtils.setPassphraseWarningDisabled(false);
+						ZWPreferences.setPassphraseWarningDisabled(false);
 						((ZWSettingsFragment)this.getSupportFragmentManager(
 								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 					}
@@ -1289,15 +1289,15 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			case ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
 				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
-				if (ZWPreferencesUtils.userHasPassphrase()){
-					receiveFrag.loadNewAddressFromDatabase(ZWPreferencesUtils.getCachedPassphrase());
-					ZWPreferencesUtils.usingCachedPass = false;
+				if (ZWPreferences.userHasPassphrase()){
+					receiveFrag.loadNewAddressFromDatabase(ZWPreferences.getCachedPassphrase());
+					ZWPreferences.usingCachedPass = false;
 				} else {
 					receiveFrag.loadNewAddressFromDatabase(null);
 				}
 				break;
 			case ZWRequestCodes.DEBUG_MODE_ON:
-				ZWPreferencesUtils.setDebugMode(true);
+				ZWPreferences.setDebugMode(true);
 				this.initCoins(); //re-init coins to show testnet in debug mode
 				((ZWSettingsFragment)this.getSupportFragmentManager(
 						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
@@ -1305,19 +1305,19 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			case ZWRequestCodes.CONFIRM_SEND_COINS:
 				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
-				if (ZWPreferencesUtils.userHasPassphrase()){
-					sendFrag.onClickSendCoins(ZWPreferencesUtils.getCachedPassphrase());
-					ZWPreferencesUtils.usingCachedPass = false;
+				if (ZWPreferences.userHasPassphrase()){
+					sendFrag.onClickSendCoins(ZWPreferences.getCachedPassphrase());
+					ZWPreferences.usingCachedPass = false;
 				} else {
 					sendFrag.onClickSendCoins(null);
 				}
 				break;
 			case ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED:
-				ZWPreferencesUtils.setMempoolIsSpendable(true);
+				ZWPreferences.setMempoolIsSpendable(true);
 				JSONObject serverResponse;
 				try {
 					serverResponse = new JSONObject(info.getString(ZWDataSyncHelper.toSignResponseKey));
-					String passphrase = info.getString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY);
+					String passphrase = info.getString(ZWPreferences.BUNDLE_PASSPHRASE_KEY);
 					ZWCoin sendingCoin = ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY));
 					((ZWSendTaskFragment) getSupportFragmentManager(
 							).findFragmentByTag(ZWTags.SEND_TASK)).signSentCoins(sendingCoin, serverResponse, passphrase);
@@ -1353,7 +1353,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		if (newName.isEmpty()){
 			this.alertUser(getResources().getString(R.string.zw_set_empty_name), ZWTags.TRIED_SETTING_NAME_TO_EMPTY);
 		} else {
-			ZWPreferencesUtils.setUserName(newName);
+			ZWPreferences.setUserName(newName);
 			this.showingDialog = false;
 			this.alertUser(getResources().getString(R.string.zw_set_name_complete) + newName, ZWTags.SET_NAME_COMPLETE);
 			((ZWSettingsFragment)this.getSupportFragmentManager(
@@ -1431,7 +1431,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	
 	//update coin market val & wallet coin and fiat balances
 	public void updateWalletHeaderView(View headerView){
-		ZWFiat selectedFiat = ZWPreferencesUtils.getFiatCurrency();
+		ZWFiat selectedFiat = ZWPreferences.getFiatCurrency();
 		
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
 		

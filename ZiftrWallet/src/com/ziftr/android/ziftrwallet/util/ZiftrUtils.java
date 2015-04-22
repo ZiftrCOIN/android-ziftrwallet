@@ -34,7 +34,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.google.common.primitives.UnsignedLongs;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 
 public class ZiftrUtils {
 
@@ -361,7 +361,7 @@ public class ZiftrUtils {
 	 * @return
 	 */
 	public static byte[] saltedHash(String newPassphrase) {
-		return saltedHash(ZWPreferencesUtils.getSalt(), newPassphrase);
+		return saltedHash(ZWPreferences.getSalt(), newPassphrase);
 	}
 	
 	public static byte[] saltedHash(String salt, String newPassphrase) {

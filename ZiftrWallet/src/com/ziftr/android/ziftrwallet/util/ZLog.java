@@ -7,7 +7,7 @@ import java.io.OutputStreamWriter;
 import android.util.Log;
 
 import com.ziftr.android.ziftrwallet.ZWApplication;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 
 public abstract class ZLog {
 	
@@ -35,7 +35,7 @@ public abstract class ZLog {
 	}
 	
 	private static ZLog initLogger() {
-		if (ZWApplication.isDebuggable() || ZWPreferencesUtils.getDebugMode()) {
+		if (ZWApplication.isDebuggable() || ZWPreferences.getDebugMode()) {
 			
 			return new AndroidLogger();
 		}

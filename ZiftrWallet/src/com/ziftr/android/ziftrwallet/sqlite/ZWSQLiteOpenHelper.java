@@ -10,7 +10,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
@@ -393,7 +393,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 	
 	public synchronized BigInteger getWalletBalance(ZWCoin coin) {
-		return ZWPreferencesUtils.getMempoolIsSpendable() ? getWalletBalance(coin, BalanceType.ESTIMATED) : getWalletBalance(coin, BalanceType.AVAILABLE);
+		return ZWPreferences.getMempoolIsSpendable() ? getWalletBalance(coin, BalanceType.ESTIMATED) : getWalletBalance(coin, BalanceType.AVAILABLE);
 	}
 
 	public synchronized BigInteger getWalletBalance(ZWCoin coinId, BalanceType bType) {

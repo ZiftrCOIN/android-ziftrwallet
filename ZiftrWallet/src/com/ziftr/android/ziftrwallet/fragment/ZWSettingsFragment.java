@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.dialog.ZWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWResetPassphraseDialog;
@@ -68,7 +68,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.enableMempoolSpendingBar.setOnClickListener(this);
 
 		this.chosenFiat = (TextView) rootView.findViewById(R.id.chosen_fiat);
-		this.chosenFiat.setText(ZWPreferencesUtils.getFiatCurrency().getName());
+		this.chosenFiat.setText(ZWPreferences.getFiatCurrency().getName());
 		this.resetPassword = (RelativeLayout) rootView.findViewById(R.id.reset_password_button);
 		this.resetPassword.setOnClickListener(this);
 		this.resetPasswordLabel = ((TextView) resetPassword.findViewById(R.id.reset_password_text));
@@ -82,13 +82,13 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.disableName.setOnClickListener(this);
 		this.setNameLabel = (TextView) this.setName.findViewById(R.id.set_name_label);
 		
-		if (ZWPreferencesUtils.getFeesAreEditable()) {
+		if (ZWPreferences.getFeesAreEditable()) {
 			this.editableConfirmationFee.setChecked(true);
 		} else {
 			this.editableConfirmationFee.setChecked(false);
 		}
 		
-		if (ZWPreferencesUtils.getMempoolIsSpendable()) {
+		if (ZWPreferences.getMempoolIsSpendable()) {
 			this.enableMempoolSpending.setChecked(true);
 		} else {
 			this.enableMempoolSpending.setChecked(false);
@@ -114,10 +114,10 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
 	public void updateSettingsVisibility(boolean justSetPass) {
 		//Show/hide options based on password settings
-		if (ZWPreferencesUtils.userHasPassphrase() || justSetPass) {
+		if (ZWPreferences.userHasPassphrase() || justSetPass) {
 			this.resetPasswordLabel.setText("Reset Passphrase");
 			this.disablePassphrase.setVisibility(View.VISIBLE);
-		} else if (!ZWPreferencesUtils.getPassphraseWarningDisabled()){
+		} else if (!ZWPreferences.getPassphraseWarningDisabled()){
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 			this.resetPasswordLabel.setText("Set Passphrase");
 		} else {
@@ -125,10 +125,10 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.disablePassphrase.setVisibility(View.GONE);
 		}
 		//Show/hide options based on name settings
-		if (ZWPreferencesUtils.userHasSetName()){
+		if (ZWPreferences.userHasSetName()){
 			this.setNameLabel.setText("Change Name");
 			this.disableName.setVisibility(View.VISIBLE);
-		} else if (ZWPreferencesUtils.getDisabledName()) {
+		} else if (ZWPreferences.getDisabledName()) {
 			this.setNameLabel.setText("Set Name");
 			this.disableName.setVisibility(View.GONE);
 		} else {
@@ -137,7 +137,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		}
 		
 		//show debug button text based on dis/enabled
-		if (!ZWPreferencesUtils.getDebugMode()){
+		if (!ZWPreferences.getDebugMode()){
 			this.debugButton.setText("Enable debugging");
 			this.exportwalletButton.setVisibility(View.GONE);
 			this.exportlogsButton.setVisibility(View.GONE);
@@ -148,7 +148,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.exportwalletButton.setVisibility(View.VISIBLE);
 			this.exportlogsButton.setVisibility(View.VISIBLE);
 			this.enablelogsButton.setVisibility(View.VISIBLE);
-			if (ZWPreferencesUtils.getLogToFile()){
+			if (ZWPreferences.getLogToFile()){
 				this.enablelogsButton.setText(" Disable File logging ");
 			} else {
 				this.enablelogsButton.setText(" Enable File logging ");
@@ -160,7 +160,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		if (v==this.resetPassword){
-			if (ZWPreferencesUtils.userHasPassphrase()) {
+			if (ZWPreferences.userHasPassphrase()) {
 				ZWResetPassphraseDialog passphraseDialog = 
 						new ZWResetPassphraseDialog();
 				// Set the target fragment
@@ -189,12 +189,12 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				}
 			}
 		} else if (v==this.editableConfirmationFee){
-			ZWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
+			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.disablePassphrase){
-			if (ZWPreferencesUtils.userHasPassphrase()){
+			if (ZWPreferences.userHasPassphrase()){
 				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSPHRASE_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
 			} else {
-				ZWPreferencesUtils.setPassphraseWarningDisabled(true);
+				ZWPreferences.setPassphraseWarningDisabled(true);
 				//update settings visibility too slow with recognizing disabled password so update here
 				this.disablePassphrase.setVisibility(View.GONE);
 				this.resetPasswordLabel.setText("Set Passphrase");
@@ -203,15 +203,15 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			getZWMainActivity().openSetFiatCurrency();
 		} else if (v == this.editableConfirmationFeeBar){
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
-			ZWPreferencesUtils.setFeesAreEditable(this.editableConfirmationFee.isChecked());
+			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} else if (v == this.enableMempoolSpending){
-			ZWPreferencesUtils.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
+			ZWPreferences.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
 		} else if (v == this.enableMempoolSpendingBar) {
 			this.enableMempoolSpending.setChecked(!this.enableMempoolSpending.isChecked());
-			ZWPreferencesUtils.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
+			ZWPreferences.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
 		} else if (v == this.disableName){
-			ZWPreferencesUtils.setUserName(null);
-			ZWPreferencesUtils.setDisabledName(true);
+			ZWPreferences.setUserName(null);
+			ZWPreferences.setDisabledName(true);
 			this.updateSettingsVisibility(false);
 		} else if (v == this.setName){
 			ZWSetNameDialog setNameDialog = new ZWSetNameDialog();
@@ -225,8 +225,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 						"set_name");
 			}
 		} else if (v == this.debugButton) {
-			if (ZWPreferencesUtils.getDebugMode()){
-				ZWPreferencesUtils.setDebugMode(false);
+			if (ZWPreferences.getDebugMode()){
+				ZWPreferences.setDebugMode(false);
 				resetLoggerHelper();
 				//re-init coins to not show testnet in non-debug mode
 				this.getZWMainActivity().initCoins();
@@ -248,10 +248,10 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(log));
 			startActivity(Intent.createChooser(intent, "Send logs"));
 		} else if (v == this.enablelogsButton){
-			if (ZWPreferencesUtils.getLogToFile()){
+			if (ZWPreferences.getLogToFile()){
 				resetLoggerHelper();
 			} else {
-				ZWPreferencesUtils.setLogToFile(true);
+				ZWPreferences.setLogToFile(true);
 				ZLog.setLogger(ZLog.FILE_LOGGER);
 			}
 			this.updateSettingsVisibility(false);
@@ -259,8 +259,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	}
 	
 	private void resetLoggerHelper(){
-		ZWPreferencesUtils.setLogToFile(false);
-		if (ZWApplication.isDebuggable() || ZWPreferencesUtils.getDebugMode()){
+		ZWPreferences.setLogToFile(false);
+		if (ZWApplication.isDebuggable() || ZWPreferences.getDebugMode()){
 			ZLog.setLogger(ZLog.ANDROID_LOGGER);
 		} else {
 			ZLog.setLogger(ZLog.NOOP_LOGGER);

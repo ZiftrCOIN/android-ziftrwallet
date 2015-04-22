@@ -18,7 +18,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
@@ -95,7 +95,7 @@ public class ZWAccountsFragment extends ZWFragment {
 		//show Add Currency Message if user has no wallets
 		this.toggleAddCurrencyMessage();
 		
-		this.fiatType = ZWPreferencesUtils.getFiatCurrency();
+		this.fiatType = ZWPreferences.getFiatCurrency();
 
 		this.calculateTotal();
 		// Return the view which was inflated
@@ -203,7 +203,7 @@ public class ZWAccountsFragment extends ZWFragment {
 	
 	private void calculateTotal(){
 		BigDecimal total = BigDecimal.ZERO;
-		ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
+		ZWFiat fiat = ZWPreferences.getFiatCurrency();
 		
 		for(ZWCoin coin : this.activatedCoins) {
 			BigInteger balanceAtomic = walletManager.getWalletBalance(coin);

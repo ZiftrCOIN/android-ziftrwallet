@@ -56,12 +56,12 @@ public class ZWWalletWidget extends AppWidgetProvider{
 			views.setViewVisibility(R.id.widget_coin, View.VISIBLE);
 			views.setViewVisibility(R.id.widget_balance, View.VISIBLE);
 
-			if (ZWPreferencesUtils.getWidgetCoin() == null){
-				ZWPreferencesUtils.setWidgetCoin(ZWWalletManager.getInstance().getActivatedCoins().get(0).getSymbol());
+			if (ZWPreferences.getWidgetCoin() == null){
+				ZWPreferences.setWidgetCoin(ZWWalletManager.getInstance().getActivatedCoins().get(0).getSymbol());
 			}
 			ZWCoin selectedCoin = null;
 			for (ZWCoin coin : coins){
-				if (coin.getSymbol().equals(ZWPreferencesUtils.getWidgetCoin())){
+				if (coin.getSymbol().equals(ZWPreferences.getWidgetCoin())){
 					selectedCoin = coin;
 					break;
 				}
@@ -69,7 +69,7 @@ public class ZWWalletWidget extends AppWidgetProvider{
 
 			if (selectedCoin != null){
 				int next = (coins.indexOf(selectedCoin) + 1) % coins.size();
-				ZWPreferencesUtils.setWidgetCoin(coins.get(next).getSymbol());
+				ZWPreferences.setWidgetCoin(coins.get(next).getSymbol());
 				ZWCoin selectedCurr = coins.get(next);
 				views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
 				views.setImageViewResource(R.id.widget_select_coin, selectedCurr.getLogoResId());
@@ -78,7 +78,7 @@ public class ZWWalletWidget extends AppWidgetProvider{
 				views.setTextViewText(R.id.widget_balance, selectedCurr.getFormattedAmount(balance));
 			}
 		} else {
-			ZWPreferencesUtils.setWidgetCoin(null);
+			ZWPreferences.setWidgetCoin(null);
 			views.setViewVisibility(R.id.widget_select_coin, View.GONE);
 			views.setViewVisibility(R.id.widget_coin, View.GONE);
 			views.setViewVisibility(R.id.widget_balance, View.GONE);

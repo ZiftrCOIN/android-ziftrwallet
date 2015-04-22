@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
@@ -109,7 +109,7 @@ public class ZWWalletTransactionListAdapter extends ZWSearchableListAdapter<ZWSe
 			String amt = txListItem.getCoin().getFormattedAmount(txListItem.getAmount());
 			txAmount.setText(amt);
 
-			ZWFiat fiat = ZWPreferencesUtils.getFiatCurrency();
+			ZWFiat fiat = ZWPreferences.getFiatCurrency();
 			
 			TextView txAmountFiatEquiv = (TextView) convertView.findViewById(R.id.txAmountFiatEquiv);
 			

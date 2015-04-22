@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWPreferencesUtils;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWSetNameDialogHandler;
 
 public class ZWSetNameDialog extends ZWDialogFragment{
@@ -33,7 +33,7 @@ public class ZWSetNameDialog extends ZWDialogFragment{
 		Button next = (Button) this.getDialogView().findViewById(R.id.right_dialog_button);
 		next.setOnClickListener(this);
 		
-		this.setStringInTextView(R.id.singleEditText, ZWPreferencesUtils.getUserName());
+		this.setStringInTextView(R.id.singleEditText, ZWPreferences.getUserName());
 
 		this.newName = (EditText) this.getDialogView().findViewById(R.id.singleEditText);
 		if (savedInstanceState != null && savedInstanceState.containsKey(SET_NAME_KEY)) {
