@@ -14,7 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ziftr.android.ziftrwallet.ZWMessageManager;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
@@ -88,9 +87,18 @@ public class ZWDataSyncHelper {
 		}
 
 		ZiftrNetworkManager.networkStopped();
+		
+		
+		//TODO -need to fix this mess of dialogs, returning json data, and other stuff
+		//some sort of helper task fragment should handle sending and signing coins, and IT can be what shows any
+		//error dialogs
+		/**
 		if (!message.isEmpty() && request.getResponseCode() != 200) {
 			ZWMessageManager.alertError(message);
 		}
+		**/
+		
+		
 		return null;
 	}
 	
@@ -217,7 +225,14 @@ public class ZWDataSyncHelper {
 			}
 			return true;
 		} else {
+			
+			//TODO -need to fix this mess of dialogs, returning json data, and other stuff
+			//some sort of helper task fragment should handle sending and signing coins, and IT can be what shows any
+			//error dialogs
+			/**
 			ZWMessageManager.alertError("error: " + signingRequest.getResponseMessage());
+			**/
+			
 			return false;
 		}
 		

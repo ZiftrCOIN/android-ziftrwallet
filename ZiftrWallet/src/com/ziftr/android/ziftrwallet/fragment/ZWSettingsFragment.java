@@ -21,11 +21,15 @@ import com.ziftr.android.ziftrwallet.dialog.ZWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWResetPassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWSetNameDialog;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
 public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
+	public static final String FRAGMENT_TAG = "settings_fragment";
+	public static final String DIALOG_ENABLE_DEBUG_TAG = "dialog_enable_debug";
+	
 	private RelativeLayout disablePassphrase;
 	private RelativeLayout resetPassword;
 	private TextView resetPasswordLabel;
@@ -232,8 +236,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				this.getZWMainActivity().initCoins();
 				this.updateSettingsVisibility(false);
 			} else {
-				String warning = getActivity().getResources().getString(R.string.debug_warning);
-				this.getZWMainActivity().alertConfirmation(ZWRequestCodes.DEBUG_MODE_ON, warning, ZWTags.ACTIVATE_DEBUG, new Bundle());
+				ZiftrDialogFragment fragment = ZiftrDialogFragment.buildContinueCancelDialog(R.string.debug_warning);
+				fragment.show(getFragmentManager(), DIALOG_ENABLE_DEBUG_TAG);
 			}
 		} else if (v == this.exportwalletButton) {
 			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");

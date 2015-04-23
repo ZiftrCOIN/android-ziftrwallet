@@ -28,11 +28,11 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
-import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -41,6 +41,9 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
+	public static final String FRAGMENT_TAG = "receive_coins_fragment";
+	public static final String DIALOG_NEW_ADDRESS_TAG = "receive_new_address";
+	public static final String DIALOG_ENTER_PASSWORD_TAG = "receive_enter_password";
 
 	private static final int FADE_DURATION = 500;
 
@@ -64,7 +67,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	 */
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		this.setQrCodeGenerated(false);
+		this.qrCodeGenerated = false;
 
 		this.rootView = inflater.inflate(R.layout.accounts_receive_coins, container, false);
 		this.populateWalletHeader(rootView.findViewById(R.id.walletHeader));
@@ -84,7 +87,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 	@Override
 	public void onStop() {
-		this.setQrCodeGenerated(false);
+		this.qrCodeGenerated = false;
 		super.onStop();
 	}
 
@@ -102,13 +105,18 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 				Toast.makeText(getActivity(), "Text copied.", Toast.LENGTH_SHORT).show();
 			}
-		} else if (v == this.qrCodeImageView) {
-			this.conditionallyGenerateNewAddress(true);
-		} else if (v == this.getAddressBookImageView()) {
+		} 
+		else if (v == this.qrCodeImageView && !fragmentHasAddress()) {
+			//only generate a new address if there isn't already one generated (in the address box)
+			this.generateNewAddress();
+		} 
+		else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(new ZWReceiveAddressBookFragment(), R.id.receiveCoinBaseFrameLayout);
-		} else if (v == this.generateAddressForLabel) {
-			this.conditionallyGenerateNewAddress(false);
-		} else if (v == this.helpButton){
+		} 
+		else if (v == this.generateAddressForLabel) {
+			this.generateNewAddress();
+		} 
+		else if (v == this.helpButton){
 			getZWMainActivity().alertUser(
 					"The message and amount fields are encoded into the QRcode and should be used if you wish to pre-fill a message" +
 					" and/or amount label in the scanning user's application. These are optional and are not saved" +
@@ -118,23 +126,33 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 	}
 
-	private void conditionallyGenerateNewAddress(boolean requireFragHasAddress) {
-		if(!(requireFragHasAddress && this.fragmentHasAddress()) && !this.labelEditText.getText().toString().isEmpty()) {
-			// TODO make the passphrase diaog have extra information about how they 
-			// won't be able to delete the address they are about to make
-			if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
-				Bundle b = new Bundle();
-				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
-				getZWMainActivity().showGetPassphraseDialog(
-						ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY, b, 
-						ZWTags.VALIDATE_PASS_RECEIVE);
-			} else {
-				getZWMainActivity().alertConfirmation(ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS, 
-						"Addresses cannot be deleted once they are created. Are you sure?", 
-						ZWTags.CONFIRM_NEW_ADDRESS, new Bundle());
-			}
+	
+	
+	private void generateNewAddress() {
+		if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
+			showEnterPasswordDialog();
+		}
+		else {
+			showNewAddressConfirmationDialog();
 		}
 	}
+	
+	private void showEnterPasswordDialog() {
+		
+		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
+		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
+		passwordDialog.setupTextboxes(R.string.zw_password_hint, 0, 0);
+		
+		passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
+	}
+	
+	
+	private void showNewAddressConfirmationDialog() {
+		ZiftrDialogFragment dialog = ZiftrDialogFragment.buildContinueCancelDialog(R.string.zw_dialog_create_address);
+		dialog.show(getFragmentManager(), DIALOG_NEW_ADDRESS_TAG);
+	}
+	
+	
 
 	/**
 	 * @param inflater
@@ -254,7 +272,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			e.printStackTrace();
 		}
 
-		this.setQrCodeGenerated(true);
+		this.qrCodeGenerated = true;
 	}
 
 	/**
@@ -275,7 +293,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			@Override
 			public void onGlobalLayout() {
 				if (getActivity() != null) {
-					if (fragmentHasAddress() && !isQrCodeGenerated()) {
+					if (fragmentHasAddress() && !qrCodeGenerated) {
 						generateQrCode(false);
 					}
 				}
@@ -288,49 +306,51 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	 * gets a new key from the database helper on an extra thread, and
 	 * then updates the UI with the new address on the UI thread. 
 	 */
-	public void loadNewAddressFromDatabase(final String passphrase) {
-		// Get the database from the activity on the UI thread
-		final ZWWalletManager database = this.getWalletManager();
-		final String addressLabel = addressEditText.getText().toString();
-		// Run database IO on new thread
+	public void loadNewAddressFromDatabase() {
+		
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				long time = System.currentTimeMillis() / 1000;
-				final ZWAddress address = database.createReceivingAddress(passphrase, getSelectedCoin(), addressLabel, 0, time, time);
+				final ZWAddress address;
+				final boolean needPassword;
+				
+				String password = ZWPreferences.getCachedPassword();
+				if(ZWPreferences.userHasPassword() && password == null) {
+					//user's cached password has expired, so we have to ask them for it again
+					needPassword = true;
+					address = null;
+				}
+				else {
+					needPassword = false;
+					long time = System.currentTimeMillis() / 1000;
+					String addressLabel = addressEditText.getText().toString();
+					 address = getWalletManager().createReceivingAddress(password, getSelectedCoin(), addressLabel, 0, time, time);
+				}
 
 				// Run the updating of the UI on the UI thread
 				ZWReceiveCoinsFragment.this.getZWMainActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						String newAddress = address.getAddress();
-						addressEditText.setText(newAddress);
-						updateAddressLabelInDatabase();
-						generateQrCode(true);
+						if(needPassword) {
+							showEnterPasswordDialog();
+						}
+						else {
+							String newAddress = address.getAddress();
+							addressEditText.setText(newAddress);
+							updateAddressLabelInDatabase();
+							generateQrCode(true);
+						}
+						
 					}
 				});
 			}
 		});
 	}
 
-	/**
-	 * @return the qrCodeGenerated
-	 */
-	public boolean isQrCodeGenerated() {
-		return qrCodeGenerated;
-	}
-
-	/**
-	 * @param qrCodeGenerated the qrCodeGenerated to set
-	 */
-	public void setQrCodeGenerated(boolean qrCodeGenerated) {
-		this.qrCodeGenerated = qrCodeGenerated;
-	}
-
 	@Override
 	public void updateAddress(String address, String label) {
 		super.updateAddress(address, label);
-		this.setQrCodeGenerated(false);
+		this.qrCodeGenerated = false;
 	}
 
 	public String getActionBarTitle() {

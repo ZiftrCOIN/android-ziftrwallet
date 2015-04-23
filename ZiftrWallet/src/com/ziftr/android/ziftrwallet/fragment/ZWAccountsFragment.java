@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -23,7 +24,9 @@ import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -31,7 +34,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * associated with list view of user wallets and a bar at the bottom of the list
  * view which opens a dialog to add rows to the list view.  
  */
-public class ZWAccountsFragment extends ZWFragment {
+public class ZWAccountsFragment extends ZWFragment implements OnItemClickListener, OnItemLongClickListener {
 
 	/** The view container for this fragment. */
 	private View rootView;
@@ -52,6 +55,33 @@ public class ZWAccountsFragment extends ZWFragment {
 	
 	private TextView totalBalance;
 	private ZWFiat fiatType;
+	
+	
+	/**
+	 * a small listener class for handling when the user ok's removing a coin type
+	 *
+	 */
+	private static class DialogListener implements DialogInterface.OnClickListener {
+		
+		private ZWCoin coin;
+		
+		public DialogListener(ZWCoin coin) {
+			this.coin = coin;
+		}
+		
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			if(which == DialogInterface.BUTTON_POSITIVE) {
+				ZWWalletManager.getInstance().deactivateCoin(coin);
+				
+				//in this case data was updated by the UI, not network, but this delivers the same message to the UI
+				ZiftrNetworkManager.dataUpdated(); 
+			}
+			
+		}
+	};
+	
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -114,27 +144,12 @@ public class ZWAccountsFragment extends ZWFragment {
 
 
 	/**
-	 * Notifies the list view adapter that the data set has changed
-	 * to initialize a redraw. 
-	 * 
-	 * May save this for later to refresh when deleting a wallet from the list
-	 * of wallets on this accounts page. 
-	 */
-	public void refreshListOfUserWallets() {
-		this.walletAdapter.notifyDataSetChanged();
-		if (this.activatedCoins.size() == 0){
-			this.currencyListView.removeFooterView(this.footer);
-		}
-	}
-
-	/**
 	 * Sets up the data set, the adapter, and the onclick for 
 	 * the list view of currencies that the user currently has a 
 	 * wallet for.
 	 */
 	private void initializeCurrencyListView() {
 		// Get the values from the manager and initialize the list view from them
-		
 		
 		this.activatedCoins = this.walletManager.getActivatedCoins();
 		
@@ -150,43 +165,12 @@ public class ZWAccountsFragment extends ZWFragment {
 		this.walletAdapter = new ZWCurrencyListAdapter(this.mContext, this.activatedCoins);
 		this.currencyListView.setAdapter(this.walletAdapter);
 
-		this.currencyListView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, 
-					int position, long id) {
-				ZWCoin coin = (ZWCoin) 
-						parent.getItemAtPosition(position);
-
-				getZWMainActivity().openWalletView(coin);
-
-			}
-		});
-
+		this.currencyListView.setOnItemClickListener(this);
+		
 		//Long click to deactivate wallet
-		this.currencyListView.setOnItemLongClickListener(new OnItemLongClickListener(){
-
-			@Override
-			public boolean onItemLongClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				ZWCoin coin = (ZWCoin) parent.getItemAtPosition(position);
-				Bundle b = new Bundle();
-				b.putString(ZWCoin.TYPE_KEY, coin.getSymbol());
-				b.putInt("ITEM_LOCATION", position);
-				getZWMainActivity().alertConfirmation(ZWRequestCodes.DEACTIVATE_WALLET, "Are you sure you want to "
-						+ "deactivate this wallet? This will not actually delete any of your stored data, and you can reactivate it at any time.", 
-						ZWTags.DEACTIVATE_WALLET, b);
-				return true;
-			}
-
-		});
-
+		this.currencyListView.setOnItemLongClickListener(this);
 	}
-
-	public void removeFromView(int pos){
-		this.activatedCoins.remove(pos);
-		this.refreshListOfUserWallets();
-		this.toggleAddCurrencyMessage();
-	}
+	
 	
 	public void toggleAddCurrencyMessage(){
 		if (this.activatedCoins.size() <=0){
@@ -228,6 +212,43 @@ public class ZWAccountsFragment extends ZWFragment {
 			}
 
 		});
+	}
+	
+
+	@Override
+	public void onDataUpdated() {
+		super.onDataUpdated();
+		
+		//we just completely replace the old data with new data, so just replace the adapter instead of updating it
+		this.activatedCoins = this.walletManager.getActivatedCoins();
+		this.walletAdapter = new ZWCurrencyListAdapter(this.mContext, this.activatedCoins);
+		//this.walletAdapter.notifyDataSetChanged();
+		
+		this.currencyListView.setAdapter(this.walletAdapter);
+		
+		this.toggleAddCurrencyMessage();
+	}
+	
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+		
+		ZWCoin coin = (ZWCoin) parent.getItemAtPosition(position);
+		
+		ZiftrDialogFragment dialog = new ZiftrDialogFragment();
+		dialog.setupDialog(0, R.string.zw_dialog_deactivate_message, R.string.zw_dialog_deactivate, R.string.zw_dialog_cancel);
+
+		dialog.setOnClickListener(new ZWAccountsFragment.DialogListener(coin));
+		dialog.show(getFragmentManager(), "deactivate_coin");
+		
+		return true;
+	}
+
+	
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		ZWCoin coin = (ZWCoin) parent.getItemAtPosition(position);
+		getZWMainActivity().openWalletView(coin);		
 	}
 
 	

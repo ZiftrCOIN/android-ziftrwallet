@@ -90,7 +90,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 			this.finish();
 
 		} else {
-			this.showAlert(getResources().getString(R.string.zw_incorrect_passphrase), ZWTags.PASSPHRASE_INCORRECT);
+			this.showAlert(getResources().getString(R.string.zw_incorrect_password), ZWTags.PASSPHRASE_INCORRECT);
 		}
 	}
 

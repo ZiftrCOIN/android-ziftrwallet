@@ -22,6 +22,7 @@ import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
+import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 
 public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFragmentActivity> {
@@ -130,7 +131,7 @@ public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFra
 		mActivity.openWalletView(btcTestDefault);
 		mActivity.openReceiveCoinsView(null);
 		mActivity.getSupportFragmentManager().executePendingTransactions();
-		View receiveScreen  = mActivity.getSupportFragmentManager().findFragmentByTag(ZWTags.RECIEVE_FRAGMENT).getView();
+		View receiveScreen  = mActivity.getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG).getView();
 		View qrCodeContainer = receiveScreen.findViewById(R.id.generateAddressQrCodeContainer);
 		EditText label = (EditText) receiveScreen.findViewById(R.id.addressName).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
 		ImageView addAddress = (ImageView) receiveScreen.findViewById(R.id.generateNewAddressForLabel);

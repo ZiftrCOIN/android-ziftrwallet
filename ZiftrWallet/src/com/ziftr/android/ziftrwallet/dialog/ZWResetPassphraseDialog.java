@@ -47,7 +47,7 @@ public class ZWResetPassphraseDialog extends ZWDialogFragment {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
-				R.layout.dialog_reset_passphrase, null));
+				R.layout.dialog_text_edit, null));
 		
 		this.initDialogFields();
 
@@ -62,15 +62,15 @@ public class ZWResetPassphraseDialog extends ZWDialogFragment {
 		// Do this after the view has been inflated so views with ids exist
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(OLD_PASSPHRASE_KEY) != null) {
-				this.setStringInTextView(R.id.textbox_old_passphrase, 
+				this.setStringInTextView(R.id.dialog_textbox_top, 
 						savedInstanceState.getString(OLD_PASSPHRASE_KEY));
 			}
 			if (savedInstanceState.getString(NEW_PASSPHRASE_KEY) != null) {
-				this.setStringInTextView(R.id.textbox_new_passphrase, 
+				this.setStringInTextView(R.id.dialog_textbox_middle, 
 						savedInstanceState.getString(NEW_PASSPHRASE_KEY));
 			}
 			if (savedInstanceState.getString(CONFIRM_PASSPHRASE_KEY) != null) {
-				this.setStringInTextView(R.id.textbox_confirm_passphrase, 
+				this.setStringInTextView(R.id.dialog_textbox_bottom, 
 						savedInstanceState.getString(CONFIRM_PASSPHRASE_KEY));
 			}
 		}
@@ -96,9 +96,9 @@ public class ZWResetPassphraseDialog extends ZWDialogFragment {
 			//CONTINUE
 			handler.handleResetPassphrasePositive(
 					this.getTargetRequestCode(), 
-					this.getStringFromTextView(R.id.textbox_old_passphrase), 
-					this.getStringFromTextView(R.id.textbox_new_passphrase), 
-					this.getStringFromTextView(R.id.textbox_confirm_passphrase));
+					this.getStringFromTextView(R.id.dialog_textbox_top), 
+					this.getStringFromTextView(R.id.dialog_textbox_middle), 
+					this.getStringFromTextView(R.id.dialog_textbox_bottom));
 			this.dismiss();
 			break;
 		}
@@ -115,11 +115,11 @@ public class ZWResetPassphraseDialog extends ZWDialogFragment {
 		
 		// Save all of the important strings in the dialog
 		outState.putString(OLD_PASSPHRASE_KEY, 
-				this.getStringFromTextView(R.id.textbox_old_passphrase));
+				this.getStringFromTextView(R.id.dialog_textbox_top));
 		outState.putString(NEW_PASSPHRASE_KEY, 
-				this.getStringFromTextView(R.id.textbox_new_passphrase));
+				this.getStringFromTextView(R.id.dialog_textbox_middle));
 		outState.putString(CONFIRM_PASSPHRASE_KEY, 
-				this.getStringFromTextView(R.id.textbox_confirm_passphrase));
+				this.getStringFromTextView(R.id.dialog_textbox_bottom));
 	}
 	
 	@Override

@@ -16,6 +16,8 @@ public class ZWMessageManager {
 	private static final int ALERT = 0;
 	private static final int CONFIRM = 1;
 	
+	
+	/****************************
 	public static void registerMessageHandler(ZWMessageHandler msgHandler) {
 		currentHandler = new WeakReference<ZWMessageHandler>(msgHandler);
 		if (msgQueue.size() > 0){
@@ -76,5 +78,7 @@ public class ZWMessageManager {
 				break;
 		}
 	}
+	
+	************************/
 
 }

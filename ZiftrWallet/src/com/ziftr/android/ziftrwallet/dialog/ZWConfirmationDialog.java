@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.Button;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWConfirmationDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
 
 /**
@@ -40,7 +39,7 @@ public class ZWConfirmationDialog extends ZWDialogFragment {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 
 		this.setDialogView(this.getActivity().getLayoutInflater().inflate(
-				R.layout.dialog_confirmation, null));
+				R.layout.dialog_generic, null));
 		
 		this.initDialogFields();
 
@@ -56,6 +55,7 @@ public class ZWConfirmationDialog extends ZWDialogFragment {
 	}
 
 	public void onClick(View view) {
+		/*****
 		ZWConfirmationDialogHandler handler = 
 				(ZWConfirmationDialogHandler) this.getHandler();
 		switch(view.getId()) {
@@ -70,6 +70,7 @@ public class ZWConfirmationDialog extends ZWDialogFragment {
 				this.dismiss();
 				break;
 		}
+		****/
 	}
 
 	@Override

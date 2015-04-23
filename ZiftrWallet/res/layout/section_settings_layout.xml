@@ -121,7 +121,7 @@
             style="@style/divider_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/zw_passphrase" />
+            android:text="@string/zw_password" />
 
         <RelativeLayout
             android:id="@+id/reset_password_button"
@@ -155,7 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="@string/zw_disable_passphrase" />
+                android:text="@string/zw_disable_password" />
 
             <ImageView
                 android:layout_width="@dimen/zw_total_icon_side_length"

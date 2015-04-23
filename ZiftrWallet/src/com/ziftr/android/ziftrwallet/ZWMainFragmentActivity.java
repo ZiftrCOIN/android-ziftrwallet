@@ -12,6 +12,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -40,12 +41,13 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
-import com.ziftr.android.ziftrwallet.dialog.ZWConfirmationDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWEditAddressLabelDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWValidatePassphraseDialog;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWConfirmationDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWEditAddressLabelDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWResetPassphraseDialogHandler;
@@ -80,18 +82,20 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * depending on which task the user selects.
  */
 public class ZWMainFragmentActivity extends ActionBarActivity 
-implements DrawerListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
-ZWResetPassphraseDialogHandler, ZWConfirmationDialogHandler, ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
-ZiftrNetworkHandler, ZWMessageHandler {
+implements DrawerListener, ZiftrDialogHandler, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
+ZWResetPassphraseDialogHandler, ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
+ZiftrNetworkHandler {
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
 	
 	/** Use this key to save which section of the drawer menu is open. */
-	private static final String SELECTED_SECTION_KEY = "SELECTED_SECTION_KEY";
+	private static final String KEY_SELECTED_SECTION = "SELECTED_SECTION_KEY";
 
 	/** Use this key to save whether or not the search bar is visible (vs gone). */
-	private static final String SEARCH_BAR_VISIBILITY_KEY = "SEARCH_BAR_VISIBILITY_KEY";
+	private static final String KEY_SEARCH_BAR_VISIBILITY = "SEARCH_BAR_VISIBILITY_KEY";
+	
+	private static final String KEY_SELECTED_COIN = "selected_coin";
 
 	/** The main view that all of the fragments will be stored in. */
 	private View baseFragmentContainer;
@@ -226,13 +230,11 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		this.initializeSearchBarText();
 		
 		ZiftrNetworkManager.registerNetworkHandler(this);
-		ZWMessageManager.registerMessageHandler(this);
 	}
 
 	@Override
 	public void onPause(){
 		super.onPause();
-		ZWMessageManager.unregisterMessageHandler(this);
 	}
 
 	
@@ -252,9 +254,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	@Override
 	public void onPostResume(){
 		super.onPostResume();
-		//we are now ready to commit transactions without state loss so register the message handler
-		//to see if any alerts were pending
-		ZWMessageManager.registerMessageHandler(this);
 	}
 	
 	
@@ -358,10 +357,10 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		super.onSaveInstanceState(outState);
 
 		// Save which part of the app is currently open.
-		outState.putString(SELECTED_SECTION_KEY, this.getCurrentlySelectedDrawerMenuOption());
-		outState.putInt(SEARCH_BAR_VISIBILITY_KEY, getSearchBar().getVisibility());
+		outState.putString(KEY_SELECTED_SECTION, this.getCurrentlySelectedDrawerMenuOption());
+		outState.putInt(KEY_SEARCH_BAR_VISIBILITY, getSearchBar().getVisibility());
 		if (this.getSelectedCoin() != null) {
-			outState.putString(ZWCoin.TYPE_KEY, this.getSelectedCoin().getSymbol());
+			outState.putString(KEY_SELECTED_COIN, this.getSelectedCoin().getSymbol());
 		}
 		
 		outState.putBoolean("consumedIntent", consumedIntent);
@@ -654,17 +653,17 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 */
 	private void initializeCoinType(Bundle args) {
 		if (args != null) {
-			if (args.getString(ZWCoin.TYPE_KEY) != null) {
+			if (args.getString(KEY_SELECTED_COIN) != null) {
 				// Need to do this so that we populate the wallet header view as well
-				this.setSelectedCoin(ZWCoin.getCoin(args.getString(ZWCoin.TYPE_KEY)));
+				this.setSelectedCoin(ZWCoin.getCoin(args.getString(KEY_SELECTED_COIN)));
 			}
 		}
 	}
 
 	private void initializeHeaderViewsVisibility(Bundle args) {
 		if (args != null) {
-			if (args.getInt(SEARCH_BAR_VISIBILITY_KEY, -1) != -1) {
-				this.getSearchBar().setVisibility(args.getInt(SEARCH_BAR_VISIBILITY_KEY));
+			if (args.getInt(KEY_SEARCH_BAR_VISIBILITY, -1) != -1) {
+				this.getSearchBar().setVisibility(args.getInt(KEY_SEARCH_BAR_VISIBILITY));
 			}
 		}
 	}
@@ -698,7 +697,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		} else {
 			// Here we must make sure that the drawer menu is still
 			// showing which section of the app is currently open.
-			String prevSelectedSectionString = savedInstanceState.getString(SELECTED_SECTION_KEY);
+			String prevSelectedSectionString = savedInstanceState.getString(KEY_SELECTED_SECTION);
 			if (prevSelectedSectionString != null) {
 				FragmentType fragmentType = FragmentType.valueOf(prevSelectedSectionString);
 				if (fragmentType.getDrawerMenuView() != null) {
@@ -921,13 +920,13 @@ ZiftrNetworkHandler, ZWMessageHandler {
 	 * @param typeOfWalletToStart
 	 */
 	public void openReceiveCoinsView(ZWAddress address) {
-		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
 		if (fragToShow == null) {
 			fragToShow = new ZWReceiveCoinsFragment();
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, ZWTags.RECIEVE_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
+		this.showFragment(fragToShow, ZWReceiveCoinsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, 
 				true, ZWTags.ACCOUNTS_INNER);
 		if (address != null){
 			((ZWReceiveCoinsFragment) fragToShow).setReceiveAddress(address);		
@@ -1089,6 +1088,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		}
 	}
 
+	
+	/***
 	public void alertConfirmation(int requestcode, String message, String tag, Bundle args) {
 		ZWConfirmationDialog confirmDialog = new ZWConfirmationDialog();
 
@@ -1100,6 +1101,8 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			confirmDialog.show(this.getSupportFragmentManager(), tag);
 		}
 	}
+	***/
+	
 
 	/**
 	 * generate dialog to ask for passphrase
@@ -1159,9 +1162,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		case ZWRequestCodes.RESET_PASSPHRASE_DIALOG:
 			// Nothing to do
 			break;
-		case ZWRequestCodes.DEACTIVATE_WALLET:
-			// Nothing to do
-			break;
 		}
 	}
 	
@@ -1173,11 +1173,6 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
 			ZWPreferences.setCachedPassword(passphrase);
 			switch(requestCode) {
-			case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_NEW_KEY:
-				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
-						).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
-				receiveFrag.loadNewAddressFromDatabase(passphrase);
-				break;
 			case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
 				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager(
 						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
@@ -1194,7 +1189,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 				
 				//manually toggle showing false to allow alert to show
 				this.showingDialog = false;
-				this.alertUser(getResources().getString(R.string.zw_disabled_passphrase), ZWTags.PASSPHRASE_DISABLED);
+				this.alertUser(getResources().getString(R.string.zw_disabled_password), ZWTags.PASSPHRASE_DISABLED);
 				break;
 			}
 		} else {
@@ -1212,7 +1207,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 			} else {
 				//manually toggle showing false to allow alert to show
 				this.showingDialog = false;
-				this.alertUser(getResources().getString(R.string.zw_incorrect_passphrase), ZWTags.PASSPHRASE_INCORRECT);
+				this.alertUser(getResources().getString(R.string.zw_incorrect_password), ZWTags.PASSPHRASE_INCORRECT);
 			}
 		}
 
@@ -1245,7 +1240,7 @@ ZiftrNetworkHandler, ZWMessageHandler {
 								).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(true);
 					}
 					this.showingDialog = false;
-					this.alertUser(getResources().getString(R.string.zw_set_pass_complete), ZWTags.SET_PASS_COMPLETE);
+					this.alertUser(getResources().getString(R.string.zw_set_password_complete), ZWTags.SET_PASS_COMPLETE);
 				} else {
 					//if changepassphrase returned false, the passphrase did not correctly decrypt already encrypted keys
 					return;
@@ -1255,45 +1250,20 @@ ZiftrNetworkHandler, ZWMessageHandler {
 				this.showingDialog = false;
 				
 				// If don't match, tell user. 
-				this.alertUser(getResources().getString(R.string.zw_incorrect_reset_passphrase), ZWTags.PASSPHRASE_INCORRECT);
+				this.alertUser(getResources().getString(R.string.zw_incorrect_reset_password), ZWTags.PASSPHRASE_INCORRECT);
 			} 
 		} else {
 			//manually toggle showing false to allow alert to show
 			this.showingDialog = false;
 
-			this.alertUser(getResources().getString(R.string.zw_incorrect_reset_passphrase_match), "wrong_re-enter_passphrase");
+			this.alertUser(getResources().getString(R.string.zw_incorrect_reset_password_match), "wrong_re-enter_passphrase");
 		}
 	}
 
 
-	@Override
+	
 	public void handleConfirmationPositive(int requestCode, Bundle info) {
 		switch (requestCode) {
-			case ZWRequestCodes.DEACTIVATE_WALLET:
-				ZWCoin coin = ZWCoin.getCoin(info.getString(ZWCoin.TYPE_KEY));
-				this.walletManager.deactivateCoin(coin);
-				ZWAccountsFragment frag = (ZWAccountsFragment) getSupportFragmentManager(
-						).findFragmentByTag(FragmentType.ACCOUNT_FRAGMENT_TYPE.toString());
-				frag.removeFromView(info.getInt("ITEM_LOCATION"));
-				if (this.selectedCoin == coin){
-					this.selectedCoin = null;
-				}
-				break;
-			case ZWRequestCodes.CONFIRM_CREATE_NEW_ADDRESS:
-				ZWReceiveCoinsFragment receiveFrag = (ZWReceiveCoinsFragment) getSupportFragmentManager(
-						).findFragmentByTag(ZWTags.RECIEVE_FRAGMENT);
-				if (ZWPreferences.userHasPassword()){
-					receiveFrag.loadNewAddressFromDatabase(ZWPreferences.getCachedPassword());
-				} else {
-					receiveFrag.loadNewAddressFromDatabase(null);
-				}
-				break;
-			case ZWRequestCodes.DEBUG_MODE_ON:
-				ZWPreferences.setDebugMode(true);
-				this.initCoins(); //re-init coins to show testnet in debug mode
-				((ZWSettingsFragment)this.getSupportFragmentManager(
-						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
-				break;
 			case ZWRequestCodes.CONFIRM_SEND_COINS:
 				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_FRAGMENT);
 				if (ZWPreferences.userHasPassword()){
@@ -1660,14 +1630,52 @@ ZiftrNetworkHandler, ZWMessageHandler {
 		}
 	}
 
+	
 	@Override
-	public void handleErrorMsg(String err) {
-		this.alertUser(err, ZWTags.ERROR_MSG);
+	public void handleDialogYes(DialogFragment fragment) {
+		
+		if(ZWReceiveCoinsFragment.DIALOG_NEW_ADDRESS_TAG.equals(fragment.getTag())) {
+			//user is creating a new address
+			ZWReceiveCoinsFragment receiveFragment = 
+					(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
+			receiveFragment.loadNewAddressFromDatabase();
+		}
+		else if(ZWReceiveCoinsFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
+			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredTextTop();
+			byte[] inputHash = ZiftrUtils.saltedHash(enteredPassword);
+			
+			if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
+				ZWPreferences.setCachedPassword(enteredPassword);
+				
+				ZWReceiveCoinsFragment receiveFragment = 
+						(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
+				receiveFragment.loadNewAddressFromDatabase();
+			}
+			else {
+				ZiftrDialogFragment wrongPasswordDialog = ZiftrDialogFragment.buildContinueDialog(R.string.zw_incorrect_password);
+				wrongPasswordDialog.show(getSupportFragmentManager(), "wrong_password_dialog");
+			}
+		}
+		else if(ZWSettingsFragment.DIALOG_ENABLE_DEBUG_TAG.equals(fragment.getTag())) {
+			ZWPreferences.setDebugMode(true);
+			this.initCoins(); //re-init coins to show testnet in debug mode
+			ZWSettingsFragment settingsFragment = 
+					(ZWSettingsFragment)this.getSupportFragmentManager().findFragmentByTag(ZWSettingsFragment.FRAGMENT_TAG);
+			settingsFragment.updateSettingsVisibility(false);
+		}
+		
 	}
 
 	@Override
-	public void handleConfirmationMsg(int requestCode, String msg, String tag, Bundle b) {
-		this.alertConfirmation(requestCode, msg, tag, b);
+	public void handleDialogNo(DialogFragment fragment) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleDialogCancel(DialogFragment fragment) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

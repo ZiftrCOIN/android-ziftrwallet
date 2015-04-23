@@ -240,7 +240,7 @@ public abstract class ZWDialogFragment extends DialogFragment implements View.On
 	}
 
 	protected void closeKeyboard(int curFocusId) {
-		//close keyboard
+
 		InputMethodManager inputMan = (InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputMan.hideSoftInputFromWindow(this.getDialogView().findViewById(curFocusId).getWindowToken(), 0);
 	}

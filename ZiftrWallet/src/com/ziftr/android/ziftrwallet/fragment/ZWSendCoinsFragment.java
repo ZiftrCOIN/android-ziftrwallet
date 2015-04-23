@@ -11,7 +11,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -38,7 +37,6 @@ import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
 import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment;
-import com.ziftr.android.ziftrwallet.network.ZWSendTaskFragment.SendTaskCallback;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 
@@ -227,6 +225,8 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				a.onBackPressed();
 			}
 		} else if (v == sendButton) {
+			//TODO -temporaily disabling sending until we fix this dialogs mess
+			/***
 			if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
 				Bundle b = new Bundle();
 				b.putString(ZWCoin.TYPE_KEY, getSelectedCoin().getSymbol());
@@ -237,6 +237,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			this.totalTextView.getText() + " " + getSelectedCoin().getSymbol() + "?"
 			, ZWTags.CONFIRM_SEND, new Bundle());
 			}
+			****/
 		} else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(new ZWSendAddressBookFragment(), R.id.sendCoinBaseFrameLayout);
 		} else if (v == this.helpFeeButton) {

@@ -22,7 +22,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/zw_welcome_passphrase_message"
+        android:text="@string/zw_welcome_password_message"
         android:textColor="@color/zw_default_text"
         android:textSize="@dimen/zw_txt_small" />
 
@@ -34,7 +34,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/zw_create_passphrase"
+        android:text="@string/zw_create_password"
         android:textColor="@color/White"
         android:textSize="@dimen/zw_txt_small" />
 
@@ -58,7 +58,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="5dp"
         android:background="@drawable/clickable_button_color"
-        android:text="@string/zw_save_passphrase"
+        android:text="@string/zw_save_password"
         android:textColor="@color/White"
         android:textSize="@dimen/zw_txt_small" />
 

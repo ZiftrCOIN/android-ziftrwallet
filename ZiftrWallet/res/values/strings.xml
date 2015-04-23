@@ -1,42 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- TODO Get rid of duplicate strings -->
-
-
-    <!-- Description here -->
     <string name="zw_empty_string"></string>
-    <!-- Description here -->
+    <string name="app_name">ziftrWALLET</string>
     <string name="zw_app_name">ziftrWALLET</string>
-    <!-- Description here -->
-    <string name="zw_hello_world">Hello world!</string>
-    <!-- Description here -->
+    
     <string name="zw_action_settings">Settings</string>
-    <!-- Description here -->
-    <string name="zw_passphrase_hint">Enter your passphrase</string>
-    <!-- Description here -->
-    <string name="zw_old_passphrase_hint">Enter your old passphrase</string>
-    <!-- Description here -->
-    <string name="zw_new_passphrase_hint">Enter your new passphrase</string>
-    <!-- Description here -->
-    <string name="zw_confirm_passphrase_hint">Re-enter your passphrase</string>
-    <!-- Description here -->
+    <string name="zw_password_hint">Enter your password</string>
+    <string name="zw_old_passphrase_hint">Enter your old password</string>
+    <string name="zw_new_passphrase_hint">Enter your new password</string>
+    <string name="zw_confirm_password_hint">Re-enter your password</string>
     <string name="zw_menu_text_accounts">ACCOUNTS</string>
-    <!-- Description here -->
     <string name="zw_menu_text_terms">TERMS</string>
-    <!-- Description here -->
     <string name="zw_menu_text_settings">SETTINGS</string>
-    <!-- Description here -->
     <string name="zw_menu_text_about">ABOUT</string>
-    <!-- Description here -->
     <string name="zw_menu_text_security">SECURITY</string>
-    <!-- Description here -->
     <string name="zw_continue_button_text">CONTINUE</string>
-    <!-- Description here -->
     <string name="zw_cancel_button_text">CANCEL</string>
-    <!-- Description here -->
     <string name="zw_send_button_text">SEND</string>
-    <!-- Description here -->
     <string name="zw_send_to_address">SEND TO: </string>
     <!-- Description here -->
     <string name="zw_send_to_address_name">NAME: </string>
@@ -116,52 +97,31 @@
     <string name="zw_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
     <!-- label for reset password -->
     <string name="zw_reset_password">Reset Password</string>
-    <!-- Description here -->
     <string name="zw_about">About</string>
-    <!-- Description here -->
-    <string name="zw_disable_passphrase">Disable Passphrase</string>
-    <!-- Description here -->
+    <string name="zw_disable_password">Disable Password</string>
     <string name="zw_fiat_currency">Fiat Currency</string>
-    <!-- Description here -->
     <string name="zw_editable_confirmation_fees">Editable Confirmation Fees</string>
-    <!-- Description here -->
     <string name="zw_currency">CURRENCY</string>
-    <!-- Description here -->
-    <string name="zw_passphrase">PASSPHRASE</string>
-    <!-- Description here -->
+    <string name="zw_password">PASSWORD</string>
     <string name="zw_confirmation_fee">CONFIRMATION FEES</string>
-    <!-- ello -->
     <string name="hello">Hello!</string>
-    <!-- welcome label -->
     <string name="zw_welcome">Welcome to ziftrWALLET!</string>
-    <!-- message in passphrase welcome screen -->
-    <string name="zw_welcome_passphrase_message">Please take a moment to set your passphrase below. 
+    <string name="zw_welcome_password_message">Please take a moment to set your password below. 
         This will ensure that your coins are secure in the unfortunate event that someone steals or hacks your phone. 
         We recommend using a few words that you are sure to remember and that only you will know.\n\nOnce you\'ve set your 
-        passphrase, DO NOT FORGET IT! You will not be able to spend your coins without it.</string>
-    <!-- message in name welcome screen -->
+        password, DO NOT FORGET IT! You will not be able to spend your coins without it.</string>
     <string name="zw_welcome_name_message">Please also take a moment to provide your name below. This value is only 
         stored on your device and, if provided, persons sending you coins will not need to type your name every 
         time they transact with you. We suggest you use your first name, or the name you commonly use.</string>
-    <!-- Description here -->
     <string name="zw_receive_button_text">RECEIVE</string>
-    <!-- Description here -->
-    <string name="zw_create_passphrase">CREATE PASSPHRASE</string>
-    <!-- Description here -->
-    <string name="zw_save_passphrase">SAVE PASSPHRASE</string>
-    <!-- Description here -->
+    <string name="zw_create_password">CREATE PASSWORD</string>
+    <string name="zw_save_password">SAVE PASSWORD</string>
     <string name="zw_ask_me_later">ASK ME LATER</string>
-    <!-- Description here -->
     <string name="zw_save_name">SAVE NAME</string>
-    <!-- Description here -->
     <string name="zw_set_name">SET NAME</string>
-    <!-- Description here -->
     <string name="zw_name_label">NAME</string>
-    <!-- Description here -->
     <string name="zw_set_name_settings">Set Name</string>
-    <!-- Description here -->
     <string name="zw_disable_name">Disable Name</string>
-    <!-- Description here -->
     <string name="zw_create_new_address">CREATE NEW ADDRESS</string>
     <!-- Description here -->
     <string name="zw_total_label">Total</string>
@@ -184,16 +144,20 @@
     <string name="send_fee_info">Why is there a fee?\n\nThis fee is NOT paid to Ziftr. The fee goes to the miner that secures your transaction as a reward for their service. 
         This is standard for all cryptocurrency applications. Without it, your transaction would likely stay as pending for an inconvenient length of time.</string>
     <string name="mempool_spending">Spend Unconfirmed Transactions</string>
-    <string name="zw_incorrect_passphrase">Error: Passphrases don\'t match.</string>
-    <string name="zw_incorrect_reset_passphrase_match">"The passphrases you entered don't match. Your previous passphrase is still in place.</string>
-    <string name="zw_incorrect_reset_passphrase">"The passphrase you entered doesn't match your previous passphrase. Your previous passphrase is still in place.</string>
+    <string name="zw_incorrect_password">Error: Incorrect password.</string>
+    <string name="zw_incorrect_reset_password_match">"The passwords you entered don't match. Your previous password is still in place.</string>
+    <string name="zw_incorrect_reset_password">"The password you entered doesn't match your previous passphrase. Your previous password is still in place.</string>
     <string name="zw_set_empty_name">Looks like you wanted to disable your name instead!</string>
     <string name="zw_invalid_address_uri">The address is not valid.</string>
     <string name="zw_searchbar_hint">search</string>
     <string name="zw_set_name_complete">Your name is set to: </string>
-    <string name="zw_set_pass_complete">Your new passphrase is set!</string>
-    <string name="zw_disabled_passphrase">Warning: your passphrase is disabled.</string>
+    <string name="zw_set_password_complete">Your new password is set!</string>
+    <string name="zw_disabled_password">Warning: your password is disabled.</string>
     <string name="zw_warning">Warning</string>
     <string name="zw_delete_data_warning">You are about to delete your wallet data! Ensure you have your wallet exported or you will lose all your coins!</string>
+    <string name="zw_dialog_deactivate_message">Are you sure you want to deactivate this wallet? This will not actually delete any of your stored data, and you can reactivate it at any time.</string>
+    <string name="zw_dialog_create_address">Addresses cannot be deleted once they are created. Are you sure?</string>
+    <string name="zw_dialog_enter_password">Please enter your password.</string>
+    <string name="zw_dialog_deactivate">Deactivate</string>
 
 </resources>

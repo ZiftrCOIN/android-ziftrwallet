@@ -4,9 +4,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <include layout="@layout/custom_dialog_title" />
+    <include layout="@layout/dialog_include_title" />
 
-    <include layout="@layout/custom_dialog_message" />
+    <include layout="@layout/dialog_include_message" />
 
     <EditText
         android:id="@+id/textbox_passphrase"
@@ -21,6 +21,6 @@
         <requestFocus />
     </EditText>
 
-    <include layout="@layout/custom_dialog_2buttons" />
+    <include layout="@layout/dialog_include_2buttons" />
 
 </LinearLayout>
