@@ -78,7 +78,9 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		Context appContext = ZWApplication.getApplication(); 
 		
 		if(appContext != null) {
-			this.message = appContext.getString(messageResId);
+			if(messageResId > 0) {
+				this.message = appContext.getString(messageResId);
+			}
 			
 			if(titleResId > 0) {
 				this.title = appContext.getString(titleResId);

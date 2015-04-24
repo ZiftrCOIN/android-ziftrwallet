@@ -4,22 +4,19 @@ import java.io.File;
 
 import android.app.Application;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 
-import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
-import com.ziftr.android.ziftrwallet.dialog.ZWValidatePassphraseDialog;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
-import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
-import com.ziftr.android.ziftrwallet.fragment.ZWTags;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWManageSpaceActivity extends FragmentActivity implements OnClickListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler{
+public class ZWManageSpaceActivity extends FragmentActivity implements OnClickListener, ZiftrDialogHandler {
 	
 	private Button continueButton;
 	private Button cancelButton;
@@ -64,44 +61,43 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 	}
 	
 	public void showContinuePassphraseDialog(){
-		ZWValidatePassphraseDialog passphraseDialog = new ZWValidatePassphraseDialog();
-		String message = "Please input your passphrase. ";
-		passphraseDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
-		passphraseDialog.show(this.getSupportFragmentManager(), "delete_data");
+		
+		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
+		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
+		passwordDialog.setupTextboxes(R.string.zw_empty_string, 0, 0);
+		
+		passwordDialog.show(getSupportFragmentManager(), "password_dialog");
 	}
-	
-	public void showAlert(String message, String tag){
-		ZWSimpleAlertDialog alertUserDialog = new ZWSimpleAlertDialog();
-		Bundle args = new Bundle();
-		args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.ALERT_USER_DIALOG);
-		alertUserDialog.setArguments(args);
 
-		// Set negative text to null to not have negative button
-		alertUserDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
-		alertUserDialog.show(this.getSupportFragmentManager(), tag);
-
-	}
 
 	@Override
-	public void handlePassphrasePositive(int requestCode, String passphrase) {
-		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
-		if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
-			this.clearAppData();
-			this.finish();
-
-		} else {
-			this.showAlert(getResources().getString(R.string.zw_incorrect_password), ZWTags.PASSPHRASE_INCORRECT);
+	public void handleDialogYes(DialogFragment fragment) {
+		
+		if("password_dialog".equals(fragment.getTag())) {
+			ZiftrTextDialogFragment passwordDialog = (ZiftrTextDialogFragment) fragment;
+			String password = passwordDialog.getEnteredTextTop();
+			
+			byte[] inputHash = ZiftrUtils.saltedHash(password);
+			
+			if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
+				this.clearAppData();
+				this.finish();
+			}
+			else {
+				//incorrect password
+				ZiftrDialogFragment wrongPassword = ZiftrDialogFragment.buildContinueDialog(R.string.zw_incorrect_password);
+				wrongPassword.show(getSupportFragmentManager(), "wrong_password");
+			}
 		}
 	}
 
 	@Override
-	public void handleNegative(int requestCode) {
-		//Nothing
+	public void handleDialogNo(DialogFragment fragment) {
+		//do nothing, just let the dialog dismiss itself
 	}
 
 	@Override
-	public void handleNeutral(int requestCode) {
-		// TODO Auto-generated method stub
-		
+	public void handleDialogCancel(DialogFragment fragment) {
+		//do nothing, just let the dialog dismiss itself		
 	}
 }

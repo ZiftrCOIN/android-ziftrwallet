@@ -157,7 +157,6 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 				return reencryptionStatus.error;
 			}
 			
-			ZLog.log("priv key: ", decrypted);
 			ContentValues cv = new ContentValues();
 			
 			if(newCrypter != null) {

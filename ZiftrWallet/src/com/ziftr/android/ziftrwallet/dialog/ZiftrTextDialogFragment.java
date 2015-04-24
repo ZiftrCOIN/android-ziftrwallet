@@ -105,6 +105,21 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 		return null;
 	}
 
+	
+	public String getEnteredTextMiddle() {
+		if(middleEditText != null) {
+			return middleEditText.getText().toString();
+		}
+		
+		return null;
+	}
+	
+	public String getEnteredTextBottom() {
+		if(bottomEditText != null) {
+			return bottomEditText.getText().toString();
+		}
+		return null;
+	}
 
 
 	@Override

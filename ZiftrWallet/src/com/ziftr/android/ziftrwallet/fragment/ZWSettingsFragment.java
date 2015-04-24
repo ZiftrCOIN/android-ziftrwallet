@@ -14,21 +14,22 @@ import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.dialog.ZWCreatePassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWResetPassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWSetNameDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
 public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
-	public static final String FRAGMENT_TAG = "settings_fragment";
-	public static final String DIALOG_ENABLE_DEBUG_TAG = "dialog_enable_debug";
+	public static final String DIALOG_ENABLE_DEBUG_TAG = "settings_enable_debug";
+	public static final String DIALOG_CREATE_PASSWORD_TAG = "settings_create_password";
+	public static final String DIALOG_CHANGE_PASSWORD_TAG = "settings_change_password";
 	
 	private RelativeLayout disablePassphrase;
 	private RelativeLayout resetPassword;
@@ -163,38 +164,31 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
 	@Override
 	public void onClick(View v) {
-		if (v==this.resetPassword){
+		if (v==this.resetPassword) {
 			if (ZWPreferences.userHasPassword()) {
+				ZiftrTextDialogFragment changePasswordDialog = new ZiftrTextDialogFragment();
+				changePasswordDialog.setupDialog(R.string.zw_dialog_change_password);
+				changePasswordDialog.setupTextboxes(R.string.zw_old_passphrase_hint, 
+													R.string.zw_dialog_new_passphrase_hint, 
+													R.string.zw_dialog_confirm_password_hint);
+				
+				changePasswordDialog.show(getFragmentManager(), DIALOG_CHANGE_PASSWORD_TAG);
+				
 				ZWResetPassphraseDialog passphraseDialog = 
 						new ZWResetPassphraseDialog();
-				// Set the target fragment
-				passphraseDialog.setTargetFragment(ZWSettingsFragment.this, 
-						ZWRequestCodes.RESET_PASSPHRASE_DIALOG);
-				Bundle args = new Bundle();
-				args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.RESET_PASSPHRASE_DIALOG);
-				passphraseDialog.setArguments(args);
-				passphraseDialog.setupDialog("ziftrWALLET", null, 
-						"Continue", null, "Cancel");
-				if (!getZWMainActivity().isShowingDialog()) {
-					passphraseDialog.show(ZWSettingsFragment.this.getFragmentManager(), 
-							"scan_qr");
-				}
-			} else {
-				ZWCreatePassphraseDialog createPassphraseDialog = new ZWCreatePassphraseDialog();
-				createPassphraseDialog.setTargetFragment(ZWSettingsFragment.this, ZWRequestCodes.CREATE_PASSPHRASE_DIALOG);
-				createPassphraseDialog.setupDialog("ziftrWALLET", "Create your passphrase", "Save", null, "Cancel");
-				Bundle args = new Bundle();
-				args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.CREATE_PASSPHRASE_DIALOG);
-				createPassphraseDialog.setArguments(args);
-
-				if (!getZWMainActivity().isShowingDialog()) {
-					createPassphraseDialog.show(ZWSettingsFragment.this.getFragmentManager(), 
-							"create_passphrase");
-				}
+			} 
+			else {
+				ZiftrTextDialogFragment createPasswordDialog = new ZiftrTextDialogFragment();
+				createPasswordDialog.setupDialog(0, R.string.zw_dialog_create_password, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
+				createPasswordDialog.setupTextboxes(R.string.zw_dialog_new_passphrase_hint, R.string.zw_dialog_confirm_password_hint, 0);
+				
+				createPasswordDialog.show(getFragmentManager(), DIALOG_CREATE_PASSWORD_TAG);
 			}
-		} else if (v==this.editableConfirmationFee){
+		} 
+		else if (v==this.editableConfirmationFee){
 			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
-		} else if (v == this.disablePassphrase){
+		} 
+		else if (v == this.disablePassphrase){
 			if (ZWPreferences.userHasPassword()){
 				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSWORD_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
 			} else {
@@ -203,7 +197,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				this.disablePassphrase.setVisibility(View.GONE);
 				this.resetPasswordLabel.setText("Set Passphrase");
 			}
-		} else if (v == this.setFiatCurrency){
+		} 
+		else if (v == this.setFiatCurrency){
 			getZWMainActivity().openSetFiatCurrency();
 		} else if (v == this.editableConfirmationFeeBar){
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());

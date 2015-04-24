@@ -32,15 +32,11 @@ public class ZWTags {
 	
 	public static final String TRIED_SETTING_NAME_TO_EMPTY = "set name is empty";
 	
-	public static final String PASSPHRASE_INCORRECT = "wrong_passphrase";
-	
 	public static final String SET_PASSPHRASE_NOT_MATCH = "non-matching_passphrase";
 
 	public static final String URI_INVALID_ADDRESS = "invalid_uri_address_dialog";
 	
 	public static final String SET_NAME_COMPLETE = "set_name_complete";
-	
-	public static final String SET_PASS_COMPLETE = "set_pass_complete";
 	
 	public static final String PASSPHRASE_DISABLED = "disabled_pass_complete";
 

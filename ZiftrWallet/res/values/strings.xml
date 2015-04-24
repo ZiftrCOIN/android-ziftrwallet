@@ -8,8 +8,8 @@
     <string name="zw_action_settings">Settings</string>
     <string name="zw_password_hint">Enter your password</string>
     <string name="zw_old_passphrase_hint">Enter your old password</string>
-    <string name="zw_new_passphrase_hint">Enter your new password</string>
-    <string name="zw_confirm_password_hint">Re-enter your password</string>
+    <string name="zw_dialog_new_passphrase_hint">Enter your new password</string>
+    <string name="zw_dialog_confirm_password_hint">Re-enter your password</string>
     <string name="zw_menu_text_accounts">ACCOUNTS</string>
     <string name="zw_menu_text_terms">TERMS</string>
     <string name="zw_menu_text_settings">SETTINGS</string>
@@ -135,7 +135,7 @@
 		ziftrCOIN, the first digital currency developed for online shoppers, aims to revolutionize shopping by putting cryptocurrency into the hands of consumers and enabling them to conduct simple, secure transactions at their favorite online retailers.\n\n
 		To learn more about ziftrCOIN, go to www.ziftrCOIN.com.</string>
     <string name="zw_security_text"><b>ZiftrWallet</b> is a decentralized mobile wallet in that addresses and keys are stored on your phone. This way your wallet is safe from server-side attacks, however it is necessary for the user to keep the phone physically secure. 
-	    \n\nBe wary of allowing untrusted people or apps access to your phone and be sure to set your passphrase. \n\nIt is recommended to store a spendable amount of cryptocurrency on ziftrWallet rather than your entire balance.
+	    \n\nBe wary of allowing untrusted people or apps access to your phone and be sure to set your password. \n\nIt is recommended to store a spendable amount of cryptocurrency on ziftrWallet rather than your entire balance.
 	   \n\n<b>WARNING: Remember to transfer your coins to other wallets before uninstalling.</b></string>
     <string name="zw_no_currency_description">No more wallets to add! Ensure you have wifi for this list to populate.</string>
     <string name="zw_no_currency">No Available Currencies</string>
@@ -145,8 +145,8 @@
         This is standard for all cryptocurrency applications. Without it, your transaction would likely stay as pending for an inconvenient length of time.</string>
     <string name="mempool_spending">Spend Unconfirmed Transactions</string>
     <string name="zw_incorrect_password">Error: Incorrect password.</string>
-    <string name="zw_incorrect_reset_password_match">"The passwords you entered don't match. Your previous password is still in place.</string>
-    <string name="zw_incorrect_reset_password">"The password you entered doesn't match your previous passphrase. Your previous password is still in place.</string>
+    <string name="zw_incorrect_reset_password_match">The passwords you entered don\'t match. Your previous password is still in place.</string>
+    <string name="zw_incorrect_reset_password">The password you entered doesn\'t match your previous password. Your previous password is still in place.</string>
     <string name="zw_set_empty_name">Looks like you wanted to disable your name instead!</string>
     <string name="zw_invalid_address_uri">The address is not valid.</string>
     <string name="zw_searchbar_hint">search</string>
@@ -159,5 +159,11 @@
     <string name="zw_dialog_create_address">Addresses cannot be deleted once they are created. Are you sure?</string>
     <string name="zw_dialog_enter_password">Please enter your password.</string>
     <string name="zw_dialog_deactivate">Deactivate</string>
-
+    <string name="zw_dialog_create_password">Create your password</string>
+    <string name="zw_dialog_save">Save</string>
+    <string name="zw_dialog_new_password_match">The passwords entered don\'t match. Please try again.</string>
+    <string name="zw_dialog_change_password">Change your password.</string>
 </resources>
+
+
+

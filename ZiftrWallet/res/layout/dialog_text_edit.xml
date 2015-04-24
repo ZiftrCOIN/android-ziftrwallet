@@ -15,7 +15,8 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginTop="8dp"
-        android:hint="@string/zw_old_passphrase_hint"
+        android:fontFamily="sans-serif"
+        android:hint="@string/zw_empty_string"
         android:inputType="textPassword" />
 
     <EditText
@@ -27,7 +28,7 @@
         android:layout_marginRight="4dp"
         android:layout_marginTop="4dp"
         android:fontFamily="sans-serif"
-        android:hint="@string/zw_new_passphrase_hint"
+        android:hint="@string/zw_empty_string"
         android:inputType="textPassword" />
 
     <EditText
@@ -39,7 +40,7 @@
         android:layout_marginRight="4dp"
         android:layout_marginTop="4dp"
         android:fontFamily="sans-serif"
-        android:hint="@string/zw_confirm_password_hint"
+        android:hint="@string/zw_empty_string"
         android:inputType="textPassword" />
 
         <include layout="@layout/dialog_include_2buttons" />

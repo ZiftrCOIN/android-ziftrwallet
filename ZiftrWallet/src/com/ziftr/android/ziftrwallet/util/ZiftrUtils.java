@@ -356,21 +356,18 @@ public class ZiftrUtils {
 		}
 	}
 	
-	/**
-	 * @param newPassphrase
-	 * @return
-	 */
-	public static byte[] saltedHash(String newPassphrase) {
-		return saltedHash(ZWPreferences.getSalt(), newPassphrase);
+	
+	public static byte[] saltedHash(String password) {
+		return saltedHash(ZWPreferences.getSalt(), password);
 	}
 	
-	public static byte[] saltedHash(String salt, String newPassphrase) {
-		if (newPassphrase == null) {
+	public static byte[] saltedHash(String salt, String password) {
+		if (password == null) {
 			return null;
 		}
 		
-		byte[] newPassphraseBytes = newPassphrase.getBytes();
-		byte[] concat = new byte[32 + newPassphrase.getBytes().length];
+		byte[] newPassphraseBytes = password.getBytes();
+		byte[] concat = new byte[32 + password.getBytes().length];
 		System.arraycopy(ZiftrUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
 		System.arraycopy(newPassphraseBytes, 0, concat, 32, newPassphraseBytes.length);
 		return ZiftrUtils.Sha256Hash(concat);
