@@ -27,7 +27,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
  * The ZWMainActivity starts this fragment. This fragment is 
@@ -201,17 +200,8 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 	
 	//this updates transaction history for all activated wallets
 	@Override
-	public void refreshData(final boolean autorefresh) {
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				for (ZWCoin coin : activatedCoins) {
-					ZWDataSyncHelper.updateTransactionHistory(coin, autorefresh);
-				}
-			}
-
-		});
+	public void refreshData(final boolean autorefresh) {	
+		ZWDataSyncHelper.updateTransactionHistory(activatedCoins, autorefresh);
 	}
 	
 

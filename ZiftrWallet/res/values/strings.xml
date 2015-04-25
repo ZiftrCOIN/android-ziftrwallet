@@ -163,6 +163,14 @@
     <string name="zw_dialog_save">Save</string>
     <string name="zw_dialog_new_password_match">The passwords entered don\'t match. Please try again.</string>
     <string name="zw_dialog_change_password">Change your password.</string>
+    <string name="zw_dialog_old_encryption">Your wallet is already encrypted with an older password. Enter your old password.</string>
+    <string name="zw_dialog_old_encryption_changed">Encryption has been removed. Please try setting your password again.</string>
+    <string name="zw_dialog_old_encryption_failed">Incorrect password. Your wallet is still encrypted with your old password.</string>
+    <string name="zw_dialog_old_encryption_fatal">There was a fatal error with wallet encryption. Please backup your wallet files and reinstall the application.</string>
+    <string name="zw_dialog_database_error">There was an error reading your wallet files. You must restart the application.</string>
+    <string name="zw_dialog_restart">Restart</string>
+    <string name="zw_dialog_blank_name">You cannot enter a blank name. Name can be disabled from the settings menu.</string>
+    
 </resources>
 
 

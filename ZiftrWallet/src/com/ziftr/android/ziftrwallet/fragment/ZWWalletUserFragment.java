@@ -5,7 +5,6 @@ import android.view.View;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class ZWWalletUserFragment extends ZWFragment {
 	
@@ -40,14 +39,7 @@ public abstract class ZWWalletUserFragment extends ZWFragment {
 	
 	@Override
 	public void refreshData(final boolean autorefresh) {
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				ZWDataSyncHelper.updateTransactionHistory(getZWMainActivity().getSelectedCoin(), autorefresh);
-			}
-
-		});
+		ZWDataSyncHelper.updateTransactionHistory(getZWMainActivity().getSelectedCoin(), autorefresh);
 	}
 
 }

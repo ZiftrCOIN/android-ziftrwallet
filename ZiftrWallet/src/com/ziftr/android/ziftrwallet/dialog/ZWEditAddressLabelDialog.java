@@ -9,7 +9,6 @@ import android.widget.Button;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWEditAddressLabelDialogHandler;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**

@@ -14,15 +14,6 @@ public class ZWRequestCodes {
 	
 	public static final int SET_NAME_DIALOG = 12;
 	
-	public static final int DISABLE_PASSWORD_DIALOG = 14;
-	
 	public static final int CONFIRM_SEND_COINS = 15;
 	
-	//used for when user tries to reencrypt encrypted addresses with new passphrase, ask for old passphrase to decrypt
-	public static final int PASSWORD_FOR_DECRYPTING = 17;
-	
-	public static final int UPSERT_DB_ERROR = 18;
-	
-
-
 }

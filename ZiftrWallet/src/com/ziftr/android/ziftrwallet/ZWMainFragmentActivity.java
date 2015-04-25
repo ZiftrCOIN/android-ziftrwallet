@@ -12,7 +12,6 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -44,10 +43,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZWEditAddressLabelDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
-import com.ziftr.android.ziftrwallet.dialog.ZWValidatePassphraseDialog;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWEditAddressLabelDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWSetNameDialogHandler;
@@ -71,7 +67,6 @@ import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -81,7 +76,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * depending on which task the user selects.
  */
 public class ZWMainFragmentActivity extends ActionBarActivity 
-implements DrawerListener, ZiftrDialogHandler, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
+implements DrawerListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
 ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
 ZiftrNetworkHandler {
 
@@ -116,6 +111,7 @@ ZiftrNetworkHandler {
 	private ImageView syncButton; //the button in various fragments users can press to sync their data
 	private boolean isSyncing = false;
 	
+	private ZWActivityDialogHandler dialogHandler;
 	private boolean consumedIntent = false;
 	
 	/**
@@ -212,6 +208,10 @@ ZiftrNetworkHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		dialogHandler = new ZWActivityDialogHandler(this);
+		ZiftrDialogManager.registerHandler(dialogHandler);
+		
 		if (ZWPreferences.getLogToFile()){
 			ZLog.setLogger(ZLog.FILE_LOGGER);
 		}
@@ -227,8 +227,9 @@ ZiftrNetworkHandler {
 		// Recreate wallet manager
 		this.walletManager = ZWWalletManager.getInstance();
 		
+		//TODO -probably need to add a timer or something to this so we don't do it constantly when a user rotates their screen
 		//load available coins from API blockchains
-		initCoins();
+		ZWDataSyncHelper.updateCoinData();
 		
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
@@ -851,43 +852,6 @@ ZiftrNetworkHandler {
 		}
 	}
 
-	/**
-	 * Sets the stored passphrase hash to be the specified
-	 * hash.
-	 * 
-	 * @param oldPassphrase - Used to decrypt old keys, if not null
-	 * @param newPassphrase - Used to encrypt all keys, should not be null
-	 */
-	private boolean changePassphrase(final String oldPassphrase, final String newPassphrase) {
-		// TODO put up a blocking dialog while this is happening
-	
-		//note: null/blank newPassphrase is ok now, it's how password is cleared
-		final ZWMainFragmentActivity mainActivity = this;
-		final reencryptionStatus status = walletManager.changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
-		//tried to set passphrase on encrypted database private keys
-		if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
-			this.runOnUiThread(new Runnable(){
-				@Override
-				public void run() {
-					mainActivity.setShowingDialog(false);
-					if (status == reencryptionStatus.encrypted){
-						mainActivity.showGetPassphraseDialog(ZWRequestCodes.PASSWORD_FOR_DECRYPTING, new Bundle(), 
-								"pass_for_old_encrypted_keys", "Your keys have already been encrypted with a passphrase, please enter your old passphrase:");
-					} else {
-						mainActivity.alertUser("We've encountered a fatal error in your database, please contact customer service!",  
-								"inconsistent_encrypted_database");
-					}
-				}
-				
-			});
-			return false;
-		} else {
-			//reencryption was successful
-			String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
-			ZWPreferences.setStoredPasswordHash(saltedHash);
-		}
-		return true;
-	}
 	
 
 	/**
@@ -1018,18 +982,7 @@ ZiftrNetworkHandler {
 				ZWTags.ACCOUNTS_INNER);
 
 	}
-	
-	//initialize available coin currencies the user can choose to add
-	public void initCoins(){
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			@Override
-			public void run() {
-				ZWDataSyncHelper.downloadCoinData();
-				//update currency exchange rates
-				ZWDataSyncHelper.getMarketValue();
-			}
-		});
-	}
+
 	
 	/**
 	 * Open View for selecting fiat currency in settings
@@ -1145,28 +1098,6 @@ ZiftrNetworkHandler {
 	}
 
 	
-	/**
-	 * generate dialog to ask for passphrase
-	 * 
-	 * @param requestcode = ZWRequestcodes parameter to differentiate where the password dialog is
-	 * @param args = bundle with ZWCoinType of currency to add if user is adding currency
-	 */
-	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag) {
-		this.showGetPassphraseDialog(requestcode, args, tag, "Please input your passphrase.");
-	}
-	
-	public void showGetPassphraseDialog(int requestcode, Bundle args, String tag, String message) {
-		if (!isShowingDialog()) {
-			ZWValidatePassphraseDialog passphraseDialog = new ZWValidatePassphraseDialog();
-
-			args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestcode);
-			passphraseDialog.setArguments(args);
-
-			passphraseDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
-			passphraseDialog.show(this.getSupportFragmentManager(), tag);
-		}
-	}
-	
 	///////////// Handler methods /////////////
 
 	@Override
@@ -1194,34 +1125,11 @@ ZiftrNetworkHandler {
 						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
 				sendFrag.onClickSendCoins(passphrase);
 				break;
-			case ZWRequestCodes.DISABLE_PASSWORD_DIALOG:
-				this.changePassphrase(passphrase, null);
-				
-				ZWPreferences.disablePassword();
-				ZWPreferences.setPasswordWarningDisabled(true);
-				
-				((ZWSettingsFragment)this.getSupportFragmentManager(
-						).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
-				
-				//manually toggle showing false to allow alert to show
-				this.showingDialog = false;
-				this.alertUser(getResources().getString(R.string.zw_disabled_password), ZWTags.PASSPHRASE_DISABLED);
-				break;
 			}
 		} 
 		else {
 			//if input doesnt match stored hash we may be entering a passphrase for decrypting
-			if (requestCode == ZWRequestCodes.PASSWORD_FOR_DECRYPTING){
-				if (ZWWalletManager.getInstance().attemptDecrypt(passphrase)){
-					//the passphrase worked, decrypt all keys now
-					ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(passphrase, null);
-					this.setShowingDialog(false);
-					alertUser("Your old passphrase was correct and your keys unencrypted, please set your passphrase again.", "correct_passphrase");
-				} else {
-					this.setShowingDialog(false);
-					alertUser("Your passphrase was incorrect, Warning: your database is still encrypted with the old passphrase", "incorrect_passphrase");
-				}
-			} 
+			
 
 		}
 
@@ -1270,7 +1178,7 @@ ZiftrNetworkHandler {
 			this.showingDialog = false;
 			this.alertUser(getResources().getString(R.string.zw_set_name_complete) + newName, ZWTags.SET_NAME_COMPLETE);
 			((ZWSettingsFragment)this.getSupportFragmentManager(
-					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility(false);
+					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
 		}
 	}
 
@@ -1594,131 +1502,6 @@ ZiftrNetworkHandler {
 				rotation.setRepeatCount(0);
 			}
 		}
-	}
-
-	
-	public Fragment getFragment(FragmentType fragmentType) {
-		return this.getSupportFragmentManager().findFragmentByTag(fragmentType.toString());
-	}
-	
-	
-	@Override
-	public void handleDialogYes(DialogFragment fragment) {
-		
-		if(ZWReceiveCoinsFragment.DIALOG_NEW_ADDRESS_TAG.equals(fragment.getTag())) {
-			//user is creating a new address
-			ZWReceiveCoinsFragment receiveFragment = 
-					(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
-			receiveFragment.loadNewAddressFromDatabase();
-		}
-		else if(ZWReceiveCoinsFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
-			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredTextTop();
-			byte[] inputHash = ZiftrUtils.saltedHash(enteredPassword);
-			
-			if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
-				ZWPreferences.setCachedPassword(enteredPassword);
-				
-				ZWReceiveCoinsFragment receiveFragment = 
-						(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
-				if(receiveFragment != null) {
-					
-					receiveFragment.loadNewAddressFromDatabase();
-				}
-			}
-			else {
-				ZiftrDialogFragment wrongPasswordDialog = ZiftrDialogFragment.buildContinueDialog(R.string.zw_incorrect_password);
-				wrongPasswordDialog.show(getSupportFragmentManager(), "wrong_password_dialog");
-			}
-		}
-		else if(ZWSettingsFragment.DIALOG_ENABLE_DEBUG_TAG.equals(fragment.getTag())) {
-			ZWPreferences.setDebugMode(true);
-			this.initCoins(); //re-init coins to show testnet in debug mode
-			ZWSettingsFragment settingsFragment = (ZWSettingsFragment)this.getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
-			if(settingsFragment != null) {
-				settingsFragment.updateSettingsVisibility(false);
-			}
-		}
-		else if(ZWSettingsFragment.DIALOG_CREATE_PASSWORD_TAG.equals(fragment.getTag())) {
-			ZiftrTextDialogFragment passwordFragment = (ZiftrTextDialogFragment) fragment;
-			String password = passwordFragment.getEnteredTextTop();
-			String confirmedPassword = passwordFragment.getEnteredTextMiddle();
-			
-			if(password.equals(confirmedPassword)) {
-				if (this.changePassphrase(null, password)) {
-					ZWPreferences.setPasswordWarningDisabled(false);
-					ZWSettingsFragment settingsFragment = (ZWSettingsFragment)this.getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
-					if(settingsFragment != null) {
-						settingsFragment.updateSettingsVisibility(true);	
-					}
-					ZiftrDialogFragment success = ZiftrDialogFragment.buildContinueDialog(R.string.zw_set_password_complete);
-					success.show(getSupportFragmentManager(), "changed_password");
-				} 
-				else {
-					//this is an epic failure, it basically measn the database is corrupted, or somehow double encrypted
-					//TODO -alert the user?
-					return;
-				}
-			}
-			else {
-				ZiftrDialogFragment error = ZiftrDialogFragment.buildContinueDialog(R.string.zw_dialog_new_password_match);
-				error.show(getSupportFragmentManager(), "password_match_error");
-			}
-		}
-		else if(ZWSettingsFragment.DIALOG_CHANGE_PASSWORD_TAG.equals(fragment.getTag())) {
-			ZiftrTextDialogFragment passwordFragment = (ZiftrTextDialogFragment) fragment;
-			String oldPassword = passwordFragment.getEnteredTextTop();
-			String newPassword = passwordFragment.getEnteredTextMiddle();
-			String confirmPassword = passwordFragment.getEnteredTextBottom();
-		
-			if(newPassword.equals(confirmPassword)) {
-				byte[] oldPasswordHash = ZiftrUtils.saltedHash(oldPassword);
-				
-				if (ZWPreferences.inputHashMatchesStoredHash(oldPasswordHash)) {
-					//everything looks ok, try and change passwords
-					if (this.changePassphrase(oldPassword, newPassword)) {
-						ZWPreferences.setPasswordWarningDisabled(false);
-						ZWSettingsFragment settingsFragment = (ZWSettingsFragment)this.getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
-						if(settingsFragment != null) {
-							settingsFragment.updateSettingsVisibility(true);	
-						}
-						
-						ZiftrDialogFragment success = ZiftrDialogFragment.buildContinueDialog(R.string.zw_set_password_complete);
-						success.show(getSupportFragmentManager(), "changed_password");
-					} 
-					else {
-						//this is an epic failure, it basically measn the database is corrupted, or somehow double encrypted
-						//TODO -alert the user?
-						return;
-					}
-				}
-				else {
-					//entered password wrong
-					ZiftrDialogFragment wrongPassword = ZiftrDialogFragment.buildContinueDialog(R.string.zw_incorrect_reset_password);
-					wrongPassword.show(getSupportFragmentManager(), "changed_password_failed");
-				}
-			}
-			else {
-				//new passwords don't match
-				ZiftrDialogFragment passwordMismatch = ZiftrDialogFragment.buildContinueDialog(R.string.zw_incorrect_reset_password_match);
-				passwordMismatch.show(getSupportFragmentManager(), "changed_password_failed");
-				
-				
-			}
-			
-		}
-		
-	}
-
-	@Override
-	public void handleDialogNo(DialogFragment fragment) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void handleDialogCancel(DialogFragment fragment) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }

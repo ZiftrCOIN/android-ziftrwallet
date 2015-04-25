@@ -18,10 +18,10 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZWResetPassphraseDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWSetNameDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
+import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
@@ -108,7 +108,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.enablelogsButton = (Button) rootView.findViewById(R.id.enable_logs);
 		this.enablelogsButton.setOnClickListener(this);
 		
-		this.updateSettingsVisibility(false);
+		this.updateSettingsVisibility();
 		return rootView;
 	}
 
@@ -117,9 +117,9 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.getZWMainActivity().changeActionBar("SETTINGS", true, true, false);
 	}
 
-	public void updateSettingsVisibility(boolean justSetPass) {
+	public void updateSettingsVisibility() {
 		//Show/hide options based on password settings
-		if (ZWPreferences.userHasPassword() || justSetPass) {
+		if (ZWPreferences.userHasPassword()) {
 			this.resetPasswordLabel.setText("Reset Passphrase");
 			this.disablePassphrase.setVisibility(View.VISIBLE);
 		} else if (!ZWPreferences.getPasswordWarningDisabled()){
@@ -173,9 +173,6 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 													R.string.zw_dialog_confirm_password_hint);
 				
 				changePasswordDialog.show(getFragmentManager(), DIALOG_CHANGE_PASSWORD_TAG);
-				
-				ZWResetPassphraseDialog passphraseDialog = 
-						new ZWResetPassphraseDialog();
 			} 
 			else {
 				ZiftrTextDialogFragment createPasswordDialog = new ZiftrTextDialogFragment();
@@ -190,8 +187,14 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		} 
 		else if (v == this.disablePassphrase){
 			if (ZWPreferences.userHasPassword()){
-				this.getZWMainActivity().showGetPassphraseDialog(ZWRequestCodes.DISABLE_PASSWORD_DIALOG, new Bundle(), ZWTags.VALIDATE_PASS_DISABLE);
-			} else {
+				ZiftrTextDialogFragment disablePasswordFragment = new ZiftrTextDialogFragment();
+				disablePasswordFragment.setupDialog(R.string.zw_dialog_enter_password);
+				disablePasswordFragment.setupTextboxes(R.string.zw_empty_string, 0, 0);
+				
+				//note the tag, removing a password is just changing it to an empty password
+				disablePasswordFragment.show(getFragmentManager(), DIALOG_CHANGE_PASSWORD_TAG);
+			} 
+			else {
 				ZWPreferences.setPasswordWarningDisabled(true);
 				//update settings visibility too slow with recognizing disabled password so update here
 				this.disablePassphrase.setVisibility(View.GONE);
@@ -211,7 +214,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		} else if (v == this.disableName){
 			ZWPreferences.setUserName(null);
 			ZWPreferences.setDisabledName(true);
-			this.updateSettingsVisibility(false);
+			this.updateSettingsVisibility();
 		} else if (v == this.setName){
 			ZWSetNameDialog setNameDialog = new ZWSetNameDialog();
 			setNameDialog.setTargetFragment(ZWSettingsFragment.this, ZWRequestCodes.SET_NAME_DIALOG);
@@ -228,8 +231,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				ZWPreferences.setDebugMode(false);
 				resetLoggerHelper();
 				//re-init coins to not show testnet in non-debug mode
-				this.getZWMainActivity().initCoins();
-				this.updateSettingsVisibility(false);
+				ZWDataSyncHelper.updateCoinData();
+				this.updateSettingsVisibility();
 			} else {
 				ZiftrDialogFragment fragment = ZiftrDialogFragment.buildContinueCancelDialog(R.string.debug_warning);
 				fragment.show(getFragmentManager(), DIALOG_ENABLE_DEBUG_TAG);
@@ -253,7 +256,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				ZWPreferences.setLogToFile(true);
 				ZLog.setLogger(ZLog.FILE_LOGGER);
 			}
-			this.updateSettingsVisibility(false);
+			this.updateSettingsVisibility();
 		}
 	}
 	

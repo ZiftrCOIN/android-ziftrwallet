@@ -26,8 +26,6 @@ public class ZWTags {
 	
 	public static final String EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK = "edit_address_label_address_book";
 	
-	public static final String VALIDATE_PASS_DISABLE = "validate_disable_passphrase_dialog";
-	
 	public static final String CONFIRM_SEND = "confirm_send_dialog";
 	
 	public static final String TRIED_SETTING_NAME_TO_EMPTY = "set name is empty";
@@ -38,8 +36,6 @@ public class ZWTags {
 	
 	public static final String SET_NAME_COMPLETE = "set_name_complete";
 	
-	public static final String PASSPHRASE_DISABLED = "disabled_pass_complete";
-
 	public static final String ERROR_MSG = "error_alert";
 
 	public static final String CONTINUE_SPENDING_UNCONFIRMED = "spending_unconfirmed";

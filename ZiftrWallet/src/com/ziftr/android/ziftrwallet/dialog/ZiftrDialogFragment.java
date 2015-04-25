@@ -1,9 +1,5 @@
 package com.ziftr.android.ziftrwallet.dialog;
 
-import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWApplication;
-import com.ziftr.android.ziftrwallet.util.ZLog;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -15,6 +11,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
 public class ZiftrDialogFragment extends DialogFragment implements OnClickListener, DialogInterface.OnClickListener {
@@ -222,20 +222,8 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 			return;
 		}
 		
-		
-		ZiftrDialogHandler handler = null;
-		if(this.getParentFragment() != null && this.getParentFragment() instanceof ZiftrDialogHandler) {
-			handler = (ZiftrDialogHandler) this.getParentFragment();
-		}
-		else if(this.getActivity() != null && this.getActivity() instanceof ZiftrDialogHandler) {
-			handler = (ZiftrDialogHandler) this.getActivity();
-		}
-		
-		
-		if(handler != null) {
-			handler.handleDialogCancel(this);
-		}
-		
+		//tell the dialog manager that this dialog has been cancelled
+		ZiftrDialogManager.dialogCancelled(this);
 		
 		super.onCancel(dialog);
 	}
@@ -248,24 +236,14 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 			return;
 		}
 		
-		//find the parent of this fragment and tell them about the click
-		ZiftrDialogHandler handler = null;
-		if(this.getParentFragment() != null && this.getParentFragment() instanceof ZiftrDialogHandler) {
-			handler = (ZiftrDialogHandler) this.getParentFragment();
+		//tell the dialog manager that a button has been pressed on the active dialog
+		if(which == DialogInterface.BUTTON_POSITIVE) {
+			ZiftrDialogManager.dialogClickedYes(this);
 		}
-		else if(this.getActivity() != null && this.getActivity() instanceof ZiftrDialogHandler) {
-			handler = (ZiftrDialogHandler) this.getActivity();
+		else if(which == DialogInterface.BUTTON_NEGATIVE) {
+			ZiftrDialogManager.dialogClickedNo(this);
 		}
-		
-		
-		if(handler != null) {
-			if(which == DialogInterface.BUTTON_POSITIVE) {
-				handler.handleDialogYes(this);
-			}
-			else if(which == DialogInterface.BUTTON_NEGATIVE) {
-				handler.handleDialogNo(this);
-			}
-		}
+	
 	}
 
 	@Override
@@ -281,6 +259,5 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		this.dismiss();
 	}
 
-	
 	
 }

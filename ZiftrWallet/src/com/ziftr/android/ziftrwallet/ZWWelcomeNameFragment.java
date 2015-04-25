@@ -9,7 +9,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 
 public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
@@ -51,27 +53,29 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 
-		ZWWelcomeActivity a = (ZWWelcomeActivity) this.getActivity();
-		// Need an activity to do pretty much everything below
-		if (a == null) {
-			return;
-		}
-
 		if (v == askMeLaterButton) {
 			if (this.getActivity() != null) {
 				this.startMain();
 			}
-		} else if (v == saveNameButton) {
+		}
+		else if (v == saveNameButton) {
 			String name = nameEditText.getText().toString();
 			if (!name.isEmpty()) {
 				if (ZWPreferences.setUserName(name) == -1){
-					a.alert("Your name was not set! We've encountered a database error, please restart app.", 
-							"error_set_password", ZWRequestCodes.UPSERT_DB_ERROR);
-				} else {
+					ZiftrDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
+					dbErrorFragment.setupDialog(R.string.zw_app_name, 
+												R.string.zw_dialog_database_error, 
+												R.string.zw_dialog_restart, 
+												R.string.zw_dialog_cancel);
+					
+					dbErrorFragment.show(getFragmentManager(), ZWActivityDialogHandler.DIALOG_DATABASE_ERROR_TAG);
+				} 
+				else {
 					this.startMain();
 				}
-			} else {
-				a.alert("An empty name doesn't give any information about you!", "name_is_empty_string");
+			} 
+			else {
+				ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_blank_name);
 			}
 		}
 

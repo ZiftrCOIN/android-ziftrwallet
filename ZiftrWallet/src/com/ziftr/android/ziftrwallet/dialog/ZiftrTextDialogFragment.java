@@ -74,6 +74,18 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 	}
 	
 	
+	
+	/**
+	 * setup the textboxes {@link EditText} to be displayed by this dialog,
+	 * sets the dialog to only have a single textbox (using the top slot),
+	 * with no text hint
+	 */
+	public void setupTextboxes() {
+		this.setupTextboxes(R.string.zw_empty_string, 0, 0);
+	}
+	
+	
+	
 	/**
 	 * setup the textboxes {@link EditText} to be displayed by this dialog,
 	 * The strings resource ids passed in will be used as the "hint text" for the 3 text boxes.
@@ -98,7 +110,7 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 
 	
 	public String getEnteredTextTop() {
-		if(topEditText != null) {
+		if(topEditText != null && topEditText.getVisibility() == View.VISIBLE) {
 			return topEditText.getText().toString();
 		}
 		
@@ -107,7 +119,7 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 
 	
 	public String getEnteredTextMiddle() {
-		if(middleEditText != null) {
+		if(middleEditText != null && middleEditText.getVisibility() == View.VISIBLE) {
 			return middleEditText.getText().toString();
 		}
 		
@@ -115,7 +127,7 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 	}
 	
 	public String getEnteredTextBottom() {
-		if(bottomEditText != null) {
+		if(bottomEditText != null && bottomEditText.getVisibility() == View.VISIBLE) {
 			return bottomEditText.getText().toString();
 		}
 		return null;

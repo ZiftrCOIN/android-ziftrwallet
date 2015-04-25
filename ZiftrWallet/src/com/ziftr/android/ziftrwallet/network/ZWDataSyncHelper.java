@@ -211,14 +211,14 @@ public class ZWDataSyncHelper {
 					//createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
 					
 					//TODO -once create transaction works properly remove this
-					updateTransactionHistory(coin, false);
+					downloadTransactionHistory(coin, false);
 				}
 				catch(Exception e2) {
 					ZLog.log("Exception parsing successful spend response: ", e2);
 					
 					//if the server said the send was successful, but we couldn't handle the response, 
 					//then we just update our history and hope it's there
-					updateTransactionHistory(coin, false);
+					downloadTransactionHistory(coin, false);
 				}
 			} catch(Exception e) {
 				ZLog.log("Exception saving spend transaction: ", e);
@@ -238,9 +238,22 @@ public class ZWDataSyncHelper {
 		
 	}
 
+	
+	public static void updateCoinData() {
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				downloadCoinTypes();
+				downloadMarketValues();
+				
+				ZiftrNetworkManager.dataUpdated();
+			}
+		});
+	}
 
 	
-	public static void downloadCoinData(){
+	private static void downloadCoinTypes(){
 		ZiftrNetworkManager.networkStarted();
 		
 		ZiftrNetRequest request = ZWApi.buildCoinDataRequest();
@@ -311,7 +324,7 @@ public class ZWDataSyncHelper {
 		ZiftrNetworkManager.networkStopped();
 	}
 	
-	public static void getMarketValue(){
+	private static void downloadMarketValues(){
 		ZiftrNetworkManager.networkStarted();
 		ZiftrNetRequest request = ZWApi.buildMarketValueRequest();
 		String response = request.sendAndWait();
@@ -363,8 +376,35 @@ public class ZWDataSyncHelper {
 		}
 	}
 
+	
+	public static void updateTransactionHistory(final List<ZWCoin> coins, final boolean autorefresh) {
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				for(ZWCoin coin : coins) {
+					downloadTransactionHistory(coin, autorefresh);
+				}
+				ZiftrNetworkManager.dataUpdated();
+			}
+		});
+	}
+	
+	
+	public static void updateTransactionHistory(final ZWCoin coin, final boolean autorefresh) {
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				downloadTransactionHistory(coin, autorefresh);
+				ZiftrNetworkManager.dataUpdated();
+			}
+		});
+		
+	}
+	
 
-	public static void updateTransactionHistory(ZWCoin coin, boolean autorefresh) {
+	public static void downloadTransactionHistory(ZWCoin coin, boolean autorefresh) {
 		if (autorefresh && ZWDataSyncHelper.lastRefreshed.containsKey(coin.getSymbol())){
 			if (ZWDataSyncHelper.lastRefreshed.get(coin.getSymbol()) > (System.currentTimeMillis() / 1000) - REFRESH_TIME){
 				ZLog.log("history not refreshed" );
@@ -405,7 +445,6 @@ public class ZWDataSyncHelper {
 		}//end if response code = 200
 
 		ZiftrNetworkManager.networkStopped();
-		ZiftrNetworkManager.dataUpdated();
 		ZWDataSyncHelper.lastRefreshed.put(coin.getSymbol(), System.currentTimeMillis() / 1000);
 	}
 
