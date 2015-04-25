@@ -1,9 +1,7 @@
 package com.ziftr.android.ziftrwallet.fragment;
 
 public class ZWRequestCodes {
-	
-	public static final int VALIDATE_PASSPHRASE_DIALOG_SEND = 1;
-	
+
 	public static final int ALERT_USER_DIALOG = 2;
 	
 	public static final int SCAN_QR_CODE = 3;

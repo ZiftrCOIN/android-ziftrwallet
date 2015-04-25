@@ -33,7 +33,7 @@ public class ZWSimpleAlertDialog extends ZWDialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		AlertDialog.Builder builder = this.createBuilder(savedInstanceState);
 		
-		this.setDialogView(this.getActivity().getLayoutInflater().inflate(R.layout.dialog_default_bad, null));
+		this.setDialogView(this.getActivity().getLayoutInflater().inflate(R.layout.dialog_generic, null));
 		this.initDialogFields();
 		builder.setView(this.getDialogView());
 		Button okbutton = (Button) this.getDialogView().findViewById(R.id.left_dialog_button);

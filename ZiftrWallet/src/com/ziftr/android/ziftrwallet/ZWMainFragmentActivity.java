@@ -47,7 +47,6 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWEditAddressLabelDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWSetNameDialogHandler;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWValidatePassphraseDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
@@ -76,7 +75,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * depending on which task the user selects.
  */
 public class ZWMainFragmentActivity extends ActionBarActivity 
-implements DrawerListener, ZWValidatePassphraseDialogHandler, ZWNeutralDialogHandler, 
+implements DrawerListener, ZWNeutralDialogHandler, 
 ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
 ZiftrNetworkHandler {
 
@@ -1103,37 +1102,12 @@ ZiftrNetworkHandler {
 	@Override
 	public void handleNegative(int requestCode) {
 		switch(requestCode) {
-		case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
-			// Nothing to do
-			break;
 		case ZWRequestCodes.ALERT_USER_DIALOG:
 			// Nothing to do
 			break;
 		}
 	}
 	
-	
-	@Override
-	public void handlePassphrasePositive(int requestCode, String passphrase) {
-		byte[] inputHash = ZiftrUtils.saltedHash(passphrase);
-		
-		if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
-			ZWPreferences.setCachedPassword(passphrase);
-			switch(requestCode) {
-			case ZWRequestCodes.VALIDATE_PASSPHRASE_DIALOG_SEND:
-				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager(
-						).findFragmentByTag(ZWTags.SEND_FRAGMENT);
-				sendFrag.onClickSendCoins(passphrase);
-				break;
-			}
-		} 
-		else {
-			//if input doesnt match stored hash we may be entering a passphrase for decrypting
-			
-
-		}
-
-	}
 
 	
 	public void handleConfirmationPositive(int requestCode, Bundle info) {
