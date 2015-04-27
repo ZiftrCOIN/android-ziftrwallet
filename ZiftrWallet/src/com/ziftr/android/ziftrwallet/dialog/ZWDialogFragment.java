@@ -11,7 +11,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
@@ -214,17 +213,12 @@ public abstract class ZWDialogFragment extends DialogFragment implements View.On
 	@Override
 	public void onStart() {
 		//ignore this if showing dialog in welcome activity
-		if (this.getActivity().getClass().getSimpleName().equals(ZWMainFragmentActivity.class.getSimpleName()))
-			((ZWMainFragmentActivity) this.getActivity()).setShowingDialog(true);
-		super.onStart();
+
 	}
 
 	@Override
 	public void onDetach() {
-		//ignore this if showing dialog in welcome activity
-		if (this.getActivity().getClass().getSimpleName().equals(ZWMainFragmentActivity.class.getSimpleName()))
-			((ZWMainFragmentActivity) this.getActivity()).setShowingDialog(false);
-		super.onDetach();
+
 	}
 	
 	/**

@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
@@ -193,6 +194,32 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		else if(ZWActivityDialogHandler.DIALOG_DATABASE_ERROR_TAG.equals(fragment.getTag())) {
 			//user pressed the restart button
 			System.exit(0);
+		}
+		else if(ZWSettingsFragment.DIALOG_SET_NAME_TAG.equals(fragment.getTag())) {
+			ZiftrTextDialogFragment nameFragment = (ZiftrTextDialogFragment) fragment;
+			String enteredName = nameFragment.getEnteredTextTop();
+			
+			if(enteredName == null || enteredName.length() == 0) {
+				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_dialog_blank_name);
+			}
+			else {
+				ZWPreferences.setUserName(enteredName);
+				ZWSettingsFragment settingsFragment = (ZWSettingsFragment) getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
+				if(settingsFragment != null) {
+					settingsFragment.updateSettingsVisibility();
+				}
+				
+				//for the name confirmation dialog we need to assemble the strings before we create the dialog
+				//this way we can append the user's entered name
+				ZiftrDialogFragment nameSetDialog = new ZiftrDialogFragment();
+				
+				String dialogTitle = activity.getString(R.string.zw_app_name);
+				String message = activity.getString(R.string.zw_dialog_set_name_complete) + enteredName;
+				String dialogYes = activity.getString(R.string.zw_dialog_continue);
+				
+				nameSetDialog.setupDialog(dialogTitle, message, dialogYes, null);
+				nameSetDialog.show(getSupportFragmentManager(), "activity_set_name_complete");
+			}
 		}
 		
 	}

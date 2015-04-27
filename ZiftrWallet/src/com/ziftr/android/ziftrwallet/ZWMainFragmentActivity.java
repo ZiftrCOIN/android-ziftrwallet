@@ -45,8 +45,6 @@ import com.ziftr.android.ziftrwallet.dialog.ZWEditAddressLabelDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.handlers.ZWEditAddressLabelDialogHandler;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWNeutralDialogHandler;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWSetNameDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
@@ -75,9 +73,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * depending on which task the user selects.
  */
 public class ZWMainFragmentActivity extends ActionBarActivity 
-implements DrawerListener, ZWNeutralDialogHandler, 
-ZWEditAddressLabelDialogHandler, ZWSetNameDialogHandler, OnClickListener, 
-ZiftrNetworkHandler {
+implements DrawerListener, ZWEditAddressLabelDialogHandler, OnClickListener, ZiftrNetworkHandler {
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
@@ -98,9 +94,6 @@ ZiftrNetworkHandler {
 
 	/** This object is responsible for all the wallets. */
 	private ZWWalletManager walletManager;
-
-	/** Boolean determining if a dialog is shown, used to prevent overlapping dialogs */
-	private boolean showingDialog = false;
 
 	/** reference to searchBarEditText */
 	private EditText searchEditText;
@@ -1054,27 +1047,14 @@ ZiftrNetworkHandler {
 
 		// Set negative text to null to not have negative button
 		alertUserDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
+		/**
 		if (!isShowingDialog()){
 			alertUserDialog.show(this.getSupportFragmentManager(), tag);
 		}
+		**/
 	}
 
 	
-	/***
-	public void alertConfirmation(int requestcode, String message, String tag, Bundle args) {
-		ZWConfirmationDialog confirmDialog = new ZWConfirmationDialog();
-
-		args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestcode);
-		confirmDialog.setArguments(args);
-		confirmDialog.setupDialog("ziftrWALLET", message, "Continue", null, "Cancel");
-
-		if (!isShowingDialog()) {
-			confirmDialog.show(this.getSupportFragmentManager(), tag);
-		}
-	}
-	***/
-	
-
 	/**
 	 * generate dialog to ask for passphrase
 	 * 
@@ -1082,18 +1062,18 @@ ZiftrNetworkHandler {
 	 * @param args = bundle with ZWCoinType of currency to add if user is adding currency
 	 */
 	public void showEditAddressLabelDialog(int requestcode, boolean isReceiving, Bundle args, String tag) {
-		if (!isShowingDialog()) {
-			ZWEditAddressLabelDialog dialog = new ZWEditAddressLabelDialog();
 
-			args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestcode);
-			args.putBoolean(ZWEditAddressLabelDialog.IS_RECEIVING_NOT_SENDING_KEY, isReceiving);
-			dialog.setArguments(args);
+		ZWEditAddressLabelDialog dialog = new ZWEditAddressLabelDialog();
 
-			String message = "Edit the below address' label. ";
-			dialog.setupDialog("ziftrWALLET", message, "Done", null, "Cancel");
+		args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestcode);
+		args.putBoolean(ZWEditAddressLabelDialog.IS_RECEIVING_NOT_SENDING_KEY, isReceiving);
+		dialog.setArguments(args);
 
-			dialog.show(this.getSupportFragmentManager(), tag);
-		}
+		String message = "Edit the below address' label. ";
+		dialog.setupDialog("ziftrWALLET", message, "Done", null, "Cancel");
+
+		dialog.show(this.getSupportFragmentManager(), tag);
+
 	}
 
 	
@@ -1143,18 +1123,6 @@ ZiftrNetworkHandler {
 		}
 	}
 
-	@Override
-	public void handleSetNamePositive(int requestCode, String newName){
-		if (newName.isEmpty()){
-			this.alertUser(getResources().getString(R.string.zw_set_empty_name), ZWTags.TRIED_SETTING_NAME_TO_EMPTY);
-		} else {
-			ZWPreferences.setUserName(newName);
-			this.showingDialog = false;
-			this.alertUser(getResources().getString(R.string.zw_set_name_complete) + newName, ZWTags.SET_NAME_COMPLETE);
-			((ZWSettingsFragment)this.getSupportFragmentManager(
-					).findFragmentByTag(FragmentType.SETTINGS_FRAGMENT_TYPE.toString())).updateSettingsVisibility();
-		}
-	}
 
 	public void updateTopFragmentView() {
 		// If already on the UI thread, then it just does this right now
@@ -1168,22 +1136,7 @@ ZiftrNetworkHandler {
 			}
 		});
 	}
-	
-	@Override
-	public void handleNeutral(int requestCode) {
-		switch (requestCode) {
-		case ZWRequestCodes.ALERT_USER_DIALOG:
-			break;
-		}
-	}
 
-	public void setShowingDialog(boolean showing) {
-		this.showingDialog = showing;
-	}
-
-	public boolean isShowingDialog() {
-		return this.showingDialog;
-	}
 
 	/**
 	 * @return the curSelectedCoinType

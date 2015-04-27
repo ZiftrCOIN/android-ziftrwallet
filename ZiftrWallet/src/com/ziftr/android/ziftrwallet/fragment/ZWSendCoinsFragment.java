@@ -255,9 +255,6 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		String addressToSendTo = this.addressEditText.getText().toString();
 		String addressName = labelEditText.getText().toString();
 		ZWWalletManager manager = getWalletManager();
-		
-		//set dialog showing false earlier to allow error dialogs to show
-		getZWMainActivity().setShowingDialog(false);
 
 		try {
 			sendCoins(addressToSendTo, amountSending, feeSending, passphrase);

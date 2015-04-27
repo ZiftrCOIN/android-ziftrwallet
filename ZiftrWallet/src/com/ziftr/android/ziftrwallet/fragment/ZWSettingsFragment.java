@@ -17,8 +17,6 @@ import android.widget.TextView;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZWSetNameDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
@@ -30,6 +28,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	public static final String DIALOG_ENABLE_DEBUG_TAG = "settings_enable_debug";
 	public static final String DIALOG_CREATE_PASSWORD_TAG = "settings_create_password";
 	public static final String DIALOG_CHANGE_PASSWORD_TAG = "settings_change_password";
+	public static final String DIALOG_SET_NAME_TAG = "settings_set_name";
 	
 	private RelativeLayout disablePassphrase;
 	private RelativeLayout resetPassword;
@@ -203,56 +202,64 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		} 
 		else if (v == this.setFiatCurrency){
 			getZWMainActivity().openSetFiatCurrency();
-		} else if (v == this.editableConfirmationFeeBar){
+		} 
+		else if (v == this.editableConfirmationFeeBar){
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
 			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
-		} else if (v == this.enableMempoolSpending){
+		}
+		else if (v == this.enableMempoolSpending){
 			ZWPreferences.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
-		} else if (v == this.enableMempoolSpendingBar) {
+		}
+		else if (v == this.enableMempoolSpendingBar) {
 			this.enableMempoolSpending.setChecked(!this.enableMempoolSpending.isChecked());
 			ZWPreferences.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
-		} else if (v == this.disableName){
+		}
+		else if (v == this.disableName){
 			ZWPreferences.setUserName(null);
 			ZWPreferences.setDisabledName(true);
 			this.updateSettingsVisibility();
-		} else if (v == this.setName){
-			ZWSetNameDialog setNameDialog = new ZWSetNameDialog();
-			setNameDialog.setTargetFragment(ZWSettingsFragment.this, ZWRequestCodes.SET_NAME_DIALOG);
-			setNameDialog.setupDialog("ziftrWALLET", "Enter your name.", "Save", null, "Cancel");
-			Bundle args = new Bundle();
-			args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.SET_NAME_DIALOG);
-			setNameDialog.setArguments(args);
-			if (!getZWMainActivity().isShowingDialog()) {
-				setNameDialog.show(ZWSettingsFragment.this.getFragmentManager(), 
-						"set_name");
-			}
-		} else if (v == this.debugButton) {
+		}
+		else if (v == this.setName){
+			
+			ZiftrTextDialogFragment setNameDialog = new ZiftrTextDialogFragment();
+			setNameDialog.setupTextboxes();
+			
+			setNameDialog.setupDialog(R.string.zw_app_name, R.string.zw_dialog_enter_name, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
+			
+			setNameDialog.show(getFragmentManager(), DIALOG_SET_NAME_TAG);
+		}
+		else if (v == this.debugButton) {
 			if (ZWPreferences.getDebugMode()){
 				ZWPreferences.setDebugMode(false);
 				resetLoggerHelper();
 				//re-init coins to not show testnet in non-debug mode
 				ZWDataSyncHelper.updateCoinData();
 				this.updateSettingsVisibility();
-			} else {
+			}
+			else {
 				ZiftrDialogFragment fragment = ZiftrDialogFragment.buildContinueCancelDialog(R.string.debug_warning);
 				fragment.show(getFragmentManager(), DIALOG_ENABLE_DEBUG_TAG);
 			}
-		} else if (v == this.exportwalletButton) {
+		} 
+		else if (v == this.exportwalletButton) {
 			File wallet = new File(this.getActivity().getExternalFilesDir(null), "wallet.dat");
 			Intent intent = new Intent(Intent.ACTION_SEND);
 			intent.setType("plain/text");
 			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(wallet));
 			startActivity(Intent.createChooser(intent, "Send backup"));
-		} else if (v == this.exportlogsButton){ 
+		}
+		else if (v == this.exportlogsButton){ 
 			File log = new File(this.getActivity().getExternalFilesDir(null) + "/logs", "Zlog.txt");
 			Intent intent = new Intent(Intent.ACTION_SEND);
 			intent.setType("plain/text");
 			intent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(log));
 			startActivity(Intent.createChooser(intent, "Send logs"));
-		} else if (v == this.enablelogsButton){
+		}
+		else if (v == this.enablelogsButton){
 			if (ZWPreferences.getLogToFile()){
 				resetLoggerHelper();
-			} else {
+			}
+			else {
 				ZWPreferences.setLogToFile(true);
 				ZLog.setLogger(ZLog.FILE_LOGGER);
 			}

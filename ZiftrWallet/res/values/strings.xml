@@ -150,7 +150,7 @@
     <string name="zw_set_empty_name">Looks like you wanted to disable your name instead!</string>
     <string name="zw_invalid_address_uri">The address is not valid.</string>
     <string name="zw_searchbar_hint">search</string>
-    <string name="zw_set_name_complete">Your name is set to: </string>
+    <string name="zw_dialog_set_name_complete">"Your name is set to:\u0020"</string>
     <string name="zw_set_password_complete">Your new password is set!</string>
     <string name="zw_disabled_password">Warning: your password is disabled.</string>
     <string name="zw_warning">Warning</string>
@@ -170,6 +170,7 @@
     <string name="zw_dialog_database_error">There was an error reading your wallet files. You must restart the application.</string>
     <string name="zw_dialog_restart">Restart</string>
     <string name="zw_dialog_blank_name">You cannot enter a blank name. Name can be disabled from the settings menu.</string>
+    <string name="zw_dialog_enter_name">Please enter your name.</string>
     
 </resources>
 
