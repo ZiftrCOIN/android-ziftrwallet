@@ -171,6 +171,7 @@
     <string name="zw_dialog_restart">Restart</string>
     <string name="zw_dialog_blank_name">You cannot enter a blank name. Name can be disabled from the settings menu.</string>
     <string name="zw_dialog_enter_name">Please enter your name.</string>
+    <string name="zw_dialog_edit_address">Edit address label.</string>
     
 </resources>
 

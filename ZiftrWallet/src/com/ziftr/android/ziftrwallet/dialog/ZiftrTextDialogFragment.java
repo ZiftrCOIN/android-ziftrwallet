@@ -14,8 +14,13 @@ import android.widget.EditText;
 public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 
 	String topHintText;
+	String topText;
+	
 	String middleHintText;
+	String middleText;
+	
 	String bottomHintText;
+	String bottomText;
 	
 	EditText topEditText;
 	EditText middleEditText;
@@ -32,9 +37,9 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 		middleEditText = (EditText) customTextDialog.findViewById(R.id.dialog_textbox_middle);
 		bottomEditText = (EditText) customTextDialog.findViewById(R.id.dialog_textbox_bottom);
 		
-		setupTextbox(topEditText, topHintText);
-		setupTextbox(middleEditText, middleHintText);
-		setupTextbox(bottomEditText, bottomHintText);
+		setupTextbox(topEditText, topText, topHintText);
+		setupTextbox(middleEditText, middleText, middleHintText);
+		setupTextbox(bottomEditText, bottomText, bottomHintText);
 		
 		return this.buildCustomDialog(customTextDialog);
 	}
@@ -53,8 +58,9 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 	}
 
 
-	private void setupTextbox(EditText textbox, String hintText) {
-		if(hintText != null) {
+	private void setupTextbox(EditText textbox, String text, String hintText) {
+		if(hintText != null || text != null) {
+			textbox.setText(text);
 			textbox.setHint(hintText);
 			textbox.setVisibility(View.VISIBLE);
 		}
@@ -71,6 +77,10 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 		outState.putString("topHintText", topHintText);
 		outState.putString("middleHintText", middleHintText);
 		outState.putString("bottomHintText", bottomHintText);
+		
+		outState.putString("topText", topText);
+		outState.putString("middleText", middleText);
+		outState.putString("bottomText", bottomText);
 	}
 	
 	
@@ -83,6 +93,23 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 	public void setupTextboxes() {
 		this.setupTextboxes(R.string.zw_empty_string, 0, 0);
 	}
+	
+	
+	public void setupTextboxTop(String prefilledText, String hint) {
+		this.topText = prefilledText;
+		this.topHintText = hint;
+	}
+	
+	public void setupTextboxMiddle(String prefilledText, String hint) {
+		this.middleText = prefilledText;
+		this.middleHintText = hint;
+	}
+	
+	public void setupTextboxBottom(String prefilledText, String hint) {
+		this.bottomText = prefilledText;
+		this.bottomHintText = hint;
+	}
+	
 	
 	
 	

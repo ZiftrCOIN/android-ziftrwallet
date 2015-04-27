@@ -17,7 +17,7 @@
         android:layout_marginTop="8dp"
         android:fontFamily="sans-serif"
         android:hint="@string/zw_empty_string"
-        android:inputType="textPassword" />
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/dialog_textbox_middle"

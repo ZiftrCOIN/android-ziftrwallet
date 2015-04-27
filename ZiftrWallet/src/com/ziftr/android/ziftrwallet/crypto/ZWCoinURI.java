@@ -249,7 +249,7 @@ public class ZWCoinURI {
 
 	public static String convertToCoinURI(ZWAddress address, BigInteger amount, String label, String message) {
 		try {
-		 return convertToCoinURI(address.getCoinId(), address.getAddress(), amount, label, message);
+		 return convertToCoinURI(address.getCoin(), address.getAddress(), amount, label, message);
 		} catch (IllegalArgumentException e) {
 			ZLog.log("error converting to coinuri" + e);
 			return null;

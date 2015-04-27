@@ -24,6 +24,8 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 	protected String yes;
 	protected String no;
 	
+	protected Object dataObject;
+	
 	private DialogInterface.OnClickListener clickListener = null;
 	private DialogInterface.OnCancelListener cancelListener = null;
 	
@@ -191,6 +193,8 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		outState.putString("yes", yes);
 		outState.putString("no", no);
 		
+		outState.putSerializable("dataObject", "test");
+		
 		super.onSaveInstanceState(outState);
 	}
 
@@ -258,6 +262,35 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		
 		this.dismiss();
 	}
+	
+
+	/**
+	 * This can be used as a shortcut to store some data that the handler or other calling code may need to reference later.
+	 * Since dialogs can be destroyed and recreated by the Android lifecycle, setting a data object will cause this dialog
+	 * fragment to be retained.
+	 * @param data any serializable data that the fragment or its handlers may need later
+	 */
+	public void setData(Object data) {
+		this.dataObject = data;
+		
+		if(this.dataObject != null) {
+			this.setRetainInstance(true);
+		}
+		else {
+			this.setRetainInstance(false);
+		}
+	}
+	
+	
+	/**
+	 * Gets the Object stored by {@link #getData()}.
+	 * @return the object previously set, or null if no data was ever set
+	 */
+	public Object getData() {
+		return this.dataObject;
+	}
 
 	
 }
+
+

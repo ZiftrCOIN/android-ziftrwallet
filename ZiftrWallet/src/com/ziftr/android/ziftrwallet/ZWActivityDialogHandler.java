@@ -6,13 +6,16 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
+import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSettingsFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -220,6 +223,31 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 				nameSetDialog.setupDialog(dialogTitle, message, dialogYes, null);
 				nameSetDialog.show(getSupportFragmentManager(), "activity_set_name_complete");
 			}
+		}
+		else if(ZWAddressListAdapter.DIALOG_EDIT_ADDRESS_TAG.equals(fragment.getTag())) {
+			ZiftrTextDialogFragment editLabelFragment = (ZiftrTextDialogFragment) fragment;
+			
+			final String newLabel = editLabelFragment.getEnteredTextTop();
+			final ZWAddress editedAddress = (ZWAddress) editLabelFragment.getData();
+			
+			ZiftrUtils.runOnNewThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					
+					if(editedAddress != null) {
+						ZWWalletManager.getInstance().updateAddressLabel(editedAddress.getCoin(), 
+																		editedAddress.getAddress(), 
+																		newLabel, 
+																		editedAddress.isPersonalAddress());
+						
+						//in this case the user updated the data directly instead of data downloaded from the internet, 
+						//but this will let the rest of the UI know
+						ZiftrNetworkManager.dataUpdated();
+					}
+				}
+			});
+
 		}
 		
 	}

@@ -81,7 +81,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	public static final int LENGTH = 20;
 
 	/** The type of coin that this is an address for. */
-	private ZWCoin coinId;
+	private ZWCoin coin;
 
 	/** The version byte specifies what type of address it is (P2SH, P2PubKey, etc). */
 	private byte versionByte;
@@ -198,7 +198,7 @@ public class ZWAddress implements ZWSearchableListItem {
 			throw new ZWAddressFormatException("Version byte does not match any supported coin types");
 		}
 
-		this.coinId = coinId;
+		this.coin = coinId;
 		this.versionByte = versionByte;
 		this.hash160 = hash160;
 		// Default, should be overridden with the setter method
@@ -221,8 +221,8 @@ public class ZWAddress implements ZWSearchableListItem {
 		this.spentFrom = spentFrom;
 	}
 	
-	public ZWCoin getCoinId() {
-		return this.coinId;
+	public ZWCoin getCoin() {
+		return this.coin;
 	}
 
 	/**
@@ -250,7 +250,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * Address Format for pay-to-script-hash.
 	 */
 	public boolean isP2SHAddress() {
-		return coinId != null && this.versionByte == this.coinId.getScriptHashPrefix();
+		return coin != null && this.versionByte == this.coin.getScriptHashPrefix();
 	}
 
 	public boolean isPersonalAddress() {

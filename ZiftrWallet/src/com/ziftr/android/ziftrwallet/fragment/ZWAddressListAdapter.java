@@ -5,17 +5,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
-import com.ziftr.android.ziftrwallet.dialog.ZWEditAddressLabelDialog;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -24,8 +23,10 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * of currencies the user can choose from. This adapts each option to form
  * a view for each currency, reusing old views to improve efficiency. 
  */
-public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> {
+public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> implements OnClickListener {
 
+	public static final String DIALOG_EDIT_ADDRESS_TAG = "addresslist_edit_address";
+	
 	private ZWMainFragmentActivity activity;
 	
 	/**
@@ -66,19 +67,9 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> {
 			convertView = this.getInflater().inflate(R.layout.accounts_address_book_list_item, parent, false);
 		}
 
-		// Get all the references
 		ImageView editImage = (ImageView) convertView.findViewById(R.id.leftIcon);
-		editImage.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Bundle args = new Bundle();
-				args.putBoolean(ZWEditAddressLabelDialog.IS_RECEIVING_NOT_SENDING_KEY, address.isPersonalAddress());
-				args.putString(ZWEditAddressLabelDialog.CURRENT_ENTERED_TEXT_KEY, address.getLabel());
-				args.putString(ZWEditAddressLabelDialog.ADDRESS_KEY, address.getAddress());
-				activity.showEditAddressLabelDialog(ZWRequestCodes.EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK, 
-						address.isPersonalAddress(), args, ZWTags.EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK);
-			}
-		});
+		editImage.setTag(address); //use the button tag as a convenient place to store the existing label
+		editImage.setOnClickListener(this);
 
 		ImageView inOutImage = (ImageView) convertView.findViewById(R.id.rightIcon);
 		inOutImage.setImageResource(this.getImgResIdForItem(address));
@@ -193,6 +184,25 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> {
 		} else if (this.sortState == SortState.TIME_OLD_TO_NEW) {
 			this.sortByTime(false);
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		
+		if(v.getId() == R.id.leftIcon) {
+			//user is editing the label
+			ZWAddress address = (ZWAddress) v.getTag();
+			
+			if(address != null) {
+				ZiftrTextDialogFragment editLabelDialog = new ZiftrTextDialogFragment();
+				editLabelDialog.setupDialog(R.string.zw_app_name, R.string.zw_dialog_edit_address, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
+				editLabelDialog.setupTextboxTop(address.getLabel(), null);
+				editLabelDialog.setData(address);
+				
+				editLabelDialog.show(activity.getSupportFragmentManager(), DIALOG_EDIT_ADDRESS_TAG);
+			}
+		}
+		
 	}
 
 }

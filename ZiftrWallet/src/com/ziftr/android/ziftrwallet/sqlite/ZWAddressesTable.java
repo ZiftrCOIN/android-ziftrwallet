@@ -62,7 +62,7 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	protected abstract ContentValues addressToContentValues(ZWAddress address);
 
 	protected void insert(ZWAddress address, SQLiteDatabase db) {
-		db.insert(getTableName(address.getCoinId()), 
+		db.insert(getTableName(address.getCoin()), 
 				null, addressToContentValues(address));
 	}
 
@@ -186,7 +186,7 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	protected void updateAddress(ZWAddress address, SQLiteDatabase db) {
 		ContentValues values = addressToContentValues(address);
 		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
-		db.update(getTableName(address.getCoinId()), values, whereClause, null);
+		db.update(getTableName(address.getCoin()), values, whereClause, null);
 	}
 
 	protected void updateAddressLabel(ZWCoin coin, String address, String newLabel, SQLiteDatabase db) {

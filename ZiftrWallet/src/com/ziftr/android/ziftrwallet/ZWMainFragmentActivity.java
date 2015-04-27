@@ -41,10 +41,8 @@ import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZWEditAddressLabelDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
-import com.ziftr.android.ziftrwallet.dialog.handlers.ZWEditAddressLabelDialogHandler;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
@@ -73,7 +71,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * depending on which task the user selects.
  */
 public class ZWMainFragmentActivity extends ActionBarActivity 
-implements DrawerListener, ZWEditAddressLabelDialogHandler, OnClickListener, ZiftrNetworkHandler {
+implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
@@ -1052,75 +1050,6 @@ implements DrawerListener, ZWEditAddressLabelDialogHandler, OnClickListener, Zif
 			alertUserDialog.show(this.getSupportFragmentManager(), tag);
 		}
 		**/
-	}
-
-	
-	/**
-	 * generate dialog to ask for passphrase
-	 * 
-	 * @param requestcode = ZWRequestcodes parameter to differentiate where the password dialog is
-	 * @param args = bundle with ZWCoinType of currency to add if user is adding currency
-	 */
-	public void showEditAddressLabelDialog(int requestcode, boolean isReceiving, Bundle args, String tag) {
-
-		ZWEditAddressLabelDialog dialog = new ZWEditAddressLabelDialog();
-
-		args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, requestcode);
-		args.putBoolean(ZWEditAddressLabelDialog.IS_RECEIVING_NOT_SENDING_KEY, isReceiving);
-		dialog.setArguments(args);
-
-		String message = "Edit the below address' label. ";
-		dialog.setupDialog("ziftrWALLET", message, "Done", null, "Cancel");
-
-		dialog.show(this.getSupportFragmentManager(), tag);
-
-	}
-
-	
-	///////////// Handler methods /////////////
-
-	@Override
-	public void handleNegative(int requestCode) {
-		switch(requestCode) {
-		case ZWRequestCodes.ALERT_USER_DIALOG:
-			// Nothing to do
-			break;
-		}
-	}
-	
-
-	
-	public void handleConfirmationPositive(int requestCode, Bundle info) {
-		switch (requestCode) {
-			case ZWRequestCodes.CONFIRM_SEND_COINS:
-				ZWSendCoinsFragment sendFrag = (ZWSendCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_FRAGMENT);
-				if (ZWPreferences.userHasPassword()){
-					sendFrag.onClickSendCoins(ZWPreferences.getCachedPassword());
-				} else {
-					sendFrag.onClickSendCoins(null);
-				}
-				break;
-			}
-	}
-
-	@Override
-	public void handleAddressLabelChange(int requestCode, final String address, 
-			final String label, final boolean isReceiving) {
-		ZLog.log("update address: ", address);
-		ZLog.log("update label: ", label);
-		ZLog.log("update isReceive: " + isReceiving);
-
-		switch (requestCode) {
-		case ZWRequestCodes.EDIT_ADDRESS_LABEL_FROM_ADDRESS_BOOK:
-			ZiftrUtils.runOnNewThread(new Runnable() {
-				@Override
-				public void run() {
-					getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, isReceiving);
-					updateTopFragmentView();
-				}
-			});
-			break;
-		}
 	}
 
 

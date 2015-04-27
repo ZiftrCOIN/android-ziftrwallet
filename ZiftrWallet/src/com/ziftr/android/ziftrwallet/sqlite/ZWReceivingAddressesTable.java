@@ -111,7 +111,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		
 		values.put(COLUMN_PRIV_KEY, getPrivDataForInsert(address.getKey()));
 		values.put(COLUMN_PUB_KEY, ZiftrUtils.bytesToHexString(address.getKey().getPubKey()));
-		values.put(COLUMN_ADDRESS, Base58.encode(address.getCoinId().getPubKeyHashPrefix(), address.getHash160()));
+		values.put(COLUMN_ADDRESS, Base58.encode(address.getCoin().getPubKeyHashPrefix(), address.getHash160()));
 		values.put(COLUMN_LABEL, address.getLabel());
 		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getKey().getCreationTimeSeconds());
