@@ -11,8 +11,8 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -26,6 +26,8 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.setContentView(R.layout.manage_space);
+		
+		ZiftrDialogManager.registerHandler(this);
 		
 		this.continueButton = (Button) this.findViewById(R.id.continue_button);
 		this.cancelButton = (Button) this.findViewById(R.id.cancel_button);
@@ -85,8 +87,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 			}
 			else {
 				//incorrect password
-				ZiftrDialogFragment wrongPassword = ZiftrDialogFragment.buildContinueDialog(R.string.zw_incorrect_password);
-				wrongPassword.show(getSupportFragmentManager(), "wrong_password");
+				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_incorrect_password);
 			}
 		}
 	}

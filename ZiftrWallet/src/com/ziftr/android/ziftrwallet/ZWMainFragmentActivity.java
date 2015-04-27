@@ -40,15 +40,12 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
-import com.ziftr.android.ziftrwallet.dialog.ZWDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZWSimpleAlertDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
-import com.ziftr.android.ziftrwallet.fragment.ZWRequestCodes;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListAdapter;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListItem;
 import com.ziftr.android.ziftrwallet.fragment.ZWSecurityFragment;
@@ -313,10 +310,13 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 			
 			ZWCoin coin = ZWCoin.getCoin(scheme, address);
 			if(coin == null) {
-					this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
+				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_invalid_address_uri);
 			}
 			else if(!getWalletManager().isCoinActivated(coin)) {
-					this.alertUser("You must activate " + coin.getName() + " and add coins to your wallet before you can send to an address.", ZWTags.URI_INVALID_ADDRESS);
+				String notActiveError = getString(R.string.zw_dialog_error_activate_coin);
+				notActiveError = String.format(notActiveError, coin.getName());
+				
+				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), notActiveError);
 			}
 			else {
 				
@@ -327,8 +327,8 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 					openSendCoinsView(uri);
 				} 
 				catch (Exception e) {
-					ZLog.log("Exception open send coins view: ", e);
-						this.alertUser(getResources().getString(R.string.zw_invalid_address_uri), ZWTags.URI_INVALID_ADDRESS);
+					ZLog.log("Exception opening send coins view: ", e);
+					ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_invalid_address_uri);
 				}
 			}
 			
@@ -1029,29 +1029,6 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	public void onDrawerStateChanged(int newState) {
 		// Nothing to do
 	}
-
-	/**
-	 * Pops up a dialog to give the user some information. 
-	 * 
-	 * @param message
-	 * @param tag
-	 */
-	public void alertUser(String message, String tag) {
-		ZWSimpleAlertDialog alertUserDialog = new ZWSimpleAlertDialog();
-
-		Bundle args = new Bundle();
-		args.putInt(ZWDialogFragment.REQUEST_CODE_KEY, ZWRequestCodes.ALERT_USER_DIALOG);
-		alertUserDialog.setArguments(args);
-
-		// Set negative text to null to not have negative button
-		alertUserDialog.setupDialog("ziftrWALLET", message, null, "OK", null);
-		/**
-		if (!isShowingDialog()){
-			alertUserDialog.show(this.getSupportFragmentManager(), tag);
-		}
-		**/
-	}
-
 
 	public void updateTopFragmentView() {
 		// If already on the UI thread, then it just does this right now

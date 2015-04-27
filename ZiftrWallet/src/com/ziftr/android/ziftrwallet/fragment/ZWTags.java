@@ -25,8 +25,6 @@ public class ZWTags {
 	public static final String VALIDATE_PASS_SEND = "validate_passphrase_dialog_send";
 	
 	public static final String CONFIRM_SEND = "confirm_send_dialog";
-
-	public static final String URI_INVALID_ADDRESS = "invalid_uri_address_dialog";
 	
 	public static final String ERROR_MSG = "error_alert";
 

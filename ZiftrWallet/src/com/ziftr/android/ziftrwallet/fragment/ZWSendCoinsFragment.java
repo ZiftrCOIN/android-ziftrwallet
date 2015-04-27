@@ -33,6 +33,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURIParseException;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWInsufficientMoneyException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWSendAmountException;
@@ -146,11 +147,13 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 				if (this.getSelectedCoin().addressIsValid(dataFromQRScan)) {
 					String address = dataFromQRScan;
 					this.updateAddress(address, null);
-				} else {
-					this.getZWMainActivity().alertUser("There was an error in the scanned data.", "error_in_request");
 				}
-			} catch (ZWAddressFormatException e) {
-				this.getZWMainActivity().alertUser("The scanned address is not valid.", "invalid_scanned_address_dialog");
+				else {
+					ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_qrcode_data);
+				}
+			} 
+			catch (ZWAddressFormatException e) {
+				ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_qrcode_address);
 			}
 
 			if(coinUri != null) {
@@ -238,11 +241,12 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			, ZWTags.CONFIRM_SEND, new Bundle());
 			}
 			****/
-		} else if (v == this.getAddressBookImageView()) {
+		} 
+		else if (v == this.getAddressBookImageView()) {
 			this.openAddressBook(new ZWSendAddressBookFragment(), R.id.sendCoinBaseFrameLayout);
-		} else if (v == this.helpFeeButton) {
-			String fee_info = getActivity().getResources().getString(R.string.send_fee_info);
-			getZWMainActivity().alertUser(fee_info,	"fee_help_dialog");
+		} 
+		else if (v == this.helpFeeButton) {
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.send_fee_info);
 		}
 	}
 
@@ -260,33 +264,27 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			sendCoins(addressToSendTo, amountSending, feeSending, passphrase);
 			if (manager.getAddress(getSelectedCoin(), addressToSendTo, false) != null){
 				manager.updateAddressLabel(getSelectedCoin(), addressToSendTo, addressName, false);
-			} else {
+			}
+			else {
 				manager.createSendingAddress(getSelectedCoin(), addressToSendTo, addressName);
 			}
-		} catch(ZWAddressFormatException afe) {
-			this.getZWMainActivity().alertUser(
-					"The address is not formatted correctly. Please try again. ", 
-					"address_format_error_dialog");
-			return;
-		} catch(ZWInsufficientMoneyException ime) {
-			this.getZWMainActivity().alertUser(
-					"The current wallet does not have enough coins to send the amount requested. ", 
-					"insufficient_funds_dialog");
-			return;
-		} catch(ZWSendAmountException e){
-			this.getZWMainActivity().alertUser(
-					e.getMessage(), 
-					"error_sending_amount_dialog");
-		} catch(Exception e) {
+		} 
+		catch(ZWAddressFormatException afe) {
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_address_format);
+		}
+		catch(ZWInsufficientMoneyException ime) {
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_no_coins);
+		}
+		catch(ZWSendAmountException e){
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), e.getMessage());
+		}
+		catch(Exception e) {
 			// Shouldn't really happen, just helpful for debugging
-			ZLog.log("Exception trying to send coin: ", e);
-			this.getZWMainActivity().alertUser(
-					"There was an error with your request. \n" + (e.getMessage() == null ? "" : e.getMessage()) + 
-					"\nAmount: " + amountSending + 
-					". \nFee: " + feeSending + 
-					". \nAddress: " + addressToSendTo + ".",
-					"error_in_send_dialog");
-			return;
+			
+			String errorTemplate = getActivity().getString(R.string.zw_dialog_error_request_template);
+			String error = String.format(errorTemplate, e.getMessage(), amountSending, feeSending, addressToSendTo);
+			
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), error);
 		}
 
 	}

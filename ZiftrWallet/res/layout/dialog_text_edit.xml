@@ -29,7 +29,7 @@
         android:layout_marginTop="4dp"
         android:fontFamily="sans-serif"
         android:hint="@string/zw_empty_string"
-        android:inputType="textPassword" />
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/dialog_textbox_bottom"
@@ -41,7 +41,7 @@
         android:layout_marginTop="4dp"
         android:fontFamily="sans-serif"
         android:hint="@string/zw_empty_string"
-        android:inputType="textPassword" />
+        android:inputType="text" />
 
         <include layout="@layout/dialog_include_2buttons" />
 

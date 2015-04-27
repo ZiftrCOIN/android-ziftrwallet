@@ -19,83 +19,44 @@
     <string name="zw_cancel_button_text">CANCEL</string>
     <string name="zw_send_button_text">SEND</string>
     <string name="zw_send_to_address">SEND TO: </string>
-    <!-- Description here -->
     <string name="zw_send_to_address_name">NAME: </string>
-    <!-- Description here -->
     <string name="zw_receive_message_title">MESSAGE: </string>
-    <!-- Description here -->
     <string name="zw_send_amount">AMOUNT: </string>
-    <!-- Description here -->
     <string name="zw_send_amount_equivalent">USD</string>
-    <!-- Description here -->
     <string name="zw_send_transaction_fee">FEE/KB: </string>
-    <!-- Description here -->
     <string name="zw_send_total">TOTAL: </string>
-    <!-- Description here -->
     <string name="zw_send_default_total">0.00</string>
-    <!-- Description here -->
     <string name="zw_send_default_total_fiat_equiv">($0.00)</string>
-    <!-- Description here -->
     <string name="zw_splash_screen_description">Splash Screen</string>
-    <!-- Description here -->
     <string name="zw_splash_screen_activity_title">Splash</string>
-    <!-- Description here -->
     <string name="zw_add_new_wallet_content_description">Add New Wallet</string>
-    <!-- Description here -->
     <string name="zw_add_currency">ADD CURRENCY</string>
-    <!-- Description here -->
     <string name="zw_bitcoin">Bitcoin</string>
-    <!-- Description here -->
     <string name="zw_bitcoin_caps">BITCOIN</string>
-    <!-- Description here -->
     <string name="zw_right_caret_content_description"></string>
-    <!-- Description here -->
     <string name="zw_tx_list_divider_default">PENDING</string>
-    <!-- Description here -->
     <string name="zw_tx_list_title_default">REI</string>
-    <!-- Description here -->
     <string name="zw_tx_list_time_default">June 30, 2014  5:03 pm</string>
-    <!-- Description here -->
     <string name="zw_receive_coins_address_label_box_title">ADDRESS LABEL</string>
-    <!-- Description here -->
     <string name="zw_receive_coins_address_value_box_title">ADDRESS</string>
-    <!-- Description here -->
     <string name="zw_receive_coins_address_value_default">1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU1morseGzJtU3XUDQFpZqKCx7GLnhvYqbU</string>
-    <!-- Description here -->
     <string name="zw_tx_details_pending_label">(Pending)</string>
-    <!-- Description here -->
     <string name="zw_tx_details_amount_sent_label">Amount Sent</string>
-    <!-- Description here -->
     <string name="Placeholder">Placeholder</string>
-    <!-- Description here -->
     <string name="zw_tx_details_confirmation_fee_label">Confirmation Fee</string>
-    <!-- Description here -->
     <string name="zw_tx_label">Transaction Note</string>
-    <!-- Description here -->
     <string name="zw_tx_details_sent">Sent</string>
-    <!-- welcome label -->
     <string name="zw_tx_routing_address">Address</string>
-    <!-- Description here -->
-    <string name="ok">OK</string>
-    <!-- Description here -->
+    <string name="zw_dialog_ok">OK</string>
     <string name="zw_dialog_cancel">Cancel</string>
-    <!-- Description here -->
     <string name="zw_dialog_select">Select</string>
-    <!-- Description here -->
     <string name="zw_dialog_continue">Continue</string>
-    <!-- Description here -->
     <string name="zw_ab_menu_description">Menu</string>
-    <!-- Description here -->
     <string name="zw_ab_home_description">Home</string>
-    <!-- Description here -->
     <string name="zw_ab_back_description">Back</string>
-    <!-- Description here -->
     <string name="zw_ab_search_description">Search</string>
-    <!-- Description here -->
     <string name="zw_add_a_currency">Add a Currency</string>
-    <!-- string with link for website -->
     <string name="zw_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
-    <!-- label for reset password -->
     <string name="zw_reset_password">Reset Password</string>
     <string name="zw_about">About</string>
     <string name="zw_disable_password">Disable Password</string>
@@ -147,7 +108,6 @@
     <string name="zw_incorrect_password">Error: Incorrect password.</string>
     <string name="zw_incorrect_reset_password_match">The passwords you entered don\'t match. Your previous password is still in place.</string>
     <string name="zw_incorrect_reset_password">The password you entered doesn\'t match your previous password. Your previous password is still in place.</string>
-    <string name="zw_set_empty_name">Looks like you wanted to disable your name instead!</string>
     <string name="zw_invalid_address_uri">The address is not valid.</string>
     <string name="zw_searchbar_hint">search</string>
     <string name="zw_dialog_set_name_complete">"Your name is set to:\u0020"</string>
@@ -172,6 +132,13 @@
     <string name="zw_dialog_blank_name">You cannot enter a blank name. Name can be disabled from the settings menu.</string>
     <string name="zw_dialog_enter_name">Please enter your name.</string>
     <string name="zw_dialog_edit_address">Edit address label.</string>
+    <string name="zw_dialog_error_qrcode_data">There was an error in the scanned data.</string>
+    <string name="zw_dialog_error_qrcode_address">The scanned address is not valid.</string>
+    <string name="zw_dialog_error_address_format">The address is not formatted correctly. Please try again.</string>
+    <string name="zw_dialog_error_no_coins">The current wallet does not have enough coins to send the amount requested.</string>
+    <string name="zw_dialog_error_request_template">There was an error with your request. \n%1$s \nAmount: %2$s \nFee %3$s \nAddress %4$s.</string>
+    <string name="zw_dialog_receive_help">The message and amount fields are encoded into the QRcode and should be used if you wish to pre-fill a message and amount for the scanning user\'s wallet. These are optional and are not saved when loading an address from the address book.</string>
+    <string name="zw_dialog_error_activate_coin">You must activate %1$s and add coins to your wallet before you can send to an address.</string>
     
 </resources>
 

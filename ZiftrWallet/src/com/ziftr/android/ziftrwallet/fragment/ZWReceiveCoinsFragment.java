@@ -32,6 +32,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
@@ -117,11 +118,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			this.generateNewAddress();
 		} 
 		else if (v == this.helpButton){
-			getZWMainActivity().alertUser(
-					"The message and amount fields are encoded into the QRcode and should be used if you wish to pre-fill a message" +
-					" and/or amount label in the scanning user's application. These are optional and are not saved" +
-					" when loading an address from the address book.", 
-					"msg_help_dialog");
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_receive_help);
 		}
 
 	}

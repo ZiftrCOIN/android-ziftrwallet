@@ -57,22 +57,6 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 	}
 	
 	
-	/**
-	 * a quick factory method to create a dialog that uses the app title as the title,
-	 * and has a "Continue" button
-	 * @param messageResId the resource id of the string to be displayed as this dialogs message
-	 * @param listener the on click listener that will handle the user pressing this dialog's buttons
-	 * @return a new instance of a ZiftrDialogFragment ready to be shown
-	 */
-	public static ZiftrDialogFragment buildContinueDialog(int messageResId) {
-		
-		ZiftrDialogFragment dialog = new ZiftrDialogFragment();
-		dialog.setupDialog(0, messageResId, R.string.zw_dialog_continue, 0);
-		
-		return dialog;
-	}
-	
-	
 	public void setupDialog(int titleResId, int messageResId, int yesResId, int noResId) {
 		
 		//note if we wanted to make this class truly portable we'd just load these up in oncreate when getActivity() works
@@ -120,7 +104,7 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		
 		restoreInstanceState(savedInstanceState);
 		
-		View customDialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_generic, null);
+		View customDialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_message, null);
 		return buildCustomDialog(customDialogView);
 	}
 	
