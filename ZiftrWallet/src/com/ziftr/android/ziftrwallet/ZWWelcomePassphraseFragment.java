@@ -13,7 +13,6 @@ import android.widget.EditText;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
-import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -49,12 +48,12 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 		setPassphraseButton = (Button) rootView.findViewById(R.id.set_password);
 		skipPassphraseButton = (Button) rootView.findViewById(R.id.skip_password);
 
-		passwordEditText = (EditText) rootView.findViewById(R.id.new_password).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		passwordEditText.setId(R.id.zw_welcome_passphrase_1);
+		passwordEditText = (EditText) rootView.findViewById(R.id.new_password).findViewById(R.id.customEditText);
 		passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
-		confirmPassphraseEditText = (EditText) rootView.findViewById(R.id.new_confirm_password).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
-		confirmPassphraseEditText.setId(R.id.zw_welcome_passphrase_2);
+		confirmPassphraseEditText = 
+				(EditText) rootView.findViewById(R.id.new_confirm_password).findViewById(R.id.customEditText);
+		
 		confirmPassphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		confirmPassphraseEditText.clearFocus();
 

@@ -50,6 +50,8 @@ import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
  */
 public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 
+	public static final String FRAGMENT_TAG = "send_coins";
+	
 	/** The view container for this fragment. */
 	private View rootView;
 
@@ -133,7 +135,7 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 	 */
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (data != null && data.hasExtra("SCAN_RESULT") && requestCode == ZWRequestCodes.SCAN_QR_CODE) {
+		if (data != null && data.hasExtra("SCAN_RESULT")) {
 			// If we have scanned this address before then we get the label for it here
 			String dataFromQRScan = data.getExtras().getCharSequence("SCAN_RESULT").toString();
 			
@@ -200,8 +202,9 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			// for Regular bar code, its ÒPRODUCT_MODEÓ instead of ÒQR_CODE_MODEÓ
 			intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
 			intent.putExtra("SAVE_HISTORY", false);
-			startActivityForResult(intent, ZWRequestCodes.SCAN_QR_CODE);
-		} else if (v == pasteButton) {
+			startActivityForResult(intent, 0);
+		} 
+		else if (v == pasteButton) {
 			// Gets a handle to the clipboard service.
 			ClipboardManager clipboard = (ClipboardManager)
 					getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
@@ -222,12 +225,14 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 			if (textToPaste != null && !textToPaste.isEmpty()) {
 				addressEditText.setText(textToPaste);
 			}
-		} else if (v == cancelButton) {
+		} 
+		else if (v == cancelButton) {
 			Activity a = getActivity();
 			if (a != null) {
 				a.onBackPressed();
 			}
-		} else if (v == sendButton) {
+		}
+		else if (v == sendButton) {
 			//TODO -temporaily disabling sending until we fix this dialogs mess
 			/***
 			if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
@@ -301,24 +306,24 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 		//this is because due to xml reuse in the layout files all the edit texts have the same id
 		//so they need to be dug out and explicitly have a unique id set
 		//otherwise their contents will not be stored automatically during a suspend/resume cycle
-		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+		this.coinAmountEditText = (EditText) 
+				this.rootView.findViewById(R.id.sendAmountCoinFiatDualView).findViewById(R.id.dualTextBoxLinLayout1).findViewById(R.id.customEditText);
 		coinAmountEditText.setId(R.id.zw_send_coin_amount);
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.sendAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+				).findViewById(R.id.dualTextBoxLinLayout2).findViewById(R.id.customEditText);
 		fiatAmountEditText.setId(R.id.zw_send_fiat_amount);
 
-		this.fiatFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFeeFiatEquiv).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+		this.fiatFeeEditText = 
+				(EditText) this.rootView.findViewById(R.id.sendEditTextTransactionFeeFiatEquiv).findViewById(R.id.customEditText);
 		fiatFeeEditText.setId(R.id.zw_send_fiat_fee);
 
-		this.coinFeeEditText = (EditText) this.rootView.findViewById(
-				R.id.sendEditTextTransactionFee).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+		this.coinFeeEditText = 
+				(EditText) this.rootView.findViewById(R.id.sendEditTextTransactionFee).findViewById(R.id.customEditText);
 		coinFeeEditText.setId(R.id.zw_send_coin_fee);
 
 		this.labelEditText = (EditText) this.rootView.findViewById(
-				R.id.send_edit_text_reciever_name).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+				R.id.send_edit_text_reciever_name).findViewById(R.id.customEditText);
 		labelEditText.setId(R.id.zw_send_name);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(

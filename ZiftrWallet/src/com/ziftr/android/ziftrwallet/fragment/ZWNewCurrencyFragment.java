@@ -16,6 +16,8 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 
 public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickListener{
 
+	public static final String FRAGMENT_TAG = "new_currency";
+	
 	private ZWNewCurrencyListAdapter currencyAdapter;
 
 	/** The root view for this application. */

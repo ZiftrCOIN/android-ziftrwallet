@@ -14,6 +14,8 @@ import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 
 public class ZWSetFiatFragment extends ZWFragment implements OnItemClickListener{
 	
+	public static final String FRAGMENT_TAG = "set_fiat";
+	
 	private ZWFiatListAdapter fiatAdapter;
 
 	private View rootView;

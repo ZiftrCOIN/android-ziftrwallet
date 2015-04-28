@@ -12,7 +12,6 @@ import android.widget.EditText;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
-import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 
 public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 
@@ -43,7 +42,7 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 		saveNameButton = (Button) rootView.findViewById(R.id.set_name);
 		askMeLaterButton = (Button) rootView.findViewById(R.id.skip_name);
 
-		nameEditText = (EditText) rootView.findViewById(R.id.usersName).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+		nameEditText = (EditText) rootView.findViewById(R.id.usersName).findViewById(R.id.customEditText);
 		nameEditText.setId(R.id.zw_save_user_name_edit_text);
 		
 		saveNameButton.setOnClickListener(this);

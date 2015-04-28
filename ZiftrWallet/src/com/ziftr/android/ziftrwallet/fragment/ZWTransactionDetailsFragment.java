@@ -32,6 +32,8 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWTransactionDetailsFragment extends ZWWalletUserFragment 
 implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListener {
+	
+	public static String FRAGMENT_TAG = "transaction_details_fragment";
 
 	public static final String TX_ITEM_HASH_KEY = "txItemHash";
 

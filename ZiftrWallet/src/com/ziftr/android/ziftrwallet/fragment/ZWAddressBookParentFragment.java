@@ -46,9 +46,8 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		FragmentTransaction transaction = this.getChildFragmentManager().beginTransaction();
 
 		// TODO maybe add animation to transaciton here?
-		// TODO add or replace?
-		transaction.add(baseLayout, addressBookFragment, ZWTags.ADDRESS_BOOK);
-		//transaction.replace(baseLayout, childFragment, ZWTags.ADDRESS_BOOK);
+		transaction.add(baseLayout, addressBookFragment, ZWAddressBookFragment.FRAGMENT_TAG);
+
 		transaction.addToBackStack(null);
 		transaction.commit();
 	}
@@ -95,7 +94,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 	 * @return
 	 */
 	private ZWFragment getChildFragment() {
-		return (ZWFragment) this.getChildFragmentManager().findFragmentByTag(ZWTags.ADDRESS_BOOK);
+		return (ZWFragment) this.getChildFragmentManager().findFragmentByTag(ZWAddressBookFragment.FRAGMENT_TAG);
 	}
 
 	public boolean showingChildFragment() {

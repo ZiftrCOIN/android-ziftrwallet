@@ -163,12 +163,12 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		
 		// For the amounts and the binding
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout1).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+				).findViewById(R.id.dualTextBoxLinLayout1).findViewById(R.id.customEditText);
 		this.coinAmountEditText.setId(R.id.zw_receive_coin_amount);
 		this.coinAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
 		this.fiatAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
-				).findViewById(R.id.dualTextBoxLinLayout2).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+				).findViewById(R.id.dualTextBoxLinLayout2).findViewById(R.id.customEditText);
 		this.fiatAmountEditText.setId(R.id.zw_receive_fiat_amount);
 		this.fiatAmountEditText.setRawInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
 
@@ -179,8 +179,8 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.helpButton = (ImageView) this.rootView.findViewById(R.id.help_msg_button);
 		this.helpButton.setOnClickListener(this);
 		// For the message edit text
-		this.messageEditText = (EditText) this.rootView.findViewById(
-				R.id.receiveMessageContainer).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+		this.messageEditText = 
+				(EditText) this.rootView.findViewById(R.id.receiveMessageContainer).findViewById(R.id.customEditText);
 		this.messageEditText.setId(R.id.zw_receive_message);
 
 		this.addressEditText = (EditText) this.rootView.findViewById(R.id.addressValueTextView);
@@ -198,7 +198,8 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.generateAddressForLabel = (ImageView) this.rootView.findViewById(R.id.generateNewAddressForLabel);
 		this.generateAddressForLabel.setOnClickListener(this);
 
-		this.labelEditText = (EditText) this.rootView.findViewById(R.id.addressName).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+		this.labelEditText = 
+				(EditText) this.rootView.findViewById(R.id.addressName).findViewById(R.id.customEditText);
 		this.labelEditText.setId(R.id.zw_receive_address_label);
 		this.labelEditText.requestFocus();
 		this.labelEditText.addTextChangedListener(new ZiftrTextWatcher() {

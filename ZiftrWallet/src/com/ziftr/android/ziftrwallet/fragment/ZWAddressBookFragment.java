@@ -23,6 +23,8 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 public abstract class ZWAddressBookFragment extends ZWWalletUserFragment 
 implements TextWatcher, OnClickListener {
 
+	public static final String FRAGMENT_TAG = "address_book";
+	
 	/** The root view for this application. */
 	private View rootView; 
 

@@ -52,7 +52,6 @@ import com.ziftr.android.ziftrwallet.fragment.ZWSecurityFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSendCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSetFiatFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSettingsFragment;
-import com.ziftr.android.ziftrwallet.fragment.ZWTags;
 import com.ziftr.android.ziftrwallet.fragment.ZWTermsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWTransactionDetailsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
@@ -69,6 +68,8 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class ZWMainFragmentActivity extends ActionBarActivity 
 implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
+	
+	private static final String TAG_BACKSTACK =  "accounts_inner";
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
@@ -401,17 +402,21 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		String curSelected = getCurrentlySelectedDrawerMenuOption();
 		if (curSelected == null) {
 			super.onBackPressed();
-		} else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
+		} 
+		else if (FragmentType.ACCOUNT_FRAGMENT_TYPE.toString().equals(curSelected)) {
 			super.onBackPressed();
 			//if we are in set fiat screen, back should go back to settings
-		} else if (topFragment.getTag().equals(ZWTags.SET_FIAT)) {
+		} 
+		else if (topFragment.getTag().equals(ZWSetFiatFragment.FRAGMENT_TAG)) {
 			super.onBackPressed();
-		} else {
+		} 
+		else {
 			//Select accounts in drawer since anywhere you hit back, you will end up in accounts
 			selectSingleDrawerMenuOption(findViewById(R.id.menuDrawerAccountsLayout));
-			if (!getSupportFragmentManager().popBackStackImmediate(ZWTags.ACCOUNTS_INNER, 0)) {
-				ZWMainFragmentActivity.this.showFragmentFromType(
-						FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
+			
+			if (!getSupportFragmentManager().popBackStackImmediate(TAG_BACKSTACK, 0)) {
+				ZWMainFragmentActivity.this.showFragmentFromType(FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
+				
 				//clear back stack
 				this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 			}
@@ -583,13 +588,12 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 								FragmentType.ACCOUNT_FRAGMENT_TYPE, false);
 
 						//Else accounts is not selected so resume previous accounts activity
-					} else if (!getSupportFragmentManager().popBackStackImmediate(
-							ZWTags.ACCOUNTS_INNER, 0)) {
-						ZWMainFragmentActivity.this.showFragmentFromType(
-								FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
+					} 
+					else if (!getSupportFragmentManager().popBackStackImmediate(TAG_BACKSTACK, 0)) {
+						ZWMainFragmentActivity.this.showFragmentFromType(FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
 						ZWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-
 					}
+					
 					ZWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 				}
 			});
@@ -728,7 +732,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 	private void initializeSearchBarText() {
 		//listener for when searchBar text has focus, shows keyboard if focused and removes keyboard if not
-		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewWithTag(ZWTags.ZW_EDIT_TEXT);
+		this.searchEditText = (EditText) findViewById(R.id.searchBarContainer).findViewById(R.id.customEditText);
 		this.searchEditText.clearFocus();
 		this.searchEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
 		this.searchEditText.setHint(getResources().getString(R.string.zw_searchbar_hint));
@@ -875,14 +879,13 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	public void openWalletView(ZWCoin typeOfWalletToStart) {
 		
 		this.setSelectedCoin(typeOfWalletToStart);
-		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWTags.WALLET_FRAGMENT);
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWWalletFragment.FRAGMENT_TAG);
 		if (fragToShow == null) {
 			fragToShow = new ZWWalletFragment();
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, ZWTags.WALLET_FRAGMENT, 
-				R.id.oneWalletBaseFragmentHolder, true, ZWTags.ACCOUNTS_INNER);
+		this.showFragment(fragToShow, ZWWalletFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
 	}
 
 	
@@ -899,8 +902,8 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		}
 
 		// If we did a tablet view this might be different. 
-		this.showFragment(fragToShow, ZWReceiveCoinsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, 
-				true, ZWTags.ACCOUNTS_INNER);
+		this.showFragment(fragToShow, ZWReceiveCoinsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
+		
 		if (address != null){
 			((ZWReceiveCoinsFragment) fragToShow).setReceiveAddress(address);		
 		}
@@ -912,23 +915,25 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	 * @param typeOfWalletToStart
 	 */
 	public void openSendCoinsView(Object preloadData) {
-		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWTags.SEND_FRAGMENT);
+		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWSendCoinsFragment.FRAGMENT_TAG);
 
 		if (fragToShow == null) {
 			fragToShow = new ZWSendCoinsFragment();
+			
 			if(preloadData != null) {
 				//note, instanceof is a bit hacky, but best to keep all this fragment loading code in one method
 				if(preloadData instanceof ZWCoinURI) {
 					((ZWSendCoinsFragment) fragToShow).preloadSendData((ZWCoinURI) preloadData);
-				} else {
+				} 
+				else {
 					((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
 				}
-		}
+			}
 		
 			// If we did a tablet view this might be different. 
-			this.showFragment(fragToShow, ZWTags.SEND_FRAGMENT, R.id.oneWalletBaseFragmentHolder, 
-				true, ZWTags.ACCOUNTS_INNER);
-		} else {
+			this.showFragment(fragToShow, ZWSendCoinsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
+		} 
+		else {
 			//we are already showing sendcoins fragment
 			if(preloadData instanceof ZWCoinURI) {
 				((ZWSendCoinsFragment) fragToShow).loadSendData((ZWCoinURI) preloadData);
@@ -944,15 +949,15 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	 */
 	public void openTxnDetails(ZWTransaction txItem) {
 		ZWTransactionDetailsFragment fragToShow = (ZWTransactionDetailsFragment) 
-				this.getSupportFragmentManager().findFragmentByTag(ZWTags.TXN_DETAILS);
+				this.getSupportFragmentManager().findFragmentByTag(ZWTransactionDetailsFragment.FRAGMENT_TAG);
 		if (fragToShow == null) {
 			fragToShow = new ZWTransactionDetailsFragment();
 		}
 		Bundle b= new Bundle();
 		b.putString(ZWTransactionDetailsFragment.TX_ITEM_HASH_KEY, txItem.getSha256Hash());
 		fragToShow.setArguments(b);
-		this.showFragment(fragToShow, ZWTags.TXN_DETAILS, R.id.oneWalletBaseFragmentHolder, true, 
-				ZWTags.ACCOUNTS_INNER);
+		this.showFragment(fragToShow, ZWTransactionDetailsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
+		
 	}
 
 	/**
@@ -963,13 +968,12 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 			this.menuDrawer.closeDrawer(Gravity.LEFT);
 		}
 		ZWNewCurrencyFragment fragToShow = (ZWNewCurrencyFragment) 
-				this.getSupportFragmentManager().findFragmentByTag(ZWTags.ADD_CURRENCY);
+				this.getSupportFragmentManager().findFragmentByTag(ZWNewCurrencyFragment.FRAGMENT_TAG);
 		if (fragToShow == null) {
 			fragToShow = new ZWNewCurrencyFragment();
 		}
 
-		this.showFragment(fragToShow, ZWTags.ADD_CURRENCY, R.id.oneWalletBaseFragmentHolder, true, 
-				ZWTags.ACCOUNTS_INNER);
+		this.showFragment(fragToShow, ZWNewCurrencyFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
 
 	}
 
@@ -978,12 +982,12 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	 * Open View for selecting fiat currency in settings
 	 */
 	public void openSetFiatCurrency(){
-		ZWSetFiatFragment fragToShow = (ZWSetFiatFragment) this.getSupportFragmentManager().findFragmentByTag(ZWTags.SET_FIAT);
+		ZWSetFiatFragment fragToShow = (ZWSetFiatFragment) this.getSupportFragmentManager().findFragmentByTag(ZWSetFiatFragment.FRAGMENT_TAG);
 		if (fragToShow == null){
 			fragToShow = new ZWSetFiatFragment();
 		}
-		this.showFragment(fragToShow, ZWTags.SET_FIAT, R.id.oneWalletBaseFragmentHolder, true, ZWTags.SET_FIAT);
-
+		
+		this.showFragment(fragToShow, ZWSetFiatFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, ZWSetFiatFragment.FRAGMENT_TAG);
 	}
 
 	/**

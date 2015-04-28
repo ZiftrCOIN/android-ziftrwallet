@@ -18,15 +18,12 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 
 /**
- * This is the abstract superclass for all of the individual Wallet type
- * Fragments. It provides some generic methods that will be useful
- * to all Fragments of the OneWallet. 
- * 
- * TODO in the evenListener for the search bar, make a call to notifyDatasetChanged
- * so that all the transactions that don't match are filtered out. 
+ * This is the main "account" fragment for each coin.
  */
 public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatcher, OnItemClickListener {
 
+	public static final String FRAGMENT_TAG = "wallet_fragment";
+	
 	/** The root view for this application. */
 	private View rootView;
 
