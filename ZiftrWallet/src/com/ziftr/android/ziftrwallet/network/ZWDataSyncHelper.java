@@ -528,8 +528,11 @@ public class ZWDataSyncHelper {
 				transaction.setFee(BigInteger.ZERO);
 			}
 			
+			//we can't just use spent coins, because we also "spent" a fee
+			BigInteger totalSpent = inputCoins.subtract(receivedCoins); 
+			
 			//spending is stored in the database as negative number, so subtract from zero
-			transaction.setAmount(BigInteger.ZERO.subtract(spentCoins)); 
+			transaction.setAmount(BigInteger.ZERO.subtract(totalSpent)); 
 		}
 		else {
 			//we're receiving coins
