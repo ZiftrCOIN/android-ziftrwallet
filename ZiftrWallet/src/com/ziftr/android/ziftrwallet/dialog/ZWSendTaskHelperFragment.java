@@ -288,7 +288,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 		
 		ZWSendCoinsFragment sendFragment = (ZWSendCoinsFragment) getFragmentManager().findFragmentByTag(ZWSendCoinsFragment.FRAGMENT_TAG);
 		if(sendFragment != null) {
-			sendFragment.updateSendStatus(rawTransaction.getCoin());
+			sendFragment.finishedSending(rawTransaction.getCoin());
 		}
 	}
 }
