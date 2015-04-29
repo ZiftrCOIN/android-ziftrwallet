@@ -139,6 +139,17 @@
     <string name="zw_dialog_error_request_template">There was an error with your request. \n%1$s \nAmount: %2$s \nFee %3$s \nAddress %4$s.</string>
     <string name="zw_dialog_receive_help">The message and amount fields are encoded into the QRcode and should be used if you wish to pre-fill a message and amount for the scanning user\'s wallet. These are optional and are not saved when loading an address from the address book.</string>
     <string name="zw_dialog_error_activate_coin">You must activate %1$s and add coins to your wallet before you can send to an address.</string>
+    <string name="zw_dialog_sending">Sending&#8230;</string>
+    <string name="zw_dialog_error_send_badtransaction">There was an error with the data received from the server. Unable to send coins. Please try again later.</string>
+    <string name="zw_dialog_error_send_noconnection">Unable to connect to the server. Please check your internet connection and try again.</string>
+    <string name="zw_dialog_error_send_returnederror">An error was received from the server. \n%1$s \n%2$s</string>
+    <string name="zw_dialog_error_send_nocoins">You do not have enough %1$s to complete this transaction.</string>
+    <string name="zw_dialog_warning_unconfirmed">Warning! To complete this transaction you must spend coins that are not fully confirmed. Are you sure you want to continue?</string>
+    <string name="zw_dialog_send">Send</string>
+    <string name="zw_dialog_send_confirmation">Are you sure you want to send: \n%1$s \nto \n%2$s?</string>
+    <string name="zw_dialog_send_fee">\n(includes %1$s fee)</string>
+    <string name="zw_toast_sent">%1$s sent.</string>
+    <string name="zw_debug_change_server">Enter server Base URL.</string>
     
 </resources>
 

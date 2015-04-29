@@ -74,7 +74,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 		this.rootView = inflater.inflate(R.layout.accounts_transaction_details, container, false);
 
-		this.txItem = getWalletManager().readTransactionByHash(this.getSelectedCoin(), this.getArguments().getString(TX_ITEM_HASH_KEY));
+		this.txItem = getWalletManager().getTransaction(this.getSelectedCoin(), this.getArguments().getString(TX_ITEM_HASH_KEY));
 
 		this.editLabelButton = (ImageView) rootView.findViewById(R.id.edit_txn_note);
 		this.labelEditText = (EditText) rootView.findViewById(R.id.txn_note);

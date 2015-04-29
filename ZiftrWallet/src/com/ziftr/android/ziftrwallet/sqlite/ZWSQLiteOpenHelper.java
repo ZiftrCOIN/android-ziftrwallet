@@ -333,16 +333,16 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 
-	public synchronized ZWTransaction readTransactionByHash(ZWCoin coinId, String hash) {
-		if (hash == null) {
+	public synchronized ZWTransaction getTransaction(ZWCoin coin, String transactionId) {
+		if (transactionId == null) {
 			return null;
 		}
 
 		List<String> hashes = new ArrayList<String>();
-		hashes.add(hash);
+		hashes.add(transactionId);
 
 		List<ZWTransaction> readAddresses = 
-				this.transactionsTable.readTransactionsByHash(coinId, hashes, this.getReadableDatabase());
+				this.transactionsTable.readTransactionsByHash(coin, hashes, this.getReadableDatabase());
 		if (readAddresses.size() == 0) {
 			return null;
 		} else {
@@ -360,8 +360,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param db
 	 * @return
 	 */
-	public synchronized List<ZWTransaction> readTransactionsByAddress(ZWCoin coinId, String address) {
-		return transactionsTable.readTransactionsByAddress(coinId, address, getReadableDatabase());
+	public synchronized List<ZWTransaction> getTransactionsByAddress(ZWCoin coin, String address) {
+		return transactionsTable.readTransactionsByAddress(coin, address, getReadableDatabase());
 	}
 
 	/**
@@ -369,17 +369,17 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * If hashes is null then it gets all addresses from the database.
 	 * Orders them by most recent. 
 	 * 
-	 * @param coinId
+	 * @param coin
 	 * @param addresses
 	 * @param db
 	 * @return
 	 */
-	public synchronized List<ZWTransaction> readTransactionsByHash(ZWCoin coinId, List<String> hashes) {
-		return transactionsTable.readTransactionsByHash(coinId, hashes, getReadableDatabase());
+	public synchronized List<ZWTransaction> getTransactions(ZWCoin coin, List<String> hashes) {
+		return transactionsTable.readTransactionsByHash(coin, hashes, getReadableDatabase());
 	}
 
-	public synchronized List<ZWTransaction> readAllTransactions(ZWCoin coinId) {
-		return this.transactionsTable.readTransactions(coinId, null, getReadableDatabase());
+	public synchronized List<ZWTransaction> getAllTransactions(ZWCoin coin) {
+		return this.transactionsTable.readTransactions(coin, null, getReadableDatabase());
 	}
 
 	
@@ -398,7 +398,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	public synchronized BigInteger getWalletBalance(ZWCoin coinId, BalanceType bType) {
 		BigInteger balance = BigInteger.ZERO;
-		List<ZWTransaction> txs = this.readAllTransactions(coinId);
+		List<ZWTransaction> txs = this.getAllTransactions(coinId);
 
 		for (ZWTransaction tx : txs) {
 			if (bType == BalanceType.AVAILABLE) {
@@ -424,24 +424,28 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.updateTransactionNote(tx, getWritableDatabase());
 	}
 
-	public synchronized List<String> getAddressList(ZWCoin coin, boolean receivingAddresses) {
+	
+	/**
+	 * gets a list of Strings of the public addresses for all of the users addresses
+	 * @param coin which coin to get addresses for
+	 * @param includeEmpty should this list include addresses with no known balance (empty)
+	 * @return a list of strings representing the public addresses
+	 */
+	public synchronized List<String> getAddressList(ZWCoin coin, boolean includeEmpty) {
 		List<String> addresses;
 
-		if(receivingAddresses) {
-			addresses = this.receivingAddressesTable.getAddressesList(coin, getWritableDatabase());
-		}
-		else {
-			addresses = this.sendingAddressesTable.getAddressesList(coin, getWritableDatabase());
-		}
+		addresses = this.receivingAddressesTable.getAddressesList(coin, getWritableDatabase());
+		
 		return addresses;
 	}
 	
+	
 	/**
-	 * As part of the R in CRUD, this method gets an address from the 
+	 * gets an address from the 
 	 * database for the given coin type and table boolean. Returns null if
 	 * no such address is found
 	 * 
-	 * @param coinId - The coin type to determine which table we use. 
+	 * @param coin - The coin type to determine which table we use. 
 	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
@@ -451,10 +455,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	
 	/**
-	 * As part of the R in CRUD, this method gets an address from the 
-	 * database for the given coin type and table boolean.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
+	 * gets a list of {@link ZWAddress} objects from the database based on a list of public address strings
+	 * @param coin - The coin type to determine which table we use. 
 	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
 	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
@@ -473,8 +475,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.receivingAddressesTable.getHiddenAddresses(coin, getReadableDatabase(), true);
 	}
 
+	
 	/**
-	 * As part of the R in CRUD, this method gets all the addresses from the 
+	 * gets all the visible (not hidden) addresses from the 
 	 * database for the given coin type and table boolean.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
@@ -490,21 +493,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.sendingAddressesTable.getAllAddresses(coin, getReadableDatabase());
 	}
 	
-
-	/**
-	 * As part of the R in CRUD, this method gives the number of entries
-	 * in the addresses table for the coin type specified and table boolean. 
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
-	 */
-	public synchronized int getNumAddresses(ZWCoin coinId, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).numEntries(coinId, getReadableDatabase());
-	}
-
-	/////////////////////////////////////////////////////////////
-	//////////  Interface for exchange table  ///////////
-	/////////////////////////////////////////////////////////////
 	
 	public synchronized String getExchangeValue(String from, String to){
 		return this.exchangeTable.getExchangeVal(from, to, getReadableDatabase());
@@ -513,25 +501,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public synchronized void upsertExchangeValue(String from, String to, String val){
 		this.exchangeTable.upsert(from, to, val, getWritableDatabase());
 	}
-	
-	////////////////////////////////////////////////////////
-	//////////  Interface for coin table  ///////////////
-	////////////////////////////////////////////////////////
 
-	/***
-	public synchronized void updateCoinTWO(ZWCoin coin) {
-		this.coinTable.updateCoin(coin, getWritableDatabase());
-	}
-	***/
-	
-	
-	/**
-	public synchronized List<ZWCoin> getEnabledCoins(boolean includeTestnet){
-		return this.coinTable.getEnabledCoins(getReadableDatabase());
-	}
-	**/
-	
-	
+		
 	public synchronized void updateCoin(ZWCoin coin){
 		this.coinTable.upsertCoin(coin, getWritableDatabase());
 	}

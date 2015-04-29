@@ -29,6 +29,9 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	public static final String DIALOG_CREATE_PASSWORD_TAG = "settings_create_password";
 	public static final String DIALOG_CHANGE_PASSWORD_TAG = "settings_change_password";
 	public static final String DIALOG_SET_NAME_TAG = "settings_set_name";
+	public static final String DIALOG_CHANGE_SERVER_TAG = "settings_change_server";
+	
+	//TODO -there's no need to keep all these around, the click handler could just use view ids
 	
 	private RelativeLayout disablePassphrase;
 	private RelativeLayout resetPassword;
@@ -46,6 +49,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	private Button exportwalletButton;
 	private Button exportlogsButton;
 	private Button enablelogsButton;
+	private Button setCustomServer;
 
 
 	@Override
@@ -106,6 +110,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.exportlogsButton.setOnClickListener(this);
 		this.enablelogsButton = (Button) rootView.findViewById(R.id.enable_logs);
 		this.enablelogsButton.setOnClickListener(this);
+		this.setCustomServer = (Button) rootView.findViewById(R.id.change_server);
+		this.setCustomServer.setOnClickListener(this);
 		
 		this.updateSettingsVisibility();
 		return rootView;
@@ -146,15 +152,18 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.exportwalletButton.setVisibility(View.GONE);
 			this.exportlogsButton.setVisibility(View.GONE);
 			this.enablelogsButton.setVisibility(View.GONE);
+			this.setCustomServer.setVisibility(View.GONE);
 
 		} else {
 			this.debugButton.setText("Disable debugging");
 			this.exportwalletButton.setVisibility(View.VISIBLE);
 			this.exportlogsButton.setVisibility(View.VISIBLE);
 			this.enablelogsButton.setVisibility(View.VISIBLE);
+			this.setCustomServer.setVisibility(View.VISIBLE);
 			if (ZWPreferences.getLogToFile()){
 				this.enablelogsButton.setText(" Disable File logging ");
-			} else {
+			} 
+			else {
 				this.enablelogsButton.setText(" Enable File logging ");
 			}
 		}
@@ -264,6 +273,13 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				ZLog.setLogger(ZLog.FILE_LOGGER);
 			}
 			this.updateSettingsVisibility();
+		}
+		else if(v == this.setCustomServer) {
+			ZiftrTextDialogFragment customServerDialog = new ZiftrTextDialogFragment();
+			customServerDialog.setupDialog(R.string.zw_debug_change_server);
+			customServerDialog.setupTextboxTop(ZWPreferences.getCustomAPIServer(), null);
+			
+			customServerDialog.show(getFragmentManager(), DIALOG_CHANGE_SERVER_TAG);
 		}
 	}
 	

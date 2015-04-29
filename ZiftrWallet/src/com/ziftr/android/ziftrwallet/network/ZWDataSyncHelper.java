@@ -19,6 +19,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWRawTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -35,24 +36,14 @@ public class ZWDataSyncHelper {
 	//seconds to wait before autorefreshing
 	public static final long REFRESH_TIME = 60;
 	
-	public static JSONObject sendCoins(ZWCoin coin, BigInteger fee, BigInteger amount, List<String> inputs, String output, final String passphrase){
-		String message = "";
+	
+	public static ZWRawTransaction fetchRawTransaction(ZWCoin coin, BigInteger feePerKb, BigInteger amount, List<String> inputs, String output, String changeAddress){
 		ZLog.log("Sending " + amount + " coins to " + output);
 		ZiftrNetworkManager.networkStarted();
 		
-		//find (or create) an address for change that hasn't been spent from
-		List<String> changeAddresses = ZWWalletManager.getInstance().getHiddenAddressList(coin, false);
-		String changeAddress;
-		if (changeAddresses.size() <= 0){
-			//create new address for change
-			changeAddress = ZWWalletManager.getInstance().createChangeAddress(passphrase, coin).getAddress();
-			ZLog.log(changeAddress);
-		} else {
-			//or reuse one that hasnt been spent from
-			changeAddress = changeAddresses.get(0);
-		}
+		ZWRawTransaction rawTransaction = null;
 		
-		JSONObject spendJson = buildSpendPostData(inputs, output, amount, fee.toString(), changeAddress);
+		JSONObject spendJson = buildSpendPostData(inputs, output, amount, feePerKb.toString(), changeAddress);
 		
 		ZLog.log("Spending coins with json: ", spendJson.toString());
 		
@@ -61,92 +52,45 @@ public class ZWDataSyncHelper {
 		String response = request.sendAndWait();
 		ZLog.forceFullLog(response);		
 		
-		switch (request.getResponseCode()){
-			case 200:
-				try {
-					JSONObject jsonRes = new JSONObject(response);
-					
-					ZLog.log("Spend transaction data to sign: ", jsonRes.toString());
-					ZiftrNetworkManager.networkStopped();
-					return jsonRes;
-
-				}
-				catch(Exception e) {
-					ZLog.log("Exception send coin request: ", e);
-					message = "Error, something went wrong! " + request.getResponseCode() + " " + request.getResponseMessage();
-				}
-				break;
-			case 0:
-				ZLog.log("Unable to connect to server. Please check your connection.");
-				message = "Unable to connect to server. Please check your connection.";
-				break;
-			default:
-				ZLog.log("Default error sending");
-				message = "Error, something went wrong! " + request.getResponseCode() + " " + request.getResponseMessage();
-				break;
+		if(request.getResponseCode() == 200) {
+			try {
+				JSONObject jsonResponse = new JSONObject(response);
+				rawTransaction = createRawTransaction(coin, jsonResponse, amount, changeAddress, output);
+			} 
+			catch (Exception e) {
+				ZLog.log("Exception creating raw transaction: ", e);
+			}
+			
+			if(rawTransaction == null) {
+				//this means we were able to talk to the server successfully, but for some reason
+				//we were unable to create a proper raw transaction from the response
+				//TODO -we can add more fine-grained messages here if we need
+				rawTransaction = new ZWRawTransaction(coin, output, ZWRawTransaction.ERROR_CODE_BAD_DATA, null);
+			}
+		}
+		else {
+			rawTransaction = new ZWRawTransaction(coin, output, request.getResponseCode(), request.getResponseMessage());
 		}
 
 		ZiftrNetworkManager.networkStopped();
-		
-		
-		//TODO -need to fix this mess of dialogs, returning json data, and other stuff
-		//some sort of helper task fragment should handle sending and signing coins, and IT can be what shows any
-		//error dialogs
-		/**
-		if (!message.isEmpty() && request.getResponseCode() != 200) {
-			ZWMessageManager.alertError(message);
-		}
-		**/
-		
-		
-		return null;
+
+		return rawTransaction;
 	}
 	
 	
-	/***
-	static boolean checkSpendingUnconfirmedTxn(ZWCoin coin, JSONObject serverResponse, List<String> inputs, String passphrase){
-		List<ZWTransaction> spendingFromTxns = new ArrayList<ZWTransaction>();
-		try {
-			JSONObject transaction = serverResponse.getJSONObject("transaction");
-			JSONArray vin = transaction.getJSONArray("vin");
-			for (int i=0; i< vin.length(); i++){
-				JSONObject input = vin.optJSONObject(i);
-				String txid = input.optString("txid");
-				ZWTransaction txn = ZWWalletManager.getInstance().readTransactionByHash(coin, txid);
-				spendingFromTxns.add(txn);
-			}
-			
-			for (ZWTransaction txn : spendingFromTxns){
-				if (txn.isPending()){
-					//warn user of spending unconfirmed txn
-					Bundle b = new Bundle();
-					b.putString(toSignResponseKey, serverResponse.toString());
-					b.putString(ZWPreferencesUtils.BUNDLE_PASSPHRASE_KEY, passphrase);
-					b.putString(ZWCoin.TYPE_KEY, coin.getSymbol());
-					ZWMessageManager.alertConfirmation(ZWRequestCodes.CONTINUE_SENDING_UNCONFIRMED, "Warning: this spend transaction will use" +
-					" unconfirmed coins!", ZWTags.CONTINUE_SPENDING_UNCONFIRMED, b);
-					return true;
-				}
-			}
-		} catch (JSONException e1) {
-			ZLog.log("Exception getting txns spending from before signing: ", e1);
-		}
-		return false;
-	}
-	**/
 	
-	
-	
-	
-	public static boolean signSentCoins(ZWCoin coin, JSONObject serverResponse, String passphrase) {
+	public static boolean signRawTransaction(ZWRawTransaction rawTransaction, String password) {
 		
 		ZiftrNetworkManager.networkStarted();
 		
 		Set<String> addressesSpentFrom = new HashSet<String>();
+		boolean signingSuccessful = false;
+		
+		ZWCoin coin = rawTransaction.getCoin();
 		JSONObject signedData = new JSONObject();
 		
 		try {
-			JSONObject transaction = serverResponse.getJSONObject("transaction");
+			JSONObject transaction = rawTransaction.getRawData().getJSONObject("transaction");
 			JSONArray toSignList = transaction.getJSONArray("to_sign");
 			for (int i=0; i< toSignList.length(); i++){
 				JSONObject toSign = toSignList.getJSONObject(i);
@@ -154,9 +98,7 @@ public class ZWDataSyncHelper {
 				String signingAddressPublic = toSign.optString("address");
 				addressesSpentFrom.add(signingAddressPublic);
 				
-				ZLog.log("Signing a transaction with address: ", signingAddressPublic);
-				
-				ZWECKey key = ZWWalletManager.getInstance().getKeyForAddress(coin, signingAddressPublic, passphrase);
+				ZWECKey key = ZWWalletManager.getInstance().getKeyForAddress(coin, signingAddressPublic, password);
 				toSign.put("pubkey", ZiftrUtils.bytesToHexString(key.getPubKey()));
 	
 				String stringToSign = toSign.getString("tosign");
@@ -172,7 +114,7 @@ public class ZWDataSyncHelper {
 
 			//now pack all the signing into a json object to send it off to the server
 			signedData.put("transaction", transaction);
-			ZLog.log("sending  this signed tx to server :" + signedData);
+			ZLog.log("sending  this signed transaction to server :" + signedData);
 		}
 		catch(Exception e) {
 			ZLog.log("Exception attempting to sign transactions: ", e);
@@ -186,32 +128,24 @@ public class ZWDataSyncHelper {
 		ZLog.log(signingRequest.getResponseCode());
 		ZLog.log("Response from signing: ", response);
 		
-		ZiftrNetworkManager.networkStopped();
-		
 		if(signingRequest.getResponseCode() == 202){
 			try {
 				//flag any addresses we spent from as having been spent from (so we don't reuse change addresses)
-				if (addressesSpentFrom.size() <= 0){
-					ZLog.log("addresses we spent from weren't in our db ERROR!");
-				} else {
-					for (String addr : addressesSpentFrom){
-						ZLog.log(addr + "changed to spent");
-						ZWAddress address = ZWWalletManager.getInstance().getAddress(coin, addr, true);
-						address.setSpentFrom(true);
-						ZWWalletManager.getInstance().updateAddress(address);
-					}
+				for(String addressString : addressesSpentFrom) {
+					ZWAddress address = ZWWalletManager.getInstance().getAddress(coin, addressString, true);
+					address.setSpentFrom(true);
+					ZWWalletManager.getInstance().updateAddress(address);
 				}
 				
-				//update the transactions table immediately with the data from this transaction
+				//update the transactions table with the data from this transaction
 				try {
 					JSONObject responseJson = new JSONObject(response);
 					ZLog.log("Response from completed signing: ", responseJson);
 					
-					//createTransactionFromSpendResponse(coin, responseJson, null);
-					//createTransaction(coin, responseJson, inputs, new HashMap<String, JSONObject>());
 					
-					//TODO -once create transaction works properly remove this
-					downloadTransactionHistory(coin, false);
+					JSONObject transactionJson = responseJson.getJSONObject("transaction");
+					createTransaction(coin, transactionJson);
+					signingSuccessful = true;
 				}
 				catch(Exception e2) {
 					ZLog.log("Exception parsing successful spend response: ", e2);
@@ -220,22 +154,18 @@ public class ZWDataSyncHelper {
 					//then we just update our history and hope it's there
 					downloadTransactionHistory(coin, false);
 				}
-			} catch(Exception e) {
+			}
+			catch(Exception e) {
 				ZLog.log("Exception saving spend transaction: ", e);
 			}
-			return true;
-		} else {
-			
-			//TODO -need to fix this mess of dialogs, returning json data, and other stuff
-			//some sort of helper task fragment should handle sending and signing coins, and IT can be what shows any
-			//error dialogs
-			/**
-			ZWMessageManager.alertError("error: " + signingRequest.getResponseMessage());
-			**/
-			
-			return false;
-		}
 		
+		}
+	
+
+		ZiftrNetworkManager.networkStopped();
+		
+		
+		return signingSuccessful;
 	}
 
 	
@@ -656,58 +586,124 @@ public class ZWDataSyncHelper {
 	}
 	
 	
-	//create transaction immediately after sending
-	//need fee before we can use
-	/**********
-	private static void createTransactionFromSpendResponse(ZWCoin coin, JSONObject json, String sentTo) throws JSONException{
-		String hash = json.getString("txid");
-		ZWTransaction transaction = new ZWTransaction(coin, hash);
+	
+	
+	private static ZWRawTransaction createRawTransaction(ZWCoin coin, JSONObject json, BigInteger amount, String changeAddress, String outputAddress) throws JSONException {
 		
-		//send transaction just happened
-		long time = System.currentTimeMillis() / 1000;
-		transaction.setTxTime(time * 1000);
-		transaction.setConfirmationCount(json.optLong("confirmations"));
+		JSONObject transactionJson = json.getJSONObject("transaction");
 		
-		BigInteger fees = new BigInteger("0");
-		BigInteger value = new BigInteger("0"); //calculate this by scanning inputs
+		BigInteger inputCoins = new BigInteger("0");
+		BigInteger change = new BigInteger("0");
 		
-		//set the display address to the address we sent to
-		ArrayList<String> displayAddresses = new ArrayList<String>();
-		displayAddresses.add(sentTo);
+		boolean spendOk = false;
+		boolean changeOk = false;
+		boolean hexOk = false;
 		
-		ZWAddress sentToAddress = ZWWalletManager.getInstance().getAddress(coin, sentTo, false);
-		if(sentTo != null) {
-			if(transaction.getNote() == null || transaction.getNote().length() == 0){
-				transaction.setNote(sentToAddress.getLabel());
+		boolean unconfirmedInputs = false;
+		
+		
+		//first go through all of the inputs and see how much we're spending
+		JSONArray inputs = transactionJson.getJSONArray("vin");
+		for(int x = 0; x < inputs.length(); x++) {
+			JSONObject input = inputs.getJSONObject(x);
+			
+			String inputTxid = input.getString("txid");
+			int outputIndex = input.getInt("vout");
+			
+			ArrayList<ZWTransactionOutput> matchingOutputs = ZWWalletManager.getInstance().getTransactionOutputs(coin, inputTxid, outputIndex);
+			if(matchingOutputs.size() > 0) {
+				
+				//this means we found the output we're going to use to spend coins in this transaction
+				
+				if(matchingOutputs.size() > 1) {
+					//if there is more than one then this is some kind of multisig transaction
+					//we don't yet support this, but we continue building the raw transaction anyway, since there is no way it can harm the user
+				}
+				
+				ZWTransactionOutput matchingOutput = matchingOutputs.get(0);
+				
+				//check to see if the transaction this output is part of has been fully confirmed
+				ZWTransaction matchingOutputTransaction = ZWWalletManager.getInstance().getTransaction(coin, matchingOutput.getTransactionId());
+				if(matchingOutputTransaction == null || matchingOutputTransaction.isPending()) {
+					unconfirmedInputs = true;
+				}
+				
+				inputCoins = inputCoins.add(matchingOutput.getValue());
 			}
-		}
+			else {
+				//TODO this either means there is something wrong with our local database (so we'll be unable to sign this transaction)
+				//or it means we're signing some sort of multi-sig transaction, which isn't supported yet
+				ZLog.log("Warning: Unknown inputs in a transaction we're signing.");
+			}
 
-		//we know this is a sending txn
-		JSONArray outputs = json.getJSONArray("vout");
+		}
+		
+		
+		//now we have to go through all the outputs and make sure that this transaction is what the user actually asked for
+		JSONArray outputs = transactionJson.getJSONArray("vout");
+		
+		int numOutputs = outputs.length();
+		
+		if(numOutputs == 1) {
+			changeOk = true; //if there's only one output, just assume exact change
+		}
+		else if(numOutputs > 2) {
+			//there should be at most two outputs, one for change, another for the recipient
+			//if there are more something bad is happening
+			return null;
+		}
 		for(int x = 0; x < outputs.length(); x++) {
+			
 			JSONObject output = outputs.getJSONObject(x);
 			JSONObject scriptPubKey = output.getJSONObject("script_pub_key");
 			JSONArray outputAddresses = scriptPubKey.getJSONArray("addresses");
-			boolean usedValue = false;
-			for(int y = 0; y < outputAddresses.length(); y++) {
-				String outputAddress = outputAddresses.getString(y);
-				//if this output is to the address we sent to then minus it from the txn val
-				if(outputAddress.equals(sentTo)) {
-					if(!usedValue) {
-						usedValue = true;
-						String outputValue = output.getString("value");
-						BigInteger outputValueInt = convertToBigIntSafe(coin, outputValue); 
-						value = value.add(outputValueInt);
-					}
+			
+			if(outputAddresses.length() != 1) {
+				//if we have strange outputs with multiple addresses, that's unexpected behavior
+				return null;
+			}
+		
+			String addressString = outputAddresses.getString(0);
+			
+			String outputValueString = output.getString("value");
+			BigInteger outputValue = convertToBigIntSafe(coin, outputValueString);
+			
+			if(addressString.equals(outputAddress)) {
+				//this is the output for the address we're sending coins to
+				//we need to make sure it all lines up
+				
+				if(outputValue.compareTo(amount) != 0) {
+					//if the raw transaction output value to the new recipient doesn't match the expect one, that's a problem
+					return null;
 				}
-			} //endy
-		} //end x
-		transaction.setAmount(value);
-		transaction.setFee(fees);
-		transaction.setDisplayAddresses(displayAddresses);
-		ZWWalletManager.getInstance().addTransaction(transaction);
+				else {
+					spendOk = true;
+				}
+			}
+			else if(addressString.equals(changeAddress)) {
+				change = outputValue;
+				changeOk = true;
+			}
+
+
+		}
+		
+		String hex = transactionJson.getString("hex");
+		if(hex.length() > 0) {
+			hexOk = true;
+			//TODO -we really need to verify this hex to be 100% sure everything is on the up and up
+		}
+		
+		if(spendOk && changeOk && hexOk) {
+			ZWRawTransaction rawTransaction = new ZWRawTransaction(coin, inputCoins, amount, change, outputAddress);
+			rawTransaction.setRawData(json);
+			rawTransaction.setUsingUnconfirmedInputs(unconfirmedInputs);
+			return rawTransaction;
+		}
+		
+		return null;
 	}
-	***********/
+	
 	
 	private static JSONObject buildSpendPostData(List<String> inputs, String output, BigInteger amount, String fee, String changeAddress) {
 		JSONObject postData = new JSONObject();

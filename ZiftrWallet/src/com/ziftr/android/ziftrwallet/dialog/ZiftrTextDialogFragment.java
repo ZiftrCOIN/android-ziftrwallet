@@ -96,16 +96,37 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 	
 	
 	public void setupTextboxTop(String prefilledText, String hint) {
+		
+		if(prefilledText == null && hint == null) {
+			//if the calling code is specifically setting up a text box, then it clearly wants it displayed
+			//setting the text to an empty string will make sure the textbox shows up in the UI
+			prefilledText = "";
+		}
+		
 		this.topText = prefilledText;
 		this.topHintText = hint;
 	}
 	
 	public void setupTextboxMiddle(String prefilledText, String hint) {
+		
+		if(prefilledText == null && hint == null) {
+			//if the calling code is specifically setting up a text box, then it clearly wants it displayed
+			//setting the text to an empty string will make sure the textbox shows up in the UI
+			prefilledText = "";
+		}
+		
 		this.middleText = prefilledText;
 		this.middleHintText = hint;
 	}
 	
 	public void setupTextboxBottom(String prefilledText, String hint) {
+		
+		if(prefilledText == null && hint == null) {
+			//if the calling code is specifically setting up a text box, then it clearly wants it displayed
+			//setting the text to an empty string will make sure the textbox shows up in the UI
+			prefilledText = "";
+		}
+		
 		this.bottomText = prefilledText;
 		this.bottomHintText = hint;
 	}

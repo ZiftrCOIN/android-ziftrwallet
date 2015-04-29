@@ -35,7 +35,7 @@ public abstract class ZiftrTaskDialogFragment extends ZiftrDialogFragment {
 			if(no == null) no = savedInstanceState.getString("no");
 		}
 	
-		ProgressDialog dialog = new ProgressDialog(this.getActivity());  //ProgressDialog. //.show(this, "Searching...", "Finding the best prices for " +upc +".", true);
+		ProgressDialog dialog = new ProgressDialog(this.getActivity()); 
 		dialog.setTitle(title);
 		dialog.setMessage(message);
 		dialog.setIndeterminate(true);
@@ -80,6 +80,7 @@ public abstract class ZiftrTaskDialogFragment extends ZiftrDialogFragment {
 		super.onDestroyView();
 	}
 
+	
 	@Override
 	public void show(FragmentManager manager, String tag) {
 		this.startTask();
@@ -143,16 +144,15 @@ public abstract class ZiftrTaskDialogFragment extends ZiftrDialogFragment {
 							
 							dismissAllowingStateLoss();
 							
-							if(act instanceof ZiftrDialogHandler) {
-								//task dialogs can only be attached to activities, since they are retained
-								//so no need to look for a parent fragment
-								if(successful) {
-									((ZiftrDialogHandler)act).handleDialogYes(ZiftrTaskDialogFragment.this);
-								}
-								else {
-									((ZiftrDialogHandler)act).handleDialogNo(ZiftrTaskDialogFragment.this);
-								}
+							if(successful) {
+								ZiftrTaskDialogFragment.this.onClick(getDialog(), DialogInterface.BUTTON_POSITIVE);
+								//ZiftrDialogManager.dialogClickedYes(ZiftrTaskDialogFragment.this);
 							}
+							else {
+								ZiftrTaskDialogFragment.this.onClick(getDialog(), DialogInterface.BUTTON_NEGATIVE);
+								//ZiftrDialogManager.dialogClickedNo(ZiftrTaskDialogFragment.this);
+							}
+						
 					
 						}
 						

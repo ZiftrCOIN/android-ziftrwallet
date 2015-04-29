@@ -249,6 +249,11 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			});
 
 		}
+		else if(ZWSettingsFragment.DIALOG_CHANGE_SERVER_TAG.equals(fragment.getTag())) {
+			ZiftrTextDialogFragment changeServerDialog = (ZiftrTextDialogFragment) fragment;
+			String customServer = changeServerDialog.getEnteredTextTop();
+			ZWPreferences.setCustomAPIServer(customServer);
+		}
 		
 	}
 

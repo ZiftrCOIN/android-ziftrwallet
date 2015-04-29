@@ -16,6 +16,7 @@
 
 package com.ziftr.android.ziftrwallet.crypto;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import javax.annotation.Nullable;
@@ -23,7 +24,6 @@ import javax.annotation.Nullable;
 import android.annotation.SuppressLint;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.exceptions.ZWWrongNetworkException;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListItem;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -176,29 +176,32 @@ public class ZWAddress implements ZWSearchableListItem {
 	/**
 	 * A private helper method for initialization that prevents code duplication. 
 	 * 
-	 * @param coinId
+	 * @param coin
 	 * @param versionByte
 	 * @param hash160
 	 */
-	private void initialize(ZWCoin coinId, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
+	private void initialize(ZWCoin coin, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
 		if (hash160.length != 20) {
 			throw new ZWAddressFormatException("Addresses are 160-bit hashes, so you must provide 20 bytes");
 		}
 
-		if (coinId != null) {
-			if (!isAcceptableVersion(coinId, versionByte)) {
-				throw new ZWWrongNetworkException(versionByte, coinId.getAcceptableAddressCodes());
+		if (coin != null) {
+			if (!isAcceptableVersion(coin, versionByte)) {
+				String exceptionMessage = "Version code of address did not match acceptable versions for network: " + 
+						String.valueOf(versionByte) + " not in " +
+						Arrays.toString(coin.getAcceptableAddressCodes());
+				throw new ZWAddressFormatException(exceptionMessage);
 			}
 		} else {
 			// If null then we need to infer what the coinType is 
-			coinId = getCoinTypeFromVersionByte(versionByte);
+			coin = getCoinTypeFromVersionByte(versionByte);
 		}
 
-		if (coinId == null) {
+		if (coin == null) {
 			throw new ZWAddressFormatException("Version byte does not match any supported coin types");
 		}
 
-		this.coin = coinId;
+		this.coin = coin;
 		this.versionByte = versionByte;
 		this.hash160 = hash160;
 		// Default, should be overridden with the setter method

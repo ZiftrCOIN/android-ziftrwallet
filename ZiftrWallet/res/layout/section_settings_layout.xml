@@ -260,6 +260,16 @@
             android:text="Export logs"
             android:textColor="@color/zw_default_text"
             android:visibility="gone" />
+        
+        <Button
+            android:id="@+id/change_server"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/zw_button_footer_height"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/clickable_button_color"
+            android:text="Change API Server"
+            android:textColor="@color/zw_default_text"
+            android:visibility="gone" />
     </LinearLayout>
 
 </ScrollView>

@@ -10,6 +10,7 @@ import android.annotation.SuppressLint;
 import android.util.Base64;
 
 import com.google.common.base.Joiner;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
@@ -21,7 +22,14 @@ public class ZWApi {
 	private static final String SANDBOX_BASE_URL = "sandbox.fpa.bz";
 	private static final String LIVE_BASE_URL = "api.fpa.bz";
 	
-	private static final String BASE_URL = SANDBOX_BASE_URL;
+	private static String BASE_URL = SANDBOX_BASE_URL;
+	
+	static {
+		String customBaseUrl = ZWPreferences.getCustomAPIServer();
+		if(customBaseUrl != null && customBaseUrl.length() > 0) {
+			BASE_URL = customBaseUrl;
+		}
+	}
 	
 	
 	private static final String AUTHORIZATION = "Basic " + Base64.encodeToString("pub_c905a5608ce7ec9b63dbcb60c947921c:".getBytes(), Base64.DEFAULT);
@@ -39,6 +47,9 @@ public class ZWApi {
 	
 	
 	private static String buildUrl(String type, String chain, String endPoint, boolean secure) {
+		
+		ZWPreferences.getCustomAPIServer();
+		
 		String protocol;
 		if(secure) {
 			protocol = "https";

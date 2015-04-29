@@ -261,9 +261,20 @@ public abstract class ZWPreferences {
 		ZWWalletManager.getInstance().upsertAppDataVal(LOG_TO_FILE_KEY, enabled);
 	}
 	
+	public static String getCustomAPIServer() {
+		return getOption("custom_server", null);
+	}
+	
+	
+	public static void setCustomAPIServer(String customServer) {
+		ZWWalletManager.getInstance().upsertAppDataVal("custom_server", customServer);
+	}
+	
+	
 	public static String getCachedPassword(){
 		return CacheThread.getCache();
 	}
+	
 	
 	public static String getSalt(){
 		String salt = ZWWalletManager.getInstance().getAppDataString(ZWAppDataTable.SALT);
