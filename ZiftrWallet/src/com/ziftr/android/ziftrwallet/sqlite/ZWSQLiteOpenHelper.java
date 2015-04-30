@@ -393,7 +393,10 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 	
 	public synchronized BigInteger getWalletBalance(ZWCoin coin) {
-		return ZWPreferences.getMempoolIsSpendable() ? getWalletBalance(coin, BalanceType.ESTIMATED) : getWalletBalance(coin, BalanceType.AVAILABLE);
+		
+		return getWalletBalance(coin, BalanceType.ESTIMATED);
+		
+		//return ZWPreferences.getWarningUnconfirmed() ? getWalletBalance(coin, BalanceType.ESTIMATED) : getWalletBalance(coin, BalanceType.AVAILABLE);
 	}
 
 	public synchronized BigInteger getWalletBalance(ZWCoin coinId, BalanceType bType) {

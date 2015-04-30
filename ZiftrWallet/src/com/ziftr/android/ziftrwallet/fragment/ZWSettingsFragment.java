@@ -37,7 +37,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	private RelativeLayout resetPassword;
 	private TextView resetPasswordLabel;
 	private CheckBox editableConfirmationFee;
-	private CheckBox enableMempoolSpending;
+	private CheckBox warnUnconfirmedSpending;
 	private RelativeLayout setFiatCurrency;
 	private TextView chosenFiat;
 	private RelativeLayout editableConfirmationFeeBar;
@@ -82,8 +82,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.resetPasswordLabel = ((TextView) resetPassword.findViewById(R.id.reset_password_text));
 		this.editableConfirmationFee = (CheckBox) rootView.findViewById(R.id.editable_confirmation_fees);
 		this.editableConfirmationFee.setOnClickListener(this);
-		this.enableMempoolSpending = (CheckBox) rootView.findViewById(R.id.enable_mempool_spending);
-		this.enableMempoolSpending.setOnClickListener(this);
+		this.warnUnconfirmedSpending = (CheckBox) rootView.findViewById(R.id.enable_mempool_spending);
+		this.warnUnconfirmedSpending.setOnClickListener(this);
 		this.setName = (RelativeLayout) rootView.findViewById(R.id.set_name_button);
 		this.setName.setOnClickListener(this);
 		this.disableName = (RelativeLayout) rootView.findViewById(R.id.disable_name_button);
@@ -96,10 +96,10 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.editableConfirmationFee.setChecked(false);
 		}
 		
-		if (ZWPreferences.getMempoolIsSpendable()) {
-			this.enableMempoolSpending.setChecked(true);
+		if (ZWPreferences.getWarningUnconfirmed()) {
+			this.warnUnconfirmedSpending.setChecked(true);
 		} else {
-			this.enableMempoolSpending.setChecked(false);
+			this.warnUnconfirmedSpending.setChecked(false);
 		}
 
 		this.debugButton = (Button) rootView.findViewById(R.id.debug_button);
@@ -216,12 +216,12 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.editableConfirmationFee.setChecked(!this.editableConfirmationFee.isChecked());
 			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		}
-		else if (v == this.enableMempoolSpending){
-			ZWPreferences.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
+		else if (v == this.warnUnconfirmedSpending){
+			ZWPreferences.setWarningUnconfirmed(this.warnUnconfirmedSpending.isChecked());
 		}
 		else if (v == this.enableMempoolSpendingBar) {
-			this.enableMempoolSpending.setChecked(!this.enableMempoolSpending.isChecked());
-			ZWPreferences.setMempoolIsSpendable(this.enableMempoolSpending.isChecked());
+			this.warnUnconfirmedSpending.setChecked(!this.warnUnconfirmedSpending.isChecked());
+			ZWPreferences.setWarningUnconfirmed(this.warnUnconfirmedSpending.isChecked());
 		}
 		else if (v == this.disableName){
 			ZWPreferences.setUserName(null);

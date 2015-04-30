@@ -193,7 +193,13 @@ public class ZWSendTaskHelperFragment extends Fragment {
 					
 					if(which == DialogInterface.BUTTON_POSITIVE) {
 						//if the user clicked "send"
-						signRawTransaction();
+						
+						if(rawTransaction.usingUnconfirmedInputs() && ZWPreferences.getWarningUnconfirmed()) {
+							showUnconfirmedInputsWarning();
+						}
+						else {
+							signRawTransaction();
+						}
 					}
 					
 				}
@@ -218,6 +224,30 @@ public class ZWSendTaskHelperFragment extends Fragment {
 		}
 	}
 
+	
+	
+	private void showUnconfirmedInputsWarning() {
+		ZiftrDialogFragment unconfirmedDialog = new ZiftrDialogFragment();
+		unconfirmedDialog.setupDialog(R.string.zw_app_name, R.string.zw_dialog_warning_unconfirmed, R.string.zw_dialog_send, R.string.zw_dialog_cancel);
+		
+		unconfirmedDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				//just do nothing to block cancelling
+			}
+		});
+		
+		unconfirmedDialog.setOnClickListener(new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if(which == DialogInterface.BUTTON_POSITIVE) {
+					signRawTransaction();
+				}
+			}
+		});
+	}
 	
 	
 	private void signRawTransaction() {

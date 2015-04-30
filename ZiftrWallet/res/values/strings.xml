@@ -104,7 +104,7 @@
     <string name="debug_warning">This will enable &quot;testnet&quot; coins and advanced options that may compromise wallet security and/or device performance. Use at your own risk! \n\nAre you sure you want to activate debug mode?</string>
     <string name="send_fee_info">Why is there a fee?\n\nThis fee is NOT paid to Ziftr. The fee goes to the miner that secures your transaction as a reward for their service. 
         This is standard for all cryptocurrency applications. Without it, your transaction would likely stay as pending for an inconvenient length of time.</string>
-    <string name="mempool_spending">Spend Unconfirmed Transactions</string>
+    <string name="zw_warning_unconfirmed">Show Unconfirmed Coins Warning</string>
     <string name="zw_incorrect_password">Error: Incorrect password.</string>
     <string name="zw_incorrect_reset_password_match">The passwords you entered don\'t match. Your previous password is still in place.</string>
     <string name="zw_incorrect_reset_password">The password you entered doesn\'t match your previous password. Your previous password is still in place.</string>

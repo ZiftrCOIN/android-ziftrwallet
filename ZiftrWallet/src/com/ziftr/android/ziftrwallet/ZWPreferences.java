@@ -46,7 +46,7 @@ public abstract class ZWPreferences {
 	public final static String LOG_TO_FILE_KEY = "log_to_file_key";
 	
 	/** Save whether we can spend unconfirmed txns or not*/
-	public final static String SPENDABLE_MEMPOOL_KEY = "spendable_mempool_key";
+	public final static String UNCONFIRMED_WARNING_KEY = "unconfirmed_warning_key";
 
 	
 	/**
@@ -186,12 +186,12 @@ public abstract class ZWPreferences {
 		ZWWalletManager.getInstance().upsertAppDataVal(EDITABLE_FEES_KEY, feesAreEditable);
 	}
 
-	public static boolean getMempoolIsSpendable() {
-		return getOption(SPENDABLE_MEMPOOL_KEY, false);
+	public static boolean getWarningUnconfirmed() {
+		return getOption(UNCONFIRMED_WARNING_KEY, true);
 	}
 
-	public static void setMempoolIsSpendable(boolean spendable) {
-		ZWWalletManager.getInstance().upsertAppDataVal(SPENDABLE_MEMPOOL_KEY, spendable);
+	public static void setWarningUnconfirmed(boolean warn) {
+		ZWWalletManager.getInstance().upsertAppDataVal(UNCONFIRMED_WARNING_KEY, warn);
 	}
 	
 	public static boolean getPasswordWarningDisabled() {
