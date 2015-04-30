@@ -43,7 +43,7 @@ public class ZWDataSyncHelper {
 		
 		ZWRawTransaction rawTransaction = null;
 		
-		JSONObject spendJson = buildSpendPostData(inputs, output, amount, feePerKb.toString(), changeAddress);
+		JSONObject spendJson = buildSpendPostData(inputs, output, amount, feePerKb.longValue(), changeAddress);
 		
 		ZLog.log("Spending coins with json: ", spendJson.toString());
 		
@@ -52,7 +52,7 @@ public class ZWDataSyncHelper {
 		String response = request.sendAndWait();
 		ZLog.forceFullLog(response);		
 		
-		if(request.getResponseCode() == 200) {
+		if( responseCodeOk(request.getResponseCode()) ) {
 			try {
 				JSONObject jsonResponse = new JSONObject(response);
 				rawTransaction = createRawTransaction(coin, jsonResponse, amount, changeAddress, output);
@@ -128,7 +128,7 @@ public class ZWDataSyncHelper {
 		ZLog.log(signingRequest.getResponseCode());
 		ZLog.log("Response from signing: ", response);
 		
-		if(signingRequest.getResponseCode() == 202){
+		if( responseCodeOk(signingRequest.getResponseCode()) ){
 			try {
 				//flag any addresses we spent from as having been spent from (so we don't reuse change addresses)
 				for(String addressString : addressesSpentFrom) {
@@ -169,6 +169,15 @@ public class ZWDataSyncHelper {
 	}
 
 	
+	private static boolean responseCodeOk(int responseCode) {
+		if(responseCode >= 200 && responseCode < 300) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	
 	public static void updateCoinData() {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			
@@ -188,7 +197,7 @@ public class ZWDataSyncHelper {
 		
 		ZiftrNetRequest request = ZWApi.buildCoinDataRequest();
 		String response = request.sendAndWait();
-		if (request.getResponseCode() == 200){
+		if (responseCodeOk(request.getResponseCode())){
 
 			ZLog.log("Coin data response: ", response);
 			try {
@@ -258,7 +267,7 @@ public class ZWDataSyncHelper {
 		ZiftrNetworkManager.networkStarted();
 		ZiftrNetRequest request = ZWApi.buildMarketValueRequest();
 		String response = request.sendAndWait();
-		if (request.getResponseCode() == 200){
+		if (responseCodeOk(request.getResponseCode()){
 			ZLog.log("Market Value Response: ", response);
 			try {
 				JSONObject marketJson = new JSONObject(response);
@@ -354,7 +363,7 @@ public class ZWDataSyncHelper {
 		String response = request.sendAndWait();
 
 		ZLog.forceFullLog("Transaction history response(" + request.getResponseCode() + "): " + response);
-		if(request.getResponseCode() == 200) {
+		if( responseCodeOk(request.getResponseCode()) ) {
 			try {
 				JSONObject responseJson = new JSONObject(response);
 				JSONArray transactions = responseJson.getJSONArray("transactions");
@@ -372,7 +381,7 @@ public class ZWDataSyncHelper {
 			catch(Exception e) {
 				ZLog.log("Exception downloading transactions: ", e);
 			}
-		}//end if response code = 200
+		}//end if response code
 
 		ZiftrNetworkManager.networkStopped();
 		ZWDataSyncHelper.lastRefreshed.put(coin.getSymbol(), System.currentTimeMillis() / 1000);
@@ -708,11 +717,11 @@ public class ZWDataSyncHelper {
 	}
 	
 	
-	private static JSONObject buildSpendPostData(List<String> inputs, String output, BigInteger amount, String fee, String changeAddress) {
+	private static JSONObject buildSpendPostData(List<String> inputs, String output, BigInteger amount, long feePerKb, String changeAddress) {
 		JSONObject postData = new JSONObject();
 		JSONObject transaction = new JSONObject();
 		try {
-			transaction.put("fee_per_kb", fee);
+			transaction.put("fee_per_kb", feePerKb);
 			transaction.put("surplus_refund_address", changeAddress);
 			JSONArray inputAddresses = new JSONArray();
 			for (String addr : inputs){
