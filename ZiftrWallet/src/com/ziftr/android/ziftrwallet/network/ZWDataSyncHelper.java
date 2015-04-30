@@ -409,14 +409,17 @@ public class ZWDataSyncHelper {
 		String transactionId = json.getString("txid");
 		ZWTransaction transaction = new ZWTransaction(coin, transactionId);
 		
-		ArrayList<ZWAddress> displayAddresses = new ArrayList<ZWAddress>();
+		ArrayList<ZWAddress> receivingAddressesUsed = new ArrayList<ZWAddress>();
+		ArrayList<ZWAddress> sendingAddressesUsed = new ArrayList<ZWAddress>();
 		ArrayList<ZWTransactionOutput> receivedOutputs = new ArrayList<ZWTransactionOutput>();
 		//ArrayList<ZWTransactionOutput> spentOutputs = new ArrayList<ZWTransactionOutput>();
 		
-		BigInteger inputCoins = new BigInteger("0");
+		
 		boolean unknownInputs = false;
+		boolean unknownOutputs = false;
 		boolean isSpending = false;
 		
+		BigInteger inputCoins = new BigInteger("0");
 		BigInteger receivedCoins = new BigInteger("0");
 		BigInteger spentCoins = new BigInteger("0");
 		
@@ -495,15 +498,7 @@ public class ZWDataSyncHelper {
 					String valueString = output.getString("value");
 					BigInteger value = convertToBigIntSafe(coin, valueString);
 					int outputIndex = output.getInt("n");
-					
-					if(!outputAddress.isHidden()) {
-						
-						//also if we haven't already set some sort of note, use this address's label
-						if(transaction.getNote() == null || transaction.getNote().length() == 0){
-							transaction.setNote(outputAddress.getLabel());
-						}
-					}
-					
+	
 					ZWTransactionOutput transactionOutput = new ZWTransactionOutput(outputAddressString, transactionId, outputIndex, value, isMultiSig);
 					transaction.setMultisig(isMultiSig);
 					
@@ -513,24 +508,23 @@ public class ZWDataSyncHelper {
 							receivedCoins = receivedCoins.add(value);
 							usedValue = true;
 						}
-						if(!isSpending) {
-							//if we're receiving coins, we display our address they're received on
-							displayAddresses.add(outputAddress);
-						}
+
+						//if we're receiving coins, we display our address they're received on
+						receivingAddressesUsed.add(outputAddress);
 					}
 					else {
 						if(!usedValue) {
 							spentCoins = spentCoins.add(value);
 							usedValue = true;
 						}
-						if(isSpending) {
-							//if we're spending coins, we display the address we sent to
-							displayAddresses.add(outputAddress);
-						}
+
+						//if we're spending coins, we display the address we sent to
+						sendingAddressesUsed.add(outputAddress);
 					}
 				}
 				else {
-					//it's an address we don't know about, probably someone else's change, we don't care
+					//it's an address we don't know about, probably someone else's change
+					unknownOutputs = true;
 				}
 				
 			}
@@ -566,44 +560,9 @@ public class ZWDataSyncHelper {
 			transaction.setFee(BigInteger.ZERO);
 		}
 
+		
 		//go through our used addresses and choose the ones to display in the UI
-		ArrayList<String> displayStrings = new ArrayList<String>();
-		for(ZWAddress address : displayAddresses) {
-			
-			if(!address.isHidden()) {
-				
-				displayStrings.add(address.getAddress());
-				
-				//also if we haven't already set some sort of note, use this address's label
-				if(transaction.getNote() == null || transaction.getNote().length() == 0){
-					transaction.setNote(address.getLabel());
-				}
-				
-			}
-		}
-		
-		if(displayStrings.size() == 0) {
-			//if we have no display strings, it could be because we only have hidden addresses
-			//this means that someone "returned" coins to one of our change addresses, or something strange like that
-			//if this happens we can still use the coins, so unhide the address
-			for(ZWAddress address : displayAddresses) {
-				address.setHidden(false);
-				address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_returned_coins));
-				ZWWalletManager.getInstance().updateAddress(address);
-				
-				displayStrings.add(address.getAddress());
-			}
-			
-			if(displayStrings.size() > 0) {
-				transaction.setNote("Returned Coins");
-			}
-			else {
-				//we have no display addresses so we have no idea what's up with this transaction
-				transaction.setNote("Unknown Transaction");
-			}
-		}
-		
-		transaction.setDisplayAddresses(displayStrings);
+		determineTransactionDisplayData(transaction, isSpending, unknownOutputs, receivingAddressesUsed, sendingAddressesUsed);
 		
 		//now we need to save the outputs we're using
 		for(ZWTransactionOutput output : receivedOutputs) {
@@ -611,6 +570,123 @@ public class ZWDataSyncHelper {
 		}
 		
 		ZWWalletManager.getInstance().addTransaction(transaction);
+	}
+	
+	
+	/**
+	 * Figuring out which addresses to use for display addresses and labels can be complicated due to 
+	 * the many possible corner cases.
+	 * Due to the slight variations in the way people can use the blockchain in unexpected ways,
+	 * there isn't even a great way to turn this into more reusable code.
+	 * This method simply isolates this flow-chart logic to figure out which addresses are which
+	 */
+	private static void determineTransactionDisplayData(ZWTransaction transaction, boolean isSpending, boolean unknownOutputs,
+													List<ZWAddress> receivingAddressesUsed, List<ZWAddress> sendingAddressesUsed) {
+		//go through address to set addresses to display and transaction note
+		ArrayList<String> displayStrings = new ArrayList<String>();
+		
+		if(isSpending) {
+			if(sendingAddressesUsed.size() > 0) {
+				//this is a normal "send" transaction
+				for(ZWAddress address : sendingAddressesUsed) {
+					displayStrings.add(address.getAddress());
+					
+					//also if we haven't already set some sort of note, use this address's label
+					if(transaction.getNote() == null || transaction.getNote().length() == 0){
+						transaction.setNote(address.getLabel());
+					}
+				}
+			}
+			else {
+				//if we don't know of any sending addresses we have some sort of weird corner case
+				if(unknownOutputs) {
+					//we somehow sent to an address we don't know about, or part of a strange multisig
+					transaction.setNote(ZWApplication.getApplication().getString(R.string.zw_transaction_unknown));
+				}
+				else {
+					//in this case, the user sent coins to themselves for some reason
+					//so even though this is a "send" use receiving addresses for notes
+					for(ZWAddress address : receivingAddressesUsed) {
+						if(!address.isHidden()) {
+							
+							displayStrings.add(address.getAddress());
+							
+							//also if we haven't already set some sort of note, use this address's label
+							if(transaction.getNote() == null || transaction.getNote().length() == 0){
+								transaction.setNote(address.getLabel());
+							}
+							
+						}
+					}
+					
+					if(displayStrings.size() == 0) {
+						//this is a very strange corner case
+						//it means the user found their own hidden change addresses, then sent coins to them
+						//so we unhide those addresses and give them a default label
+						for(ZWAddress address : receivingAddressesUsed) {
+							address.setHidden(false);
+							address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_self_send));
+							ZWWalletManager.getInstance().updateAddress(address);
+							
+							displayStrings.add(address.getAddress());
+						}
+						
+						if(displayStrings.size() > 0) {
+							transaction.setNote(ZWApplication.getApplication().getString(R.string.zw_transaction_self_send));
+						}
+						else {
+							//we have no display addresses so we have no idea what's up with this transaction
+							transaction.setNote(ZWApplication.getApplication().getString(R.string.zw_transaction_unknown));
+						}
+					}
+					
+				}
+			}
+		}
+		else {
+			//we're receiving coins
+			if(receivingAddressesUsed.size() > 0) {
+				for(ZWAddress address : receivingAddressesUsed) {
+					if(!address.isHidden()) {
+						
+						displayStrings.add(address.getAddress());
+						
+						//also if we haven't already set some sort of note, use this address's label
+						if(transaction.getNote() == null || transaction.getNote().length() == 0){
+							transaction.setNote(address.getLabel());
+						}
+						
+					}
+				}
+				
+				if(displayStrings.size() == 0) {
+					//if this happens it means someone else has sent us coins using only our hidden change address
+					//this could happen if someone tried to return coins using the address they came from for some reason
+					for(ZWAddress address : receivingAddressesUsed) {
+						address.setHidden(false);
+						address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_returned_coins));
+						ZWWalletManager.getInstance().updateAddress(address);
+						
+						displayStrings.add(address.getAddress());
+					}
+					
+					if(displayStrings.size() > 0) {
+						transaction.setNote(ZWApplication.getApplication().getString(R.string.zw_transaction_returned_coins));
+					}
+					else {
+						//we have no display addresses so we have no idea what's up with this transaction
+						transaction.setNote(ZWApplication.getApplication().getString(R.string.zw_transaction_unknown));
+					}
+				}
+			}
+			else {
+				//this is a receive, but we know don't seem to know about the addresses
+				//only way this should happen is if there is some fatal server issue
+				transaction.setNote(ZWApplication.getApplication().getString(R.string.zw_transaction_unknown));
+			}
+		}
+		
+		transaction.setDisplayAddresses(displayStrings);
 	}
 	
 	

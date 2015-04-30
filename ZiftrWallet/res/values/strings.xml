@@ -151,6 +151,8 @@
     <string name="zw_toast_sent">%1$s sent.</string>
     <string name="zw_debug_change_server">Enter server Base URL.</string>
     <string name="zw_transaction_returned_coins">Returned Coins</string>
+    <string name="zw_transaction_unknown">Unknown Transaction</string>
+    <string name="zw_transaction_self_send">Sent to Self</string>
     
 </resources>
 
