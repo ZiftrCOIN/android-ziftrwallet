@@ -14,6 +14,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
@@ -267,7 +269,7 @@ public class ZWDataSyncHelper {
 		ZiftrNetworkManager.networkStarted();
 		ZiftrNetRequest request = ZWApi.buildMarketValueRequest();
 		String response = request.sendAndWait();
-		if (responseCodeOk(request.getResponseCode()){
+		if ( responseCodeOk(request.getResponseCode()) ){
 			ZLog.log("Market Value Response: ", response);
 			try {
 				JSONObject marketJson = new JSONObject(response);
@@ -572,7 +574,7 @@ public class ZWDataSyncHelper {
 			//if this happens we can still use the coins, so unhide the address
 			for(ZWAddress address : displayAddresses) {
 				address.setHidden(false);
-				address.setLabel("Returned Coins");
+				address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_returned_coins));
 				ZWWalletManager.getInstance().updateAddress(address);
 				
 				displayStrings.add(address.getAddress());

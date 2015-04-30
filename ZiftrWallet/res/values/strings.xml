@@ -150,6 +150,7 @@
     <string name="zw_dialog_send_fee">\n(includes %1$s fee)</string>
     <string name="zw_toast_sent">%1$s sent.</string>
     <string name="zw_debug_change_server">Enter server Base URL.</string>
+    <string name="zw_transaction_returned_coins">Returned Coins</string>
     
 </resources>
 
