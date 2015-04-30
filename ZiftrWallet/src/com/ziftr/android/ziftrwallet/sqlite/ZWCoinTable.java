@@ -31,6 +31,7 @@ public class ZWCoinTable {
 	
 	/** if server has enabled the coin (as opposed to activated by client)*/
 	public static final String COLUMN_ENABLED = "is_enabled";
+	public static final String COLUMN_HEALTH = "health";
 	public static final String COLUMN_CHAIN = "chain";
 	public static final String COLUMN_TYPE = "type";
 	public static final String COLUMN_SCALE = "scale";
@@ -61,10 +62,12 @@ public class ZWCoinTable {
 		this.addColumn(COLUMN_SCRIPT_PREFIX, "INTEGER", db);
 		this.addColumn(COLUMN_BLOCK_TIME, "INTEGER", db);
 		this.addColumn(COLUMN_RECOMMENDED_CONFIRMS, "INTEGER", db);
-		this.addColumn(COLUMN_ENABLED, "INTEGER", db);
 		this.addColumn(COLUMN_CHAIN, "TEXT", db);
 		this.addColumn(COLUMN_TYPE, "TEXT", db);
 		this.addColumn(COLUMN_LOGO_URL, "TEXT", db);
+		
+		this.addColumn(COLUMN_ENABLED, "INTEGER", db);
+		this.addColumn(COLUMN_HEALTH, "TEXT", db);
 
 	}
 	
@@ -115,8 +118,9 @@ public class ZWCoinTable {
 	protected List<ZWCoin> getInactiveCoins(SQLiteDatabase db, boolean includeTestnet) {
 		String whereClause = COLUMN_ACTIVATED_STATUS + " IS NULL OR " + COLUMN_ACTIVATED_STATUS + " < " + String.valueOf(ACTIVATED);
 		if(!includeTestnet) {
-			whereClause += " AND " + COLUMN_CHAIN + " = 'main'";
+			whereClause += " AND " + COLUMN_CHAIN + " = 'main'" + " AND " + COLUMN_ENABLED + " = 1";
 		}
+		
 		
 		return getCoins(whereClause, db);
 	}
@@ -246,6 +250,8 @@ public class ZWCoinTable {
 		int blockGenTime = cursor.getInt(cursor.getColumnIndex(COLUMN_BLOCK_TIME));
 		String chain = cursor.getString(cursor.getColumnIndex(COLUMN_CHAIN));
 		
+		String health = cursor.getString(cursor.getColumnIndex(COLUMN_HEALTH));
+		
 		int enabledInt = cursor.getInt(cursor.getColumnIndex(COLUMN_ENABLED));
 		boolean enabled = enabledInt > 0;
 		
@@ -254,7 +260,7 @@ public class ZWCoinTable {
 		//Integer activationStatus = cursor.getInt(cursor.getColumnIndex(COLUMN_ACTIVATED_STATUS));
 		
 		ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, String.valueOf(defaultFee), logoUrl, 
-				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, enabled);
+				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, enabled, health);
 		
 		return coin;
 	}
@@ -284,6 +290,7 @@ public class ZWCoinTable {
 		content.put(COLUMN_BLOCK_TIME, coin.getBlockTime());
 		content.put(COLUMN_CHAIN, coin.getChain());
 		content.put(COLUMN_ENABLED, coin.isEnabled());
+		content.put(COLUMN_HEALTH, coin.getHealth());
 		
 		
 		return content;

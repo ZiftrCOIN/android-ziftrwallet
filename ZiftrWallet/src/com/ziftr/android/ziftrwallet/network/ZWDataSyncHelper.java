@@ -225,6 +225,8 @@ public class ZWDataSyncHelper {
 					int blockNum = coinJson.optInt("height");
 					boolean isEnabled = coinJson.optBoolean("is_enabled");
 					
+					String health = coinJson.optString("health");
+					
 					
 					String scheme = coinJson.optString("scheme");
 					if(scheme == null || scheme.length() == 0) {
@@ -237,9 +239,21 @@ public class ZWDataSyncHelper {
 
 					}
 					
-					int scale = coinJson.optInt("scale");
+					long divisor = coinJson.optLong("divisor");
+					if(divisor == 0) {
+						//TODO -remove this once it's fixed on the server side
+						divisor = coinJson.optLong("default_fee_per_kb_divisor");
+					}
+					
+					int scale = 0;
+					if(divisor != 0) {
+						//calculate the scale
+						BigDecimal bigDecScale = BigDecimal.valueOf(divisor);
+						BigDecimal scaleCalc = BigDecimal.ONE.divide(bigDecScale);
+						scale = scaleCalc.scale();
+					}
+
 					if(scale == 0) {
-						//TODO -temp hack until api sends us proper coin scale
 						scale = 8;
 					}
 
@@ -247,7 +261,7 @@ public class ZWDataSyncHelper {
 					
 					if(name != null && name.length() > 0) {
 						ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, feeString, logoUrl, pubKeyPrefix, 
-								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, isEnabled);
+								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, isEnabled, health);
 						ZWWalletManager.getInstance().updateCoin(coin);
 					}
 				

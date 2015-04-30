@@ -25,6 +25,7 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 	protected String no;
 	
 	protected Object dataObject;
+	protected boolean isCancelable = true;
 	
 	private DialogInterface.OnClickListener clickListener = null;
 	private DialogInterface.OnCancelListener cancelListener = null;
@@ -105,7 +106,12 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		restoreInstanceState(savedInstanceState);
 		
 		View customDialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_message, null);
-		return buildCustomDialog(customDialogView);
+		
+		Dialog customDialog = buildCustomDialog(customDialogView);
+		customDialog.setCancelable(isCancelable);
+		customDialog.setCanceledOnTouchOutside(isCancelable);
+		
+		return customDialog;
 	}
 	
 	
@@ -274,6 +280,12 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		return this.dataObject;
 	}
 
+	
+	public void setCancelable(boolean isCancelable) {
+		this.isCancelable = isCancelable;
+	}
+	
+	
 	
 }
 

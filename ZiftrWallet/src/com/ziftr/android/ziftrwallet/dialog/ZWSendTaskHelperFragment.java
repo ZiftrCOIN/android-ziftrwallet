@@ -29,6 +29,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 	private final String DIALOG_ENTER_PASSWORD = "enter_password";
 	private final String DIALOG_WRONG_PASSWORD = "wrong_password";
 	private final String DIALOG_CONFIRM_SENDING = "confirm_sending";
+	private final String DIALOG_WARNING_UNCONFIRMED = "unconfirmed_warning";
 	
 	private ZWCoin coin; //coin type being sent
 	private BigInteger feePerKb; //user's preferred feePerKb for this transaction
@@ -176,15 +177,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 			
 			ZiftrDialogFragment confirmDialog = new ZiftrDialogFragment();
 			confirmDialog.setupDialog(title, message, send, cancel);
-			
-			confirmDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-				
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					//do nothing, we just want to block the user from dismissing the dialog by clicking away from it
-					//they can still dismiss it by clicking the cancel button
-				}
-			});
+			confirmDialog.setCancelable(false);
 			
 			confirmDialog.setOnClickListener(new DialogInterface.OnClickListener() {
 				
@@ -229,14 +222,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 	private void showUnconfirmedInputsWarning() {
 		ZiftrDialogFragment unconfirmedDialog = new ZiftrDialogFragment();
 		unconfirmedDialog.setupDialog(R.string.zw_app_name, R.string.zw_dialog_warning_unconfirmed, R.string.zw_dialog_send, R.string.zw_dialog_cancel);
-		
-		unconfirmedDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-			
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				//just do nothing to block cancelling
-			}
-		});
+		unconfirmedDialog.setCancelable(false);
 		
 		unconfirmedDialog.setOnClickListener(new DialogInterface.OnClickListener() {
 			
@@ -247,6 +233,8 @@ public class ZWSendTaskHelperFragment extends Fragment {
 				}
 			}
 		});
+		
+		unconfirmedDialog.show(getFragmentManager(), DIALOG_WARNING_UNCONFIRMED);
 	}
 	
 	

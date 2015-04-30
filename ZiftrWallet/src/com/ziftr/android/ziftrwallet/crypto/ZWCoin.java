@@ -96,6 +96,7 @@ public class ZWCoin implements ZWCurrency {
 	
 	
 	private boolean enabled = false;
+	private String health = null;
 	private BigInteger defaultFeePer;
 	private byte pubKeyHashPrefix; 
 	private byte scriptHashPrefix;  
@@ -112,7 +113,7 @@ public class ZWCoin implements ZWCurrency {
 	
 	public ZWCoin(String name, String type, String chain, String scheme, int scale, 
 			String defaultFee, String logoUrl, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int confirmationsNeeded, int blockTime, boolean enabled) {
+			byte privKeyPrefix, int confirmationsNeeded, int blockTime, boolean enabled, String health) {
 
 		this.name = name;
 		this.type = type;
@@ -126,6 +127,7 @@ public class ZWCoin implements ZWCurrency {
 		this.confirmationsNeeded = confirmationsNeeded;
 		this.blockTime = blockTime;
 		this.enabled = enabled;
+		this.health = health;
 
 		try {
 			this.defaultFeePer = new BigInteger(defaultFee);
@@ -388,6 +390,11 @@ public class ZWCoin implements ZWCurrency {
 		}
 		
 		return new byte[0];
+	}
+
+	
+	public String getHealth() {
+		return this.health;
 	}
 
 	

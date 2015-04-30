@@ -57,7 +57,7 @@ public class ZWNewCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		coinName.setText(nameText);
 		
 		ImageView noServerImage = (ImageView) convertView.findViewById(R.id.imageViewNoServer);
-		if(coin.isEnabled()) {
+		if("ok".equals(coin.getHealth())) {
 			noServerImage.setVisibility(View.GONE);
 		}
 		else {

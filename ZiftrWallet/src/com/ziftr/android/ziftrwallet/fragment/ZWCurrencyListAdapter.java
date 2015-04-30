@@ -96,7 +96,7 @@ public class ZWCurrencyListAdapter extends ArrayAdapter<ZWCoin> {
 		coinValue.setText(ZiftrUtils.getCurrencyDisplayString(unitPrice));
 		
 		ImageView noServerImage = (ImageView) convertView.findViewById(R.id.imageViewNoServer);
-		if(coin.isEnabled()) {
+		if("ok".equals(coin.getHealth())) {
 			noServerImage.setVisibility(View.GONE);
 		} else {
 			noServerImage.setVisibility(View.VISIBLE);
