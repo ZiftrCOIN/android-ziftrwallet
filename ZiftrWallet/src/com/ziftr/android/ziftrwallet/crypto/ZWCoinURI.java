@@ -14,6 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* Copyright ( C ) ZiftrCOIN LLC - All Rights Reserved
+ * Unauthorized copying of this file, via any medium, including being compiled as part of a binary package is strictly prohibited
+ *
+ * ZiftrWALLET is a trademark of Ziftr, LLC
+ */
+
 
 package com.ziftr.android.ziftrwallet.crypto;
 
