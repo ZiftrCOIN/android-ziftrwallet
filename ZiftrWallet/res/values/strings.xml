@@ -58,6 +58,7 @@
     <string name="zw_add_a_currency">Add a Currency</string>
     <string name="zw_ziftr_site_link"><a href="http://www.ziftrcoin.com">Website</a></string>
     <string name="zw_reset_password">Reset Password</string>
+    <string name="zw_set_password">Set Password</string>
     <string name="zw_about">About</string>
     <string name="zw_disable_password">Disable Password</string>
     <string name="zw_fiat_currency">Fiat Currency</string>
@@ -142,7 +143,7 @@
     <string name="zw_dialog_sending">Sending&#8230;</string>
     <string name="zw_dialog_error_send_badtransaction">There was an error with the data received from the server. Unable to send coins. Please try again later.</string>
     <string name="zw_dialog_error_send_noconnection">Unable to connect to the server. Please check your internet connection and try again.</string>
-    <string name="zw_dialog_error_send_returnederror">An error was received from the server. \n%1$s \n%2$s</string>
+    <string name="zw_dialog_error_send_returnederror">Error (%1$s): \n%2$s</string>
     <string name="zw_dialog_error_send_nocoins">You do not have enough %1$s to complete this transaction.</string>
     <string name="zw_dialog_warning_unconfirmed">Warning! To complete this transaction you must spend coins that are not fully confirmed. Are you sure you want to continue?</string>
     <string name="zw_dialog_send">Send</string>

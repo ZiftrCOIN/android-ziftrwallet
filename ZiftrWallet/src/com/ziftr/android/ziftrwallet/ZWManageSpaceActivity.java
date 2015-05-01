@@ -39,7 +39,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 	public void onClick(View v) {
 		if (v == continueButton){
 			if (ZWPreferences.userHasPassword()){
-				this.showContinuePassphraseDialog();
+				this.showContinuePasswordDialog();
 			} else {
 				this.clearAppData();
 				this.finish();
@@ -62,7 +62,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 		}
 	}
 	
-	public void showContinuePassphraseDialog(){
+	public void showContinuePasswordDialog(){
 		
 		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
 		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);

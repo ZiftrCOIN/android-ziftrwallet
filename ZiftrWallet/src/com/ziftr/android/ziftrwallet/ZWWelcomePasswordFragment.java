@@ -16,14 +16,14 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWWelcomePassphraseFragment extends Fragment implements OnClickListener {
+public class ZWWelcomePasswordFragment extends Fragment implements OnClickListener {
 
 	private View rootView;
 	private EditText passwordEditText;
-	private EditText confirmPassphraseEditText;
+	private EditText confirmPasswordEditText;
 
-	private Button setPassphraseButton;
-	private Button skipPassphraseButton;
+	private Button setPasswordButton;
+	private Button skipPasswordButton;
 
 
 	@Override
@@ -45,20 +45,20 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 	 * Finds all the view fields and sets the listeners.  
 	 */
 	private void initializeViewFields() {
-		setPassphraseButton = (Button) rootView.findViewById(R.id.set_password);
-		skipPassphraseButton = (Button) rootView.findViewById(R.id.skip_password);
+		setPasswordButton = (Button) rootView.findViewById(R.id.set_password);
+		skipPasswordButton = (Button) rootView.findViewById(R.id.skip_password);
 
 		passwordEditText = (EditText) rootView.findViewById(R.id.new_password).findViewById(R.id.customEditText);
 		passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 
-		confirmPassphraseEditText = 
+		confirmPasswordEditText = 
 				(EditText) rootView.findViewById(R.id.new_confirm_password).findViewById(R.id.customEditText);
 		
-		confirmPassphraseEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-		confirmPassphraseEditText.clearFocus();
+		confirmPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		confirmPasswordEditText.clearFocus();
 
-		setPassphraseButton.setOnClickListener(this);
-		skipPassphraseButton.setOnClickListener(this);
+		setPasswordButton.setOnClickListener(this);
+		skipPasswordButton.setOnClickListener(this);
 	}
 
 	@Override
@@ -70,20 +70,20 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 			return;
 		}
 
-		if (v == skipPassphraseButton) {
+		if (v == skipPasswordButton) {
 			this.startNextScreen();
 		}
-		else if (v == setPassphraseButton) {
+		else if (v == setPasswordButton) {
 			final String password = passwordEditText.getText().toString();
-			String confirmPassphrase = confirmPassphraseEditText.getText().toString();
+			String confirmPassword = confirmPasswordEditText.getText().toString();
 
-			if (password.equals(confirmPassphrase)) {
+			if (password.equals(confirmPassword)) {
 
 				ZiftrUtils.runOnNewThread(new Runnable() {
 					@Override
 					public void run() {
 						final reencryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(null, password);
-						//tried to set passphrase on encrypted database private keys
+						//tried to set password on encrypted database private keys
 						if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
 							welcomeActivity.runOnUiThread(new Runnable(){
 								@Override
@@ -104,12 +104,12 @@ public class ZWWelcomePassphraseFragment extends Fragment implements OnClickList
 
 						} 
 						else {
-							//set passphrase
+							//set password
 							String saltedHash = ZiftrUtils.saltedHashString(password);
 							
 							
 							if (ZWPreferences.setStoredPasswordHash(saltedHash) == -1){
-								//if we failed setting passphrase, something could be wrong with db
+								//if we failed setting password, something could be wrong with db
 								ZiftrDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
 								dbErrorFragment.setupDialog(R.string.zw_app_name, 
 															R.string.zw_dialog_database_error, 

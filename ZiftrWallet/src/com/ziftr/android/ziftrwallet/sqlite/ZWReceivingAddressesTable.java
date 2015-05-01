@@ -148,7 +148,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 				decrypted = oldCrypter.decrypt(new ZWEncryptedData(oldPrivKeyValInDb.substring(1)));
 			} else if (oldPrivKeyValInDb.charAt(0) == ZWKeyCrypter.PBE_AES_ENCRYPTION){
 				if (i==0){
-					ZLog.log("ERROR tried to encrypt already encrypted first key possible recovery by entering old passphrase.");
+					ZLog.log("ERROR tried to encrypt already encrypted first key possible recovery by entering old password.");
 					return reencryptionStatus.encrypted;
 				} else {
 				//shouldn't happen

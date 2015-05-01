@@ -28,12 +28,12 @@ public class ZWWelcomeActivity extends FragmentActivity {
 		
 		if (savedInstanceState == null) {
 			if (!ZWPreferences.userHasPassword() && !ZWPreferences.getPasswordWarningDisabled()) {
-				this.openPassphraseFragment();
+				this.openPasswordFragment();
 			} else if (!ZWPreferences.userHasSetName() && !ZWPreferences.getDisabledName()) {
 				this.openNameFragment(false);
 			} else {
 				ZLog.log(
-						"Shouldn't be in the welcome screen if user already has passphrase and set name!");
+						"Shouldn't be in the welcome screen if user already has password and set name!");
 			}
 		}
 	}
@@ -41,8 +41,8 @@ public class ZWWelcomeActivity extends FragmentActivity {
 	/**
 	 * 
 	 */
-	public void openPassphraseFragment() {
-		this.openFragment(new ZWWelcomePassphraseFragment(), false, false);
+	public void openPasswordFragment() {
+		this.openFragment(new ZWWelcomePasswordFragment(), false, false);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class ZWWelcomeActivity extends FragmentActivity {
 		if  (addToBackStack){
 			tx.addToBackStack("");
 		}
-		tx.replace(R.id.welcomeScreenFragmentContainer, fragToOpen, "welcome_passphrase_fragment");
+		tx.replace(R.id.welcomeScreenFragmentContainer, fragToOpen, "welcome_password_fragment");
 		tx.commit();
 	}
 	

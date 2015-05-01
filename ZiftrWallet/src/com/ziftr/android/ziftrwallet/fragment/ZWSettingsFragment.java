@@ -33,7 +33,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	
 	//TODO -there's no need to keep all these around, the click handler could just use view ids
 	
-	private RelativeLayout disablePassphrase;
+	private RelativeLayout disablePassword;
 	private RelativeLayout resetPassword;
 	private TextView resetPasswordLabel;
 	private CheckBox editableConfirmationFee;
@@ -66,8 +66,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
 		View rootView = inflater.inflate(R.layout.section_settings_layout, container, false);
 
-		this.disablePassphrase = (RelativeLayout) rootView.findViewById(R.id.disable_passphrase);
-		this.disablePassphrase.setOnClickListener(this);
+		this.disablePassword = (RelativeLayout) rootView.findViewById(R.id.disable_passphrase);
+		this.disablePassword.setOnClickListener(this);
 		this.setFiatCurrency = (RelativeLayout) rootView.findViewById(R.id.select_fiat_currency);
 		this.setFiatCurrency.setOnClickListener(this);
 		this.editableConfirmationFeeBar =(RelativeLayout) rootView.findViewById(R.id.editable_confirmation_fees_bar);
@@ -125,14 +125,14 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	public void updateSettingsVisibility() {
 		//Show/hide options based on password settings
 		if (ZWPreferences.userHasPassword()) {
-			this.resetPasswordLabel.setText("Reset Passphrase");
-			this.disablePassphrase.setVisibility(View.VISIBLE);
+			this.resetPasswordLabel.setText(R.string.zw_reset_password);
+			this.disablePassword.setVisibility(View.VISIBLE);
 		} else if (!ZWPreferences.getPasswordWarningDisabled()){
-			this.disablePassphrase.setVisibility(View.VISIBLE);
-			this.resetPasswordLabel.setText("Set Passphrase");
+			this.disablePassword.setVisibility(View.VISIBLE);
+			this.resetPasswordLabel.setText(R.string.zw_set_password);
 		} else {
-			this.resetPasswordLabel.setText("Set Passphrase");
-			this.disablePassphrase.setVisibility(View.GONE);
+			this.resetPasswordLabel.setText(R.string.zw_set_password);
+			this.disablePassword.setVisibility(View.GONE);
 		}
 		//Show/hide options based on name settings
 		if (ZWPreferences.userHasSetName()){
@@ -193,7 +193,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		else if (v==this.editableConfirmationFee){
 			ZWPreferences.setFeesAreEditable(this.editableConfirmationFee.isChecked());
 		} 
-		else if (v == this.disablePassphrase){
+		else if (v == this.disablePassword){
 			if (ZWPreferences.userHasPassword()){
 				ZiftrTextDialogFragment disablePasswordFragment = new ZiftrTextDialogFragment();
 				disablePasswordFragment.setupDialog(R.string.zw_dialog_enter_password);
@@ -205,8 +205,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			else {
 				ZWPreferences.setPasswordWarningDisabled(true);
 				//update settings visibility too slow with recognizing disabled password so update here
-				this.disablePassphrase.setVisibility(View.GONE);
-				this.resetPasswordLabel.setText("Set Passphrase");
+				this.disablePassword.setVisibility(View.GONE);
+				this.resetPasswordLabel.setText(R.string.zw_set_password);
 			}
 		} 
 		else if (v == this.setFiatCurrency){

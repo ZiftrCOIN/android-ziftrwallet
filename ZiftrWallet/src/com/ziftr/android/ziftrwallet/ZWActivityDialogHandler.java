@@ -41,14 +41,14 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 	}
 	
 	
-	private boolean changePassphrase(final String oldPassphrase, final String newPassphrase) {
+	private boolean changePassword(final String oldPassword, final String newPassword) {
 		// TODO put up a blocking dialog while this is happening
 	
-		//note: null/blank newPassphrase is ok now, it's how password is cleared
-		final reencryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(oldPassphrase, newPassphrase);
+		//note: null/blank newPassword is ok now, it's how password is cleared
+		final reencryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(oldPassword, newPassword);
 		
 		if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
-			//tried to set passphrase on encrypted database private keys
+			//tried to set password on encrypted database private keys
 			this.activity.runOnUiThread(new Runnable(){
 				@Override
 				public void run() {
@@ -68,7 +68,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			return false;
 		} else {
 			//reencryption was successful
-			String saltedHash = ZiftrUtils.saltedHashString(newPassphrase);
+			String saltedHash = ZiftrUtils.saltedHashString(newPassword);
 			ZWPreferences.setStoredPasswordHash(saltedHash);
 		}
 		return true;
@@ -117,7 +117,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			String confirmedPassword = passwordFragment.getEnteredTextMiddle();
 			
 			if(password.equals(confirmedPassword)) {
-				if (this.changePassphrase(null, password)) {
+				if (this.changePassword(null, password)) {
 					ZWPreferences.setPasswordWarningDisabled(true);
 					ZWSettingsFragment settingsFragment = (ZWSettingsFragment)this.getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
 					if(settingsFragment != null) {
@@ -146,7 +146,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 				
 				if (ZWPreferences.inputHashMatchesStoredHash(oldPasswordHash)) {
 					//everything looks ok, try and change passwords
-					if (this.changePassphrase(oldPassword, newPassword)) {
+					if (this.changePassword(oldPassword, newPassword)) {
 						ZWPreferences.setPasswordWarningDisabled(true);
 						ZWSettingsFragment settingsFragment = (ZWSettingsFragment)this.getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
 						if(settingsFragment != null) {

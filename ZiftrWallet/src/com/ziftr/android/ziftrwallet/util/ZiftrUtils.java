@@ -366,22 +366,20 @@ public class ZiftrUtils {
 			return null;
 		}
 		
-		byte[] newPassphraseBytes = password.getBytes();
+		byte[] newPasswordBytes = password.getBytes();
 		byte[] concat = new byte[32 + password.getBytes().length];
 		System.arraycopy(ZiftrUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
-		System.arraycopy(newPassphraseBytes, 0, concat, 32, newPassphraseBytes.length);
+		System.arraycopy(newPasswordBytes, 0, concat, 32, newPasswordBytes.length);
 		return ZiftrUtils.Sha256Hash(concat);
 	}
 	
-	/**
-	 * @param newPassphrase
-	 * @return
-	 */
-	public static String saltedHashString(String newPassphrase) {
-		if(newPassphrase == null || newPassphrase.isEmpty()) {
+	
+	
+	public static String saltedHashString(String newPassword) {
+		if(newPassword == null || newPassword.isEmpty()) {
 			return null;
 		}
-		return ZiftrUtils.bytesToHexString(saltedHash(newPassphrase));
+		return ZiftrUtils.bytesToHexString(saltedHash(newPassword));
 	}
 
 	/**
