@@ -271,23 +271,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * delete an address just in case someone sends coins to an old address.
 	 */
 
-	/////////////////////////////////////////////////////////////////
-	//////////  Interface for creating sending addresses  ///////////
-	/////////////////////////////////////////////////////////////////
 
-	/**
-	 * As part of the C in CRUD, this method adds a sending (not owned by the user)
-	 * address to the correct table within our database.
-	 * 
-	 * Default values will be used in this method for the note, balance, and status.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @throws ZWAddressFormatException 
-	 */
-	public ZWAddress createSendingAddress(ZWCoin coinId, String addressString) 
-			throws ZWAddressFormatException {
-		return createSendingAddress(coinId, addressString, "");
-	}
 
 	/**
 	 * As part of the C in CRUD, this method adds a sending (not owned by the user)
@@ -299,9 +283,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param note - The note that the user associates with this address.
 	 * @throws ZWAddressFormatException 
 	 */
-	public ZWAddress createSendingAddress(ZWCoin coinId, String addressString, String note) throws ZWAddressFormatException {
+	public ZWAddress createSendingAddress(ZWCoin coin, String addressString, String note) throws ZWAddressFormatException {
 		long time = System.currentTimeMillis() / 1000;
-		return createSendingAddress(coinId, addressString, note, 0, time);
+		return createSendingAddress(coin, addressString, note, 0, time);
 	}
 
 	/**
@@ -312,14 +296,18 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param key - The key to use.
 	 * @throws ZWAddressFormatException 
 	 */
-	public synchronized ZWAddress createSendingAddress(ZWCoin coinId, String addressString, String note, 
+	public synchronized ZWAddress createSendingAddress(ZWCoin coin, String addressString, String note, 
 			long balance, long modified) throws ZWAddressFormatException {
-		ZWAddress address = new ZWAddress(coinId, addressString);
+		ZWAddress address = new ZWAddress(coin, addressString);
 		address.setLabel(note);
 		address.setLastKnownBalance(balance);
 		//address.getKey().setCreationTimeSeconds(creation);
 		address.setLastTimeModifiedSeconds(modified);
-		this.sendingAddressesTable.insert(address, this.getWritableDatabase());
+		long rowId = this.sendingAddressesTable.insert(address, this.getWritableDatabase());
+		if(rowId == -1) {
+			//this address already exists, so update it
+			updateAddress(address);
+		}
 		return address;
 	}
 

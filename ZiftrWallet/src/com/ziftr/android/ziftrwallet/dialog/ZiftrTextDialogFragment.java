@@ -1,15 +1,14 @@
 package com.ziftr.android.ziftrwallet.dialog;
 
-import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWApplication;
-
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+
+import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
 
 public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 
@@ -184,12 +183,15 @@ public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
 
 	@Override
 	public void dismiss() {
-		
-		Activity activity = getActivity();
-		if(activity != null) {
-			InputMethodManager inputMan = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+		try {
+			InputMethodManager inputMan = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 			inputMan.hideSoftInputFromWindow(getDialog().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		}
+		catch(Exception e) {
+			//any of these UI elements could be null at this point
+			//if that's the case, the keyboard likely isn't open, so don't worry about it
+		}
+		
 		
 		super.dismiss();
 	}

@@ -2,9 +2,6 @@ package com.ziftr.android.ziftrwallet;
 
 import java.util.Arrays;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.util.ZLog;

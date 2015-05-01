@@ -1,4 +1,4 @@
-package com.ziftr.android.ziftrwallet.dialog;
+package com.ziftr.android.ziftrwallet.fragment;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -15,7 +15,11 @@ import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWRawTransaction;
-import com.ziftr.android.ziftrwallet.fragment.ZWSendCoinsFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTaskDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
+import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
@@ -101,6 +105,12 @@ public class ZWSendTaskHelperFragment extends Fragment {
 	
 	private void startSending() {
 		
+		//make sure the user isn't trying to send 0 coins
+		if(amount.compareTo(BigInteger.ZERO) == 0) {
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_send_zero);
+			return;
+		}
+		
 		//get our list of inputs to use for spending
 		final List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, false);
 		
@@ -110,12 +120,20 @@ public class ZWSendTaskHelperFragment extends Fragment {
 			
 			@Override
 			protected boolean doTask() {
-				
+
 				try {
-					Thread.sleep(1500);
-				} catch (InterruptedException e) { 
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Thread.sleep(700); //quick sleep so the UI doesn't "flash" the loading message
+				} 
+				catch (InterruptedException e) {
+					//do nothing, just quick sleep
+				}
+				
+				//first save this sending address into the user's address book
+				try {
+					ZWWalletManager.getInstance().createSendingAddress(coin, outputAddress, outputAddressLabel);
+				} 
+				catch (ZWAddressFormatException e) {
+					return false;
 				}
 				
 				//we'll need to get a change address to store any change from the transaction
@@ -142,7 +160,12 @@ public class ZWSendTaskHelperFragment extends Fragment {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				//this is where we handle the response from getting the raw transaction data from the server
-				handleRawTransaction();
+				if(which == DialogInterface.BUTTON_POSITIVE) {
+					handleRawTransaction();
+				}
+				else if(which == DialogInterface.BUTTON_NEGATIVE) {
+					ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_address_format);
+				}
 			}
 		});
 		

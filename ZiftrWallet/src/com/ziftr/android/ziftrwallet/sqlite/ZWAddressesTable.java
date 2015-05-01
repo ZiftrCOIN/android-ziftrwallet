@@ -61,9 +61,8 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	 */
 	protected abstract ContentValues addressToContentValues(ZWAddress address);
 
-	protected void insert(ZWAddress address, SQLiteDatabase db) {
-		db.insert(getTableName(address.getCoin()), 
-				null, addressToContentValues(address));
+	protected long insert(ZWAddress address, SQLiteDatabase db) {
+		return db.insert(getTableName(address.getCoin()), null, addressToContentValues(address));
 	}
 
 	
