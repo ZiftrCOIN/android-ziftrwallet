@@ -31,7 +31,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 	}
 	
 	
-	private FragmentManager getSupportFragmentManager() {
+	public FragmentManager getSupportFragmentManager() {
 		return this.activity.getSupportFragmentManager();
 	}
 	

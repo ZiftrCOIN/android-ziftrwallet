@@ -19,12 +19,12 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 @SuppressLint("DefaultLocale")
 public class ZWApi {
 
-	
+	private static final String UPDATE_CHECK_URL = "http://www.ziftrwallet.com/updates/android/";
 	private static final String MOCK_BASE_URL = "mocksvc.mulesoft.com/mocks/fa5dec6e-b96d-46b7-ac46-28624489f7dd";
 	private static final String SANDBOX_BASE_URL = "sandbox.fpa.bz";
 	private static final String LIVE_BASE_URL = "api.fpa.bz";
 	
-	private static String BASE_URL = SANDBOX_BASE_URL;
+	private static String BASE_URL = LIVE_BASE_URL;
 	
 	static {
 		String customBaseUrl = ZWPreferences.getCustomAPIServer();
@@ -113,6 +113,13 @@ public class ZWApi {
 	}
 	
 	
+	
+	public static ZiftrNetRequest buildUpdateCheckRequest() {
+		String url = UPDATE_CHECK_URL + String.valueOf(ZWApplication.getVersionCode()) + ".json";
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url);
+		
+		return request;
+	}
 	
 	
 	/**

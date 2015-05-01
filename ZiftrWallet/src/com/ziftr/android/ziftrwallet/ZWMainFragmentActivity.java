@@ -218,6 +218,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		//TODO -probably need to add a timer or something to this so we don't do it constantly when a user rotates their screen
 		//load available coins from API blockchains
 		ZWDataSyncHelper.updateCoinData();
+		ZWDataSyncHelper.checkForUpdates();
 		
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
@@ -257,6 +258,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	public void onResume(){
 		super.onResume();
 		this.handleIntent(getIntent());
+		ZiftrDialogManager.showWaitingDialogs();
 	}
 	
 	@Override

@@ -2,23 +2,30 @@ package com.ziftr.android.ziftrwallet.dialog;
 
 import java.lang.ref.WeakReference;
 
-import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWApplication;
-
 import android.content.Context;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
+
+import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
 
 public abstract class ZiftrDialogManager {
 	
 	private static WeakReference<ZiftrDialogHandler> handlerHolder = new WeakReference<ZiftrDialogHandler>(null);
 	
+	private static String waitingDialogMessage;
+	
 	public static synchronized void registerHandler(ZiftrDialogHandler handler) {
 		handlerHolder = new WeakReference<ZiftrDialogHandler>(handler);
+		
+		if(waitingDialogMessage != null && handler != null) {
+			showSimpleAlert(handler.getSupportFragmentManager(), waitingDialogMessage);
+			waitingDialogMessage = null;
+		}
 	}
 	
 	
-	public static void dialogClickedYes(DialogFragment fragment) {
+	public static synchronized void dialogClickedYes(DialogFragment fragment) {
 		ZiftrDialogHandler handler = handlerHolder.get();
 		if(handler != null) {
 			handler.handleDialogYes(fragment);
@@ -26,20 +33,29 @@ public abstract class ZiftrDialogManager {
 	}
 
 	
-	public static void dialogClickedNo(DialogFragment fragment) {
+	public static synchronized void dialogClickedNo(DialogFragment fragment) {
 		ZiftrDialogHandler handler = handlerHolder.get();
 		if(handler != null) {
 			handler.handleDialogNo(fragment);
 		}
 	}
 	
-	public static void dialogCancelled(DialogFragment fragment) {
+	public static synchronized void dialogCancelled(DialogFragment fragment) {
 		ZiftrDialogHandler handler = handlerHolder.get();
 		if(handler != null) {
 			handler.handleDialogCancel(fragment);
 		}
 	}
 	
+	
+	public static synchronized void showWaitingDialogs() {
+		ZiftrDialogHandler handler = handlerHolder.get();
+		
+		if(waitingDialogMessage != null && handler != null) {
+			showSimpleAlert(handler.getSupportFragmentManager(), waitingDialogMessage);
+			waitingDialogMessage = null;
+		}
+	}
 	
 
 	/**
@@ -68,5 +84,22 @@ public abstract class ZiftrDialogManager {
 		dialog.show(fragmentManager, "simple_alert_dialog");
 	}
 
+	
+	public static synchronized void showSimpleAlert(String message) {
+
+		ZiftrDialogHandler handler = handlerHolder.get();
+		if(handler != null) {
+			try {
+				showSimpleAlert(handler.getSupportFragmentManager(), message);
+			}
+			catch(Exception e) {
+				waitingDialogMessage = message;
+			}
+		}
+		else {
+			waitingDialogMessage = message;
+		}
+		
+	}
 	
 }

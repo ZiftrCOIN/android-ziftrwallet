@@ -38,6 +38,8 @@ public abstract class ZWPreferences {
 	
 	/** Save whether we can spend unconfirmed txns or not*/
 	public final static String UNCONFIRMED_WARNING_KEY = "unconfirmed_warning";
+	
+	private static final String UPDATE_CHECK_KEY = "update_check";
 
 	
 	/**
@@ -293,6 +295,23 @@ public abstract class ZWPreferences {
 		}
 		
 		return dbVal;
+	}
+	
+	
+	public static long getLastUpdateCheck() {
+		String databaseValue = ZWWalletManager.getInstance().getAppDataString(UPDATE_CHECK_KEY);
+		
+		if(databaseValue == null || databaseValue.length() == 0) {
+			return 0;
+		}
+		
+		return Long.valueOf(databaseValue);
+	}
+	
+	
+	public static void setLastUpdateCheck(long timestamp) {
+		String lastCheck = String.valueOf(timestamp);
+		ZWWalletManager.getInstance().upsertAppDataVal(UPDATE_CHECK_KEY, lastCheck);
 	}
 	
 

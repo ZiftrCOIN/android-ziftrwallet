@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
@@ -25,6 +26,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWRawTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -95,7 +97,7 @@ public class ZWDataSyncHelper {
 				
 				errorMessage = "";
 				
-				Iterator<String> keys = fields.keys();
+				Iterator<?> keys = fields.keys();
 				while(keys.hasNext()) {
 					String key = keys.next().toString();
 					String value = fields.optString(key);
@@ -220,6 +222,45 @@ public class ZWDataSyncHelper {
 		}
 		
 		return false;
+	}
+	
+	
+	public static void checkForUpdates() {
+		ZiftrUtils.runOnNewThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				
+				long lastCheckTime = ZWPreferences.getLastUpdateCheck();
+				if(System.currentTimeMillis() - lastCheckTime < 900000) {
+					//only bug the user once every 15 minutes
+					return;
+				}
+				
+				String updateMessage = null;
+				
+				ZiftrNetRequest updateCheckRequest = ZWApi.buildUpdateCheckRequest();
+				
+				try {
+					updateCheckRequest.sendAndWait();
+					
+					String updateResponse = updateCheckRequest.getResponseData();
+					JSONObject updateJson = new JSONObject(updateResponse);
+					updateMessage = updateJson.getString("message");
+				}
+				catch(Exception e) {
+					//do nothing, this means everything is ok and there are no updates
+				}
+				
+				ZWPreferences.setLastUpdateCheck(System.currentTimeMillis());
+				
+				if(updateMessage != null) {
+					ZiftrDialogManager.showSimpleAlert(updateMessage);
+				}
+				
+			}
+		});
 	}
 	
 	
