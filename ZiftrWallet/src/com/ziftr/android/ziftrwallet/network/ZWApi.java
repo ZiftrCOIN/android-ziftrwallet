@@ -10,6 +10,8 @@ import android.annotation.SuppressLint;
 import android.util.Base64;
 
 import com.google.common.base.Joiner;
+import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
@@ -31,8 +33,8 @@ public class ZWApi {
 		}
 	}
 	
-	
-	private static final String AUTHORIZATION = "Basic " + Base64.encodeToString("pub_c905a5608ce7ec9b63dbcb60c947921c:".getBytes(), Base64.DEFAULT);
+	private static final String API_KEY = ZWApplication.getApplication().getString(R.string.api_key_blockchain_server) + ":";
+	private static final String AUTHORIZATION = "Basic " + Base64.encodeToString(API_KEY.getBytes(), Base64.DEFAULT);
 	private static final String ACCEPT = "application/vnd.ziftr.fpa-0-1+json";
 	
 	
