@@ -1,19 +1,21 @@
 package com.ziftr.android.ziftrwallet.sqlite;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.ziftr.android.ziftrwallet.ZWApplication;
+import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWAppDataTable {
 	
-	public static final String TABLE_NAME = "app_data";
-	public static final String COLUMN_KEY = "key";
-	public static final String COLUMN_VALUE = "value";
-	public static final String SALT = "salt";
-	public static final String PASS_KEY = "password_hash";
+	private static final String TABLE_NAME = "app_data";
+	private static final String COLUMN_KEY = "key";
+	private static final String COLUMN_VALUE = "value";
 
 	
 	protected void create(SQLiteDatabase db) {
@@ -59,9 +61,9 @@ public class ZWAppDataTable {
 			String val = c.getString(c.getColumnIndex(COLUMN_VALUE));
 			c.close();
 			return val;
-		} else {
+		}
+		else {
 			c.close();
-			//no row found = no internet or api call failed when retreiving fiat rates return 0
 			return null;
 		}
 	}
@@ -73,11 +75,33 @@ public class ZWAppDataTable {
 			int val = c.getInt(c.getColumnIndex(COLUMN_VALUE));
 			c.close();
 			return val == 0 ? false : true;
-		} else {
+		} 
+		else {
 			c.close();
-			//no row found = no internet or api call failed when retreiving fiat rates return 0
 			return null;
 		}
-	}	
+	}
+	
+	
+	
+	/**
+	 * Older versions of the app used SharedPreferences to hold preference data.
+	 * Since we need to be absolutely sure some of the data isn't lost, and we're using sqlite already,
+	 * it makes sense to just store all preferences in the sqlite database
+	 * That has the added benefit of making it easier to backup the user's preferences as well.
+	 */
+	public void upgradeFromOldPreferences(SQLiteDatabase db) {
+		SharedPreferences prefs = ZWApplication.getApplication().getSharedPreferences("ziftrWALLET_Prefs", Context.MODE_PRIVATE);
+		String oldSalt = prefs.getString("ziftrWALLET_salt_key", null);
+		String oldPasswordHash = prefs.getString("zw_passphrase_key_1", null);
+		
+		if(oldSalt != null && oldPasswordHash != null) {
+			this.upsert("salt", oldSalt, db);
+			this.upsert("password_hash", oldPasswordHash, db);
+		}
+		
+		String oldName = prefs.getString("zw_name_key", null);
+		this.upsert("user_name", oldName, db);
+	}
 	
 }

@@ -89,6 +89,9 @@ public class ZWSendTaskHelperFragment extends Fragment {
 			if(password == null) {
 				getPassword();
 			}
+			else {
+				startSending();
+			}
 		}
 		else {
 			startSending();
@@ -287,6 +290,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 				
 				if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
 					ZWPreferences.setCachedPassword(enteredPassword);
+					ZWSendTaskHelperFragment.this.password = enteredPassword;
 					startSending();
 				}
 				else {

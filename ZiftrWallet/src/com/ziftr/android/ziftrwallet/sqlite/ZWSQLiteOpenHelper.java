@@ -10,7 +10,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
@@ -73,7 +72,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	/** Table with market values of currencies */
 	private ZWExchangeTable exchangeTable;
 	
-	private ZWAppDataTable miscellaneousTable;
+	private ZWAppDataTable appDataTable;
 
 	///////////////////////////////////////////////////////
 	//////////  Boiler plate SQLite Table Stuff ///////////
@@ -89,7 +88,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.coinTable = new ZWCoinTable();
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
-		this.miscellaneousTable = new ZWAppDataTable();
+		this.appDataTable = new ZWAppDataTable();
 	}
 
 	
@@ -115,7 +114,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		//Make exchange table
 		this.exchangeTable.create(db);
 		//Make misc table
-		this.miscellaneousTable.create(db);
+		this.appDataTable.create(db);
 	}
 	
 	
@@ -137,6 +136,10 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 				this.transactionsTable.create(coin, db);
 				this.transactionOutputsTable.create(coin, db);
 			}
+			
+			//the old version also stored user preferences and passwords hashes in SharedPreferences
+			//that's all stored in the sqlite database now, so coppy important data over
+			this.appDataTable.upgradeFromOldPreferences(db);
 		}
 	}
 
@@ -573,20 +576,20 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	
 	//returns 1 if successful, -1 if error
 	public synchronized int upsertAppDataVal(String key, String val){
-		return this.miscellaneousTable.upsert(key, val, getWritableDatabase());
+		return this.appDataTable.upsert(key, val, getWritableDatabase());
 	}
 	
 	//returns 1 if successful, -1 if error
 	public synchronized int upsertAppDataVal(String key, boolean val){
-		return this.miscellaneousTable.upsert(key, val, getWritableDatabase());
+		return this.appDataTable.upsert(key, val, getWritableDatabase());
 	}
 	
 	public synchronized String getAppDataString(String key){
-		return this.miscellaneousTable.getStringFromKey(key, getReadableDatabase());
+		return this.appDataTable.getStringFromKey(key, getReadableDatabase());
 	}
 	
 	public synchronized Boolean getAppDataBoolean(String key){
-		return this.miscellaneousTable.getBooleanFromKey(key, getReadableDatabase());
+		return this.appDataTable.getBooleanFromKey(key, getReadableDatabase());
 	}
 
 	/**
