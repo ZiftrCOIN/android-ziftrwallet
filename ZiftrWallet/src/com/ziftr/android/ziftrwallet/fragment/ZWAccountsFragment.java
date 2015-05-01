@@ -197,10 +197,10 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 		for(ZWCoin coin : this.activatedCoins) {
 			BigInteger balanceAtomic = walletManager.getWalletBalance(coin);
 			BigDecimal balance = coin.getAmount(balanceAtomic);
-			total.add(ZWConverter.convert(balance, coin, fiat));
+			total = total.add(ZWConverter.convert(balance, coin, fiat));
 		}
 
-		this.totalBalance.setText(this.fiatType.getSymbol() + total.toPlainString());
+		this.totalBalance.setText(this.fiatType.getSymbol() + total.setScale(fiat.getScale(), BigDecimal.ROUND_HALF_UP).toPlainString());
 	}
 	
 	
