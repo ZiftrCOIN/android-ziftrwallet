@@ -129,6 +129,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		if(oldVersion < 2 && newVersion >= 2) {
 			//upgrading from version 1 to 2+ requires adding new tables for any active coins
 			ZLog.log("Upgrading from local database v1 to v2...");
+			
+			this.coinTable.create(db); //make sure coin table is up to date
 			List<ZWCoin> coins = this.coinTable.getNotUnactiveCoins(db);
 			for(ZWCoin coin : coins) {
 				this.receivingAddressesTable.create(coin, db);
@@ -139,6 +141,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 			
 			//the old version also stored user preferences and passwords hashes in SharedPreferences
 			//that's all stored in the sqlite database now, so coppy important data over
+			this.appDataTable.create(db);
 			this.appDataTable.upgradeFromOldPreferences(db);
 		}
 	}
