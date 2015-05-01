@@ -6,6 +6,7 @@ import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -71,12 +72,54 @@ public class ZWDataSyncHelper {
 			}
 		}
 		else {
-			rawTransaction = new ZWRawTransaction(coin, output, request.getResponseCode(), request.getResponseMessage());
+			rawTransaction = createRawTransactionError(request, coin, output);
 		}
 
 		ZiftrNetworkManager.networkStopped();
 
 		return rawTransaction;
+	}
+	
+	
+	
+	private static ZWRawTransaction createRawTransactionError(ZiftrNetRequest request, ZWCoin coin, String output) {
+		String response = request.getResponseData();
+		
+		String errorMessage;
+		
+		if(response != null) {
+			try {
+				JSONObject responseJson = new JSONObject(response);
+				JSONObject errorJson = responseJson.getJSONObject("error");
+				JSONObject fields = errorJson.getJSONObject("fields");
+				
+				errorMessage = "";
+				
+				Iterator<String> keys = fields.keys();
+				while(keys.hasNext()) {
+					String key = keys.next().toString();
+					String value = fields.optString(key);
+					errorMessage += value;
+					
+					if(keys.hasNext()) {
+						errorMessage += "\n";
+					}
+				}
+				
+				if(errorMessage.length() == 0) {
+					errorMessage = request.getResponseMessage();
+				}
+				
+			}
+			catch(Exception e) {
+				errorMessage = request.getResponseMessage();
+			}
+		}
+		else {
+			errorMessage = request.getResponseMessage();
+		}
+		
+		return new ZWRawTransaction(coin, output, request.getResponseCode(), errorMessage);	
 	}
 	
 	
