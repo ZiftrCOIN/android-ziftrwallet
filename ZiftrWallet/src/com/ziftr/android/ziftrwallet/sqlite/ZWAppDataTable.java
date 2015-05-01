@@ -93,14 +93,14 @@ public class ZWAppDataTable {
 	public void upgradeFromOldPreferences(SQLiteDatabase db) {
 		SharedPreferences prefs = ZWApplication.getApplication().getSharedPreferences("ziftrWALLET_Prefs", Context.MODE_PRIVATE);
 		String oldSalt = prefs.getString("ziftrWALLET_salt_key", null);
-		String oldPasswordHash = prefs.getString("zw_passphrase_key_1", null);
+		String oldPasswordHash = prefs.getString("ow_passphrase_key_1", null);
 		
 		if(oldSalt != null && oldPasswordHash != null) {
 			this.upsert("salt", oldSalt, db);
 			this.upsert("password_hash", oldPasswordHash, db);
 		}
 		
-		String oldName = prefs.getString("zw_name_key", null);
+		String oldName = prefs.getString("ow_name_key", null);
 		this.upsert("user_name", oldName, db);
 	}
 	

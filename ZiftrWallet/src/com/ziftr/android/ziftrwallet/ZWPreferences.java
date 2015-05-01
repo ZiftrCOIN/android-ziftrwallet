@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -263,6 +264,10 @@ public abstract class ZWPreferences {
 	
 	public static String getSalt(){
 		String salt = ZWWalletManager.getInstance().getAppDataString(PREFS_SALT_KEY);
+		
+		if(salt == null || salt.length() == 0) {
+			salt = ZWPbeAesCrypter.generateSalt();
+		}
 
 		return salt;
 	}
