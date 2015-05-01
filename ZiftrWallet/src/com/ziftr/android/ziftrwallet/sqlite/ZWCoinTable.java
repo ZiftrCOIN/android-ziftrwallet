@@ -122,7 +122,7 @@ public class ZWCoinTable {
 	
 	
 	protected List<ZWCoin> getInactiveCoins(SQLiteDatabase db, boolean includeTestnet) {
-		String whereClause = COLUMN_ACTIVATED_STATUS + " IS NULL OR " + COLUMN_ACTIVATED_STATUS + " < " + String.valueOf(ACTIVATED);
+		String whereClause = "(" + COLUMN_ACTIVATED_STATUS + " IS NULL OR " + COLUMN_ACTIVATED_STATUS + " < " + String.valueOf(ACTIVATED) + ")";
 		if(!includeTestnet) {
 			whereClause += " AND " + COLUMN_CHAIN + " = 'main'" + " AND " + COLUMN_ENABLED + " = 1";
 		}

@@ -271,6 +271,7 @@ public abstract class ZWPreferences {
 		
 		if(salt == null || salt.length() == 0) {
 			salt = ZWPbeAesCrypter.generateSalt();
+			ZWWalletManager.getInstance().upsertAppDataVal(PREFS_SALT_KEY, salt);
 		}
 
 		return salt;
