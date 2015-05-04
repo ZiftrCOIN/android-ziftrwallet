@@ -17,9 +17,6 @@ public class ZWRawTransaction  {
 	
 	private JSONObject rawData;
 	
-	private BigInteger change;
-	private BigInteger spentCoins;
-	private BigInteger inputCoins;
 	private String toAddress;
 	private boolean usingUnconfirmedInputs;
 	
@@ -34,10 +31,6 @@ public class ZWRawTransaction  {
 	public ZWRawTransaction(ZWCoin coin, BigInteger inputCoins, BigInteger spentCoins, BigInteger change, String toAddress) {
 		this.coin = coin;
 		this.toAddress = toAddress;
-		
-		this.inputCoins = inputCoins;
-		this.spentCoins = spentCoins;
-		this.change = change;
 		
 		this.totalFee = inputCoins.subtract(spentCoins).subtract(change);
 		this.totalSpent = totalFee.add(spentCoins);

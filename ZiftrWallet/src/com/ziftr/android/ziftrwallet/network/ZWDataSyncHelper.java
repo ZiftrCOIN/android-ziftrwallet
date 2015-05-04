@@ -200,12 +200,12 @@ public class ZWDataSyncHelper {
 					createTransaction(coin, transactionJson);
 					signingSuccessful = true;
 				}
-				catch(Exception e2) {
-					ZLog.log("Exception parsing successful spend response: ", e2);
+				catch(Exception e) {
+					ZLog.log("Exception parsing successful spend response: ", e);
 					
 					//if the server said the send was successful, but we couldn't handle the response, 
 					//then we just update our history and hope it's there
-					downloadTransactionHistory(coin, false);
+					updateTransactionHistory(coin, false);
 				}
 			}
 			catch(Exception e) {
@@ -422,13 +422,13 @@ public class ZWDataSyncHelper {
 	}
 
 	
-	public static void updateTransactionHistory(final List<ZWCoin> coins, final boolean autorefresh) {
+	public static void updateTransactionHistories(final List<ZWCoin> coins, final boolean autorefresh) {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			
 			@Override
 			public void run() {
 				for(ZWCoin coin : coins) {
-					downloadTransactionHistory(coin, autorefresh);
+					downloadAllTransactions(coin, autorefresh);
 				}
 				ZiftrNetworkManager.dataUpdated();
 			}
@@ -441,22 +441,44 @@ public class ZWDataSyncHelper {
 			
 			@Override
 			public void run() {
-				downloadTransactionHistory(coin, autorefresh);
+				downloadAllTransactions(coin, autorefresh);
 				ZiftrNetworkManager.dataUpdated();
 			}
 		});
 		
 	}
 	
-
-	public static void downloadTransactionHistory(ZWCoin coin, boolean autorefresh) {
+	
+	private static void downloadAllTransactions(ZWCoin coin, boolean autorefresh) {
 		if (autorefresh && ZWDataSyncHelper.lastRefreshed.containsKey(coin.getSymbol())){
 			if (ZWDataSyncHelper.lastRefreshed.get(coin.getSymbol()) > (System.currentTimeMillis() / 1000) - REFRESH_TIME){
 				ZLog.log("history not refreshed" );
 				return;
 			}
 		}
-		List<String> addresses = ZWWalletManager.getInstance().getAddressList(coin, true);
+		
+		int maxAddressLimit = 100;
+		
+		List<String> allAddresses = ZWWalletManager.getInstance().getAddressList(coin, true);
+		
+		for(int addressIndex = 0; addressIndex < allAddresses.size(); addressIndex += maxAddressLimit) {
+			List<String> addresses;
+			int addressIndexEnd = addressIndex + maxAddressLimit;
+			if(allAddresses.size() >= addressIndexEnd) {
+				addresses = allAddresses.subList(addressIndex, addressIndexEnd);
+			}
+			else {
+				addresses = allAddresses.subList(addressIndex, allAddresses.size());
+			}
+		
+			downloadTransactionHistory(coin, addresses);
+		}
+		
+	}
+	
+
+	public static void downloadTransactionHistory(ZWCoin coin, List<String> addresses) {
+		
 		if (addresses.size() <= 0){
 			ZLog.log("No addresses to get transaction history for");
 			return;

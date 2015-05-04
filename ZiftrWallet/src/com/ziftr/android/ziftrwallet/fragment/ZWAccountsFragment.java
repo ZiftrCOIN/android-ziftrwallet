@@ -207,7 +207,7 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 	//this updates transaction history for all activated wallets
 	@Override
 	public void refreshData(final boolean autorefresh) {	
-		ZWDataSyncHelper.updateTransactionHistory(activatedCoins, autorefresh);
+		ZWDataSyncHelper.updateTransactionHistories(activatedCoins, autorefresh);
 	}
 	
 
