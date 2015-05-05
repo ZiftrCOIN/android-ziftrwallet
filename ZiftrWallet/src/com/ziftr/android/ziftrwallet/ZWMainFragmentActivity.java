@@ -209,6 +209,11 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		if (ZWPreferences.getLogToFile()){
 			ZLog.setLogger(ZLog.FILE_LOGGER);
 		}
+		else if(ZWPreferences.getDebugMode()) {
+			ZLog.setLogger(ZLog.ANDROID_LOGGER);
+		}
+		
+		
 		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
 		if(savedInstanceState != null) {
 			consumedIntent = savedInstanceState.getBoolean("consumedIntent");

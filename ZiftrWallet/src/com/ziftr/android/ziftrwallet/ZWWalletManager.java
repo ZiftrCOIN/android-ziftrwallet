@@ -95,7 +95,8 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	public static synchronized void closeInstance() {
 		if (instance != null) {
 			instance.close();
-		} else {
+		} 
+		else {
 			// If used right shouldn't happen because get instance should always
 			// be called before every close call.
 			log("instance was null when we called closeInstance...");
@@ -185,6 +186,21 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 		key.setKeyCrypter(this.passphraseToCrypter(passphrase));
 		return key;
 	}
+
+
+	@Override
+	protected void finalize() throws Throwable {
+		
+		try {
+			this.close();
+		}
+		catch(Exception e) {
+			//just making sure the database is properly closed
+		}
+	}
+	
+	
+	
 
 }
 

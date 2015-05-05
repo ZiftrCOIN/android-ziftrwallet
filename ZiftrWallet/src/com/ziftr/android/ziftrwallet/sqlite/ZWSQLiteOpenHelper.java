@@ -134,7 +134,11 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		if(oldVersion < 2 && newVersion >= 2) {
 			//upgrading from version 1 to 2+ requires adding new tables for any active coins
-			ZLog.log("Upgrading from local database v1 to v2...");
+			
+			//note, don't put ZLog message here, fixed an issue where ZLog was trying to read the database
+			//while being loaded by the class loader, which was happening here due to being called first
+			//this caused a recursive getDatabase call, the issue has been fixed but best to not 
+			//depend on any static classes here
 			
 			this.coinTable.create(db); //make sure coin table is up to date
 			List<ZWCoin> coins = this.coinTable.getNotUnactiveCoins(db);

@@ -41,7 +41,7 @@ public abstract class ZLog {
 	}
 	
 	private static ZLog initLogger() {
-		if (ZWApplication.isDebuggable() || ZWPreferences.getDebugMode()) {
+		if(ZWApplication.isDebuggable() ) { 
 			
 			return new AndroidLogger();
 		}
