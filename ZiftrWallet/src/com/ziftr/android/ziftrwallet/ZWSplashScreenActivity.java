@@ -107,10 +107,12 @@ public class ZWSplashScreenActivity extends FragmentActivity {
 		boolean existingUserName = ZWPreferences.userHasSetName();
 		boolean userNameDisabled = ZWPreferences.getDisabledName();
 		
+		boolean agreedToTos = ZWPreferences.userAgreedToTos();
+		
 		boolean passwordSetup = existingPassword || passwordWarningDisabled;
 		boolean userNameSetup = existingUserName || userNameDisabled;
 		
-		if(passwordSetup && userNameSetup) {
+		if(agreedToTos && passwordSetup && userNameSetup) {
 			//if the user has both their password and username setup (or properly disabled) go directly to wallet
 			Intent noFragmentIntent = new Intent(ZWSplashScreenActivity.this, ZWMainFragmentActivity.class);
 			noFragmentIntent.setFlags(noFragmentIntent.getFlags() | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);

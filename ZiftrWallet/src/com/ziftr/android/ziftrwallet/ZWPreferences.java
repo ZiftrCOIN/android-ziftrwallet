@@ -45,6 +45,8 @@ public abstract class ZWPreferences {
 	public final static String UNCONFIRMED_WARNING_KEY = "unconfirmed_warning";
 	
 	private static final String UPDATE_CHECK_KEY = "update_check";
+	
+	private static final String AGREED_TO_TOS_KEY = "agreed_to_tos";
 
 	
 	/**
@@ -320,5 +322,13 @@ public abstract class ZWPreferences {
 		ZWWalletManager.getInstance().upsertAppDataVal(UPDATE_CHECK_KEY, lastCheck);
 	}
 	
+	
+	public static boolean userAgreedToTos() {
+		return getOption(AGREED_TO_TOS_KEY, false);
+	}
+	
+	public static void setUserAgreedToTos(boolean agreed) {
+		ZWWalletManager.getInstance().upsertAppDataVal(AGREED_TO_TOS_KEY, agreed);
+	}
 
 }

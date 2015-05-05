@@ -32,44 +32,55 @@ public class ZWWelcomeActivity extends FragmentActivity {
 		this.setContentView(R.layout.welcome);
 		
 		if (savedInstanceState == null) {
-			if (!ZWPreferences.userHasPassword() && !ZWPreferences.getPasswordWarningDisabled()) {
-				this.openPasswordFragment();
-			} else if (!ZWPreferences.userHasSetName() && !ZWPreferences.getDisabledName()) {
-				this.openNameFragment(false);
-			} else {
-				ZLog.log(
-						"Shouldn't be in the welcome screen if user already has password and set name!");
-			}
+			showTermsFragment();
 		}
 	}
 	
-	/**
-	 * 
-	 */
-	public void openPasswordFragment() {
-		this.openFragment(new ZWWelcomePasswordFragment(), false, false);
+	
+	public void showTermsFragment() {
+		if(ZWPreferences.userAgreedToTos()) {
+			//move on to the password screen if we don't need the terms screen
+			showPasswordFragment(true);
+		}
+		else {
+			showFragment(new ZWWelcomeTermsFragment(), true);
+		}
+		
 	}
 	
-	/**
-	 * 
-	 */
-	public void openNameFragment(boolean addToBackStack) {
-		Fragment welcomeFrag = new ZWWelcomeNameFragment();
-		this.openFragment(welcomeFrag, true, addToBackStack);
+	
+	public void showPasswordFragment(boolean fromSplashScreen) {
+		if (ZWPreferences.userHasPassword() || ZWPreferences.getPasswordWarningDisabled()) {
+			//move on to the name screen if we don't need to show the password screen
+			showNameFragment(fromSplashScreen);
+		}
+		else {
+			this.showFragment(new ZWWelcomePasswordFragment(), fromSplashScreen);
+		}
 	}
 	
-	/**
-	 * 
-	 */
-	private void openFragment(Fragment fragToOpen, boolean addTransition, boolean addToBackStack) {
+	
+	public void showNameFragment(boolean fromSplashScreen) {
+		if (ZWPreferences.userHasSetName() || ZWPreferences.getDisabledName()) {
+			//start real activity if we don't need to show the name screen
+			startZWMainActivity();
+		}
+		else {
+			this.showFragment(new ZWWelcomeNameFragment(), fromSplashScreen);
+		}
+			
+		
+	}
+	
+	
+	private void showFragment(Fragment fragment, boolean fromSplashScreen) { 
 		FragmentTransaction tx = this.getSupportFragmentManager().beginTransaction();
-		if (addTransition) {
+		if (!fromSplashScreen) {
 			tx.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
-		}
-		if  (addToBackStack){
 			tx.addToBackStack("");
 		}
-		tx.replace(R.id.welcomeScreenFragmentContainer, fragToOpen, "welcome_password_fragment");
+		
+		tx.replace(R.id.welcomeScreenFragmentContainer, fragment, "welcome_password_fragment");
 		tx.commit();
 	}
 	
@@ -79,5 +90,5 @@ public class ZWWelcomeActivity extends FragmentActivity {
 		startActivity(main);
 		this.finish();
 	}
-	
+
 }

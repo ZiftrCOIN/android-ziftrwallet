@@ -155,6 +155,9 @@
     <string name="zw_transaction_unknown">Unknown Transaction</string>
     <string name="zw_transaction_self_send">Sent to Self</string>
     <string name="zw_dialog_send_zero">You can\'t send zero coins.</string>
+    <string name="zw_welcome_accept_terms">AGREE</string>
+    <string name="zw_welcome_terms">Terms and Conditions.</string>
+    <string name="zw_welcome_terms_directions">Please take a moment to review our terms of service at: \n \n<a href="http://www.ziftrwallet.com/terms-conditions">http://www.ziftrwallet.com/terms-conditions</a> \n \nBy using ziftrWALLET you agree to the terms and conditions provided at the above link. \n \n</string>
     
 </resources>
 

@@ -50,7 +50,7 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 	 * Finds all the view fields and sets the listeners.  
 	 */
 	private void initializeViewFields() {
-		setPasswordButton = (Button) rootView.findViewById(R.id.set_password);
+		setPasswordButton = (Button) rootView.findViewById(R.id.acceptTerms);
 		skipPasswordButton = (Button) rootView.findViewById(R.id.skip_password);
 
 		passwordEditText = (EditText) rootView.findViewById(R.id.new_password).findViewById(R.id.customEditText);
@@ -126,6 +126,7 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 						}
 					}
 				});
+				
 				this.startNextScreen();
 				
 			} 
@@ -137,11 +138,7 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 	
 	private void startNextScreen() {
 		ZWWelcomeActivity welcomeActivity = (ZWWelcomeActivity) this.getActivity();
-		if (ZWPreferences.userHasSetName() || ZWPreferences.getDisabledName()) {
-			welcomeActivity.startZWMainActivity();
-		} else {
-			welcomeActivity.openNameFragment(true);
-		}
+		welcomeActivity.showNameFragment(false);
 	}
 
 }
