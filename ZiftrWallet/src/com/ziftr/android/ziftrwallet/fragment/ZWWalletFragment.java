@@ -124,8 +124,7 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 			ZWSearchableListItem pendingDivider = new ZWSearchableListItem() {
 				
 				@Override
-				public boolean matches(CharSequence constraint,
-						ZWSearchableListItem nextItem) {
+				public boolean matches(CharSequence constraint, ZWSearchableListItem nextItem) {
 					if(nextItem instanceof ZWTransaction) {
 						return true;
 					}

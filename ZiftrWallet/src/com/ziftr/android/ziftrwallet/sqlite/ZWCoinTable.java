@@ -157,6 +157,7 @@ public class ZWCoinTable {
 		ArrayList<ZWCoin> coins = new ArrayList<ZWCoin>();
 		
 		String sql = "SELECT * FROM " + TABLE_NAME;
+		
 		Cursor cursor = database.rawQuery(sql, null);
 		if(cursor.moveToFirst()) {
 			do {
@@ -165,19 +166,23 @@ public class ZWCoinTable {
 			}
 			while(cursor.moveToNext());
 		}
-		
+		cursor.close();
 		
 		return coins;
 	}
 	
 	protected ZWCoin getCoin(String coinSymbol, SQLiteDatabase db){
 		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coinSymbol);
+		
+		ZWCoin coin = null;
+		
 		Cursor cursor = db.rawQuery(sql, null);
 		if(cursor.moveToFirst()) {
-			ZWCoin coin = cursorToCoin(cursor);
-			return coin;
+			coin = cursorToCoin(cursor);
 		}
-		return null;
+		cursor.close();
+		
+		return coin;
 	}
 	
 	
@@ -200,7 +205,6 @@ public class ZWCoinTable {
 				isActivated = true;
 			}
 		}
-
 		cursor.close();
 		
 		return isActivated;

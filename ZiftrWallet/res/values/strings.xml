@@ -147,7 +147,10 @@
     <string name="zw_dialog_error_send_nocoins">You do not have enough %1$s to complete this transaction.</string>
     <string name="zw_dialog_warning_unconfirmed">Warning! To complete this transaction you must spend coins that are not fully confirmed. Are you sure you want to continue?</string>
     <string name="zw_dialog_send">Send</string>
-    <string name="zw_dialog_send_confirmation">Are you sure you want to send: \n%1$s \nto \n%2$s?</string>
+    <string name="zw_dialog_send_confirmation">Are you sure you want to send:</string>
+    <string name="zw_dialog_send_confirmation_fee">(includes %1$s fee)</string>
+    <string name="zw_dialog_send_confirmation_title">Confirm Transaction</string>
+    <string name="zw_dialog_send_confirmation_to">to</string>
     <string name="zw_dialog_send_fee">\n(includes %1$s fee)</string>
     <string name="zw_toast_sent">%1$s sent.</string>
     <string name="zw_debug_change_server">Enter server Base URL.</string>

@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
 
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWWelcomeActivity extends FragmentActivity {
 

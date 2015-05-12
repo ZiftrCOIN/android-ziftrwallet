@@ -86,7 +86,7 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	protected ZWSQLiteOpenHelper(Context context, String databasePath) {
 		// If the database path is null then an in memory database is used
-		super(context, databasePath, null, DATABASE_VERSION);
+		super(context, databasePath, ZiftrCursorFactory.newFactory(), DATABASE_VERSION);
 
 		this.sendingAddressesTable = new ZWSendingAddressesTable();
 		this.receivingAddressesTable = new ZWReceivingAddressesTable();

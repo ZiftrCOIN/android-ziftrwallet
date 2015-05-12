@@ -98,6 +98,8 @@ public class ZWTransactionOutputsTable extends ZWCoinSpecificTable {
 			while(cursor.moveToNext());
 		}
 		
+		cursor.close();
+		
 		return outputs;
 	}
 	

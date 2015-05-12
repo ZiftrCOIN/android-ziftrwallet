@@ -106,12 +106,9 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 			// Recreate key from stored private key
 			try {
 				foundAddress = cursorToAddress(coinId, c);
-				return foundAddress;
-
 			}
 			catch (ZWAddressFormatException afe) {
-				ZLog.log("Error loading address from ", coinId.getSymbol(), 
-						" receiving addresses database.");
+				ZLog.log("Error loading address from ", coinId.getSymbol(), " receiving addresses database.");
 				ZLog.log(afe);
 			}
 		}
@@ -119,8 +116,7 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 		// Make sure we close the cursor
 		c.close();
 
-		return null;
-		
+		return foundAddress;
 	}
 	
 

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sendConfirmationRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    
+    <include layout="@layout/dialog_include_title" />
+
+    <TextView
+        android:id="@+id/sendConfirmationMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/zw_dialog_send_confirmation" />
+
+    <TextView
+        android:id="@+id/sendConfirmationTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.00 BTC"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/sendConfirmationFee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/zw_dialog_send_confirmation_fee"
+        android:textColor="@color/Gray" />
+
+    <TextView
+        android:id="@+id/sendConfirmationTo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/zw_dialog_send_confirmation_to"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/sendConfirmationAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1L4gopaoHOlhiGuhigUIjh" />
+
+    <LinearLayout
+        android:id="@+id/sendConfirmationButtonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:id="@+id/sendConfirmationCancelButton"
+            style="@style/dialog_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/send_confirmation_statelist"
+            android:gravity="center_vertical|start"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/sendConfirmationCancelImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="6dp"
+                android:adjustViewBounds="true"
+                android:maxHeight="42dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/send_cancel_icon_clickable" />
+            
+            <TextView
+                android:id="@+id/sendConfirmationCancelText"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:text="@string/zw_cancel_button_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sendConfirmationSendButton"
+            style="@style/dialog_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/send_confirmation_statelist"
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/sendConfirmationSendText"
+                android:layout_width="0dp"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/zw_send_button_text" />
+
+            <ImageView
+                android:id="@+id/sendConfirmationSendImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="6dp"
+                android:adjustViewBounds="true"
+                android:maxHeight="42dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/send_go_icon_clickable" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
