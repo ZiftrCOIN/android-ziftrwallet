@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
@@ -115,7 +115,7 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 							
 							if (ZWPreferences.setStoredPasswordHash(saltedHash) == -1){
 								//if we failed setting password, something could be wrong with db
-								ZiftrDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
+								ZiftrSimpleDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
 								dbErrorFragment.setupDialog(R.string.zw_app_name, 
 															R.string.zw_dialog_database_error, 
 															R.string.zw_dialog_restart, 

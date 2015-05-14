@@ -10,7 +10,6 @@ import java.math.BigInteger;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,8 +20,9 @@ import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWRawTransaction;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZWSendConfirmationDialog;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTaskDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
@@ -186,29 +186,9 @@ public class ZWSendTaskHelperFragment extends Fragment {
 		}
 		else if(rawTransaction.getErrorCode() == 0 && rawTransaction.getErrorMessage() == null) {
 			
-			//TODO build dialog from raw transaction data, then show confirmation dialog
-			//show follow  up confirmation if user has warnings for unconfirmed transactions turned on and this transaction needs them
-			//then actually sign the transaction
-			
-			
-			
-			Context appContext = ZWApplication.getApplication(); //use app context incase we're in the background when this apps
-			
-			String title = appContext.getString(R.string.zw_app_name);
-			String send = appContext.getString(R.string.zw_dialog_send);
-			String cancel = appContext.getString(R.string.zw_dialog_cancel);
-			
-			String message = appContext.getString(R.string.zw_dialog_send_confirmation);
-			String transactionCost = rawTransaction.getTotalSpent() + " " + rawTransaction.getCoin().getSymbol();
-			if(rawTransaction.getFee() != null) {
-				String feeString = appContext.getString(R.string.zw_dialog_send_fee);
-				feeString = String.format(feeString, rawTransaction.getFee());
-				transactionCost += feeString;
-			}
-			message = String.format(message, transactionCost, rawTransaction.getAddress());
-			
-			ZiftrDialogFragment confirmDialog = new ZiftrDialogFragment();
-			confirmDialog.setupDialog(title, message, send, cancel);
+			ZWSendConfirmationDialog confirmDialog = new ZWSendConfirmationDialog();
+			//confirmDialog.setupDialog(title, message, send, cancel);
+			confirmDialog.setupConfirmationDetails(rawTransaction.getCoin().getSymbol(), rawTransaction.getTotalSpent(), rawTransaction.getFee(), rawTransaction.getAddress());
 			confirmDialog.setCancelable(false);
 			
 			confirmDialog.setOnClickListener(new DialogInterface.OnClickListener() {
@@ -252,7 +232,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 	
 	
 	private void showUnconfirmedInputsWarning() {
-		ZiftrDialogFragment unconfirmedDialog = new ZiftrDialogFragment();
+		ZiftrSimpleDialogFragment unconfirmedDialog = new ZiftrSimpleDialogFragment();
 		unconfirmedDialog.setupDialog(R.string.zw_app_name, R.string.zw_dialog_warning_unconfirmed, R.string.zw_dialog_send, R.string.zw_dialog_cancel);
 		unconfirmedDialog.setCancelable(false);
 		
@@ -323,7 +303,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 					startSending();
 				}
 				else {
-					ZiftrDialogFragment wrongPassword = new ZiftrDialogFragment();
+					ZiftrSimpleDialogFragment wrongPassword = new ZiftrSimpleDialogFragment();
 					wrongPassword.setupDialog(0, R.string.zw_incorrect_password, R.string.zw_dialog_ok, 0);
 					wrongPassword.show(getFragmentManager(), DIALOG_WRONG_PASSWORD);
 				}

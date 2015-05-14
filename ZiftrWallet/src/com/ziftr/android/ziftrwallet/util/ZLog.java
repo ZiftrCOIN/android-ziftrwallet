@@ -13,7 +13,6 @@ import java.io.OutputStreamWriter;
 import android.util.Log;
 
 import com.ziftr.android.ziftrwallet.ZWApplication;
-import com.ziftr.android.ziftrwallet.ZWPreferences;
 
 public abstract class ZLog {
 	

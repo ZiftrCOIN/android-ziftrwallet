@@ -12,7 +12,7 @@ import android.support.v4.app.FragmentManager;
 
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
@@ -219,7 +219,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 				
 				//for the name confirmation dialog we need to assemble the strings before we create the dialog
 				//this way we can append the user's entered name
-				ZiftrDialogFragment nameSetDialog = new ZiftrDialogFragment();
+				ZiftrSimpleDialogFragment nameSetDialog = new ZiftrSimpleDialogFragment();
 				
 				String dialogTitle = activity.getString(R.string.zw_app_name);
 				String message = activity.getString(R.string.zw_dialog_set_name_complete) + enteredName;

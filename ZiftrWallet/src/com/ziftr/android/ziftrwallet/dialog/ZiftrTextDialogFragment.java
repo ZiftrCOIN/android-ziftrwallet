@@ -16,7 +16,7 @@ import android.widget.EditText;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 
-public class ZiftrTextDialogFragment extends ZiftrDialogFragment {
+public class ZiftrTextDialogFragment extends ZiftrSimpleDialogFragment {
 
 	String topHintText;
 	String topText;

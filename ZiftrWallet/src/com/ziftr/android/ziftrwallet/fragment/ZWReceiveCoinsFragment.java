@@ -37,7 +37,7 @@ import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
@@ -151,7 +151,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	
 	
 	private void showNewAddressConfirmationDialog() {
-		ZiftrDialogFragment dialog = ZiftrDialogFragment.buildContinueCancelDialog(R.string.zw_dialog_create_address);
+		ZiftrSimpleDialogFragment dialog = ZiftrSimpleDialogFragment.buildContinueCancelDialog(R.string.zw_dialog_create_address);
 		dialog.show(getFragmentManager(), DIALOG_NEW_ADDRESS_TAG);
 	}
 	

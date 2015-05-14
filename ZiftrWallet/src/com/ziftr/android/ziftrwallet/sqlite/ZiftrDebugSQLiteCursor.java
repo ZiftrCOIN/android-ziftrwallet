@@ -31,7 +31,7 @@ public class ZiftrDebugSQLiteCursor extends SQLiteCursor {
 			cursorCreationStack += stack[x].toString() + "\n";
 		}
 		
-		//addActiveCursor(reference);
+		addActiveCursor(reference);
 		openedCursors++;
 	}
 	
@@ -60,7 +60,7 @@ public class ZiftrDebugSQLiteCursor extends SQLiteCursor {
 		explicitlyClosedCursors++;
 		super.close();
 		
-		//ZLog.log("Closed Ziftr Cursor: \n" + String.valueOf(openedCursors - explicitlyClosedCursors) + " cursors remain open.");
+		ZLog.log("Closed Ziftr Cursor: \n" + String.valueOf(openedCursors - explicitlyClosedCursors) + " cursors remain open.");
 	}
 
 

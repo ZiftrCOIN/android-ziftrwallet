@@ -19,7 +19,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
 
 
-public abstract class ZiftrTaskDialogFragment extends ZiftrDialogFragment {
+public abstract class ZiftrTaskDialogFragment extends ZiftrSimpleDialogFragment {
 	
 	
 	protected abstract boolean doTask();

@@ -71,7 +71,7 @@ public abstract class ZiftrDialogManager {
 	 * @param messageResId the resource id of the string to be displayed
 	 */
 	public static void showSimpleAlert(FragmentManager fragmentManager, int messageResId) {
-		ZiftrDialogFragment dialog = new ZiftrDialogFragment();
+		ZiftrSimpleDialogFragment dialog = new ZiftrSimpleDialogFragment();
 		dialog.setupDialog(0, messageResId, R.string.zw_dialog_ok, 0);
 		
 		dialog.show(fragmentManager, "simple_alert_dialog");
@@ -81,7 +81,7 @@ public abstract class ZiftrDialogManager {
 	public static void showSimpleAlert(FragmentManager fragmentManager, String message) {
 		Context appContext = ZWApplication.getApplication();
 		
-		ZiftrDialogFragment dialog = new ZiftrDialogFragment();
+		ZiftrSimpleDialogFragment dialog = new ZiftrSimpleDialogFragment();
 		String title = appContext.getString(R.string.zw_app_name);
 		String ok = appContext.getString(R.string.zw_dialog_ok);
 		

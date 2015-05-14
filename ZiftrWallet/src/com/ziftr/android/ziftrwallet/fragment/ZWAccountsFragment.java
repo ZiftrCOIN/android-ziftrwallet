@@ -30,7 +30,7 @@ import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 
@@ -231,7 +231,7 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 		
 		ZWCoin coin = (ZWCoin) parent.getItemAtPosition(position);
 		
-		ZiftrDialogFragment dialog = new ZiftrDialogFragment();
+		ZiftrSimpleDialogFragment dialog = new ZiftrSimpleDialogFragment();
 		dialog.setupDialog(0, R.string.zw_dialog_deactivate_message, R.string.zw_dialog_deactivate, R.string.zw_dialog_cancel);
 
 		dialog.setOnClickListener(new ZWAccountsFragment.DialogListener(coin));

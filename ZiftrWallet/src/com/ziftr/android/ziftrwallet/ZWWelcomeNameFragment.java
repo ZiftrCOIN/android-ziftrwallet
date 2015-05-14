@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 
@@ -66,7 +66,7 @@ public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {
 			String name = nameEditText.getText().toString();
 			if (!name.isEmpty()) {
 				if (ZWPreferences.setUserName(name) == -1){
-					ZiftrDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
+					ZiftrSimpleDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
 					dbErrorFragment.setupDialog(R.string.zw_app_name, 
 												R.string.zw_dialog_database_error, 
 												R.string.zw_dialog_restart, 

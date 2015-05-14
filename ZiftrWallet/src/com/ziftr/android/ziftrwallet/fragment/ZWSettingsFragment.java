@@ -23,7 +23,7 @@ import android.widget.TextView;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -252,7 +252,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				this.updateSettingsVisibility();
 			}
 			else {
-				ZiftrDialogFragment fragment = ZiftrDialogFragment.buildContinueCancelDialog(R.string.debug_warning);
+				ZiftrSimpleDialogFragment fragment = ZiftrSimpleDialogFragment.buildContinueCancelDialog(R.string.debug_warning);
 				fragment.show(getFragmentManager(), DIALOG_ENABLE_DEBUG_TAG);
 			}
 		} 

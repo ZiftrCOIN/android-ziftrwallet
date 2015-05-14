@@ -23,7 +23,7 @@ import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
-public class ZiftrDialogFragment extends DialogFragment implements OnClickListener, DialogInterface.OnClickListener {
+public class ZiftrSimpleDialogFragment extends DialogFragment implements OnClickListener, DialogInterface.OnClickListener {
 	
 	protected String title;
 	protected String message;
@@ -36,7 +36,7 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 	private DialogInterface.OnClickListener clickListener = null;
 	private DialogInterface.OnCancelListener cancelListener = null;
 	
-	public ZiftrDialogFragment() {
+	public ZiftrSimpleDialogFragment() {
 		//this.setRetainInstance(true);
 	}
 	
@@ -55,9 +55,9 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 	 * @param listener the on click listener that will handle the user pressing this dialog's buttons
 	 * @return a new instance of a ZiftrDialogFragment ready to be shown
 	 */
-	public static ZiftrDialogFragment buildContinueCancelDialog(int messageResId) {
+	public static ZiftrSimpleDialogFragment buildContinueCancelDialog(int messageResId) {
 		
-		ZiftrDialogFragment dialog = new ZiftrDialogFragment();
+		ZiftrSimpleDialogFragment dialog = new ZiftrSimpleDialogFragment();
 		dialog.setupDialog(messageResId);
 		
 		return dialog;
@@ -127,6 +127,8 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 			if(message == null) message = savedInstanceState.getString("message");
 			if(yes == null) yes = savedInstanceState.getString("yes");
 			if(no == null) no = savedInstanceState.getString("no");
+			
+			isCancelable = savedInstanceState.getBoolean("isCancelable");
 		}
 	}
 	
@@ -189,7 +191,7 @@ public class ZiftrDialogFragment extends DialogFragment implements OnClickListen
 		outState.putString("yes", yes);
 		outState.putString("no", no);
 		
-		outState.putSerializable("dataObject", "test");
+		outState.putBoolean("isCancelable", isCancelable);
 		
 		super.onSaveInstanceState(outState);
 	}
