@@ -62,12 +62,10 @@
 
         <LinearLayout
             android:id="@+id/left_dialog_button"
-            style="@style/dialog_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginRight="2dp"
             android:layout_weight="1"
-            android:background="@drawable/send_confirmation_statelist"
             android:clickable="true"
             android:gravity="center_vertical|start"
             android:orientation="horizontal" >
@@ -78,12 +76,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
                 android:layout_marginLeft="8dp"
+                android:layout_marginRight="6dp"
                 android:layout_marginTop="6dp"
                 android:adjustViewBounds="true"
                 android:duplicateParentState="true"
                 android:maxHeight="42dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/send_cancel_icon_clickable" />
+                android:src="@drawable/icon_cancel_statelist" />
             
             <TextView
                 android:id="@+id/sendConfirmationCancelText"
@@ -91,20 +90,18 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:duplicateParentState="true"
-                android:gravity="center"
+                android:gravity="left"
                 android:text="@string/zw_cancel_button_text"
-                android:textColor="@color/White" />
+                android:textColor="@color/send_confirmation_text_statelist" />
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/right_dialog_button"
-            style="@style/dialog_button"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="2dp"
             android:layout_weight="1"
-            android:background="@drawable/send_confirmation_statelist"
             android:clickable="true"
             android:gravity="center_vertical|end"
             android:orientation="horizontal" >
@@ -115,22 +112,23 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:duplicateParentState="true"
-                android:gravity="center"
+                android:gravity="right"
                 android:text="@string/zw_send_button_text"
-                android:textColor="@color/White" />
+                android:textColor="@color/send_confirmation_text_statelist" />
 
             <ImageView
                 android:id="@+id/sendConfirmationSendImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
+                android:layout_marginLeft="6dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="6dp"
                 android:adjustViewBounds="true"
                 android:duplicateParentState="true"
                 android:maxHeight="42dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/send_go_icon_clickable" />
+                android:src="@drawable/icon_send_statelist" />
 
         </LinearLayout>
 
