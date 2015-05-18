@@ -202,7 +202,7 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> imp
 			if(address != null) {
 				ZiftrTextDialogFragment editLabelDialog = new ZiftrTextDialogFragment();
 				editLabelDialog.setupDialog(0, R.string.zw_dialog_edit_address, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
-				editLabelDialog.setupTextboxTop(address.getLabel(), null);
+				editLabelDialog.addTextbox(address.getLabel(), null, false);
 				editLabelDialog.setData(address);
 				
 				editLabelDialog.show(activity.getSupportFragmentManager(), DIALOG_EDIT_ADDRESS_TAG);

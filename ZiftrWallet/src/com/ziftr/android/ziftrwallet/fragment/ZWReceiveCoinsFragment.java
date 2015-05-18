@@ -144,7 +144,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		
 		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
 		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
-		passwordDialog.setupTextboxes();
+		passwordDialog.addEmptyTextbox(true);
 		
 		passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
 	}

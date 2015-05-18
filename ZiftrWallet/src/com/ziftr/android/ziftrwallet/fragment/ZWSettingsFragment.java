@@ -182,16 +182,19 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			if (ZWPreferences.userHasPassword()) {
 				ZiftrTextDialogFragment changePasswordDialog = new ZiftrTextDialogFragment();
 				changePasswordDialog.setupDialog(R.string.zw_dialog_change_password);
-				changePasswordDialog.setupTextboxes(R.string.zw_old_passphrase_hint, 
-													R.string.zw_dialog_new_passphrase_hint, 
-													R.string.zw_dialog_confirm_password_hint);
+				
+				changePasswordDialog.addTextbox(0, R.string.zw_old_passphrase_hint, true);
+				changePasswordDialog.addTextbox(0, R.string.zw_dialog_new_passphrase_hint, true);
+				changePasswordDialog.addTextbox(0, R.string.zw_dialog_confirm_password_hint, true);
 				
 				changePasswordDialog.show(getFragmentManager(), DIALOG_CHANGE_PASSWORD_TAG);
 			} 
 			else {
 				ZiftrTextDialogFragment createPasswordDialog = new ZiftrTextDialogFragment();
 				createPasswordDialog.setupDialog(0, R.string.zw_dialog_create_password, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
-				createPasswordDialog.setupTextboxes(R.string.zw_dialog_new_passphrase_hint, R.string.zw_dialog_confirm_password_hint, 0);
+				
+				createPasswordDialog.addTextbox(0, R.string.zw_dialog_new_passphrase_hint, true);
+				createPasswordDialog.addTextbox(0, R.string.zw_dialog_confirm_password_hint, true);
 				
 				createPasswordDialog.show(getFragmentManager(), DIALOG_CREATE_PASSWORD_TAG);
 			}
@@ -203,7 +206,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			if (ZWPreferences.userHasPassword()){
 				ZiftrTextDialogFragment disablePasswordFragment = new ZiftrTextDialogFragment();
 				disablePasswordFragment.setupDialog(R.string.zw_dialog_enter_password);
-				disablePasswordFragment.setupTextboxes(R.string.zw_empty_string, 0, 0);
+				disablePasswordFragment.addEmptyTextbox(true);
 				
 				//note the tag, removing a password is just changing it to an empty password
 				disablePasswordFragment.show(getFragmentManager(), DIALOG_CHANGE_PASSWORD_TAG);
@@ -237,7 +240,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		else if (v == this.setName){
 			
 			ZiftrTextDialogFragment setNameDialog = new ZiftrTextDialogFragment();
-			setNameDialog.setupTextboxes();
+			setNameDialog.addEmptyTextbox(false);
 			
 			setNameDialog.setupDialog(R.string.zw_app_name, R.string.zw_dialog_enter_name, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
 			
@@ -283,7 +286,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		else if(v == this.setCustomServer) {
 			ZiftrTextDialogFragment customServerDialog = new ZiftrTextDialogFragment();
 			customServerDialog.setupDialog(R.string.zw_debug_change_server);
-			customServerDialog.setupTextboxTop(ZWPreferences.getCustomAPIServer(), null);
+			customServerDialog.addTextbox(ZWPreferences.getCustomAPIServer(), null, false);
 			
 			customServerDialog.show(getFragmentManager(), DIALOG_CHANGE_SERVER_TAG);
 		}

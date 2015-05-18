@@ -1,7 +1,5 @@
 package com.ziftr.android.ziftrwallet.dialog;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -15,25 +13,7 @@ public class ZWSendConfirmationDialog extends ZiftrSimpleDialogFragment {
 	private String totalString;
 	private String coinName;
 	private String addressString;
-	
-	
-	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		
-		restoreInstanceState(savedInstanceState);
-		
-		View customDialogView = getActivity().getLayoutInflater().inflate(R.layout.send_confirmation, null);
-		
-		Dialog customDialog = buildCustomDialog(customDialogView);
-		customDialog.setCancelable(isCancelable);
-		customDialog.setCanceledOnTouchOutside(isCancelable);
-		
-		return customDialog;
-	}
-	
-	
-	
-	
+
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
@@ -58,42 +38,45 @@ public class ZWSendConfirmationDialog extends ZiftrSimpleDialogFragment {
 		}
 	}
 
+	
 
 	@Override
-	protected Dialog buildCustomDialog(View customDialogView) {
+	protected View buildRootView() {
+		View customDialogView = getActivity().getLayoutInflater().inflate(R.layout.send_confirmation, null);
+		return customDialogView;
+	}
+
+
+	@Override
+	protected View initRootView(View rootView) {
 		
-		AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
-		
-		builder.setView(customDialogView);
-		
-		TextView titleTextView = (TextView) customDialogView.findViewById(R.id.dialog_title);
+		TextView titleTextView = (TextView) rootView.findViewById(R.id.dialog_title);
 		titleTextView.setText(R.string.zw_dialog_send_confirmation_title);
 
-		View sendButton = customDialogView.findViewById(R.id.right_dialog_button);
+		View sendButton = rootView.findViewById(R.id.right_dialog_button);
 		if(sendButton != null) {
 			sendButton.setOnClickListener(this);
 		}
 		
-		View cancelButton = customDialogView.findViewById(R.id.left_dialog_button);
+		View cancelButton = rootView.findViewById(R.id.left_dialog_button);
 		if(cancelButton != null) {
 			cancelButton.setOnClickListener(this);
 		}
 		
 		
-		TextView totalText = (TextView) customDialogView.findViewById(R.id.sendConfirmationTotal);
+		TextView totalText = (TextView) rootView.findViewById(R.id.sendConfirmationTotal);
 		String confirmTotal = totalString + " " + coinName;
 		totalText.setText(confirmTotal);
 		
-		TextView feeText = (TextView) customDialogView.findViewById(R.id.sendConfirmationFee);
+		TextView feeText = (TextView) rootView.findViewById(R.id.sendConfirmationFee);
 		String feeBase = getActivity().getString(R.string.zw_dialog_send_confirmation_fee);
 		String fee = String.format(feeBase, feeString);
 		feeText.setText(fee);
 		
-		TextView addressText = (TextView) customDialogView.findViewById(R.id.sendConfirmationAddress);
+		TextView addressText = (TextView) rootView.findViewById(R.id.sendConfirmationAddress);
 		addressText.setText(addressString);
 		
-		
-		return builder.create();
+		return rootView;
 	}
 	
 	

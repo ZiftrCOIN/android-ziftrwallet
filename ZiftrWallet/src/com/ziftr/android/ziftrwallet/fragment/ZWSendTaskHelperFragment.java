@@ -289,12 +289,13 @@ public class ZWSendTaskHelperFragment extends Fragment {
 	private void getPassword() {
 		final ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
 		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
-		passwordDialog.setupTextboxes();
+		passwordDialog.addEmptyTextbox(true);
+		
 		passwordDialog.setOnClickListener(new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				String enteredPassword = passwordDialog.getEnteredTextTop();
+				String enteredPassword = passwordDialog.getEnteredText(0);
 				byte[] inputHash = ZiftrUtils.saltedHash(enteredPassword);
 				
 				if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {

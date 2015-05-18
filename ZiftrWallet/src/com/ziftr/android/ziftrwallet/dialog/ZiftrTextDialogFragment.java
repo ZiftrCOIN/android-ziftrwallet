@@ -6,187 +6,196 @@
 
 package com.ziftr.android.ziftrwallet.dialog;
 
-import android.app.Dialog;
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.InputType;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZiftrTextDialogFragment extends ZiftrSimpleDialogFragment {
 
-	String topHintText;
-	String topText;
 	
-	String middleHintText;
-	String middleText;
 	
-	String bottomHintText;
-	String bottomText;
+	ViewGroup textboxContainer;
 	
-	EditText topEditText;
-	EditText middleEditText;
-	EditText bottomEditText;
-	
-	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
+	private static class TextBoxSetup implements Parcelable {
 		
-		restoreInstanceState(savedInstanceState);
+		public static final Parcelable.Creator<TextBoxSetup> CREATOR = new Parcelable.Creator<TextBoxSetup>() {
+		    public TextBoxSetup createFromParcel(Parcel in) {
+		        return new TextBoxSetup(in);
+		    }
 		
-		View customTextDialog = getActivity().getLayoutInflater().inflate(R.layout.dialog_text_edit, null);
+		    public TextBoxSetup[] newArray(int size) {
+		        return new TextBoxSetup[size];
+		    }
+		};
+				
+		private String text;
+		private String hintText;
+		private int inputType;
+
+		private TextBoxSetup(String defaultText, String hint, int type) {
+			this.text = defaultText;
+			this.hintText = hint;
+			this.inputType = type;
+		}
+
+		public TextBoxSetup(Parcel in) {
+			text = in.readString();
+			hintText = in.readString();
+			inputType = in.readInt();
+		}
+
+		@Override
+		public int describeContents() {
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeString(text);
+			dest.writeString(hintText);
+			dest.writeInt(inputType);
+		}
 		
-		topEditText = (EditText) customTextDialog.findViewById(R.id.dialog_textbox_top);
-		middleEditText = (EditText) customTextDialog.findViewById(R.id.dialog_textbox_middle);
-		bottomEditText = (EditText) customTextDialog.findViewById(R.id.dialog_textbox_bottom);
-		
-		setupTextbox(topEditText, topText, topHintText);
-		setupTextbox(middleEditText, middleText, middleHintText);
-		setupTextbox(bottomEditText, bottomText, bottomHintText);
-		
-		return this.buildCustomDialog(customTextDialog);
 	}
+	
+	private ArrayList<TextBoxSetup> textboxes = new ArrayList<ZiftrTextDialogFragment.TextBoxSetup>();
 
 	
+
+	@Override
+	protected View buildRootView() {
+		
+		return getActivity().getLayoutInflater().inflate(R.layout.dialog_text_edit, null);
+	}
 	
+	
+	@Override
+	protected View initRootView(View rootView) {
+		super.initRootView(rootView);
+		
+		textboxContainer = (ViewGroup) rootView.findViewById(R.id.dialogEditTextLayout);
+		LayoutInflater inflater = getActivity().getLayoutInflater();
+		for(int x = 0; x < textboxes.size(); x++) {
+			TextBoxSetup textbox = textboxes.get(x);
+			EditText textboxView = (EditText) inflater.inflate(R.layout.dialog_include_edittext, null); //note we pass null, so we're returned the EditText			
+			textboxView.setTag(x); //use the array index as a tag (autoboxed to Integer class) to easily get it out of the UI later
+			
+			textboxView.setId(x+1); //set a non zero id, so on resume functions
+			//textboxView.setId(View.generateViewId()); //need higher api level
+			
+			textboxContainer.addView(textboxView);
+			textboxView.setHint(textbox.hintText);
+			textboxView.setText(textbox.text);
+			if(textbox.inputType > 0) {
+				textboxView.setInputType(textbox.inputType);
+			}
+		}
+		
+		return rootView;
+	}
+
+
+
 	@Override
 	protected void restoreInstanceState(Bundle savedInstanceState) {
 		super.restoreInstanceState(savedInstanceState);
 		
 		if(savedInstanceState != null) {
+			
+			ArrayList<TextBoxSetup> storedTextboxes = savedInstanceState.getParcelableArrayList("textboxes");
+			if(storedTextboxes != null) {
+				textboxes = storedTextboxes;
+			}
+			
+			/***
 			if(topHintText == null) topHintText = savedInstanceState.getString("topHintText");
 			if(middleHintText == null) middleHintText = savedInstanceState.getString("middleHintText");
 			if(bottomHintText == null) bottomHintText = savedInstanceState.getString("bottomHintText");
+			***/
 		}
 	}
-
-
-	private void setupTextbox(EditText textbox, String text, String hintText) {
-		if(hintText != null || text != null) {
-			textbox.setText(text);
-			textbox.setHint(hintText);
-			textbox.setVisibility(View.VISIBLE);
-		}
-		else {
-			textbox.setVisibility(View.GONE);
-		}
-	}
+	
 
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		
-		outState.putString("topHintText", topHintText);
-		outState.putString("middleHintText", middleHintText);
-		outState.putString("bottomHintText", bottomHintText);
-		
-		outState.putString("topText", topText);
-		outState.putString("middleText", middleText);
-		outState.putString("bottomText", bottomText);
-	}
-	
-	
-	
-	/**
-	 * setup the textboxes {@link EditText} to be displayed by this dialog,
-	 * sets the dialog to only have a single textbox (using the top slot),
-	 * with no text hint
-	 */
-	public void setupTextboxes() {
-		this.setupTextboxes(R.string.zw_empty_string, 0, 0);
-	}
-	
-	
-	public void setupTextboxTop(String prefilledText, String hint) {
-		
-		if(prefilledText == null && hint == null) {
-			//if the calling code is specifically setting up a text box, then it clearly wants it displayed
-			//setting the text to an empty string will make sure the textbox shows up in the UI
-			prefilledText = "";
+		for(int x = 0; x < textboxes.size(); x++) {
+			
+			//need to go through the text boxes and store the text in them
+			EditText textboxView = (EditText) textboxContainer.findViewWithTag(x);
+			if(textboxView != null) {
+				TextBoxSetup textbox = textboxes.get(x);
+				String text = textboxView.getText().toString();
+				ZLog.log("Storing textbox with text: ", text);
+				textbox.text = text;
+			}
 		}
 		
-		this.topText = prefilledText;
-		this.topHintText = hint;
+		outState.putParcelableArrayList("textboxes", textboxes);
+	}
+
+
+	
+	public void addEmptyTextbox(boolean hideText) {
+		this.addTextbox(R.string.zw_empty_string, 0, hideText);
 	}
 	
-	public void setupTextboxMiddle(String prefilledText, String hint) {
-		
-		if(prefilledText == null && hint == null) {
-			//if the calling code is specifically setting up a text box, then it clearly wants it displayed
-			//setting the text to an empty string will make sure the textbox shows up in the UI
-			prefilledText = "";
-		}
-		
-		this.middleText = prefilledText;
-		this.middleHintText = hint;
-	}
-	
-	public void setupTextboxBottom(String prefilledText, String hint) {
-		
-		if(prefilledText == null && hint == null) {
-			//if the calling code is specifically setting up a text box, then it clearly wants it displayed
-			//setting the text to an empty string will make sure the textbox shows up in the UI
-			prefilledText = "";
-		}
-		
-		this.bottomText = prefilledText;
-		this.bottomHintText = hint;
-	}
-	
-	
-	
-	
-	/**
-	 * setup the textboxes {@link EditText} to be displayed by this dialog,
-	 * The strings resource ids passed in will be used as the "hint text" for the 3 text boxes.
-	 * Passing 0 will cause the text box to be removed.
-	 * @param topHintText the resource id for hint text for the top text box, or 0 for this text box to be removed
-	 * @param middleHintText the resource id for hint text for the middle text box, or 0 for this text box to be removed
-	 * @param bottomHintText the resource id for hint text for the bottom text box, or 0 for this text box to be removed
-	 */
-	public void setupTextboxes(int topHintResId, int middleHintResId, int bottomHintResId) {
+	public void addTextbox(int defaultTextResId, int hintResId, boolean hideText) {
 		Context appContext = ZWApplication.getApplication(); 
 		
-		if(topHintResId > 0) {
-			this.topHintText = appContext.getString(topHintResId);
+		String defaultText = null;
+		if(defaultTextResId > 0) {
+			defaultText = appContext.getString(defaultTextResId);
 		}
-		if(middleHintResId > 0) {
-			this.middleHintText = appContext.getString(middleHintResId);
+		
+		String hint = null;
+		if(hintResId > 0) {
+			hint = appContext.getString(hintResId);
 		}
-		if(bottomHintResId > 0) {
-			this.bottomHintText = appContext.getString(bottomHintResId);
-		}
+		
+		this.addTextbox(defaultText, hint, hideText);
 	}
-
 	
-	public String getEnteredTextTop() {
-		if(topEditText != null && topEditText.getVisibility() == View.VISIBLE) {
-			return topEditText.getText().toString();
+	
+	
+	public void addTextbox(String defaultText, String hint, boolean hideText) {
+		int type = 0;
+		if(hideText) {
+			type = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD;
+		}
+		
+		TextBoxSetup textbox = new TextBoxSetup(defaultText, hint, type);
+		textboxes.add(textbox);
+	}
+	
+	
+	
+	public String getEnteredText(int textboxIndex) {
+	
+		EditText textbox = (EditText) textboxContainer.findViewWithTag(textboxIndex);
+		if(textbox != null) {
+			return textbox.getText().toString();
 		}
 		
 		return null;
 	}
 
 	
-	public String getEnteredTextMiddle() {
-		if(middleEditText != null && middleEditText.getVisibility() == View.VISIBLE) {
-			return middleEditText.getText().toString();
-		}
-		
-		return null;
-	}
-	
-	public String getEnteredTextBottom() {
-		if(bottomEditText != null && bottomEditText.getVisibility() == View.VISIBLE) {
-			return bottomEditText.getText().toString();
-		}
-		return null;
-	}
-
-
 	@Override
 	public void dismiss() {
 		try {

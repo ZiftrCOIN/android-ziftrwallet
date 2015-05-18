@@ -6,35 +6,23 @@
 
 package com.ziftr.android.ziftrwallet.dialog;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
-public class ZiftrSimpleDialogFragment extends DialogFragment implements OnClickListener, DialogInterface.OnClickListener {
+public class ZiftrSimpleDialogFragment extends ZiftrDialogFragment  {
 	
 	protected String title;
 	protected String message;
 	protected String yes;
 	protected String no;
 	
-	protected Object dataObject;
-	protected boolean isCancelable = true;
-	
-	private DialogInterface.OnClickListener clickListener = null;
-	private DialogInterface.OnCancelListener cancelListener = null;
 	
 	public ZiftrSimpleDialogFragment() {
 		//this.setRetainInstance(true);
@@ -100,40 +88,17 @@ public class ZiftrSimpleDialogFragment extends DialogFragment implements OnClick
 		setupDialog(0, messageResId, R.string.zw_dialog_continue, R.string.zw_dialog_cancel);
 	}
 
-	@Override
-	public void onAttach(Activity activity) {
-		ZLog.log("Attaching a dialog fragment: ", this.getTag());
-		super.onAttach(activity);
-	}
+	
 
 	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		
-		restoreInstanceState(savedInstanceState);
-		
+	protected View buildRootView() {
 		View customDialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_message, null);
-		
-		Dialog customDialog = buildCustomDialog(customDialogView);
-		customDialog.setCancelable(isCancelable);
-		customDialog.setCanceledOnTouchOutside(isCancelable);
-		
-		return customDialog;
+		return customDialogView;
 	}
 	
 	
-	protected void restoreInstanceState(Bundle savedInstanceState) {
-		if(savedInstanceState != null) {
-			if(title == null) title = savedInstanceState.getString("title");
-			if(message == null) message = savedInstanceState.getString("message");
-			if(yes == null) yes = savedInstanceState.getString("yes");
-			if(no == null) no = savedInstanceState.getString("no");
-			
-			isCancelable = savedInstanceState.getBoolean("isCancelable");
-		}
-	}
-	
-	protected Dialog buildCustomDialog(View customDialogView) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
+	@Override
+	protected View initRootView(View rootView) {
 		
 		//TODO -this crap is crazy, should just be using default dialog builder methods and setting a theme
 		//This entire method should be scrapped and replaced with themes as well as all the stupid onClick wrapper stuff.
@@ -149,16 +114,15 @@ public class ZiftrSimpleDialogFragment extends DialogFragment implements OnClick
 			builder.setNegativeButton(no, this);
 		}
 		***/
-		
-		builder.setView(customDialogView);
-		
-		TextView titleTextView = (TextView) customDialogView.findViewById(R.id.dialog_title);
+
+		TextView titleTextView = (TextView) rootView.findViewById(R.id.dialog_title);
 		titleTextView.setText(title);
 		
-		TextView messageTextView = (TextView) customDialogView.findViewById(R.id.dialog_message);
+		
+		TextView messageTextView = (TextView) rootView.findViewById(R.id.dialog_message);
 		messageTextView.setText(message);
 
-		Button yesButton = (Button) customDialogView.findViewById(R.id.right_dialog_button);
+		Button yesButton = (Button) rootView.findViewById(R.id.right_dialog_button);
 		if(yes != null) {
 			yesButton.setText(yes);
 			yesButton.setOnClickListener(this);
@@ -167,7 +131,7 @@ public class ZiftrSimpleDialogFragment extends DialogFragment implements OnClick
 			yesButton.setVisibility(View.GONE);
 		}
 		
-		Button noButton = (Button) customDialogView.findViewById(R.id.left_dialog_button);
+		Button noButton = (Button) rootView.findViewById(R.id.left_dialog_button);
 		if(no != null) {
 			noButton.setText(no);
 			noButton.setOnClickListener(this);
@@ -176,11 +140,22 @@ public class ZiftrSimpleDialogFragment extends DialogFragment implements OnClick
 			noButton.setVisibility(View.GONE);
 		}
 		
-		
-		return builder.create();
+		return rootView;
 	}
 	
 	
+	protected void restoreInstanceState(Bundle savedInstanceState) {
+		
+		super.restoreInstanceState(savedInstanceState);
+		
+		if(savedInstanceState != null) {
+			if(title == null) title = savedInstanceState.getString("title");
+			if(message == null) message = savedInstanceState.getString("message");
+			if(yes == null) yes = savedInstanceState.getString("yes");
+			if(no == null) no = savedInstanceState.getString("no");
+	
+		}
+	}
 
 	
 	@Override
@@ -191,109 +166,9 @@ public class ZiftrSimpleDialogFragment extends DialogFragment implements OnClick
 		outState.putString("yes", yes);
 		outState.putString("no", no);
 		
-		outState.putBoolean("isCancelable", isCancelable);
-		
 		super.onSaveInstanceState(outState);
 	}
 
-	@Override
-	public void onDismiss(DialogInterface dialog) {
-		
-		ZLog.log("Dismissing dialog...");
-		
-		//this.getFragmentManager().beginTransaction().remove(this).commitAllowingStateLoss();
-		
-		super.onDismiss(dialog);
-	}
-
-	
-	public void setOnClickListener(DialogInterface.OnClickListener listener) {
-		this.clickListener = listener;
-	}
-	
-	public void setOnCancelListener(DialogInterface.OnCancelListener listener) {
-		this.cancelListener = listener;
-	}
-	
-	
-	@Override
-	public void onCancel(DialogInterface dialog) {
-		
-		if(this.cancelListener != null) {
-			cancelListener.onCancel(dialog);
-			return;
-		}
-		
-		//tell the dialog manager that this dialog has been cancelled
-		ZiftrDialogManager.dialogCancelled(this);
-		
-		super.onCancel(dialog);
-	}
-
-	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		
-		if(clickListener != null) {
-			clickListener.onClick(dialog, which);
-			return;
-		}
-		
-		//tell the dialog manager that a button has been pressed on the active dialog
-		if(which == DialogInterface.BUTTON_POSITIVE) {
-			ZiftrDialogManager.dialogClickedYes(this);
-		}
-		else if(which == DialogInterface.BUTTON_NEGATIVE) {
-			ZiftrDialogManager.dialogClickedNo(this);
-		}
-	
-	}
-
-	@Override
-	public void onClick(View v) {
-		//wrapping around basic dialog handling stuff becasue at the moment we have a stupid implementation of custom dialog UI
-		if(v.getId() == R.id.right_dialog_button) {
-			this.onClick(this.getDialog(), DialogInterface.BUTTON_POSITIVE);
-		}
-		else if(v.getId() == R.id.left_dialog_button) {
-			this.onClick(this.getDialog(), DialogInterface.BUTTON_NEGATIVE);
-		}
-		
-		this.dismiss();
-	}
-	
-
-	/**
-	 * This can be used as a shortcut to store some data that the handler or other calling code may need to reference later.
-	 * Since dialogs can be destroyed and recreated by the Android lifecycle, setting a data object will cause this dialog
-	 * fragment to be retained.
-	 * @param data any serializable data that the fragment or its handlers may need later
-	 */
-	public void setData(Object data) {
-		this.dataObject = data;
-		
-		if(this.dataObject != null) {
-			this.setRetainInstance(true);
-		}
-		else {
-			this.setRetainInstance(false);
-		}
-	}
-	
-	
-	/**
-	 * Gets the Object stored by {@link #getData()}.
-	 * @return the object previously set, or null if no data was ever set
-	 */
-	public Object getData() {
-		return this.dataObject;
-	}
-
-	
-	public void setCancelable(boolean isCancelable) {
-		this.isCancelable = isCancelable;
-	}
-	
-	
 	
 }
 

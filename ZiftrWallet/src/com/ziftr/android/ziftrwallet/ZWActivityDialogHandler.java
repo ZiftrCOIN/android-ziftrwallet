@@ -60,7 +60,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 					if (status == reencryptionStatus.encrypted){
 						ZiftrTextDialogFragment decryptOldWalletDialog = new ZiftrTextDialogFragment();
 						decryptOldWalletDialog.setupDialog(R.string.zw_dialog_old_encryption);
-						decryptOldWalletDialog.setupTextboxes();
+						decryptOldWalletDialog.addEmptyTextbox(true);
 						
 						decryptOldWalletDialog.show(getSupportFragmentManager(), DIALOG_OLD_PASSWORD_TAG);
 					} 
@@ -91,7 +91,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			receiveFragment.loadNewAddressFromDatabase();
 		}
 		else if(ZWReceiveCoinsFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
-			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredTextTop();
+			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
 			byte[] inputHash = ZiftrUtils.saltedHash(enteredPassword);
 			
 			if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
@@ -118,8 +118,8 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWSettingsFragment.DIALOG_CREATE_PASSWORD_TAG.equals(fragment.getTag())) {
 			ZiftrTextDialogFragment passwordFragment = (ZiftrTextDialogFragment) fragment;
-			String password = passwordFragment.getEnteredTextTop();
-			String confirmedPassword = passwordFragment.getEnteredTextMiddle();
+			String password = passwordFragment.getEnteredText(0);
+			String confirmedPassword = passwordFragment.getEnteredText(1);
 			
 			if(password.equals(confirmedPassword)) {
 				if (this.changePassword(null, password)) {
@@ -142,9 +142,9 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWSettingsFragment.DIALOG_CHANGE_PASSWORD_TAG.equals(fragment.getTag())) {
 			ZiftrTextDialogFragment passwordFragment = (ZiftrTextDialogFragment) fragment;
-			String oldPassword = passwordFragment.getEnteredTextTop();
-			String newPassword = passwordFragment.getEnteredTextMiddle();
-			String confirmPassword = passwordFragment.getEnteredTextBottom();
+			String oldPassword = passwordFragment.getEnteredText(0);
+			String newPassword = passwordFragment.getEnteredText(1);
+			String confirmPassword = passwordFragment.getEnteredText(2);
 		
 			if(newPassword == confirmPassword || newPassword.equals(confirmPassword)) {
 				byte[] oldPasswordHash = ZiftrUtils.saltedHash(oldPassword);
@@ -186,7 +186,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWActivityDialogHandler.DIALOG_OLD_PASSWORD_TAG.equals(fragment.getTag())) {
 			ZiftrTextDialogFragment passwordFragment = (ZiftrTextDialogFragment) fragment;
-			String password = passwordFragment.getEnteredTextTop();
+			String password = passwordFragment.getEnteredText(0);
 
 			//TODO -fix this, why are we "attempting" then doing it for real?
 			if (ZWWalletManager.getInstance().attemptDecrypt(password)){
@@ -205,7 +205,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWSettingsFragment.DIALOG_SET_NAME_TAG.equals(fragment.getTag())) {
 			ZiftrTextDialogFragment nameFragment = (ZiftrTextDialogFragment) fragment;
-			String enteredName = nameFragment.getEnteredTextTop();
+			String enteredName = nameFragment.getEnteredText(0);
 			
 			if(enteredName == null || enteredName.length() == 0) {
 				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_dialog_blank_name);
@@ -232,7 +232,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		else if(ZWAddressListAdapter.DIALOG_EDIT_ADDRESS_TAG.equals(fragment.getTag())) {
 			ZiftrTextDialogFragment editLabelFragment = (ZiftrTextDialogFragment) fragment;
 			
-			final String newLabel = editLabelFragment.getEnteredTextTop();
+			final String newLabel = editLabelFragment.getEnteredText(0);
 			final ZWAddress editedAddress = (ZWAddress) editLabelFragment.getData();
 			
 			ZiftrUtils.runOnNewThread(new Runnable() {
@@ -256,7 +256,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWSettingsFragment.DIALOG_CHANGE_SERVER_TAG.equals(fragment.getTag())) {
 			ZiftrTextDialogFragment changeServerDialog = (ZiftrTextDialogFragment) fragment;
-			String customServer = changeServerDialog.getEnteredTextTop();
+			String customServer = changeServerDialog.getEnteredText(0);
 			ZWPreferences.setCustomAPIServer(customServer);
 		}
 		

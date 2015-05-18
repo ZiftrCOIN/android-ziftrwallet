@@ -71,7 +71,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 		
 		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
 		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
-		passwordDialog.setupTextboxes();
+		passwordDialog.addEmptyTextbox(true);
 		
 		passwordDialog.show(getSupportFragmentManager(), "password_dialog");
 	}
@@ -82,7 +82,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 		
 		if("password_dialog".equals(fragment.getTag())) {
 			ZiftrTextDialogFragment passwordDialog = (ZiftrTextDialogFragment) fragment;
-			String password = passwordDialog.getEnteredTextTop();
+			String password = passwordDialog.getEnteredText(0);
 			
 			byte[] inputHash = ZiftrUtils.saltedHash(password);
 			

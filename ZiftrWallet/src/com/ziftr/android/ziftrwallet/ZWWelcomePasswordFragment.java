@@ -96,7 +96,7 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 									if (status == reencryptionStatus.encrypted){
 										ZiftrTextDialogFragment oldPasswordDialog = new ZiftrTextDialogFragment();
 										oldPasswordDialog.setupDialog(R.string.zw_dialog_old_encryption);
-										oldPasswordDialog.setupTextboxes();
+										oldPasswordDialog.addEmptyTextbox(true);
 										
 										oldPasswordDialog.show(getFragmentManager(), ZWActivityDialogHandler.DIALOG_OLD_PASSWORD_TAG);	
 									} 

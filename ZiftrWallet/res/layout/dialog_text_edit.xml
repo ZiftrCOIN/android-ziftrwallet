@@ -7,42 +7,14 @@
     <include layout="@layout/dialog_include_title" />
     <include layout="@layout/dialog_include_message" />
 
-    <EditText
-        android:id="@+id/dialog_textbox_top"
+    <LinearLayout
+        android:id="@+id/dialogEditTextLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginTop="8dp"
-        android:fontFamily="sans-serif"
-        android:hint="@string/zw_empty_string"
-        android:inputType="text" />
+        android:orientation="vertical" >
+    
+    </LinearLayout>
 
-    <EditText
-        android:id="@+id/dialog_textbox_middle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginTop="4dp"
-        android:fontFamily="sans-serif"
-        android:hint="@string/zw_empty_string"
-        android:inputType="text" />
-
-    <EditText
-        android:id="@+id/dialog_textbox_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginTop="4dp"
-        android:fontFamily="sans-serif"
-        android:hint="@string/zw_empty_string"
-        android:inputType="text" />
-
-        <include layout="@layout/dialog_include_2buttons" />
+	<include layout="@layout/dialog_include_2buttons" />
 
 </LinearLayout>
