@@ -112,8 +112,8 @@ public abstract class ZLog {
 				StringBuilder logMessage = new StringBuilder();
 				for (Object msg : messages) {
 					if (msg != null) {
-						if (msg instanceof Exception) {
-							Exception e = (Exception)msg;
+						if (msg instanceof Throwable) {
+							Throwable e = (Throwable)msg;
 							logMessage.append(Log.getStackTraceString(e));
 						}
 						else {
@@ -173,8 +173,8 @@ public abstract class ZLog {
 				StringBuilder logMessage = new StringBuilder();
 				for (Object msg : messages) {
 					if (msg != null) {
-						if (msg instanceof Exception) {
-							Exception e = (Exception)msg;
+						if (msg instanceof Throwable) {
+							Throwable e = (Throwable)msg;
 							logMessage.append(Log.getStackTraceString(e));
 						}
 						else {

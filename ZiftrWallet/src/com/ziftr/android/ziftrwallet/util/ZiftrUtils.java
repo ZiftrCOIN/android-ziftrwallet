@@ -196,7 +196,7 @@ public class ZiftrUtils {
 	 * Takes an input stream, reads it into a string, then closes the stream
 	 * @param stream An {@link InputStream} to be read and closed.
 	 * @return a String of whatever was contained in the input stream, returns a 
-	 * blank strink if there was an error
+	 * blank string if there was an error
 	 */
 	public static String streamToString(InputStream stream) {
 
@@ -208,9 +208,20 @@ public class ZiftrUtils {
 			while((line = reader.readLine()) != null) {
 				builder.append(line).append('\n');
 			}
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			ZLog.log("Exception reading stream to string: \n", e);
-		} finally {
+		}
+		catch(OutOfMemoryError error) {
+			//ongoing issue
+			//still can't figure out how it's possible the app could 
+			//not have enough memory to allocate a string builder in this case
+			//at least try to prevent the app from crashing, and simply don't show any
+			//troublesome transactions
+			ZLog.log(error);
+			return "";
+		}
+		finally {
 			try {
 				reader.close();
 			} catch(Exception e) {}
