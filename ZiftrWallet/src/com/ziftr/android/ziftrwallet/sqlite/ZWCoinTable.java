@@ -27,7 +27,6 @@ public class ZWCoinTable {
 	public static final String COLUMN_SYMBOL = "symbol";	
 	public static final String COLUMN_NAME = "name";
 	public static final String COLUMN_ACTIVATED_STATUS = "activated_status";
-	public static final String COLUMN_BLOCK_HEIGHT = "block_height";
 	public static final String COLUMN_DEFAULT_FEE_PER_KB = "default_fee_per_kb";
 	public static final String COLUMN_PUB_KEY_PREFIX = "pub_key_hash_prefix";
 	public static final String COLUMN_SCRIPT_PREFIX = "script_hash_prefix";
@@ -43,6 +42,8 @@ public class ZWCoinTable {
 	public static final String COLUMN_SCALE = "scale";
 	public static final String COLUMN_SCHEME = "scheme";
 	public static final String COLUMN_LOGO_URL = "logo_url";
+	
+	public static final String COLUMN_SYNCED_BLOCK_HEIGHT = "synced_block_height";
 	
 	
 	private static final int UNACTIVATED = 0; //Used for table types that just haven't been used yet.
@@ -61,7 +62,7 @@ public class ZWCoinTable {
 		this.addColumn(COLUMN_SCHEME, "TEXT", db);
 		this.addColumn(COLUMN_SCALE, "INTEGER", db);
 		this.addColumn(COLUMN_ACTIVATED_STATUS, "INTEGER", db);		
-		this.addColumn(COLUMN_BLOCK_HEIGHT, "INTEGER", db);
+		this.addColumn(COLUMN_SYNCED_BLOCK_HEIGHT, "INTEGER", db);
 		this.addColumn(COLUMN_DEFAULT_FEE_PER_KB, "INTEGER", db);
 		this.addColumn(COLUMN_PUB_KEY_PREFIX, "INTEGER", db);
 		this.addColumn(COLUMN_PRIV_KEY_PREFIX, "INTEGER", db);
@@ -97,7 +98,7 @@ public class ZWCoinTable {
 			db.insertOrThrow(TABLE_NAME, null, baseCoinValues); //this may fail, that's ok
 			
 			ContentValues defaults = new ContentValues(2);
-			defaults.put(COLUMN_BLOCK_HEIGHT, 0);
+			defaults.put(COLUMN_SYNCED_BLOCK_HEIGHT, 0);
 			defaults.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
 			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(defaultCoin.getSymbol());
 			
@@ -186,6 +187,28 @@ public class ZWCoinTable {
 	}
 	
 	
+	protected long getSyncedBlockHeight(ZWCoin coin, SQLiteDatabase database) {
+		long height = 0;
+		
+		String sql = "SELECT " + COLUMN_SYNCED_BLOCK_HEIGHT + " FROM " + TABLE_NAME + 
+				" WHERE " + COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
+		
+		Cursor cursor = database.rawQuery(sql, null);
+		if(cursor.moveToFirst()) {
+			height = cursor.getLong(0); //only selected 1 column, so use the first one
+		}
+		cursor.close();
+		
+		return height;
+	}
+	
+	protected void setSyncedBlockHeight(ZWCoin coin, long blockHeight, SQLiteDatabase database) {
+		ContentValues values = new ContentValues();
+		values.put(COLUMN_SYNCED_BLOCK_HEIGHT, blockHeight);
+		String whereClause = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
+		database.update(TABLE_NAME, values, whereClause, null);
+	}
+	
 	
 	protected boolean isCoinActivated(ZWCoin coin, SQLiteDatabase db) {
 		
@@ -231,15 +254,13 @@ public class ZWCoinTable {
 		
 		ContentValues cv = getContentValues(coin);
 		
-		try {
+		String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
+		int updated = db.update(TABLE_NAME, cv, where, null);
+		if(updated == 0) {
+			//if it's an insert add a default synced height
+			cv.put(COLUMN_SYNCED_BLOCK_HEIGHT, coin.getSyncedHeight());
 			db.insertOrThrow(TABLE_NAME, null, cv);
 		}
-		catch(Exception e) {
-			//failed to insert, likely because the coin already exists in the database, so just update it
-			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
-			db.update(TABLE_NAME, cv, where, null);
-		}
-		
 	}
 
 	
@@ -261,6 +282,7 @@ public class ZWCoinTable {
 		String chain = cursor.getString(cursor.getColumnIndex(COLUMN_CHAIN));
 		
 		String health = cursor.getString(cursor.getColumnIndex(COLUMN_HEALTH));
+		long syncedHeight = cursor.getLong(cursor.getColumnIndex(COLUMN_SYNCED_BLOCK_HEIGHT));
 		
 		int enabledInt = cursor.getInt(cursor.getColumnIndex(COLUMN_ENABLED));
 		boolean enabled = enabledInt > 0;
@@ -270,7 +292,11 @@ public class ZWCoinTable {
 		//Integer activationStatus = cursor.getInt(cursor.getColumnIndex(COLUMN_ACTIVATED_STATUS));
 		
 		ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, String.valueOf(defaultFee), logoUrl, 
-				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, enabled, health);
+				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime);
+		
+		coin.setEnabled(enabled);
+		coin.setHealth(health);
+		coin.setSyncedHeight(syncedHeight);
 		
 		return coin;
 	}

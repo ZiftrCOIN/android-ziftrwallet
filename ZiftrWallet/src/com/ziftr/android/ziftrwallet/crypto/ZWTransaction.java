@@ -69,7 +69,7 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 * Default create has no num confs, calls other create with -1 confs. 
 	 * 0 confs means has been seen by netowrk. -1 confs means is local only.  
 	 */
-	private long numConfirmations;
+	//private long numConfirmations;
 	
 	/** 
 	 * The list of addresses that were used in this transaction. 
@@ -84,8 +84,9 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 * Otherwise another malicious user could send them a 1 of 2 multisig and simply take their coins back later.
 	 */
 	private boolean multisig = false;
+
+	private long blockHeight;
 	
-	// Viewing stuff
 
 	/** Which coin this transaction is for */
 	private ZWCoin coin;
@@ -197,17 +198,13 @@ public class ZWTransaction implements ZWSearchableListItem {
 
 	
 	/**
-	 * @return True if this transaction is seen by the network.
-	 */
-	public Boolean isBroadcasted() {
-		return this.numConfirmations > -1;
-	}
-
-	/**
 	 * @return True if this transaction type is pending
 	 */
 	public Boolean isPending() {
-		if(this.numConfirmations < this.coin.getNumRecommendedConfirmations()) {
+		if(this.blockHeight >= 0) {
+			return true;
+		}
+		else if (coin.getSyncedHeight() - this.blockHeight < coin.getNumRecommendedConfirmations()) {
 			return true;
 		}
 		
@@ -218,15 +215,14 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 * @return the numConfirmations
 	 */
 	public long getConfirmationCount() {
-		return numConfirmations;
+		if(this.blockHeight >= 0) {
+			return coin.getSyncedHeight() - this.blockHeight;
+		}
+		
+		return 0;
 	}
 
-	/**
-	 * @param numConfirmations the numConfirmations to set
-	 */
-	public void setConfirmationCount(long numConfirmations) {
-		this.numConfirmations = numConfirmations;
-	}
+	
 
 	/**
 	 * @return the displayAddress
@@ -294,6 +290,16 @@ public class ZWTransaction implements ZWSearchableListItem {
 		//else {
 			return this.getNote().toLowerCase(Locale.ENGLISH).contains(constraint.toString().toLowerCase());
 		//}
+	}
+
+	
+	public void setBlockHeight(long blockHeight) {
+		this.blockHeight = blockHeight;
+	}
+	
+	
+	public long getBlockHeight() {
+		return blockHeight;
 	}
 	
 }

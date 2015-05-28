@@ -101,8 +101,6 @@ public class ZWCoin implements ZWCurrency {
 	}
 	
 	
-	private boolean enabled = false;
-	private String health = null;
 	private BigInteger defaultFeePer;
 	private byte pubKeyHashPrefix; 
 	private byte scriptHashPrefix;  
@@ -116,10 +114,13 @@ public class ZWCoin implements ZWCurrency {
 	private int scale;
 	private String logoUrl;
 	
+	private boolean enabled = false;
+	private String health = null;
+	private long syncedHeight = 0;
 	
 	public ZWCoin(String name, String type, String chain, String scheme, int scale, 
 			String defaultFee, String logoUrl, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int confirmationsNeeded, int blockTime, boolean enabled, String health) {
+			byte privKeyPrefix, int confirmationsNeeded, int blockTime) {
 
 		this.name = name;
 		this.type = type;
@@ -132,8 +133,7 @@ public class ZWCoin implements ZWCurrency {
 		this.privKeyPrefix = privKeyPrefix;
 		this.confirmationsNeeded = confirmationsNeeded;
 		this.blockTime = blockTime;
-		this.enabled = enabled;
-		this.health = health;
+		
 
 		try {
 			this.defaultFeePer = new BigInteger(defaultFee);
@@ -225,16 +225,6 @@ public class ZWCoin implements ZWCurrency {
 	
 	public int getBlockTime() {
 		return this.blockTime;
-	}
-	
-	
-	/**
-	 * is the server able to give proper information about this coin?
-	 * meaning is the api enabled, is the blockchain up to date, etc
-	 * @return true if the coin is fully enabled, false if there may be coin specific functionality issues
-	 */
-	public boolean isEnabled() {
-		return this.enabled;
 	}
 	
 	
@@ -397,10 +387,39 @@ public class ZWCoin implements ZWCurrency {
 		
 		return new byte[0];
 	}
+	
+	
+	
 
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+	
+	/**
+	 * is the server able to give proper information about this coin?
+	 * meaning is the api enabled, is the blockchain up to date, etc
+	 * @return true if the coin is fully enabled, false if there may be coin specific functionality issues
+	 */
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+	
+
+	public void setHealth(String health) {
+		this.health = health;
+	}
 	
 	public String getHealth() {
 		return this.health;
+	}
+	
+	
+	public void setSyncedHeight(long syncedHeight) {
+		this.syncedHeight = syncedHeight;
+	}
+	
+	public long getSyncedHeight() {
+		return this.syncedHeight;
 	}
 
 	

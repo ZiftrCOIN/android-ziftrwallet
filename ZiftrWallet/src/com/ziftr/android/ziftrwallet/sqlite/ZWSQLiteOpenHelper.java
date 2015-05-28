@@ -35,7 +35,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  */
 public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 
 	
 	/**
@@ -132,8 +132,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if(oldVersion < 2 && newVersion >= 2) {
-			//upgrading from version 1 to 2+ requires adding new tables for any active coins
+		
+		if(oldVersion < newVersion) {
+			//upgrading versions usually requires adding new tables for any active coins
 			
 			//note, don't put ZLog message here, fixed an issue where ZLog was trying to read the database
 			//while being loaded by the class loader, which was happening here due to being called first
@@ -149,11 +150,16 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 				this.transactionOutputsTable.create(coin, db);
 			}
 			
-			//the old version also stored user preferences and passwords hashes in SharedPreferences
+		}
+		
+		
+		if(oldVersion < 2) {
+			//db version 1 stored user preferences and passwords hashes in SharedPreferences
 			//that's all stored in the sqlite database now, so coppy important data over
 			this.appDataTable.create(db);
 			this.appDataTable.upgradeFromOldPreferences(db);
 		}
+		
 	}
 
 	
@@ -403,16 +409,17 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		//return ZWPreferences.getWarningUnconfirmed() ? getWalletBalance(coin, BalanceType.ESTIMATED) : getWalletBalance(coin, BalanceType.AVAILABLE);
 	}
 
-	public synchronized BigInteger getWalletBalance(ZWCoin coinId, BalanceType bType) {
+	public synchronized BigInteger getWalletBalance(ZWCoin coinId, BalanceType balanceType) {
 		BigInteger balance = BigInteger.ZERO;
 		List<ZWTransaction> txs = this.getAllTransactions(coinId);
 
 		for (ZWTransaction tx : txs) {
-			if (bType == BalanceType.AVAILABLE) {
+			if (balanceType == BalanceType.AVAILABLE) {
 				if (!tx.isPending() || tx.getAmount().compareTo(BigInteger.ZERO) == -1) {
 					balance = balance.add(tx.getAmount());
 				}
-			} else if (tx.isBroadcasted()) {
+			} 
+			else if (balanceType == BalanceType.ESTIMATED) {
 				balance = balance.add(tx.getAmount());
 			}
 		}
@@ -611,6 +618,14 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 */
 	public void addTransactionOutput(ZWCoin coin, ZWTransactionOutput output) {
 		this.transactionOutputsTable.addTransactionOutput(coin, output, this.getWritableDatabase());
+	}
+	
+	
+	public void setSyncedBlockHeight(ZWCoin coin, long syncedHeight) {
+		if(syncedHeight > 0) {
+			coin.setSyncedHeight(syncedHeight);
+			this.coinTable.setSyncedBlockHeight(coin, syncedHeight, this.getWritableDatabase());
+		}
 	}
 	
 }

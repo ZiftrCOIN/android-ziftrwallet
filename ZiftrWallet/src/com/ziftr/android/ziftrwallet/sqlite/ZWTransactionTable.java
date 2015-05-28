@@ -67,6 +67,8 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 	
 	public static final String COLUMN_MULTISIG = "multisig";
 	
+	public static final String COLUMN_BLOCK_HEIGHT = "block_height";
+	
 	protected ZWTransactionTable() {
 
 	}
@@ -99,7 +101,9 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		addColumn(coin, COLUMN_NOTE, "TEXT", database);
 		
 		//add column for number of confirmations that transaction has
-		addColumn(coin, COLUMN_NUM_CONFIRMATIONS, "INTEGER", database);
+		//addColumn(coin, COLUMN_NUM_CONFIRMATIONS, "INTEGER", database);
+		//add column for block height of this transaction
+		addColumn(coin, COLUMN_BLOCK_HEIGHT, "INTEGER", database);
 		
 		//add column for which address to display
 		addColumn(coin, COLUMN_DISPLAY_ADDRESSES, "TEXT", database);
@@ -117,7 +121,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		StringBuilder sqlBuilder = new StringBuilder("INSERT OR IGNORE INTO ");
 		sqlBuilder.append(getTableName(transaction.getCoin())).append(" (").append(COLUMN_HASH).append(", ");
 		
-		//note isn't a primary key but the user can edit it, so we don't want it changing every time the
+		//note isn't a primary key but the user can edit it, so we don't want it changing every time the network updates data
 		sqlBuilder.append(COLUMN_NOTE);  
 
 		sqlBuilder.append(") VALUES (").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(", ");
@@ -377,8 +381,8 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		
 		
 		tx.setFee(new BigInteger(cursor.getString(cursor.getColumnIndex(COLUMN_FEE))));
-		tx.setConfirmationCount(cursor.getInt(cursor.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
-
+		tx.setBlockHeight(cursor.getLong(cursor.getColumnIndex(COLUMN_BLOCK_HEIGHT)));
+		
 		String addressesString = cursor.getString(cursor.getColumnIndex(COLUMN_DISPLAY_ADDRESSES));
 		List<String> addressList = new ArrayList<String>();
 		String[] addressArray = addressesString.split(",");
@@ -402,6 +406,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
 		values.put(COLUMN_DISPLAY_ADDRESSES, tx.getAddressAsCommaListString());
 		values.put(COLUMN_MULTISIG, tx.isMultisig());
+		values.put(COLUMN_BLOCK_HEIGHT, tx.getBlockHeight());
 
 		return values;
 	}

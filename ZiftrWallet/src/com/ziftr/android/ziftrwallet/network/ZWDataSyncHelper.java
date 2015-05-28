@@ -351,7 +351,11 @@ public class ZWDataSyncHelper {
 					
 					if(name != null && name.length() > 0) {
 						ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, feeString, logoUrl, pubKeyPrefix, 
-								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, isEnabled, health);
+								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime);
+						
+						coin.setHealth(health);
+						coin.setEnabled(isEnabled);
+						
 						ZWWalletManager.getInstance().updateCoin(coin);
 					}
 				
@@ -457,6 +461,8 @@ public class ZWDataSyncHelper {
 			}
 		}
 		
+		long syncedHeight = -1;
+		
 		int maxAddressLimit = 100;
 		
 		List<String> allAddresses = ZWWalletManager.getInstance().getAddressList(coin, true);
@@ -471,19 +477,32 @@ public class ZWDataSyncHelper {
 				addresses = allAddresses.subList(addressIndex, allAddresses.size());
 			}
 		
-			downloadTransactionHistory(coin, addresses);
+			long reportedBlockHeight = downloadTransactionHistory(coin, addresses);
+			
+			if(reportedBlockHeight > 0) {
+				if(syncedHeight < 0 || reportedBlockHeight < syncedHeight) {
+					syncedHeight = reportedBlockHeight;
+				}
+			}
 		}
 		
+		
+		if(syncedHeight > 0) {
+			ZWWalletManager.getInstance().setSyncedBlockHeight(coin, syncedHeight);
+		}
+		ZWDataSyncHelper.lastRefreshed.put(coin.getSymbol(), System.currentTimeMillis() / 1000);
 	}
 	
 
-	public static void downloadTransactionHistory(ZWCoin coin, List<String> addresses) {
+	private static long downloadTransactionHistory(ZWCoin coin, List<String> addresses) {
 		
 		if (addresses.size() <= 0){
 			ZLog.log("No addresses to get transaction history for");
-			return;
+			return -1;
 		}
 		ZiftrNetworkManager.networkStarted();
+		
+		long syncedHeight = -1;
 
 		ZLog.log("Getting transaction history for addresses: ", addresses);
 
@@ -500,7 +519,16 @@ public class ZWDataSyncHelper {
 				for(int x = transactions.length() -1; x >= 0; x--) {
 					JSONObject transactionInfoJson = transactions.getJSONObject(x);
 					JSONObject transactionJson = transactionInfoJson.getJSONObject("transaction");
-					createTransaction(coin, transactionJson);
+					
+					long transactionHeight = createTransaction(coin, transactionJson);
+					if(transactionHeight > 0) {
+						//if we got a valid block chain height while parsing this transaction,
+						//we want to take the lowest height reported by all the transactions
+						//this way we're sure we don't miss a block
+						if(syncedHeight < 0 || syncedHeight > transactionHeight) {
+							syncedHeight = transactionHeight;
+						}
+					}
 				}
 
 				//if we got this far without any exceptions, everything went good, so let the UI know the database has changed, so it can update
@@ -512,12 +540,16 @@ public class ZWDataSyncHelper {
 		}//end if response code
 
 		ZiftrNetworkManager.networkStopped();
-		ZWDataSyncHelper.lastRefreshed.put(coin.getSymbol(), System.currentTimeMillis() / 1000);
+		
+		return syncedHeight;
 	}
 
 	
 	//creates transaction in local database from json response
-	private static void createTransaction(ZWCoin coin, JSONObject json) throws JSONException {	
+	private static long createTransaction(ZWCoin coin, JSONObject json) throws JSONException {
+		
+		long chainHeight = -1;
+		
 		String transactionId = json.getString("txid");
 		ZWTransaction transaction = new ZWTransaction(coin, transactionId);
 		
@@ -535,6 +567,8 @@ public class ZWDataSyncHelper {
 		BigInteger receivedCoins = new BigInteger("0");
 		BigInteger spentCoins = new BigInteger("0");
 		
+		long blockHeight = -1;
+		
 		long time = json.optLong("time");
 		if(time == 0) {
 			//this happens when a transaction hasn't even been confirmed once
@@ -542,7 +576,27 @@ public class ZWDataSyncHelper {
 			time = System.currentTimeMillis() / 1000; //server sends us seconds, so our hold over time should be formatted the same way
 		}
 		transaction.setTxTime(time * 1000);
-		transaction.setConfirmationCount(json.optLong("confirmations"));
+		
+		if(json.has("height")) {
+			blockHeight = json.getLong("height");
+		}
+
+		
+		if(json.has("height")) {
+			long jsonHeight = json.optLong("height");
+			long jsonConfirmations = json.optLong("confirmations");
+			
+			transaction.setBlockHeight(jsonHeight);
+		
+			//total chain height = transaction height + confirmations -1
+			//-1 because transactions have 1 confirmation as soon as they're in a block,
+			//so a transaction in block 100 of a 100 block chain with have 1 confirmation
+			//the chain height is 100, not 101
+			chainHeight = jsonHeight + jsonConfirmations -1;
+		}
+		else {
+			transaction.setBlockHeight(-1);
+		}
 	
 		
 		//go through each input of this transaction to see if it might be from us (a spend)
@@ -682,6 +736,8 @@ public class ZWDataSyncHelper {
 		}
 		
 		ZWWalletManager.getInstance().addTransaction(transaction);
+		
+		return chainHeight;
 	}
 	
 	
