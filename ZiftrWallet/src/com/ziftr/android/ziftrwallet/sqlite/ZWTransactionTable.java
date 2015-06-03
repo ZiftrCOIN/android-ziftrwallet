@@ -56,7 +56,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 	 * or not transactions are pending. When a transaction has at least 
 	 * {@link ZWCoin#getNumRecommendedConfirmations()} then it can be considered save.
 	 */
-	public static final String COLUMN_NUM_CONFIRMATIONS = "num_confirmations";
+	//public static final String COLUMN_NUM_CONFIRMATIONS = "num_confirmations";
 
 	/**
 	 * Within the transactions' output addresses, we get all the addresses that are 
@@ -131,7 +131,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		db.execSQL(sqlBuilder.toString());
 		
 		sqlBuilder = new StringBuilder("UPDATE ").append(getTableName(transaction.getCoin())).append(" SET ");
-		sqlBuilder.append(COLUMN_NUM_CONFIRMATIONS).append(" = ").append(transaction.getConfirmationCount()).append(", ");
+		sqlBuilder.append(COLUMN_BLOCK_HEIGHT).append(" = ").append(transaction.getBlockHeight()).append(", ");
 		sqlBuilder.append(COLUMN_FEE).append(" = ").append(transaction.getFee().toString()).append(", ");
 		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString()).append(", ");;
 		sqlBuilder.append(COLUMN_CREATION_TIMESTAMP).append(" = ").append(transaction.getTxTime()).append(", ");		
@@ -230,28 +230,30 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		return this.readTransactions(coinId, where.toString(), db);
 	}
 
-	protected List<ZWTransaction> readPendingTransactions(ZWCoin coinId, SQLiteDatabase db) {
+	protected List<ZWTransaction> readPendingTransactions(ZWCoin coin, SQLiteDatabase db) {
 
 		StringBuilder where = new StringBuilder("");
 
-		where.append(COLUMN_NUM_CONFIRMATIONS);
-		where.append(" < ");
-		int confirmationsRequired = coinId.getNumRecommendedConfirmations();
-		where.append(DatabaseUtils.sqlEscapeString(String.valueOf(confirmationsRequired)));
+		long pendingBlockHeight = coin.getSyncedHeight() - coin.getNumRecommendedConfirmations();
+		
+		where.append(COLUMN_BLOCK_HEIGHT).append(" >= ").append(pendingBlockHeight);
+		where.append(" OR ");
+		where.append(COLUMN_BLOCK_HEIGHT).append(" < 0");
 
-		return this.readTransactions(coinId, where.toString(), db);
+		return this.readTransactions(coin, where.toString(), db);
 	}
 
-	protected List<ZWTransaction> readConfirmedTransactions(ZWCoin coinId, SQLiteDatabase db) {
+	protected List<ZWTransaction> readConfirmedTransactions(ZWCoin coin, SQLiteDatabase db) {
 
 		StringBuilder where = new StringBuilder("");
 
-		where.append(COLUMN_NUM_CONFIRMATIONS);
-		where.append(" >= ");
-		int confirmationsRequired = coinId.getNumRecommendedConfirmations();
-		where.append(DatabaseUtils.sqlEscapeString(String.valueOf(confirmationsRequired)));
+		long pendingBlockHeight = coin.getSyncedHeight() - coin.getNumRecommendedConfirmations();
+		
+		where.append(COLUMN_BLOCK_HEIGHT).append(" < ").append(pendingBlockHeight);
+		where.append(" AND ");
+		where.append(COLUMN_BLOCK_HEIGHT).append(" >= 0");
 
-		return this.readTransactions(coinId, where.toString(), db);
+		return this.readTransactions(coin, where.toString(), db);
 	}
 
 	/**
@@ -300,40 +302,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		return newTxs;
 	}
 
-	/***
-	protected void updateTransaction(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
-		try {
-			ContentValues values = txToContentValues(tx);
-			int numUpdated = db.update(getTableName(tx.getCoin()), values, 
-					getWhereClaus(tx), null);
-			if (numUpdated == 0) {
-				// Will happen when we try to do an update but not in there. 
-				// In this case an insert should be called. 
-				throw new ZWNoTransactionFoundException("Error: No such entry.");
-			}
-		} catch (SQLiteException sqle) {
-			throw new ZWNoTransactionFoundException("Error: No such entry.");
-		}
-	}
-	***/
-
-	protected void updateTransactionNumConfirmations(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
-		try {
-			ContentValues values = new ContentValues();
-			values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
-			ZLog.log("Updating transaction confirmations with:  " + getWhereClaus(tx));
-			int numUpdated = db.update(getTableName(tx.getCoin()), values, 
-					getWhereClaus(tx), null);
-
-			if (numUpdated == 0) {
-				// Will happen when we try to do an update but not in there. 
-				// In this case an insert should be called. 
-				throw new ZWNoTransactionFoundException("Error: No such entry.");
-			}
-		} catch (SQLiteException sqle) {
-			throw new ZWNoTransactionFoundException("Error: No such entry.");
-		}
-	}
+	
 
 	protected void updateTransactionNote(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
 		try {
@@ -353,11 +322,13 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		}
 	}
 
+	
 	protected void deleteTransaction(ZWTransaction tx, SQLiteDatabase db) {
 
 		db.delete(getTableName(tx.getCoin()), getWhereClaus(tx), null);
 	}
 
+	
 	private ZWTransaction cursorToTransaction(ZWCoin coin, Cursor cursor, SQLiteDatabase db) {
 		
 		String hash = cursor.getString(cursor.getColumnIndex(COLUMN_HASH));
@@ -403,7 +374,6 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		values.put(COLUMN_FEE, tx.getFee().toString());
 		values.put(COLUMN_NOTE, tx.getNote());
 		values.put(COLUMN_CREATION_TIMESTAMP, tx.getTxTime());
-		values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
 		values.put(COLUMN_DISPLAY_ADDRESSES, tx.getAddressAsCommaListString());
 		values.put(COLUMN_MULTISIG, tx.isMultisig());
 		values.put(COLUMN_BLOCK_HEIGHT, tx.getBlockHeight());

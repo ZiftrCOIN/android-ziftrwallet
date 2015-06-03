@@ -339,10 +339,12 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 							showEnterPasswordDialog();
 						}
 						else {
-							String newAddress = address.getAddress();
-							addressEditText.setText(newAddress);
-							updateAddressLabelInDatabase();
-							generateQrCode(true);
+							if(address != null) {
+								String newAddress = address.getAddress();
+								addressEditText.setText(newAddress);
+								updateAddressLabelInDatabase();
+								generateQrCode(true);
+							}
 						}
 						
 					}

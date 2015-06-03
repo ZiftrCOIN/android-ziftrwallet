@@ -60,6 +60,9 @@ import android.annotation.SuppressLint;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -92,20 +95,25 @@ public class ZWECKey {
 	 */
 	public static final BigInteger HALF_CURVE_ORDER;
 
-	private static final SecureRandom secureRandom;
-
+	
 	static {
 		// All clients must agree on the curve to use by agreement. Bitcoin uses secp256k1.
 		X9ECParameters params = SECNamedCurves.getByName("secp256k1");
 		CURVE = new ECDomainParameters(params.getCurve(), params.getG(), params.getN(), params.getH());
 		HALF_CURVE_ORDER = params.getN().shiftRight(1);
 		
+		
 		// Have added a fix for this in com.ziftr.android.onewallet.PRNGFixes.java
 		// Applied the fix in com.ziftr.android.onewallet.ZWApplication.java
 		// TODO does the fix for this (applied in ZWApplication) need to be applied every time
 		// wallet starts up?
-		secureRandom = ZiftrUtils.createTrulySecureRandom();
+		//secureRandom = ZiftrUtils.createTrulySecureRandom();
+		//note chaning it so that an instance of SecureRandom must be passed in via constructor
+		//this way the app can still funciton in a sort of read-only mode if the RNG system is messed up
+		//this also prevents the spongy castle library from creating a bad SecureRandom automatically
+		//if something goes wrong
 	}
+	
 
 	/**
 	 * If "priv" is set, "pub" can always be calculated. If "pub" is set but not "priv", we
@@ -142,7 +150,13 @@ public class ZWECKey {
 	 * Generates an entirely new keypair. Point compression is used so the resulting public key will be 33 bytes
 	 * (32 for the co-ordinate and 1 byte to represent the y bit).
 	 */
-	public ZWECKey() {
+	public ZWECKey(SecureRandom secureRandom) {
+		if(secureRandom == null) {
+			//the spongy castle crypto stuff will happily create a new instance of SecureRandom
+			//if we don't send it one, however it may create a bad one on older (pre 4.3) versions of Android
+			throw new NullPointerException("Attemping to create ZWECKey with null SecureRandom");
+		}
+		
 		ECKeyPairGenerator generator = new ECKeyPairGenerator();
 		ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(CURVE, secureRandom);
 		generator.init(keygenParams);
@@ -385,7 +399,8 @@ public class ZWECKey {
 			// Check encryption was correct. TODO maybe disable check if too slow?
 			if (!Arrays.equals(pub, publicKeyFromPrivate(privateKeyForSigning, isCompressed())))
 				throw new ZWKeyCrypterException("Could not decrypt bytes");
-		} else {
+		}
+		else {
 			// No decryption of private key required.
 			if (priv == null) {
 				throw new ZWKeyCrypterException("This ECKey does not have the private key necessary for signing.");
@@ -394,6 +409,14 @@ public class ZWECKey {
 			}
 		}
 
+		if(ZiftrUtils.createTrulySecureRandom() == null) {
+			//the spongycastle library initializes it's own SecureRandom for signing
+			//but we need to make sure the Android fixes for older versions were successfully applied
+			//before we let it do that
+			ZiftrDialogManager.showSimpleAlert(ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng));
+			throw new ZWKeyCrypterException("Random number generator not properly initialized.");
+		}
+		
 		ECDSASigner signer = new ECDSASigner();
 		ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
 		signer.init(true, privKey);

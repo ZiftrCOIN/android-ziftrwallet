@@ -21,7 +21,7 @@ import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSettingsFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWActivityDialogHandler implements ZiftrDialogHandler {
@@ -50,14 +50,14 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		// TODO put up a blocking dialog while this is happening
 	
 		//note: null/blank newPassword is ok now, it's how password is cleared
-		final reencryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(oldPassword, newPassword);
+		final EncryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(oldPassword, newPassword);
 		
-		if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
+		if (status == EncryptionStatus.ALREADY_ENCRYPTED || status == EncryptionStatus.ERROR){
 			//tried to set password on encrypted database private keys
 			this.activity.runOnUiThread(new Runnable(){
 				@Override
 				public void run() {
-					if (status == reencryptionStatus.encrypted){
+					if (status == EncryptionStatus.ALREADY_ENCRYPTED){
 						ZiftrTextDialogFragment decryptOldWalletDialog = new ZiftrTextDialogFragment();
 						decryptOldWalletDialog.setupDialog(R.string.zw_dialog_old_encryption);
 						decryptOldWalletDialog.addEmptyTextbox(true);

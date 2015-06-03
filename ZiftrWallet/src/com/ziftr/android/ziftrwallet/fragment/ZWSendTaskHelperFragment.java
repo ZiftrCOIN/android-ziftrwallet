@@ -18,6 +18,7 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWRawTransaction;
 import com.ziftr.android.ziftrwallet.dialog.ZWSendConfirmationDialog;
@@ -148,9 +149,15 @@ public class ZWSendTaskHelperFragment extends Fragment {
 				String changeAddress;
 				if (changeAddresses.size() <= 0){
 					//create new address for change
-					changeAddress = ZWWalletManager.getInstance().createChangeAddress(password, coin).getAddress();
+					ZWAddress changeAddressObject = ZWWalletManager.getInstance().createChangeAddress(password, coin);
+					if(changeAddressObject == null) {
+						return false;
+					}
+					
+					changeAddress = changeAddressObject.getAddress();
 					ZLog.log(changeAddress);
-				} else {
+				}
+				else {
 					//or reuse one that hasnt been spent from
 					changeAddress = changeAddresses.get(0);
 				}

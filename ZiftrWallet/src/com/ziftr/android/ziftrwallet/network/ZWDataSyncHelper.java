@@ -312,7 +312,9 @@ public class ZWDataSyncHelper {
 					String chain = coinJson.getString("chain");
 					String type = coinJson.getString("type");
 					
-					int blockNum = coinJson.optInt("height");
+					
+					//int blockNum = coinJson.optInt("height");
+					
 					boolean isEnabled = coinJson.optBoolean("is_enabled");
 					
 					String health = coinJson.optString("health");
@@ -567,8 +569,6 @@ public class ZWDataSyncHelper {
 		BigInteger receivedCoins = new BigInteger("0");
 		BigInteger spentCoins = new BigInteger("0");
 		
-		long blockHeight = -1;
-		
 		long time = json.optLong("time");
 		if(time == 0) {
 			//this happens when a transaction hasn't even been confirmed once
@@ -577,10 +577,6 @@ public class ZWDataSyncHelper {
 		}
 		transaction.setTxTime(time * 1000);
 		
-		if(json.has("height")) {
-			blockHeight = json.getLong("height");
-		}
-
 		
 		if(json.has("height")) {
 			long jsonHeight = json.optLong("height");

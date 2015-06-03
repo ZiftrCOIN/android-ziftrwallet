@@ -29,7 +29,6 @@ import java.util.concurrent.Executors;
 
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -379,7 +378,7 @@ public class ZiftrUtils {
 	}
 	
 	public static byte[] saltedHash(String salt, String password) {
-		if (password == null) {
+		if (password == null || salt == null) {
 			return null;
 		}
 		
@@ -393,10 +392,16 @@ public class ZiftrUtils {
 	
 	
 	public static String saltedHashString(String newPassword) {
-		if(newPassword == null || newPassword.isEmpty()) {
-			return null;
+		
+		String saltedHashString = null;
+		if(newPassword != null && newPassword.length() > 0) {
+			byte[] saltedHash = saltedHash(newPassword);
+			if(saltedHash != null) {
+				saltedHashString = bytesToHexString(saltedHash);
+			}
 		}
-		return ZiftrUtils.bytesToHexString(saltedHash(newPassword));
+		
+		return saltedHashString;
 	}
 
 	/**
@@ -484,7 +489,6 @@ public class ZiftrUtils {
 	 * Then creates a new instance of {@link SecureRandom}.
 	 * @return a new {@link SecureRandom} or null if something fatal happened and fixes could not be applied
 	 */
-	@SuppressLint("TrulyRandom")
 	public static synchronized SecureRandom createTrulySecureRandom() {
 		if(!randomSecured) {
 			try {
@@ -497,6 +501,7 @@ public class ZiftrUtils {
 			}
 		}
 		
+		//return null; //TODO -should crash the app like crazy, just for testing
 		return new SecureRandom();
 	}
 	

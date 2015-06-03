@@ -50,10 +50,10 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 	public static int UNSPENT_FROM = 0;
 	public static int SPENT_FROM = 1;
 
-	public static enum reencryptionStatus{
-		success,
-		encrypted, //first address was already encrypted
-		error //non-first address was already encrypted
+	public static enum EncryptionStatus{
+		SUCCESS,
+		ALREADY_ENCRYPTED, //first address was already encrypted
+		ERROR //non-first address was already encrypted
 	};
 	
 	@Override
@@ -129,7 +129,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 	}
 
 	//called in wrapper with transaction begin and transaction end to ensure atomicity
-	protected reencryptionStatus recryptAllAddresses(ZWCoin coin, ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter, SQLiteDatabase db) throws CryptoException {
+	protected EncryptionStatus recryptAllAddresses(ZWCoin coin, ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter, SQLiteDatabase db) throws CryptoException {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT ");
@@ -155,12 +155,12 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 			} else if (oldPrivKeyValInDb.charAt(0) == ZWKeyCrypter.PBE_AES_ENCRYPTION){
 				if (i==0){
 					ZLog.log("ERROR tried to encrypt already encrypted first key possible recovery by entering old password.");
-					return reencryptionStatus.encrypted;
+					return EncryptionStatus.ALREADY_ENCRYPTED;
 				} else {
 				//shouldn't happen
 					ZLog.log("ERROR tried to encrypt already non-first encrypted keys, inconsistently encrypted keys uh oh");
 				}
-				return reencryptionStatus.error;
+				return EncryptionStatus.ERROR;
 			}
 			
 			ContentValues cv = new ContentValues();
@@ -183,7 +183,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 				throw new CryptoException("Tables were not updated properly");
 			}
 		}
-		return reencryptionStatus.success;
+		return EncryptionStatus.SUCCESS;
 	}
 	
 	protected boolean attemptDecryptAllAddresses(ZWCoin coin, ZWKeyCrypter crypter, SQLiteDatabase db){

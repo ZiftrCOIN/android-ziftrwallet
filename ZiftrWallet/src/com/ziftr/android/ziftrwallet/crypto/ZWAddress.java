@@ -32,7 +32,6 @@ import android.annotation.SuppressLint;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListItem;
 import com.ziftr.android.ziftrwallet.util.Base58;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -109,6 +108,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * @param key
 	 * @throws ZWAddressFormatException
 	 */
+	/***
 	public ZWAddress(ZWCoin coinId) {
 		try {
 			this.key = new ZWECKey();
@@ -117,6 +117,7 @@ public class ZWAddress implements ZWSearchableListItem {
 			ZLog.log("Error making new address, this should not have happened.");
 		}
 	}
+	***/
 
 	/**
 	 * <p>Uses an ECKey to make an Address. The ECKey need not necessarilty have access

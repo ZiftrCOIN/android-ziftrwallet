@@ -36,7 +36,7 @@ public class ZWApplication extends Application {
 	    ZiftrTypefaceUtil.overrideFont(getApplicationContext());
 		isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		
-		ZiftrUtils.createTrulySecureRandom(); //just call to initialze fixes here ahead of time
+		ZiftrUtils.createTrulySecureRandom(); //just call to initialize fixes here ahead of time
 		
 		try {
 			versionCode = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;

@@ -18,7 +18,7 @@ import android.widget.EditText;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWWelcomePasswordFragment extends Fragment implements OnClickListener {
@@ -87,13 +87,13 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 				ZiftrUtils.runOnNewThread(new Runnable() {
 					@Override
 					public void run() {
-						final reencryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(null, password);
+						final EncryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(null, password);
 						//tried to set password on encrypted database private keys
-						if (status == reencryptionStatus.encrypted || status == reencryptionStatus.error){
+						if (status == EncryptionStatus.ALREADY_ENCRYPTED || status == EncryptionStatus.ERROR){
 							welcomeActivity.runOnUiThread(new Runnable(){
 								@Override
 								public void run() {
-									if (status == reencryptionStatus.encrypted){
+									if (status == EncryptionStatus.ALREADY_ENCRYPTED){
 										ZiftrTextDialogFragment oldPasswordDialog = new ZiftrTextDialogFragment();
 										oldPasswordDialog.setupDialog(R.string.zw_dialog_old_encryption);
 										oldPasswordDialog.addEmptyTextbox(true);

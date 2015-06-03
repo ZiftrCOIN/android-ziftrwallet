@@ -272,8 +272,14 @@ public abstract class ZWPreferences {
 		String salt = ZWWalletManager.getInstance().getAppDataString(PREFS_SALT_KEY);
 		
 		if(salt == null || salt.length() == 0) {
-			salt = ZWPbeAesCrypter.generateSalt();
-			ZWWalletManager.getInstance().upsertAppDataVal(PREFS_SALT_KEY, salt);
+			try {
+				salt = ZWPbeAesCrypter.generateSalt();
+				ZWWalletManager.getInstance().upsertAppDataVal(PREFS_SALT_KEY, salt);
+			}
+			catch(Exception e) {
+				salt = null;
+				ZLog.log("Exception creating salt: ", e);
+			}
 		}
 
 		return salt;

@@ -16,7 +16,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
+import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
@@ -144,8 +144,13 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	private ZWKeyCrypter passphraseToCrypter(String passphrase) {
 		ZWKeyCrypter crypter = null;
 		if (passphrase != null && passphrase.length() > 0) {
-			SecretKey secretKey = ZWPbeAesCrypter.generateSecretKey(passphrase, ZWPreferences.getSalt());
-			crypter = new ZWPbeAesCrypter(secretKey);
+			try {
+				SecretKey secretKey = ZWPbeAesCrypter.generateSecretKey(passphrase, ZWPreferences.getSalt());
+				crypter = new ZWPbeAesCrypter(secretKey);
+			}
+			catch(Exception e) {
+				ZLog.log("Exception creating key crypter: ", e);
+			}
 		}
 		return crypter;
 	}
@@ -161,8 +166,27 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	 * @param curPassphrase - null if no encryption
 	 * @param salt
 	 */
-	public synchronized reencryptionStatus changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
-		return super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassphrase), this.passphraseToCrypter(newPassphrase));
+	public synchronized EncryptionStatus changeEncryptionOfReceivingAddresses(String oldPassword, String newPassword) {
+		
+		//having null passwords and as such null key crypter objects is ok (it's how a password could be removed)
+		//however, if the passwords aren't null, we fail to make key crypter objects out of them, then that's an error
+		ZWKeyCrypter oldCrypter = null;
+		if(oldPassword != null && oldPassword.length() > 0) {
+			oldCrypter = passphraseToCrypter(oldPassword);
+			if(oldCrypter == null) {
+				return EncryptionStatus.ERROR;
+			}
+		}
+		
+		ZWKeyCrypter newCrypter = null;
+		if(newPassword != null && newPassword.length() > 0) {
+			newCrypter = passphraseToCrypter(newPassword);
+			if(newCrypter == null) {
+				return EncryptionStatus.ERROR;
+			}
+		}
+		
+		return super.changeEncryptionOfReceivingAddresses(this.passphraseToCrypter(oldPassword), this.passphraseToCrypter(newPassword));
 	}
 
 	/**

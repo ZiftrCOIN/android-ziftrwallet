@@ -15,8 +15,9 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import android.annotation.SuppressLint;
-
+import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -44,7 +45,7 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 		this.setSecretKey(secretKey);
 	}
 
-	@SuppressLint("TrulyRandom")
+
 	@Override
 	public ZWEncryptedData encrypt(String clearText) throws ZWKeyCrypterException {
 		try {
@@ -115,10 +116,14 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 		}
 	}
 
-	@SuppressLint("TrulyRandom") // Have applied the fix
 	public static String generateSalt() throws ZWKeyCrypterException {
 		try {
-			SecureRandom random = new SecureRandom();
+			SecureRandom random = ZiftrUtils.createTrulySecureRandom();
+			if(random == null) {
+				String rngError = ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng);
+				ZiftrDialogManager.showSimpleAlert(rngError);
+			}
+			
 			byte[] salt = new byte[SALT_LENGTH];
 			random.nextBytes(salt);
 			String saltHex = ZiftrUtils.bytesToHexString(salt); 
@@ -134,7 +139,13 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 	}
 
 	private static byte[] generateIv(int ivLength) {
-		SecureRandom random = new SecureRandom();
+		SecureRandom random = ZiftrUtils.createTrulySecureRandom();
+		
+		if(random == null) {
+			String rngError = ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng);
+			ZiftrDialogManager.showSimpleAlert(rngError);
+		}
+		
 		byte[] iv = new byte[ivLength];
 		random.nextBytes(iv);
 		return iv;
