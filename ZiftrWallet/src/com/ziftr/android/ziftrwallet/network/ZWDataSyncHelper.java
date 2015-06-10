@@ -510,38 +510,67 @@ public class ZWDataSyncHelper {
 		
 		long heightToSync = coin.getSyncedHeight() - coin.getNumRecommendedConfirmations();
 
+		boolean hasNextPage = true;
 		ZiftrNetRequest request = ZWApi.buildTransactionsRequest(coin.getType(), coin.getChain(), heightToSync, addresses);
 		String response = request.sendAndWait();
 
-		ZLog.forceFullLog("Transaction history response(" + request.getResponseCode() + "): " + response);
-		if( responseCodeOk(request.getResponseCode()) ) {
-			try {
-				JSONObject responseJson = new JSONObject(response);
-				JSONArray transactions = responseJson.getJSONArray("transactions");
-
-				//we now have an array of transactions with a transaction hash and a url to get more data about the transaction
-				for(int x = transactions.length() -1; x >= 0; x--) {
-					JSONObject transactionInfoJson = transactions.getJSONObject(x);
-					JSONObject transactionJson = transactionInfoJson.getJSONObject("transaction");
-					
-					long transactionHeight = createTransaction(coin, transactionJson);
-					if(transactionHeight > 0) {
-						//if we got a valid block chain height while parsing this transaction,
-						//we want to take the lowest height reported by all the transactions
-						//this way we're sure we don't miss a block
-						if(syncedHeight < 0 || syncedHeight > transactionHeight) {
-							syncedHeight = transactionHeight;
+		while(hasNextPage) {
+			hasNextPage = false; //always assume this is the last/only page unless we specifically find more
+			ZLog.forceFullLog("Transaction history response: " + request.getResponseCode() + "): " + response);
+			if( responseCodeOk(request.getResponseCode()) ) {
+				try {
+					JSONObject responseJson = new JSONObject(response);
+					JSONArray transactions = responseJson.getJSONArray("transactions");
+	
+					//we now have an array of transactions with a transaction hash and a url to get more data about the transaction
+					for(int x = transactions.length() -1; x >= 0; x--) {
+						JSONObject transactionInfoJson = transactions.getJSONObject(x);
+						JSONObject transactionJson = transactionInfoJson.getJSONObject("transaction");
+						
+						long transactionHeight = createTransaction(coin, transactionJson);
+						if(transactionHeight > 0) {
+							//if we got a valid block chain height while parsing this transaction,
+							//we want to take the lowest height reported by all the transactions
+							//this way we're sure we don't miss a block
+							if(syncedHeight < 0 || syncedHeight > transactionHeight) {
+								syncedHeight = transactionHeight;
+							}
 						}
 					}
+	
+					//if we got this far without any exceptions, everything went good, so let the UI know the database has changed, so it can update
+					ZiftrNetworkManager.dataUpdated();
+					
+					//check for and download next page
+					if(transactions.length() > 0) {
+						JSONArray links = responseJson.optJSONArray("links");
+						if(links != null) {
+							for(int x = 0; x < links.length(); x++) {
+								JSONObject link = links.getJSONObject(x);
+								String rel = link.optString("rel");
+								if("prev-page".equals(rel)) {
+									String href = link.optString("href");
+									hasNextPage = true;
+									request = ZWApi.buildUrlLinkRequest(href);
+									response = request.sendAndWait();
+								}
+							}
+						}
+					}
+					
 				}
-
-				//if we got this far without any exceptions, everything went good, so let the UI know the database has changed, so it can update
-				ZiftrNetworkManager.dataUpdated();
+				catch(Exception e) {
+					ZLog.log("Exception downloading transactions: ", e);
+					syncedHeight = -1;
+					hasNextPage = false;
+				}
+			}//end if response code
+			else {
+				//this means there was something wrong with one of the pages of transaction histories
+				//so we can't assume that everything is fully synced
+				syncedHeight = -1;
 			}
-			catch(Exception e) {
-				ZLog.log("Exception downloading transactions: ", e);
-			}
-		}//end if response code
+		}
 
 		ZiftrNetworkManager.networkStopped();
 		

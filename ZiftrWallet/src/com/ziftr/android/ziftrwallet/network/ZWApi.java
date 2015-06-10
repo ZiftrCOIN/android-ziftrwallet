@@ -56,8 +56,6 @@ public class ZWApi {
 	
 	private static String buildUrl(String type, String chain, String endPoint, boolean secure) {
 		
-		ZWPreferences.getCustomAPIServer();
-		
 		String protocol;
 		if(secure) {
 			protocol = "https";
@@ -112,6 +110,7 @@ public class ZWApi {
 		
 		ZiftrParamList query = new ZiftrParamList();
 		query.add("min_block_height", String.valueOf(minimumBlockHeight));
+		query.add("last_page", "true");
 		query.add("addresses", addressesList);
 		
 		String url = buildUrl(type.toLowerCase(), chain, "transactions");
@@ -173,7 +172,15 @@ public class ZWApi {
 		return request;
 	}
 	
+	
+	public static ZiftrNetRequest buildUrlLinkRequest(String urlPath) {
+		
+		String url = "https://" + BASE_URL + urlPath;
+		ZiftrNetRequest request = ZiftrNetRequest.createRequest(url, buildGenericHeaders());
+		return request;
+	}
 
+	
 }
 
 
