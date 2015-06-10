@@ -45,5 +45,10 @@ public abstract class ZWCoinSpecificTable {
 			//quietly fail when adding columns, they likely already exist
 		}
 	}
+	
+	
+	public void deleteAll(ZWCoin coin, SQLiteDatabase database) {
+		database.delete(getTableName(coin), null, null);
+	}
 
 }

@@ -115,7 +115,7 @@ public class ZWTransactionOutputsTable extends ZWCoinSpecificTable {
 		ZWTransactionOutput output = new ZWTransactionOutput(address, transactionId, index, value, isMultiSig);
 		return output;
 	}
-	
+
 	
 }
 

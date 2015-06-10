@@ -655,6 +655,33 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		}
 	}
 	
+	
+	public void resetAllSyncedData() {
+		
+		SQLiteDatabase database = this.getWritableDatabase();
+		database.beginTransaction();
+		
+		try {
+			List<ZWCoin> coins = this.getNotUnactivatedCoins();
+			
+			for(ZWCoin coin : coins) {
+				coin.setSyncedHeight(-1);
+				this.coinTable.setSyncedBlockHeight(coin, -1, database);
+				this.transactionsTable.deleteAll(coin, database);
+				this.transactionOutputsTable.deleteAll(coin, database);
+			}
+			
+			database.setTransactionSuccessful();
+		}
+		catch(Exception e) {
+			
+		}
+		finally {
+			database.endTransaction();
+		}
+		
+	}
+	
 }
 
 

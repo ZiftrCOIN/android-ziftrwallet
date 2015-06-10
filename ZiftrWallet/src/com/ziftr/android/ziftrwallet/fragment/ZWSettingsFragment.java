@@ -23,6 +23,8 @@ import android.widget.TextView;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
+import com.ziftr.android.ziftrwallet.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
@@ -56,6 +58,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	private Button exportlogsButton;
 	private Button enablelogsButton;
 	private Button setCustomServer;
+	private Button resyncDataButton;
 
 
 	@Override
@@ -118,6 +121,8 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.enablelogsButton.setOnClickListener(this);
 		this.setCustomServer = (Button) rootView.findViewById(R.id.change_server);
 		this.setCustomServer.setOnClickListener(this);
+		this.resyncDataButton = (Button) rootView.findViewById(R.id.resync_data);
+		resyncDataButton.setOnClickListener(this);
 		
 		this.updateSettingsVisibility();
 		return rootView;
@@ -159,6 +164,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.exportlogsButton.setVisibility(View.GONE);
 			this.enablelogsButton.setVisibility(View.GONE);
 			this.setCustomServer.setVisibility(View.GONE);
+			this.resyncDataButton.setVisibility(View.GONE);
 
 		} else {
 			this.debugButton.setText("Disable debugging");
@@ -166,11 +172,12 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.exportlogsButton.setVisibility(View.VISIBLE);
 			this.enablelogsButton.setVisibility(View.VISIBLE);
 			this.setCustomServer.setVisibility(View.VISIBLE);
+			this.resyncDataButton.setVisibility(View.VISIBLE);
 			if (ZWPreferences.getLogToFile()){
-				this.enablelogsButton.setText(" Disable File logging ");
+				this.enablelogsButton.setText(" Disable File Logging ");
 			} 
 			else {
-				this.enablelogsButton.setText(" Enable File logging ");
+				this.enablelogsButton.setText(" Enable File Logging ");
 			}
 		}
 	}
@@ -289,6 +296,12 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			customServerDialog.addTextbox(ZWPreferences.getCustomAPIServer(), null, false);
 			
 			customServerDialog.show(getFragmentManager(), DIALOG_CHANGE_SERVER_TAG);
+		}
+		else if(v == this.resyncDataButton) {
+			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_debug_cleared_data);
+			ZWWalletManager.getInstance().resetAllSyncedData();
+			
+			getZWMainActivity().goHome();
 		}
 	}
 	

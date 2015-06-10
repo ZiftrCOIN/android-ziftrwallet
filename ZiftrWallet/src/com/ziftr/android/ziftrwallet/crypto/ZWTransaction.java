@@ -201,10 +201,10 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 * @return True if this transaction type is pending
 	 */
 	public Boolean isPending() {
-		if(this.blockHeight >= 0) {
+		if(this.blockHeight < 0) {
 			return true;
 		}
-		else if (coin.getSyncedHeight() - this.blockHeight < coin.getNumRecommendedConfirmations()) {
+		else if (getConfirmationCount() < coin.getNumRecommendedConfirmations()) {
 			return true;
 		}
 		
@@ -216,7 +216,8 @@ public class ZWTransaction implements ZWSearchableListItem {
 	 */
 	public long getConfirmationCount() {
 		if(this.blockHeight >= 0) {
-			return coin.getSyncedHeight() - this.blockHeight;
+			return coin.getSyncedHeight() - this.blockHeight +1; 
+			//+1 because transactions in the top most block are said to have 1 confirmation
 		}
 		
 		return 0;

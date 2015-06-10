@@ -392,6 +392,5 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		
 		return sb.toString();
 	}
-	
-	
+
 }

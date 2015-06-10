@@ -167,7 +167,7 @@ public class ZWDataSyncHelper {
 
 			//now pack all the signing into a json object to send it off to the server
 			signedData.put("transaction", transaction);
-			ZLog.log("sending  this signed transaction to server :" + signedData);
+			ZLog.forceFullLog("sending  this signed transaction to server :" + signedData);
 		}
 		catch(Exception e) {
 			ZLog.log("Exception attempting to sign transactions: ", e);
@@ -507,8 +507,10 @@ public class ZWDataSyncHelper {
 		long syncedHeight = -1;
 
 		ZLog.log("Getting transaction history for addresses: ", addresses);
+		
+		long heightToSync = coin.getSyncedHeight() - coin.getNumRecommendedConfirmations();
 
-		ZiftrNetRequest request = ZWApi.buildTransactionsRequest(coin.getType(), coin.getChain(), addresses);
+		ZiftrNetRequest request = ZWApi.buildTransactionsRequest(coin.getType(), coin.getChain(), heightToSync, addresses);
 		String response = request.sendAndWait();
 
 		ZLog.forceFullLog("Transaction history response(" + request.getResponseCode() + "): " + response);

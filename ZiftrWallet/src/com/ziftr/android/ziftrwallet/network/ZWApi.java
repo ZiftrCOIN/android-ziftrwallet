@@ -100,16 +100,18 @@ public class ZWApi {
 	 * 
 	 * @param type
 	 * @param chain
+	 * @param minimumBlockHeight
 	 * @param address
 	 * @return
 	 */
-	public static ZiftrNetRequest buildTransactionsRequest(String type, String chain, List<String> addresses) {
+	public static ZiftrNetRequest buildTransactionsRequest(String type, String chain, long minimumBlockHeight, List<String> addresses) {
 		
 		//TODO use URLEncoder.encode for each address, this convenient shortcut would break stuff
 		//if there's ever a coin with illegal characters allowed in the addresses for some reason
 		String addressesList = Joiner.on(',').join(addresses);
 		
 		ZiftrParamList query = new ZiftrParamList();
+		query.add("min_block_height", String.valueOf(minimumBlockHeight));
 		query.add("addresses", addressesList);
 		
 		String url = buildUrl(type.toLowerCase(), chain, "transactions");

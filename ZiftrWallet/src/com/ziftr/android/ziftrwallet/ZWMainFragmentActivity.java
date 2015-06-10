@@ -1186,15 +1186,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 			homeButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if (ZWMainFragmentActivity.this.drawerMenuIsOpen()) {
-						toggleDrawerPosition();
-					}					
-					//clear backstack
-					ZWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(
-							null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-					//show home
-					ZWMainFragmentActivity.this.showFragmentFromType(
-							FragmentType.ACCOUNT_FRAGMENT_TYPE, false);
+					goHome();
 				}
 			});
 
@@ -1259,6 +1251,20 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 			searchBar.setVisibility(View.GONE);
 		}
 	}
+	
+	
+	public void goHome() {
+		if (ZWMainFragmentActivity.this.drawerMenuIsOpen()) {
+			toggleDrawerPosition();
+		}					
+		//clear backstack
+		ZWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(
+				null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+		//show home
+		ZWMainFragmentActivity.this.showFragmentFromType(
+				FragmentType.ACCOUNT_FRAGMENT_TYPE, false);
+	}
+	
 
 	private void filterAccordingToVisibility(
 			final ZWSearchableListAdapter<? extends ZWSearchableListItem> adapter) {

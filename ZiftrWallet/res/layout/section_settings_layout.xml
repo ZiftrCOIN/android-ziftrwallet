@@ -237,17 +237,26 @@
             android:layout_height="@dimen/zw_button_footer_height"
             android:layout_marginTop="4dp"
             android:background="@drawable/clickable_button_color"
-            android:text="Export wallet"
+            android:text="Export Wallet"
             android:textColor="@color/zw_default_text"
             android:visibility="gone" />
 
+        <Button
+            android:id="@+id/resync_data"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/zw_button_footer_height"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/clickable_button_color"
+            android:text="Resync All Data"
+            android:textColor="@color/zw_default_text"
+            android:visibility="gone" />
+        
         <Button
             android:id="@+id/enable_logs"
             android:layout_width="match_parent"
             android:layout_height="@dimen/zw_button_footer_height"
             android:layout_marginTop="4dp"
             android:background="@drawable/clickable_button_color"
-            android:text="Enable logs"
             android:textColor="@color/zw_default_text"
             android:visibility="gone" />
 
@@ -257,7 +266,7 @@
             android:layout_height="@dimen/zw_button_footer_height"
             android:layout_marginTop="4dp"
             android:background="@drawable/clickable_button_color"
-            android:text="Export logs"
+            android:text="Export Logs"
             android:textColor="@color/zw_default_text"
             android:visibility="gone" />
         
