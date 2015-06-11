@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -489,6 +490,7 @@ public class ZiftrUtils {
 	 * Then creates a new instance of {@link SecureRandom}.
 	 * @return a new {@link SecureRandom} or null if something fatal happened and fixes could not be applied
 	 */
+	@SuppressLint("TrulyRandom")
 	public static synchronized SecureRandom createTrulySecureRandom() {
 		if(!randomSecured) {
 			try {
@@ -501,7 +503,6 @@ public class ZiftrUtils {
 			}
 		}
 		
-		//return null; //TODO -should crash the app like crazy, just for testing
 		return new SecureRandom();
 	}
 	

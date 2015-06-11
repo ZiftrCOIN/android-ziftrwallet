@@ -11,8 +11,6 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.spongycastle.crypto.CryptoException;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -246,8 +244,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	protected synchronized EncryptionStatus changeEncryptionOfReceivingAddresses(ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter) {
 
-		EncryptionStatus returnStatus = EncryptionStatus.ERROR;
-		
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		try {
