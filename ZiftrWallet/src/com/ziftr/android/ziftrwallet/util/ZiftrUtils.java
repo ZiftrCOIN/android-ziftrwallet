@@ -40,7 +40,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.google.common.primitives.UnsignedLongs;
-import com.ziftr.android.ziftrwallet.ZWPreferences;
 
 public class ZiftrUtils {
 
@@ -373,37 +372,6 @@ public class ZiftrUtils {
 		}
 	}
 	
-	
-	public static byte[] saltedHash(String password) {
-		return saltedHash(ZWPreferences.getSalt(), password);
-	}
-	
-	public static byte[] saltedHash(String salt, String password) {
-		if (password == null || salt == null) {
-			return null;
-		}
-		
-		byte[] newPasswordBytes = password.getBytes();
-		byte[] concat = new byte[32 + password.getBytes().length];
-		System.arraycopy(ZiftrUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
-		System.arraycopy(newPasswordBytes, 0, concat, 32, newPasswordBytes.length);
-		return ZiftrUtils.Sha256Hash(concat);
-	}
-	
-	
-	
-	public static String saltedHashString(String newPassword) {
-		
-		String saltedHashString = null;
-		if(newPassword != null && newPassword.length() > 0) {
-			byte[] saltedHash = saltedHash(newPassword);
-			if(saltedHash != null) {
-				saltedHashString = bytesToHexString(saltedHash);
-			}
-		}
-		
-		return saltedHashString;
-	}
 
 	/**
 	 * See Utils#doubleDigest(byte[], int, int).

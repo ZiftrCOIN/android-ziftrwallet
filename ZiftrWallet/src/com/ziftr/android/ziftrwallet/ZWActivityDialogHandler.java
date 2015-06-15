@@ -73,8 +73,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			return false;
 		} else {
 			//reencryption was successful
-			String saltedHash = ZiftrUtils.saltedHashString(newPassword);
-			ZWPreferences.setStoredPasswordHash(saltedHash);
+			ZWPreferences.setStoredPassword(newPassword);
 		}
 		return true;
 	}
@@ -92,9 +91,8 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWReceiveCoinsFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
 			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
-			byte[] inputHash = ZiftrUtils.saltedHash(enteredPassword);
 			
-			if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
+			if (ZWPreferences.inputPasswordMatchesStoredPassword(enteredPassword)) {
 				ZWPreferences.setCachedPassword(enteredPassword);
 				
 				ZWReceiveCoinsFragment receiveFragment = 
@@ -147,9 +145,8 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			String confirmPassword = passwordFragment.getEnteredText(2);
 		
 			if(newPassword == confirmPassword || newPassword.equals(confirmPassword)) {
-				byte[] oldPasswordHash = ZiftrUtils.saltedHash(oldPassword);
 				
-				if (ZWPreferences.inputHashMatchesStoredHash(oldPasswordHash)) {
+				if (ZWPreferences.inputPasswordMatchesStoredPassword(oldPassword)) {
 					//everything looks ok, try and change passwords
 					if (this.changePassword(oldPassword, newPassword)) {
 						ZWPreferences.setPasswordWarningDisabled(true);

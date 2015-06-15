@@ -110,10 +110,7 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 						} 
 						else {
 							//set password
-							String saltedHash = ZiftrUtils.saltedHashString(password);
-							
-							
-							if (ZWPreferences.setStoredPasswordHash(saltedHash) == -1){
+							if (ZWPreferences.setStoredPassword(password) <= 0){
 								//if we failed setting password, something could be wrong with db
 								ZiftrSimpleDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
 								dbErrorFragment.setupDialog(R.string.zw_app_name, 

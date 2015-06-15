@@ -19,7 +19,6 @@ import android.widget.Button;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWManageSpaceActivity extends FragmentActivity implements OnClickListener, ZiftrDialogHandler {
 	
@@ -84,9 +83,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 			ZiftrTextDialogFragment passwordDialog = (ZiftrTextDialogFragment) fragment;
 			String password = passwordDialog.getEnteredText(0);
 			
-			byte[] inputHash = ZiftrUtils.saltedHash(password);
-			
-			if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
+			if (ZWPreferences.inputPasswordMatchesStoredPassword(password)) {
 				this.clearAppData();
 				this.finish();
 			}

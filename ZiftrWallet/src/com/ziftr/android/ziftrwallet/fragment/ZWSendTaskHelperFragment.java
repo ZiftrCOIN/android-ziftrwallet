@@ -29,7 +29,6 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWSendTaskHelperFragment extends Fragment {
 	
@@ -303,9 +302,8 @@ public class ZWSendTaskHelperFragment extends Fragment {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				String enteredPassword = passwordDialog.getEnteredText(0);
-				byte[] inputHash = ZiftrUtils.saltedHash(enteredPassword);
 				
-				if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
+				if (ZWPreferences.inputPasswordMatchesStoredPassword(enteredPassword)) {
 					ZWPreferences.setCachedPassword(enteredPassword);
 					ZWSendTaskHelperFragment.this.password = enteredPassword;
 					startSending();

@@ -105,8 +105,8 @@ public abstract class ZWPreferences {
 				cacheThread.cache = cacheString;
 				cacheThread.cacheCleanupTime = System.currentTimeMillis() + cacheTime;
 			}
-
 		}
+		
 		
 		public static synchronized String getCache() {
 			if(cacheThread != null) {
@@ -126,7 +126,7 @@ public abstract class ZWPreferences {
 	 * 
 	 * @return the stored hash of the users password, if there is one.
 	 */
-	static byte[] getStoredPasswordHash() {
+	private static byte[] getStoredPasswordHash() {
 		String storedPassword = ZWWalletManager.getInstance().getAppDataString(PREFS_PASSWORD_KEY);
 		
 		if(storedPassword != null) {
@@ -136,10 +136,21 @@ public abstract class ZWPreferences {
 		return null;
 	}
 	
-	static int setStoredPasswordHash(String saltedHash) {
-		return ZWWalletManager.getInstance().upsertAppDataVal(PREFS_PASSWORD_KEY, saltedHash);
+	
+	public static int setStoredPassword(String password) {
+		String saltedHash = ZWPreferences.saltedHashString(password);
+		int numPrefsUpdated = ZWWalletManager.getInstance().upsertAppDataVal(PREFS_PASSWORD_KEY, saltedHash);
+		
+		if(numPrefsUpdated > 0) {
+			//if any of the preferences have been updated (the password hash was successfully stored)
+			//then update the cache
+			setCachedPassword(password);
+		}
+		
+		return numPrefsUpdated;
 	}
 
+	
 	/**
 	 * Get a boolean describing whether or not the user 
 	 * has entered a password before.
@@ -151,29 +162,37 @@ public abstract class ZWPreferences {
 		return getStoredPasswordHash() != null;
 	}
 
+	
 	/**
-	 * Tells if the given hash matches the stored password
-	 * hash.
+	 * Tests to see if the entered password matches the stored password,
+	 * by comparing hashes
 	 * 
-	 * @param inputHash - the hash to check agains
-	 * @return as above
+	 * @param inputPassword a String representing the password to be checked
+	 * @return true if a salted hash of the input string matches the stored hash of the password
 	 */
-	public static boolean inputHashMatchesStoredHash(byte[] inputHash) {
+	public static boolean inputPasswordMatchesStoredPassword(String inputPassword) {
+
+		byte[] inputPasswordHash = ZWPreferences.saltedHash(inputPassword);
 		byte[] storedHash = getStoredPasswordHash();
-		if (storedHash != null && inputHash != null) {
-			return Arrays.equals(storedHash, inputHash); 
-		} else if (storedHash == null && inputHash == null) {
+		
+		if (storedHash != null && inputPasswordHash != null) {
+			return Arrays.equals(storedHash, inputPasswordHash); 
+		} 
+		else if (storedHash == null && inputPasswordHash == null) {
 			return true;
-		} else {
-			ZLog.log("Error, An hash value was null that shouldn't have been.");
+		}
+		else {
+			ZLog.log("Error, A hash value was null that shouldn't have been.");
 			return false;
 		}
 	}
 
+	
 	public static boolean getFeesAreEditable() {
 		return getOption(EDITABLE_FEES_KEY, false);
 	}
 
+	
 	public static void setFeesAreEditable(boolean feesAreEditable) {
 		ZWWalletManager.getInstance().upsertAppDataVal(EDITABLE_FEES_KEY, feesAreEditable);
 	}
@@ -196,7 +215,7 @@ public abstract class ZWPreferences {
 	}
 	
 	public static void disablePassword(){
-		setStoredPasswordHash(null);
+		setStoredPassword(null);
 	}
 
 	
@@ -264,7 +283,13 @@ public abstract class ZWPreferences {
 	
 	
 	public static String getCachedPassword(){
-		return CacheThread.getCache();
+		
+		if(ZWPreferences.userHasPassword()) {
+			//as a catch-all, never return a cached password if the user doesn't have one
+			return CacheThread.getCache();
+		}
+		
+		return null;
 	}
 	
 	
@@ -336,5 +361,36 @@ public abstract class ZWPreferences {
 	public static void setUserAgreedToTos(boolean agreed) {
 		ZWWalletManager.getInstance().upsertAppDataVal(AGREED_TO_TOS_KEY, agreed);
 	}
-
+	
+	
+	private static String saltedHashString(String newPassword) {
+		String saltedHashString = null;
+		if(newPassword != null && newPassword.length() > 0) {
+			byte[] saltedHash = saltedHash(newPassword);
+			if(saltedHash != null) {
+				saltedHashString = ZiftrUtils.bytesToHexString(saltedHash);
+			}
+		}
+		
+		return saltedHashString;
+	}
+	
+	
+	public static byte[] saltedHash(String password) {
+		return saltedHash(ZWPreferences.getSalt(), password);
+	}
+	
+	
+	public static byte[] saltedHash(String salt, String password) {
+		if (password == null || salt == null) {
+			return null;
+		}
+		
+		byte[] newPasswordBytes = password.getBytes();
+		byte[] concat = new byte[32 + password.getBytes().length];
+		System.arraycopy(ZiftrUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
+		System.arraycopy(newPasswordBytes, 0, concat, 32, newPasswordBytes.length);
+		return ZiftrUtils.Sha256Hash(concat);
+	}
+	
 }
