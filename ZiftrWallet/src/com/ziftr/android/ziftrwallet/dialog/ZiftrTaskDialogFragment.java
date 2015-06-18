@@ -6,8 +6,6 @@
 
 package com.ziftr.android.ziftrwallet.dialog;
 
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -17,6 +15,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.KeyEvent;
+
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 
 public abstract class ZiftrTaskDialogFragment extends ZiftrSimpleDialogFragment {

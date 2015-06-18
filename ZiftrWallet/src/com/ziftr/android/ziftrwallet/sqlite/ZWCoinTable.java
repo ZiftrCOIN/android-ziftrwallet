@@ -44,7 +44,6 @@ public class ZWCoinTable {
 	public static final String COLUMN_SCHEME = "scheme";
 	public static final String COLUMN_LOGO_URL = "logo_url";
 	
-	
 	private static final int UNACTIVATED = 0; //Used for table types that just haven't been used yet.
 	private static final int DEACTIVATED = 1; //Used for table types that used to be ACTIVATED, but now user deactivated them.
 	private static final int ACTIVATED = 2; //Used for table types that are activated and in use by user (should always be largest value when adding other types).
@@ -74,7 +73,6 @@ public class ZWCoinTable {
 		
 		this.addColumn(COLUMN_ENABLED, "INTEGER", db);
 		this.addColumn(COLUMN_HEALTH, "TEXT", db);
-
 	}
 	
 	

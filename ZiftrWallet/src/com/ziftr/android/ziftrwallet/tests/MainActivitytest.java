@@ -25,10 +25,10 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 
 public class MainActivitytest extends ActivityInstrumentationTestCase2<ZWMainFragmentActivity> {
 

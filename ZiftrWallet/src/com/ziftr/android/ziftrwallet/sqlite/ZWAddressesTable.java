@@ -14,21 +14,24 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
+import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
-// TODO add a column for isChangeAddress. Many times we want to filter change addresses
-// out so they are never revealed to the user
-public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
+/**
+ * TODO add a column for isChangeAddress. Many times we want to filter change addresses
+ * out so they are never revealed to the user
+ */
+public abstract class ZWAddressesTable<A extends ZWSendingAddress> extends ZWCoinSpecificTable {
 
 	/** 
 	 * The address column. This is the encoded public key, along with coin type
 	 * byte and double hash checksum.
 	 */
 	public static final String COLUMN_ADDRESS = "address";
-	
+
 	/** The label column. This is for users to keep a string attached to an entry. */
 	public static final String COLUMN_LABEL = "label";
 
@@ -49,59 +52,50 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	 * A useful method to convert a cursor (pointer to a row in a table) to an address.
 	 * This has to be done differently for the table of receiving addresses and the table 
 	 * of sending addresses. 
-	 * 
-	 * @param coinId - the coin type table specifier
-	 * @param c - the cursor
-	 * @return
-	 * @throws ZWAddressFormatException
 	 */
-	protected abstract ZWAddress cursorToAddress(ZWCoin coinId, Cursor c) throws ZWAddressFormatException;
+	protected abstract A cursorToAddress(ZWCoin coinId, Cursor c) throws ZWAddressFormatException;
 
-	/**
-	 * For updating and insertion with android SQLite helper methods, we need to make a 
-	 * {@link ContentValues} object. This also has to be done differently for the table of 
-	 * receiving addresses and the table of sending addresses.
-	 * 
-	 * @param address - The address to convert.
-	 * @return
+	/** 
+	 * Do the reverse of cursorToAddress.  
 	 */
-	protected abstract ContentValues addressToContentValues(ZWAddress address);
-
-	protected long insert(ZWAddress address, SQLiteDatabase db) {
-		return db.insert(getTableName(address.getCoin()), null, addressToContentValues(address));
+	protected ContentValues addressToContentValues(A address) {
+		ContentValues values = new ContentValues();
+		values.put(COLUMN_ADDRESS, address.getAddress());
+		values.put(COLUMN_LABEL, address.getLabel());
+		values.put(COLUMN_BALANCE, address.getLastKnownBalance());
+		values.put(COLUMN_MODIFIED_TIMESTAMP, address.getLastTimeModifiedSeconds());
+		return values;
 	}
 
-	
 	@Override
 	protected void createTableColumns(ZWCoin coin, SQLiteDatabase database) {
-		
+
 		//add label column
 		addColumn(coin, COLUMN_LABEL, "TEXT", database);
-		
+
 		//add balance column
 		addColumn(coin, COLUMN_BALANCE, "INTEGER", database);
-		
+
 		//add creation timestamp column
 		addColumn(coin, COLUMN_CREATION_TIMESTAMP, "INTEGER", database);
-		
+
 		//add modified timestamp column
 		addColumn(coin, COLUMN_MODIFIED_TIMESTAMP, "INTEGER", database);
 	}
 
-	
-	protected ZWAddress getAddress(ZWCoin coinId, String address, SQLiteDatabase db) {
-	
+	protected A getAddress(ZWCoin coinId, String address, SQLiteDatabase db) {
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coinId));
 		sb.append(" WHERE ").append(COLUMN_ADDRESS).append(" = ");
 		sb.append(DatabaseUtils.sqlEscapeString(address));
-		
+
 		String toQuery = sb.toString();
 		Cursor c = db.rawQuery(toQuery, null);
 
-		ZWAddress foundAddress = null;
-		
+		A foundAddress = null;
+
 		if (c.moveToFirst()) {
 			// Recreate key from stored private key
 			try {
@@ -112,13 +106,13 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 				ZLog.log(afe);
 			}
 		}
-		
+
 		// Make sure we close the cursor
 		c.close();
 
 		return foundAddress;
 	}
-	
+
 
 	/**
 	 * Gets a list of addresses from the database. If addresses is null 
@@ -130,46 +124,51 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	 * @param receivingNotSending true
 	 * @return
 	 */
-	protected List<ZWAddress> getAddresses(ZWCoin coin, List<String> addresses, SQLiteDatabase db) {
-
-		if(addresses == null || addresses.size() == 0) {
-			ZLog.log("Trying to get addresses without specifiying public keys. Returning all addresses");
-			return getAllAddresses(coin, db);
-		}
-		
+	protected List<A> getAddresses(ZWCoin coin, ZWAddressFilter<A> filter, SQLiteDatabase db) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT * FROM ");
 		sb.append(getTableName(coin));
-		
-		sb.append(" WHERE ");
-		sb.append(COLUMN_ADDRESS);
-		sb.append(" IN (");
-		for (int i = 0; i < addresses.size(); i++) {
-			sb.append(DatabaseUtils.sqlEscapeString(addresses.get(i)));
-			if (i != (addresses.size() - 1)) {
-				sb.append(",");
-			} else {
-				sb.append(")");
-			}
+		if (filter != null) {
+			sb.append(" WHERE ");
+			sb.append(filter.where());
 		}
-	 
 		sb.append(";");
 		String toQuery = sb.toString();
 		Cursor cursor = db.rawQuery(toQuery, null);
-		
-		List<ZWAddress> newAddresses = this.readAddresses(coin, cursor);
+
+		List<A> newAddresses = this.readAddresses(coin, cursor, filter);
 
 		return newAddresses;
 	}
-
 	
-	protected List<ZWAddress> getAllAddresses(ZWCoin coin, SQLiteDatabase db) {
-		String sql = "SELECT * FROM " + getTableName(coin);
-		Cursor cursor = db.rawQuery(sql, null);
-		return this.readAddresses(coin, cursor);
+	protected List<A> getAddresses(ZWCoin coin, List<A> addresses, SQLiteDatabase db) {
+		
+		if (addresses == null)
+			return null;
+		
+		if (addresses.size() == 0) {
+			return new ArrayList<A>();
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(COLUMN_ADDRESS);
+		sb.append(" IN (");
+		sb.append(Joiner.on(",").join(addresses));
+		sb.append(")");
+		final String where = sb.toString();
+		
+		ZWAddressFilter<A> filter = new ZWAddressFilter<A>() {
+			@Override public boolean include(A address) { return true; }
+			@Override public String where() { return where; }
+		};
+		
+		return this.getAddresses(coin, filter, db);
 	}
 
-	
+	protected List<A> getAllAddresses(ZWCoin coin, SQLiteDatabase db) {
+		return this.getAddresses(coin, (ZWAddressFilter<A>)null, db);
+	}
+
 	/**
 	 * returns a list of Strings of all addresses for the given coin
 	 * @param coin
@@ -177,14 +176,14 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	 * @return
 	 */
 	protected List<String> getAddressesList(ZWCoin coin, SQLiteDatabase db) {
-		
+
 		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin);
 		Cursor cursor = db.rawQuery(sql, null);
-		
+
 		return this.readAddressList(coin, cursor);
 	}
-	
-	protected void updateAddress(ZWAddress address, SQLiteDatabase db) {
+
+	protected void updateAddress(A address, SQLiteDatabase db) {
 		ContentValues values = addressToContentValues(address);
 		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
 		db.update(getTableName(address.getCoin()), values, whereClause, null);
@@ -197,21 +196,30 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 		db.update(getTableName(coin), values, whereClause, null);
 	}
 
+	protected long insert(A address, SQLiteDatabase db) {
+		ContentValues values = this.addressToContentValues(address);
+
+		// The id will be generated upon insertion.
+		return db.insert(getTableName(address.getCoin()), null, values);
+	}
+
 	/**
-	 * reads through the cursor and creates {@link ZWAddress} from contents,
+	 * reads through the cursor and creates {@link ZWSendingAddress} from contents,
 	 * closes cursor when done
 	 * @param coin which coin the cursor is for
 	 * @param cursor a cursor with data that can be converted to addresses
-	 * @return a {@link List} of {@link ZWAddress} objects
+	 * @return a {@link List} of {@link ZWSendingAddress} objects
 	 */
-	protected List<ZWAddress> readAddresses(ZWCoin coin, Cursor cursor) {
-		ArrayList<ZWAddress> addresses = new ArrayList<ZWAddress>();
-		
+	protected List<A> readAddresses(ZWCoin coin, Cursor cursor, ZWAddressFilter<A> filter) {
+		ArrayList<A> addresses = new ArrayList<A>();
+
 		if(cursor != null && cursor.moveToFirst()) {
 			do {
 				try {
-					ZWAddress address = this.cursorToAddress(coin, cursor);
-					addresses.add(address);
+					A address = this.cursorToAddress(coin, cursor);
+					if (filter == null || filter.include(address)) {
+						addresses.add(address);
+					}
 				}
 				catch (ZWAddressFormatException e) {
 					ZLog.log("Exception trying to Address from cursor: ", e);
@@ -219,13 +227,16 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 			}
 			while(cursor.moveToNext());
 		}
-		
+
 		cursor.close();
-		
+
 		return addresses;
 	}
 	
-	
+	protected List<A> readAddresses(ZWCoin coin, Cursor cursor) {
+		return this.readAddresses(coin, cursor, null);
+	}
+
 	/**
 	 * reads through the cursor and pulls out public addresses, assumes address is string in first column of cursor,
 	 * closes cursor when done
@@ -235,7 +246,7 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 	 */
 	protected List<String> readAddressList(ZWCoin coin, Cursor cursor) {
 		ArrayList<String> addresses = new ArrayList<String>();
-		
+
 		if(cursor != null && cursor.moveToFirst()) {
 			do {
 				addresses.add(cursor.getString(0));
@@ -243,9 +254,9 @@ public abstract class ZWAddressesTable extends ZWCoinSpecificTable {
 			while (cursor.moveToNext());
 		}
 		cursor.close();
-		
+
 		return addresses;
 	}
 
-	
+
 }

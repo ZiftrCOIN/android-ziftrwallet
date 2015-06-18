@@ -13,7 +13,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -139,7 +139,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		addressEditText.setText(address);
 		
 		if(label == null) {
-			ZWAddress addressFromDatabase = this.getWalletManager().getAddress(this.getSelectedCoin(), address, false);
+			ZWSendingAddress addressFromDatabase = this.getWalletManager().getAddress(this.getSelectedCoin(), address, false);
 			if(addressFromDatabase != null) {
 				label = addressFromDatabase.getLabel();
 			}

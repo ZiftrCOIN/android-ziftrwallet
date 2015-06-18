@@ -17,8 +17,8 @@ import java.util.Locale;
 
 import com.google.common.base.Charsets;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.Base58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;

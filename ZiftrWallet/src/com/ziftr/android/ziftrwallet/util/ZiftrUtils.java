@@ -16,8 +16,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,8 +24,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -40,7 +36,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.google.common.primitives.UnsignedLongs;
-import com.ziftr.android.ziftrwallet.ZWPreferences;
 
 public class ZiftrUtils {
 
@@ -58,18 +53,6 @@ public class ZiftrUtils {
 	/** formatting for date written like "2013-12-11 10:59:48" */
 	public static final DateFormat formatterNoTimeZone = 
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); 
-
-	/** The string that prefixes all text messages signed using Bitcoin keys. */
-
-	private static final MessageDigest digest;
-	static {
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			// Can't happen, we should know about it if it does happen.
-			throw new RuntimeException(e);
-		}
-	}
 
 	/**
 	 * Converts a date string in a format such as "2013-08-26T13:59:30-04:00" 
@@ -242,19 +225,6 @@ public class ZiftrUtils {
 	}
 
 	/**
-	 * Returns the Sha256 hash of the specified byte array.
-	 * The returned array will have 32 elements.
-	 * 
-	 * @param arr - The array of information to hash.
-	 * @return - the Sha256 hash of the specified byte array.
-	 */
-	public static byte[] Sha256Hash(byte[] arr) {
-		synchronized (digest) {
-			return digest.digest(arr);
-		}
-	}
-
-	/**
 	 * Converts an array of bytes to string data.
 	 * For example:
 	 * [0xf0, 0x34, 0x5a] => "f0345a"
@@ -342,78 +312,6 @@ public class ZiftrUtils {
 	 */
 	public static BigDecimal formatToNDecimalPlaces(int numDecimalPlaces, BigDecimal toFormat) {
 		return toFormat.setScale(numDecimalPlaces, RoundingMode.HALF_UP);
-	}
-
-	
-	/**
-	 * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
-	 * TODO change name order, as it is confusing
-	 */
-	public static byte[] sha256hash160(byte[] input) {
-		try {
-			byte[] sha256 = MessageDigest.getInstance("SHA-256").digest(input);
-			RIPEMD160Digest digest = new RIPEMD160Digest();
-			digest.update(sha256, 0, sha256.length);
-			byte[] out = new byte[20];
-			digest.doFinal(out, 0);
-			return out;
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);  // Cannot happen.
-		}
-	}
-	
-	
-	public static byte[] saltedHash(String password) {
-		return saltedHash(ZWPreferences.getSalt(), password);
-	}
-	
-	public static byte[] saltedHash(String salt, String password) {
-		if (password == null) {
-			return null;
-		}
-		
-		byte[] newPasswordBytes = password.getBytes();
-		byte[] concat = new byte[32 + password.getBytes().length];
-		System.arraycopy(ZiftrUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
-		System.arraycopy(newPasswordBytes, 0, concat, 32, newPasswordBytes.length);
-		return ZiftrUtils.Sha256Hash(concat);
-	}
-	
-	
-	
-	public static String saltedHashString(String newPassword) {
-		if(newPassword == null || newPassword.isEmpty()) {
-			return null;
-		}
-		return ZiftrUtils.bytesToHexString(saltedHash(newPassword));
-	}
-
-	/**
-	 * See Utils#doubleDigest(byte[], int, int).
-	 */
-	public static byte[] doubleDigest(byte[] input) {
-		return doubleDigest(input, 0, input.length);
-	}
-
-	/**
-	 * Calculates the SHA-256 hash of the given byte range, and then hashes the resulting hash again. This is
-	 * standard procedure in Bitcoin. The resulting hash is in big endian form.
-	 */
-	public static byte[] doubleDigest(byte[] input, int offset, int length) {
-		synchronized (digest) {
-			digest.reset();
-			digest.update(input, offset, length);
-			byte[] first = digest.digest();
-			return digest.digest(first);
-		}
-	}
-
-	public static byte[] singleDigest(byte[] input, int offset, int length) {
-		synchronized (digest) {
-			digest.reset();
-			digest.update(input, offset, length);
-			return digest.digest();
-		}
 	}
 
 	

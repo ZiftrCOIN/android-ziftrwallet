@@ -8,12 +8,12 @@ package com.ziftr.android.ziftrwallet.crypto;
 
 import java.math.BigDecimal;
 
-import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.util.ZLog;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
+
+import com.ziftr.android.ziftrwallet.ZWPreferences;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWCoinFiatTextWatcher implements TextWatcher {
 

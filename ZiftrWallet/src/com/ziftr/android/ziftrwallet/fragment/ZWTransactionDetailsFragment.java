@@ -29,16 +29,16 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWTransactionDetailsFragment extends ZWWalletUserFragment 
 implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListener {
-	
+
 	public static String FRAGMENT_TAG = "transaction_details_fragment";
 
 	public static final String TX_ITEM_HASH_KEY = "txItemHash";
@@ -129,20 +129,20 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 			}
 		}
-		
+
 		this.coinLogo.setImageResource(this.getSelectedCoin().getLogoResId());
 
 		ZWFiat fiat = ZWPreferences.getFiatCurrency();
 		this.populateAmount();
 		this.populateCurrency();
-		
+
 		String feeString = txItem.getCoin().getFormattedAmount(txItem.getFee());
 		this.confirmationFee.setText(feeString);
-		
+
 		feeString = txItem.getCoin().getFormattedAmount(txItem.getFee());
 		this.confirmationFee.setText(feeString);
-		
-		
+
+
 		this.currencyType.setText(fiat.getName());
 
 		Date date = new Date(this.txItem.getTxTime());
@@ -182,7 +182,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 	private void populateCurrency() {
 		ZWFiat fiat = ZWPreferences.getFiatCurrency();
-		
+
 		BigInteger fiatAmt = ZWConverter.convert(txItem.getAmount(), 
 				txItem.getCoin(), fiat);
 		String formattedfiatAmt = fiat.getFormattedAmount(fiatAmt);
@@ -221,7 +221,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 		} else {
 			this.status.setText("Confirmed (" + confirmed + " of " + totalConfirmations + ")");
 		}
-		
+
 		//TO prevent estimated time and Confirmed text views from overlapping,
 		//we only show estimated time if the screen width > 3 * width of the confirmed textview
 		int screenWidth;
@@ -233,7 +233,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 			screenWidth = size.x; 
 		}
 		this.status.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-		
+
 		if (confirmed < totalConfirmations && screenWidth > this.status.getMeasuredWidth() * 3){
 			long estimatedTime = txItem.getCoin().getSecondsPerAverageBlockSolve()*(totalConfirmations-confirmed);
 			this.timeLeft.setText("ETC: " + formatEstimatedTime(estimatedTime));
@@ -256,7 +256,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	public void setTxItem(ZWTransaction txItem) {
 		this.txItem = txItem;
 	}
-	
+
 
 	public String formatEstimatedTime(long estimatedTime) {
 		StringBuilder sb = new StringBuilder();
@@ -312,7 +312,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 
 		// Now that we are done editing 
 		this.isEditing = false;
-		
+
 		Activity mainActivity = this.getActivity();
 		if(mainActivity != null) {
 			InputMethodManager inputManager = (InputMethodManager) mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -347,7 +347,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 			} else {
 				//received on this address
 				try {
-					ZWAddress address = getWalletManager().getAddress(txItem.getCoin(), txItem.getDisplayAddresses().get(0), true);
+					ZWReceivingAddress address = (ZWReceivingAddress) getWalletManager().getAddress(txItem.getCoin(), txItem.getDisplayAddresses().get(0), true);
 					getZWMainActivity().openReceiveCoinsView(address);
 				} catch (Exception e) {
 					ZLog.log("Error trying to get ZWAddress from display address  " + e);

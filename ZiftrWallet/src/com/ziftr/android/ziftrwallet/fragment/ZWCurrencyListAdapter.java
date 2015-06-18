@@ -21,10 +21,10 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**

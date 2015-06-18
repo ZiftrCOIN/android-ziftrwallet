@@ -23,7 +23,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 public class ZWTransactionTable extends ZWCoinSpecificTable {
 
 	private static final String TABLE_NAME_BASE = "_transactions";
-	
+
 	/** The note column. This is for users to keep a string attached to an entry. */
 	public static final String COLUMN_NOTE = "note";
 
@@ -64,20 +64,15 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 	 */
 	public static final String COLUMN_DISPLAY_ADDRESSES = "display_addresses";
 
-	
+
 	public static final String COLUMN_MULTISIG = "multisig";
-	
-	protected ZWTransactionTable() {
 
-	}
-
-	
 	@Override
 	protected String getTableName(ZWCoin coin) {
 		return coin.getSymbol() + TABLE_NAME_BASE;
 	}
 
-	
+
 	@Override
 	protected void createBaseTable(ZWCoin coin, SQLiteDatabase database) {
 		String createSql = "CREATE TABLE IF NOT EXISTS " + getTableName(coin) + 
@@ -88,25 +83,25 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 
 	@Override
 	protected void createTableColumns(ZWCoin coin, SQLiteDatabase database) {
-		
+
 		//add transaction amount column
 		addColumn(coin, COLUMN_AMOUNT, "INTEGER", database);
-		
+
 		//add fee paid column
 		addColumn(coin, COLUMN_FEE, "INTEGER", database);
-		
+
 		//add transaction note column
 		addColumn(coin, COLUMN_NOTE, "TEXT", database);
-		
+
 		//add column for number of confirmations that transaction has
 		addColumn(coin, COLUMN_NUM_CONFIRMATIONS, "INTEGER", database);
-		
+
 		//add column for which address to display
 		addColumn(coin, COLUMN_DISPLAY_ADDRESSES, "TEXT", database);
-		
+
 		//add transaction creation timestamp
 		addColumn(coin, COLUMN_CREATION_TIMESTAMP, "INTEGER", database);
-		
+
 		//add column for whether or not this transaction is multisig
 		addColumn(coin, COLUMN_MULTISIG, "INTEGER", database);
 	}
@@ -116,7 +111,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		//first do an insert, ignoring any errors, with just primary key
 		StringBuilder sqlBuilder = new StringBuilder("INSERT OR IGNORE INTO ");
 		sqlBuilder.append(getTableName(transaction.getCoin())).append(" (").append(COLUMN_HASH).append(", ");
-		
+
 		//note isn't a primary key but the user can edit it, so we don't want it changing every time the
 		sqlBuilder.append(COLUMN_NOTE);  
 
@@ -125,22 +120,22 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		sqlBuilder.append(")");
 
 		db.execSQL(sqlBuilder.toString());
-		
+
 		sqlBuilder = new StringBuilder("UPDATE ").append(getTableName(transaction.getCoin())).append(" SET ");
 		sqlBuilder.append(COLUMN_NUM_CONFIRMATIONS).append(" = ").append(transaction.getConfirmationCount()).append(", ");
 		sqlBuilder.append(COLUMN_FEE).append(" = ").append(transaction.getFee().toString()).append(", ");
 		sqlBuilder.append(COLUMN_AMOUNT).append(" = ").append(transaction.getAmount().toString()).append(", ");;
 		sqlBuilder.append(COLUMN_CREATION_TIMESTAMP).append(" = ").append(transaction.getTxTime()).append(", ");		
 		sqlBuilder.append(COLUMN_DISPLAY_ADDRESSES).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getAddressAsCommaListString()));
-		
+
 		sqlBuilder.append(" WHERE ").append(COLUMN_HASH).append(" = ").append(DatabaseUtils.sqlEscapeString(transaction.getSha256Hash())).append(";");
-		
+
 		//now update the transaction with all the data
 		int updated = db.compileStatement(sqlBuilder.toString()).executeUpdateDelete();
 		if(updated == 0) {
 			ZLog.log("Error updating transaction: ", sqlBuilder.toString());
 		}
-		
+
 	}
 
 
@@ -311,7 +306,7 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 			throw new ZWNoTransactionFoundException("Error: No such entry.");
 		}
 	}
-	***/
+	 ***/
 
 	protected void updateTransactionNumConfirmations(ZWTransaction tx, SQLiteDatabase db) throws ZWNoTransactionFoundException {
 		try {
@@ -355,18 +350,18 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 	}
 
 	private ZWTransaction cursorToTransaction(ZWCoin coin, Cursor cursor, SQLiteDatabase db) {
-		
+
 		String hash = cursor.getString(cursor.getColumnIndex(COLUMN_HASH));
 		ZWTransaction tx = new ZWTransaction(coin, hash);
 
 		tx.setNote(cursor.getString(cursor.getColumnIndex(COLUMN_NOTE)));
 		tx.setTxTime(cursor.getLong(cursor.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
-		
+
 		int multisig = cursor.getInt(cursor.getColumnIndex(COLUMN_MULTISIG));
 		if(multisig > 0) {
 			tx.setMultisig(true);
 		}
-		
+
 		try {
 			tx.setAmount(new BigInteger(cursor.getString(cursor.getColumnIndex(COLUMN_AMOUNT))));
 		}
@@ -374,8 +369,8 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 			ZLog.log("Exception loading transaction amount: ", e);
 			tx.setAmount(BigInteger.ZERO);
 		}
-		
-		
+
+
 		tx.setFee(new BigInteger(cursor.getString(cursor.getColumnIndex(COLUMN_FEE))));
 		tx.setConfirmationCount(cursor.getInt(cursor.getColumnIndex(COLUMN_NUM_CONFIRMATIONS)));
 
@@ -386,26 +381,25 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 			addressList.add(address);
 		}
 		tx.setDisplayAddresses(addressList);
-		
+
 		return tx;
 
 	}
 
-	private ContentValues txToContentValues(ZWTransaction tx) {
-		ContentValues values = new ContentValues();
-
-		values.put(COLUMN_HASH, tx.getSha256Hash());
-		values.put(COLUMN_AMOUNT, tx.getAmount().toString());
-		values.put(COLUMN_FEE, tx.getFee().toString());
-		values.put(COLUMN_NOTE, tx.getNote());
-		values.put(COLUMN_CREATION_TIMESTAMP, tx.getTxTime());
-		values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
-		values.put(COLUMN_DISPLAY_ADDRESSES, tx.getAddressAsCommaListString());
-		values.put(COLUMN_MULTISIG, tx.isMultisig());
-
-		return values;
-	}
-
+	//	private ContentValues txToContentValues(ZWTransaction tx) {
+	//		ContentValues values = new ContentValues();
+	//
+	//		values.put(COLUMN_HASH, tx.getSha256Hash());
+	//		values.put(COLUMN_AMOUNT, tx.getAmount().toString());
+	//		values.put(COLUMN_FEE, tx.getFee().toString());
+	//		values.put(COLUMN_NOTE, tx.getNote());
+	//		values.put(COLUMN_CREATION_TIMESTAMP, tx.getTxTime());
+	//		values.put(COLUMN_NUM_CONFIRMATIONS, tx.getConfirmationCount());
+	//		values.put(COLUMN_DISPLAY_ADDRESSES, tx.getAddressAsCommaListString());
+	//		values.put(COLUMN_MULTISIG, tx.isMultisig());
+	//
+	//		return values;
+	//	}
 
 	private String getWhereClaus(ZWTransaction tx) {
 		StringBuilder sb = new StringBuilder();
@@ -414,9 +408,8 @@ public class ZWTransactionTable extends ZWCoinSpecificTable {
 		sb.append(" = ");
 		sb.append(DatabaseUtils.sqlEscapeString(tx.getSha256Hash()));
 		sb.append(" ");
-		
+
 		return sb.toString();
 	}
-	
-	
+
 }
