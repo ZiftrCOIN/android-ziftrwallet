@@ -42,7 +42,7 @@ Setup:
 
     You should now be able to Run/Debug the ZiftrWallet project.
 
-
+    When you are done, run update_index.sh so that your local project files and API key files do not get pushed to github.
 
 -------- Possible Setup Issues --------
 
