@@ -44,6 +44,11 @@ public class ZWCoinTable {
 	public static final String COLUMN_SCHEME = "scheme";
 	public static final String COLUMN_LOGO_URL = "logo_url";
 	
+	/**
+	 * Each coin type has a branch of the HD wallet. 
+	 */
+	public static final String COLUMN_HD_COIN_ID = "hd_id";
+	
 	private static final int UNACTIVATED = 0; //Used for table types that just haven't been used yet.
 	private static final int DEACTIVATED = 1; //Used for table types that used to be ACTIVATED, but now user deactivated them.
 	private static final int ACTIVATED = 2; //Used for table types that are activated and in use by user (should always be largest value when adding other types).
@@ -73,6 +78,8 @@ public class ZWCoinTable {
 		
 		this.addColumn(COLUMN_ENABLED, "INTEGER", db);
 		this.addColumn(COLUMN_HEALTH, "TEXT", db);
+		
+		this.addColumn(COLUMN_HD_COIN_ID, "INTEGER", db);
 	}
 	
 	
@@ -86,27 +93,6 @@ public class ZWCoinTable {
 		}
 	}
 		
-	
-	
-	protected void insertDefault(ZWCoin defaultCoin, SQLiteDatabase db) {
-	
-		try {
-			ContentValues baseCoinValues = getContentValues(defaultCoin);
-			db.insertOrThrow(TABLE_NAME, null, baseCoinValues); //this may fail, that's ok
-			
-			ContentValues defaults = new ContentValues(2);
-			defaults.put(COLUMN_BLOCK_HEIGHT, 0);
-			defaults.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
-			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(defaultCoin.getSymbol());
-			
-			db.update(TABLE_NAME, defaults, where, null);
-		}
-		catch(Exception e) {
-			//quietly fail if these defaults already exist
-		}
-	}
-	
-	
 	public synchronized List<ZWCoin> getNotUnactiveCoins(SQLiteDatabase db) {
 		String whereClause = COLUMN_ACTIVATED_STATUS + " != " + String.valueOf(UNACTIVATED);
 		return this.getCoins(whereClause, db);

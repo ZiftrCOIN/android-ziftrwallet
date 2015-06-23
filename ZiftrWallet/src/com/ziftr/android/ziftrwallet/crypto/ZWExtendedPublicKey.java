@@ -42,6 +42,7 @@ public class ZWExtendedPublicKey extends ZWPublicKey {
 		byte[] version = Arrays.copyOfRange(decoded, 0, 4);
 		CryptoUtils.checkPublicVersionBytes(version);
 		this.data = new ZWHdData(xpub);
+		this.pub = Arrays.copyOfRange(decoded, 45, 78);
 	}
 	
 	/**
@@ -78,7 +79,7 @@ public class ZWExtendedPublicKey extends ZWPublicKey {
 		ZWHdFingerPrint parentFingerPrint = new ZWHdFingerPrint(this.getPubKeyHash());
 		ZWHdData childData = new ZWHdData((byte)(this.data.depth + 1), parentFingerPrint, index, childChainCode);
 
-		return new ZWExtendedPublicKey(newPub.getEncoded(false), childData);
+		return new ZWExtendedPublicKey(newPub.getEncoded(true), childData);
 	}
 
 	public ZWExtendedPublicKey deriveChild(String path) throws ZWHdWalletException {

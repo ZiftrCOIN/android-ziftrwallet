@@ -15,7 +15,6 @@ public abstract class ZWCoinSpecificTable {
 	
 	/** The first time that this transaction was seen by the network (ziftr server). */
 	protected static final String COLUMN_CREATION_TIMESTAMP = "creation_timestamp";
-
 	
 	protected abstract void createBaseTable(ZWCoin coin, SQLiteDatabase database);
 	protected abstract void createTableColumns(ZWCoin coin, SQLiteDatabase database);

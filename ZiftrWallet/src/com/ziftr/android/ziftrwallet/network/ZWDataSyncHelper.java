@@ -154,7 +154,6 @@ public class ZWDataSyncHelper {
 
 				ZWReceivingAddress addr = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, signingAddressPublic, password); 
 				ZWPrivateKey key = addr.getPriv();
-				key.ensureHasPublicKey();
 				toSign.put("pubkey", ZiftrUtils.bytesToHexString(key.getPub().getPubKeyBytes()));
 
 				String stringToSign = toSign.getString("tosign");

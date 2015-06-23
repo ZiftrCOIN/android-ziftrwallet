@@ -31,7 +31,12 @@ public class ZWHdChildNumber {
 			this.hardened = true;
 			s = s.substring(0, s.length()-1);
 		}
-		this.num = Integer.parseInt(s);
+		try {
+			this.num = Integer.parseInt(s);
+		} catch(NumberFormatException nfe) {
+			throw new ZWHdWalletException("Child number cannot be parsed.");
+		}
+		this.checkIndex(this.num);
 	}
 	
 	@Override
@@ -57,4 +62,33 @@ public class ZWHdChildNumber {
 		if (i < 0) throw new ZWHdWalletException("Illegal index");
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (this.getClass() != obj.getClass())
+			return false;
+		ZWHdChildNumber other = (ZWHdChildNumber) obj;
+		if (hardened != other.hardened)
+			return false;
+		if (num == null) {
+			if (other.num != null)
+				return false;
+		} else if (!num.equals(other.num)) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (hardened ? 1231 : 1237);
+		result = prime * result + ((num == null) ? 0 : num.hashCode());
+		return result;
+	}
+
 }

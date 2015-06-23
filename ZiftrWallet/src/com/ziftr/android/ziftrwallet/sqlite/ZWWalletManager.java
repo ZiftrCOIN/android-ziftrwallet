@@ -21,7 +21,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
@@ -197,18 +196,8 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		// Make table of coin activation statuses
 		this.coinTable.create(db);
 
-		//if we have any coins in our table load them into the ZWCoin class
-		//otherwise load insert the default hardcoded coins into the table and load them into the ZWCoin class
+		// If we have any coins in our table load them into the ZWCoin class
 		List<ZWCoin> coins = coinTable.getAllCoins(db);
-		if(coins.size() == 0) {
-
-			// fill in table with default coin, using UNACTIVATED as the status
-			coins = ZWDefaultCoins.getDefaultCoins();
-			for (ZWCoin coin : coins) {
-				this.coinTable.insertDefault(coin, db);
-			}
-		}
-
 		ZWCoin.loadCoins(coins);
 
 		//Make exchange table

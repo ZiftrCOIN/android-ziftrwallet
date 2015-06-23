@@ -24,8 +24,9 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 	 * Constructs a master private key from the seed.
 	 */
 	public ZWExtendedPrivateKey(byte[] seed) {
-		if (seed == null || seed.length != 256) {
-			throw new ZWHdWalletException("ZiftrWallet uses a seed of length 256!");
+		super(false);
+		if (seed == null) {
+			throw new ZWHdWalletException("Null seed is not valid. ");
 		}
 		byte[] result = CryptoUtils.Hmac(MASTER_HMAC_KEY, seed);
 		this.priv = new BigInteger(1, CryptoUtils.left(result));
@@ -36,10 +37,12 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 	 * Deserialize from an extended private key.
 	 */
 	public ZWExtendedPrivateKey(String xprv) throws ZWAddressFormatException {
+		super(false);
 		byte[] decoded = Base58.decodeChecked(xprv);
 		byte[] version = Arrays.copyOfRange(decoded, 0, 4);
 		CryptoUtils.checkPrivateVersionBytes(version);
 		this.data = new ZWHdData(xprv);
+		this.priv = new BigInteger(1, Arrays.copyOfRange(decoded, 46, 78));
 	}
 
 	/**
@@ -62,13 +65,12 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 			hmacData[0] = 0;
 			System.arraycopy(privBytes, 0, hmacData, 1, 32);
 		} else {
-			this.ensureHasPublicKey();
-			if (!this.pub.isPubKeyCanonical())
+			if (!this.getPub().isPubKeyCanonical())
 				throw new ZWHdWalletException("Non-canonical public key!");
-			if (!this.pub.isCompressed())
+			if (!this.getPub().isCompressed())
 				throw new ZWHdWalletException("HD Wallets do not support uncompressed keys!");
 
-			byte[] pkBytes = this.pub.getPubKeyBytes();
+			byte[] pkBytes = this.getPub().getPubKeyBytes();
 			System.arraycopy(pkBytes, 0, hmacData, 0, 33);
 		}
 
@@ -89,8 +91,7 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		CryptoUtils.checkNonZero(newPriv);
 
 		byte[] childChainCode = CryptoUtils.right(result);
-		this.ensureHasPublicKey();
-		ZWHdFingerPrint parentFingerPrint = new ZWHdFingerPrint(this.pub.getPubKeyHash());
+		ZWHdFingerPrint parentFingerPrint = new ZWHdFingerPrint(this.getPub().getPubKeyHash());
 		ZWHdData childData = new ZWHdData((byte)(this.data.depth + 1), parentFingerPrint, index, childChainCode);
 
 		return new ZWExtendedPrivateKey(newPriv, childData);
@@ -112,7 +113,7 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 	}
 
 	public String xprv(boolean testnet) {
-		return Base58.encode(this.serialize(testnet));
+		return Base58.encodeChecked(this.serialize(testnet));
 	}
 
 	public byte[] serialize(boolean testnet) {

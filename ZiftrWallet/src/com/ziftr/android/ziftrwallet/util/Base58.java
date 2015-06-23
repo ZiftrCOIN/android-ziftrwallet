@@ -73,7 +73,7 @@ public class Base58 {
 		byte[] result = Arrays.copyOfRange(data, 0, data.length + 4);
 		byte[] checked = CryptoUtils.doubleDigest(data);
 		System.arraycopy(checked, 0, result, data.length, 4);
-		return encode(checked);
+		return encode(result);
 	}
 
 	/** 

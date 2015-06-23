@@ -64,67 +64,77 @@ public class ZWPrivateKey {
 	 */
 	protected ZWPublicKey pub;
 	
+	protected void init(BigInteger privKey, ZWPublicKey pubKey) {
+		if (privKey == null && pubKey != null) {
+			throw new IllegalArgumentException("ZWPrivateKey requires a non-null private key");
+		}
+		
+		if (privKey == null) {
+			ECKeyPairGenerator generator = new ECKeyPairGenerator();
+			ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(ZWCurveParameters.CURVE, ZiftrUtils.createTrulySecureRandom());
+			generator.init(keygenParams);
+			AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
+			ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
+			
+			// TODO check if this (above) actually calculates the public key anyway, if it does
+			// may as well store it.
+			// Alternatively, generate a private key by hardcoding the order of the curve and choosing
+			// a random integer between 1 and the order.
+
+			this.priv = privParams.getD();
+		} else {
+			if (privKey.equals(BigInteger.ZERO))
+				throw new IllegalArgumentException("ZWPrivateKey requires a non-zero private key");
+			this.priv = privKey;
+		}
+		
+		this.pub = pubKey;
+	}
+	
+	/**
+	 * Only use this if the constructor in the subclass needs to explicitly specify 
+	 * that no super constructor needs to be used.  
+	 */
+	protected ZWPrivateKey(boolean doInit) {
+		if (doInit) {
+			this.init(null, null);
+		}
+	}
+	
 	/**
 	 * Generates an entirely new keypair. Point compression is used so the resulting public key will be 33 bytes
 	 * (32 for the co-ordinate and 1 byte to represent the y bit).
 	 */
 	public ZWPrivateKey() {
-		ECKeyPairGenerator generator = new ECKeyPairGenerator();
-		ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(ZWCurveParameters.CURVE, ZWCurveParameters.getSecureRandom());
-		generator.init(keygenParams);
-		AsymmetricCipherKeyPair keypair = generator.generateKeyPair();
-		ECPrivateKeyParameters privParams = (ECPrivateKeyParameters) keypair.getPrivate();
-		
-		// TODO check if this (above) actually calculates the public key anyway, if it does
-		// may as well store it.
-		// Alternatively, generate a private key by hardcoding the order of the curve and choosing
-		// a random integer between 1 and the order.
-
-		this.priv = privParams.getD();
-	}
-
-	public ZWPrivateKey(BigInteger privKey, boolean compressed) {
-		if (privKey == null || privKey.equals(BigInteger.ZERO))
-			throw new IllegalArgumentException("ZWPrivateKey requires a non-zero private key");
-		this.priv = privKey;
+		this.init(null, null);
 	}
 
 	/**
-	 * Creates an ECKey given either the private key only, the public key only, or both. If only the private key 
+	 * Creates a key given either the private key only, the public key only, or both. If only the private key 
 	 * is supplied, the public key will be calculated from it (this is slow). If both are supplied, it's assumed
-	 * the public key already correctly matches the public key. If only the public key is supplied, this ECKey cannot
+	 * the public key already correctly matches the public key. If only the public key is supplied, this key cannot
 	 * be used for signing.
 	 */
 	public ZWPrivateKey(BigInteger privKey, ZWPublicKey pubKey) {
-		if (privKey == null || privKey.equals(BigInteger.ZERO))
-			throw new IllegalArgumentException("ZWPrivateKey requires a non-zero private key");
-		this.priv = privKey;
-		this.initPub(pubKey);
+		this.init(privKey, pubKey);
 	}
 
-	/** Creates an ECKey given the private key only.  The public key is calculated from it (this is slow) */
+	/** Creates a key given the private key only.  The public key is calculated from it (this is slow) */
 	public ZWPrivateKey(BigInteger privKey) {
-		this(privKey, (ZWPublicKey)null);
+		this.init(privKey, null);
 	}
 
 	/**
-	 * Create a new ECKey with an encrypted private key, a public key and a KeyCrypter.
+	 * Create a new key with an encrypted private key, a public key and a KeyCrypter.
 	 *
 	 * @param encryptedPrivateKey The private key, encrypted,
 	 * @param pubKey The keys public key
 	 * @param keyCrypter The KeyCrypter that will be used, with an AES key, to encrypt and decrypt the private key
 	 */
 	public ZWPrivateKey(ZWEncryptedData encryptedPrivateKey, ZWPublicKey pubKey, ZWKeyCrypter keyCrypter) {
-		this.initPub(pubKey);
+		this.pub = pubKey;
 		this.keyCrypter = keyCrypter;
 		this.encryptedPrivateKey = encryptedPrivateKey;
-	}
-	
-	protected void initPub(ZWPublicKey pubKey) {
-		this.pub = null;
-		if (pubKey != null) {
-			this.pub = new ZWPublicKey(pubKey.getPubKeyBytes());
-		}
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,25 +144,14 @@ public class ZWPrivateKey {
 	}
 
 	public boolean hasCalculatedPublicKey() {
-		return this.pub != null;
-	}
-
-	public void ensureHasPublicKey() {
-		if (this.hasCalculatedPublicKey()) {
-			return;
-		} else if (this.isEncrypted()) {
-			throw new ZWInvalidPublicKeyException("Encrypted priv needs pub but was not constructed with it. "); 
-		} else {
-			this.pub = this.calculatePublicKey(true);
-		}
+		return this.getRawPub() != null;
 	}
 
 	public void checkPubValidity() throws ZWInvalidPublicKeyException {
 		boolean valid = false;
-		if (this.pub != null) {
-			boolean compressed = this.pub != null ? this.pub.isCompressed() : false;
-			ZWPublicKey shouldBe = this.calculatePublicKey(compressed);
-			valid = shouldBe.equals(this.pub); 
+		if (this.getRawPub() != null) {
+			ZWPublicKey shouldBe = this.calculatePublicKey(this.getRawPub().isCompressed());
+			valid = shouldBe.equals(this.getRawPub());
 		}
 
 		if (!valid) {
@@ -247,9 +246,8 @@ public class ZWPrivateKey {
 	 */
 	public String signMessage(ZWCoin coin, String message) throws ZWKeyCrypterException {
 		if (priv == null) {
-			throw new IllegalStateException("This ECKey does not have the private key necessary for signing.");
+			throw new IllegalStateException("This key does not have the private key necessary for signing.");
 		}
-		this.ensureHasPublicKey();
 		byte[] data = coin.formatMessageForSigning(message);
 		ZWSha256Hash hash = ZWSha256Hash.createDouble(data);
 		ZWECDSASignature sig = sign(hash);
@@ -257,8 +255,8 @@ public class ZWPrivateKey {
 		// TODO is this necessary for what we are doing?
 		int recId = -1;
 		for (int i = 0; i < 4; i++) {
-			ZWPublicKey k = ZWPublicKey.recoverFromSignature(i, sig, hash, this.pub.isCompressed());
-			if (this.pub.equals(k)) {
+			ZWPublicKey k = ZWPublicKey.recoverFromSignature(i, sig, hash, this.getPub().isCompressed());
+			if (this.getPub().equals(k)) {
 				recId = i;
 				break;
 			}
@@ -267,7 +265,7 @@ public class ZWPrivateKey {
 			ZLog.log("Could not construct a recoverable key. This should never happen.");
 			return null;
 		}
-		int headerByte = recId + 27 + (this.pub.isCompressed() ? 4 : 0);
+		int headerByte = recId + 27 + (this.getPub().isCompressed() ? 4 : 0);
 		byte[] sigData = new byte[65];  // 1 header + 32 bytes for R + 32 bytes for S
 		sigData[0] = (byte)headerByte;
 		System.arraycopy(ZiftrUtils.bigIntegerToBytes(sig.r, 32), 0, sigData, 1, 32);
@@ -278,8 +276,17 @@ public class ZWPrivateKey {
 	/**
 	 * @return the pub
 	 */
+	public ZWPublicKey getRawPub() {
+		return this.pub;
+	}
+	
 	public ZWPublicKey getPub() {
-		return pub;
+		if (this.isEncrypted()) {
+			throw new ZWInvalidPublicKeyException("Encrypted priv needs pub but was not constructed with it. "); 
+		} else if (!this.hasCalculatedPublicKey()) {
+			this.pub = this.calculatePublicKey(true);
+		}
+		return this.getRawPub();
 	}
 
 	/**
@@ -297,7 +304,7 @@ public class ZWPrivateKey {
 	@Nullable
 	public byte[] getPrivKeyBytesForAddressEncoding() {
 		byte[] privBytes = ZiftrUtils.bigIntegerToBytes(priv, 32);
-		if (this.pub.isCompressed()) {
+		if (!this.hasCalculatedPublicKey() || this.getPub().isCompressed()) {
 			byte[] privBytesForAddressEncoding = new byte[33];
 			System.arraycopy(privBytes, 0, privBytesForAddressEncoding, 0, 32);
 			privBytesForAddressEncoding[privBytesForAddressEncoding.length - 1] = (byte) 0x01; 
@@ -334,7 +341,7 @@ public class ZWPrivateKey {
 		}
 
 		ZWEncryptedData encryptedPrivateKey = keyCrypter.encrypt(ZiftrUtils.bytesToHexString(privKeyBytes));
-		ZWPrivateKey result = new ZWPrivateKey(encryptedPrivateKey, this.pub, keyCrypter);
+		ZWPrivateKey result = new ZWPrivateKey(encryptedPrivateKey, this.getRawPub(), keyCrypter);
 		return result;
 	}
 
@@ -430,8 +437,8 @@ public class ZWPrivateKey {
 	}
 
 	/**
-	 * @return The encryptedPrivateKey (containing the encrypted private key bytes and initialisation vector) for this ECKey,
-	 *         or null if the ECKey is not encrypted.
+	 * @return The encryptedPrivateKey (containing the encrypted private key bytes and initialisation vector) for this key,
+	 *         or null if the key is not encrypted.
 	 */
 	@Nullable
 	public ZWEncryptedData getEncryptedPrivateKey() {

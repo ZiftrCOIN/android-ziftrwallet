@@ -36,7 +36,6 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 			throw new ZWAddressFormatException("Receiving addresses must have a private key");
 		}
 		this.priv = priv;
-		this.priv.ensureHasPublicKey();
 		this.pub = this.priv.getPub();
 		this.initialize(coinId, coinId.getPubKeyHashPrefix(), this.priv.getPub().getPubKeyHash());
 	}

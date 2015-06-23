@@ -289,7 +289,6 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	@Override
 	protected ContentValues addressToContentValues(ZWReceivingAddress address) {
 		ZWPrivateKey privKey = address.getPriv();
-		privKey.ensureHasPublicKey();
 		ContentValues values = super.addressToContentValues(address);
 		values.put(COLUMN_PRIV_KEY, getPrivDataForInsert(privKey));
 		values.put(COLUMN_PUB_KEY, ZiftrUtils.bytesToHexString(privKey.getPub().getPubKeyBytes()));

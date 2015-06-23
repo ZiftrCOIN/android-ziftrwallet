@@ -72,11 +72,11 @@ public class CryptoUtils {
 	}
 
 	public static byte[] left(byte[] a) {
-		return Arrays.copyOfRange(a, 0, 256);
+		return Arrays.copyOfRange(a, 0, 32);
 	}
 
 	public static byte[] right(byte[] a) {
-		return Arrays.copyOfRange(a, 256, 512);
+		return Arrays.copyOfRange(a, 32, 64);
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class CryptoUtils {
 		}
 	}
 
-	public static String walletPath(List<ZWHdChildNumber> path, boolean publicKeyPath) {
+	public static String createPath(List<ZWHdChildNumber> path, boolean publicKeyPath) {
 		List<String> list = new ArrayList<String>();
 		for (ZWHdChildNumber i : path) {
 			list.add(i.toString());

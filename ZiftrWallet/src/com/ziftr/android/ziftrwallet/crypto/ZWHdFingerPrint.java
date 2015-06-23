@@ -36,7 +36,7 @@ public class ZWHdFingerPrint {
 			return true;
 		if (obj == null)
 			return false;
-		if (!this.getClass().equals(obj.getClass()))
+		if (this.getClass() != obj.getClass())
 			return false;
 		ZWHdFingerPrint other = (ZWHdFingerPrint) obj;
 		return Arrays.equals(fp, other.fp);
