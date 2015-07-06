@@ -44,11 +44,14 @@ public abstract class ZWPreferences {
 
 	/** Save whether we can spend unconfirmed txns or not*/
 	public final static String UNCONFIRMED_WARNING_KEY = "unconfirmed_warning";
+	
+	/** Get the seed for the HD wallet. */
+	public final static String HD_WALLET_SEED = "hd_wallet_seed";
 
 	private static final String UPDATE_CHECK_KEY = "update_check";
 
 	private static final String AGREED_TO_TOS_KEY = "agreed_to_tos";
-
+	
 
 	/**
 	 * A simple thread implementation that will keep a string in memory for a certain period of time.
@@ -330,6 +333,14 @@ public abstract class ZWPreferences {
 
 	public static void setUserAgreedToTos(boolean agreed) {
 		ZWWalletManager.getInstance().upsertAppDataVal(AGREED_TO_TOS_KEY, agreed);
+	}
+	
+	public static String getHdWalletSeed() {
+		return ZWWalletManager.getInstance().getAppDataString(HD_WALLET_SEED);
+	}
+	
+	public static void setHdWalletSeed(String data) {
+		ZWWalletManager.getInstance().upsertAppDataVal(HD_WALLET_SEED, data);
 	}
 
 }

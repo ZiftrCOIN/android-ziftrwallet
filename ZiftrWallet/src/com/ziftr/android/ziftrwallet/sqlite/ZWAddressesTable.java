@@ -58,7 +58,7 @@ public abstract class ZWAddressesTable<A extends ZWSendingAddress> extends ZWCoi
 	/** 
 	 * Do the reverse of cursorToAddress.  
 	 */
-	protected ContentValues addressToContentValues(A address) {
+	protected ContentValues addressToContentValues(A address, boolean forInsert) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ADDRESS, address.getAddress());
 		values.put(COLUMN_LABEL, address.getLabel());
@@ -184,7 +184,7 @@ public abstract class ZWAddressesTable<A extends ZWSendingAddress> extends ZWCoi
 	}
 
 	protected void updateAddress(A address, SQLiteDatabase db) {
-		ContentValues values = addressToContentValues(address);
+		ContentValues values = addressToContentValues(address, false);
 		String whereClause = COLUMN_ADDRESS + " = " + DatabaseUtils.sqlEscapeString(address.getAddress());
 		db.update(getTableName(address.getCoin()), values, whereClause, null);
 	}
@@ -197,7 +197,7 @@ public abstract class ZWAddressesTable<A extends ZWSendingAddress> extends ZWCoi
 	}
 
 	protected long insert(A address, SQLiteDatabase db) {
-		ContentValues values = this.addressToContentValues(address);
+		ContentValues values = this.addressToContentValues(address, true);
 
 		// The id will be generated upon insertion.
 		return db.insert(getTableName(address.getCoin()), null, values);

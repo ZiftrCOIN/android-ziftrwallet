@@ -33,13 +33,13 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -103,7 +103,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 	@Override
 	public void onClick(View v) {
 
-		if(v == this.copyButton) {
+		if (v == this.copyButton) {
 			if(this.fragmentHasAddress()) {
 				// Gets a handle to the clipboard service.
 				ClipboardManager clipboard = (ClipboardManager)
@@ -134,21 +134,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 
 
 	private void generateNewAddress() {
-		if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
-			showEnterPasswordDialog();
-		}
-		else {
-			showNewAddressConfirmationDialog();
-		}
-	}
-
-	private void showEnterPasswordDialog() {
-
-		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
-		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
-		passwordDialog.addEmptyTextbox(true);
-
-		passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
+		showNewAddressConfirmationDialog();
 	}
 
 
@@ -318,40 +304,30 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 			@Override
 			public void run() {
 				ZWReceivingAddress address = null;
-				boolean needPassword;
 				boolean error = false;
 
-				String password = ZWPreferences.getCachedPassword();
-				if(ZWPreferences.userHasPassword() && password == null) {
-					//user's cached password has expired, so we have to ask them for it again
-					needPassword = true;
-					address = null;
-				}
-				else {
-					needPassword = false;
-					long time = System.currentTimeMillis() / 1000;
-					String addressLabel = addressEditText.getText().toString();
-					try {
-						address = getWalletManager().createReceivingAddress(password, getSelectedCoin(), addressLabel, 0, time, time);
-					} catch (ZWAddressFormatException e) {
-						ZLog.log();
-						error = true;
-					}
+				String addressLabel = addressEditText.getText().toString();
+				try {
+					address = getWalletManager().createReceivingAddress(getSelectedCoin(), 0, false, addressLabel);
+				} catch (ZWAddressFormatException e) {
+					ZLog.log("Should not have happened, wallet corruption?");
+					error = true;
 				}
 
 				final ZWReceivingAddress faddress = address;
-				final boolean fneedPassword = needPassword;
 				final boolean ferror = error;
 
 				// Run the updating of the UI on the UI thread
-				ZWReceiveCoinsFragment.this.getZWMainActivity().runOnUiThread(new Runnable() {
+				ZWMainFragmentActivity a = ZWReceiveCoinsFragment.this.getZWMainActivity();
+				if (a == null) {
+					// Activity is dying, return
+					return;
+				}
+				a.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						if (ferror) {
 							ZiftrDialogManager.showSimpleAlert("Could not create a new receiving address!");
-						}
-						else if(fneedPassword) {
-							showEnterPasswordDialog();
 						}
 						else {
 							String newAddress = faddress.getAddress();

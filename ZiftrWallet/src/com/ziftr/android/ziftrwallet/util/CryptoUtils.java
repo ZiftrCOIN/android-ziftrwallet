@@ -9,9 +9,7 @@ package com.ziftr.android.ziftrwallet.util;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 import org.spongycastle.crypto.digests.SHA512Digest;
@@ -19,22 +17,16 @@ import org.spongycastle.crypto.macs.HMac;
 import org.spongycastle.crypto.params.KeyParameter;
 import org.spongycastle.math.ec.ECPoint;
 
-import android.text.TextUtils;
-
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCurveParameters;
+import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
-import com.ziftr.android.ziftrwallet.crypto.ZWHdChildNumber;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdWalletException;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 
 public class CryptoUtils {
 
-	public static final String HD_PATH_DELIMITER = "/";
-
-	public static final Long HARDENED_START = (long) 0x7fffffff;
-	
 	private static final MessageDigest digest;
 	static {
 		try {
@@ -149,11 +141,30 @@ public class CryptoUtils {
 	}
 
 	public static boolean isPrivPath(String s) {
-		return s != null && s.startsWith("m" + HD_PATH_DELIMITER);
+		return s != null && s.startsWith("m");
 	}
 
-	public static boolean isPubPath(String s) {
-		return s != null && s.startsWith("M" + HD_PATH_DELIMITER);
+	public static boolean isPubDerivedFromPubPath(String s) {
+		if (s == null) 
+			return false;
+
+		return s.startsWith("M");
+	}
+
+	public static boolean isPubDerivedFromPrvPath(String s) {
+		if (s == null)
+			return false;
+		boolean hasOpen = s.startsWith("[m");
+		if (hasOpen) {
+			String latter = s.substring(2);
+			int firstCloseIndex = latter.indexOf("]");
+			if (firstCloseIndex != -1) {
+				int lastCloseIndex = latter.lastIndexOf("]");
+				if (firstCloseIndex == lastCloseIndex)
+					return true;
+			}
+		}
+		return false;
 	}
 
 	public static void checkLessThanCurveOrder(BigInteger val) {
@@ -168,59 +179,29 @@ public class CryptoUtils {
 			throw new ZWHdWalletException("Miraculous coincience, private keys cancel each other mod n, this should never happen!");
 		}
 	}
-	
+
 	public static void checkNotPointAtInfinity(ECPoint point) {
 		if (point.isInfinity()) {
 			throw new ZWHdWalletException("Miraculous coincience, ECPoints added to zero, this should never happen!");
 		}
 	}
-	
+
 	public static void checkPrivateVersionBytes(byte[] version) {
 		if (!Arrays.equals(version, ZWExtendedPrivateKey.HD_VERSION_MAIN_PRIV) && !Arrays.equals(version, ZWExtendedPrivateKey.HD_VERSION_TEST_PRIV)) {
 			throw new ZWHdWalletException("Version bytes do not match for a private key!");
 		}
 	}
-	
+
 	public static void checkPublicVersionBytes(byte[] version) {
 		if (!Arrays.equals(version, ZWExtendedPublicKey.HD_VERSION_MAIN_PUB) && !Arrays.equals(version, ZWExtendedPublicKey.HD_VERSION_TEST_PUB)) {
 			throw new ZWHdWalletException("Version bytes do not match for a public key!");
 		}
 	}
-	
+
 	public static void checkHd(boolean b) {
 		if (!b) {
 			throw new ZWHdWalletException("");
 		}
-	}
-
-	public static String createPath(List<ZWHdChildNumber> path, boolean publicKeyPath) {
-		List<String> list = new ArrayList<String>();
-		for (ZWHdChildNumber i : path) {
-			list.add(i.toString());
-		}
-		String s = (publicKeyPath ? "M" : "m") + HD_PATH_DELIMITER;
-		return s + TextUtils.join(HD_PATH_DELIMITER, list);
-	}
-
-	public static List<ZWHdChildNumber> parsePath(String path) throws ZWHdWalletException {
-		if (!isPrivPath(path) && !isPubPath(path)) {
-			throw new ZWHdWalletException("The path does not specify if it is deriving a "
-					+ "private/public key by starting with M" + HD_PATH_DELIMITER + " or m" + HD_PATH_DELIMITER);
-		}
-
-		if (isPrivPath(path)) {
-			path = path.replaceFirst("m" + HD_PATH_DELIMITER, "");
-		} else {
-			path = path.replaceFirst("M" + HD_PATH_DELIMITER, "");
-		}
-
-		List<ZWHdChildNumber> list = new ArrayList<ZWHdChildNumber>();
-		String[] elements = path.split(HD_PATH_DELIMITER);
-		for (String s : elements) {
-			list.add(new ZWHdChildNumber(s));
-		}
-
-		return list;
 	}
 
 	/**
@@ -233,5 +214,38 @@ public class CryptoUtils {
 	public static boolean isEncryptedIdentifier(char id) {
 		return id == ZWKeyCrypter.PBE_AES_ENCRYPTION;
 	}
-	
+
+	public static String decryptPrefixed(ZWKeyCrypter crypter, String possiblyEncrypted) {
+		if (possiblyEncrypted == null) {
+			return null;
+		}
+
+		char encryptionId = possiblyEncrypted.charAt(0);
+		String dataWithoutEncryptionPrefix = possiblyEncrypted.substring(1);
+		
+		if (encryptionId == ZWKeyCrypter.NO_ENCRYPTION) {
+			return dataWithoutEncryptionPrefix;
+		} else if (crypter != null) {
+			return crypter.decrypt(new ZWEncryptedData(encryptionId, dataWithoutEncryptionPrefix));
+		} else {
+			return null;
+		}
+	}
+
+	public static byte[] decryptPrefixedHex(ZWKeyCrypter crypter, String possiblyEncrypted) {
+		return ZiftrUtils.hexStringToBytes(decryptPrefixed(crypter, possiblyEncrypted));
+	}
+
+	public static String encryptAndPrefix(ZWKeyCrypter crypter, byte[] data) {
+		return encryptAndPrefixHex(crypter, ZiftrUtils.bytesToHexString(data));
+	}
+
+	public static String encryptAndPrefixHex(ZWKeyCrypter crypter, String hex) {
+		if (crypter != null) {
+			return  "" + crypter.getEncryptionIdentifier() + crypter.encrypt(hex);
+		} else {
+			return "" + ZWKeyCrypter.NO_ENCRYPTION + hex;
+		}
+	}
+
 }

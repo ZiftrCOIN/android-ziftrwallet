@@ -325,10 +325,14 @@ public class ZWPublicKey {
 		boolean yBit = this.isCompressed() ? (this.pub[0] & 1) == 1 : (this.pub[64] & 1) == 1;  
 		return decompressKey(new BigInteger(1, x), yBit);
 	}
+	
+	public String getPubHex() {
+		return ZiftrUtils.bytesToHexString(pub);
+	}
 
 	@Override
 	public String toString() {
-		return "pub: " + ZiftrUtils.bytesToHexString(pub);
+		return this.getPubHex();
 	}
 
 }

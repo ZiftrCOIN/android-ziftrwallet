@@ -3,7 +3,6 @@ package com.ziftr.android.ziftrwallet.crypto;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.List;
 
 import org.spongycastle.math.ec.ECPoint;
 
@@ -18,7 +17,8 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 	public static final byte[] HD_VERSION_MAIN_PRIV = new byte[] {(byte)0x04, (byte)0x88, (byte)0xAD, (byte)0xE4};
 	public static final byte[] HD_VERSION_TEST_PRIV = new byte[] {(byte)0x04, (byte)0x35, (byte)0x83, (byte)0x94};
 
-	ZWHdData data;
+	protected ZWHdPath path;
+	protected ZWHdData data;
 
 	/** 
 	 * Constructs a master private key from the seed.
@@ -30,32 +30,49 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		}
 		byte[] result = CryptoUtils.Hmac(MASTER_HMAC_KEY, seed);
 		this.priv = new BigInteger(1, CryptoUtils.left(result));
+		this.path = new ZWHdPath("m");
 		this.data = new ZWHdData(CryptoUtils.right(result));
+	}
+	
+	public ZWExtendedPrivateKey(String path, String xprv) throws ZWAddressFormatException {
+		this(new ZWHdPath(path), xprv);
 	}
 
 	/**
 	 * Deserialize from an extended private key.
 	 */
-	public ZWExtendedPrivateKey(String xprv) throws ZWAddressFormatException {
+	protected ZWExtendedPrivateKey(ZWHdPath path, String xprv) throws ZWAddressFormatException {
 		super(false);
 		byte[] decoded = Base58.decodeChecked(xprv);
 		byte[] version = Arrays.copyOfRange(decoded, 0, 4);
 		CryptoUtils.checkPrivateVersionBytes(version);
 		this.data = new ZWHdData(xprv);
+		if (path == null) {
+			throw new ZWHdWalletException("Keys should be combined with their relative path.");
+		}
+		this.path = path;
 		this.priv = new BigInteger(1, Arrays.copyOfRange(decoded, 46, 78));
+	}
+	
+	public ZWExtendedPrivateKey(String path, BigInteger priv, ZWHdData data) {
+		this(new ZWHdPath(path), priv, data);
 	}
 
 	/**
 	 * Make an extended key from the private key and the extension data. 
 	 */
-	public ZWExtendedPrivateKey(BigInteger priv, ZWHdData data) {
+	protected ZWExtendedPrivateKey(ZWHdPath path, BigInteger priv, ZWHdData data) {
 		super(priv);
+		if (path == null) {
+			throw new ZWHdWalletException("Keys should be combined with their relative path.");
+		}
+		this.path = path;
 		this.data = data;
 	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public ZWExtendedPrivateKey deriveChild(ZWHdChildNumber index) throws ZWHdWalletException {
-		this.checkUnencrypted();
-
 		byte[] hmacData = new byte[37];
 		if (index.isHardened()) {
 			byte[] privBytes = this.getPrivKeyBytes();
@@ -84,7 +101,7 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		//     priv_child * G = priv_parent * G + one_way(pub_parent) * G
 		// which is the same as
 		//     pub_child = pub_parent + one_way(pub_parent) * G
-		// TODO In case parse256(I_left) ³ n or ki = 0, the resulting key is invalid, proceed with the next value for i
+		// TODO In case parse256(I_left) ³ n or ki = 0, the resulting key is invalid, proceed with the next value
 		BigInteger left = new BigInteger(1, CryptoUtils.left(result));
 		CryptoUtils.checkLessThanCurveOrder(left);
 		BigInteger newPriv = left.add(this.priv).mod(ZWCurveParameters.CURVE_ORDER);
@@ -94,31 +111,42 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		ZWHdFingerPrint parentFingerPrint = new ZWHdFingerPrint(this.getPub().getPubKeyHash());
 		ZWHdData childData = new ZWHdData((byte)(this.data.depth + 1), parentFingerPrint, index, childChainCode);
 
-		return new ZWExtendedPrivateKey(newPriv, childData);
+		return new ZWExtendedPrivateKey(this.path.slash(index), newPriv, childData);
+	}
+	
+	public Object deriveChild(String path) throws ZWHdWalletException {
+		return this.deriveChild(new ZWHdPath(path));
 	}
 
-	public ZWExtendedPrivateKey deriveChild(String path) throws ZWHdWalletException {
-		if (path == null || path.isEmpty())
-			throw new ZWHdWalletException("Cannot derive null or empty path");
-		if (!CryptoUtils.isPrivPath(path))
-			throw new ZWHdWalletException("Must be deriving a private key with this method.");
-
+	public Object deriveChild(ZWHdPath path) throws ZWHdWalletException {
+		if (path == null)
+			throw new ZWHdWalletException("Cannot derive null path");
+		if (!path.derivedFromPrivateKey())
+			throw new ZWHdWalletException("Cannot derive this path, it is relative to a public key");
+		
 		ZWExtendedPrivateKey p = this;
-		List<ZWHdChildNumber> pathInts = CryptoUtils.parsePath(path);
-		for (ZWHdChildNumber ci : pathInts) {
+		for (ZWHdChildNumber ci : path.getRelativeToPrv()) {
 			p = p.deriveChild(ci);
 		}
-
+		
+		if (path.resolvesToPublicKey()) {
+			ZWExtendedPublicKey pub = (ZWExtendedPublicKey) p.calculatePublicKey(true);
+			for (ZWHdChildNumber ci : path.getRelativeToPub()) {
+				pub = pub.deriveChild(ci);
+			}
+			return pub;
+		}
+		
 		return p;
 	}
-
-	public String xprv(boolean testnet) {
-		return Base58.encodeChecked(this.serialize(testnet));
+	
+	public String xprv(boolean mainnet) {
+		return Base58.encodeChecked(this.serialize(mainnet));
 	}
 
-	public byte[] serialize(boolean testnet) {
+	public byte[] serialize(boolean mainnet) {
 		ByteBuffer b = ByteBuffer.allocate(78);
-		b.put(testnet ? HD_VERSION_TEST_PRIV : HD_VERSION_MAIN_PRIV);
+		b.put(mainnet ? HD_VERSION_MAIN_PRIV : HD_VERSION_TEST_PRIV);
 		b.put(this.data.serialize());
 		b.put((byte)0);
 		b.put(this.getPrivKeyBytes());
@@ -134,15 +162,22 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		if (!compressed) {
 			throw new UnsupportedOperationException("HD wallets only support compressd public keys.");
 		}
-		this.checkUnencrypted();
 		ECPoint point = ZWCurveParameters.CURVE.getG().multiply(this.priv);
-		return new ZWExtendedPublicKey(point.getEncoded(compressed), this.data);
+		return new ZWExtendedPublicKey(this.path.toPublicPath(true), point.getEncoded(compressed), this.data);
+	}
+	
+	/**
+	 * @return the path
+	 */
+	public ZWHdPath getPath() {
+		return path;
 	}
 
-	private void checkUnencrypted() {
-		if (this.isEncrypted()) {
-			throw new ZWHdWalletException("Cannot derive children private keys from an encrypted parent!");
-		}
+	/**
+	 * @return the data
+	 */
+	public ZWHdData getData() {
+		return data;
 	}
-
+	
 }

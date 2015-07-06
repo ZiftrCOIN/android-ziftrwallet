@@ -47,7 +47,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		this.setActionBar();
 	}
 
-	public void openAddressBook(ZWAddressBookFragment addressBookFragment, int baseLayout) {
+	public void openAddressBook(ZWAddressBookFragment<? extends ZWSendingAddress> addressBookFragment, int baseLayout) {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = this.getChildFragmentManager().beginTransaction();
 

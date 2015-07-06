@@ -14,15 +14,13 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdAccount;
-import com.ziftr.android.ziftrwallet.crypto.ZWHdChildNumber;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 
 
 // TODO make a column for balance so that we don't have to loop through transaction table? 
 public class ZWAccountsTable {
-	
+
 	private static final String TABLE_NAME = "hd_accounts";
 
 	public static final String COLUMN_SYMBOL = "symbol";	
@@ -32,22 +30,21 @@ public class ZWAccountsTable {
 	public static final String COLUMN_HD_XPUB = "xpub";
 
 	protected void create(SQLiteDatabase db) {
-		
+
 		// Create table with required columns coin symbol and account #, where each pair is unique
 		String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + 
-					COLUMN_SYMBOL + " TEXT NOT NULL," +
-					COLUMN_HD_ACCOUNT + " TEXT NOT NULL, " +
-					"UNIQUE (" + COLUMN_SYMBOL + ", " + COLUMN_HD_ACCOUNT + ")" +
+				COLUMN_SYMBOL + " TEXT NOT NULL," +
+				COLUMN_HD_ACCOUNT + " INTEGER NOT NULL, " +
+				"UNIQUE (" + COLUMN_SYMBOL + ", " + COLUMN_HD_ACCOUNT + ")" +
 				") ";
 		db.execSQL(sql);
 
 		// Add all other columns
-		this.addColumn(COLUMN_SYMBOL, "TEXT NOT NULL", db);
-		this.addColumn(COLUMN_HD_PURPOSE, "TEXT NOT NULL", db);
-		this.addColumn(COLUMN_HD_PURPOSE, "TEXT NOT NULL", db);
-		this.addColumn(COLUMN_HD_XPUB, "TEXT NOT NULL", db);
+		this.addColumn(COLUMN_HD_PURPOSE, "INTEGER NOT NULL DEFAULT 44", db);
+		this.addColumn(COLUMN_HD_COIN_TYPE, "INTEGER NOT NULL DEFAULT -1", db);
+		this.addColumn(COLUMN_HD_XPUB, "TEXT NOT NULL DEFAULT " + DatabaseUtils.sqlEscapeString(""), db);
 	}
-	
+
 	private void addColumn(String columnName, String constraints, SQLiteDatabase database) {
 		try {
 			String sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + columnName + " " + constraints;
@@ -57,85 +54,69 @@ public class ZWAccountsTable {
 			// Quietly fail when adding columns, they likely already exist
 		}
 	}
-	
+
+	private String whereSymbolAccount(String coinSymbol, int accountNumber) {
+		return COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coinSymbol) + 
+				" AND " + COLUMN_HD_ACCOUNT + " = " + String.valueOf(accountNumber);
+	}
+
 	protected List<ZWHdAccount> getAllAccounts(String where, SQLiteDatabase db) {
 		ArrayList<ZWHdAccount> accounts = new ArrayList<ZWHdAccount>();
-		
+
 		String sql = "SELECT * FROM " + TABLE_NAME;
 		if (where != null && !where.isEmpty())
 			sql += " WHERE " + where;
-		
+
 		Cursor cursor = db.rawQuery(sql, null);
-		
+
 		if (cursor.moveToFirst()) {
 			do {
-				ZWHdAccount account = cursorToAccount(cursor);
-				accounts.add(account);
+				accounts.add(cursorToAccount(cursor));
 			} while (cursor.moveToNext());
 		}
 
 		// Make sure we close the cursor
 		cursor.close();
-		
+
 		return accounts;
 	}
-	
-	protected ZWHdAccount getAccount(String coinSymbol, SQLiteDatabase db){
-		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coinSymbol);
-		
-		ZWHdAccount account = null;
-		
-		Cursor cursor = db.rawQuery(sql, null);
-		if (cursor.moveToFirst()) {
-			account = cursorToAccount(cursor);
-		}
-		cursor.close();
-		
-		return account;
+
+	protected List<ZWHdAccount> getAccountsByCoin(String symbol, SQLiteDatabase db) {
+		return this.getAllAccounts(COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(symbol), db);
 	}
 
-	public void upsertAccount(ZWHdAccount account, SQLiteDatabase db) {
-		
+	protected ZWHdAccount getAccount(String coinSymbol, int accountNumber, SQLiteDatabase db) {
+		List<ZWHdAccount> all = this.getAllAccounts(this.whereSymbolAccount(coinSymbol, accountNumber), db);
+		return all.size() > 0 ? all.get(0) : null;
+	}
+
+	public void insertAccount(ZWHdAccount account, SQLiteDatabase db) {
 		ContentValues cv = getContentValues(account);
-		
-		try {
-			db.insertOrThrow(TABLE_NAME, null, cv);
-		} 
-		catch(Exception e) {
-			//failed to insert, likely because the coin already exists in the database, so just update it
-			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(account.symbol) + 
-					" AND " + COLUMN_HD_ACCOUNT + " = " + DatabaseUtils.sqlEscapeString(account.account.toString());
-			db.update(TABLE_NAME, cv, where, null);
-		}
+		db.insertOrThrow(TABLE_NAME, null, cv);
 	}
 
 	private ZWHdAccount cursorToAccount(Cursor cursor) {
 		try {
 			String symbol = cursor.getString(cursor.getColumnIndex(COLUMN_SYMBOL));
-			String purpose = cursor.getString(cursor.getColumnIndex(COLUMN_HD_PURPOSE));
-			String coinType = cursor.getString(cursor.getColumnIndex(COLUMN_HD_COIN_TYPE));
-			String account = cursor.getString(cursor.getColumnIndex(COLUMN_HD_ACCOUNT));
+			int purpose = cursor.getInt(cursor.getColumnIndex(COLUMN_HD_PURPOSE));
+			int coinType = cursor.getInt(cursor.getColumnIndex(COLUMN_HD_COIN_TYPE));
+			int account = cursor.getInt(cursor.getColumnIndex(COLUMN_HD_ACCOUNT));
 			String xpub = cursor.getString(cursor.getColumnIndex(COLUMN_HD_XPUB));
-			return new ZWHdAccount(symbol, 
-					new ZWHdChildNumber(purpose), 
-					new ZWHdChildNumber(coinType), 
-					new ZWHdChildNumber(account), 
-					new ZWExtendedPublicKey(xpub));
+			return new ZWHdAccount(symbol, purpose, coinType, account, xpub);
 		} catch (ZWAddressFormatException e) {
 			return null;
 		}
 	}
-	
+
 	private ContentValues getContentValues(ZWHdAccount account) {
 		ContentValues content = new ContentValues();
-		
+
 		content.put(COLUMN_SYMBOL, account.symbol);
-		content.put(COLUMN_HD_PURPOSE, account.purpose.toString());
-		content.put(COLUMN_HD_COIN_TYPE, account.coinType.toString());
-		content.put(COLUMN_HD_ACCOUNT, account.account.toString());
-		content.put(COLUMN_HD_XPUB, account.xpubkey.xpub(account.isTestnet()));
-		
-		//these are properties of the coin and extremely unlikely to change
+		content.put(COLUMN_HD_PURPOSE, account.purpose.getIndex());
+		content.put(COLUMN_HD_COIN_TYPE, account.coinType.getIndex());
+		content.put(COLUMN_HD_ACCOUNT, account.account.getIndex());
+		content.put(COLUMN_HD_XPUB, account.xpubkey.xpub(account.isMainnet()));
+
 		return content;
 	}
 

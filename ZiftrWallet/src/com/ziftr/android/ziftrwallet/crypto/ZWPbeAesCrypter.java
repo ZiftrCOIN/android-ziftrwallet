@@ -44,6 +44,11 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 		this.setSecretKey(secretKey);
 	}
 
+	@Override
+	public char getEncryptionIdentifier() {
+		return ZWKeyCrypter.PBE_AES_ENCRYPTION;
+	}
+
 	@SuppressLint("TrulyRandom")
 	@Override
 	public ZWEncryptedData encrypt(String clearText) throws ZWKeyCrypterException {
@@ -61,7 +66,7 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 			// Why are we appending these values?
 			// AES requires a random initialization vector (IV). We save the IV
 			// with the encrypted value so we can get it back later in decrypt()
-			return new ZWEncryptedData(ivHex + encryptedHex);
+			return new ZWEncryptedData(this.getEncryptionIdentifier(), ivHex + encryptedHex);
 		} catch (Exception e) {
 			System.out.println("error message: " + e.getMessage());
 			throw new ZWKeyCrypterException("Unable to encrypt", e);
@@ -72,6 +77,8 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 	@Override
 	public String decrypt(ZWEncryptedData encryptedData) throws ZWKeyCrypterException {
 		try {
+			if (encryptedData.encryptionId != this.getEncryptionIdentifier())
+				throw new Exception();
 			String encrypted = encryptedData.getEncryptedData();
 			Cipher decryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 			int ivLength = decryptionCipher.getBlockSize();
@@ -134,7 +141,7 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 	}
 
 	private static byte[] generateIv(int ivLength) {
-		SecureRandom random = new SecureRandom();
+		SecureRandom random = ZiftrUtils.createTrulySecureRandom();
 		byte[] iv = new byte[ivLength];
 		random.nextBytes(iv);
 		return iv;

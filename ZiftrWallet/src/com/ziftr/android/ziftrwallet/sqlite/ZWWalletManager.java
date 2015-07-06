@@ -21,15 +21,22 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
+import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWHdAccount;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress.KeyType;
 import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.reencryptionStatus;
+import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /** 
  * This class controls all of the wallets and is responsible
@@ -93,7 +100,11 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	/** Table with market values of currencies */
 	protected ZWExchangeTable exchangeTable;
 
+	/** Simple key value store for persistent preferences. */
 	protected ZWAppDataTable appDataTable;
+
+	/** Checkpoints in the HD wallet tree to make deriving a new address easy. */
+	protected ZWAccountsTable accountsTable;
 
 	///////////////////////////////////////////////////////
 	//////////  Static Singleton Access Members ///////////
@@ -172,6 +183,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
 		this.appDataTable = new ZWAppDataTable();
+		this.accountsTable = new ZWAccountsTable();
 	}
 
 	/**
@@ -200,10 +212,12 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		List<ZWCoin> coins = coinTable.getAllCoins(db);
 		ZWCoin.loadCoins(coins);
 
-		//Make exchange table
+		// Make exchange table
 		this.exchangeTable.create(db);
-		//Make misc table
+		// Make misc table
 		this.appDataTable.create(db);
+		// Make accounts table
+		this.accountsTable.create(db);
 	}
 
 
@@ -215,7 +229,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if(oldVersion < 2 && newVersion >= 2) {
+		if (oldVersion < 2 && newVersion >= 2) {
 			//upgrading from version 1 to 2+ requires adding new tables for any active coins
 
 			//note, don't put ZLog message here, fixed an issue where ZLog was trying to read the database
@@ -223,6 +237,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			//this caused a recursive getDatabase call, the issue has been fixed but best to not 
 			//depend on any static classes here
 
+			this.accountsTable.create(db);
 			this.coinTable.create(db); //make sure coin table is up to date
 			List<ZWCoin> coins = this.coinTable.getNotUnactiveCoins(db);
 			for(ZWCoin coin : coins) {
@@ -248,43 +263,22 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		return receivingNotSending ? this.receivingAddressesTable : this.sendingAddressesTable;
 	}
 
-	/**
-	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
-	 * address to the correct table within our database.
-	 * 
-	 * Default values will be used in this method for the note, balance, and status.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 */
-	public ZWReceivingAddress createChangeAddress(String passphrase, ZWCoin coinId) throws ZWAddressFormatException {
-		ZWKeyCrypter crypter = this.passphraseToCrypter(passphrase);
+	public ZWReceivingAddress createReceivingAddress(ZWCoin coinId, int account, boolean change) throws ZWAddressFormatException {
+		return this.createReceivingAddress(coinId, account, change, "");
+	}
+
+	public ZWReceivingAddress createReceivingAddress(ZWCoin coinId, int account, boolean change, String note) throws ZWAddressFormatException {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, "", 0, time, time, true, false);
-	}
+		ZWHdAccount hdAccount = this.accountsTable.getAccount(coinId.getSymbol(), account, getReadableDatabase());
+		int nextUnused = this.receivingAddressesTable.nextUnusedIndex(coinId, change, account, getReadableDatabase());
+		ZWExtendedPublicKey xpubkeyNewAddress = hdAccount.xpubkey.deriveChild("M/" + (change ? 1 : 0) + "/" + nextUnused);
+		ZWReceivingAddress address = new ZWReceivingAddress(coinId, xpubkeyNewAddress, xpubkeyNewAddress.getPath());
 
-	/**
-	 * this method creates a visible unspentfrom receiving (owned by the user) {@link ZWSendingAddress} object and adds it 
-	 * to the correct table within our database
-	 */
-	public ZWReceivingAddress createReceivingAddress(String passphrase, ZWCoin coinId, String note, long balance, long creation, long modified) throws ZWAddressFormatException {
-		return this.createReceivingAddress(passphraseToCrypter(passphrase), coinId, note, balance, creation, modified, false, false);
-	}
-
-	/**
-	 * this method creates a receiving (owned by the user) {@link ZWSendingAddress} object and adds it 
-	 * to the correct table within our database
-	 */
-	protected synchronized ZWReceivingAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, 
-			long balance, long creation, long modified, boolean hidden, boolean spentFrom) throws ZWAddressFormatException {
-		ZWReceivingAddress address = null;
-		address = new ZWReceivingAddress(coinId);
 		address.setLabel(note);
-		address.setLastKnownBalance(balance);
-		address.setCreationTimeSeconds(creation);
-		address.setLastTimeModifiedSeconds(modified);
-		address.setHidden(hidden);
-		address.setSpentFrom(spentFrom);
-		address.getPriv().setKeyCrypter(crypter);
+		address.setLastKnownBalance(0);
+		address.setCreationTimeSeconds(time);
+		address.setLastTimeModifiedSeconds(time);
+		address.setSpentFrom(false);
 		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
 
 		return address;
@@ -304,6 +298,15 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	public synchronized reencryptionStatus changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
 		ZWKeyCrypter oldCrypter = this.passphraseToCrypter(oldPassphrase);
 		ZWKeyCrypter newCrypter = this.passphraseToCrypter(newPassphrase);
+
+		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
+		if (decryptedSeed == null) {
+			ZLog.log("ERROR: Mismatch in oldCrypter and status of HD seed");
+			return reencryptionStatus.error;
+		}
+		String newSeedVal = newCrypter == null ? "" + ZWKeyCrypter.NO_ENCRYPTION + decryptedSeed : newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
+		ZWPreferences.setHdWalletSeed(newSeedVal);
+
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		try {
@@ -332,25 +335,46 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	}
 
 	/**
+	 * @param oldCrypter
+	 * @return
+	 */
+	private String getDecryptedHdSeed(ZWKeyCrypter oldCrypter) {
+		String hdSeed = ZWPreferences.getHdWalletSeed();
+		if (hdSeed == null || hdSeed.isEmpty())
+			return null;
+
+		String decryptedSeed; 
+		if (oldCrypter == null && hdSeed.charAt(0) == ZWKeyCrypter.NO_ENCRYPTION) {
+			decryptedSeed = hdSeed.substring(1);
+		} else if (oldCrypter != null && oldCrypter.getEncryptionIdentifier() == hdSeed.charAt(0)) {
+			decryptedSeed = oldCrypter.decrypt(new ZWEncryptedData(hdSeed.charAt(0), hdSeed.substring(1)));
+		} else {
+			return null;
+		}
+		return decryptedSeed;
+	}
+
+	/**
 	 * this is used to test passphrases when trying to recover from a state where a user
 	 * tried to reencrypt already encrypted password and is entering his/her old passphrase
 	 * to decrypt keys
 	 */
 	public synchronized boolean attemptDecrypt(String passphrase) {
-		ZWKeyCrypter crypter = this.passphraseToCrypter(passphrase);
-		SQLiteDatabase db = this.getWritableDatabase();
-		ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
-		for (ZWCoin coin: this.getNotUnactivatedCoins()){
-			try {
-				if (receiveTable.recryptAllAddresses(coin, crypter, null, db) != reencryptionStatus.success) {
-					return false;
-				}
-			} catch (CryptoException e) {
-				ZLog.log("ERROR Could not decrypt wallet!");
-				return false;
-			}
-		}
-		return true;
+		return this.changeEncryptionOfReceivingAddresses(passphrase, null) == reencryptionStatus.success;
+//		ZWKeyCrypter crypter = this.passphraseToCrypter(passphrase);
+//		SQLiteDatabase db = this.getWritableDatabase();
+//		ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
+//		for (ZWCoin coin: this.getNotUnactivatedCoins()){
+//			try {
+//				if (receiveTable.recryptAllAddresses(coin, crypter, null, db) != reencryptionStatus.success) {
+//					return false;
+//				}
+//			} catch (CryptoException e) {
+//				ZLog.log("ERROR Could not decrypt wallet!");
+//				return false;
+//			}
+//		}
+//		return true;
 	}
 
 
@@ -397,8 +421,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * @throws ZWAddressFormatException 
 	 */
 	public ZWSendingAddress createSendingAddress(ZWCoin coin, String addressString, String note) throws ZWAddressFormatException {
-		long time = System.currentTimeMillis() / 1000;
-		return createSendingAddress(coin, addressString, note, 0, time);
+		return createSendingAddress(coin, addressString, note, 0);
 	}
 
 	/**
@@ -410,15 +433,14 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * @throws ZWAddressFormatException 
 	 */
 	public synchronized ZWSendingAddress createSendingAddress(ZWCoin coin, String addressString, String label, 
-			long balance, long modified) throws ZWAddressFormatException {
+			long balance) throws ZWAddressFormatException {
 		ZWSendingAddress address = new ZWSendingAddress(coin, addressString);
 		address.setLabel(label);
 		address.setLastKnownBalance(balance);
-		//address.getKey().setCreationTimeSeconds(creation);
-		address.setLastTimeModifiedSeconds(modified);
+		address.setLastTimeModifiedSeconds(System.currentTimeMillis() / 1000);
 		long rowId = this.sendingAddressesTable.insert(address, this.getWritableDatabase());
 		if (rowId == -1) {
-			//this address already exists, so update it
+			// This address already exists, so update it
 			this.updateAddress(address, false);
 		}
 		return address;
@@ -449,7 +471,28 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	public synchronized ZWReceivingAddress getDecryptedReceivingAddress(ZWCoin coin, String address, String password) {
 		ZWReceivingAddress addr = this.receivingAddressesTable.getAddress(coin, address, getReadableDatabase());
-		addr.decrypt(this.passphraseToCrypter(password));
+		ZWKeyCrypter crypter = this.passphraseToCrypter(password);
+		KeyType type = addr.getKeyType();
+		switch(type) {
+		case DERIVABLE_PATH:
+			String hdSeed = getDecryptedHdSeed(crypter);
+			if (hdSeed == null) {
+				return null;
+			}
+			byte[] seed = ZiftrUtils.hexStringToBytes(hdSeed);
+			ZWExtendedPrivateKey xprvkey = new ZWExtendedPrivateKey(seed);
+			addr.deriveFromStoredPath(xprvkey);
+			break;
+		case ENCRYPTED:
+			addr.decrypt(crypter);
+			break;
+		case EXTENDED_UNENCRYPTED:
+			// Private key already available
+			break;
+		case STANDARD_UNENCRYPTED:
+			// Private key already available
+			break;
+		}
 		return addr;
 	}
 
@@ -471,7 +514,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * @return a list of address objects
 	 */
 	public synchronized List<String> getHiddenAddressList(ZWCoin coin, boolean includeSpentFrom) {
-		return this.receivingAddressesTable.getHiddenAddresses(coin, getReadableDatabase(), true);
+		return this.receivingAddressesTable.getHiddenAddresses(coin, getReadableDatabase(), includeSpentFrom);
 	}
 
 	/**
@@ -628,7 +671,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * 
 	 * @param coinId
 	 */
-	public synchronized void activateCoin(ZWCoin coin) {
+	public synchronized void activateCoin(ZWCoin coin, String password) {
 		// Safety check
 		if (isCoinActivated(coin)) {
 			return;
@@ -641,6 +684,32 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 		// Update table to match activated status
 		this.coinTable.activateCoin(coin, this.getWritableDatabase());
+
+		// Make sure the seed data for the wallet exists, and read it
+		ZWKeyCrypter crypter = this.passphraseToCrypter(password);
+		String seedStr = ZWPreferences.getHdWalletSeed();
+		byte[] seed = null;
+		if (seedStr == null) {
+			seed = new byte[32];
+			ZiftrUtils.createTrulySecureRandom().nextBytes(seed);
+			ZWPreferences.setHdWalletSeed(CryptoUtils.encryptAndPrefix(crypter, seed));
+		} else {
+			seed = CryptoUtils.decryptPrefixedHex(crypter, seedStr);
+			if (seed == null) {
+				throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
+			}
+		}
+
+		// Test if account exists before creating the new one to save time, as the derivation is CPU intensive
+		ZWHdAccount hdAcct = this.accountsTable.getAccount(coin.getSymbol(), 0, this.getWritableDatabase());
+		if (hdAcct == null) {
+			ZWExtendedPrivateKey m = new ZWExtendedPrivateKey(seed);
+			String path = "[m/44'/" + coin.getHdId() + "'/0']";
+			ZWExtendedPublicKey mPub = (ZWExtendedPublicKey) m.deriveChild(path);
+			ZWHdAccount account = new ZWHdAccount(coin.getSymbol(), mPub);
+			this.accountsTable.insertAccount(account, this.getWritableDatabase());
+		}
+
 	}
 
 

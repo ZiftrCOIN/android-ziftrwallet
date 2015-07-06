@@ -252,6 +252,7 @@ public class ZiftrUtils {
 	 * @return The result of the conversion.
 	 */
 	public static byte[] hexStringToBytes(String hexStr) {
+		if (hexStr == null) return null;
 		// TODO is this the same: Hex.decode(hexStr); ???
 		byte bArray[] = new byte[hexStr.length()/2];  
 		for (int i=0; i<(hexStr.length()/2); i++) {

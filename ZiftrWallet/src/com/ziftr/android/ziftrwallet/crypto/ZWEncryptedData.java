@@ -16,28 +16,30 @@ package com.ziftr.android.ziftrwallet.crypto;
  * we won't ever pass clear text into a decrypt method, or encrypt any data already encrypted.
  */
 public class ZWEncryptedData {
-
+	
+	char encryptionId;
 	String encryptedData;
 
     /**
      * Cloning constructor.
      * @param encryptedPrivateKey EncryptedPrivateKey to clone.
      */
-    public ZWEncryptedData(ZWEncryptedData encryptedPrivateKey) {
-    	this.encryptedData = encryptedPrivateKey.encryptedData;
+    public ZWEncryptedData(ZWEncryptedData other) {
+    	this.encryptionId = other.encryptionId;
+    	this.encryptedData = other.encryptedData;
     }
 
     /**
-     * @param iv
-     * @param encryptedPrivateKeys
+     * @param encryptedData
      */
-    public ZWEncryptedData(String encryptedData) {
+    public ZWEncryptedData(char encrId, String encryptedData) {
+    	this.encryptionId = encrId;
     	this.encryptedData = encryptedData;
     }
 
     @Override
     public ZWEncryptedData clone() {
-        return new ZWEncryptedData(this.encryptedData);
+        return new ZWEncryptedData(this.encryptionId, this.encryptedData);
     }
 
     @Override
@@ -53,18 +55,22 @@ public class ZWEncryptedData {
         if (getClass() != obj.getClass()) {
             return false;
         }
+        
         final ZWEncryptedData other = (ZWEncryptedData) obj;
-
-        return this.encryptedData.equals(other.encryptedData);
+        return this.encryptionId == other.encryptionId && this.encryptedData.equals(other.encryptedData);
     }
     
     public String getEncryptedData() {
     	return this.encryptedData;
     }
+    
+    public String toStringWithEncryptionId() {
+    	return "" + this.encryptionId + this.getEncryptedData();
+    }
 
     @Override
     public String toString() {
-        return this.getEncryptedData();
+        return this.toStringWithEncryptionId();
     }
     
     /**
@@ -72,6 +78,7 @@ public class ZWEncryptedData {
      * WARNING - this method irreversibly deletes the encrypted information.
      */
     public void clear() {
+    	this.encryptionId = ZWKeyCrypter.NO_ENCRYPTION;
         this.encryptedData = "";
     }
 }

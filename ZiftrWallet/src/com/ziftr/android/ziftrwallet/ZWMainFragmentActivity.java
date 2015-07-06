@@ -38,7 +38,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
@@ -860,31 +859,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		}
 	}
 
-
-
-	/**
-	 * called after user enters password for creating new wallet 
-	 * 
-	 * @param bundle with ZWCoin of wallet to add
-	 */
-	public void addNewCurrency(ZWCoin newCoin) {
-		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
-		// Make sure that this view only has wallets
-		// in it which the user do
-		if(this.walletManager.isCoinActivated(newCoin)) {
-			// Already in list, shouldn't ever get here though because
-			// we only show currencies in the dialog which we don't have
-			this.onBackPressed();
-			return;
-		}
-
-		walletManager.activateCoin(newCoin);
-
-		Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
-		this.onBackPressed();
-
-	}
-
+	
 	/**
 	 * Only works for enabled types right now. 
 	 * 

@@ -115,11 +115,13 @@ public class ZWCoin implements ZWCurrency {
 	private String scheme; 
 	private int scale;
 	private String logoUrl;
+	private int hd_id;
 	
 	
 	public ZWCoin(String name, String type, String chain, String scheme, int scale, 
 			String defaultFee, String logoUrl, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int confirmationsNeeded, int blockTime, boolean enabled, String health) {
+			byte privKeyPrefix, int confirmationsNeeded, int blockTime, boolean enabled, String health,
+			int hd_id) {
 
 		this.name = name;
 		this.type = type;
@@ -134,6 +136,7 @@ public class ZWCoin implements ZWCurrency {
 		this.blockTime = blockTime;
 		this.enabled = enabled;
 		this.health = health;
+		this.hd_id = hd_id;
 
 		try {
 			this.defaultFeePer = new BigInteger(defaultFee);
@@ -167,6 +170,10 @@ public class ZWCoin implements ZWCurrency {
 		}
 		
 		return symbol;
+	}
+	
+	public boolean isMainNetworkCoin() {
+		return chain.equals("main");
 	}
 	
 
@@ -290,7 +297,6 @@ public class ZWCoin implements ZWCurrency {
 	public int getSecondsPerAverageBlockSolve() {
 		return this.blockTime;
 	}
-
 	
 	@Override
 	public String getFormattedAmount(BigDecimal amount) {
@@ -403,7 +409,9 @@ public class ZWCoin implements ZWCurrency {
 		return this.health;
 	}
 
-	
+	public int getHdId() {
+		return this.hd_id;
+	}	
 	
 	
 	

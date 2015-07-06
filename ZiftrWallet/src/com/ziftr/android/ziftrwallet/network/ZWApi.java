@@ -25,10 +25,11 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 @SuppressLint("DefaultLocale")
 public class ZWApi {
 
-	private static final String UPDATE_CHECK_URL = "http://www.ziftrwallet.com/updates/android/";
-	private static final String MOCK_BASE_URL = "mocksvc.mulesoft.com/mocks/fa5dec6e-b96d-46b7-ac46-28624489f7dd";
-	private static final String SANDBOX_BASE_URL = "sandbox.fpa.bz";
-	private static final String LIVE_BASE_URL = "api.fpa.bz";
+	protected static final String UPDATE_CHECK_URL = "http://www.ziftrwallet.com/updates/android/";
+	protected static final String MOCK_BASE_URL = "mocksvc.mulesoft.com/mocks/fa5dec6e-b96d-46b7-ac46-28624489f7dd";
+	protected static final String SANDBOX_BASE_URL = "sandbox.fpa.bz";
+	protected static final String LIVE_BASE_URL = "api.fpa.bz";
+	protected static final String DEVENV_URL = "sandbox.fpa.loc";
 
 	private static String BASE_URL = SANDBOX_BASE_URL;
 
@@ -59,11 +60,12 @@ public class ZWApi {
 		ZWPreferences.getCustomAPIServer();
 
 		String protocol;
-		if(secure) {
-			protocol = "https";
+		String server = ZWPreferences.getCustomAPIServer();
+		if (!secure || (ZWPreferences.getDebugMode() && server != null && !server.isEmpty())) {
+			protocol = "http";
 		}
 		else {
-			protocol = "http";
+			protocol = "https";
 		}
 
 		StringBuilder url = new StringBuilder(protocol).append("://").append(BASE_URL).append("/blockchains/"); //  + type + "/" + chain + "/";

@@ -153,7 +153,7 @@ public class ZWDataSyncHelper {
 				addressesSpentFrom.add(signingAddressPublic);
 
 				ZWReceivingAddress addr = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, signingAddressPublic, password); 
-				ZWPrivateKey key = addr.getPriv();
+				ZWPrivateKey key = addr.getStandardKey();
 				toSign.put("pubkey", ZiftrUtils.bytesToHexString(key.getPub().getPubKeyBytes()));
 
 				String stringToSign = toSign.getString("tosign");
@@ -310,6 +310,7 @@ public class ZWDataSyncHelper {
 					byte pubKeyPrefix = (byte) coinJson.getInt("p2pkh_byte");
 					byte scriptHashPrefix = (byte) coinJson.getInt("p2sh_byte");
 					byte privateBytePrefix = (byte) coinJson.getInt("priv_byte");
+					int hdId = coinJson.getInt("hd_id");
 					int blockTime = coinJson.getInt("seconds_per_block_generated");
 					int confirmationsNeeded = coinJson.getInt("recommended_confirmations");
 					String chain = coinJson.getString("chain");
@@ -354,7 +355,7 @@ public class ZWDataSyncHelper {
 
 					if(name != null && name.length() > 0) {
 						ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, feeString, logoUrl, pubKeyPrefix, 
-								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, isEnabled, health);
+								scriptHashPrefix, privateBytePrefix, confirmationsNeeded, blockTime, isEnabled, health, hdId);
 						ZWWalletManager.getInstance().updateCoin(coin);
 					}
 
@@ -492,7 +493,7 @@ public class ZWDataSyncHelper {
 
 		ZiftrNetRequest request = ZWApi.buildTransactionsRequest(coin.getType(), coin.getChain(), addresses);
 		String response = request.sendAndWait();
-
+		
 		ZLog.forceFullLog("Transaction history response(" + request.getResponseCode() + "): " + response);
 		if( responseCodeOk(request.getResponseCode()) ) {
 			try {
@@ -737,12 +738,10 @@ public class ZWDataSyncHelper {
 					if(displayStrings.size() == 0) {
 						//this is a very strange corner case
 						//it means the user found their own hidden change addresses, then sent coins to them
-						//so we unhide those addresses and give them a default label
+						//so we give them a default label
 						for(ZWReceivingAddress address : receivingAddressesUsed) {
-							address.setHidden(false);
 							address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_self_send));
 							ZWWalletManager.getInstance().updateAddress(address, true);
-
 							displayStrings.add(address.getAddress());
 						}
 
@@ -774,14 +773,12 @@ public class ZWDataSyncHelper {
 					}
 				}
 
-				if(displayStrings.size() == 0) {
+				if (displayStrings.size() == 0) {
 					//if this happens it means someone else has sent us coins using only our hidden change address
 					//this could happen if someone tried to return coins using the address they came from for some reason
 					for(ZWReceivingAddress address : receivingAddressesUsed) {
-						address.setHidden(false);
 						address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_returned_coins));
 						ZWWalletManager.getInstance().updateAddress(address, true);
-
 						displayStrings.add(address.getAddress());
 					}
 

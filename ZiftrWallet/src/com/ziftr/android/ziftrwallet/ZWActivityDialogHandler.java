@@ -11,12 +11,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
+import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter;
+import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSettingsFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
@@ -92,18 +94,17 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 					(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
 			receiveFragment.loadNewAddressFromDatabase();
 		}
-		else if(ZWReceiveCoinsFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
+		else if(ZWNewCurrencyFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
 			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
 			byte[] inputHash = CryptoUtils.saltedHash(enteredPassword);
 
 			if (ZWPreferences.inputHashMatchesStoredHash(inputHash)) {
 				ZWPreferences.setCachedPassword(enteredPassword);
 
-				ZWReceiveCoinsFragment receiveFragment = 
-						(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
-				if(receiveFragment != null) {
-
-					receiveFragment.loadNewAddressFromDatabase();
+				ZWNewCurrencyFragment newCurrFragment = 
+						(ZWNewCurrencyFragment) getSupportFragmentManager().findFragmentByTag(ZWNewCurrencyFragment.FRAGMENT_TAG);
+				if (newCurrFragment != null) {
+					newCurrFragment.makeNewAccount((ZWCoin)((ZiftrTextDialogFragment)fragment).getData(), enteredPassword);
 				}
 			}
 			else {
@@ -170,7 +171,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 
 					} 
 					else {
-						//this is an epic failure, it basically measn the database is corrupted, or somehow double encrypted
+						//this is an epic failure, it basically means the database is corrupted, or somehow double encrypted
 						//TODO -alert the user?
 						return;
 					}
@@ -190,10 +191,9 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			ZiftrTextDialogFragment passwordFragment = (ZiftrTextDialogFragment) fragment;
 			String password = passwordFragment.getEnteredText(0);
 
-			//TODO -fix this, why are we "attempting" then doing it for real?
 			if (ZWWalletManager.getInstance().attemptDecrypt(password)){
-				ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(password, null);
-
+				//TODO -fix this, why are we "attempting" then doing it for real?
+				//ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(password, null);
 				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_dialog_old_encryption_changed);
 			} 
 			else {

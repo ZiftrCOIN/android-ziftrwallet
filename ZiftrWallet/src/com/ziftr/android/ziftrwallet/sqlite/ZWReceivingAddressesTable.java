@@ -19,6 +19,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
+import com.ziftr.android.ziftrwallet.crypto.ZWHdPath;
+import com.ziftr.android.ziftrwallet.crypto.ZWHdWalletException;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWPublicKey;
@@ -45,13 +47,17 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	/** whether an address has spent money or not */
 	public static final String COLUMN_SPENT_FROM = "spent_From";
 
+	/** Each key generated has an index relative to its parent. */
+	public static final String COLUMN_HD_INDEX = "hd_counter";
+	public static final String COLUMN_HD_ACCOUNT = "account";
+
 	public static int VISIBLE_TO_USER = 0;
 	public static int HIDDEN_FROM_USER = 1;
 
 	public static int UNSPENT_FROM = 0;
 	public static int SPENT_FROM = 1;
 
-	public static enum reencryptionStatus{
+	public static enum reencryptionStatus {
 		success,
 		encrypted, //first address was already encrypted
 		error //non-first address was already encrypted
@@ -80,34 +86,68 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		//create columns that all address tables use
 		super.createTableColumns(coin, database);
 
-		//add is_spent_from column
 		addColumn(coin, COLUMN_SPENT_FROM, "INTEGER", database);
-
-		//add is_hidden column
 		addColumn(coin, COLUMN_HIDDEN, "INTEGER", database);
+		addColumn(coin, COLUMN_HD_INDEX, "INTEGER", database);
+		addColumn(coin, COLUMN_HD_ACCOUNT, "INTEGER", database);
+
+		// "A unique constraint is satisfied if and only if no two rows in a table 
+		// have the same values and have non-null values in the unique columns."
+		// Hence, we are okay to add this here. The standard private keys that were
+		// derived without HD wallets will have null in both the COLUMN_HD_INDEX and
+		// the COLUMN_HD_ACCOUNT column, but non-null in COLUMN_HIDDEN.
+		try {
+			String rawQuery = "CREATE UNIQUE INDEX unique_account_change_counter on ";
+			rawQuery += this.getTableName(coin);
+			rawQuery += "(";
+			rawQuery += COLUMN_HD_ACCOUNT + ", ";
+			rawQuery += COLUMN_HIDDEN + ", ";
+			rawQuery += COLUMN_HD_INDEX;
+			rawQuery += ");";
+			database.rawQuery(rawQuery, null);
+		} catch(Exception e) {
+			// Okay if this throws, just means the unique index already exists
+		}
 	}
 
 	@Override
 	protected ZWReceivingAddress cursorToAddress(ZWCoin coinId, Cursor c) throws ZWAddressFormatException {
 		String dataInPrivColumn = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
-		byte[] pubKeyBytes = ZiftrUtils.hexStringToBytes(c.getString(c.getColumnIndex(COLUMN_PUB_KEY)));
 
 		// If a constructor is used that doesn't pass the pubKeyBytes it recalculates them
 		// here and that is pretty slow. Hence, whenever loading in addresses from the db, 
 		// use a constructor where you can provide the pubKeyBytes.
-		ZWPrivateKey newKey = getKeyFromStoredPrivData(dataInPrivColumn, pubKeyBytes);
-		ZWReceivingAddress newAddress = new ZWReceivingAddress(coinId, newKey);
+		byte[] pubKeyBytes = ZiftrUtils.hexStringToBytes(c.getString(c.getColumnIndex(COLUMN_PUB_KEY)));
+		ZWPublicKey pubkey = new ZWPublicKey(pubKeyBytes);
 
-		// Only receiving addresses have these columns 
-		newAddress.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
-		newAddress.setSpentFrom(c.getInt(c.getColumnIndex(COLUMN_SPENT_FROM)) != 0);
-		newAddress.setHidden(c.getInt(c.getColumnIndex(COLUMN_HIDDEN)) != 0);
+		// Hidden column is used even in non-HD address rows
+		int hidden = c.getInt(c.getColumnIndex(COLUMN_HIDDEN));
+		ZWReceivingAddress addrRet = null;
+
+		if (dataInPrivColumn == null || dataInPrivColumn.isEmpty()) {
+			int account = c.getInt(c.getColumnIndex(COLUMN_HD_ACCOUNT));
+			String path = "[m/44'/" + coinId.getHdId() + "'/" + account + "']/" + hidden + "/" + c.getInt(c.getColumnIndex(COLUMN_HD_INDEX));
+			addrRet = new ZWReceivingAddress(coinId, pubkey, new ZWHdPath(path));
+		} else if (dataInPrivColumn.charAt(0) == ZWKeyCrypter.NO_ENCRYPTION) {
+			byte[] privBytes = ZiftrUtils.hexStringToBytes(dataInPrivColumn.substring(1));
+			ZWPrivateKey newKey = new ZWPrivateKey(new BigInteger(1, privBytes), pubkey);
+			addrRet = new ZWReceivingAddress(coinId, newKey, hidden != 0);
+		} else {
+			char encryptionId = dataInPrivColumn.charAt(0);
+			String privDataWithoutEncryptionPrefix = dataInPrivColumn.substring(1);
+			addrRet = new ZWReceivingAddress(coinId, pubkey, 
+					new ZWEncryptedData(encryptionId, privDataWithoutEncryptionPrefix), hidden != 0);
+		}
+
+		addrRet.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+		addrRet.setSpentFrom(c.getInt(c.getColumnIndex(COLUMN_SPENT_FROM)) != 0);
 
 		// All addresses ahve these columns
-		newAddress.setLabel(c.getString(c.getColumnIndex(COLUMN_LABEL)));
-		newAddress.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
-		newAddress.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
-		return newAddress;
+		addrRet.setLabel(c.getString(c.getColumnIndex(COLUMN_LABEL)));
+		addrRet.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
+		addrRet.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
+
+		return addrRet;
 	}
 
 	//called in wrapper with transaction begin and transaction end to ensure atomicity
@@ -120,25 +160,31 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		sb.append(getTableName(coin));
 		sb.append(";");
 		Cursor c = db.rawQuery(sb.toString(), null);
+
 		List<String> oldPrivKeysInDb = new ArrayList<String>();
 		//read private keys
 		if (c.moveToFirst()) {
 			do {
-				oldPrivKeysInDb.add(c.getString(c.getColumnIndex(COLUMN_PRIV_KEY)));
+				String val = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
+				if (val != null && !val.isEmpty()) {
+					oldPrivKeysInDb.add(val);
+				}
 			} while (c.moveToNext());
 		}
 		c.close();
-		//decrypt private keys
+
+		// Decrypt private keys
 		for (int i = 0; i < oldPrivKeysInDb.size(); i++){
 			String oldPrivKeyValInDb = oldPrivKeysInDb.get(i);
+			char encId = oldPrivKeyValInDb.charAt(0);
 			String data = oldPrivKeyValInDb.substring(1);
 			ZWPrivateKey key = null;
 
 			boolean haveOldCrypter = oldCrypter != null;
-			boolean dataIsEncrypted = CryptoUtils.isEncryptedIdentifier(oldPrivKeyValInDb.charAt(0));
+			boolean dataIsEncrypted = oldPrivKeyValInDb.charAt(0) != ZWKeyCrypter.NO_ENCRYPTION;
+
 			if (haveOldCrypter && dataIsEncrypted) {
-				key = new ZWPrivateKey(new ZWEncryptedData(data), null, oldCrypter);
-				key = key.decrypt();
+				key = ZWPrivateKey.decrypt(new ZWEncryptedData(encId, data), oldCrypter);
 			} else if (!haveOldCrypter && !dataIsEncrypted) {
 				byte[] privBytes = ZiftrUtils.hexStringToBytes(data);
 				key = new ZWPrivateKey(new BigInteger(1, privBytes));
@@ -157,15 +203,12 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 			}
 
 			ContentValues cv = new ContentValues();
-
-			if (newCrypter != null) {
-				key = key.encrypt(newCrypter);
-			}
-			cv.put(COLUMN_PRIV_KEY, this.getPrivDataForInsert(key));
-
+			cv.put(COLUMN_PRIV_KEY, CryptoUtils.encryptAndPrefixHex(newCrypter, key.getPrivHex()));
 			StringBuilder where = new StringBuilder();
 			where.append(COLUMN_PRIV_KEY).append(" = ").append(DatabaseUtils.sqlEscapeString(oldPrivKeyValInDb));
 
+			// TODO this would be a good candidate to use compiled a compiled statement, as
+			// only the values in the statement change each time through the loop.
 			int numUpdated = db.update(getTableName(coin), cv, where.toString(), null);
 
 			if (numUpdated != 1) {
@@ -213,7 +256,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	//		return true;
 	//	}
 
-	public List<String> getHiddenAddresses(ZWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
+	protected List<String> getHiddenAddresses(ZWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
 
 		String sql = "SELECT " + COLUMN_ADDRESS + " FROM " + getTableName(coin) + " WHERE " + COLUMN_HIDDEN + " = " + HIDDEN_FROM_USER;
 		if(!includeSpentFrom) {
@@ -224,53 +267,6 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		return this.readAddressList(coin, cursor);
 	}
 
-
-	/**
-	 * @param dataInPrivColumn
-	 * @param privDataWithoutEncryptionPrefix
-	 * @param pubKeyBytes
-	 * @param newKey
-	 * @return
-	 */
-	private ZWPrivateKey getKeyFromStoredPrivData(String dataInPrivColumn, byte[] pubKeyBytes) {
-		ZWPrivateKey newKey = null;
-		String privDataWithoutEncryptionPrefix = dataInPrivColumn.substring(1);
-		ZWPublicKey pubkey = new ZWPublicKey(pubKeyBytes);
-
-		if (dataInPrivColumn.charAt(0) == ZWKeyCrypter.NO_ENCRYPTION) {
-			byte[] privBytes = ZiftrUtils.hexStringToBytes(privDataWithoutEncryptionPrefix);
-			newKey = new ZWPrivateKey(new BigInteger(1, privBytes), pubkey);
-		} else if (dataInPrivColumn.charAt(0) == ZWKeyCrypter.PBE_AES_ENCRYPTION) {
-			newKey = new ZWPrivateKey(new ZWEncryptedData(privDataWithoutEncryptionPrefix), pubkey, null);
-		}
-
-		if (newKey == null) {
-			ZLog.log("Ruh roh, why couldn't we make a key? First char: " + dataInPrivColumn.charAt(0));
-		}
-
-		return newKey;
-	}
-
-	/**
-	 * @param address
-	 * @return
-	 */
-	private String getPrivDataForInsert(ZWPrivateKey key) {
-		// TODO does this use the keyCrypter correctly/at all? 
-		String privData;
-		if (key.isEncrypted()) {
-			privData = key.getEncryptedPrivateKey().toString();
-		} else {
-			privData = ZiftrUtils.bytesToHexString(key.getPrivKeyBytes());
-		}
-		return getPrivDataForInsert(privData, key.isEncrypted());
-	}
-
-	private String getPrivDataForInsert(String data, boolean encrypted) {
-		return encrypted ? (ZWKeyCrypter.PBE_AES_ENCRYPTION + data) : (ZWKeyCrypter.NO_ENCRYPTION + data);
-	}
-
-
 	protected List<ZWReceivingAddress> getAllVisibleAddresses(ZWCoin coin, SQLiteDatabase db) {
 		ZWAddressFilter<ZWReceivingAddress> filter = new ZWAddressFilter<ZWReceivingAddress>() {
 			@Override public boolean include(ZWReceivingAddress address) { return true; }
@@ -279,24 +275,76 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		return this.getAddresses(coin, filter, db);
 	}
 
-	protected ZWPrivateKey getKeyForAddress(ZWCoin coin, String address, SQLiteDatabase db) throws ZWAddressFormatException {
-		String where = COLUMN_ADDRESS + " = " + address;
-		Cursor cursor = db.query(getTableName(coin), null, where, null, null, null, null);
-		return this.cursorToAddress(coin, cursor).getPriv();
+	@Override
+	protected ContentValues addressToContentValues(ZWReceivingAddress address, boolean forInsert) {
+		ContentValues values = super.addressToContentValues(address, forInsert);
+
+		String privData = "";
+		Integer index = null;
+		Integer account = null;
+
+		switch (address.getKeyType()) {
+		case EXTENDED_UNENCRYPTED:
+			ZWHdPath p = address.getExtendedPriv().getPath();
+
+			privData = "";
+			index = p.getBip44AddressIndex();
+			account = p.getBip44Account();
+			break;
+		case DERIVABLE_PATH:
+			ZWHdPath path = address.getPath();
+
+			privData = "";
+			index = path.getBip44AddressIndex();
+			account = path.getBip44Account();
+			break;
+		case ENCRYPTED:
+			ZWEncryptedData data = address.getEncryptedKey();
+
+			privData = data.toStringWithEncryptionId();
+			index = null;
+			account = null;
+			break;
+		case STANDARD_UNENCRYPTED:
+			ZWPrivateKey key = address.getStandardKey();
+
+			privData = "" + ZWKeyCrypter.NO_ENCRYPTION + key.getPrivHex();
+			index = null;
+			account = null;
+			break;
+		}
+
+		if (privData.isEmpty() == (index == null || account == null)) {
+			throw new ZWHdWalletException("Data for insertion not available. ");
+		}
+
+		values.put(COLUMN_CREATION_TIMESTAMP, address.getCreationTimeSeconds());
+		values.put(COLUMN_PRIV_KEY, privData);
+		values.put(COLUMN_PUB_KEY, address.getPublicKey().getPubHex());
+		values.put(COLUMN_SPENT_FROM, address.isSpentFrom());
+		if (forInsert || !privData.isEmpty()) {
+			values.put(COLUMN_HIDDEN, address.isHidden() ? 1 : 0);
+		}
+		if (forInsert) {
+			// Do not update these, they cannot be changed after insertion
+			values.put(COLUMN_HD_INDEX, index);
+			values.put(COLUMN_HD_ACCOUNT, account);
+		}
+
+		return values;
 	}
 
-
-	@Override
-	protected ContentValues addressToContentValues(ZWReceivingAddress address) {
-		ZWPrivateKey privKey = address.getPriv();
-		ContentValues values = super.addressToContentValues(address);
-		values.put(COLUMN_PRIV_KEY, getPrivDataForInsert(privKey));
-		values.put(COLUMN_PUB_KEY, ZiftrUtils.bytesToHexString(privKey.getPub().getPubKeyBytes()));
-		values.put(COLUMN_CREATION_TIMESTAMP, address.getCreationTimeSeconds());
-		values.put(COLUMN_HIDDEN, address.isHidden());
-		values.put(COLUMN_SPENT_FROM, address.isSpentFrom());
-		
-		return values;
+	protected int nextUnusedIndex(ZWCoin coin, boolean change, int account, SQLiteDatabase db) {
+		String[] selectionArgs = new String[] {
+				String.valueOf(change ? HIDDEN_FROM_USER : VISIBLE_TO_USER),
+				String.valueOf(account)
+		};
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT MAX(").append(COLUMN_HD_INDEX).append(") FROM ").append(getTableName(coin));
+		sb.append(" WHERE ").append(COLUMN_HIDDEN).append(" = ?");
+		sb.append(" AND ").append(COLUMN_HD_ACCOUNT).append(" = ?");
+		Cursor c = db.rawQuery(sb.toString(), selectionArgs);
+		return !c.moveToFirst() || c.getCount() == 0 ? 0 : c.getInt(0) + 1;
 	}
 
 }

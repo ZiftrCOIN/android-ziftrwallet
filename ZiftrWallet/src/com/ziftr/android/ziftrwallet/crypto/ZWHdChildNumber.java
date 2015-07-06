@@ -47,6 +47,10 @@ public class ZWHdChildNumber {
 	public boolean isHardened() {
 		return hardened;
 	}
+	
+	public int getIndex() {
+		return this.num;
+	}
 
 	public byte[] serialize() {
 		// BIP32 indices are serialized as unsigned integers

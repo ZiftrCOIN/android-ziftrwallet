@@ -90,8 +90,11 @@ public class ZWSendingAddress implements ZWSearchableListItem {
 	/** The ECKey for this address, if known. May be null. */
 	protected ZWPublicKey pub;
 	
-	protected ZWSendingAddress() {
-		
+	protected ZWSendingAddress(boolean ignore) {
+		if (ignore) {
+			throw new UnsupportedOperationException("Should call this method "
+					+ "with false to more clearly specify that a super constructor is being avoided");
+		}
 	}
 	
 	/**
@@ -204,10 +207,10 @@ public class ZWSendingAddress implements ZWSearchableListItem {
 	/**
 	 * @return the key
 	 */
-	public ZWPublicKey getKey() {
+	public ZWPublicKey getPublicKey() {
 		return pub;
 	}
-
+	
 	/** The (big endian) 20 byte hash that is the core of an address. */
 	public byte[] getHash160() {
 		return hash160;

@@ -143,7 +143,8 @@ public class ZWSendTaskHelperFragment extends Fragment {
 					List<String> changeAddresses = ZWWalletManager.getInstance().getHiddenAddressList(coin, false);
 					if (changeAddresses.size() <= 0){
 						//create new address for change
-						changeAddress = ZWWalletManager.getInstance().createChangeAddress(password, coin).getAddress();
+						// TODO default is account 0 for now, wallet may use different accoutns eventually
+						changeAddress = ZWWalletManager.getInstance().createReceivingAddress(coin, 0, true).getAddress();
 						ZLog.log(changeAddress);
 					} else {
 						//or reuse one that hasnt been spent from
@@ -160,6 +161,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 			}
 		};
 
+		// If doTask returns true, then which == BUTTON_POSITIVE (and vice versa)
 		buildingTransactionFragment.setupDialog(R.string.zw_dialog_sending);
 		buildingTransactionFragment.setOnClickListener(new DialogInterface.OnClickListener() {
 
