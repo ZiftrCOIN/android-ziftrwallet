@@ -3,45 +3,64 @@
  *
  * ZiftrWALLET is a trademark of Ziftr, LLC
  */
-
 package com.ziftr.android.ziftrwallet.sqlite;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.Context;
+import javax.crypto.SecretKey;
+
+import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
+import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWDefaultCoins;
-import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
+import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWHdAccount;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress.KeyType;
+import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
+import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-/**
- * This class gives the app access to a database that will persist in different
- * sessions of the app being opened. 
+/** 
+ * This class controls all of the wallets and is responsible
+ * for setting them up and closing them down when the application exits.
  * 
- * To get an instance of this class call ZWSQLiteOpenHelper.getInstance(Context).
- * When finished accessing the database, call ZWSQLiteOpenHelper.closeInstance().
+ * TODO maybe this class should be a background fragment? Ask Justin. 
+ * 
+ * The goal is that this class will make it easy to switch between using bitocoinj
+ * and switching to our API. All database access and bitcoinj access should go in here.
+ * More specifically, database access should go in ZWSQLiteOpenHelper, and if the database
+ * method is not quite correct, then it should be overridden in here to do somthing
+ * with bitcoinj.
+ * 
+ * The database helper object. Open and closed in onCreate/onDestroy
  */
-public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
+public class ZWWalletManager extends SQLiteOpenHelper {
 
-	public static final int DATABASE_VERSION = 3;
+	/** Database version */
+	public static final int DATABASE_VERSION = 4;
 
-	
+	/** Following the standard, we name our wallet file as below. */
+	public static final String DATABASE_NAME = "wallet.dat";
+
 	/**
 	 * <p>It's possible to calculate a wallets balance from multiple points of view. This enum specifies which
 	 * of the two methods the getWallatBalance() should use.</p>
@@ -66,31 +85,97 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	}
 
 	/** The helper for doing all things related to the receiving addresses table. */
-	private ZWReceivingAddressesTable receivingAddressesTable;
+	protected ZWReceivingAddressesTable receivingAddressesTable;
 
 	/** The helper for doing all things related to the sending addresses table. */
-	private ZWAddressesTable sendingAddressesTable;
+	protected ZWSendingAddressesTable sendingAddressesTable;
 
-	private ZWTransactionOutputsTable transactionOutputsTable;
-	
+	protected ZWTransactionOutputsTable transactionOutputsTable;
+
 	/** The table to keep track of coin activated/deactivated/unactivated status. */
-	private ZWCoinTable coinTable;
+	protected ZWCoinTable coinTable;
 
 	/** The table to keep track of transactions. */
-	private ZWTransactionTable transactionsTable;
-	
+	protected ZWTransactionTable transactionsTable;
+
 	/** Table with market values of currencies */
-	private ZWExchangeTable exchangeTable;
-	
-	private ZWAppDataTable appDataTable;
+	protected ZWExchangeTable exchangeTable;
+
+	/** Simple key value store for persistent preferences. */
+	protected ZWAppDataTable appDataTable;
+
+	/** Checkpoints in the HD wallet tree to make deriving a new address easy. */
+	protected ZWAccountsTable accountsTable;
 
 	private SecureRandom secureRandom;
-	
+
 	///////////////////////////////////////////////////////
-	//////////  Boiler plate SQLite Table Stuff ///////////
+	//////////  Static Singleton Access Members ///////////
 	///////////////////////////////////////////////////////
 
-	protected ZWSQLiteOpenHelper(Context context, String databasePath) {
+	/** The path where the database will be stored. */
+	private static String databasePath;
+
+	/** The single instance of the database helper that we use. */
+	private static ZWWalletManager instance;
+
+	private static boolean logging = true;
+
+	private static void log(Object... messages) {
+		if (logging) {
+			ZLog.log(messages);
+		}
+	}
+
+	public static synchronized ZWWalletManager getInstance() {
+		if (instance == null) {
+			try {
+				Application applicationContext = ZWApplication.getApplication();
+				// Here we build the path for the first time if have not yet already
+				if (databasePath == null) {
+					File externalDirectory = applicationContext.getExternalFilesDir(null);
+					if (externalDirectory != null) {
+						databasePath = new File(externalDirectory, DATABASE_NAME).getAbsolutePath();
+					} else {
+						// If we couldn't get the external directory the user is doing something weird with their sd card
+						// Leaving databaseName as null will let the database exist in memory
+
+						//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
+						log("CANNOT ACCESS LOCAL STORAGE!");
+					}
+				}
+
+				instance = new ZWWalletManager(applicationContext);
+			} catch (NullPointerException e){
+				ZLog.log("applicationContext was null");
+				return null;
+			}
+		}
+		return instance;
+	}
+
+	/**
+	 * Closes the database helper instance. Also resets the singleton instance
+	 * to be null.
+	 */
+	public static synchronized void closeInstance() {
+		if (instance != null) {
+			instance.close();
+		} 
+		else {
+			// If used right shouldn't happen because get instance should always
+			// be called before every close call.
+			log("instance was null when we called closeInstance...");
+		}
+		instance = null;
+	}
+
+	/**
+	 * Make a new manager. This context should be cleared and then re-added when
+	 * saving and bringing back the wallet manager. 
+	 */
+	private ZWWalletManager(Application context) {
+		// super constructor opens up a connection with the database.
 		// If the database path is null then an in memory database is used
 		super(context, databasePath, ZiftrCursorFactory.newFactory(), DATABASE_VERSION);
 
@@ -101,52 +186,66 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable = new ZWTransactionTable();
 		this.exchangeTable = new ZWExchangeTable();
 		this.appDataTable = new ZWAppDataTable();
+		this.accountsTable = new ZWAccountsTable();
 	}
 
-	
+	/**
+	 * @param passphrase
+	 * @return
+	 */
+	private ZWKeyCrypter passphraseToCrypter(String passphrase) {
+		ZWKeyCrypter crypter = null;
+		if (passphrase != null && passphrase.length() > 0) {
+			try {
+				SecretKey secretKey = ZWPbeAesCrypter.generateSecretKey(passphrase, ZWPreferences.getSalt());
+				crypter = new ZWPbeAesCrypter(secretKey);
+			}
+			catch(Exception e) {
+				ZLog.log("Exception creating key crypter: ", e);
+			}
+		}
+		return crypter;
+	}
+
+	/////////////////////////////////////////////////
+	//////////  Boiler plate SQLite stuff ///////////
+	/////////////////////////////////////////////////
+
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		// Make table of coin activation statuses
 		this.coinTable.create(db);
-		
-		//if we have any coins in our table load them into the ZWCoin class
-		//otherwise load insert the default hardcoded coins into the table and load them into the ZWCoin class
+
+		// If we have any coins in our table load them into the ZWCoin class
 		List<ZWCoin> coins = coinTable.getAllCoins(db);
-		if(coins.size() == 0) {
-			
-			// fill in table with default coin, using UNACTIVATED as the status
-			coins = ZWDefaultCoins.getDefaultCoins();
-			for (ZWCoin coin : coins) {
-				this.coinTable.insertDefault(coin, db);
-			}
-		}
-		
 		ZWCoin.loadCoins(coins);
-		
-		//Make exchange table
+
+		// Make exchange table
 		this.exchangeTable.create(db);
-		//Make misc table
+		// Make misc table
 		this.appDataTable.create(db);
+		// Make accounts table
+		this.accountsTable.create(db);
 	}
-	
-	
+
+
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		
+
 		//do nothing, handled in onOpen (so that it's guaranteed to be there)
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		
-		if(oldVersion < newVersion) {
+
+		if (oldVersion < newVersion) {
 			//upgrading versions usually requires adding new tables for any active coins
-			
 			//note, don't put ZLog message here, fixed an issue where ZLog was trying to read the database
 			//while being loaded by the class loader, which was happening here due to being called first
 			//this caused a recursive getDatabase call, the issue has been fixed but best to not 
 			//depend on any static classes here
-			
+
+			this.accountsTable.create(db);
 			this.coinTable.create(db); //make sure coin table is up to date
 			List<ZWCoin> coins = this.coinTable.getNotUnactiveCoins(db);
 			for(ZWCoin coin : coins) {
@@ -155,21 +254,19 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 				this.transactionsTable.create(coin, db);
 				this.transactionOutputsTable.create(coin, db);
 			}
-			
 		}
-		
-		
-		if(oldVersion < 2) {
+
+
+		if (oldVersion < 2) {
 			//db version 1 stored user preferences and passwords hashes in SharedPreferences
+			//the old version also stored user preferences and passwords hashes in SharedPreferences
 			//that's all stored in the sqlite database now, so coppy important data over
 			this.appDataTable.create(db);
 			this.appDataTable.upgradeFromOldPreferences(db);
 		}
-		
+
 	}
 
-	
-	
 	public SecureRandom getSecureRandom() {
 		if(this.secureRandom == null) {
 			this.secureRandom = ZiftrUtils.createTrulySecureRandom();
@@ -178,84 +275,75 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 				ZiftrDialogManager.showSimpleAlert(rngError);
 			}
 		}
-		
+
 		return this.secureRandom;
 	}
-	
+
 
 	//////////////////////////////////////////////////////////////////
-	//////////  Interface for receiving addresses table  ///////////
+	//////////  Interface for receiving addresses table  /////////////
 	//////////////////////////////////////////////////////////////////
 
+	@SuppressWarnings("rawtypes")
 	private synchronized ZWAddressesTable getTable(boolean receivingNotSending) {
 		return receivingNotSending ? this.receivingAddressesTable : this.sendingAddressesTable;
 	}
 
-	/**
-	 * As part of the C in CRUD, this method adds a receiving (owned by the user)
-	 * address to the correct table within our database.
-	 * 
-	 * Default values will be used in this method for the note, balance, and status.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 */
-	protected ZWAddress createChangeAddress(ZWKeyCrypter crypter, ZWCoin coinId) {
+	public ZWReceivingAddress createReceivingAddress(ZWCoin coinId, int account, boolean change) throws ZWAddressFormatException {
+		return this.createReceivingAddress(coinId, account, change, "");
+	}
+
+	public ZWReceivingAddress createReceivingAddress(ZWCoin coinId, int account, boolean change, String note) throws ZWAddressFormatException {
 		long time = System.currentTimeMillis() / 1000;
-		return createReceivingAddress(crypter, coinId, "", 0, time, time, true, false);
-	}
+		ZWHdAccount hdAccount = this.accountsTable.getAccount(coinId.getSymbol(), account, getReadableDatabase());
+		int nextUnused = this.receivingAddressesTable.nextUnusedIndex(coinId, change, account, getReadableDatabase());
+		ZWExtendedPublicKey xpubkeyNewAddress = hdAccount.xpubkey.deriveChild("M/" + (change ? 1 : 0) + "/" + nextUnused);
+		ZWReceivingAddress address = new ZWReceivingAddress(coinId, xpubkeyNewAddress, xpubkeyNewAddress.getPath());
+		address.setLabel(note);
+		address.setLastKnownBalance(0);
+		address.setCreationTimeSeconds(time);
+		address.setLastTimeModifiedSeconds(time);
+		address.setSpentFrom(false);
+		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
 
+		return address;
+	}
 
 	/**
-	 * this method creates a receiving (owned by the user) {@link ZWAddress} object and adds it 
-	 * to the correct table within our database
+	 * Caution! Only use this method if you know that the oldPassphrase is the string
+	 * that has encrypted all of the private keys in the wallets and the salt is the correct
+	 * salt that was used in the encryption. In addition, ensure that null is passed in for 
+	 * the old passphrase if there was no previous encryption.
 	 * 
-	 * @param crypter
-	 * @param coinId
-	 * @param note
-	 * @param balance
-	 * @param creation
-	 * @param modified
-	 * @param hidden
-	 * @param spentFrom 
-	 * @return
+	 * This could have very bad effects if the preconditions are not met!
+	 * 
+	 * @param curPassphrase - null if no encryption
+	 * @param salt
 	 */
-	protected synchronized ZWAddress createReceivingAddress(ZWKeyCrypter crypter, ZWCoin coinId, String note, 
-			long balance, long creation, long modified, boolean hidden, boolean spentFrom) {
-		
-		try {
-			ZWECKey ecKey = new ZWECKey(getSecureRandom());
-			ZWAddress address = new ZWAddress(coinId, ecKey);
-			address.getKey().setKeyCrypter(crypter);
-			address.setLabel(note);
-			address.setLastKnownBalance(balance);
-			address.getKey().setCreationTimeSeconds(creation);
-			address.setLastTimeModifiedSeconds(modified);
-			address.setHidden(hidden);
-			address.setSpentFrom(spentFrom);
-			this.receivingAddressesTable.insert(address, this.getWritableDatabase());
-	
-			return address;
-		}
-		catch(Exception e) {
-			ZLog.log("Exception creating new address: ", e);
-			return null;
-		}
-	}
+	public synchronized EncryptionStatus changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
+		ZWKeyCrypter oldCrypter = this.passphraseToCrypter(oldPassphrase);
+		ZWKeyCrypter newCrypter = this.passphraseToCrypter(newPassphrase);
 
-	protected synchronized EncryptionStatus changeEncryptionOfReceivingAddresses(ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter) {
+		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
+		if (decryptedSeed == null) {
+			ZLog.log("ERROR: Mismatch in oldCrypter and status of HD seed");
+			return EncryptionStatus.ERROR;
+		}
+		String newSeedVal = newCrypter == null ? "" + ZWKeyCrypter.NO_ENCRYPTION + decryptedSeed : newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
+		ZWPreferences.setHdWalletSeed(newSeedVal);
 
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		try {
 			ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
-			
+
 			for (ZWCoin coin : this.getNotUnactivatedCoins()) {
 				EncryptionStatus status = receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
 				if (status == EncryptionStatus.ALREADY_ENCRYPTED || status == EncryptionStatus.ERROR){
 					return status;
 				}
 			}
-			
+
 			//make sure to do no database work after this
 			db.setTransactionSuccessful();
 		} 
@@ -268,22 +356,54 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 			// any of the changes since there was. If it was called then it finalizes everything.
 			db.endTransaction();
 		}
-		
+
 		return EncryptionStatus.SUCCESS;
 	}
-	
-	protected synchronized boolean attemptDecrypt(ZWKeyCrypter crypter){
-		SQLiteDatabase db = this.getWritableDatabase();
-		ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
-		for (ZWCoin coin: this.getNotUnactivatedCoins()){
-			if (!receiveTable.attemptDecryptAllAddresses(coin, crypter, db)){
-				return false;
-			}
+
+	/**
+	 * @param oldCrypter
+	 * @return
+	 */
+	private String getDecryptedHdSeed(ZWKeyCrypter oldCrypter) {
+		String hdSeed = ZWPreferences.getHdWalletSeed();
+		if (hdSeed == null || hdSeed.isEmpty())
+			return null;
+
+		String decryptedSeed; 
+		if (oldCrypter == null && hdSeed.charAt(0) == ZWKeyCrypter.NO_ENCRYPTION) {
+			decryptedSeed = hdSeed.substring(1);
+		} else if (oldCrypter != null && oldCrypter.getEncryptionIdentifier() == hdSeed.charAt(0)) {
+			decryptedSeed = oldCrypter.decrypt(new ZWEncryptedData(hdSeed.charAt(0), hdSeed.substring(1)));
+		} else {
+			return null;
 		}
-		return true;
+		return decryptedSeed;
 	}
 
-	
+	/**
+	 * this is used to test passphrases when trying to recover from a state where a user
+	 * tried to reencrypt already encrypted password and is entering his/her old passphrase
+	 * to decrypt keys
+	 */
+	public synchronized boolean attemptDecrypt(String passphrase) {
+		return this.changeEncryptionOfReceivingAddresses(passphrase, null) == EncryptionStatus.SUCCESS;
+		//		ZWKeyCrypter crypter = this.passphraseToCrypter(passphrase);
+		//		SQLiteDatabase db = this.getWritableDatabase();
+		//		ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
+		//		for (ZWCoin coin: this.getNotUnactivatedCoins()){
+		//			try {
+		//				if (receiveTable.recryptAllAddresses(coin, crypter, null, db) != reencryptionStatus.success) {
+		//					return false;
+		//				}
+		//			} catch (CryptoException e) {
+		//				ZLog.log("ERROR Could not decrypt wallet!");
+		//				return false;
+		//			}
+		//		}
+		//		return true;
+	}
+
+
 	/**
 	 * As part of the U in CRUD, this method updates the addresses table in 
 	 * the database for the given coin type and key and table boolean.
@@ -293,8 +413,9 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * 
 	 * @param address - the address to fully update 
 	 */
-	public synchronized void updateAddress(ZWAddress address) {
-		this.getTable(address.isPersonalAddress()).updateAddress(address, getWritableDatabase());
+	@SuppressWarnings("unchecked")
+	public synchronized void updateAddress(ZWSendingAddress address, boolean receivingNotSending) {
+		this.getTable(receivingNotSending).updateAddress(address, getWritableDatabase());
 	}
 
 	/**
@@ -315,8 +436,6 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * delete an address just in case someone sends coins to an old address.
 	 */
 
-
-
 	/**
 	 * As part of the C in CRUD, this method adds a sending (not owned by the user)
 	 * address to the correct table within our database.
@@ -327,9 +446,8 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * @param note - The note that the user associates with this address.
 	 * @throws ZWAddressFormatException 
 	 */
-	public ZWAddress createSendingAddress(ZWCoin coin, String addressString, String note) throws ZWAddressFormatException {
-		long time = System.currentTimeMillis() / 1000;
-		return createSendingAddress(coin, addressString, note, 0, time);
+	public ZWSendingAddress createSendingAddress(ZWCoin coin, String addressString, String note) throws ZWAddressFormatException {
+		return createSendingAddress(coin, addressString, note, 0);
 	}
 
 	/**
@@ -337,30 +455,115 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	 * address to the correct table within our database.
 	 * 
 	 * @param coinId - The coin type to determine which table we use. 
-	 * @param key - The key to use.
+	 * @param pub - The key to use.
 	 * @throws ZWAddressFormatException 
 	 */
-	public synchronized ZWAddress createSendingAddress(ZWCoin coin, String addressString, String note, 
-			long balance, long modified) throws ZWAddressFormatException {
-		ZWAddress address = new ZWAddress(coin, addressString);
-		address.setLabel(note);
+	public synchronized ZWSendingAddress createSendingAddress(ZWCoin coin, String addressString, String label, 
+			long balance) throws ZWAddressFormatException {
+		ZWSendingAddress address = new ZWSendingAddress(coin, addressString);
+		address.setLabel(label);
 		address.setLastKnownBalance(balance);
-		//address.getKey().setCreationTimeSeconds(creation);
-		address.setLastTimeModifiedSeconds(modified);
+		address.setLastTimeModifiedSeconds(System.currentTimeMillis() / 1000);
 		long rowId = this.sendingAddressesTable.insert(address, this.getWritableDatabase());
-		if(rowId == -1) {
-			//this address already exists, so update it
-			updateAddress(address);
+		if (rowId == -1) {
+			// This address already exists, so update it
+			this.updateAddress(address, false);
 		}
 		return address;
 	}
 
+	/**
+	 * gets a list of Strings of the public addresses for all of the users addresses
+	 * @param coin which coin to get addresses for
+	 * @return a list of strings representing the public addresses
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized List<String> getAddressList(ZWCoin coin, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).getAddressesList(coin, getWritableDatabase());
+	}
+
+	/**
+	 * gets an address from the 
+	 * database for the given coin type and table boolean. Returns null if
+	 * no such address is found
+	 * 
+	 * @param coin - The coin type to determine which table we use. 
+	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 */
+	public synchronized ZWSendingAddress getAddress(ZWCoin coin, String address, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).getAddress(coin, address, getReadableDatabase());
+	}
+
+	public synchronized ZWReceivingAddress getDecryptedReceivingAddress(ZWCoin coin, String address, String password) {
+		ZWReceivingAddress addr = this.receivingAddressesTable.getAddress(coin, address, getReadableDatabase());
+		ZWKeyCrypter crypter = this.passphraseToCrypter(password);
+		KeyType type = addr.getKeyType();
+		switch(type) {
+		case DERIVABLE_PATH:
+			String hdSeed = getDecryptedHdSeed(crypter);
+			if (hdSeed == null) {
+				return null;
+			}
+			byte[] seed = ZiftrUtils.hexStringToBytes(hdSeed);
+			ZWExtendedPrivateKey xprvkey = new ZWExtendedPrivateKey(seed);
+			addr.deriveFromStoredPath(xprvkey);
+			break;
+		case ENCRYPTED:
+			addr.decrypt(crypter);
+			break;
+		case EXTENDED_UNENCRYPTED:
+			// Private key already available
+			break;
+		case STANDARD_UNENCRYPTED:
+			// Private key already available
+			break;
+		}
+		return addr;
+	}
+
+	/**
+	 * gets a list of {@link ZWSendingAddress} objects from the database based on a list of public address strings
+	 * @param coin - The coin type to determine which table we use. 
+	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized List<ZWSendingAddress> getAddresses(ZWCoin coin, List<String> addresses, boolean receivingNotSending) {
+		return this.getTable(receivingNotSending).getAddresses(coin, addresses, getReadableDatabase());
+	}
+
+	/**
+	 * gets all {@link ZWSendingAddress} from the receiving table for the given coin
+	 * @param coin which coin to get addresses for
+	 * @param includeSpentFrom should "unsafe" addresses (which have previously been spent from) be included
+	 * @return a list of address objects
+	 */
+	public synchronized List<String> getHiddenAddressList(ZWCoin coin, boolean includeSpentFrom) {
+		return this.receivingAddressesTable.getHiddenAddresses(coin, getReadableDatabase(), includeSpentFrom);
+	}
+
+	/**
+	 * gets all the visible (not hidden) addresses from the 
+	 * database for the given coin type and table boolean.
+	 * 
+	 * @param coinId - The coin type to determine which table we use. 
+	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 * @return List of {@link ZWSendingAddress} objects. See {@link #getAddressList(ZWCoin, boolean)} for list of Address strings.
+	 */
+	public synchronized List<ZWReceivingAddress> getAllVisibleAddresses(ZWCoin coin) {
+		return this.receivingAddressesTable.getAllVisibleAddresses(coin, getReadableDatabase());
+	}
+
+
+	public synchronized List<ZWSendingAddress> getAllSendAddresses(ZWCoin coin) {
+		return this.sendingAddressesTable.getAllAddresses(coin, getReadableDatabase());
+	}
 
 	///////////////////////////////////////////////////////////
 	//////////  Interface for  transactions  ///////////
 	///////////////////////////////////////////////////////////
 
-	
 	/**
 	 * add the transaction to the local database,
 	 * does an insert if the transaction is new otherwise updates the existing transaction
@@ -420,15 +623,14 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		return this.transactionsTable.readTransactions(coin, null, getReadableDatabase());
 	}
 
-
 	protected synchronized void deleteTransaction(ZWTransaction tx) {
 		this.transactionsTable.deleteTransaction(tx, getWritableDatabase());
 	}
-	
+
 	public synchronized BigInteger getWalletBalance(ZWCoin coin) {
-		
+
 		return getWalletBalance(coin, BalanceType.ESTIMATED);
-		
+
 		//return ZWPreferences.getWarningUnconfirmed() ? getWalletBalance(coin, BalanceType.ESTIMATED) : getWalletBalance(coin, BalanceType.AVAILABLE);
 	}
 
@@ -461,164 +663,121 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 		this.transactionsTable.updateTransactionNote(tx, getWritableDatabase());
 	}
 
-	
-	/**
-	 * gets a list of Strings of the public addresses for all of the users addresses
-	 * @param coin which coin to get addresses for
-	 * @param includeEmpty should this list include addresses with no known balance (empty)
-	 * @return a list of strings representing the public addresses
-	 */
-	public synchronized List<String> getAddressList(ZWCoin coin, boolean includeEmpty) {
-		List<String> addresses;
 
-		addresses = this.receivingAddressesTable.getAddressesList(coin, getWritableDatabase());
-		
-		return addresses;
-	}
-	
-	
-	/**
-	 * gets an address from the 
-	 * database for the given coin type and table boolean. Returns null if
-	 * no such address is found
-	 * 
-	 * @param coin - The coin type to determine which table we use. 
-	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
-	 */
-	public synchronized ZWAddress getAddress(ZWCoin coin, String address, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).getAddress(coin, address, getReadableDatabase());
-	}
-
-	
-	/**
-	 * gets a list of {@link ZWAddress} objects from the database based on a list of public address strings
-	 * @param coin - The coin type to determine which table we use. 
-	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
-	 */
-	public synchronized List<ZWAddress> getAddresses(ZWCoin coin, List<String> addresses, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).getAddresses(coin, addresses, getReadableDatabase());
-	}
-	
-	
-	/**
-	 * gets all {@link ZWAddress} from the receiving table for the given coin
-	 * @param coin which coin to get addresses for
-	 * @param includeSpentFrom should "unsafe" addresses (which have previously been spent from) be included
-	 * @return a list of address objects
-	 */
-	public synchronized List<String> getHiddenAddressList(ZWCoin coin, boolean includeSpentFrom) {
-		return this.receivingAddressesTable.getHiddenAddresses(coin, getReadableDatabase(), true);
-	}
-
-	
-	/**
-	 * gets all the visible (not hidden) addresses from the 
-	 * database for the given coin type and table boolean.
-	 * 
-	 * @param coinId - The coin type to determine which table we use. 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
-	 * @return List of {@link ZWAddress} objects. See {@link #getAddressList(ZWCoin, boolean)} for list of Address strings.
-	 */
-	public synchronized List<ZWAddress> getAllVisibleAddresses(ZWCoin coin) {
-		return this.receivingAddressesTable.getAllVisibleAddresses(coin, getReadableDatabase());
-	}
-	
-	
-	public synchronized List<ZWAddress> getAllSendAddresses(ZWCoin coin) {
-		return this.sendingAddressesTable.getAllAddresses(coin, getReadableDatabase());
-	}
-	
-	
 	public synchronized String getExchangeValue(String from, String to){
 		return this.exchangeTable.getExchangeVal(from, to, getReadableDatabase());
 	}
-	
+
 	public synchronized void upsertExchangeValue(String from, String to, String val){
 		this.exchangeTable.upsert(from, to, val, getWritableDatabase());
 	}
 
-		
+
 	public synchronized void updateCoin(ZWCoin coin){
 		this.coinTable.upsertCoin(coin, getWritableDatabase());
 	}
-	
+
 	public synchronized List<ZWCoin> getCoins() {
 		return this.coinTable.getAllCoins(getReadableDatabase());
 	}
-	
+
 	public synchronized ZWCoin getCoin(String coinSymbol){
 		return this.coinTable.getCoin(coinSymbol, getReadableDatabase());
 	}
 
 	/**
-	* Call this method to activate a coin type if it is not already activated.
-	* If it has not been activated then this method will create the necessary tables 
-	* for the coin type given and update the activated statuses table appropriately.
-	* 
-	* @param coinId
-	*/
-	public synchronized void activateCoin(ZWCoin coin) {
+	 * Call this method to activate a coin type if it is not already activated.
+	 * If it has not been activated then this method will create the necessary tables 
+	 * for the coin type given and update the activated statuses table appropriately.
+	 * 
+	 * @param coinId
+	 */
+	public synchronized void activateCoin(ZWCoin coin, String password) {
 		// Safety check
 		if (isCoinActivated(coin)) {
 			return;
 		}
-		
+
 		this.receivingAddressesTable.create(coin, this.getWritableDatabase());
 		this.sendingAddressesTable.create(coin, this.getWritableDatabase());
 		this.transactionsTable.create(coin, this.getWritableDatabase());
 		this.transactionOutputsTable.create(coin, this.getWritableDatabase());
-		
+
 		// Update table to match activated status
 		this.coinTable.activateCoin(coin, this.getWritableDatabase());
+
+		// Make sure the seed data for the wallet exists, and read it
+		ZWKeyCrypter crypter = this.passphraseToCrypter(password);
+		String seedStr = ZWPreferences.getHdWalletSeed();
+		byte[] seed = null;
+		if (seedStr == null) {
+			seed = new byte[32];
+			this.getSecureRandom().nextBytes(seed);
+			ZWPreferences.setHdWalletSeed(CryptoUtils.encryptAndPrefix(crypter, seed));
+		} else {
+			seed = CryptoUtils.decryptPrefixedHex(crypter, seedStr);
+			if (seed == null) {
+				throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
+			}
+		}
+
+		// Test if account exists before creating the new one to save time, as the derivation is CPU intensive
+		ZWHdAccount hdAcct = this.accountsTable.getAccount(coin.getSymbol(), 0, this.getWritableDatabase());
+		if (hdAcct == null) {
+			ZWExtendedPrivateKey m = new ZWExtendedPrivateKey(seed);
+			String path = "[m/44'/" + coin.getHdId() + "'/0']";
+			ZWExtendedPublicKey mPub = (ZWExtendedPublicKey) m.deriveChild(path);
+			ZWHdAccount account = new ZWHdAccount(coin.getSymbol(), mPub);
+			this.accountsTable.insertAccount(account, this.getWritableDatabase());
+		}
+
 	}
-	
-	
+
+
 	public synchronized boolean isCoinActivated(ZWCoin coin) {
 		return this.coinTable.isCoinActivated(coin, getReadableDatabase());
 	}
-	
-	
+
+
 	public synchronized List<ZWCoin> getActivatedCoins() {
 		return this.coinTable.getActiveCoins(getReadableDatabase());
 	}
-	
+
 	public synchronized List<ZWCoin> getInactiveCoins(boolean includeTestnets) {
 		return this.coinTable.getInactiveCoins(getReadableDatabase(), includeTestnets);
 	}
-	
-	
+
+
 	/**
-	* gets a list of every coin that has been, or currently is, activated,
-	* basically excluded coins that are "un-activated",
-	* the current use case for this is changing passwords, where private keys 
-	* that are in deactivated coin's databases must also be updated
-	* @return a list of activated and deactivated coins
-	*/
+	 * gets a list of every coin that has been, or currently is, activated,
+	 * basically excluded coins that are "un-activated",
+	 * the current use case for this is changing passwords, where private keys 
+	 * that are in deactivated coin's databases must also be updated
+	 * @return a list of activated and deactivated coins
+	 */
 	public synchronized List<ZWCoin> getNotUnactivatedCoins() {
 		return this.coinTable.getNotUnactiveCoins(getReadableDatabase());
 	}
-	
-	
+
+
 	public synchronized void deactivateCoin(ZWCoin coin) {
 		this.coinTable.deactivateCoin(coin, getWritableDatabase());
 	}
-	
+
 	//returns 1 if successful, -1 if error
 	public synchronized int upsertAppDataVal(String key, String val){
 		return this.appDataTable.upsert(key, val, getWritableDatabase());
 	}
-	
+
 	//returns 1 if successful, -1 if error
 	public synchronized int upsertAppDataVal(String key, boolean val){
 		return this.appDataTable.upsert(key, val, getWritableDatabase());
 	}
-	
+
 	public synchronized String getAppDataString(String key){
 		return this.appDataTable.getStringFromKey(key, getReadableDatabase());
 	}
-	
+
 	public synchronized Boolean getAppDataBoolean(String key){
 		return this.appDataTable.getBooleanFromKey(key, getReadableDatabase());
 	}
@@ -642,43 +801,52 @@ public class ZWSQLiteOpenHelper extends SQLiteOpenHelper {
 	public void addTransactionOutput(ZWCoin coin, ZWTransactionOutput output) {
 		this.transactionOutputsTable.addTransactionOutput(coin, output, this.getWritableDatabase());
 	}
-	
-	
+
 	public void setSyncedBlockHeight(ZWCoin coin, long syncedHeight) {
 		if(syncedHeight > 0) {
 			coin.setSyncedHeight(syncedHeight);
 			this.coinTable.setSyncedBlockHeight(coin, syncedHeight, this.getWritableDatabase());
 		}
 	}
-	
-	
+
+
 	public void resetAllSyncedData() {
-		
+
 		SQLiteDatabase database = this.getWritableDatabase();
 		database.beginTransaction();
-		
+
 		try {
 			List<ZWCoin> coins = this.getNotUnactivatedCoins();
-			
+
 			for(ZWCoin coin : coins) {
 				coin.setSyncedHeight(-1);
 				this.coinTable.setSyncedBlockHeight(coin, -1, database);
 				this.transactionsTable.deleteAll(coin, database);
 				this.transactionOutputsTable.deleteAll(coin, database);
 			}
-			
+
 			database.setTransactionSuccessful();
 		}
 		catch(Exception e) {
-			
+
 		}
 		finally {
 			database.endTransaction();
 		}
-		
-	}
-	
-}
 
+	}
+
+
+	@Override
+	protected void finalize() throws Throwable {
+		try {
+			this.close();
+		}
+		catch(Exception e) {
+			//just making sure the database is properly closed
+		}
+	}
+
+}
 
 

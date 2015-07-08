@@ -33,6 +33,7 @@ import java.util.Arrays;
 import org.spongycastle.crypto.RuntimeCryptoException;
 
 import com.google.common.io.ByteStreams;
+import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -40,109 +41,109 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * map. It also checks that the length is correct and provides a bit more type safety.
  */
 public class ZWSha256Hash implements Comparable<ZWSha256Hash> {
-    private byte[] bytes;
-    public static final ZWSha256Hash ZERO_HASH = new ZWSha256Hash(new byte[32]);
+	private byte[] bytes;
+	public static final ZWSha256Hash ZERO_HASH = new ZWSha256Hash(new byte[32]);
 
-    /**
-     * Creates a Sha256Hash by wrapping the given byte array. It must be 32 bytes long.
-     */
-    public ZWSha256Hash(byte[] rawHashBytes) {
-        checkArgument(rawHashBytes.length == 32, "Must only be exactly 32 bytes");
-        this.bytes = rawHashBytes;
+	/**
+	 * Creates a Sha256Hash by wrapping the given byte array. It must be 32 bytes long.
+	 */
+	public ZWSha256Hash(byte[] rawHashBytes) {
+		checkArgument(rawHashBytes.length == 32, "Must only be exactly 32 bytes");
+		this.bytes = rawHashBytes;
 
-    }
+	}
 
-    /**
-     * Creates a Sha256Hash by decoding the given hex string. It must be 64 characters long.
-     */
-    public ZWSha256Hash(String hexString) {
-        checkArgument(hexString.length() == 64, "Must only be exactly 64 hex chars");
-        this.bytes = ZiftrUtils.hexStringToBytes(hexString);
-    }
+	/**
+	 * Creates a Sha256Hash by decoding the given hex string. It must be 64 characters long.
+	 */
+	public ZWSha256Hash(String hexString) {
+		checkArgument(hexString.length() == 64, "Must only be exactly 64 hex chars");
+		this.bytes = ZiftrUtils.hexStringToBytes(hexString);
+	}
 
-    /**
-     * Calculates the (one-time) hash of contents and returns it as a new wrapped hash.
-     */
-    public static ZWSha256Hash create(byte[] contents) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return new ZWSha256Hash(digest.digest(contents));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);  // Cannot happen.
-        }
-    }
+	/**
+	 * Calculates the (one-time) hash of contents and returns it as a new wrapped hash.
+	 */
+	public static ZWSha256Hash create(byte[] contents) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			return new ZWSha256Hash(digest.digest(contents));
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);  // Cannot happen.
+		}
+	}
 
-    /**
-     * Calculates the hash of the hash of the contents. This is a standard operation in digital currency.
-     */
-    public static ZWSha256Hash createDouble(byte[] contents) {
-        return new ZWSha256Hash(ZiftrUtils.doubleDigest(contents));
-    }
+	/**
+	 * Calculates the hash of the hash of the contents. This is a standard operation in digital currency.
+	 */
+	public static ZWSha256Hash createDouble(byte[] contents) {
+		return new ZWSha256Hash(CryptoUtils.doubleDigest(contents));
+	}
 
-    /**
-     * Returns a hash of the given files contents. Reads the file fully into memory before hashing so only use with
-     * small files.
-     * @throws IOException
-     */
-    public static ZWSha256Hash hashFileContents(File f) throws IOException {
-        FileInputStream in = new FileInputStream(f);
-        try {
-            return create(ByteStreams.toByteArray(in));
-        } finally {
-            in.close();
-        }
-    }
+	/**
+	 * Returns a hash of the given files contents. Reads the file fully into memory before hashing so only use with
+	 * small files.
+	 * @throws IOException
+	 */
+	public static ZWSha256Hash hashFileContents(File f) throws IOException {
+		FileInputStream in = new FileInputStream(f);
+		try {
+			return create(ByteStreams.toByteArray(in));
+		} finally {
+			in.close();
+		}
+	}
 
-    /**
-     * Returns true if the hashes are equal.
-     */
-    @Override
-    public boolean equals(Object other) {
-        if (!(other instanceof ZWSha256Hash)) return false;
-        return Arrays.equals(bytes, ((ZWSha256Hash) other).bytes);
-    }
+	/**
+	 * Returns true if the hashes are equal.
+	 */
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof ZWSha256Hash)) return false;
+		return Arrays.equals(bytes, ((ZWSha256Hash) other).bytes);
+	}
 
-    /**
-     * Hash code of the byte array as calculated by {@link Arrays#hashCode()}. Note the difference between a SHA256
-     * secure bytes and the type of quick/dirty bytes used by the Java hashCode method which is designed for use in
-     * bytes tables.
-     */
-    @Override
-    public int hashCode() {
-        // Use the last 4 bytes, not the first 4 which are often zeros in Bitcoin.
-        return (bytes[31] & 0xFF) | ((bytes[30] & 0xFF) << 8) | ((bytes[29] & 0xFF) << 16) | ((bytes[28] & 0xFF) << 24);
-    }
+	/**
+	 * Hash code of the byte array as calculated by {@link Arrays#hashCode()}. Note the difference between a SHA256
+	 * secure bytes and the type of quick/dirty bytes used by the Java hashCode method which is designed for use in
+	 * bytes tables.
+	 */
+	@Override
+	public int hashCode() {
+		// Use the last 4 bytes, not the first 4 which are often zeros in Bitcoin.
+		return (bytes[31] & 0xFF) | ((bytes[30] & 0xFF) << 8) | ((bytes[29] & 0xFF) << 16) | ((bytes[28] & 0xFF) << 24);
+	}
 
-    @Override
-    public String toString() {
-        return ZiftrUtils.bytesToHexString(bytes);
-    }
+	@Override
+	public String toString() {
+		return ZiftrUtils.bytesToHexString(bytes);
+	}
 
-    /**
-     * Returns the bytes interpreted as a positive integer.
-     */
-    public BigInteger toBigInteger() {
-        return new BigInteger(1, bytes);
-    }
+	/**
+	 * Returns the bytes interpreted as a positive integer.
+	 */
+	public BigInteger toBigInteger() {
+		return new BigInteger(1, bytes);
+	}
 
-    public byte[] getBytes() {
-        return bytes;
-    }
+	public byte[] getBytes() {
+		return bytes;
+	}
 
-    public ZWSha256Hash duplicate() {
-        return new ZWSha256Hash(bytes);
-    }
+	public ZWSha256Hash duplicate() {
+		return new ZWSha256Hash(bytes);
+	}
 
-    @Override
-    public int compareTo(ZWSha256Hash hashToCompare) {
-        int thisCode = this.hashCode();
-        int oCode = ((ZWSha256Hash)hashToCompare).hashCode();
-        return thisCode > oCode ? 1 : (thisCode == oCode ? 0 : -1);
-    }
-    
-    private static void checkArgument(boolean arg, String error) {
-    	if (!arg) {
-    		throw new RuntimeCryptoException(error);
-    	}
-    }
+	@Override
+	public int compareTo(ZWSha256Hash hashToCompare) {
+		int thisCode = this.hashCode();
+		int oCode = ((ZWSha256Hash)hashToCompare).hashCode();
+		return thisCode > oCode ? 1 : (thisCode == oCode ? 0 : -1);
+	}
+
+	private static void checkArgument(boolean arg, String error) {
+		if (!arg) {
+			throw new RuntimeCryptoException(error);
+		}
+	}
 }

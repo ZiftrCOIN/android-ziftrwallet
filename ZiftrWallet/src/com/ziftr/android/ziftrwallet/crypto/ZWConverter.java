@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 
 public class ZWConverter {
 

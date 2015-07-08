@@ -14,8 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 
 public class ZWWelcomeNameFragment extends Fragment implements OnClickListener {

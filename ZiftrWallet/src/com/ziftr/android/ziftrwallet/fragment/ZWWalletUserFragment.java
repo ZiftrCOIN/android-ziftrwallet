@@ -8,9 +8,9 @@ package com.ziftr.android.ziftrwallet.fragment;
 
 import android.view.View;
 
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 
 public abstract class ZWWalletUserFragment extends ZWFragment {
 	
