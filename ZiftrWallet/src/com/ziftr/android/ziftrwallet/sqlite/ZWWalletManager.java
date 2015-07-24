@@ -325,13 +325,19 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		ZWKeyCrypter newCrypter = this.passphraseToCrypter(newPassphrase);
 
 		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
-		if (decryptedSeed == null) {
+		if (oldPassphrase == null){
+			//we are initializing a new passphrase and have no seed yet, need to generate seed
+			byte[] seed = new byte[32];
+			this.getSecureRandom().nextBytes(seed);
+			ZWPreferences.setHdWalletSeed(CryptoUtils.encryptAndPrefix(newCrypter, seed));
+		} else if (decryptedSeed == null) {
 			ZLog.log("ERROR: Mismatch in oldCrypter and status of HD seed");
 			return EncryptionStatus.ERROR;
+		} else {
+			String newSeedVal = newCrypter == null ? "" + ZWKeyCrypter.NO_ENCRYPTION + decryptedSeed : newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
+			ZWPreferences.setHdWalletSeed(newSeedVal);
 		}
-		String newSeedVal = newCrypter == null ? "" + ZWKeyCrypter.NO_ENCRYPTION + decryptedSeed : newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
-		ZWPreferences.setHdWalletSeed(newSeedVal);
-
+		
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		try {

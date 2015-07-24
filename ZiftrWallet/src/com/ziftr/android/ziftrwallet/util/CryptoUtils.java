@@ -242,9 +242,10 @@ public class CryptoUtils {
 
 	public static String encryptAndPrefixHex(ZWKeyCrypter crypter, String hex) {
 		if (crypter != null) {
-			return  "" + crypter.getEncryptionIdentifier() + crypter.encrypt(hex);
+			//encrypt function adds the encrypted prefix for us
+			return crypter.encrypt(hex).toString();
 		} else {
-			return "" + ZWKeyCrypter.NO_ENCRYPTION + hex;
+			return ZWKeyCrypter.NO_ENCRYPTION + hex;
 		}
 	}
 
