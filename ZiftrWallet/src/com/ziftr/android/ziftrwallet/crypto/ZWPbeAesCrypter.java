@@ -15,6 +15,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import android.annotation.SuppressLint;
+
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
@@ -45,7 +47,12 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 		this.setSecretKey(secretKey);
 	}
 
+	@Override
+	public char getEncryptionIdentifier() {
+		return ZWKeyCrypter.PBE_AES_ENCRYPTION;
+	}
 
+	@SuppressLint("TrulyRandom")
 	@Override
 	public ZWEncryptedData encrypt(String clearText) throws ZWKeyCrypterException {
 		try {
@@ -62,7 +69,7 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 			// Why are we appending these values?
 			// AES requires a random initialization vector (IV). We save the IV
 			// with the encrypted value so we can get it back later in decrypt()
-			return new ZWEncryptedData(ivHex + encryptedHex);
+			return new ZWEncryptedData(this.getEncryptionIdentifier(), ivHex + encryptedHex);
 		} catch (Exception e) {
 			System.out.println("error message: " + e.getMessage());
 			throw new ZWKeyCrypterException("Unable to encrypt", e);
@@ -73,6 +80,8 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 	@Override
 	public String decrypt(ZWEncryptedData encryptedData) throws ZWKeyCrypterException {
 		try {
+			if (encryptedData.encryptionId != this.getEncryptionIdentifier())
+				throw new Exception();
 			String encrypted = encryptedData.getEncryptedData();
 			Cipher decryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 			int ivLength = decryptionCipher.getBlockSize();
@@ -123,7 +132,7 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 				String rngError = ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng);
 				ZiftrDialogManager.showSimpleAlert(rngError);
 			}
-			
+
 			byte[] salt = new byte[SALT_LENGTH];
 			random.nextBytes(salt);
 			String saltHex = ZiftrUtils.bytesToHexString(salt); 
@@ -140,12 +149,12 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 
 	private static byte[] generateIv(int ivLength) {
 		SecureRandom random = ZiftrUtils.createTrulySecureRandom();
-		
-		if(random == null) {
+
+		if (random == null) {
 			String rngError = ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng);
 			ZiftrDialogManager.showSimpleAlert(rngError);
 		}
-		
+
 		byte[] iv = new byte[ivLength];
 		random.nextBytes(iv);
 		return iv;

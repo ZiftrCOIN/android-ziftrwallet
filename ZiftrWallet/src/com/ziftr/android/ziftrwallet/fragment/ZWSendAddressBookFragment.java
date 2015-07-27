@@ -8,12 +8,12 @@ package com.ziftr.android.ziftrwallet.fragment;
 
 import java.util.List;
 
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 
-public class ZWSendAddressBookFragment extends ZWAddressBookFragment {
+public class ZWSendAddressBookFragment extends ZWAddressBookFragment<ZWSendingAddress> {
 
 	@Override
-	protected List<ZWAddress> getDisplayAddresses() {
+	protected List<ZWSendingAddress> getDisplayAddresses() {
 		return this.getWalletManager().getAllSendAddresses(getSelectedCoin());
 	}
 }

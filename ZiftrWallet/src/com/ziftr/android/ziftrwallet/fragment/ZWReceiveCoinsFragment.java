@@ -33,18 +33,20 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
+import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
+import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
+public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
@@ -64,8 +66,8 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	private ImageView generateAddressForLabel;
 	private EditText messageEditText;
 	private ImageView helpButton;
-	
-	private ZWAddress prefilledAddress;
+
+	private ZWReceivingAddress prefilledAddress;
 
 	private boolean qrCodeGenerated = false;
 
@@ -82,10 +84,10 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.initializeViewFields(inflater, container);
 
 		this.initializeQrCodeFromBundle(savedInstanceState);
-		
+
 		return this.rootView;
 	}
-	
+
 	@Override
 	public void onResume(){
 		super.onResume();
@@ -101,7 +103,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	@Override
 	public void onClick(View v) {
 
-		if(v == this.copyButton) {
+		if (v == this.copyButton) {
 			if(this.fragmentHasAddress()) {
 				// Gets a handle to the clipboard service.
 				ClipboardManager clipboard = (ClipboardManager)
@@ -129,33 +131,19 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 	}
 
-	
-	
+
+
 	private void generateNewAddress() {
-		if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
-			showEnterPasswordDialog();
-		}
-		else {
-			showNewAddressConfirmationDialog();
-		}
+		showNewAddressConfirmationDialog();
 	}
-	
-	private void showEnterPasswordDialog() {
-		
-		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
-		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
-		passwordDialog.addEmptyTextbox(true);
-		
-		passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
-	}
-	
-	
+
+
 	private void showNewAddressConfirmationDialog() {
 		ZiftrSimpleDialogFragment dialog = ZiftrSimpleDialogFragment.buildContinueCancelDialog(R.string.zw_dialog_create_address);
 		dialog.show(getFragmentManager(), DIALOG_NEW_ADDRESS_TAG);
 	}
-	
-	
+
+
 
 	/**
 	 * @param inflater
@@ -166,7 +154,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 
-		
+
 		// For the amounts and the binding
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout1).findViewById(R.id.customEditText);
@@ -181,7 +169,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		ZWCoinFiatTextWatcher coinTextWatcher = new ZWCoinFiatTextWatcher(getSelectedCoin(), coinAmountEditText, fiatAmountEditText);
 		coinAmountEditText.addTextChangedListener(coinTextWatcher);
 		fiatAmountEditText.addTextChangedListener(coinTextWatcher);
-		
+
 		this.helpButton = (ImageView) this.rootView.findViewById(R.id.help_msg_button);
 		this.helpButton.setOnClickListener(this);
 		// For the message edit text
@@ -217,7 +205,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 				refreshAddNewAddressButtonsEnabled();
 			}
 		});
-		
+
 		if (this.prefilledAddress != null) {
 			this.addressEditText.setText(this.prefilledAddress.getAddress());
 			this.labelEditText.setText(this.prefilledAddress.getLabel());
@@ -311,42 +299,43 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	 * then updates the UI with the new address on the UI thread. 
 	 */
 	public void loadNewAddressFromDatabase() {
-		
+
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final ZWAddress address;
-				final boolean needPassword;
-				
-				String password = ZWPreferences.getCachedPassword();
-				if(ZWPreferences.userHasPassword() && password == null) {
-					//user's cached password has expired, so we have to ask them for it again
-					needPassword = true;
-					address = null;
-				}
-				else {
-					needPassword = false;
-					long time = System.currentTimeMillis() / 1000;
-					String addressLabel = addressEditText.getText().toString();
-					 address = getWalletManager().createReceivingAddress(password, getSelectedCoin(), addressLabel, 0, time, time);
+				ZWReceivingAddress address = null;
+				boolean error = false;
+
+				String addressLabel = addressEditText.getText().toString();
+				try {
+					address = getWalletManager().createReceivingAddress(getSelectedCoin(), 0, false, addressLabel);
+				} catch (ZWAddressFormatException e) {
+					ZLog.log("Should not have happened, wallet corruption?");
+					error = true;
 				}
 
+				final ZWReceivingAddress faddress = address;
+				final boolean ferror = error;
+
 				// Run the updating of the UI on the UI thread
-				ZWReceiveCoinsFragment.this.getZWMainActivity().runOnUiThread(new Runnable() {
+				ZWMainFragmentActivity a = ZWReceiveCoinsFragment.this.getZWMainActivity();
+				if (a == null) {
+					// Activity is dying, return
+					return;
+				}
+				a.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if(needPassword) {
-							showEnterPasswordDialog();
+						if (ferror || faddress == null) {
+							ZiftrDialogManager.showSimpleAlert("Could not create a new receiving address!");
 						}
 						else {
-							if(address != null) {
-								String newAddress = address.getAddress();
-								addressEditText.setText(newAddress);
-								updateAddressLabelInDatabase();
-								generateQrCode(true);
-							}
+							String newAddress = faddress.getAddress();
+							addressEditText.setText(newAddress);
+							updateAddressLabelInDatabase();
+							generateQrCode(true);
 						}
-						
+
 					}
 				});
 			}
@@ -367,8 +356,8 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	public View getContainerView() {
 		return this.scrollView;
 	}
-	
-	public void setReceiveAddress(ZWAddress address){
+
+	public void setReceiveAddress(ZWReceivingAddress address){
 		this.prefilledAddress = address;
 	}
 
@@ -403,7 +392,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			coinAmountEditText.setFocusableInTouchMode(false);
 		}
 	}
-	
+
 	public View getWalletHeaderView(){
 		return this.rootView.findViewById(R.id.walletHeader);
 	}

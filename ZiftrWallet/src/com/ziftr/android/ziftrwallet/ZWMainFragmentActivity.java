@@ -38,13 +38,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
+import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
@@ -64,6 +63,7 @@ import com.ziftr.android.ziftrwallet.fragment.ZWWalletFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -74,18 +74,18 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class ZWMainFragmentActivity extends ActionBarActivity 
 implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
-	
+
 	private static final String TAG_BACKSTACK =  "accounts_inner";
 
 	/** The drawer layout menu. */
 	private DrawerLayout menuDrawer;
-	
+
 	/** Use this key to save which section of the drawer menu is open. */
 	private static final String KEY_SELECTED_SECTION = "SELECTED_SECTION_KEY";
 
 	/** Use this key to save whether or not the search bar is visible (vs gone). */
 	private static final String KEY_SEARCH_BAR_VISIBILITY = "SEARCH_BAR_VISIBILITY_KEY";
-	
+
 	private static final String KEY_SELECTED_COIN = "selected_coin";
 
 	/** The main view that all of the fragments will be stored in. */
@@ -99,15 +99,15 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 	/** reference to searchBarEditText */
 	private EditText searchEditText;
-	
+
 
 	private ZWCoin selectedCoin;
 	private ImageView syncButton; //the button in various fragments users can press to sync their data
 	private boolean isSyncing = false;
-	
+
 	private ZWActivityDialogHandler dialogHandler;
 	private boolean consumedIntent = false;
-	
+
 	/**
 	 * This is an enum to differentiate between the different
 	 * sections of the app. Each enum also holds specific information related
@@ -164,7 +164,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		public View getDrawerMenuView() {
 			return drawerMenuView;
 		}
-		
+
 		public boolean matches(Object object) {
 			if(object == null) {
 				return false;
@@ -181,7 +181,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 
@@ -202,38 +202,38 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		dialogHandler = new ZWActivityDialogHandler(this);
 		ZiftrDialogManager.registerHandler(dialogHandler);
-		
+
 		if (ZWPreferences.getLogToFile()){
 			ZLog.setLogger(ZLog.FILE_LOGGER);
 		}
 		else if(ZWPreferences.getDebugMode()) {
 			ZLog.setLogger(ZLog.ANDROID_LOGGER);
 		}
-		
-		
+
+
 		ZLog.log("\nMain Activity Created  " + (new Date()) + "\n");
 		if(savedInstanceState != null) {
 			consumedIntent = savedInstanceState.getBoolean("consumedIntent");
 		}
-		
-		
+
+
 		// Everything is held within this main activity layout
 		this.setContentView(R.layout.activity_main);
 
 		// Recreate wallet manager
 		this.walletManager = ZWWalletManager.getInstance();
-		
+
 		//TODO -probably need to add a timer or something to this so we don't do it constantly when a user rotates their screen
 		//load available coins from API blockchains
 		ZWDataSyncHelper.updateCoinData();
 		ZWDataSyncHelper.checkForUpdates();
-		
+
 		// Get the saved cur selected coin type
 		this.initializeCoinType(savedInstanceState);
-		
+
 		// Set up header and visibility of header
 		this.initializeHeaderViewsVisibility(savedInstanceState);
 
@@ -248,7 +248,13 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
-		
+
+		//if we have activated coins from previous version without HD wallets, we should deactivate
+		if (ZWPreferences.getHdWalletSeed() == null){
+			for (ZWCoin coin : this.walletManager.getActivatedCoins()){
+				ZWWalletManager.getInstance().deactivateCoin(coin);
+			}
+		}		
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 
@@ -257,30 +263,30 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		super.onPause();
 	}
 
-	
+
 	@Override
 	protected void onNewIntent (Intent intent) {
 		consumedIntent = false;
 		this.setIntent(intent);
 	}
-	
-	
+
+
 	@Override
 	public void onResume(){
 		super.onResume();
 		this.handleIntent(getIntent());
 		ZiftrDialogManager.showWaitingDialogs();
 	}
-	
+
 	@Override
 	public void onPostResume(){
 		super.onPostResume();
 	}
-	
-	
+
+
 	private void handleIntent(Intent intent) {
-		
-		
+
+
 		//Check if loaded from widget
 		//TODO -removing incomplete widget features for first release
 		/***
@@ -295,33 +301,33 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 					openReceiveCoinsView(null);
 				}
 			}
-		
+
 		} 
-		***/
-		
-		
+		 ***/
+
+
 		if (intent != null && !consumedIntent && 
 				intent.getAction() == Intent.ACTION_VIEW &&
 				(intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0 ){
-			
+
 			//if we have an intent, and we haven't consumed it, and it's view type, and it's not from the history
 			//this we were just launched from a coin uri, so handle it appropriately
-			
+
 			String data = intent.getDataString();
-			
+
 			//clear the intent so it doesn't keep doing this
 			consumedIntent = true;
 			this.setIntent(null);
-			
-			
+
+
 			String[] dataStrings = data.split(":");
 			String scheme = dataStrings[0];
 			String address = dataStrings[1];
 			if(address.contains("?")) {
 				address = address.substring(0, address.indexOf("?"));
 			}
-			
-			
+
+
 			ZWCoin coin = ZWCoin.getCoin(scheme, address);
 			if(coin == null) {
 				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_invalid_address_uri);
@@ -329,15 +335,15 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 			else if(!getWalletManager().isCoinActivated(coin)) {
 				String notActiveError = getString(R.string.zw_dialog_error_activate_coin);
 				notActiveError = String.format(notActiveError, coin.getName());
-				
+
 				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), notActiveError);
 			}
 			else {
-				
+
 				this.setSelectedCoin(coin);
 				try {
 					ZWCoinURI uri = new ZWCoinURI(coin, data);
-					
+
 					openSendCoinsView(uri);
 				} 
 				catch (Exception e) {
@@ -345,11 +351,11 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 					ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_invalid_address_uri);
 				}
 			}
-			
+
 		}
 	}
-	
-	
+
+
 	/**
 	 * Create the options menu.
 	 * Updates the icon appropriately.
@@ -386,9 +392,9 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		if (this.getSelectedCoin() != null) {
 			outState.putString(KEY_SELECTED_COIN, this.getSelectedCoin().getSymbol());
 		}
-		
+
 		outState.putBoolean("consumedIntent", consumedIntent);
-		
+
 	}
 
 	/**
@@ -398,11 +404,11 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	 */
 	@Override
 	public void onBackPressed() {
-		
+
 		//in case the device has a hardware back button, make sure virtual keyboard is closed
 		InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-		
+
 		if (drawerMenuIsOpen()){
 			this.menuDrawer.closeDrawer(Gravity.LEFT);
 			return;
@@ -426,10 +432,10 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		else {
 			//Select accounts in drawer since anywhere you hit back, you will end up in accounts
 			selectSingleDrawerMenuOption(findViewById(R.id.menuDrawerAccountsLayout));
-			
+
 			if (!getSupportFragmentManager().popBackStackImmediate(TAG_BACKSTACK, 0)) {
 				ZWMainFragmentActivity.this.showFragmentFromType(FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
-				
+
 				//clear back stack
 				this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 			}
@@ -506,7 +512,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 		// TODO add animation to transaciton here
 		transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left, R.anim.slide_in_right, R.anim.slide_out_right);
-		
+
 		if (fragToShow.isVisible()) {
 			// If the fragment is already visible, no need to do anything
 			return;
@@ -606,7 +612,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 						ZWMainFragmentActivity.this.showFragmentFromType(FragmentType.ACCOUNT_FRAGMENT_TYPE, true);
 						ZWMainFragmentActivity.this.getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 					}
-					
+
 					ZWMainFragmentActivity.this.onAnyDrawerMenuItemClicked(clickedView);
 				}
 			});
@@ -752,7 +758,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		this.searchEditText.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-				
+
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				if (hasFocus) {
 					//make keyboard overlap the send/receive buttons
@@ -766,8 +772,8 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		});
 	}
 
-	
-	
+
+
 	/**
 	 * Should be called whenever any of the menu items in the
 	 * drawer menu are selected. Basically just contains code 
@@ -860,37 +866,13 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	}
 
 	
-
-	/**
-	 * called after user enters password for creating new wallet 
-	 * 
-	 * @param bundle with ZWCoin of wallet to add
-	 */
-	public void addNewCurrency(ZWCoin newCoin) {
-		// TODO we can probably get rid of this if it's slowing stuff down - unnecessary check 
-		// Make sure that this view only has wallets
-		// in it which the user do
-		if(this.walletManager.isCoinActivated(newCoin)) {
-			// Already in list, shouldn't ever get here though because
-			// we only show currencies in the dialog which we don't have
-			this.onBackPressed();
-			return;
-		}
-		
-		walletManager.activateCoin(newCoin);
-		
-		Toast.makeText(this, "Wallet Created!", Toast.LENGTH_LONG).show();
-		this.onBackPressed();
-
-	}
-
 	/**
 	 * Only works for enabled types right now. 
 	 * 
 	 * @param typeOfWalletToStart
 	 */
 	public void openWalletView(ZWCoin typeOfWalletToStart) {
-		
+
 		this.setSelectedCoin(typeOfWalletToStart);
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWWalletFragment.FRAGMENT_TAG);
 		if (fragToShow == null) {
@@ -901,14 +883,14 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		this.showFragment(fragToShow, ZWWalletFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
 	}
 
-	
+
 
 	/**
 	 * Only works for enabled types right now. 
 	 * 
 	 * @param typeOfWalletToStart
 	 */
-	public void openReceiveCoinsView(ZWAddress address) {
+	public void openReceiveCoinsView(ZWReceivingAddress address) {
 		Fragment fragToShow = this.getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
 		if (fragToShow == null) {
 			fragToShow = new ZWReceiveCoinsFragment();
@@ -916,7 +898,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 		// If we did a tablet view this might be different. 
 		this.showFragment(fragToShow, ZWReceiveCoinsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
-		
+
 		if (address != null){
 			((ZWReceiveCoinsFragment) fragToShow).setReceiveAddress(address);		
 		}
@@ -932,7 +914,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 		if (fragToShow == null) {
 			fragToShow = new ZWSendCoinsFragment();
-			
+
 			if(preloadData != null) {
 				//note, instanceof is a bit hacky, but best to keep all this fragment loading code in one method
 				if(preloadData instanceof ZWCoinURI) {
@@ -942,7 +924,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 					((ZWSendCoinsFragment) fragToShow).preloadAddress(preloadData.toString());
 				}
 			}
-		
+
 			// If we did a tablet view this might be different. 
 			this.showFragment(fragToShow, ZWSendCoinsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
 		} 
@@ -954,9 +936,9 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		}
 
 	}
-	
 
-	
+
+
 	/**
 	 * Open the view for transaction details
 	 */
@@ -970,7 +952,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		b.putString(ZWTransactionDetailsFragment.TX_ITEM_HASH_KEY, txItem.getSha256Hash());
 		fragToShow.setArguments(b);
 		this.showFragment(fragToShow, ZWTransactionDetailsFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
-		
+
 	}
 
 	/**
@@ -990,7 +972,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 	}
 
-	
+
 	/**
 	 * Open View for selecting fiat currency in settings
 	 */
@@ -999,7 +981,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		if (fragToShow == null){
 			fragToShow = new ZWSetFiatFragment();
 		}
-		
+
 		this.showFragment(fragToShow, ZWSetFiatFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, ZWSetFiatFragment.FRAGMENT_TAG);
 	}
 
@@ -1084,14 +1066,14 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		ImageView coinLogo = (ImageView) (headerView.findViewById(R.id.leftIcon));
 
 		coinLogo.setImageResource(this.selectedCoin.getLogoResId());
-		
+
 		headerView.findViewById(R.id.market_graph_icon).setVisibility(View.VISIBLE);
-		
+
 		TextView coinTitle = (TextView) headerView.findViewById(R.id.topLeftTextView);
 		coinTitle.setText(this.selectedCoin.getName());
-		
+
 		updateWalletHeaderView(headerView);
-		
+
 		syncButton = (ImageView) headerView.findViewById(R.id.rightIcon);
 		syncButton.setImageResource(R.drawable.icon_sync_button_statelist);
 		syncButton.setOnClickListener(this);
@@ -1099,13 +1081,13 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 			startSyncAnimation();
 		}
 	}
-	
+
 	//update coin market val & wallet coin and fiat balances
 	public void updateWalletHeaderView(View headerView){
 		ZWFiat selectedFiat = ZWPreferences.getFiatCurrency();
-		
+
 		TextView fiatExchangeRateText = (TextView) headerView.findViewById(R.id.bottomLeftTextView);
-		
+
 		String fiatString = selectedFiat.getUnitPrice(getSelectedCoin());
 		fiatExchangeRateText.setText(ZiftrUtils.getCurrencyDisplayString(fiatString));
 
@@ -1117,11 +1099,11 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 		TextView walletBalanceInFiatText = (TextView) headerView.findViewById(R.id.bottomRightTextView);
 		BigDecimal walletBalanceInFiat = ZWConverter.convert(walletBalance, getSelectedCoin(), selectedFiat);
-		
+
 		String balanceString = selectedFiat.getFormattedAmount(walletBalanceInFiat, true);
 		walletBalanceInFiatText.setText(ZiftrUtils.getCurrencyDisplayString(balanceString));
 	}
-	
+
 
 	/**
 	 * Customize actionbar
@@ -1312,44 +1294,44 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 	@Override
 	public void networkStarted() {
-		
+
 		ZLog.log("Network started.......");
-		
+
 		this.runOnUiThread( new Runnable() {
 			@Override
 			public void run() {
 				startSyncAnimation();
 			}
 		});
-		
+
 	}
 
 	@Override
 	public void networkStopped() {
 
 		ZLog.log("Network stopped.......");
-		
+
 		this.runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				stopSyncAnimation();
 			}
 		});
-		
+
 	}
 
 	private synchronized void startSyncAnimation() {
 		isSyncing = true;
 		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
 			syncButton.clearAnimation(); //clear out any old animations before starting the new one
-			
+
 			Animation rotation = AnimationUtils.loadAnimation(ZWMainFragmentActivity.this, R.anim.rotation);
 			rotation.setRepeatCount(Animation.INFINITE);
 			syncButton.startAnimation(rotation);
 		}
 	}
-	
+
 	private synchronized void stopSyncAnimation() {
 		isSyncing = false;
 		if(syncButton != null && syncButton.getVisibility() == View.VISIBLE) {
@@ -1359,5 +1341,5 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 			}
 		}
 	}
-	
+
 }

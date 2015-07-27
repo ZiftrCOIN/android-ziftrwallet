@@ -1,5 +1,4 @@
-
- /** Copyright 2011 Google Inc.
+/** Copyright 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
 /* Copyright ( C ) ZiftrCOIN LLC - All Rights Reserved
  * Unauthorized copying of this file, via any medium, including being compiled as part of a binary package is strictly prohibited
  *
@@ -44,9 +41,8 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * valid (see {@link ZWCoin}), and also to indicate how the bytes inside the address
  * should be interpreted. Whilst almost all addresses today are hashes of public keys, 
  * another (currently not fully supported type) can contain a hash of a script instead.</p>
- * 
  */
-public class ZWAddress implements ZWSearchableListItem {
+public class ZWSendingAddress implements ZWSearchableListItem {
 
 	///////////////////////////////////////
 	//////////  Database Fields  //////////
@@ -55,7 +51,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	/**
 	 * The note that the user has applied to this given address. 
 	 */
-	private String note = "";
+	private String label = "";
 
 	/**
 	 * The last known balance for this address. May not be up to date.
@@ -63,17 +59,11 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * TODO do we really need this for all addresses or can this go in the ECKey class?
 	 */
 	private long lastKnownBalance;
-	
+
 	/**
 	 * The most recent time that this address had a transaction made using it. May not be up to date.
 	 */
 	private long lastTimeModifiedSeconds;
-	
-	/** whether the address is hidden to the user */
-	private boolean hidden = false;
-	
-	/** whether the address has been spent from */
-	private boolean spentFrom = false;
 
 	//////////////////////////////////////////////
 	//////////  Address Content Fields  //////////
@@ -98,27 +88,15 @@ public class ZWAddress implements ZWSearchableListItem {
 	private byte[] hash160;
 
 	/** The ECKey for this address, if known. May be null. */
-	private ZWECKey key;
+	protected ZWPublicKey pub;
 	
-	
-	/**
-	 * <p>Uses a new ECKey to make an Address.</p> 
-	 * 
-	 * @param coinId
-	 * @param key
-	 * @throws ZWAddressFormatException
-	 */
-	/***
-	public ZWAddress(ZWCoin coinId) {
-		try {
-			this.key = new ZWECKey();
-			this.initialize(coinId, coinId.getPubKeyHashPrefix(), this.key.getPubKeyHash());
-		} catch(ZWAddressFormatException afe) {
-			ZLog.log("Error making new address, this should not have happened.");
+	protected ZWSendingAddress(boolean ignore) {
+		if (ignore) {
+			throw new UnsupportedOperationException("Should call this method "
+					+ "with false to more clearly specify that a super constructor is being avoided");
 		}
 	}
-	***/
-
+	
 	/**
 	 * <p>Uses an ECKey to make an Address. The ECKey need not necessarilty have access
 	 * to a private key as this class can be used for both sending (non-owned) and 
@@ -128,9 +106,9 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * @param key
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(ZWCoin coinId, ZWECKey key) throws ZWAddressFormatException {
+	public ZWSendingAddress(ZWCoin coinId, ZWPublicKey key) throws ZWAddressFormatException {
 		this.initialize(coinId, coinId.getPubKeyHashPrefix(), key.getPubKeyHash());
-		this.key = key;
+		this.pub = key;
 	}
 
 	/**
@@ -139,7 +117,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * @param address
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(String address) throws ZWAddressFormatException {
+	public ZWSendingAddress(String address) throws ZWAddressFormatException {
 		this(null, address);
 	}
 
@@ -150,7 +128,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * @param address
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(ZWCoin coinId, String address) throws ZWAddressFormatException {
+	public ZWSendingAddress(ZWCoin coinId, String address) throws ZWAddressFormatException {
 		// Checksum is validated in the decoding
 		byte[] allData = Base58.decodeChecked(address);
 		byte[] hash160 = ZiftrUtils.stripVersionAndChecksum(allData, 20);
@@ -167,7 +145,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * @param hash160
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWAddress(ZWCoin coinId, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
+	public ZWSendingAddress(ZWCoin coinId, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
 		this.initialize(coinId, versionByte, hash160);
 	}
 
@@ -176,7 +154,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * 
 	 * @throws ZWAddressFormatException 
 	 */
-	public ZWAddress(ZWCoin coinId, byte[] hash160) throws ZWAddressFormatException {
+	public ZWSendingAddress(ZWCoin coinId, byte[] hash160) throws ZWAddressFormatException {
 		this(coinId, coinId.getPubKeyHashPrefix(), hash160);
 	}
 
@@ -187,8 +165,8 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * @param versionByte
 	 * @param hash160
 	 */
-	private void initialize(ZWCoin coin, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
-		if (hash160.length != 20) {
+	protected void initialize(ZWCoin coin, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
+		if (hash160 == null || hash160.length != 20) {
 			throw new ZWAddressFormatException("Addresses are 160-bit hashes, so you must provide 20 bytes");
 		}
 
@@ -215,22 +193,6 @@ public class ZWAddress implements ZWSearchableListItem {
 		lastTimeModifiedSeconds = System.currentTimeMillis() / 1000;
 	}
 
-	public boolean isHidden() {
-		return hidden;
-	}
-
-	public void setHidden(boolean hidden) {
-		this.hidden = hidden;
-	}
-	
-	public boolean isSpentFrom(){
-		return this.spentFrom;
-	}
-	
-	public void setSpentFrom(boolean spentFrom){
-		this.spentFrom = spentFrom;
-	}
-	
 	public ZWCoin getCoin() {
 		return this.coin;
 	}
@@ -245,10 +207,10 @@ public class ZWAddress implements ZWSearchableListItem {
 	/**
 	 * @return the key
 	 */
-	public ZWECKey getKey() {
-		return key;
+	public ZWPublicKey getPublicKey() {
+		return pub;
 	}
-
+	
 	/** The (big endian) 20 byte hash that is the core of an address. */
 	public byte[] getHash160() {
 		return hash160;
@@ -263,10 +225,6 @@ public class ZWAddress implements ZWSearchableListItem {
 		return coin != null && this.versionByte == this.coin.getScriptHashPrefix();
 	}
 
-	public boolean isPersonalAddress() {
-		return key != null && (key.getPrivKeyBytes() != null || key.isEncrypted());
-	}
-
 	@Override
 	public String toString() {
 		return this.getAddress();
@@ -276,14 +234,17 @@ public class ZWAddress implements ZWSearchableListItem {
 	//////////  Getters and Setters  //////////
 	///////////////////////////////////////////
 
-
+	public boolean isPersonalAddress() {
+		return false;
+	}
+	
 	/**
 	 * @return the note
 	 */
 	public String getLabel() {
-		return note;
+		return label;
 	}
-	
+
 	/**
 	 * Gets the publicly displayed base58 encoded version of this address
 	 * @return the public address as a String
@@ -296,7 +257,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	 * @param note the note to set
 	 */
 	public void setLabel(String note) {
-		this.note = note;
+		this.label = note;
 	}
 
 	/**
@@ -312,7 +273,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	public void setLastKnownBalance(long lastKnownBalance) {
 		this.lastKnownBalance = lastKnownBalance;
 	}
-	
+
 	/**
 	 * @return the lastTimeModifiedSeconds
 	 */
@@ -326,7 +287,7 @@ public class ZWAddress implements ZWSearchableListItem {
 	public void setLastTimeModifiedSeconds(long lastTimeModifiedSeconds) {
 		this.lastTimeModifiedSeconds = lastTimeModifiedSeconds;
 	}
-	
+
 	public static boolean isAcceptableVersion(ZWCoin coinId, byte b) {
 		return coinId.getPubKeyHashPrefix() == b || coinId.getScriptHashPrefix() == b;
 	}
@@ -369,5 +330,5 @@ public class ZWAddress implements ZWSearchableListItem {
 				Locale.ENGLISH).contains(constraint.toString().toLowerCase());
 		return addressMatches || labelMatches;
 	}
-	
+
 }

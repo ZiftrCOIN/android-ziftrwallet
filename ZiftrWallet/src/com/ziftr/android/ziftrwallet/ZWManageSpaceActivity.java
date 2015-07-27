@@ -21,24 +21,24 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 
 public class ZWManageSpaceActivity extends FragmentActivity implements OnClickListener, ZiftrDialogHandler {
-	
+
 	private Button continueButton;
 	private Button cancelButton;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.setContentView(R.layout.manage_space);
-		
+
 		ZiftrDialogManager.registerHandler(this);
-		
+
 		this.continueButton = (Button) this.findViewById(R.id.continue_button);
 		this.cancelButton = (Button) this.findViewById(R.id.cancel_button);
 		this.continueButton.setOnClickListener(this);
 		this.cancelButton.setOnClickListener(this);
 	}
-	
+
 	@Override
 	public void onClick(View v) {
 		if (v == continueButton){
@@ -53,7 +53,7 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 			this.finish();
 		}
 	}
-	
+
 	private void clearAppData(){
 		Application applicationContext = ZWApplication.getApplication();
 		//delete external files database and logs
@@ -65,24 +65,24 @@ public class ZWManageSpaceActivity extends FragmentActivity implements OnClickLi
 			}
 		}
 	}
-	
+
 	public void showContinuePasswordDialog(){
-		
+
 		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
 		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
 		passwordDialog.addEmptyTextbox(true);
-		
+
 		passwordDialog.show(getSupportFragmentManager(), "password_dialog");
 	}
 
 
 	@Override
 	public void handleDialogYes(DialogFragment fragment) {
-		
+
 		if("password_dialog".equals(fragment.getTag())) {
 			ZiftrTextDialogFragment passwordDialog = (ZiftrTextDialogFragment) fragment;
 			String password = passwordDialog.getEnteredText(0);
-			
+
 			if (ZWPreferences.inputPasswordMatchesStoredPassword(password)) {
 				this.clearAppData();
 				this.finish();

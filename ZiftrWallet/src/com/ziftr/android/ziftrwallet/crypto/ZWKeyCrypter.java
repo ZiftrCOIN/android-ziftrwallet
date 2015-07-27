@@ -19,6 +19,13 @@ public interface ZWKeyCrypter {
 	public static final char PBE_AES_ENCRYPTION = 'H';
 	
 	/**
+	 * Get the type of encryption this crypter supports.
+	 * 
+	 * @return
+	 */
+	public char getEncryptionIdentifier();
+	
+	/**
 	 * Use the key crypter to encrypt a given clear text message.
 	 * 
 	 * @param clearText - the message to encrypt
