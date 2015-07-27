@@ -306,9 +306,6 @@ public abstract class ZWPreferences {
 		String salt = ZWWalletManager.getInstance().getAppDataString(PREFS_SALT_KEY);
 
 		if(salt == null || salt.length() == 0) {
-			if (!ZWPreferences.userHasPassword()){
-				return null;
-			}
 			try {
 				salt = ZWPbeAesCrypter.generateSalt();
 				ZWWalletManager.getInstance().upsertAppDataVal(PREFS_SALT_KEY, salt);
