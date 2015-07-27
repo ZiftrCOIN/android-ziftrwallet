@@ -15,6 +15,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWNullCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
@@ -151,6 +152,8 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 			catch(Exception e) {
 				ZLog.log("Exception creating key crypter: ", e);
 			}
+		} else {
+			crypter = new ZWNullCrypter();
 		}
 		return crypter;
 	}
