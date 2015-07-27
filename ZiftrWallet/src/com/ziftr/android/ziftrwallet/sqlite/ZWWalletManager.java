@@ -325,8 +325,8 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		ZWKeyCrypter newCrypter = this.passphraseToCrypter(newPassphrase);
 
 		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
-		if (oldPassphrase == null && ZWPreferences.getHdWalletSeed() == null){
-			//we are initializing a new passphrase and have no seed yet, need to generate seed
+		if (ZWPreferences.getHdWalletSeed() == null){
+			//need to generate seed
 			byte[] seed = new byte[32];
 			this.getSecureRandom().nextBytes(seed);
 			ZWPreferences.setHdWalletSeed(CryptoUtils.encryptAndPrefix(newCrypter, seed));
