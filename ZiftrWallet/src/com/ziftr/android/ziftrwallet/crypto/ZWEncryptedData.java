@@ -65,7 +65,7 @@ public class ZWEncryptedData {
     }
     
     public String toStringWithEncryptionId() {
-    	return "" + this.encryptionId + this.getEncryptedData();
+    	return this.encryptionId + this.getEncryptedData();
     }
 
     @Override

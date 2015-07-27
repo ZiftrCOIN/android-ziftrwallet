@@ -211,42 +211,4 @@ public class CryptoUtils {
 		return new byte[] { h[0], h[1], h[2], h[3] };
 	}
 
-	public static boolean isEncryptedIdentifier(char id) {
-		return id == ZWKeyCrypter.PBE_AES_ENCRYPTION;
-	}
-
-	public static String decryptPrefixed(ZWKeyCrypter crypter, String possiblyEncrypted) {
-		if (possiblyEncrypted == null) {
-			return null;
-		}
-
-		char encryptionId = possiblyEncrypted.charAt(0);
-		String dataWithoutEncryptionPrefix = possiblyEncrypted.substring(1);
-
-		if (encryptionId == ZWKeyCrypter.NO_ENCRYPTION) {
-			return dataWithoutEncryptionPrefix;
-		} else if (crypter != null) {
-			return crypter.decrypt(new ZWEncryptedData(encryptionId, dataWithoutEncryptionPrefix));
-		} else {
-			return null;
-		}
-	}
-
-	public static byte[] decryptPrefixedHex(ZWKeyCrypter crypter, String possiblyEncrypted) {
-		return ZiftrUtils.hexStringToBytes(decryptPrefixed(crypter, possiblyEncrypted));
-	}
-
-	public static String encryptAndPrefix(ZWKeyCrypter crypter, byte[] data) {
-		return encryptAndPrefixHex(crypter, ZiftrUtils.bytesToHexString(data));
-	}
-
-	public static String encryptAndPrefixHex(ZWKeyCrypter crypter, String hex) {
-		if (crypter != null) {
-			//encrypt function adds the encrypted prefix for us
-			return crypter.encrypt(hex).toString();
-		} else {
-			return ZWKeyCrypter.NO_ENCRYPTION + hex;
-		}
-	}
-
 }

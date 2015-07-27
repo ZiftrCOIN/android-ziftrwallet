@@ -180,30 +180,15 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 			String data = oldPrivKeyValInDb.substring(1);
 			ZWPrivateKey key = null;
 
-			boolean haveOldCrypter = oldCrypter != null;
-			boolean dataIsEncrypted = oldPrivKeyValInDb.charAt(0) != ZWKeyCrypter.NO_ENCRYPTION;
-
-			if (haveOldCrypter && dataIsEncrypted) {
+			try {
 				key = ZWPrivateKey.decrypt(new ZWEncryptedData(encId, data), oldCrypter);
-			} else if (!haveOldCrypter && !dataIsEncrypted) {
-				byte[] privBytes = ZiftrUtils.hexStringToBytes(data);
-				key = new ZWPrivateKey(new BigInteger(1, privBytes));
-			} else if (i == 0 && !haveOldCrypter && dataIsEncrypted) {
-				// This can happen if the user upgrades from an only wallet and the password hash is erased.
-				// The app will think that the user doesn't have a password, but the data in the database is still
-				// encrypted. 
-				// TODO In this case, we should make sure that the user has entered the right password and attempt 
-				// to recrypt
+			} catch (Exception e) {
 				ZLog.log("ERROR tried to encrypt already encrypted first key possible recovery by entering old password.");
 				return EncryptionStatus.ALREADY_ENCRYPTED;
-			} else {
-				//shouldn't happen
-				ZLog.log("ERROR tried to encrypt already non-first encrypted keys, inconsistently encrypted keys uh oh");
-				return EncryptionStatus.ERROR;
 			}
 
 			ContentValues cv = new ContentValues();
-			cv.put(COLUMN_PRIV_KEY, CryptoUtils.encryptAndPrefixHex(newCrypter, key.getPrivHex()));
+			cv.put(COLUMN_PRIV_KEY, newCrypter.encrypt(key.getPrivHex()).toString());
 			StringBuilder where = new StringBuilder();
 			where.append(COLUMN_PRIV_KEY).append(" = ").append(DatabaseUtils.sqlEscapeString(oldPrivKeyValInDb));
 

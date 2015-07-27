@@ -294,9 +294,7 @@ public class ZWPrivateKey {
 	 * @return unencryptedKey
 	 */
 	public static ZWPrivateKey decrypt(ZWEncryptedData data, ZWKeyCrypter crypter) throws ZWKeyCrypterException {
-		if (crypter == null) {
-			throw new ZWKeyCrypterException("There is no key crypter set to decrypt.");
-		} else if (data == null) {
+		if (data == null) {
 			throw new ZWKeyCrypterException("There is no encrypted key to decrypt .");
 		}
 

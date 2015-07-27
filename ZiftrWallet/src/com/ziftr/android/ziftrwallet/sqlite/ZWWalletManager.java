@@ -26,6 +26,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdAccount;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWNullCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress.KeyType;
@@ -203,6 +204,8 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			catch(Exception e) {
 				ZLog.log("Exception creating key crypter: ", e);
 			}
+		} else {
+			crypter = new ZWNullCrypter();
 		}
 		return crypter;
 	}
@@ -329,12 +332,12 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			//we are initializing a new passphrase and have no seed yet, need to generate seed
 			byte[] seed = new byte[32];
 			this.getSecureRandom().nextBytes(seed);
-			ZWPreferences.setHdWalletSeed(CryptoUtils.encryptAndPrefix(newCrypter, seed));
+			ZWPreferences.setHdWalletSeed(newCrypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString());
 		} else if (decryptedSeed == null) {
 			ZLog.log("ERROR: Mismatch in oldCrypter and status of HD seed");
 			return EncryptionStatus.ERROR;
 		} else {
-			String newSeedVal = newCrypter == null ? "" + ZWKeyCrypter.NO_ENCRYPTION + decryptedSeed : newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
+			String newSeedVal = newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
 			ZWPreferences.setHdWalletSeed(newSeedVal);
 		}
 		
@@ -719,9 +722,9 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		if (seedStr == null) {
 			seed = new byte[32];
 			this.getSecureRandom().nextBytes(seed);
-			ZWPreferences.setHdWalletSeed(CryptoUtils.encryptAndPrefix(crypter, seed));
+			ZWPreferences.setHdWalletSeed(crypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString());
 		} else {
-			seed = CryptoUtils.decryptPrefixedHex(crypter, seedStr);
+			seed = ZiftrUtils.hexStringToBytes(crypter.decrypt(new ZWEncryptedData(crypter.getEncryptionIdentifier(), seedStr.substring(1))));
 			if (seed == null) {
 				throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
 			}
