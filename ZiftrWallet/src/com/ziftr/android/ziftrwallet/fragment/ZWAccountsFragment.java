@@ -237,6 +237,10 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 		dialog.setOnClickListener(new ZWAccountsFragment.DialogListener(coin));
 		dialog.show(getFragmentManager(), "deactivate_coin");
 		
+		// remove the dropshadow at the bottom if no more coins left
+		if (this.activatedCoins.size() > 0){
+			this.currencyListView.removeFooterView(this.footer);
+		}
 		return true;
 	}
 

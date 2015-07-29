@@ -328,8 +328,8 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		ZWKeyCrypter newCrypter = this.passphraseToCrypter(newPassphrase);
 
 		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
-		if (oldPassphrase == null && ZWPreferences.getHdWalletSeed() == null){
-			//we are initializing a new passphrase and have no seed yet, need to generate seed
+		if (ZWPreferences.getHdWalletSeed() == null){
+			//need to generate seed
 			byte[] seed = new byte[32];
 			this.getSecureRandom().nextBytes(seed);
 			ZWPreferences.setHdWalletSeed(newCrypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString());
@@ -715,6 +715,10 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		// Update table to match activated status
 		this.coinTable.activateCoin(coin, this.getWritableDatabase());
 
+		this.activateHd(coin, password);
+	}
+	
+	public synchronized void activateHd(ZWCoin coin, String password){
 		// Make sure the seed data for the wallet exists, and read it
 		ZWKeyCrypter crypter = this.passphraseToCrypter(password);
 		String seedStr = ZWPreferences.getHdWalletSeed();
@@ -729,17 +733,19 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 				throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
 			}
 		}
-
+		
 		// Test if account exists before creating the new one to save time, as the derivation is CPU intensive
-		ZWHdAccount hdAcct = this.accountsTable.getAccount(coin.getSymbol(), 0, this.getWritableDatabase());
-		if (hdAcct == null) {
+		if (!this.hasHdAccount(coin)) {
 			ZWExtendedPrivateKey m = new ZWExtendedPrivateKey(seed);
 			String path = "[m/44'/" + coin.getHdId() + "'/0']";
 			ZWExtendedPublicKey mPub = (ZWExtendedPublicKey) m.deriveChild(path);
 			ZWHdAccount account = new ZWHdAccount(coin.getSymbol(), mPub);
 			this.accountsTable.insertAccount(account, this.getWritableDatabase());
 		}
-
+	}
+	
+	public synchronized boolean hasHdAccount(ZWCoin coin){
+		return this.accountsTable.getAccount(coin.getSymbol(), 0, this.getWritableDatabase()) != null;
 	}
 
 

@@ -249,12 +249,6 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		// Hook up the search bar to show the keyboard without messing up the view
 		this.initializeSearchBarText();
 
-		//if we have activated coins from previous version without HD wallets, we should deactivate
-		if (ZWPreferences.getHdWalletSeed() == null){
-			for (ZWCoin coin : this.walletManager.getActivatedCoins()){
-				ZWWalletManager.getInstance().deactivateCoin(coin);
-			}
-		}		
 		ZiftrNetworkManager.registerNetworkHandler(this);
 	}
 

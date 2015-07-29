@@ -154,6 +154,7 @@ public class ZWDataSyncHelper {
 
 				ZWReceivingAddress addr = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, signingAddressPublic, password); 
 				ZWPrivateKey key = addr.getStandardKey();
+
 				toSign.put("pubkey", ZiftrUtils.bytesToHexString(key.getPub().getPubKeyBytes()));
 
 				String stringToSign = toSign.getString("tosign");
@@ -188,7 +189,8 @@ public class ZWDataSyncHelper {
 				//flag any addresses we spent from as having been spent from (so we don't reuse change addresses)
 				// TODO add a new way to set the spent from in all of these 
 				for(String addressString : addressesSpentFrom) {
-					ZWReceivingAddress address = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, addressString, password); 
+					
+					ZWReceivingAddress address = (ZWReceivingAddress) ZWWalletManager.getInstance().getAddress(coin, addressString, true);
 					address.setSpentFrom(true);
 					ZWWalletManager.getInstance().updateAddress(address, true);
 				}
