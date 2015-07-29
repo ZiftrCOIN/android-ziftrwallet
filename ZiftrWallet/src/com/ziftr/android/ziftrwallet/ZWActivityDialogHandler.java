@@ -25,7 +25,6 @@ import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWActivityDialogHandler implements ZiftrDialogHandler {
@@ -86,7 +85,6 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 
 	@Override
 	public void handleDialogYes(DialogFragment fragment) {
-
 		if(ZWReceiveCoinsFragment.DIALOG_NEW_ADDRESS_TAG.equals(fragment.getTag())) {
 			//user is creating a new address
 			ZWReceiveCoinsFragment receiveFragment = 
@@ -95,14 +93,26 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWNewCurrencyFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
 			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
-
 			if (ZWPreferences.inputPasswordMatchesStoredPassword(enteredPassword)) {
 				ZWPreferences.setCachedPassword(enteredPassword);
-
 				ZWNewCurrencyFragment newCurrFragment = 
 						(ZWNewCurrencyFragment) getSupportFragmentManager().findFragmentByTag(ZWNewCurrencyFragment.FRAGMENT_TAG);
 				if (newCurrFragment != null) {
 					newCurrFragment.makeNewAccount((ZWCoin)((ZiftrTextDialogFragment)fragment).getData(), enteredPassword);
+				}
+			}
+			else {
+				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_incorrect_password);
+			}
+		}
+		else if(ZWReceiveCoinsFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
+			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
+			if (ZWPreferences.inputPasswordMatchesStoredPassword(enteredPassword)) {
+				ZWPreferences.setCachedPassword(enteredPassword);
+				ZWReceiveCoinsFragment receiveFragment = 
+						(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
+				if (receiveFragment != null){
+					receiveFragment.makeNewAccount((ZWCoin)((ZiftrTextDialogFragment)fragment).getData(), enteredPassword);
 				}
 			}
 			else {

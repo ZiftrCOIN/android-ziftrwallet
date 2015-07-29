@@ -143,6 +143,9 @@ public class ZWSendTaskHelperFragment extends Fragment {
 					if (changeAddresses.size() <= 0){
 						//create new address for change
 						// TODO default is account 0 for now, wallet may use different accoutns eventually
+						if (!ZWWalletManager.getInstance().hasHdAccount(coin)){
+							ZWWalletManager.getInstance().activateHd(coin, ZWSendTaskHelperFragment.this.password);
+						}
 						changeAddress = ZWWalletManager.getInstance().createReceivingAddress(coin, 0, true).getAddress();
 						ZLog.log(changeAddress);
 					} else {
