@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -35,12 +36,16 @@ import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
+import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTaskDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
@@ -134,8 +139,61 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 
 
 	private void generateNewAddress() {
-		showNewAddressConfirmationDialog();
+		if (ZWWalletManager.getInstance().hasHdAccount(this.getSelectedCoin())){
+			showNewAddressConfirmationDialog();
+		} else {
+			ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
+			passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
+			passwordDialog.addEmptyTextbox(true);
+			passwordDialog.setData(this.getSelectedCoin());
+			passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
+		}
 	}
+	
+	//called if user doesn't have an activated hd wallet during address creation, need to activate
+	public void makeNewAccount(final ZWCoin coin, final String password) {
+		//now we either have the user's password, or they don't have one set,
+		//so we need to contact the server and have a transaction built
+		ZiftrTaskDialogFragment creatingAccountFragment = new ZiftrTaskDialogFragment() {
+			@Override
+			protected boolean doTask() {
+				long start = System.currentTimeMillis();
+				try {
+					ZWWalletManager.getInstance().activateHd(coin, password);
+				} 
+				catch(Exception e) {
+					return false;
+				}
+				
+				long end = System.currentTimeMillis();
+				long minTime = 500;
+				if ((end - start) < minTime) {
+					try {
+						Thread.sleep(minTime - (end - start)); //quick sleep so the UI doesn't "flash" the loading message
+					} catch (InterruptedException e) {
+						//do nothing, just quick sleep
+					}
+				}
+				return true;
+			}
+		};
+		// If doTask returns true, then which == BUTTON_POSITIVE (and vice versa)
+		creatingAccountFragment.setupDialog(R.string.zw_dialog_new_account);
+		creatingAccountFragment.setOnClickListener(new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if (which == DialogInterface.BUTTON_POSITIVE) {
+					ZWReceiveCoinsFragment.this.loadNewAddressFromDatabase();
+				}
+				else if (which == DialogInterface.BUTTON_NEGATIVE) {
+					ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_in_account_creation);
+				}
+			}
+		});
+
+		creatingAccountFragment.show(getFragmentManager(), ZWNewCurrencyFragment.DIALOG_ADDING_ACCOUNT);
+	}
+
 
 
 	private void showNewAddressConfirmationDialog() {
