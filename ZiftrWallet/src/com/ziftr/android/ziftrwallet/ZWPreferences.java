@@ -155,10 +155,6 @@ public abstract class ZWPreferences {
 		return numPrefsUpdated;
 	}
 
-	static int setStoredPasswordHash(String saltedHash) {
-		return ZWWalletManager.getInstance().upsertAppDataVal(PREFS_PASSWORD_KEY, saltedHash);
-	}
-
 
 	/**
 	 * Get a boolean describing whether or not the user 
