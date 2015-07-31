@@ -36,7 +36,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 

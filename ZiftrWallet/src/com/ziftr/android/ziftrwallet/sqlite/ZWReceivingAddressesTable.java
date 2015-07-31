@@ -26,7 +26,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 

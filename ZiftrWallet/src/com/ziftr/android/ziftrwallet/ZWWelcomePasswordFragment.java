@@ -20,7 +20,6 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWWelcomePasswordFragment extends Fragment implements OnClickListener {

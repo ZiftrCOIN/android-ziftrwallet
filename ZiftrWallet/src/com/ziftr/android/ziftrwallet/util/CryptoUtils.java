@@ -19,11 +19,9 @@ import org.spongycastle.math.ec.ECPoint;
 
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCurveParameters;
-import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdWalletException;
-import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 
 public class CryptoUtils {
 
