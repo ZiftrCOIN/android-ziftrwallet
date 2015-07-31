@@ -182,6 +182,7 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.VISIBLE);
 			this.rootView.findViewById(R.id.total_label).setVisibility(View.GONE);
 			this.totalBalance.setVisibility(View.GONE);
+			this.currencyListView.removeFooterView(this.footer);
 		} else {
 			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.GONE);
 			this.rootView.findViewById(R.id.total_label).setVisibility(View.VISIBLE);
@@ -237,10 +238,6 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 		dialog.setOnClickListener(new ZWAccountsFragment.DialogListener(coin));
 		dialog.show(getFragmentManager(), "deactivate_coin");
 		
-		// remove the dropshadow at the bottom if no more coins left
-		if (this.activatedCoins.size() > 0){
-			this.currencyListView.removeFooterView(this.footer);
-		}
 		return true;
 	}
 
