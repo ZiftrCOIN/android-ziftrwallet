@@ -47,7 +47,7 @@ public abstract class ZWPreferences {
 	public final static String UNCONFIRMED_WARNING_KEY = "unconfirmed_warning";
 
 	/** Get the seed for the HD wallet. */
-	public final static String HD_WALLET_SEED = "hd_wallet_seed";
+	public final static String HD_WALLET_SEED_KEY = "hd_wallet_seed";
 
 	private static final String UPDATE_CHECK_KEY = "update_check";
 
@@ -402,11 +402,11 @@ public abstract class ZWPreferences {
 	}
 
 	public static String getHdWalletSeed() {
-		return ZWWalletManager.getInstance().getAppDataString(HD_WALLET_SEED);
+		return ZWWalletManager.getInstance().getAppDataString(HD_WALLET_SEED_KEY);
 	}
 
 	public static void setHdWalletSeed(String data) {
-		ZWWalletManager.getInstance().upsertAppDataVal(HD_WALLET_SEED, data);
+		ZWWalletManager.getInstance().upsertAppDataVal(HD_WALLET_SEED_KEY, data);
 	}
 
 }

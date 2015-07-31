@@ -143,7 +143,7 @@ public abstract class ZiftrDialogFragment extends DialogFragment implements OnCl
 	
 	
 	/**
-	 * Gets the Object stored by {@link #getData()}.
+	 * Gets the Object stored by {@link #setData()}.
 	 * @return the object previously set, or null if no data was ever set
 	 */
 	public Object getData() {
