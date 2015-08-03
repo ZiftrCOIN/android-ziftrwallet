@@ -141,7 +141,8 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if (which == DialogInterface.BUTTON_POSITIVE) {
-					Toast.makeText(ZWNewCurrencyFragment.this.getZWMainActivity(), "Wallet Created!", Toast.LENGTH_LONG).show();
+					String toastText = getZWMainActivity().getString(R.string.zw_toast_wallet_created);
+					Toast.makeText(ZWNewCurrencyFragment.this.getZWMainActivity(), toastText, Toast.LENGTH_LONG).show();
 					ZWNewCurrencyFragment.this.getZWMainActivity().onBackPressed();
 				}
 				else if (which == DialogInterface.BUTTON_NEGATIVE) {
