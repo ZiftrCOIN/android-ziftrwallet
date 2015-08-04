@@ -298,7 +298,7 @@ public abstract class ZWPreferences {
 	}
 
 
-	public static String getSalt(){
+	public static synchronized String getSalt(){
 		String salt = ZWWalletManager.getInstance().getAppDataString(PREFS_SALT_KEY);
 
 		if(salt == null || salt.length() == 0) {
@@ -397,12 +397,18 @@ public abstract class ZWPreferences {
 		return CryptoUtils.Sha256Hash(concat);
 	}
 
-	public static String getHdWalletSeed() {
-		return ZWWalletManager.getInstance().getAppDataString(HD_WALLET_SEED_KEY);
+	
+	public static synchronized String getHdWalletSeed() {
+		String seedString = ZWWalletManager.getInstance().getAppDataString(HD_WALLET_SEED_KEY);
+		return seedString;
 	}
 
-	public static void setHdWalletSeed(String data) {
+	
+	public static synchronized void setHdWalletSeed(String data) {
 		ZWWalletManager.getInstance().upsertAppDataVal(HD_WALLET_SEED_KEY, data);
 	}
-
+	
+	
+	
 }
+

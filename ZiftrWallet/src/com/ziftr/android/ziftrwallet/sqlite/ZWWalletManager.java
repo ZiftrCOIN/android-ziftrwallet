@@ -107,8 +107,6 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	/** Checkpoints in the HD wallet tree to make deriving a new address easy. */
 	protected ZWAccountsTable accountsTable;
 
-	private SecureRandom secureRandom;
-
 	///////////////////////////////////////////////////////
 	//////////  Static Singleton Access Members ///////////
 	///////////////////////////////////////////////////////
@@ -189,26 +187,8 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		this.accountsTable = new ZWAccountsTable();
 	}
 
-	/**
-	 * @param passphrase
-	 * @return
-	 */
-	private ZWKeyCrypter passphraseToCrypter(String passphrase) {
-		ZWKeyCrypter crypter = null;
-		if (passphrase != null && passphrase.length() > 0) {
-			try {
-				SecretKey secretKey = ZWPbeAesCrypter.generateSecretKey(passphrase, ZWPreferences.getSalt());
-				crypter = new ZWPbeAesCrypter(secretKey);
-			}
-			catch(Exception e) {
-				ZLog.log("Exception creating key crypter: ", e);
-			}
-		} else {
-			crypter = new ZWNullCrypter();
-		}
-		return crypter;
-	}
 
+	
 	/////////////////////////////////////////////////
 	//////////  Boiler plate SQLite stuff ///////////
 	/////////////////////////////////////////////////
@@ -269,18 +249,6 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	}
 
-	public SecureRandom getSecureRandom() {
-		if(this.secureRandom == null) {
-			this.secureRandom = ZiftrUtils.createTrulySecureRandom();
-			if(this.secureRandom == null) {
-				String rngError = ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng);
-				ZiftrDialogManager.showSimpleAlert(rngError);
-			}
-		}
-
-		return this.secureRandom;
-	}
-
 
 	//////////////////////////////////////////////////////////////////
 	//////////  Interface for receiving addresses table  /////////////
@@ -323,19 +291,18 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * @param salt
 	 */
 	public synchronized EncryptionStatus changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
-		ZWKeyCrypter oldCrypter = this.passphraseToCrypter(oldPassphrase);
-		ZWKeyCrypter newCrypter = this.passphraseToCrypter(newPassphrase);
+		ZWKeyCrypter oldCrypter = passwordToCrypter(oldPassphrase);
+		ZWKeyCrypter newCrypter = passwordToCrypter(newPassphrase);
 
 		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
 		if (ZWPreferences.getHdWalletSeed() == null){
-			//need to generate seed
-			byte[] seed = new byte[32];
-			this.getSecureRandom().nextBytes(seed);
-			ZWPreferences.setHdWalletSeed(newCrypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString());
-		} else if (decryptedSeed == null) {
+			createNewHdWalletSeed(newPassphrase);
+		} 
+		else if (decryptedSeed == null) {
 			ZLog.log("ERROR: Mismatch in oldCrypter and status of HD seed");
 			return EncryptionStatus.ERROR;
-		} else {
+		}
+		else {
 			String newSeedVal = newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
 			ZWPreferences.setHdWalletSeed(newSeedVal);
 		}
@@ -505,7 +472,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	public synchronized ZWReceivingAddress getDecryptedReceivingAddress(ZWCoin coin, String address, String password) {
 		ZWReceivingAddress addr = this.receivingAddressesTable.getAddress(coin, address, getReadableDatabase());
-		ZWKeyCrypter crypter = this.passphraseToCrypter(password);
+		ZWKeyCrypter crypter = passwordToCrypter(password);
 		KeyType type = addr.getKeyType();
 		switch(type) {
 		case DERIVABLE_PATH:
@@ -719,19 +686,19 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	
 	public synchronized void activateHd(ZWCoin coin, String password){
 		// Make sure the seed data for the wallet exists, and read it
-		ZWKeyCrypter crypter = this.passphraseToCrypter(password);
+		ZWKeyCrypter crypter = passwordToCrypter(password);
+		
 		String seedStr = ZWPreferences.getHdWalletSeed();
-		byte[] seed = null;
+		
 		if (seedStr == null) {
-			seed = new byte[32];
-			this.getSecureRandom().nextBytes(seed);
-			ZWPreferences.setHdWalletSeed(crypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString());
-		} else {
-			seed = ZiftrUtils.hexStringToBytes(crypter.decrypt(new ZWEncryptedData(crypter.getEncryptionIdentifier(), seedStr.substring(1))));
-			if (seed == null) {
-				throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
-			}
+			seedStr = createNewHdWalletSeed(password);
+		} 
+		
+		byte[] seed = ZiftrUtils.hexStringToBytes(crypter.decrypt(new ZWEncryptedData(crypter.getEncryptionIdentifier(), seedStr.substring(1))));
+		if (seed == null) {
+			throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
 		}
+	
 		
 		// Test if account exists before creating the new one to save time, as the derivation is CPU intensive
 		if (!this.hasHdAccount(coin)) {
@@ -850,6 +817,56 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	}
 
+	
+	
+	private static synchronized String createNewHdWalletSeed(String password) {
+		//we need to re-check the current one, incase multiple threads try to do this at the same time
+		String seedString = ZWPreferences.getHdWalletSeed();
+		if (seedString == null) {
+			byte[] seed = new byte[32];
+			getSecureRandom().nextBytes(seed);
+			
+			ZWKeyCrypter crypter = passwordToCrypter(password);
+			ZWPreferences.setHdWalletSeed(crypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString());
+		}
+		
+		return seedString;
+	}
+
+	
+	/**
+	 * @param password
+	 * @return
+	 */
+	private static ZWKeyCrypter passwordToCrypter(String password) {
+		ZWKeyCrypter crypter = null;
+		if (password != null && password.length() > 0) {
+			try {
+				SecretKey secretKey = ZWPbeAesCrypter.generateSecretKey(password, ZWPreferences.getSalt());
+				crypter = new ZWPbeAesCrypter(secretKey);
+			}
+			catch(Exception e) {
+				ZLog.log("Exception creating key crypter: ", e);
+			}
+		} else {
+			crypter = new ZWNullCrypter();
+		}
+		return crypter;
+	}
+	
+	
+	
+	private static SecureRandom getSecureRandom() {
+		SecureRandom random = ZiftrUtils.createTrulySecureRandom();
+		if(random == null) {
+			String rngError = ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng);
+			ZiftrDialogManager.showSimpleAlert(rngError);
+		}
+
+		return random;
+	}
+
+	
 
 	@Override
 	protected void finalize() throws Throwable {

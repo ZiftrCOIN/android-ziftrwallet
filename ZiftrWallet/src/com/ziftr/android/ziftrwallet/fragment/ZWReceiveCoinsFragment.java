@@ -142,13 +142,15 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 		String cachedPassword = ZWPreferences.getCachedPassword();
 		if (ZWWalletManager.getInstance().hasHdAccount(this.getSelectedCoin())){
 			showNewAddressConfirmationDialog();
-		} else if (ZWPreferences.userHasPassword() && cachedPassword == null){
+		} 
+		else if (ZWPreferences.userHasPassword() && cachedPassword == null){
 			ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
 			passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
 			passwordDialog.addEmptyTextbox(true);
 			passwordDialog.setData(this.getSelectedCoin());
 			passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
-		} else {
+		} 
+		else {
 			makeNewAccount(this.getSelectedCoin(), cachedPassword);
 		}
 	}
