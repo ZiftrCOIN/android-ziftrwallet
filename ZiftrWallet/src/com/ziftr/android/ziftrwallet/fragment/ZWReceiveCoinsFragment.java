@@ -366,6 +366,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 					} 
 					else {
 						ZWWalletManager.getInstance().activateHd(coin, cachedPassword);
+						createNewAddressFromDatabase();
 					}
 				
 				} 
