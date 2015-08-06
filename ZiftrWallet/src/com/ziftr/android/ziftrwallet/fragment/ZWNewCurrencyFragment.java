@@ -30,8 +30,8 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 
 	public static final String FRAGMENT_TAG = "new_currency";
 	
-	public static final String DIALOG_ENTER_PASSWORD_TAG = "add_coin_get_password";
-	public static final String DIALOG_ADDING_ACCOUNT = "adding_account";
+	public static final String DIALOG_ENTER_PASSWORD_TAG = "new_currency_add_coin_get_password";
+	public static final String DIALOG_NEW_ADDRESS = "new_currency_creating_address";
 	
 	private ZWNewCurrencyListAdapter currencyAdapter;
 	
@@ -151,7 +151,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 			}
 		});
 
-		creatingAccountFragment.show(getFragmentManager(), DIALOG_ADDING_ACCOUNT);
+		creatingAccountFragment.show(getFragmentManager(), DIALOG_NEW_ADDRESS);
 	}
 
 }

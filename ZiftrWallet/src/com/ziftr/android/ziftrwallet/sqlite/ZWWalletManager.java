@@ -668,10 +668,6 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * @param coinId
 	 */
 	public synchronized void activateCoin(ZWCoin coin, String password) {
-		// Safety check
-		if (isCoinActivated(coin)) {
-			return;
-		}
 
 		this.receivingAddressesTable.create(coin, this.getWritableDatabase());
 		this.sendingAddressesTable.create(coin, this.getWritableDatabase());

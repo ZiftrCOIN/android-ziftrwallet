@@ -58,6 +58,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 	public static final String FRAGMENT_TAG = "receive_coins_fragment";
 	public static final String DIALOG_NEW_ADDRESS_TAG = "receive_new_address";
 	public static final String DIALOG_ENTER_PASSWORD_TAG = "receive_enter_password";
+	public static final String DIALOT_TASK_CREATE_HD_ACCOUNT = "receive_create_hd_account";
 
 	private static final int FADE_DURATION = 500;
 
@@ -139,67 +140,37 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 
 
 	private void generateNewAddress() {
-		String cachedPassword = ZWPreferences.getCachedPassword();
+		
+		showNewAddressConfirmationDialog();
+		
+		/**
 		if (ZWWalletManager.getInstance().hasHdAccount(this.getSelectedCoin())){
 			showNewAddressConfirmationDialog();
-		} 
-		else if (ZWPreferences.userHasPassword() && cachedPassword == null){
-			ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
-			passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
-			passwordDialog.addEmptyTextbox(true);
-			passwordDialog.setData(this.getSelectedCoin());
-			passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
-		} 
-		else {
-			makeNewAccount(this.getSelectedCoin(), cachedPassword);
 		}
+		else {
+			//if we don't have an hd account for this coin, we need to create one
+			//which may require a password
+			String cachedPassword = ZWPreferences.getCachedPassword();
+			if(ZWPreferences.userHasPassword() && cachedPassword == null){
+				showEnterPasswordDialog();
+			} 
+			else {
+				showNewAddressConfirmationDialog();
+			}
+		}
+		**/
 	}
 	
-	//called if user doesn't have an activated hd wallet during address creation, need to activate
-	public void makeNewAccount(final ZWCoin coin, final String password) {
-		//now we either have the user's password, or they don't have one set,
-		//so we need to contact the server and have a transaction built
-		ZiftrTaskDialogFragment creatingAccountFragment = new ZiftrTaskDialogFragment() {
-			@Override
-			protected boolean doTask() {
-				long start = System.currentTimeMillis();
-				try {
-					ZWWalletManager.getInstance().activateHd(coin, password);
-				} 
-				catch(Exception e) {
-					return false;
-				}
-				
-				long end = System.currentTimeMillis();
-				long minTime = 500;
-				if ((end - start) < minTime) {
-					try {
-						Thread.sleep(minTime - (end - start)); //quick sleep so the UI doesn't "flash" the loading message
-					} catch (InterruptedException e) {
-						//do nothing, just quick sleep
-					}
-				}
-				return true;
-			}
-		};
-		// If doTask returns true, then which == BUTTON_POSITIVE (and vice versa)
-		creatingAccountFragment.setupDialog(R.string.zw_dialog_new_account);
-		creatingAccountFragment.setOnClickListener(new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				if (which == DialogInterface.BUTTON_POSITIVE) {
-					ZWReceiveCoinsFragment.this.loadNewAddressFromDatabase();
-				}
-				else if (which == DialogInterface.BUTTON_NEGATIVE) {
-					ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_in_account_creation);
-				}
-			}
-		});
-
-		creatingAccountFragment.show(getFragmentManager(), ZWNewCurrencyFragment.DIALOG_ADDING_ACCOUNT);
+	
+	private void showEnterPasswordDialog() {
+		
+		ZiftrTextDialogFragment passwordDialog = new ZiftrTextDialogFragment();
+		passwordDialog.setupDialog(R.string.zw_dialog_enter_password);
+		passwordDialog.addEmptyTextbox(true);
+		
+		passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
 	}
-
-
+	
 
 	private void showNewAddressConfirmationDialog() {
 		ZiftrSimpleDialogFragment dialog = ZiftrSimpleDialogFragment.buildContinueCancelDialog(R.string.zw_dialog_create_address);
@@ -355,55 +326,131 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 			}
 		});
 	}
+	
+	
+	
+	
+	public void createNewAddress() {
+		
+		ZWCoin coin = getSelectedCoin();
+		if (!ZWWalletManager.getInstance().hasHdAccount(coin)){
+			this.upgradeToHdAccount(coin);
+		}
+		else {
+			ZiftrUtils.runOnNewThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					createNewAddressFromDatabase();
+				}
+			});
+		}
+			
+	}
+	
+	
+	private void upgradeToHdAccount(final ZWCoin coin) {
+		
+		ZiftrTaskDialogFragment newAddressTaskFragment = new ZiftrTaskDialogFragment() {
+			@Override
+			protected boolean doTask() {
+				long start = System.currentTimeMillis();
+				try {	
+					//if the user doesn't have an HD account, we can't create an address for them, so we need to make one
+					String cachedPassword = ZWPreferences.getCachedPassword();
+					if(ZWPreferences.userHasPassword() && cachedPassword == null){
+						//if they have a password and it's not cached, we need them to enter it, so 
+						//show a dialog for that and stop the rest
+						showEnterPasswordDialog();
+						return true;
+					} 
+					else {
+						ZWWalletManager.getInstance().activateHd(coin, cachedPassword);
+					}
+				
+				} 
+				catch(Exception e) {
+					return false;
+				}
+				
+				long end = System.currentTimeMillis();
+				long minTime = 500;
+				if ((end - start) < minTime) {
+					try {
+						Thread.sleep(minTime - (end - start)); //quick sleep so the UI doesn't "flash" the loading message
+					} 
+					catch (InterruptedException e) {
+						//do nothing, just quick sleep
+					}
+				}
+				return true;
+			}
+		};
+		
+		newAddressTaskFragment.setupDialog(R.string.zw_dialog_new_account);
+		
+		newAddressTaskFragment.setOnClickListener(new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if (which == DialogInterface.BUTTON_NEGATIVE) {
+					//if it was successful (BUTTON_POSITIVE), we just dismiss it and show the address
+					//otherwise, show the error
+					ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_in_account_creation);
+				}
+			}
+		});
+
+		newAddressTaskFragment.show(getFragmentManager(), DIALOT_TASK_CREATE_HD_ACCOUNT);
+	}
+
+	
+	
 
 	/**
 	 * This method gets the database from the activity on the UI thread,
 	 * gets a new key from the database helper on an extra thread, and
 	 * then updates the UI with the new address on the UI thread. 
 	 */
-	public void loadNewAddressFromDatabase() {
+	private void createNewAddressFromDatabase() {
 
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			@Override
-			public void run() {
-				ZWReceivingAddress address = null;
-				boolean error = false;
+		ZWReceivingAddress address = null;
 
-				String addressLabel = addressEditText.getText().toString();
-				try {
-					address = getWalletManager().createReceivingAddress(getSelectedCoin(), 0, false, addressLabel);
-				} catch (ZWAddressFormatException e) {
-					ZLog.log("Should not have happened, wallet corruption?");
-					error = true;
-				}
+		try {
+			String addressLabel = addressEditText.getText().toString();
+			address = getWalletManager().createReceivingAddress(getSelectedCoin(), 0, false, addressLabel);
+		} 
+		catch (ZWAddressFormatException e) {
+			ZLog.log("Should not have happened, wallet corruption?");
+		}
+		
+		if(address == null) {
+			//TODO -add this message to strings resource file instead of hardcoding
+			ZiftrDialogManager.showSimpleAlert("Could not create a new receiving address!");
+		}
+		else {
+			String addressString = address.getAddress();
+			updateAddressUI(addressString);
+		}
 
-				final ZWReceivingAddress faddress = address;
-				final boolean ferror = error;
-
-				// Run the updating of the UI on the UI thread
-				ZWMainFragmentActivity a = ZWReceiveCoinsFragment.this.getZWMainActivity();
-				if (a == null) {
-					// Activity is dying, return
-					return;
-				}
-				a.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (ferror || faddress == null) {
-							ZiftrDialogManager.showSimpleAlert("Could not create a new receiving address!");
-						}
-						else {
-							String newAddress = faddress.getAddress();
-							addressEditText.setText(newAddress);
-							updateAddressLabelInDatabase();
-							generateQrCode(true);
-						}
-
-					}
-				});
-			}
-		});
 	}
+	
+	
+	private void updateAddressUI(final String newAddress) {
+		ZWMainFragmentActivity activity = ZWReceiveCoinsFragment.this.getZWMainActivity();
+		if(activity != null) {
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					addressEditText.setText(newAddress);
+					updateAddressLabelInDatabase();
+					generateQrCode(true);
+				}
+			});
+		}
+	}
+	
+	
+	
 
 	@Override
 	public void updateAddress(String address, String label) {

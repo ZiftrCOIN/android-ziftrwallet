@@ -89,7 +89,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			//user is creating a new address
 			ZWReceiveCoinsFragment receiveFragment = 
 					(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
-			receiveFragment.loadNewAddressFromDatabase();
+			receiveFragment.createNewAddress();
 		}
 		else if(ZWNewCurrencyFragment.DIALOG_ENTER_PASSWORD_TAG.equals(fragment.getTag())) {
 			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
@@ -112,7 +112,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 				ZWReceiveCoinsFragment receiveFragment = 
 						(ZWReceiveCoinsFragment) getSupportFragmentManager().findFragmentByTag(ZWReceiveCoinsFragment.FRAGMENT_TAG);
 				if (receiveFragment != null){
-					receiveFragment.makeNewAccount((ZWCoin)((ZiftrTextDialogFragment)fragment).getData(), enteredPassword);
+					receiveFragment.createNewAddress();
 				}
 			}
 			else {
