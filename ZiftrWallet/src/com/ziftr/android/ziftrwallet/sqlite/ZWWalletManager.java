@@ -823,7 +823,9 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			getSecureRandom().nextBytes(seed);
 			
 			ZWKeyCrypter crypter = passwordToCrypter(password);
-			ZWPreferences.setHdWalletSeed(crypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString());
+			
+			seedString = crypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString();
+			ZWPreferences.setHdWalletSeed(seedString);
 		}
 		
 		return seedString;

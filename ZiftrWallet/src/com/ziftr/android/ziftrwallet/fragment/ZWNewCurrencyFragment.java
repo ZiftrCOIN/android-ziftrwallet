@@ -25,6 +25,7 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTaskDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickListener {
 
@@ -118,6 +119,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 					ZWWalletManager.getInstance().activateCoin(coin, password);
 				} 
 				catch(Exception e) {
+					ZLog.log("Exception activating coin: ", e);
 					return false;
 				}
 				
