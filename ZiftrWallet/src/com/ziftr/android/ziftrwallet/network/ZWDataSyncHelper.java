@@ -516,7 +516,7 @@ public class ZWDataSyncHelper {
 
 		while(hasNextPage) {
 			hasNextPage = false; //always assume this is the last/only page unless we specifically find more
-			ZLog.forceFullLog("Transaction history response: " + request.getResponseCode() + "): " + response);
+			ZLog.forceFullLog("******\n**\n**\n**\n**\n**\n**\n Transaction history response: " + request.getResponseCode() + "): " + response);
 			if( responseCodeOk(request.getResponseCode()) ) {
 				try {
 					JSONObject responseJson = new JSONObject(response);
@@ -581,6 +581,8 @@ public class ZWDataSyncHelper {
 	//creates transaction in local database from json response
 	private static long createTransaction(ZWCoin coin, JSONObject json) throws JSONException {
 		
+		//ZLog.forceFullLog("+\n+\n+\n Creating a transaction... \n" + json.toString());
+		
 		long chainHeight = -1;
 		
 		String transactionId = json.getString("txid");
@@ -619,6 +621,10 @@ public class ZWDataSyncHelper {
 			//-1 because transactions have 1 confirmation as soon as they're in a block,
 			//so a transaction in block 100 of a 100 block chain with have 1 confirmation
 			//the chain height is 100, not 101
+			
+			//ZLog.log("jsonHeight: ", String.valueOf(jsonHeight));
+			//ZLog.log("confirmations: ", String.valueOf(jsonConfirmations));
+			
 			chainHeight = jsonHeight + jsonConfirmations -1;
 		}
 		else {
@@ -753,6 +759,7 @@ public class ZWDataSyncHelper {
 			transaction.setFee(BigInteger.ZERO);
 		}
 
+		//ZLog.log("Transaction amount: ", transaction.getAmount().toString());
 		
 		//go through our used addresses and choose the ones to display in the UI
 		determineTransactionDisplayData(transaction, isSpending, unknownOutputs, receivingAddressesUsed, sendingAddressesUsed);
@@ -761,6 +768,10 @@ public class ZWDataSyncHelper {
 		for(ZWTransactionOutput output : receivedOutputs) {
 			ZWWalletManager.getInstance().addTransactionOutput(coin, output);
 		}
+		
+
+		ZLog.log("- \nTransaction: ", transaction.getSha256Hash(), "\nHeight: ", transaction.getBlockHeight(), "\nAddress: ", transaction.getAddressAsCommaListString());
+		
 		
 		ZWWalletManager.getInstance().addTransaction(transaction);
 		

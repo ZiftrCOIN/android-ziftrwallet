@@ -97,12 +97,17 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 		// here and that is pretty slow. Hence, whenever loading in addresses from the db, 
 		// use a constructor where you can provide the pubKeyBytes.
 		ZWECKey newKey = getKeyFromStoredPrivData(dataInPrivColumn, pubKeyBytes);
-		ZWAddress newAddress = new ZWAddress(coinId, newKey);
+		
+		
+		//ZWAddress newAddress = new ZWAddress(coinId, newKey);
 
+		//TODO -big hax not using real addresses with private keys, just for display testing dogecoin issue
+		ZWAddress newAddress = new ZWAddress(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
+		
 		// Reset all the address' parameters for use elsewhere
 		newAddress.setLabel(c.getString(c.getColumnIndex(COLUMN_LABEL)));
 		newAddress.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
-		newAddress.getKey().setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+		//newAddress.getKey().setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
 		newAddress.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
 		newAddress.setHidden(c.getInt(c.getColumnIndex(COLUMN_HIDDEN)) != 0);
 		newAddress.setSpentFrom(c.getInt(c.getColumnIndex(COLUMN_SPENT_FROM)) != 0);
@@ -250,6 +255,10 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable {
 			newKey = new ZWECKey(ZiftrUtils.hexStringToBytes(privDataWithoutEncryptionPrefix), pubKeyBytes);
 		} else if (dataInPrivColumn.charAt(0) == ZWKeyCrypter.PBE_AES_ENCRYPTION) {
 			newKey = new ZWECKey(new ZWEncryptedData(privDataWithoutEncryptionPrefix), pubKeyBytes, null);
+		}
+		else {
+			//TODO -this is way wrong, just trying to force some keys for this doge bug
+			newKey = new ZWECKey(ZiftrUtils.hexStringToBytes(privDataWithoutEncryptionPrefix), pubKeyBytes);
 		}
 		
 		if (newKey == null) {
