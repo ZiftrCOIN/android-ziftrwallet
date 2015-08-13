@@ -5,10 +5,14 @@
  */
 package com.ziftr.android.ziftrwallet.sqlite;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.crypto.SecretKey;
@@ -36,6 +40,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
+import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -813,6 +818,90 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	}
 
+	
+	public static synchronized String[] createHdWalletMnemonic(byte[] entropy) {
+		
+		int entropySize = Byte.SIZE * entropy.length; //bits in each byte * number of bytes
+		
+		if(entropySize < 128 || entropySize % 32 != 0) {
+			//TODO error, must be at least 128 bits of entropy and must be a multiple of 32
+		}
+		
+		byte[] sha256hash = CryptoUtils.Sha256Hash(entropy);
+		int checksumSize = entropySize / 32;
+		
+
+		//swap for endianess??
+		//sha256hash = org.spongycastle.util.Arrays.reverse(sha256hash);
+		//entropy = org.spongycastle.util.Arrays.reverse(entropy);
+		
+		
+		//BitSet checksumBits = ZiftrUtils.bytesToBitSet(sha256hash);
+		//BitSet mnemonicBits = ZiftrUtils.bytesToBitSet(entropy);
+		boolean[] checksumBits = ZiftrUtils.bytesToBits(sha256hash, true);
+		boolean[] mnemonicBits = ZiftrUtils.bytesToBits(entropy, true);
+		
+		
+		mnemonicBits = Arrays.copyOf(mnemonicBits, entropySize + checksumSize);
+		
+		//append the first bits of the checksum to the end of the original entropy, per bip-39
+		for(int x = 0; x < checksumSize; x++) {
+			//mnemonicBits.set(entropySize + x, checksumBits.get(x));
+			mnemonicBits[entropySize + x] = checksumBits[x];
+		}
+		
+		
+		//create an array of indexes into the word list
+		//can't just use mnemonicBits.length() because it only counts up to the highest set bit
+		int[] mnemonicWordIndexes = new int[(entropySize + checksumSize) / 11]; 
+		
+		for(int x = 0; x < mnemonicWordIndexes.length; x++) {
+			int startBitIndex = x * 11;
+			int endBitIndex = startBitIndex + 11;
+			
+			//BitSet wordIndexBits = mnemonicBits.get(startBitIndex, endBitIndex);
+			boolean[] wordIndexBits = Arrays.copyOfRange(mnemonicBits, startBitIndex, endBitIndex);
+			
+			//mnemonicWordIndexes[x] = ZiftrUtils.bitSetToInt(wordIndexBits);
+			mnemonicWordIndexes[x] = ZiftrUtils.bitsToInt(wordIndexBits, true);
+		}
+		
+		ArrayList<String> wordList = getWordList();
+		
+		String[] mnemonicSentence = new String[mnemonicWordIndexes.length];
+		for(int x = 0; x < mnemonicSentence.length; x++) {
+			mnemonicSentence[x] = wordList.get(mnemonicWordIndexes[x]);
+		}
+		
+		ZLog.log("Generated mnemonic sentence: ", Arrays.toString(mnemonicSentence));
+		
+		return mnemonicSentence;
+	}
+	
+	
+	public static ArrayList<String> getWordList() {
+		
+		ArrayList<String> wordList = new ArrayList<String>(2048);
+		
+		try {
+			InputStream wordlistInputStream = ZWApplication.getApplication().getResources().openRawResource(R.raw.english);
+			
+			BufferedReader reader = new BufferedReader(new InputStreamReader(wordlistInputStream));
+			String word = reader.readLine();
+			while(word != null) {
+				wordList.add(word.trim());
+				word = reader.readLine();
+			}
+			
+			reader.close();
+		}
+		catch(Exception e) {
+			ZLog.log("Exception loading bip39 word list: ", e);
+		}
+		
+		
+		return wordList;
+	}
 	
 	
 	private static synchronized String createNewHdWalletSeed(String password) {

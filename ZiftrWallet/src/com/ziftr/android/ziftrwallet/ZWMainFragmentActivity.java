@@ -270,6 +270,14 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		super.onResume();
 		this.handleIntent(getIntent());
 		ZiftrDialogManager.showWaitingDialogs();
+		
+		byte[] test = new byte[16];
+		//ZiftrUtils.createTrulySecureRandom().nextBytes(test);
+		test = new byte[]{0x10, 0x08, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; //{-20, -27, -109, 91, -100, -128, -90, -113, -21, 24, -114, -69, 52, -7, -40, -105};
+		
+		//TODO -testing
+		ZWWalletManager.createHdWalletMnemonic(test);
+		
 	}
 
 	@Override

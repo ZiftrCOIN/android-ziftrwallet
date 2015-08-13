@@ -469,7 +469,80 @@ public class ZiftrUtils {
 		spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
 		return spannableString;
 	}
+	
+	
 
+
+	/**
+	 * Converts an array of bytes in an array of bits (booleans)
+	 * @param bytes the bytes to be converted
+	 * @param msbFirst (Most Significant Bit First) if true the most significant (left most) bit of the first byte 
+	 * will be stored at index 0 of the returned array, the most significant byte of the second byte will be at index 8, etc
+	 * @return an array of booleans representing the bit data
+	 */
+	public static boolean[] bytesToBits(byte[] bytes, boolean msbFirst) {
+		
+		boolean[] bits = new boolean[bytes.length * Byte.SIZE];
+		
+		//note some code re-use here, but much more efficient to check for msb once instead of each bit or byte
+		if(msbFirst) {
+			for(int x = 0; x < bytes.length; x++) {
+				byte data = bytes[x];
+				int byteIndex = x * Byte.SIZE + Byte.SIZE -1;
+				for(int i = Byte.SIZE -1; i >= 0 ; i--) {
+					boolean bit = (data & (1 << i)) > 0;
+					bits[byteIndex - i] = bit;
+				}
+			}
+		}
+		else {
+			for(int x = 0; x < bytes.length; x++) {
+				byte data = bytes[x];
+				int byteIndex = x * Byte.SIZE;
+				for(int i = 0; i < Byte.SIZE; i++) {
+					boolean bit = (data & (1 << i)) > 0;
+					bits[byteIndex + i] = bit;
+				}
+			}
+		}
+		
+		return bits;
+	}
+	
+	
+	
+	/**
+	 * Converts an array of booleans representing bits into the integer equivalent
+	 * @param bits the bits to be converted
+	 * @param msbFirst (Most Significant Bit First), true if the most significant bit is the first element in the array (index 0)
+	 * @return an int value of the bits in the array
+	 */
+	public static int bitsToInt(boolean[] bits, boolean msbFirst) {
+		int value = 0;
+		
+		if(bits.length > Integer.SIZE) {
+			throw new NumberFormatException("bit array is too large to convert to int.");
+		}
+		
+		if(msbFirst) {
+			int msbShift = bits.length - 1; //how far to shift the most significant bit
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					value += (1 << (msbShift - x));
+				}
+			}
+		}
+		else {
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					value += (1 << x);
+				}
+			}
+		}
+	
+		return value;
+	}
+	
 }
 
 
