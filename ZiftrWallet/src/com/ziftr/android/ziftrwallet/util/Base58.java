@@ -69,6 +69,7 @@ public class Base58 {
 		return encodeChecked(addressBytes);
 	}
 
+	
 	public static String encodeChecked(byte[] data) {
 		byte[] result = Arrays.copyOfRange(data, 0, data.length + 4);
 		byte[] checked = CryptoUtils.doubleDigest(data);
@@ -76,6 +77,7 @@ public class Base58 {
 		return encode(result);
 	}
 
+	
 	/** 
 	 * Encodes the given bytes in base58. Checksum is not appended. 
 	 */

@@ -11,16 +11,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.crypto.SecretKey;
 
+import org.spongycastle.crypto.digests.SHA512Digest;
+import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.spongycastle.crypto.params.KeyParameter;
+
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
@@ -830,14 +836,6 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		byte[] sha256hash = CryptoUtils.Sha256Hash(entropy);
 		int checksumSize = entropySize / 32;
 		
-
-		//swap for endianess??
-		//sha256hash = org.spongycastle.util.Arrays.reverse(sha256hash);
-		//entropy = org.spongycastle.util.Arrays.reverse(entropy);
-		
-		
-		//BitSet checksumBits = ZiftrUtils.bytesToBitSet(sha256hash);
-		//BitSet mnemonicBits = ZiftrUtils.bytesToBitSet(entropy);
 		boolean[] checksumBits = ZiftrUtils.bytesToBits(sha256hash, true);
 		boolean[] mnemonicBits = ZiftrUtils.bytesToBits(entropy, true);
 		
@@ -846,23 +844,18 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		
 		//append the first bits of the checksum to the end of the original entropy, per bip-39
 		for(int x = 0; x < checksumSize; x++) {
-			//mnemonicBits.set(entropySize + x, checksumBits.get(x));
 			mnemonicBits[entropySize + x] = checksumBits[x];
 		}
 		
 		
 		//create an array of indexes into the word list
-		//can't just use mnemonicBits.length() because it only counts up to the highest set bit
 		int[] mnemonicWordIndexes = new int[(entropySize + checksumSize) / 11]; 
 		
 		for(int x = 0; x < mnemonicWordIndexes.length; x++) {
 			int startBitIndex = x * 11;
 			int endBitIndex = startBitIndex + 11;
 			
-			//BitSet wordIndexBits = mnemonicBits.get(startBitIndex, endBitIndex);
 			boolean[] wordIndexBits = Arrays.copyOfRange(mnemonicBits, startBitIndex, endBitIndex);
-			
-			//mnemonicWordIndexes[x] = ZiftrUtils.bitSetToInt(wordIndexBits);
 			mnemonicWordIndexes[x] = ZiftrUtils.bitsToInt(wordIndexBits, true);
 		}
 		
@@ -902,6 +895,65 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		
 		return wordList;
 	}
+	
+	
+	
+	public static byte[] generateHdSeed(String[] mnemonicSentence, String seedPassword) {
+	
+		if(seedPassword == null) {
+			seedPassword = "";
+		}
+		else {
+			//we need to make sure the password is ok for this particular version of Android
+			//see: http://android-developers.blogspot.com/2013/12/changes-to-secretkeyfactory-api-in.html
+			//best solution is to just not allow users to use non-ascii characters in their password for 4.3 and earlier versions
+			//this way there's no issues of possible compatibility with other bip 39 hd wallet implementations
+			
+			//note: using spongycastle now so we don't need to worry about this
+			/**
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+				for(char c : seedPassword.toCharArray()) {
+					if((c & 0x7F) != c) {
+						return null;
+					}
+				}
+			}
+			**/
+		}
+		
+		
+		String mnemonicString = Joiner.on(" ").join(mnemonicSentence);
+		mnemonicString = Normalizer.normalize(mnemonicString, Normalizer.Form.NFKD);
+		
+		String salt = "mnemonic" + seedPassword;
+		salt = Normalizer.normalize(salt, Normalizer.Form.NFKD);
+		
+
+		int keySize = 512;
+		int iterations = 2048;
+		
+		try {
+			byte[] mnemonicBytes = mnemonicString.getBytes("UTF-8");
+			byte[] saltBytes = salt.getBytes("UTF-8");
+			
+			
+			PKCS5S2ParametersGenerator generator = new PKCS5S2ParametersGenerator(new SHA512Digest());
+			generator.init(mnemonicBytes, saltBytes, iterations);
+			
+			KeyParameter keyParams = (KeyParameter) generator.generateDerivedParameters(keySize);
+			byte[] derivedKeyBytes = keyParams.getKey();
+			
+			return derivedKeyBytes;
+		} 
+		catch (Exception e) {
+			ZLog.log("Excpetion generating HD Seed: ", e);
+		}
+		
+		
+		return null;
+	}
+	
+	
 	
 	
 	private static synchronized String createNewHdWalletSeed(String password) {

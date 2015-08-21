@@ -129,6 +129,8 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 			p = p.deriveChild(ci);
 		}
 		
+		String xprv = p.xprv(true);
+		
 		if (path.resolvesToPublicKey()) {
 			ZWExtendedPublicKey pub = (ZWExtendedPublicKey) p.calculatePublicKey(true);
 			for (ZWHdChildNumber ci : path.getRelativeToPub()) {
@@ -140,17 +142,26 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		return p;
 	}
 	
+	
+	
 	public String xprv(boolean mainnet) {
 		return Base58.encodeChecked(this.serialize(mainnet));
 	}
 
+	
+	/**
+	 * Gets the serialized version of this extended private key.
+	 * Note: returned bytes do NOT include checksum (for converting to base58)
+	 * @param mainnet
+	 * @return
+	 */
 	public byte[] serialize(boolean mainnet) {
 		ByteBuffer b = ByteBuffer.allocate(78);
-		b.put(mainnet ? HD_VERSION_MAIN_PRIV : HD_VERSION_TEST_PRIV);
-		b.put(this.data.serialize());
+		b.put(mainnet ? HD_VERSION_MAIN_PRIV : HD_VERSION_TEST_PRIV); //version bytes
+		b.put(this.data.serialize()); //data contains (in order), depth, fingerprint, child number, chain code
 		b.put((byte)0);
 		b.put(this.getPrivKeyBytes());
-		CryptoUtils.checkHd(b.remaining() == 0);
+		CryptoUtils.checkHd(b.remaining() == 0); 
 		return b.array();
 	}
 

@@ -42,6 +42,7 @@ import android.widget.TextView;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
+import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
@@ -64,6 +65,7 @@ import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.util.CryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -272,11 +274,31 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		ZiftrDialogManager.showWaitingDialogs();
 		
 		byte[] test = new byte[16];
-		//ZiftrUtils.createTrulySecureRandom().nextBytes(test);
-		test = new byte[]{0x10, 0x08, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; //{-20, -27, -109, 91, -100, -128, -90, -113, -21, 24, -114, -69, 52, -7, -40, -105};
+		ZiftrUtils.createTrulySecureRandom().nextBytes(test);
+		//test = new byte[]{116, 32, -74, -54, 22, -121, 124, -10, -115, -12, -34, -59, 11, 57, 83, 33};
+		test = new byte[]{0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f};
 		
 		//TODO -testing
-		ZWWalletManager.createHdWalletMnemonic(test);
+		String[] mnemonicTest = ZWWalletManager.createHdWalletMnemonic(test);
+		
+		byte[] derivedKeySeed = ZWWalletManager.generateHdSeed(mnemonicTest, "this is a test");
+		
+		String derivedKeySeedString = ZiftrUtils.bytesToHexString(derivedKeySeed);
+				
+		ZWExtendedPrivateKey rootKey = new ZWExtendedPrivateKey(derivedKeySeed);
+		String rootKeyString = rootKey.xprv(true);
+		
+		String privPath = rootKey.getPath().toString();
+		
+		String path = "m/44'/0'/0'/0"; //"[m/44'/0'/0']";
+		ZWExtendedPrivateKey extendedKey = (ZWExtendedPrivateKey) rootKey.deriveChild(path);
+		String extendedKeyString = extendedKey.xprv(true);
+		
+		byte[] hmacBytes = CryptoUtils.Hmac("Bitcoin seed".getBytes(), derivedKeySeed);
+		String hmacString = ZiftrUtils.bytesToHexString(hmacBytes);
+		
+		ZLog.log("Generated HD Seed: ", derivedKeySeedString);
+		ZLog.log("Generated HD Root Key: ", rootKeyString);
 		
 	}
 
