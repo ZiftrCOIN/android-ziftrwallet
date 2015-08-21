@@ -19,7 +19,7 @@ import com.google.common.base.Charsets;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.util.Base58;
+import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -83,7 +83,7 @@ public class ZWCoin implements ZWCurrency {
 				//if the schemes are equal we found the right coin
 				//now check if it's regular or testnet (or the address is messed up)
 				try {
-					byte[] decodedAddress = Base58.decodeChecked(address);
+					byte[] decodedAddress = ZiftrBase58.decodeChecked(address);
 					byte prefix = decodedAddress[0];
 					if(prefix == coin.pubKeyHashPrefix || prefix == coin.scriptHashPrefix) {
 						return coin;
@@ -328,7 +328,7 @@ public class ZWCoin implements ZWCurrency {
 		}
 
 		try {
-			byte[] decodedBytes = Base58.decode(address);
+			byte[] decodedBytes = ZiftrBase58.decode(address);
 			for (byte b : this.getAcceptableAddressCodes()) {
 				if (decodedBytes[0] == b) {
 					return true;

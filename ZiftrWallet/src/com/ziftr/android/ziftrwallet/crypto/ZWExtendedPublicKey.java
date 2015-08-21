@@ -7,8 +7,8 @@ import java.util.Arrays;
 import org.spongycastle.math.ec.ECPoint;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.Base58;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 
 /**
  * Public key paths look like this:
@@ -46,9 +46,9 @@ public class ZWExtendedPublicKey extends ZWPublicKey {
 			throw new ZWHdWalletException("Keys should be combined with their relative path.");
 		}
 		this.path = path;
-		byte[] decoded = Base58.decodeChecked(xpub);
+		byte[] decoded = ZiftrBase58.decodeChecked(xpub);
 		byte[] version = Arrays.copyOfRange(decoded, 0, 4);
-		CryptoUtils.checkPublicVersionBytes(version);
+		ZWCryptoUtils.checkPublicVersionBytes(version);
 		this.data = new ZWHdData(xpub);
 		this.pub = Arrays.copyOfRange(decoded, 45, 78);
 	}
@@ -86,15 +86,15 @@ public class ZWExtendedPublicKey extends ZWPublicKey {
 		}
 
 		System.arraycopy(index.serialize(), 0, hmacData, 33, 4);
-		byte[] result = CryptoUtils.Hmac(this.data.chainCode, hmacData);
+		byte[] result = ZWCryptoUtils.Hmac(this.data.chainCode, hmacData);
 
-		BigInteger left = new BigInteger(1, CryptoUtils.left(result));
-		CryptoUtils.checkLessThanCurveOrder(left);
+		BigInteger left = new BigInteger(1, ZWCryptoUtils.left(result));
+		ZWCryptoUtils.checkLessThanCurveOrder(left);
 		ECPoint leftMultiple = ZWCurveParameters.CURVE.getG().multiply(left);
 		ECPoint newPub = leftMultiple.add(this.getPoint());
-		CryptoUtils.checkNotPointAtInfinity(newPub);
+		ZWCryptoUtils.checkNotPointAtInfinity(newPub);
 
-		byte[] childChainCode = CryptoUtils.right(result);
+		byte[] childChainCode = ZWCryptoUtils.right(result);
 		ZWHdFingerPrint parentFingerPrint = new ZWHdFingerPrint(this.getPubKeyHash());
 		ZWHdData childData = new ZWHdData((byte)(this.data.depth + 1), parentFingerPrint, index, childChainCode);
 
@@ -122,7 +122,7 @@ public class ZWExtendedPublicKey extends ZWPublicKey {
 	}
 
 	public String xpub(boolean mainnet) {
-		return Base58.encodeChecked(this.serialize(mainnet));
+		return ZiftrBase58.encodeChecked(this.serialize(mainnet));
 	}
 
 	public byte[] serialize(boolean mainnet) {
@@ -132,7 +132,7 @@ public class ZWExtendedPublicKey extends ZWPublicKey {
 		b.put(mainnet ? HD_VERSION_MAIN_PUB: HD_VERSION_TEST_PUB);
 		b.put(this.data.serialize());
 		b.put(this.getPubKeyBytes());
-		CryptoUtils.checkHd(b.remaining() == 0);
+		ZWCryptoUtils.checkHd(b.remaining() == 0);
 		return b.array();
 	}
 	

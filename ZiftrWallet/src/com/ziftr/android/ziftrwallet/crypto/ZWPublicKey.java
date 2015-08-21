@@ -22,7 +22,7 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.encoders.Base64;
 
 import com.google.common.base.Preconditions;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -91,7 +91,7 @@ public class ZWPublicKey {
 	/** Gets the hash160 form of the public key (as seen in addresses). */
 	public byte[] getPubKeyHash() {
 		if (pubKeyHash == null)
-			pubKeyHash = CryptoUtils.sha256hash160(this.pub);
+			pubKeyHash = ZWCryptoUtils.sha256hash160(this.pub);
 		return pubKeyHash;
 	}
 

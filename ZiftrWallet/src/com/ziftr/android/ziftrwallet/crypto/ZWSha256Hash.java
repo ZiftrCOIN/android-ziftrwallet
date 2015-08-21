@@ -33,7 +33,7 @@ import java.util.Arrays;
 import org.spongycastle.crypto.RuntimeCryptoException;
 
 import com.google.common.io.ByteStreams;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -77,7 +77,7 @@ public class ZWSha256Hash implements Comparable<ZWSha256Hash> {
 	 * Calculates the hash of the hash of the contents. This is a standard operation in digital currency.
 	 */
 	public static ZWSha256Hash createDouble(byte[] contents) {
-		return new ZWSha256Hash(CryptoUtils.doubleDigest(contents));
+		return new ZWSha256Hash(ZWCryptoUtils.doubleDigest(contents));
 	}
 
 	/**

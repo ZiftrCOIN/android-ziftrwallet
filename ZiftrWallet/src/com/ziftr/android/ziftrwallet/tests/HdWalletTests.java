@@ -240,6 +240,13 @@ public class HdWalletTests extends TestCase {
 
 		assertTrue(Arrays.equals(M_child_child_1.serialize(true), M_child_child_2.serialize(true)));
 	}
+	
+	
+	@Test
+	public void testMnemonicGeneration() {
+		
+	}
+	
 
 	@Test
 	public void testPubDerivationThrows() throws ZWAddressFormatException {

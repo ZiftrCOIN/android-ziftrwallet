@@ -28,7 +28,7 @@ import android.annotation.SuppressLint;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListItem;
-import com.ziftr.android.ziftrwallet.util.Base58;
+import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 /**
@@ -130,7 +130,7 @@ public class ZWSendingAddress implements ZWSearchableListItem {
 	 */
 	public ZWSendingAddress(ZWCoin coinId, String address) throws ZWAddressFormatException {
 		// Checksum is validated in the decoding
-		byte[] allData = Base58.decodeChecked(address);
+		byte[] allData = ZiftrBase58.decodeChecked(address);
 		byte[] hash160 = ZiftrUtils.stripVersionAndChecksum(allData, 20);
 
 		this.initialize(coinId, allData[0], hash160);
@@ -250,7 +250,7 @@ public class ZWSendingAddress implements ZWSearchableListItem {
 	 * @return the public address as a String
 	 */
 	public String getAddress() {
-		return Base58.encode(this.versionByte, this.hash160);
+		return ZiftrBase58.encode(this.versionByte, this.hash160);
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class ZWSendingAddress implements ZWSearchableListItem {
 	 */
 	@Nullable
 	public static ZWCoin getCoinTypeFromAddress(String address) throws ZWAddressFormatException {
-		return getCoinTypeFromDecodedAddress(Base58.decodeChecked(address));
+		return getCoinTypeFromDecodedAddress(ZiftrBase58.decodeChecked(address));
 	}
 
 	@Nullable

@@ -7,8 +7,8 @@ import java.util.Arrays;
 import org.spongycastle.math.ec.ECPoint;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.Base58;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 
 public class ZWExtendedPrivateKey extends ZWPrivateKey {
 
@@ -28,10 +28,10 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		if (seed == null) {
 			throw new ZWHdWalletException("Null seed is not valid. ");
 		}
-		byte[] result = CryptoUtils.Hmac(MASTER_HMAC_KEY, seed);
-		this.priv = new BigInteger(1, CryptoUtils.left(result));
+		byte[] result = ZWCryptoUtils.Hmac(MASTER_HMAC_KEY, seed);
+		this.priv = new BigInteger(1, ZWCryptoUtils.left(result));
 		this.path = new ZWHdPath("m");
-		this.data = new ZWHdData(CryptoUtils.right(result));
+		this.data = new ZWHdData(ZWCryptoUtils.right(result));
 	}
 	
 	public ZWExtendedPrivateKey(String path, String xprv) throws ZWAddressFormatException {
@@ -43,9 +43,9 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 	 */
 	protected ZWExtendedPrivateKey(ZWHdPath path, String xprv) throws ZWAddressFormatException {
 		super(false);
-		byte[] decoded = Base58.decodeChecked(xprv);
+		byte[] decoded = ZiftrBase58.decodeChecked(xprv);
 		byte[] version = Arrays.copyOfRange(decoded, 0, 4);
-		CryptoUtils.checkPrivateVersionBytes(version);
+		ZWCryptoUtils.checkPrivateVersionBytes(version);
 		this.data = new ZWHdData(xprv);
 		if (path == null) {
 			throw new ZWHdWalletException("Keys should be combined with their relative path.");
@@ -92,7 +92,7 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		}
 
 		System.arraycopy(index.serialize(), 0, hmacData, 33, 4);
-		byte[] result = CryptoUtils.Hmac(this.data.chainCode, hmacData);
+		byte[] result = ZWCryptoUtils.Hmac(this.data.chainCode, hmacData);
 
 		// This addition modulo the curve order is what makes it possible to generate child public keys without
 		// knowing the private key (for non-hardened children). Essentially
@@ -102,12 +102,12 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		// which is the same as
 		//     pub_child = pub_parent + one_way(pub_parent) * G
 		// TODO In case parse256(I_left) ³ n or ki = 0, the resulting key is invalid, proceed with the next value
-		BigInteger left = new BigInteger(1, CryptoUtils.left(result));
-		CryptoUtils.checkLessThanCurveOrder(left);
+		BigInteger left = new BigInteger(1, ZWCryptoUtils.left(result));
+		ZWCryptoUtils.checkLessThanCurveOrder(left);
 		BigInteger newPriv = left.add(this.priv).mod(ZWCurveParameters.CURVE_ORDER);
-		CryptoUtils.checkNonZero(newPriv);
+		ZWCryptoUtils.checkNonZero(newPriv);
 
-		byte[] childChainCode = CryptoUtils.right(result);
+		byte[] childChainCode = ZWCryptoUtils.right(result);
 		ZWHdFingerPrint parentFingerPrint = new ZWHdFingerPrint(this.getPub().getPubKeyHash());
 		ZWHdData childData = new ZWHdData((byte)(this.data.depth + 1), parentFingerPrint, index, childChainCode);
 
@@ -145,7 +145,7 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 	
 	
 	public String xprv(boolean mainnet) {
-		return Base58.encodeChecked(this.serialize(mainnet));
+		return ZiftrBase58.encodeChecked(this.serialize(mainnet));
 	}
 
 	
@@ -161,7 +161,7 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		b.put(this.data.serialize()); //data contains (in order), depth, fingerprint, child number, chain code
 		b.put((byte)0);
 		b.put(this.getPrivKeyBytes());
-		CryptoUtils.checkHd(b.remaining() == 0); 
+		ZWCryptoUtils.checkHd(b.remaining() == 0); 
 		return b.array();
 	}
 

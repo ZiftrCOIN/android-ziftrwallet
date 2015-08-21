@@ -11,8 +11,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.Base58;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 
 /** 
  * A class that holds the associated HD wallet tree information
@@ -56,7 +56,7 @@ public class ZWHdData {
 	}
 	
 	public ZWHdData(String xp) throws ZWAddressFormatException {
-		byte[] decoded = Base58.decodeChecked(xp);
+		byte[] decoded = ZiftrBase58.decodeChecked(xp);
 		if (decoded[4] < 0) throw new ZWAddressFormatException("Depth may not be less than zero.");
 		this.depth = decoded[4];
 		this.parentFingerPrint = new ZWHdFingerPrint(Arrays.copyOfRange(decoded, 5, 9));
@@ -80,7 +80,7 @@ public class ZWHdData {
 		b.put(this.parentFingerPrint.serialize());
 		b.put(this.index.serialize());
 		b.put(this.chainCode);
-		CryptoUtils.checkHd(b.remaining() == 0);
+		ZWCryptoUtils.checkHd(b.remaining() == 0);
 		return b.array();
 	}
 	

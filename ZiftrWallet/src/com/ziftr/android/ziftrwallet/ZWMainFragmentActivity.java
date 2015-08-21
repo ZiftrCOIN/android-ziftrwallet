@@ -65,7 +65,7 @@ import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkHandler;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -294,7 +294,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		ZWExtendedPrivateKey extendedKey = (ZWExtendedPrivateKey) rootKey.deriveChild(path);
 		String extendedKeyString = extendedKey.xprv(true);
 		
-		byte[] hmacBytes = CryptoUtils.Hmac("Bitcoin seed".getBytes(), derivedKeySeed);
+		byte[] hmacBytes = ZWCryptoUtils.Hmac("Bitcoin seed".getBytes(), derivedKeySeed);
 		String hmacString = ZiftrUtils.bytesToHexString(hmacBytes);
 		
 		ZLog.log("Generated HD Seed: ", derivedKeySeedString);

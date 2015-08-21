@@ -10,7 +10,7 @@ import java.util.Arrays;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -392,9 +392,9 @@ public abstract class ZWPreferences {
 
 		byte[] newPasswordBytes = password.getBytes();
 		byte[] concat = new byte[32 + password.getBytes().length];
-		System.arraycopy(CryptoUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
+		System.arraycopy(ZWCryptoUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
 		System.arraycopy(newPasswordBytes, 0, concat, 32, newPasswordBytes.length);
-		return CryptoUtils.Sha256Hash(concat);
+		return ZWCryptoUtils.Sha256Hash(concat);
 	}
 
 	

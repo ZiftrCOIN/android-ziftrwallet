@@ -45,7 +45,7 @@ import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
  * <li>Doubleclicking selects the whole number as one word if it's all alphanumeric.</li>
  * </ul>
  */
-public class Base58 {
+public class ZiftrBase58 {
 	public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
 
 	private static final int[] INDEXES = new int[128];
@@ -72,7 +72,7 @@ public class Base58 {
 	
 	public static String encodeChecked(byte[] data) {
 		byte[] result = Arrays.copyOfRange(data, 0, data.length + 4);
-		byte[] checked = CryptoUtils.doubleDigest(data);
+		byte[] checked = ZWCryptoUtils.doubleDigest(data);
 		System.arraycopy(checked, 0, result, data.length, 4);
 		return encode(result);
 	}
@@ -182,7 +182,7 @@ public class Base58 {
 		byte[] bytes = copyOfRange(tmp, 0, tmp.length - 4);
 		byte[] checksum = copyOfRange(tmp, tmp.length - 4, tmp.length);
 
-		tmp = CryptoUtils.doubleDigest(bytes);
+		tmp = ZWCryptoUtils.doubleDigest(bytes);
 		byte[] hash = copyOfRange(tmp, 0, 4);
 		if (!Arrays.equals(checksum, hash)) 
 			throw new ZWAddressFormatException("Checksum does not validate");

@@ -46,7 +46,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -833,7 +833,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			//TODO error, must be at least 128 bits of entropy and must be a multiple of 32
 		}
 		
-		byte[] sha256hash = CryptoUtils.Sha256Hash(entropy);
+		byte[] sha256hash = ZWCryptoUtils.Sha256Hash(entropy);
 		int checksumSize = entropySize / 32;
 		
 		boolean[] checksumBits = ZiftrUtils.bytesToBits(sha256hash, true);

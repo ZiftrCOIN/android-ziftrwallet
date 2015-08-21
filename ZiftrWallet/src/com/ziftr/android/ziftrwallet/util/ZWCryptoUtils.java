@@ -23,7 +23,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdWalletException;
 
-public class CryptoUtils {
+public class ZWCryptoUtils {
 
 	private static final MessageDigest digest;
 	static {
@@ -98,9 +98,9 @@ public class CryptoUtils {
 
 		byte[] newPasswordBytes = password.getBytes();
 		byte[] concat = new byte[32 + password.getBytes().length];
-		System.arraycopy(CryptoUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
+		System.arraycopy(ZWCryptoUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
 		System.arraycopy(newPasswordBytes, 0, concat, 32, newPasswordBytes.length);
-		return CryptoUtils.Sha256Hash(concat);
+		return ZWCryptoUtils.Sha256Hash(concat);
 	}
 
 	public static String saltedHashString(String newPassword) {

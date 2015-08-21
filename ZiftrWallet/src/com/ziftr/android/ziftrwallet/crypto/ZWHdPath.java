@@ -3,7 +3,7 @@ package com.ziftr.android.ziftrwallet.crypto;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ziftr.android.ziftrwallet.util.CryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 
 /**
  * An object that stores directions for navigating down a BIP32 HD wallet tree.
@@ -36,20 +36,20 @@ public class ZWHdPath {
 
 	public ZWHdPath(String path) {
 
-		if (CryptoUtils.isPrivPath(path)) {
+		if (ZWCryptoUtils.isPrivPath(path)) {
 			// private path, starts with m
 			path = path.replaceFirst("m", "");
 			this.relativeToPrv = this.split(path);
 			this.relativeToPub = null;
-		} else if (CryptoUtils.isPubDerivedFromPrvPath(path)) {
+		} else if (ZWCryptoUtils.isPubDerivedFromPrvPath(path)) {
 			// public path derived from private, starts with [m
 			String main = path.substring(2);
 			// -1 makes the empty string at the end included, if a path like [m/1/2]  
 			String[] parts = main.split("]", -1);
-			CryptoUtils.checkHd(parts.length == 2);
+			ZWCryptoUtils.checkHd(parts.length == 2);
 			this.relativeToPrv = this.split(parts[0]);
 			this.relativeToPub = this.split(parts[1]);
-		} else if (CryptoUtils.isPubDerivedFromPubPath(path)) {
+		} else if (ZWCryptoUtils.isPubDerivedFromPubPath(path)) {
 			// public path, starts with M
 			path = path.replaceFirst("M", "");
 			this.relativeToPrv = null;
@@ -62,13 +62,13 @@ public class ZWHdPath {
 	}
 
 	private void checkValidity() {
-		CryptoUtils.checkHd(this.relativeToPrv != null || this.relativeToPub != null);
-		CryptoUtils.checkHd(this.resolvesToPrivateKey() != this.resolvesToPublicKey());
-		CryptoUtils.checkHd(this.derivedFromPrivateKey() != this.derivedFromPublicKey());
-		CryptoUtils.checkHd(!(this.derivedFromPublicKey() && this.resolvesToPrivateKey()));
+		ZWCryptoUtils.checkHd(this.relativeToPrv != null || this.relativeToPub != null);
+		ZWCryptoUtils.checkHd(this.resolvesToPrivateKey() != this.resolvesToPublicKey());
+		ZWCryptoUtils.checkHd(this.derivedFromPrivateKey() != this.derivedFromPublicKey());
+		ZWCryptoUtils.checkHd(!(this.derivedFromPublicKey() && this.resolvesToPrivateKey()));
 		if (this.resolvesToPublicKey()) {
 			for (ZWHdChildNumber pubChild : this.relativeToPub) {
-				CryptoUtils.checkHd(!pubChild.isHardened());
+				ZWCryptoUtils.checkHd(!pubChild.isHardened());
 			}
 		}
 	}
@@ -150,7 +150,7 @@ public class ZWHdPath {
 		ZWHdPath clone = new ZWHdPath(this);
 		if (child != null) {
 			if (this.resolvesToPublicKey()) {
-				CryptoUtils.checkHd(!child.isHardened());
+				ZWCryptoUtils.checkHd(!child.isHardened());
 				clone.relativeToPub.add(child);
 			} else {
 				clone.relativeToPrv.add(child);
@@ -259,22 +259,22 @@ public class ZWHdPath {
 	}
 
 	private void checkBip44Path() {
-		CryptoUtils.checkHd(this.derivedFromPrivateKey());
+		ZWCryptoUtils.checkHd(this.derivedFromPrivateKey());
 
 		if (this.resolvesToPrivateKey()) {
-			CryptoUtils.checkHd(this.relativeToPrv.size() == 5);
-			CryptoUtils.checkHd(!this.relativeToPrv.get(3).isHardened());
-			CryptoUtils.checkHd(!this.relativeToPrv.get(4).isHardened());
+			ZWCryptoUtils.checkHd(this.relativeToPrv.size() == 5);
+			ZWCryptoUtils.checkHd(!this.relativeToPrv.get(3).isHardened());
+			ZWCryptoUtils.checkHd(!this.relativeToPrv.get(4).isHardened());
 		} else {
-			CryptoUtils.checkHd(this.relativeToPrv.size() == 3);
-			CryptoUtils.checkHd(this.relativeToPub.size() == 2);
-			CryptoUtils.checkHd(!this.relativeToPub.get(0).isHardened());
-			CryptoUtils.checkHd(!this.relativeToPub.get(1).isHardened());
+			ZWCryptoUtils.checkHd(this.relativeToPrv.size() == 3);
+			ZWCryptoUtils.checkHd(this.relativeToPub.size() == 2);
+			ZWCryptoUtils.checkHd(!this.relativeToPub.get(0).isHardened());
+			ZWCryptoUtils.checkHd(!this.relativeToPub.get(1).isHardened());
 		}
 
-		CryptoUtils.checkHd(this.relativeToPrv.get(0).isHardened());
-		CryptoUtils.checkHd(this.relativeToPrv.get(1).isHardened());
-		CryptoUtils.checkHd(this.relativeToPrv.get(2).isHardened());
+		ZWCryptoUtils.checkHd(this.relativeToPrv.get(0).isHardened());
+		ZWCryptoUtils.checkHd(this.relativeToPrv.get(1).isHardened());
+		ZWCryptoUtils.checkHd(this.relativeToPrv.get(2).isHardened());
 	}
 
 	public boolean isBip44Path() {
