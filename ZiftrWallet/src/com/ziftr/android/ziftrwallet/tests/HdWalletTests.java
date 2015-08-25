@@ -14,8 +14,8 @@ import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdChildNumber;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdPath;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdWalletException;
+import com.ziftr.android.ziftrwallet.crypto.ZWMnemonicGenerator;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class HdWalletTests extends TestCase {
@@ -249,14 +249,14 @@ public class HdWalletTests extends TestCase {
 		
 		byte[] testSeedData = new byte[]{0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f};
 		
-		String[] mnemonicSentence = ZWWalletManager.createHdWalletMnemonic(testSeedData);
+		String[] mnemonicSentence = ZWMnemonicGenerator.createHdWalletMnemonic(testSeedData);
 		
 		//make sure the mnemonic was properly generated from a known data set
 		String mnemonicString = Joiner.on(" ").join(mnemonicSentence);
 		assertEquals(mnemonicString, "legal winner thank year wave sausage worth useful legal winner thank yellow");
 		
 		//make sure we can generate a proper seed from the mnemonic and password according to bip39
-		byte[] hdSeed = ZWWalletManager.generateHdSeed(mnemonicSentence, "this is a test");
+		byte[] hdSeed = ZWMnemonicGenerator.generateHdSeed(mnemonicSentence, "this is a test");
 		
 		ZWExtendedPrivateKey rootKey = new ZWExtendedPrivateKey(hdSeed);
 		String rootKeyString = rootKey.xprv(true);
@@ -269,6 +269,21 @@ public class HdWalletTests extends TestCase {
 		String extendedKeyString = extendedKey.xprv(true);
 		
 		assertEquals(extendedKeyString, "xprvA1hCyZyZxgqyC1yaZqo93iUNTWr6V7nBnCrEmVZswNDPiqT6JBWG1S6banhSoWVdv5DvEsTYEX8Dsfh5wWtadFkJMsPMZzA3n86v8M1A84R");
+	}
+	
+	
+	@Test
+	public void testMnemonicChecksum() {
+
+		String validMnemonic = "legal winner thank year wave sausage worth useful legal winner thank yellow";
+		boolean passed = ZWMnemonicGenerator.passesChecksum(validMnemonic);
+		
+		assertTrue(passed);
+		
+		String invalidMnemonic = "legal winner thank year wave sausage worth useful yellow winner thank legal";
+		passed = ZWMnemonicGenerator.passesChecksum(invalidMnemonic);
+		
+		assertFalse(passed);
 	}
 	
 

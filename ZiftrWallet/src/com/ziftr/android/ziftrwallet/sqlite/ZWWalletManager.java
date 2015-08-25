@@ -5,28 +5,18 @@
  */
 package com.ziftr.android.ziftrwallet.sqlite;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.crypto.SecretKey;
-
-import org.spongycastle.crypto.digests.SHA512Digest;
-import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
-import org.spongycastle.crypto.params.KeyParameter;
 
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
@@ -46,7 +36,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
-import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -825,133 +814,10 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	}
 
 	
-	public static synchronized String[] createHdWalletMnemonic(byte[] entropy) {
-		
-		int entropySize = Byte.SIZE * entropy.length; //bits in each byte * number of bytes
-		
-		if(entropySize < 128 || entropySize % 32 != 0) {
-			//TODO error, must be at least 128 bits of entropy and must be a multiple of 32
-		}
-		
-		byte[] sha256hash = ZWCryptoUtils.Sha256Hash(entropy);
-		int checksumSize = entropySize / 32;
-		
-		boolean[] checksumBits = ZiftrUtils.bytesToBits(sha256hash, true);
-		boolean[] mnemonicBits = ZiftrUtils.bytesToBits(entropy, true);
-		
-		
-		mnemonicBits = Arrays.copyOf(mnemonicBits, entropySize + checksumSize);
-		
-		//append the first bits of the checksum to the end of the original entropy, per bip-39
-		for(int x = 0; x < checksumSize; x++) {
-			mnemonicBits[entropySize + x] = checksumBits[x];
-		}
-		
-		
-		//create an array of indexes into the word list
-		int[] mnemonicWordIndexes = new int[(entropySize + checksumSize) / 11]; 
-		
-		for(int x = 0; x < mnemonicWordIndexes.length; x++) {
-			int startBitIndex = x * 11;
-			int endBitIndex = startBitIndex + 11;
-			
-			boolean[] wordIndexBits = Arrays.copyOfRange(mnemonicBits, startBitIndex, endBitIndex);
-			mnemonicWordIndexes[x] = ZiftrUtils.bitsToInt(wordIndexBits, true);
-		}
-		
-		ArrayList<String> wordList = getWordList();
-		
-		String[] mnemonicSentence = new String[mnemonicWordIndexes.length];
-		for(int x = 0; x < mnemonicSentence.length; x++) {
-			mnemonicSentence[x] = wordList.get(mnemonicWordIndexes[x]);
-		}
-		
-		ZLog.log("Generated mnemonic sentence: ", Arrays.toString(mnemonicSentence));
-		
-		return mnemonicSentence;
-	}
-	
-	
-	public static ArrayList<String> getWordList() {
-		
-		ArrayList<String> wordList = new ArrayList<String>(2048);
-		
-		try {
-			InputStream wordlistInputStream = ZWApplication.getApplication().getResources().openRawResource(R.raw.english);
-			
-			BufferedReader reader = new BufferedReader(new InputStreamReader(wordlistInputStream));
-			String word = reader.readLine();
-			while(word != null) {
-				wordList.add(word.trim());
-				word = reader.readLine();
-			}
-			
-			reader.close();
-		}
-		catch(Exception e) {
-			ZLog.log("Exception loading bip39 word list: ", e);
-		}
-		
-		
-		return wordList;
-	}
 	
 	
 	
-	public static byte[] generateHdSeed(String[] mnemonicSentence, String seedPassword) {
 	
-		if(seedPassword == null) {
-			seedPassword = "";
-		}
-		else {
-			//we need to make sure the password is ok for this particular version of Android
-			//see: http://android-developers.blogspot.com/2013/12/changes-to-secretkeyfactory-api-in.html
-			//best solution is to just not allow users to use non-ascii characters in their password for 4.3 and earlier versions
-			//this way there's no issues of possible compatibility with other bip 39 hd wallet implementations
-			
-			//note: using spongycastle now so we don't need to worry about this
-			/**
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-				for(char c : seedPassword.toCharArray()) {
-					if((c & 0x7F) != c) {
-						return null;
-					}
-				}
-			}
-			**/
-		}
-		
-		
-		String mnemonicString = Joiner.on(" ").join(mnemonicSentence);
-		mnemonicString = Normalizer.normalize(mnemonicString, Normalizer.Form.NFKD);
-		
-		String salt = "mnemonic" + seedPassword;
-		salt = Normalizer.normalize(salt, Normalizer.Form.NFKD);
-		
-
-		int keySize = 512;
-		int iterations = 2048;
-		
-		try {
-			byte[] mnemonicBytes = mnemonicString.getBytes("UTF-8");
-			byte[] saltBytes = salt.getBytes("UTF-8");
-			
-			
-			PKCS5S2ParametersGenerator generator = new PKCS5S2ParametersGenerator(new SHA512Digest());
-			generator.init(mnemonicBytes, saltBytes, iterations);
-			
-			KeyParameter keyParams = (KeyParameter) generator.generateDerivedParameters(keySize);
-			byte[] derivedKeyBytes = keyParams.getKey();
-			
-			return derivedKeyBytes;
-		} 
-		catch (Exception e) {
-			ZLog.log("Excpetion generating HD Seed: ", e);
-		}
-		
-		
-		return null;
-	}
 	
 	
 	
@@ -971,6 +837,9 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		
 		return seedString;
 	}
+	
+	
+	
 
 	
 	/**

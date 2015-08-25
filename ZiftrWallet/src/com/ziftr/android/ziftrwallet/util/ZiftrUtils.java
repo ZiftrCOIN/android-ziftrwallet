@@ -471,6 +471,32 @@ public class ZiftrUtils {
 	}
 	
 	
+	/**
+	 * converts an integer into an array of bits (booleans)
+	 * @param integer the int to be converted
+	 * @param msbFirst (Most Significant Bit First) if true, the most significant (left most) bit of the integer will be the first bit
+	 * in the array (index 0) 
+	 * @return an array of booleans representing the bit data
+	 */
+	public static boolean[] integerToBits(int integer, boolean msbFirst) {
+	
+		boolean[] bits = new boolean[Integer.SIZE];
+		
+		if(msbFirst) {
+			for(int x = 0; x < bits.length; x++) {
+				boolean bit = (integer & (1 << x)) > 0;
+				bits[bits.length -1 -x] = bit;
+			}
+		}
+		else {
+			for(int x = 0; x < bits.length; x++) {
+				boolean bit = (integer & (1 << x)) > 0;
+				bits[x] = bit;
+			}
+		}
+		
+		return bits;
+	}
 
 
 	/**
@@ -488,25 +514,70 @@ public class ZiftrUtils {
 		if(msbFirst) {
 			for(int x = 0; x < bytes.length; x++) {
 				byte data = bytes[x];
-				int byteIndex = x * Byte.SIZE + Byte.SIZE -1;
+				int bitIndex = x * Byte.SIZE + Byte.SIZE -1;
 				for(int i = Byte.SIZE -1; i >= 0 ; i--) {
 					boolean bit = (data & (1 << i)) > 0;
-					bits[byteIndex - i] = bit;
+					bits[bitIndex - i] = bit;
 				}
 			}
 		}
 		else {
 			for(int x = 0; x < bytes.length; x++) {
 				byte data = bytes[x];
-				int byteIndex = x * Byte.SIZE;
+				int bitIndex = x * Byte.SIZE;
 				for(int i = 0; i < Byte.SIZE; i++) {
 					boolean bit = (data & (1 << i)) > 0;
-					bits[byteIndex + i] = bit;
+					bits[bitIndex + i] = bit;
 				}
 			}
 		}
 		
 		return bits;
+	}
+	
+	
+	
+	/**
+	 * Converts an array of booleans representing bits into an array of bytes representing the bit data
+	 * @param bits the bits to be converted
+	 * @param msbFirst (Most Significant Bit First), if true, the first bit in the array is considered the most significant bit of
+	 * the first byte, the 9th bit (index 8) would be the most significant bit of the second byte, etc
+	 * @return an array of bytes representing the bit data passed in
+	 */
+	public static byte[] bitsToBytes(boolean[] bits, boolean msbFirst) {
+		byte[] bytes;
+		if(bits.length % Byte.SIZE != 0) {
+			ZLog.log("Trying to convert arbitrary sized bit array to bytes: size = ", String.valueOf(bits.length));
+			bytes = new byte[bits.length / Byte.SIZE +1];
+		}
+		else {
+			bytes = new byte[bits.length / Byte.SIZE];
+		}
+		
+		if(msbFirst) {
+			int byteIndex = 0;
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					byteIndex = x / Byte.SIZE;
+					int bitShift = Byte.SIZE -1 - x % Byte.SIZE;
+					
+					bytes[byteIndex] += 1 << bitShift;
+				}
+			}
+		}
+		else {
+			int byteIndex = 0;
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					byteIndex = x / Byte.SIZE;
+					int bitShift = x % Byte.SIZE;
+					
+					bytes[byteIndex] += 1 << bitShift;
+				}
+			}
+		}
+		
+		return bytes;
 	}
 	
 	

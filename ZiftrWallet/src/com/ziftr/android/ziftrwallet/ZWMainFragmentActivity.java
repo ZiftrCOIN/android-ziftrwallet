@@ -275,6 +275,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	@Override
 	public void onPostResume(){
 		super.onPostResume();
+		
 	}
 
 
