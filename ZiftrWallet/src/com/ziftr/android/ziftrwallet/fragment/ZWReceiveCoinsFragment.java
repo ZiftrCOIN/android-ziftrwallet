@@ -459,8 +459,9 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 		this.qrCodeGenerated = false;
 	}
 
-	public String getActionBarTitle() {
-		return "RECEIVE"; 
+	@Override
+	public int getActionBarTitleResId() {
+		return R.string.zw_actionbar_receive; 
 	}
 
 	@Override

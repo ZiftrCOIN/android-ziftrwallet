@@ -53,7 +53,7 @@ public class ZWWalletFragment extends ZWWalletUserFragment implements TextWatche
 	public void onResume() {
 		super.onResume();
 		// Changes action bar and registers this as the listener for search button clicks
-		this.getZWMainActivity().changeActionBar("ACCOUNT", true, true, false, this, this.txAdapter);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_account, true, true, false, this, this.txAdapter);
 		this.refreshData(true);
 
 	}

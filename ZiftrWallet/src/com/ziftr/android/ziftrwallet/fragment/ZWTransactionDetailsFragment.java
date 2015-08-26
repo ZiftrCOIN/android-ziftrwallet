@@ -114,7 +114,7 @@ implements ZWEditableTextBoxController.EditHandler<ZWTransaction>, OnClickListen
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("TRANSACTION", false, false, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_transaction, false, false, false);
 	}
 
 	/**

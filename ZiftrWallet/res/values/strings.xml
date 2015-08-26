@@ -166,6 +166,18 @@
     <string name="zw_dialog_error_rng">Unable to properly initialize this device\'s random number generator. Causes may be; too many apps running, low storage, or low battery. Until the issue is resolved, you will be unable to send coins, create new addresses, or create a password.</string>
 	<string name="zw_debug_cleared_data">All non-private data has been cleared and will re-sync. \nNote: Your wallet balance may be inaccurate until all coin types have been refreshed.</string>
 	<string name="zw_toast_wallet_created">Wallet Created!</string>
+	<string name="zw_button_manage_hd_wallet">Manage HD Account</string>
+	<string name="zw_actionbar_addresses">ADDRESSES</string>
+	<string name="zw_actionbar_account">ACCOUNT</string>
+	<string name="zw_actionbar_about">ABOUT</string>
+	<string name="zw_actionbar_main">ziftrWALLET</string>
+	<string name="zw_actionbar_currency">CURRENCY</string>
+	<string name="zw_actionbar_security">SECURITY</string>
+	<string name="zw_actionbar_settings">SETTINGS</string>
+	<string name="zw_actionbar_terms">TERMS</string>
+	<string name="zw_actionbar_transaction">TRANSACTION</string>
+	<string name="zw_actionbar_send">SEND</string>
+	<string name="zw_actionbar_receive">RECEIVE</string>
 </resources>
 
 

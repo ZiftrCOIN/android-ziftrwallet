@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -27,7 +28,7 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
-public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickListener {
+public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickListener, OnClickListener {
 
 	public static final String FRAGMENT_TAG = "new_currency";
 	
@@ -45,7 +46,7 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("CURRENCY", true, true, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_currency, true, true, false);
 	}
 
 	@Override
@@ -61,6 +62,9 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 		} else {
 			this.rootView.findViewById(R.id.no_currency_message).setVisibility(View.GONE);
 		}
+		
+		View manageHdAccountButton = rootView.findViewById(R.id.manageHdAccountButton);
+		manageHdAccountButton.setOnClickListener(this);
 		
 		initializeCurrencyList(unactivatedCoins);
 		return this.rootView;
@@ -154,6 +158,13 @@ public class ZWNewCurrencyFragment extends ZWFragment implements OnItemClickList
 		});
 
 		creatingAccountFragment.show(getFragmentManager(), DIALOG_NEW_ADDRESS);
+	}
+
+	@Override
+	public void onClick(View v) {
+		if(v.getId() == R.id.manageHdAccountButton) {
+			this.getZWMainActivity().openManageHdWallet();
+		}
 	}
 
 }

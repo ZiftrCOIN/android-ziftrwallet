@@ -34,7 +34,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 	protected EditText fiatAmountEditText;
 
 	public abstract View getContainerView();
-	public abstract String getActionBarTitle();
+	public abstract int getActionBarTitleResId();
 
 	protected void initializeViewFields(View rootView, int addressBookId) {
 		this.addressBookImageView = (ImageView) rootView.findViewById(addressBookId);
@@ -72,7 +72,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 	 */
 	protected void setActionBar() {
 		if (!this.showingChildFragment()) {
-			this.getZWMainActivity().changeActionBar(getActionBarTitle(), false, true, false);
+			this.getZWMainActivity().changeActionBar(getActionBarTitleResId(), false, true, false);
 		}
 	}
 

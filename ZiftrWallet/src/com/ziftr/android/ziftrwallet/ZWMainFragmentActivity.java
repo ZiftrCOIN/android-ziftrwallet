@@ -49,6 +49,7 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.fragment.ZWAboutFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAccountsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWFragment;
+import com.ziftr.android.ziftrwallet.fragment.ZWManageHdAccountFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSearchableListAdapter;
@@ -275,7 +276,6 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 	@Override
 	public void onPostResume(){
 		super.onPostResume();
-		
 	}
 
 
@@ -966,6 +966,21 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		this.showFragment(fragToShow, ZWNewCurrencyFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
 
 	}
+	
+	
+	/**
+	 * Shows the fragment for managing/creating/restoring the HD wallet mnemonic
+	 */
+	public void openManageHdWallet() {
+		
+		ZWManageHdAccountFragment fragToShow = (ZWManageHdAccountFragment) 
+				this.getSupportFragmentManager().findFragmentByTag(ZWManageHdAccountFragment.FRAGMENT_TAG);
+		if (fragToShow == null) {
+			fragToShow = new ZWManageHdAccountFragment();
+		}
+
+		this.showFragment(fragToShow, ZWManageHdAccountFragment.FRAGMENT_TAG, R.id.oneWalletBaseFragmentHolder, true, TAG_BACKSTACK);
+	}
 
 
 	/**
@@ -1102,27 +1117,27 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 
 	/**
 	 * Customize actionbar
-	 * @param title - text in middle of actionbar
+	 * @param title - the resource id for the string to be displayed in the middle of the action bar
 	 * @param menu - boolean determine if menu button to open drawer is visible, if false, 
 	 * then the back button will be visible.
 	 * @param home - boolean to display home button
 	 * @param search - boolean to display search button
 	 * @param addCurrency - boolean to display + button to add new currency
 	 */
-	public void changeActionBar(String title, boolean menu, boolean home, boolean addCurrency) {
-		this.changeActionBar(title, menu, home, addCurrency, null, null);
+	public void changeActionBar(int titleResId, boolean menu, boolean home, boolean addCurrency) {
+		this.changeActionBar(titleResId, menu, home, addCurrency, null, null);
 	}
 
 	/**
 	 * Customize actionbar
-	 * @param title - text in middle of actionbar
+	 * @param title - the resource id for the string to be displayed in the middle of the action bar
 	 * @param menu - boolean determine if menu button to open drawer is visible, if false, 
 	 * then the back button will be visible.
 	 * @param home - boolean to display home button
 	 * @param search - boolean to display search button
 	 * @param addCurrency - boolean to display + button to add new currency
 	 */
-	public void changeActionBar(String title, boolean menu, boolean home, boolean addCurrency,
+	public void changeActionBar(int titleResId, boolean menu, boolean home, boolean addCurrency,
 			final TextWatcher textWatcher, 
 			final ZWSearchableListAdapter<? extends ZWSearchableListItem> adapter) {
 
@@ -1135,7 +1150,7 @@ implements DrawerListener, OnClickListener, ZiftrNetworkHandler {
 		final View searchBar = findViewById(R.id.searchBar);
 
 		TextView titleview = (TextView) findViewById(R.id.actionBarTitle);
-		titleview.setText(title);
+		titleview.setText(titleResId);
 
 		if (menu) {
 			backButton.setVisibility(View.GONE);

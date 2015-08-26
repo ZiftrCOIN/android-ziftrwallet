@@ -130,7 +130,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("SETTINGS", true, true, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_settings, true, true, false);
 	}
 
 	public void updateSettingsVisibility() {

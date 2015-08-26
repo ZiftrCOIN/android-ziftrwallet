@@ -45,7 +45,7 @@ implements TextWatcher, OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("ADDRESSES", false, false, false, this, this.addressAdapter);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_addresses, false, false, false, this, this.addressAdapter);
 	}
 
 	@Override

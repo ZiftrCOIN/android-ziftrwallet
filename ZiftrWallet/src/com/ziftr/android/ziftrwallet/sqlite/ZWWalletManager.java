@@ -840,6 +840,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	
 	
 	
+	
 
 	
 	/**

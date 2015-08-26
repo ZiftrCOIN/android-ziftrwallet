@@ -493,8 +493,8 @@ public class ZWSendCoinsFragment extends ZWAddressBookParentFragment {
 	}
 
 	@Override
-	public String getActionBarTitle() {
-		return "SEND";
+	public int getActionBarTitleResId() {
+		return R.string.zw_actionbar_send;
 	}
 
 	@Override

@@ -103,7 +103,7 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("ziftrWALLET", true, false, true);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_main, true, false, true);
 		this.refreshData(true);
 	}
 

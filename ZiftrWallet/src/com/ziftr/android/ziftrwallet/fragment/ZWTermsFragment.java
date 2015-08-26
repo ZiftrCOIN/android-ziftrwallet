@@ -45,7 +45,7 @@ public class ZWTermsFragment extends ZWFragment {
 	
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("TERMS", true, true, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_terms, true, true, false);
 	}
 
 	
