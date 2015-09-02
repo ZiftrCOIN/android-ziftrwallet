@@ -18,6 +18,7 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter;
+import com.ziftr.android.ziftrwallet.fragment.ZWManageHdAccountFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSettingsFragment;
@@ -267,6 +268,34 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			ZiftrTextDialogFragment changeServerDialog = (ZiftrTextDialogFragment) fragment;
 			String customServer = changeServerDialog.getEnteredText(0);
 			ZWPreferences.setCustomAPIServer(customServer);
+		}
+		else if(ZWManageHdAccountFragment.DIALOG_READ_HD_SENTENCE_TAG.equals(fragment.getTag())) {
+			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
+			if (ZWPreferences.inputPasswordMatchesStoredPassword(enteredPassword)) {
+				ZWPreferences.setCachedPassword(enteredPassword);
+				ZWManageHdAccountFragment manageHdAccountFragment = 
+						(ZWManageHdAccountFragment) getSupportFragmentManager().findFragmentByTag(ZWManageHdAccountFragment.FRAGMENT_TAG);
+				if (manageHdAccountFragment != null){
+					manageHdAccountFragment.readMnemonic(enteredPassword);
+				}
+			}
+			else {
+				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_incorrect_password);
+			}
+		}
+		else if(ZWManageHdAccountFragment.DIALOG_WRITE_HD_SENTENCE_TAG.equals(fragment.getTag())) {
+			String enteredPassword = ((ZiftrTextDialogFragment)fragment).getEnteredText(0);
+			if (ZWPreferences.inputPasswordMatchesStoredPassword(enteredPassword)) {
+				ZWPreferences.setCachedPassword(enteredPassword);
+				ZWManageHdAccountFragment manageHdAccountFragment = 
+						(ZWManageHdAccountFragment) getSupportFragmentManager().findFragmentByTag(ZWManageHdAccountFragment.FRAGMENT_TAG);
+				if (manageHdAccountFragment != null){
+					manageHdAccountFragment.writeMnemonic(enteredPassword);
+				}
+			}
+			else {
+				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_incorrect_password);
+			}
 		}
 
 	}

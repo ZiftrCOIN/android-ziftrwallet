@@ -61,7 +61,8 @@ public static synchronized String[] createHdWalletMnemonic(byte[] entropy) {
 			mnemonicSentence[x] = wordList.get(mnemonicWordIndexes[x]);
 		}
 		
-		ZLog.log("Generated mnemonic sentence: ", Arrays.toString(mnemonicSentence));
+		//note: make sure not to log this on release
+		//ZLog.log("Generated mnemonic sentence: ", Arrays.toString(mnemonicSentence));
 		
 		return mnemonicSentence;
 	}

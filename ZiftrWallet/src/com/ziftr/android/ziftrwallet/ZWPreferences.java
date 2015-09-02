@@ -10,8 +10,8 @@ import java.util.Arrays;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
-import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public abstract class ZWPreferences { 
@@ -48,6 +48,8 @@ public abstract class ZWPreferences {
 
 	/** Get the seed for the HD wallet. */
 	public final static String HD_WALLET_SEED_KEY = "hd_wallet_seed";
+	
+	public static final String HD_WALLET_MNEMONIC_KEY = "hd_wallet_mnemonic";
 
 	private static final String UPDATE_CHECK_KEY = "update_check";
 
@@ -409,6 +411,17 @@ public abstract class ZWPreferences {
 	}
 	
 	
+	public static synchronized String getEncryptedHdMnemonic() {
+		String mnemonicString = ZWWalletManager.getInstance().getAppDataString(HD_WALLET_MNEMONIC_KEY);
+		return mnemonicString;
+	}
+	
+	public static synchronized void setEncryptedHdMnemonic(String ecryptedMnemonic) {
+		ZWWalletManager.getInstance().upsertAppDataVal(HD_WALLET_MNEMONIC_KEY, ecryptedMnemonic);
+	}
+	
 	
 }
+
+
 

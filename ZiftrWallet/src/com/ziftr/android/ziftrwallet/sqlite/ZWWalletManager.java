@@ -294,6 +294,14 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		ZWKeyCrypter oldCrypter = passwordToCrypter(oldPassphrase);
 		ZWKeyCrypter newCrypter = passwordToCrypter(newPassphrase);
 
+		//TODO -need to change this
+		//first off, if changing encryption on addresses fails, the seed will still change encryption,
+		//due to it being outside the beginTransaction block,
+		//it's also somewhat confusing that we generate a key if there isn't one, we can't do this anymore
+		//since we're now using mnemonics and we need to be sure the user is aware of this
+		//best case is to manually get the encrypted seed, if that's not null or empty
+		//attempt to decrypt it
+		//finally if that is successful, re-encrypt it, and save it again, all INSIDE the transaction block
 		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
 		if (ZWPreferences.getHdWalletSeed() == null){
 			createNewHdWalletSeed(newPassphrase);
@@ -841,13 +849,15 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	
 	
 	
+	
+	
 
 	
 	/**
 	 * @param password
 	 * @return
 	 */
-	private static ZWKeyCrypter passwordToCrypter(String password) {
+	public static ZWKeyCrypter passwordToCrypter(String password) {
 		ZWKeyCrypter crypter = null;
 		if (password != null && password.length() > 0) {
 			try {

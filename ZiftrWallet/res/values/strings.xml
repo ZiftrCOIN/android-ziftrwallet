@@ -178,6 +178,19 @@
 	<string name="zw_actionbar_transaction">TRANSACTION</string>
 	<string name="zw_actionbar_send">SEND</string>
 	<string name="zw_actionbar_receive">RECEIVE</string>
+	<string name="zw_actionbar_hd_account">HD ACCOUNT</string>
+	<string name="zw_accounts_hd_need_password">You need to enter your password to see your backup sentence.</string>
+	<string name="zw_accounts_hd_no_account">You do not have an HD account setup.</string>
+	<string name="zw_button_enter_password">View Backup Sentence</string>
+	<string name="zw_button_accept_hd_account">Accept Account</string>
+	<string name="zw_button_hd_new_sentence">New Sentence</string>
+	<string name="zw_accounts_hd_enter_mnemonic">Please enter an existing backup sentence.</string>
+	<string name="zw_button_verify">Verify</string>
+	<string name="zw_button_restore">Restore</string>
+	<string name="zw_accounts_hd_verify_pass">Backup sentence is valid!</string>
+	<string name="zw_accounts_hd_verify_fail">Sentence is invalid!</string>
+	<string name="zw_button_hd_new_account">New HD Account</string>
+	<string name="zw_button_hd_restore_account">Restore Account</string>
 </resources>
 
 
