@@ -17,6 +17,7 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
+import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
 import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter;
 import com.ziftr.android.ziftrwallet.fragment.ZWManageHdAccountFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWNewCurrencyFragment;
@@ -24,8 +25,8 @@ import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWSettingsFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWActivityDialogHandler implements ZiftrDialogHandler {
@@ -50,38 +51,64 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 	}
 
 
-	private boolean changePassword(final String oldPassword, final String newPassword) {
-		// TODO put up a blocking dialog while this is happening
-
-		//note: null/blank newPassword is ok now, it's how password is cleared
-		final EncryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(oldPassword, newPassword);
+	
+	public static boolean changePassword(final FragmentActivity activity, final String oldPassword, final String newPassword) {
 		
-		if (status == EncryptionStatus.ALREADY_ENCRYPTED || status == EncryptionStatus.ERROR){
+		try {
+			boolean encryptionChanged = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(oldPassword, newPassword);
+			
 			//tried to set password on encrypted database private keys
-			this.activity.runOnUiThread(new Runnable(){
+			if (!encryptionChanged){
+				activity.runOnUiThread(new Runnable(){
+					@Override
+					public void run() {
+						ZiftrDialogManager.showSimpleAlert(activity.getSupportFragmentManager(), R.string.zw_dialog_old_encryption_fatal);	
+					}
+
+				});
+
+			} 
+			else {
+				//set password
+				if (ZWPreferences.setStoredPassword(newPassword) <= 0) {
+					//if we failed setting password, something could be wrong with db
+					ZiftrSimpleDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
+					dbErrorFragment.setupDialog(R.string.zw_app_name, 
+							R.string.zw_dialog_database_error, 
+							R.string.zw_dialog_restart, 
+							R.string.zw_dialog_cancel);
+
+					dbErrorFragment.show(activity.getSupportFragmentManager(), ZWActivityDialogHandler.DIALOG_DATABASE_ERROR_TAG);
+				}
+				else {
+					//if we actually managed to successfully change the password
+					return true;
+				}
+			}
+		} 
+		catch (ZWDataEncryptionException e) {
+			ZLog.log("Exception trying to change encryption: ", e);
+			
+			//this can happen if an older version of the database somehow loses it's encryption flag
+			//(typically caused by users attempting manual backups with running app)
+			//if that's the case the user may be able to recover by entering their old password
+			activity.runOnUiThread(new Runnable(){
 				@Override
 				public void run() {
-					if (status == EncryptionStatus.ALREADY_ENCRYPTED){
-						ZiftrTextDialogFragment decryptOldWalletDialog = new ZiftrTextDialogFragment();
-						decryptOldWalletDialog.setupDialog(R.string.zw_dialog_old_encryption);
-						decryptOldWalletDialog.addEmptyTextbox(true);
+					ZiftrTextDialogFragment oldPasswordDialog = new ZiftrTextDialogFragment();
+					oldPasswordDialog.setupDialog(R.string.zw_dialog_old_encryption);
+					oldPasswordDialog.addEmptyTextbox(true);
 
-						decryptOldWalletDialog.show(getSupportFragmentManager(), DIALOG_OLD_PASSWORD_TAG);
-					} 
-					else {
-						ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_dialog_old_encryption_fatal);
-					}
+					oldPasswordDialog.show(activity.getSupportFragmentManager(), ZWActivityDialogHandler.DIALOG_OLD_PASSWORD_TAG);	
 				}
 
 			});
-			return false;
-		} else {
-			//reencryption was successful
-			ZWPreferences.setStoredPassword(newPassword);
 		}
-		return true;
-	}
+		
+		return false;
 
+	}
+	
 
 
 	@Override
@@ -134,7 +161,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			String confirmedPassword = passwordFragment.getEnteredText(1);
 
 			if(password.equals(confirmedPassword)) {
-				if (this.changePassword(null, password)) {
+				if (ZWActivityDialogHandler.changePassword(this.activity, null, password)) {
 					ZWPreferences.setPasswordWarningDisabled(true);
 					ZWSettingsFragment settingsFragment = (ZWSettingsFragment)this.getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
 					if(settingsFragment != null) {
@@ -143,8 +170,8 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 					ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_set_password_complete);
 				} 
 				else {
-					//this is an epic failure, it basically measn the database is corrupted, or somehow double encrypted
-					//TODO -alert the user?
+					//this is an epic failure, it basically means the database is corrupted, or somehow double encrypted
+					//the change password method will alert the user with an error
 					return;
 				}
 			}
@@ -162,7 +189,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 
 				if (ZWPreferences.inputPasswordMatchesStoredPassword(oldPassword)) {
 					//everything looks ok, try and change passwords
-					if (this.changePassword(oldPassword, newPassword)) {
+					if (ZWActivityDialogHandler.changePassword(this.activity, oldPassword, newPassword)) {
 						ZWPreferences.setPasswordWarningDisabled(true);
 						ZWSettingsFragment settingsFragment = (ZWSettingsFragment)this.getFragment(FragmentType.SETTINGS_FRAGMENT_TYPE);
 						if(settingsFragment != null) {
@@ -180,7 +207,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 					} 
 					else {
 						//this is an epic failure, it basically means the database is corrupted, or somehow double encrypted
-						//TODO -alert the user?
+						//user will be alerted by change password error handling
 						return;
 					}
 				}
@@ -199,9 +226,18 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			ZiftrTextDialogFragment passwordFragment = (ZiftrTextDialogFragment) fragment;
 			String password = passwordFragment.getEnteredText(0);
 
-			if (ZWWalletManager.getInstance().attemptDecrypt(password)){
-				//TODO -fix this, why are we "attempting" then doing it for real?
-				//ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(password, null);
+			boolean encryptionChanged = false;
+			
+			try {
+				encryptionChanged = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(password, null);
+			} 
+			catch (ZWDataEncryptionException e) {
+				//this would only happen if some of the data is somehow not encrypted correctly
+				//it's a fatal error, so show user message, but not much else can be done
+				ZLog.log("Exception removing password: ", e);
+			}
+			
+			if (encryptionChanged){
 				ZiftrDialogManager.showSimpleAlert(getSupportFragmentManager(), R.string.zw_dialog_old_encryption_changed);
 			} 
 			else {

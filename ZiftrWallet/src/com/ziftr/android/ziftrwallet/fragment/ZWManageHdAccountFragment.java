@@ -14,12 +14,12 @@ import com.google.common.base.Joiner;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
-import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWMnemonicGenerator;
+import com.ziftr.android.ziftrwallet.crypto.ZWPrivateData;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
-import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWManageHdAccountFragment extends ZWFragment implements OnClickListener {
@@ -268,15 +268,21 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 	
 	public void readMnemonic(String password) {
 		
-		ZWKeyCrypter crypter = ZWWalletManager.passwordToCrypter(password);
-		
 		String encryptedMnemonic = ZWPreferences.getEncryptedHdMnemonic();
-		String decryptedMnemonic = crypter.decrypt(new ZWEncryptedData(crypter.getEncryptionIdentifier(), encryptedMnemonic));
-		
-		if(ZWMnemonicGenerator.passesChecksum(decryptedMnemonic)) {
-			hdMnemonic = decryptedMnemonic;
-			this.mnemonicText.setText(hdMnemonic);
+		ZWPrivateData mnemonicData = ZWPrivateData.createFromPrivateDataString(encryptedMnemonic);
+		try {
+			String decryptedMnemonic = mnemonicData.decrypt(password).getDataString();
+			
+			if(ZWMnemonicGenerator.passesChecksum(decryptedMnemonic)) {
+				hdMnemonic = decryptedMnemonic;
+				this.mnemonicText.setText(hdMnemonic);
+			}
+		} 
+		catch (ZWDataEncryptionException e) {
+			ZLog.log("Error decrypting stored hd mnemonic: ", e);
 		}
+		
+		
 	}
 	
 	

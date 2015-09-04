@@ -266,42 +266,6 @@ public class ZWPrivateKey {
 		}
 	}
 
-	/**
-	 * Create an encrypted private key with the keyCrypter and the AES key supplied.
-	 * This method returns a new encrypted key and leaves the original unchanged.
-	 * To be secure you need to clear the original, unencrypted private key bytes.
-	 *
-	 * @param keyCrypter The keyCrypter that specifies exactly how the encrypted bytes are created.
-	 * @param aesKey The KeyParameter with the AES encryption key (usually constructed with keyCrypter#deriveKey and cached as it is slow to create).
-	 * @return encryptedKey
-	 */
-	public ZWEncryptedData encrypt(ZWKeyCrypter keyCrypter) throws ZWKeyCrypterException {
-		if (keyCrypter == null) {
-			throw new ZWKeyCrypterException("Cannot encrypt this key using a null keyCrypter");
-		}
-
-		ZWEncryptedData encryptedPrivateKey = keyCrypter.encrypt(this.getPrivHex());
-		return encryptedPrivateKey;
-	}
-
-	/**
-	 * Create a decrypted private key with the keyCrypter and AES key supplied. Note that if the aesKey is wrong, this
-	 * has some chance of throwing KeyCrypterException due to the corrupted padding that will result, but it can also
-	 * just yield a garbage key.
-	 *
-	 * @param keyCrypter The keyCrypter that specifies exactly how the decrypted bytes are created.
-	 * @param aesKey The KeyParameter with the AES encryption key (usually constructed with keyCrypter#deriveKey and cached).
-	 * @return unencryptedKey
-	 */
-	public static ZWPrivateKey decrypt(ZWEncryptedData data, ZWKeyCrypter crypter) throws ZWKeyCrypterException {
-		if (data == null) {
-			throw new ZWKeyCrypterException("There is no encrypted key to decrypt .");
-		}
-
-		byte[] unencryptedPrivateKey = crypter.decryptToBytes(data);
-		ZWPrivateKey key = new ZWPrivateKey(new BigInteger(1, unencryptedPrivateKey));
-		return key;
-	}
 
 	/*
 	 * Check that it is possible to decrypt the key with the keyCrypter and that the original key is returned.

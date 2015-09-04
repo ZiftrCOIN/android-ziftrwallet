@@ -23,7 +23,7 @@ import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWPbeAesCrypter implements ZWKeyCrypter {
+public class ZWPbeAesCrypterUtils {
 
 	// 128 is in default android, to get 256 AES encryption you have to use the JCE 
 	public static final int KEY_LENGTH = 128;
@@ -40,21 +40,15 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 
 	public static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
 	public static final String SECRET_KEY_ALGORITHM = "AES";
-
-	private SecretKey secretKey;
-
-	public ZWPbeAesCrypter(SecretKey secretKey) {
-		this.setSecretKey(secretKey);
+	
+	
+	private ZWPbeAesCrypterUtils(SecretKey secretKey) {
+		//kept prive so this is just a static utility method class
 	}
 
-	@Override
-	public char getEncryptionIdentifier() {
-		return ZWKeyCrypter.PBE_AES_ENCRYPTION;
-	}
-
+	
 	@SuppressLint("TrulyRandom")
-	@Override
-	public ZWEncryptedData encrypt(String clearText) throws ZWKeyCrypterException {
+	public static String encrypt(SecretKey secretKey, String data) throws ZWKeyCrypterException {
 		try {
 			Cipher encryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 
@@ -62,34 +56,32 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 			String ivHex = ZiftrUtils.bytesToHexString(iv); 
 			IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
-			encryptionCipher.init(Cipher.ENCRYPT_MODE, this.secretKey, ivSpec);
-			byte[] encryptedText = encryptionCipher.doFinal(clearText.getBytes("UTF-8"));
+			encryptionCipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
+			byte[] encryptedText = encryptionCipher.doFinal(data.getBytes("UTF-8"));
 			String encryptedHex = ZiftrUtils.bytesToHexString(encryptedText);
 
 			// Why are we appending these values?
 			// AES requires a random initialization vector (IV). We save the IV
 			// with the encrypted value so we can get it back later in decrypt()
-			return new ZWEncryptedData(this.getEncryptionIdentifier(), ivHex + encryptedHex);
-		} catch (Exception e) {
+			return ivHex + encryptedHex;
+		} 
+		catch (Exception e) {
 			System.out.println("error message: " + e.getMessage());
 			throw new ZWKeyCrypterException("Unable to encrypt", e);
 		}
 	}
 
 
-	@Override
-	public String decrypt(ZWEncryptedData encryptedData) throws ZWKeyCrypterException {
+	public static String decrypt(SecretKey secretKey, String encryptedData) throws ZWKeyCrypterException {
 		try {
-			if (encryptedData.encryptionId != this.getEncryptionIdentifier())
-				throw new Exception();
-			String encrypted = encryptedData.getEncryptedData();
+			
 			Cipher decryptionCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 			int ivLength = decryptionCipher.getBlockSize();
-			String ivHex = encrypted.substring(0, ivLength * 2);
-			String encryptedHex = encrypted.substring(ivLength * 2);
+			String ivHex = encryptedData.substring(0, ivLength * 2);
+			String encryptedHex = encryptedData.substring(ivLength * 2);
 
 			IvParameterSpec ivspec = new IvParameterSpec(ZiftrUtils.hexStringToBytes(ivHex));
-			decryptionCipher.init(Cipher.DECRYPT_MODE, this.secretKey, ivspec);
+			decryptionCipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
 			byte[] decryptedText = decryptionCipher.doFinal(ZiftrUtils.hexStringToBytes(encryptedHex));
 			String decrypted = new String(decryptedText, "UTF-8");
 			return decrypted;
@@ -98,29 +90,28 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 		}
 	}
 
-	@Override
-	public byte[] decryptToBytes(ZWEncryptedData encryptedData) throws ZWKeyCrypterException {
-		return ZiftrUtils.hexStringToBytes(decrypt(encryptedData));
-	}
 
-	@Override
-	public SecretKey getSecretKey() {
-		return this.secretKey;
-	}
-
-	@Override
-	public void setSecretKey(SecretKey secretKey) {
-		this.secretKey = secretKey;
+	public static byte[] decryptToBytes(SecretKey secretKey, String encryptedData) throws ZWKeyCrypterException {
+		return ZiftrUtils.hexStringToBytes(decrypt(secretKey, encryptedData));
 	}
 
 	public static SecretKey generateSecretKey(String password, String salt) throws ZWKeyCrypterException {
+		
+		if(password == null || password.length() == 0) {
+			return null;
+		}
+		if(salt == null || salt.length() == 0) {
+			throw new ZWKeyCrypterException("Cannot create SecretKey without valid salt.");
+		}
+		
 		try {
 			PBEKeySpec pbeKeySpec = new PBEKeySpec(password.toCharArray(), ZiftrUtils.hexStringToBytes(salt), PBE_ITERATION_COUNT, KEY_LENGTH);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(PBE_ALGORITHM);
 			SecretKey tmp = factory.generateSecret(pbeKeySpec);
 			SecretKey secret = new SecretKeySpec(tmp.getEncoded(), SECRET_KEY_ALGORITHM);
 			return secret;
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			throw new ZWKeyCrypterException("Unable to get secret key", e);
 		}
 	}
@@ -147,7 +138,7 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 		}
 	}
 
-	private static byte[] generateIv(int ivLength) {
+	public static byte[] generateIv(int ivLength) {
 		SecureRandom random = ZiftrUtils.createTrulySecureRandom();
 
 		if (random == null) {
@@ -160,31 +151,8 @@ public class ZWPbeAesCrypter implements ZWKeyCrypter {
 		return iv;
 	}
 
-	public static void main(String[] args) {
-		try {
-			String password = "passwwword";
-			String salt = generateSalt();
-			SecretKey secKey = generateSecretKey(password, salt);
-			ZWKeyCrypter c = new ZWPbeAesCrypter(secKey);
-
-			String unencrypted = "E9873D79C6D87DC0FB6A5778633389F4453213303DA61F20BD67FC233AA33262";
-			ZWEncryptedData encrypted = c.encrypt(unencrypted);
-			String decrypted = c.decrypt(encrypted);
-
-			System.out.println("unencrypted: " + unencrypted);
-			System.out.println("encrypted: " + encrypted);
-			System.out.println("decrypted: " + decrypted);
-			/*
-			System.out.println("\n\n\n");
-
-			password = "j";
-			String encryptedData = "6efeed1cab1d6eb550733eff3024b7a60f8b92cacd2d32995a20e28bdf2a02d28005bcd530219a3a79856e77907210cab513456658cd060f6d1336822e0ec42b4da80dff13b9be896c654322af3a197da503e155ed78cdc71a0f66236e2ec19a";
-			String decrypted = ;
-			 */
-
-		} catch (ZWKeyCrypterException e) {
-			System.out.println("error!: " + e.getMessage());
-		}
-	}
-
 }
+
+
+
+

@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.spongycastle.crypto.CryptoException;
+import javax.crypto.SecretKey;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -18,15 +18,14 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdPath;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdWalletException;
-import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWPrivateData;
 import com.ziftr.android.ziftrwallet.crypto.ZWPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.ZLog;
+import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddress> {
@@ -124,18 +123,22 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		ZWReceivingAddress addrRet = null;
 
 		if (dataInPrivColumn == null || dataInPrivColumn.isEmpty()) {
+			//this address is derived from an HD seed and the private key can be calculated later
 			int account = c.getInt(c.getColumnIndex(COLUMN_HD_ACCOUNT));
 			String path = "[m/44'/" + coinId.getHdId() + "'/" + account + "']/" + hidden + "/" + c.getInt(c.getColumnIndex(COLUMN_HD_INDEX));
 			addrRet = new ZWReceivingAddress(coinId, pubkey, new ZWHdPath(path));
-		} else if (dataInPrivColumn.charAt(0) == ZWKeyCrypter.NO_ENCRYPTION) {
-			byte[] privBytes = ZiftrUtils.hexStringToBytes(dataInPrivColumn.substring(1));
-			ZWPrivateKey newKey = new ZWPrivateKey(new BigInteger(1, privBytes), pubkey);
-			addrRet = new ZWReceivingAddress(coinId, newKey, hidden != 0);
-		} else {
-			char encryptionId = dataInPrivColumn.charAt(0);
-			String privDataWithoutEncryptionPrefix = dataInPrivColumn.substring(1);
-			addrRet = new ZWReceivingAddress(coinId, pubkey, 
-					new ZWEncryptedData(encryptionId, privDataWithoutEncryptionPrefix), hidden != 0);
+		}
+		else {
+			//otherwise it's an address where the private key is known and stored (a legacy address)
+			ZWPrivateData privateData = ZWPrivateData.createFromPrivateDataString(dataInPrivColumn);
+			if(privateData.isEncrypted()) {
+				addrRet = new ZWReceivingAddress(coinId, pubkey, privateData, hidden != 0);
+			}
+			else {
+				byte[] privBytes = ZiftrUtils.hexStringToBytes(privateData.getDataString());
+				ZWPrivateKey newKey = new ZWPrivateKey(new BigInteger(1, privBytes), pubkey);
+				addrRet = new ZWReceivingAddress(coinId, newKey, hidden != 0);
+			}
 		}
 
 		addrRet.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
@@ -150,7 +153,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	}
 
 	//called in wrapper with transaction begin and transaction end to ensure atomicity
-	protected EncryptionStatus recryptAllAddresses(ZWCoin coin, ZWKeyCrypter oldCrypter, ZWKeyCrypter newCrypter, SQLiteDatabase db) throws CryptoException {
+	protected boolean recryptAllAddresses(ZWCoin coin, SecretKey oldKey, SecretKey newKey, SQLiteDatabase db) throws ZWDataEncryptionException {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT ");
@@ -175,32 +178,26 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		// Decrypt private keys
 		for (int i = 0; i < oldPrivKeysInDb.size(); i++){
 			String oldPrivKeyValInDb = oldPrivKeysInDb.get(i);
-			char encId = oldPrivKeyValInDb.charAt(0);
-			String data = oldPrivKeyValInDb.substring(1);
-			ZWPrivateKey key = null;
-
-			try {
-				key = ZWPrivateKey.decrypt(new ZWEncryptedData(encId, data), oldCrypter);
-			} catch (Exception e) {
-				ZLog.log("ERROR tried to encrypt already encrypted first key possible recovery by entering old password.");
-				return EncryptionStatus.ALREADY_ENCRYPTED;
-			}
+			
+			ZWPrivateData keyData = ZWPrivateData.createFromPrivateDataString(oldPrivKeyValInDb);
+			
+			keyData.decrypt(oldKey);
+			keyData.encrypt(newKey);
 
 			ContentValues cv = new ContentValues();
-			cv.put(COLUMN_PRIV_KEY, newCrypter.encrypt(key.getPrivHex()).toString());
-			StringBuilder where = new StringBuilder();
-			where.append(COLUMN_PRIV_KEY).append(" = ").append(DatabaseUtils.sqlEscapeString(oldPrivKeyValInDb));
+			cv.put(COLUMN_PRIV_KEY, keyData.toString());
+			String whereClause = COLUMN_PRIV_KEY + " = " + DatabaseUtils.sqlEscapeString(oldPrivKeyValInDb);
 
-			// TODO this would be a good candidate to use compiled a compiled statement, as
-			// only the values in the statement change each time through the loop.
-			int numUpdated = db.update(getTableName(coin), cv, where.toString(), null);
+			int numUpdated = db.update(getTableName(coin), cv, whereClause, null);
 
 			if (numUpdated != 1) {
-				throw new CryptoException("Tables were not updated properly");
+				return false;
 			}
 		}
-		return EncryptionStatus.SUCCESS;
+		
+		return true;
 	}
+	
 
 	//	protected boolean attemptDecryptAllAddresses(ZWCoin coin, ZWKeyCrypter crypter, SQLiteDatabase db){
 	//		StringBuilder sb = new StringBuilder();
@@ -283,16 +280,17 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 			account = path.getBip44Account();
 			break;
 		case ENCRYPTED:
-			ZWEncryptedData data = address.getEncryptedKey();
+			ZWPrivateData data = address.getEncryptedKey();
 
-			privData = data.toStringWithEncryptionId();
+			privData = data.getStorageString();
 			index = null;
 			account = null;
 			break;
 		case STANDARD_UNENCRYPTED:
 			ZWPrivateKey key = address.getStandardKey();
+			ZWPrivateData privateKeyData = ZWPrivateData.createFromUnecryptedData(key.getPrivHex());
 
-			privData = "" + ZWKeyCrypter.NO_ENCRYPTION + key.getPrivHex();
+			privData = privateKeyData.getStorageString();
 			index = null;
 			account = null;
 			break;

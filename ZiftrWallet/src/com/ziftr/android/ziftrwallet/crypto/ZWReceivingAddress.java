@@ -6,6 +6,7 @@
 package com.ziftr.android.ziftrwallet.crypto;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
+import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
 
 public class ZWReceivingAddress extends ZWSendingAddress {
@@ -79,7 +80,7 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 		keyType = KeyType.DERIVABLE_PATH;
 	}
 	
-	public ZWReceivingAddress(ZWCoin coinId, ZWPublicKey pub, ZWEncryptedData data, boolean hidden) throws ZWAddressFormatException {
+	public ZWReceivingAddress(ZWCoin coinId, ZWPublicKey pub, ZWPrivateData data, boolean hidden) throws ZWAddressFormatException {
 		super(false);
 		if (data == null) {
 			throw new ZWAddressFormatException("Cannot use this constructor without any encrpted data");
@@ -160,8 +161,8 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 		return keyType;
 	}
 	
-	public ZWEncryptedData getEncryptedKey() {
-		return (ZWEncryptedData) this.priv;
+	public ZWPrivateData getEncryptedKey() {
+		return (ZWPrivateData) this.priv;
 	}
 	
 	public ZWExtendedPrivateKey getExtendedPriv() {
@@ -176,10 +177,10 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 		return (ZWPrivateKey) this.priv;
 	}
 	
-	public void decrypt(ZWKeyCrypter crypter) {
+	public void decrypt(String password) throws ZWDataEncryptionException {
 		switch (this.keyType) {
 		case STANDARD_UNENCRYPTED:
-			if (crypter != null) {
+			if (password != null && password.length() > 0) {
 				throw new ZWKeyCrypterException("Already decrypted.");
 			}
 			break;
@@ -187,7 +188,7 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 		case EXTENDED_UNENCRYPTED:
 			throw new ZWHdWalletException("Should not encrypt extended keys directly, only encrypt the seed.");
 		case ENCRYPTED:
-			this.priv = ZWPrivateKey.decrypt(this.getEncryptedKey(), crypter);
+			this.priv = this.getEncryptedKey().decrypt(password).getDataString();
 			this.keyType = KeyType.STANDARD_UNENCRYPTED;
 			break;
 		}

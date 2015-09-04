@@ -22,9 +22,14 @@
 
 package com.ziftr.android.ziftrwallet.exceptions;
 
-@SuppressWarnings("serial")
+
 public class ZWAddressFormatException extends Exception {
-    public ZWAddressFormatException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7790450049294381011L;
+
+	public ZWAddressFormatException() {
         super();
     }
 

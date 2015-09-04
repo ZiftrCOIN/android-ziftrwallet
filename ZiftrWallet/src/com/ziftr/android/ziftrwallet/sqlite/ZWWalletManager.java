@@ -21,13 +21,11 @@ import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWEncryptedData;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdAccount;
-import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
-import com.ziftr.android.ziftrwallet.crypto.ZWNullCrypter;
-import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypterUtils;
+import com.ziftr.android.ziftrwallet.crypto.ZWPrivateData;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress.KeyType;
 import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
@@ -35,7 +33,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
+import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -290,9 +288,12 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * @param curPassphrase - null if no encryption
 	 * @param salt
 	 */
-	public synchronized EncryptionStatus changeEncryptionOfReceivingAddresses(String oldPassphrase, String newPassphrase) {
-		ZWKeyCrypter oldCrypter = passwordToCrypter(oldPassphrase);
-		ZWKeyCrypter newCrypter = passwordToCrypter(newPassphrase);
+	public synchronized boolean changeEncryptionOfReceivingAddresses(String oldPassword, String newPassword) throws ZWDataEncryptionException {
+		
+		String salt = ZWPreferences.getSalt();
+		SecretKey oldKey = ZWPbeAesCrypterUtils.generateSecretKey(oldPassword, salt);
+		SecretKey newKey = ZWPbeAesCrypterUtils.generateSecretKey(newPassword, salt);
+		
 
 		//TODO -need to change this
 		//first off, if changing encryption on addresses fails, the seed will still change encryption,
@@ -302,17 +303,18 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		//best case is to manually get the encrypted seed, if that's not null or empty
 		//attempt to decrypt it
 		//finally if that is successful, re-encrypt it, and save it again, all INSIDE the transaction block
-		String decryptedSeed = this.getDecryptedHdSeed(oldCrypter);
+		String decryptedSeed = this.getDecryptedHdSeed(oldPassword);
 		if (ZWPreferences.getHdWalletSeed() == null){
-			createNewHdWalletSeed(newPassphrase);
+			createNewHdWalletSeed(newPassword);
 		} 
 		else if (decryptedSeed == null) {
 			ZLog.log("ERROR: Mismatch in oldCrypter and status of HD seed");
-			return EncryptionStatus.ERROR;
+			
+			return false;
 		}
 		else {
-			String newSeedVal = newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
-			ZWPreferences.setHdWalletSeed(newSeedVal);
+			//String newSeedVal = newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
+			//ZWPreferences.setHdWalletSeed(newSeedVal);
 		}
 		
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -321,69 +323,44 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
 
 			for (ZWCoin coin : this.getNotUnactivatedCoins()) {
-				EncryptionStatus status = receiveTable.recryptAllAddresses(coin, oldCrypter, newCrypter, db);
-				if (status == EncryptionStatus.ALREADY_ENCRYPTED || status == EncryptionStatus.ERROR){
-					return status;
+				boolean successfullyRecrypted = receiveTable.recryptAllAddresses(coin, oldKey, newKey, db);
+				if (!successfullyRecrypted){
+					return false;
 				}
 			}
 
 			//make sure to do no database work after this
 			db.setTransactionSuccessful();
 		} 
-		catch(Exception e) {
-			ZLog.log("Exception trying to change encryption of receiving addresses: ", e);
-			return EncryptionStatus.ERROR;
-		}
 		finally {
 			// If setTransactionSuccessful is not called, then this will roll back to not do 
 			// any of the changes since there was. If it was called then it finalizes everything.
 			db.endTransaction();
 		}
 
-		return EncryptionStatus.SUCCESS;
+		return true;
 	}
 
 	/**
 	 * @param oldCrypter
 	 * @return
 	 */
-	private String getDecryptedHdSeed(ZWKeyCrypter oldCrypter) {
+	private String getDecryptedHdSeed(String password) {
 		String hdSeed = ZWPreferences.getHdWalletSeed();
-		if (hdSeed == null || hdSeed.isEmpty())
-			return null;
-
-		String decryptedSeed; 
-		if (oldCrypter == null && hdSeed.charAt(0) == ZWKeyCrypter.NO_ENCRYPTION) {
-			decryptedSeed = hdSeed.substring(1);
-		} else if (oldCrypter != null && oldCrypter.getEncryptionIdentifier() == hdSeed.charAt(0)) {
-			decryptedSeed = oldCrypter.decrypt(new ZWEncryptedData(hdSeed.charAt(0), hdSeed.substring(1)));
-		} else {
+		if (hdSeed == null || hdSeed.isEmpty()) {
 			return null;
 		}
-		return decryptedSeed;
-	}
-
-	/**
-	 * this is used to test passphrases when trying to recover from a state where a user
-	 * tried to reencrypt already encrypted password and is entering his/her old passphrase
-	 * to decrypt keys
-	 */
-	public synchronized boolean attemptDecrypt(String passphrase) {
-		return this.changeEncryptionOfReceivingAddresses(passphrase, null) == EncryptionStatus.SUCCESS;
-		//		ZWKeyCrypter crypter = this.passphraseToCrypter(passphrase);
-		//		SQLiteDatabase db = this.getWritableDatabase();
-		//		ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
-		//		for (ZWCoin coin: this.getNotUnactivatedCoins()){
-		//			try {
-		//				if (receiveTable.recryptAllAddresses(coin, crypter, null, db) != reencryptionStatus.success) {
-		//					return false;
-		//				}
-		//			} catch (CryptoException e) {
-		//				ZLog.log("ERROR Could not decrypt wallet!");
-		//				return false;
-		//			}
-		//		}
-		//		return true;
+		
+		ZWPrivateData seedData = ZWPrivateData.createFromPrivateDataString(hdSeed);
+		
+		try {
+			seedData.decrypt(password);
+			return seedData.getDataString();
+		}
+		catch(Exception e) {
+			ZLog.log("Exception decrypting hd seed: ", e);
+			return null;
+		}
 	}
 
 
@@ -478,13 +455,13 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		return this.getTable(receivingNotSending).getAddress(coin, address, getReadableDatabase());
 	}
 
-	public synchronized ZWReceivingAddress getDecryptedReceivingAddress(ZWCoin coin, String address, String password) {
+	public synchronized ZWReceivingAddress getDecryptedReceivingAddress(ZWCoin coin, String address, String password) throws ZWDataEncryptionException {
 		ZWReceivingAddress addr = this.receivingAddressesTable.getAddress(coin, address, getReadableDatabase());
-		ZWKeyCrypter crypter = passwordToCrypter(password);
+
 		KeyType type = addr.getKeyType();
 		switch(type) {
 		case DERIVABLE_PATH:
-			String hdSeed = getDecryptedHdSeed(crypter);
+			String hdSeed = getDecryptedHdSeed(password);
 			if (hdSeed == null) {
 				return null;
 			}
@@ -493,7 +470,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			addr.deriveFromStoredPath(xprvkey);
 			break;
 		case ENCRYPTED:
-			addr.decrypt(crypter);
+			addr.decrypt(password);
 			break;
 		case EXTENDED_UNENCRYPTED:
 			// Private key already available
@@ -689,16 +666,33 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	}
 	
 	public synchronized void activateHd(ZWCoin coin, String password){
-		// Make sure the seed data for the wallet exists, and read it
-		ZWKeyCrypter crypter = passwordToCrypter(password);
 		
+		// Make sure the seed data for the wallet exists, and read it
 		String seedStr = ZWPreferences.getHdWalletSeed();
+		
+		ZWPrivateData seedData;
 		
 		if (seedStr == null) {
 			seedStr = createNewHdWalletSeed(password);
-		} 
+			seedData = ZWPrivateData.createFromUnecryptedData(seedStr);
+		}
+		else {
+			seedData = ZWPrivateData.createFromPrivateDataString(seedStr);
+		}
 		
-		byte[] seed = ZiftrUtils.hexStringToBytes(crypter.decrypt(new ZWEncryptedData(crypter.getEncryptionIdentifier(), seedStr.substring(1))));
+		byte[] seed = null;
+		
+		try {
+			seedData.decrypt(password);
+			seed = ZiftrUtils.hexStringToBytes(seedData.getDataString());
+		} 
+		catch (ZWDataEncryptionException e) {
+			ZLog.log("Exception activating HD: ", e);
+		}
+		
+		
+		//TODO -this isn't really an acceptable way to handlet this
+		//the app shouldn't crash, it should let the user know there is an issue
 		if (seed == null) {
 			throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
 		}
@@ -837,10 +831,8 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			byte[] seed = new byte[32];
 			getSecureRandom().nextBytes(seed);
 			
-			ZWKeyCrypter crypter = passwordToCrypter(password);
-			
-			seedString = crypter.encrypt(ZiftrUtils.bytesToHexString(seed)).toString();
-			ZWPreferences.setHdWalletSeed(seedString);
+			ZWPrivateData seedData = ZWPrivateData.createFromUnecryptedData(ZiftrUtils.bytesToHexString(seed));
+			ZWPreferences.setHdWalletSeed(seedData.getStorageString());
 		}
 		
 		return seedString;
@@ -852,26 +844,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	
 	
 
-	
-	/**
-	 * @param password
-	 * @return
-	 */
-	public static ZWKeyCrypter passwordToCrypter(String password) {
-		ZWKeyCrypter crypter = null;
-		if (password != null && password.length() > 0) {
-			try {
-				SecretKey secretKey = ZWPbeAesCrypter.generateSecretKey(password, ZWPreferences.getSalt());
-				crypter = new ZWPbeAesCrypter(secretKey);
-			}
-			catch(Exception e) {
-				ZLog.log("Exception creating key crypter: ", e);
-			}
-		} else {
-			crypter = new ZWNullCrypter();
-		}
-		return crypter;
-	}
+
 	
 	
 	

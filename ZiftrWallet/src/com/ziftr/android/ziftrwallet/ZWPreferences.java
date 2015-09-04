@@ -8,7 +8,7 @@ package com.ziftr.android.ziftrwallet;
 import java.util.Arrays;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
-import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypterUtils;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
@@ -305,7 +305,7 @@ public abstract class ZWPreferences {
 
 		if(salt == null || salt.length() == 0) {
 			try {
-				salt = ZWPbeAesCrypter.generateSalt();
+				salt = ZWPbeAesCrypterUtils.generateSalt();
 				ZWWalletManager.getInstance().upsertAppDataVal(PREFS_SALT_KEY, salt);
 			}
 			catch(Exception e) {
