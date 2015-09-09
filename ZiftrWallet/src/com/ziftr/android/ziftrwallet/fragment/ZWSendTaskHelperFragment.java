@@ -117,7 +117,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 		}
 
 		//get our list of inputs to use for spending
-		final List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin, true);
+		final List<String> inputs = ZWWalletManager.getInstance().getAddressList(coin);
 
 		//now we either have the user's password, or they don't have one set,
 		//so we need to contact the server and have a transaction built

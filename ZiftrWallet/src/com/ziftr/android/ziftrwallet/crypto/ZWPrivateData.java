@@ -27,23 +27,6 @@ public class ZWPrivateData {
 	// of database
 	private static final char NO_ENCRYPTION = 'G';
 	private static final char PBE_AES_ENCRYPTION = 'H';
-
-	// 128 is in default android, to get 256 AES encryption you have to use the JCE 
-	private static final int KEY_LENGTH = 128;
-	private static final int SALT_LENGTH = KEY_LENGTH / 8;
-
-	// 100 is pretty low but we want this to be fast on mobile phones
-	private static final int PBE_ITERATION_COUNT = 100;
-
-	private static final String HASH_ALGORITHM = "SHA-256";
-	private static final String PBE_ALGORITHM = "PBKDF2WithHmacSHA1"; //"PBKDF2WithHmacSHA256";
-
-	// TODO use this in the case that the phone doesn't come with 
-	private static final String SECONDARY_PBE_ALGORITHM = "PBKDF2WithHmacSHA1";
-
-	private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
-	private static final String SECRET_KEY_ALGORITHM = "AES";
-	
 	
 	
 	char encryptionIdentifier;

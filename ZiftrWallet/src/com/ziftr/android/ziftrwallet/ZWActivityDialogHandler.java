@@ -11,8 +11,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
@@ -279,7 +279,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 			ZiftrTextDialogFragment editLabelFragment = (ZiftrTextDialogFragment) fragment;
 
 			final String newLabel = editLabelFragment.getEnteredText(0);
-			final ZWSendingAddress editedAddress = (ZWSendingAddress) editLabelFragment.getData();
+			final ZWAddress editedAddress = (ZWAddress) editLabelFragment.getData();
 
 			ZiftrUtils.runOnNewThread(new Runnable() {
 
@@ -287,10 +287,7 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 				public void run() {
 
 					if(editedAddress != null) {
-						ZWWalletManager.getInstance().updateAddressLabel(editedAddress.getCoin(), 
-								editedAddress.getAddress(), 
-								newLabel, 
-								editedAddress.isPersonalAddress());
+						ZWWalletManager.getInstance().updateAddressLabel(editedAddress, newLabel);
 
 						//in this case the user updated the data directly instead of data downloaded from the internet, 
 						//but this will let the rest of the UI know

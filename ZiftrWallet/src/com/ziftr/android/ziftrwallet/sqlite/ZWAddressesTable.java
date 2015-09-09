@@ -15,6 +15,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.google.common.base.Joiner;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
@@ -24,7 +25,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
  * TODO add a column for isChangeAddress. Many times we want to filter change addresses
  * out so they are never revealed to the user
  */
-public abstract class ZWAddressesTable<A extends ZWSendingAddress> extends ZWCoinSpecificTable {
+public abstract class ZWAddressesTable<A extends ZWAddress> extends ZWCoinSpecificTable {
 
 	/** 
 	 * The address column. This is the encoded public key, along with coin type
@@ -141,7 +142,7 @@ public abstract class ZWAddressesTable<A extends ZWSendingAddress> extends ZWCoi
 		return newAddresses;
 	}
 	
-	protected List<A> getAddresses(ZWCoin coin, List<A> addresses, SQLiteDatabase db) {
+	protected List<A> getAddresses(ZWCoin coin, List<String> addresses, SQLiteDatabase db) {
 		
 		if (addresses == null)
 			return null;

@@ -32,8 +32,8 @@ public class ZWSendingAddressesTable extends ZWAddressesTable<ZWSendingAddress> 
 	}
 
 	@Override
-	protected ZWSendingAddress cursorToAddress(ZWCoin coinId, Cursor c) throws ZWAddressFormatException {
-		ZWSendingAddress newAddress = new ZWSendingAddress(coinId, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
+	protected ZWSendingAddress cursorToAddress(ZWCoin coin, Cursor c) throws ZWAddressFormatException {
+		ZWSendingAddress newAddress = new ZWSendingAddress(coin, c.getString(c.getColumnIndex(COLUMN_ADDRESS)));
 
 		// Reset all the keys parameters for use elsewhere
 		newAddress.setLabel(c.getString(c.getColumnIndex(COLUMN_LABEL)));

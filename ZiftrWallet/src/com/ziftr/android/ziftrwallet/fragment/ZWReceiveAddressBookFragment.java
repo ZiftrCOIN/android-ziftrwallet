@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 
-public class ZWReceiveAddressBookFragment extends ZWAddressBookFragment<ZWReceivingAddress> {
+public class ZWReceiveAddressBookFragment extends ZWAddressBookFragment {
 
 	@Override
 	protected List<ZWReceivingAddress> getDisplayAddresses() {

@@ -47,7 +47,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		this.setActionBar();
 	}
 
-	public void openAddressBook(ZWAddressBookFragment<? extends ZWSendingAddress> addressBookFragment, int baseLayout) {
+	public void openAddressBook(ZWAddressBookFragment addressBookFragment, int baseLayout) {
 		// The transaction that will take place to show the new fragment
 		FragmentTransaction transaction = this.getChildFragmentManager().beginTransaction();
 
@@ -139,7 +139,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		addressEditText.setText(address);
 		
 		if(label == null) {
-			ZWSendingAddress addressFromDatabase = this.getWalletManager().getAddress(this.getSelectedCoin(), address, false);
+			ZWSendingAddress addressFromDatabase = this.getWalletManager().getAddressSending(this.getSelectedCoin(), address);
 			if(addressFromDatabase != null) {
 				label = addressFromDatabase.getLabel();
 			}
@@ -164,7 +164,7 @@ public abstract class ZWAddressBookParentFragment extends ZWWalletUserFragment i
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				getWalletManager().updateAddressLabel(getSelectedCoin(), address, label, true);
+				getWalletManager().updateReceivingAddressLabel(getSelectedCoin(), address, label);
 			}
 		});
 	}

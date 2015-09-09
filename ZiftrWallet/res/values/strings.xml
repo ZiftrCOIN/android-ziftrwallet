@@ -146,6 +146,7 @@
     <string name="zw_dialog_error_send_noconnection">Unable to connect to the server. Please check your internet connection and try again.</string>
     <string name="zw_dialog_error_in_account_creation">Unable to add a wallet for the coin specified. Please contact info@ziftrcoin.com to alert us that you are experiencing an issue.</string>
     <string name="zw_dialog_error_send_returnederror">Error (%1$s): \n%2$s</string>
+    <string name="zw_dialog_error_failed_creating_address">Could not create a new receiving address!</string>
     <string name="zw_dialog_error_send_nocoins">You do not have enough %1$s to complete this transaction.</string>
     <string name="zw_dialog_warning_unconfirmed">Warning! To complete this transaction you must spend coins that are not fully confirmed. Are you sure you want to continue?</string>
     <string name="zw_dialog_send">Send</string>

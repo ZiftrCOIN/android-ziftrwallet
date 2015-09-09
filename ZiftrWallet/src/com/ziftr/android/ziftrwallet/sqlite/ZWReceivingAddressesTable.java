@@ -256,6 +256,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		return this.getAddresses(coin, filter, db);
 	}
 
+	
 	@Override
 	protected ContentValues addressToContentValues(ZWReceivingAddress address, boolean forInsert) {
 		ContentValues values = super.addressToContentValues(address, forInsert);

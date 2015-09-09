@@ -24,12 +24,12 @@ import org.json.JSONObject;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECDSASignature;
 import com.ziftr.android.ziftrwallet.crypto.ZWPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWRawTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
-import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
@@ -152,7 +152,9 @@ public class ZWDataSyncHelper {
 				String signingAddressPublic = toSign.optString("address");
 				addressesSpentFrom.add(signingAddressPublic);
 
-				ZWReceivingAddress addr = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, signingAddressPublic, password); 
+				//ZWReceivingAddress addr = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, signingAddressPublic, password);
+				ZWReceivingAddress addr = ZWWalletManager.getInstance().getAddressReceiving(coin, signingAddressPublic);
+				
 				ZWPrivateKey key = addr.getStandardKey();
 
 				toSign.put("pubkey", ZiftrUtils.bytesToHexString(key.getPub().getPubKeyBytes()));
@@ -190,9 +192,9 @@ public class ZWDataSyncHelper {
 				// TODO add a new way to set the spent from in all of these 
 				for(String addressString : addressesSpentFrom) {
 					
-					ZWReceivingAddress address = (ZWReceivingAddress) ZWWalletManager.getInstance().getAddress(coin, addressString, true);
+					ZWReceivingAddress address = (ZWReceivingAddress) ZWWalletManager.getInstance().getAddressReceiving(coin, addressString);
 					address.setSpentFrom(true);
-					ZWWalletManager.getInstance().updateAddress(address, true);
+					ZWWalletManager.getInstance().updateReceivingAddress(address);
 				}
 
 				//update the transactions table with the data from this transaction
@@ -469,7 +471,7 @@ public class ZWDataSyncHelper {
 		long syncedHeight = -1;
 		int maxAddressLimit = 100;
 
-		List<String> allAddresses = ZWWalletManager.getInstance().getAddressList(coin, true);
+		List<String> allAddresses = ZWWalletManager.getInstance().getAddressList(coin);
 
 		for (int addressIndex = 0; addressIndex < allAddresses.size(); addressIndex += maxAddressLimit) {
 			List<String> addresses;
@@ -586,7 +588,7 @@ public class ZWDataSyncHelper {
 		ZWTransaction transaction = new ZWTransaction(coin, transactionId);
 
 		ArrayList<ZWReceivingAddress> receivingAddressesUsed = new ArrayList<ZWReceivingAddress>();
-		ArrayList<ZWSendingAddress> sendingAddressesUsed = new ArrayList<ZWSendingAddress>();
+		ArrayList<ZWAddress> sendingAddressesUsed = new ArrayList<ZWAddress>();
 		ArrayList<ZWTransactionOutput> receivedOutputs = new ArrayList<ZWTransactionOutput>();
 		//ArrayList<ZWTransactionOutput> spentOutputs = new ArrayList<ZWTransactionOutput>();
 
@@ -676,11 +678,9 @@ public class ZWDataSyncHelper {
 			for(int addressIndex = 0; addressIndex < addressCount; addressIndex++) {
 				String outputAddressString = outputAddresses.getString(addressIndex);
 
-				boolean ownedAddress = true;
-				ZWSendingAddress outputAddress = ZWWalletManager.getInstance().getAddress(coin, outputAddressString, ownedAddress);
+				ZWAddress outputAddress = ZWWalletManager.getInstance().getAddressReceiving(coin, outputAddressString);
 				if (outputAddress == null) {
-					ownedAddress = false;
-					outputAddress = ZWWalletManager.getInstance().getAddress(coin, outputAddressString, ownedAddress);
+					outputAddress = ZWWalletManager.getInstance().getAddressSending(coin, outputAddressString);
 				}
 
 				if (outputAddress != null) {
@@ -692,7 +692,7 @@ public class ZWDataSyncHelper {
 					ZWTransactionOutput transactionOutput = new ZWTransactionOutput(outputAddressString, transactionId, outputIndex, value, isMultiSig);
 					transaction.setMultisig(isMultiSig);
 
-					if (ownedAddress) {
+					if (outputAddress.isOwnedAddress()) {
 						receivedOutputs.add(transactionOutput);
 						if(!usedValue) {
 							receivedCoins = receivedCoins.add(value);
@@ -773,14 +773,14 @@ public class ZWDataSyncHelper {
 	 * This method simply isolates this flow-chart logic to figure out which addresses are which
 	 */
 	private static void determineTransactionDisplayData(ZWTransaction transaction, boolean isSpending, boolean unknownOutputs,
-			List<ZWReceivingAddress> receivingAddressesUsed, List<ZWSendingAddress> sendingAddressesUsed) {
+			List<ZWReceivingAddress> receivingAddressesUsed, List<ZWAddress> sendingAddressesUsed) {
 		//go through address to set addresses to display and transaction note
 		ArrayList<String> displayStrings = new ArrayList<String>();
 
 		if(isSpending) {
 			if(sendingAddressesUsed.size() > 0) {
 				//this is a normal "send" transaction
-				for(ZWSendingAddress address : sendingAddressesUsed) {
+				for(ZWAddress address : sendingAddressesUsed) {
 					displayStrings.add(address.getAddress());
 
 					//also if we haven't already set some sort of note, use this address's label
@@ -817,7 +817,7 @@ public class ZWDataSyncHelper {
 						//so we give them a default label
 						for(ZWReceivingAddress address : receivingAddressesUsed) {
 							address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_self_send));
-							ZWWalletManager.getInstance().updateAddress(address, true);
+							ZWWalletManager.getInstance().updateReceivingAddress(address);
 							displayStrings.add(address.getAddress());
 						}
 
@@ -854,7 +854,7 @@ public class ZWDataSyncHelper {
 					//this could happen if someone tried to return coins using the address they came from for some reason
 					for(ZWReceivingAddress address : receivingAddressesUsed) {
 						address.setLabel(ZWApplication.getApplication().getString(R.string.zw_transaction_returned_coins));
-						ZWWalletManager.getInstance().updateAddress(address, true);
+						ZWWalletManager.getInstance().updateReceivingAddress(address);
 						displayStrings.add(address.getAddress());
 					}
 

@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
-import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -29,7 +29,7 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  * of currencies the user can choose from. This adapts each option to form
  * a view for each currency, reusing old views to improve efficiency. 
  */
-public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWSendingAddress> implements OnClickListener {
+public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> implements OnClickListener {
 
 	public static final String DIALOG_EDIT_ADDRESS_TAG = "addresslist_edit_address";
 	
@@ -54,18 +54,18 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWSendingAddre
 	private SortState sortState = SortState.UNSORTED;
 
 	// Make this take a factory finalizable something or other
-	public ZWAddressListAdapter(ZWMainFragmentActivity activity, List<ZWSendingAddress> txList) {
+	public ZWAddressListAdapter(ZWMainFragmentActivity activity, List<ZWAddress> txList) {
 		super(activity, R.layout.accounts_address_book_list_item, txList);
 		this.activity = activity;
 	}
 
 	public ZWAddressListAdapter(ZWMainFragmentActivity activity) {
-		this(activity, new ArrayList<ZWSendingAddress>());
+		this(activity, new ArrayList<ZWAddress>());
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		final ZWSendingAddress address = getItem(position);
+		final ZWAddress address = getItem(position);
 
 		// The convertView is an oldView that android is recycling, or null if not recycling yet
 		if (convertView == null) {
@@ -93,8 +93,8 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWSendingAddre
 	 * @param txListItem
 	 * @return
 	 */
-	private int getImgResIdForItem(ZWSendingAddress address) {
-		if (address.isPersonalAddress()) {
+	private int getImgResIdForItem(ZWAddress address) {
+		if (address.isOwnedAddress()) {
 			return R.drawable.received_enabled;
 		} else {
 			return R.drawable.sent_enabled;
@@ -116,9 +116,9 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWSendingAddre
 	private void sortByTime(boolean newerFirst) {
 		// TODO do on a different thread with a callback
 		final int multiplier = newerFirst ? 1 : -1;
-		Comparator<ZWSendingAddress> comparator = new Comparator<ZWSendingAddress>() {
+		Comparator<ZWAddress> comparator = new Comparator<ZWAddress>() {
 			@Override
-			public int compare(ZWSendingAddress lhs, ZWSendingAddress rhs) {
+			public int compare(ZWAddress lhs, ZWAddress rhs) {
 				if (lhs.getLastTimeModifiedSeconds() < rhs.getLastTimeModifiedSeconds()) {
 					return multiplier * 1;
 				} else if (lhs.getLastTimeModifiedSeconds() > rhs.getLastTimeModifiedSeconds()) {
@@ -134,16 +134,16 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWSendingAddre
 	private void sortAlphabeticall(boolean aToZ) {
 		// TODO do on a different thread with a callback 
 		final int multiplier = aToZ ? 1 : -1;
-		Comparator<ZWSendingAddress> comparator = new Comparator<ZWSendingAddress>() {
+		Comparator<ZWAddress> comparator = new Comparator<ZWAddress>() {
 			@Override
-			public int compare(ZWSendingAddress lhs, ZWSendingAddress rhs) {
+			public int compare(ZWAddress lhs, ZWAddress rhs) {
 				return multiplier * lhs.getLabel().compareToIgnoreCase(rhs.getLabel());
 			}
 		};
 		this.sort(comparator);
 	}
 	
-	private void sort(final Comparator<ZWSendingAddress> comparator) {
+	private void sort(final Comparator<ZWAddress> comparator) {
 		// Have to do the sorting on a different thread in case it takes  along time
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
@@ -197,7 +197,7 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWSendingAddre
 		
 		if(v.getId() == R.id.leftIcon) {
 			//user is editing the label
-			ZWSendingAddress address = (ZWSendingAddress) v.getTag();
+			ZWAddress address = (ZWAddress) v.getTag();
 			
 			if(address != null) {
 				ZiftrTextDialogFragment editLabelDialog = new ZiftrTextDialogFragment();

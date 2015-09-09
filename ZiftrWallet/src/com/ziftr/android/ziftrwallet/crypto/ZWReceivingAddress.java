@@ -9,7 +9,7 @@ import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable;
 
-public class ZWReceivingAddress extends ZWSendingAddress {
+public class ZWReceivingAddress extends ZWAddress {
 
 	public enum KeyType {
 		/** priv is a {@link ZWPrivateKey} */
@@ -54,7 +54,6 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 	 * @throws ZWAddressFormatException
 	 */
 	public ZWReceivingAddress(ZWCoin coinId, ZWPrivateKey priv, boolean hidden) throws ZWAddressFormatException {
-		super(false);
 		if (priv == null) {
 			throw new ZWAddressFormatException("Cannot use this constructor without a addresses must have a private key");
 		}
@@ -72,7 +71,6 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 	}
 	
 	public ZWReceivingAddress(ZWCoin coinId, ZWPublicKey pub, ZWHdPath path) throws ZWAddressFormatException {
-		super(false);
 		this.priv = path;
 		this.pub = pub;
 		// Do not need to set hidden, it is derived from the path stored in this.priv
@@ -81,7 +79,6 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 	}
 	
 	public ZWReceivingAddress(ZWCoin coinId, ZWPublicKey pub, ZWPrivateData data, boolean hidden) throws ZWAddressFormatException {
-		super(false);
 		if (data == null) {
 			throw new ZWAddressFormatException("Cannot use this constructor without any encrpted data");
 		}
@@ -150,7 +147,7 @@ public class ZWReceivingAddress extends ZWSendingAddress {
 	}
 
 	@Override
-	public boolean isPersonalAddress() {
+	public boolean isOwnedAddress() {
 		return true;
 	}
 	

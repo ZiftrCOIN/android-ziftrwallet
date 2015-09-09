@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
@@ -252,21 +253,18 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	//////////  Interface for receiving addresses table  /////////////
 	//////////////////////////////////////////////////////////////////
 
-	@SuppressWarnings("rawtypes")
-	private synchronized ZWAddressesTable getTable(boolean receivingNotSending) {
-		return receivingNotSending ? this.receivingAddressesTable : this.sendingAddressesTable;
+	
+
+	public ZWReceivingAddress createReceivingAddress(ZWCoin coin, int account, boolean change) throws ZWAddressFormatException {
+		return this.createReceivingAddress(coin, account, change, "");
 	}
 
-	public ZWReceivingAddress createReceivingAddress(ZWCoin coinId, int account, boolean change) throws ZWAddressFormatException {
-		return this.createReceivingAddress(coinId, account, change, "");
-	}
-
-	public ZWReceivingAddress createReceivingAddress(ZWCoin coinId, int account, boolean change, String note) throws ZWAddressFormatException {
+	public ZWReceivingAddress createReceivingAddress(ZWCoin coin, int account, boolean change, String note) throws ZWAddressFormatException {
 		long time = System.currentTimeMillis() / 1000;
-		ZWHdAccount hdAccount = this.accountsTable.getAccount(coinId.getSymbol(), account, getReadableDatabase());
-		int nextUnused = this.receivingAddressesTable.nextUnusedIndex(coinId, change, account, getReadableDatabase());
+		ZWHdAccount hdAccount = this.accountsTable.getAccount(coin.getSymbol(), account, getReadableDatabase());
+		int nextUnused = this.receivingAddressesTable.nextUnusedIndex(coin, change, account, getReadableDatabase());
 		ZWExtendedPublicKey xpubkeyNewAddress = hdAccount.xpubkey.deriveChild("M/" + (change ? 1 : 0) + "/" + nextUnused);
-		ZWReceivingAddress address = new ZWReceivingAddress(coinId, xpubkeyNewAddress, xpubkeyNewAddress.getPath());
+		ZWReceivingAddress address = new ZWReceivingAddress(coin, xpubkeyNewAddress, xpubkeyNewAddress.getPath());
 		address.setLabel(note);
 		address.setLastKnownBalance(0);
 		address.setCreationTimeSeconds(time);
@@ -373,22 +371,41 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * 
 	 * @param address - the address to fully update 
 	 */
-	@SuppressWarnings("unchecked")
-	public synchronized void updateAddress(ZWSendingAddress address, boolean receivingNotSending) {
-		this.getTable(receivingNotSending).updateAddress(address, getWritableDatabase());
+	public synchronized void updateReceivingAddress(ZWReceivingAddress address) {
+		this.receivingAddressesTable.updateAddress(address, getWritableDatabase());
 	}
+	
+	
+	public synchronized void updateSendingAddress(ZWSendingAddress address) {
+		this.sendingAddressesTable.updateAddress(address, getWritableDatabase());
+	}
+	
 
 	/**
-	 * As part of the U in CRUD, this method updates the label for the given address.
-	 * 
-	 * @param coin - The coin type
-	 * @param address - The address to update
-	 * @param newLabel - the label to change the address to
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table.
+	 * Updates the address label in whichever database the passed in address belongs. 
+	 * @param address the address object to update
 	 */
-	public synchronized void updateAddressLabel(ZWCoin coin, String address, String newLabel, boolean receivingNotSending) {
-		this.getTable(receivingNotSending).updateAddressLabel(coin, address, newLabel, getWritableDatabase());
+	public synchronized void updateAddressLabel(ZWAddress address, String newLabel) {
+		ZWAddressesTable<?> table;
+		if(address.isOwnedAddress()) {
+			table = this.receivingAddressesTable;
+		}
+		else {
+			table = this.sendingAddressesTable;
+		}
+		
+		ZWCoin coin = address.getCoin();
+		String addressString = address.getAddress();
+		
+		table.updateAddressLabel(coin, addressString, newLabel, getWritableDatabase());
 	}
+	
+	
+	public synchronized void updateReceivingAddressLabel(ZWCoin coin, String address, String newLabel) {
+		this.receivingAddressesTable.updateAddressLabel(coin, address, newLabel, getWritableDatabase());
+	}
+	
+	
 
 	/* 
 	 * NOTE:
@@ -427,33 +444,46 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		long rowId = this.sendingAddressesTable.insert(address, this.getWritableDatabase());
 		if (rowId == -1) {
 			// This address already exists, so update it
-			this.updateAddress(address, false);
+			this.updateSendingAddress(address);
 		}
 		return address;
 	}
 
 	/**
-	 * gets a list of Strings of the public addresses for all of the users addresses
+	 * gets a list of Strings of the public addresses for all of the user's receiving addresses
 	 * @param coin which coin to get addresses for
 	 * @return a list of strings representing the public addresses
 	 */
-	@SuppressWarnings("unchecked")
-	public synchronized List<String> getAddressList(ZWCoin coin, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).getAddressesList(coin, getWritableDatabase());
+	public synchronized List<String> getAddressList(ZWCoin coin) {
+		return this.receivingAddressesTable.getAddressesList(coin, getWritableDatabase());
 	}
 
 	/**
-	 * gets an address from the 
-	 * database for the given coin type and table boolean. Returns null if
+	 * gets an address object from the user's history of addresses that have been sent to
+	 * Returns null if
 	 * no such address is found
 	 * 
 	 * @param coin - The coin type to determine which table we use. 
-	 * @param address - The list of 1xyz... (Base58) encoded address in the database.
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
+	 * @param address - the public address as a string
 	 */
-	public synchronized ZWSendingAddress getAddress(ZWCoin coin, String address, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).getAddress(coin, address, getReadableDatabase());
+	public synchronized ZWSendingAddress getAddressSending(ZWCoin coin, String address) {
+		return this.sendingAddressesTable.getAddress(coin, address, getReadableDatabase());
 	}
+	
+	
+	/**
+	 * gets an address object from the user's owned addresses
+	 * Returns null if
+	 * no such address is found
+	 * 
+	 * @param coin - The coin type to determine which table we use. 
+	 * @param address - the public address as a string
+	 */
+	public synchronized ZWReceivingAddress getAddressReceiving(ZWCoin coin, String address) {
+		return this.receivingAddressesTable.getAddress(coin, address, getReadableDatabase());
+	}
+	
+	
 
 	public synchronized ZWReceivingAddress getDecryptedReceivingAddress(ZWCoin coin, String address, String password) throws ZWDataEncryptionException {
 		ZWReceivingAddress addr = this.receivingAddressesTable.getAddress(coin, address, getReadableDatabase());
@@ -483,18 +513,16 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	}
 
 	/**
-	 * gets a list of {@link ZWSendingAddress} objects from the database based on a list of public address strings
+	 * gets a list of {@link ZWReceivingAddress} objects from the database based on a list of public address strings
 	 * @param coin - The coin type to determine which table we use. 
 	 * @param addresses - The list of 1xyz... (Base58) encoded address in the database. 
-	 * @param receivingNotSending - If true, uses receiving table. If false, sending table. 
 	 */
-	@SuppressWarnings("unchecked")
-	public synchronized List<ZWSendingAddress> getAddresses(ZWCoin coin, List<String> addresses, boolean receivingNotSending) {
-		return this.getTable(receivingNotSending).getAddresses(coin, addresses, getReadableDatabase());
+	public synchronized List<ZWReceivingAddress> getAddresses(ZWCoin coin, List<String> addresses) {
+		return this.receivingAddressesTable.getAddresses(coin, addresses, getReadableDatabase());
 	}
 
 	/**
-	 * gets all {@link ZWSendingAddress} from the receiving table for the given coin
+	 * gets all {@link ZWReceivingAddress} from the receiving table for the given coin
 	 * @param coin which coin to get addresses for
 	 * @param includeSpentFrom should "unsafe" addresses (which have previously been spent from) be included
 	 * @return a list of address objects

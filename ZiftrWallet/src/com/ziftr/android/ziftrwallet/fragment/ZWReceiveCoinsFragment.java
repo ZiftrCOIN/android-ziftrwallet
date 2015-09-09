@@ -425,8 +425,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 		}
 		
 		if(address == null) {
-			//TODO -add this message to strings resource file instead of hardcoding
-			ZiftrDialogManager.showSimpleAlert("Could not create a new receiving address!");
+			ZiftrDialogManager.showSimpleAlert(this.getString(R.string.zw_dialog_error_failed_creating_address));
 		}
 		else {
 			String addressString = address.getAddress();

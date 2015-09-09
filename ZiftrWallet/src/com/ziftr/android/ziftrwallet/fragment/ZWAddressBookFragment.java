@@ -22,11 +22,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter.SortState;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public abstract class ZWAddressBookFragment<A extends ZWSendingAddress> extends ZWWalletUserFragment 
+public abstract class ZWAddressBookFragment extends ZWWalletUserFragment 
 implements TextWatcher, OnClickListener {
 
 	public static final String FRAGMENT_TAG = "address_book";
@@ -110,10 +111,9 @@ implements TextWatcher, OnClickListener {
 		this.addressListView.setAdapter(this.addressAdapter);
 		this.addressListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public void onItemClick(AdapterView<?> parent, View view, 
 					int position, long id) {
-				A address = (A) addressListView.getItemAtPosition(position);
+				ZWAddress address = (ZWAddress) addressListView.getItemAtPosition(position);
 				ZWAddressBookParentFragment parentFragment = getAddressBookParentFragment();
 				parentFragment.updateAddress(address.getAddress(), address.getLabel());
 				parentFragment.returnToParentFragment();
@@ -129,7 +129,7 @@ implements TextWatcher, OnClickListener {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final List<A> addresses = getDisplayAddresses();
+				final List<? extends ZWAddress> addresses = getDisplayAddresses();
 				Activity a = ZWAddressBookFragment.this.getZWMainActivity();
 				// It it's null then the app is dying and we do it on the next round
 				if (a != null) {
@@ -154,7 +154,7 @@ implements TextWatcher, OnClickListener {
 	 * fragment to display to the user
 	 * @return a list of address objects
 	 */
-	protected abstract List<A> getDisplayAddresses();
+	protected abstract List<? extends ZWAddress> getDisplayAddresses();
 	
 	
 	/**
