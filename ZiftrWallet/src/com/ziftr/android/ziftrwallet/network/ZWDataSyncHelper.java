@@ -152,8 +152,8 @@ public class ZWDataSyncHelper {
 				String signingAddressPublic = toSign.optString("address");
 				addressesSpentFrom.add(signingAddressPublic);
 
-				//ZWReceivingAddress addr = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, signingAddressPublic, password);
-				ZWReceivingAddress addr = ZWWalletManager.getInstance().getAddressReceiving(coin, signingAddressPublic);
+				ZWReceivingAddress addr = ZWWalletManager.getInstance().getDecryptedReceivingAddress(coin, signingAddressPublic, password);
+				//ZWReceivingAddress addr = ZWWalletManager.getInstance().getAddressReceiving(coin, signingAddressPublic);
 				
 				ZWPrivateKey key = addr.getStandardKey();
 

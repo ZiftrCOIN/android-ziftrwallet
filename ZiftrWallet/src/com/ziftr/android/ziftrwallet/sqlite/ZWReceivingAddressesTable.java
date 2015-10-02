@@ -6,7 +6,6 @@
 
 package com.ziftr.android.ziftrwallet.sqlite;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +17,7 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWHdPath;
-import com.ziftr.android.ziftrwallet.crypto.ZWHdWalletException;
 import com.ziftr.android.ziftrwallet.crypto.ZWPrivateData;
-import com.ziftr.android.ziftrwallet.crypto.ZWPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
@@ -109,7 +105,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	}
 
 	@Override
-	protected ZWReceivingAddress cursorToAddress(ZWCoin coinId, Cursor c) throws ZWAddressFormatException {
+	protected ZWReceivingAddress cursorToAddress(ZWCoin coin, Cursor c) throws ZWAddressFormatException {
 		String dataInPrivColumn = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
 
 		// If a constructor is used that doesn't pass the pubKeyBytes it recalculates them
@@ -119,13 +115,29 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		ZWPublicKey pubkey = new ZWPublicKey(pubKeyBytes);
 
 		// Hidden column is used even in non-HD address rows
-		int hidden = c.getInt(c.getColumnIndex(COLUMN_HIDDEN));
-		ZWReceivingAddress addrRet = null;
+		boolean hidden = getBooleanValue(c, COLUMN_HIDDEN);
+		
+		ZWPrivateData privateData = ZWPrivateData.createFromPrivateDataString(dataInPrivColumn);
 
+		Integer hdAccount = getIntegerValue(c, COLUMN_HD_ACCOUNT);
+		Integer hdIndex = getIntegerValue(c, COLUMN_HD_INDEX);
+		
+		ZWReceivingAddress addrRet = new ZWReceivingAddress(coin, pubkey, privateData, hidden, hdAccount, hdIndex);
+		
+		/***
 		if (dataInPrivColumn == null || dataInPrivColumn.isEmpty()) {
 			//this address is derived from an HD seed and the private key can be calculated later
 			int account = c.getInt(c.getColumnIndex(COLUMN_HD_ACCOUNT));
+			int index = c.getInt(c.getColumnIndex(COLUMN_HD_INDEX));
+			
+			
+			
 			String path = "[m/44'/" + coinId.getHdId() + "'/" + account + "']/" + hidden + "/" + c.getInt(c.getColumnIndex(COLUMN_HD_INDEX));
+			
+			
+			
+			
+			
 			addrRet = new ZWReceivingAddress(coinId, pubkey, new ZWHdPath(path));
 		}
 		else {
@@ -140,6 +152,9 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 				addrRet = new ZWReceivingAddress(coinId, newKey, hidden != 0);
 			}
 		}
+		
+		***/
+		
 
 		addrRet.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
 		addrRet.setSpentFrom(c.getInt(c.getColumnIndex(COLUMN_SPENT_FROM)) != 0);
@@ -261,10 +276,19 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	protected ContentValues addressToContentValues(ZWReceivingAddress address, boolean forInsert) {
 		ContentValues values = super.addressToContentValues(address, forInsert);
 
-		String privData = "";
+		String privData = null;
 		Integer index = null;
 		Integer account = null;
-
+		
+		ZWPrivateData addressPrivateData = address.getPrivateKeyData();
+		if(addressPrivateData != null) {
+			privData = addressPrivateData.getStorageString();
+		}
+		
+		index = address.getHdIndex();
+		account = address.getHdAccount();
+		
+		/***
 		switch (address.getKeyType()) {
 		case EXTENDED_UNENCRYPTED:
 			ZWHdPath p = address.getExtendedPriv().getPath();
@@ -296,10 +320,13 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 			account = null;
 			break;
 		}
+		***/
 
+		/**
 		if (privData.isEmpty() == (index == null || account == null)) {
 			throw new ZWHdWalletException("Data for insertion not available. ");
 		}
+		**/
 
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getCreationTimeSeconds());
 		values.put(COLUMN_PRIV_KEY, privData);
@@ -316,6 +343,8 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 
 		return values;
 	}
+	
+	
 
 	protected int nextUnusedIndex(ZWCoin coin, boolean change, int account, SQLiteDatabase db) {
 		String[] selectionArgs = new String[] {

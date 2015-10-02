@@ -37,9 +37,13 @@ public class ZWPrivateData {
 	 * create a new {@link ZWPrivateData} object from an existing private data string,
 	 * @param privateData the private data string to use to create the object, it should have an encryption id as the first character
 	 * this string typically comes from the {@link #getStorageString()} method of a previous ZWPrivateData object
-	 * @return a new ZWPrivateData object with the encryption status set based on the data passed in
+	 * @return a new ZWPrivateData object with the encryption status set based on the data passed in, or null if privateData is empty
 	 */
 	public static ZWPrivateData createFromPrivateDataString(String privateData) {
+		if(privateData == null || privateData.isEmpty()) {
+			return null;
+		}
+		
 		return new ZWPrivateData(privateData);
 	}
 
@@ -47,9 +51,13 @@ public class ZWPrivateData {
 	/**
 	 * creates a new {@link ZWPrivateData} object from raw unencrypted string data
 	 * @param data raw unencrypted data to be part of this private data object
-	 * @return a new ZWPrivateData object with encryption status set to not encrypted
+	 * @return a new ZWPrivateData object with encryption status set to not encrypted, or null if data is empty
 	 */
 	public static ZWPrivateData createFromUnecryptedData(String data) {
+		if(data == null || data.isEmpty()) {
+			return null;
+		}
+		
 		return new ZWPrivateData(NO_ENCRYPTION, data);
 	}
 

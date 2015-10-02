@@ -49,5 +49,44 @@ public abstract class ZWCoinSpecificTable {
 	public void deleteAll(ZWCoin coin, SQLiteDatabase database) {
 		database.delete(getTableName(coin), null, null);
 	}
+	
+	
+	protected Integer getIntegerValue(Cursor cursor, String column) {
+		
+		int columnIndex = cursor.getColumnIndex(column);
+		if(!cursor.isNull(columnIndex)) {
+			return cursor.getInt(columnIndex);
+		}
+		
+		return null;
+	}
+	
+	
+	protected String getStringValue(Cursor cursor, String column) {
+		
+		int columnIndex = cursor.getColumnIndex(column);
+		if(!cursor.isNull(columnIndex)) {
+			return cursor.getString(columnIndex);
+		}
+		
+		return null;
+	}
+	
+	
+	protected Boolean getBooleanValue(Cursor cursor, String column) {
+	
+		int columnIndex = cursor.getColumnIndex(column);
+		if(!cursor.isNull(columnIndex)) {
+			int value = cursor.getInt(columnIndex);
+			if(value == 0) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+		
+		return null;
+	}
 
 }

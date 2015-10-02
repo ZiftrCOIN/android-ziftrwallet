@@ -261,10 +261,19 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	public ZWReceivingAddress createReceivingAddress(ZWCoin coin, int account, boolean change, String note) throws ZWAddressFormatException {
 		long time = System.currentTimeMillis() / 1000;
+		
 		ZWHdAccount hdAccount = this.accountsTable.getAccount(coin.getSymbol(), account, getReadableDatabase());
+		
 		int nextUnused = this.receivingAddressesTable.nextUnusedIndex(coin, change, account, getReadableDatabase());
+		
 		ZWExtendedPublicKey xpubkeyNewAddress = hdAccount.xpubkey.deriveChild("M/" + (change ? 1 : 0) + "/" + nextUnused);
-		ZWReceivingAddress address = new ZWReceivingAddress(coin, xpubkeyNewAddress, xpubkeyNewAddress.getPath());
+		
+		
+		ZWReceivingAddress address = new ZWReceivingAddress(coin, xpubkeyNewAddress, null, change, account, nextUnused);
+		
+		//ZWReceivingAddress address = new ZWReceivingAddress(coin, xpubkeyNewAddress, xpubkeyNewAddress.getPath());
+		
+		
 		address.setLabel(note);
 		address.setLastKnownBalance(0);
 		address.setCreationTimeSeconds(time);
