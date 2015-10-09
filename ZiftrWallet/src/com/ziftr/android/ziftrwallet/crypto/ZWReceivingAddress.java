@@ -5,40 +5,16 @@
  */
 package com.ziftr.android.ziftrwallet.crypto;
 
-import java.math.BigInteger;
-
-import javax.annotation.Nullable;
-
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
-import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWReceivingAddress extends ZWAddress {
+public abstract class ZWReceivingAddress extends ZWAddress {
 
-	public enum KeyType {
-		/** priv is a {@link ZWPrivateKey} */
-		STANDARD_UNENCRYPTED,
-		
-		/** priv is a {@link ZWExtendedPrivateKey} */
-		EXTENDED_UNENCRYPTED,
-		
-		/** priv is a {@link ZWHdPath}. */
-		DERIVABLE_PATH,
-		
-		/** priv is a {@link ZWEncryptedData} */
-		ENCRYPTED
-	};
-	
-	private KeyType keyType;
 	
 	/** Receiving address can be sent to, and spent from. Spending from uses this private key. */
 	//private Object priv;
 	
-	private ZWPrivateData privateKeyData;
-	
-	private Integer hdAccount;
-	private Integer hdIndex;
-	private String path;
+	protected ZWPrivateData privateKeyData;
 	
 	/**
 	 * Creation time of the key in seconds since the epoch, or zero if the key was deserialized from a 
@@ -56,38 +32,6 @@ public class ZWReceivingAddress extends ZWAddress {
 	 */
 	private boolean hidden = false;
 
-	/**
-	public ZWReceivingAddress(ZWCoin coinId) throws ZWAddressFormatException {
-		this(coinId, new ZWPrivateKey(), false);
-	}
-	**/
-	
-
-	/**
-	 * @throws ZWAddressFormatException
-	 */
-	
-	/**
-	public ZWReceivingAddress(ZWCoin coin, ZWPrivateKey priv, boolean hidden) throws ZWAddressFormatException {
-		if (priv == null) {
-			throw new ZWAddressFormatException("Cannot use this constructor without a addresses must have a private key");
-		}
-		this.priv = priv;
-		this.pub = priv.getPub();
-		this.hidden = hidden;
-		this.initialize(coin, coin.getPubKeyHashPrefix(), this.pub.getPubKeyHash()); 
-		keyType = KeyType.STANDARD_UNENCRYPTED;
-	}
-	**/
-	
-	/***
-	public ZWReceivingAddress(ZWCoin coinId, ZWExtendedPrivateKey priv) throws ZWAddressFormatException {
-		// hidden=false doesn't do anything here, the values is ignored in isHidden for this KeyType
-		this(coinId, (ZWPrivateKey)priv, false);
-		keyType = KeyType.EXTENDED_UNENCRYPTED;
-	} 
-	***/
-	
 	
 	/**
 	 * 
@@ -99,50 +43,14 @@ public class ZWReceivingAddress extends ZWAddress {
 	 * @param hdIndex
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWReceivingAddress(ZWCoin coin, ZWPublicKey publicKey, @Nullable ZWPrivateData privateKeyData, boolean change, @Nullable Integer hdAccount, @Nullable Integer hdIndex) throws ZWAddressFormatException {
+	protected ZWReceivingAddress(ZWCoin coin, ZWPublicKey publicKey, boolean change) throws ZWAddressFormatException {
 		
-		if(hdAccount != null && hdIndex != null) {
-			this.hdAccount = hdAccount;
-			this.hdIndex = hdIndex;
-			this.path = "[m/44'/" + coin.getHdId() + "'/" + hdAccount + "']/" + change + "/" + hdIndex;
-		}
 		
-		this.privateKeyData = privateKeyData;
+		//this.privateKeyData = privateKeyData;
+		
 		this.hidden = change; //most other wallets call this change, so we're starting to move over to that (change addresses are hidden from the user)
 		this.initialize(coin, coin.getPubKeyHashPrefix(), publicKey.getPubKeyHash());
 	}
-
-	
-	/***
-	
-	public ZWReceivingAddress(ZWCoin coinId, ZWPublicKey pub, ZWHdPath path) throws ZWAddressFormatException {
-		this.priv = path;
-		this.pub = pub;
-		// Do not need to set hidden, it is derived from the path stored in this.priv
-		this.initialize(coinId, coinId.getPubKeyHashPrefix(), this.pub.getPubKeyHash());
-		keyType = KeyType.DERIVABLE_PATH;
-	}
-	***/
-	
-	
-	/***
-	public ZWReceivingAddress(ZWCoin coinId, ZWPublicKey pub, ZWPrivateData data, boolean hidden) throws ZWAddressFormatException {
-		if (data == null) {
-			throw new ZWAddressFormatException("Canno
-			t use this constructor without any encrpted data");
-		}
-		
-		//this.priv = data;
-		this.privateKeyData = data;
-		
-		
-		this.pub = pub;
-		this.hidden = hidden;
-		this.initialize(coinId, coinId.getPubKeyHashPrefix(), pub.getPubKeyHash());
-		keyType = KeyType.ENCRYPTED;
-	}
-	***/
-	
 	
 	
 
@@ -196,15 +104,6 @@ public class ZWReceivingAddress extends ZWAddress {
 	}
 
 	
-	public Integer getHdAccount() {
-		return this.hdAccount;
-	}
-	
-	
-	public Integer getHdIndex() {
-		return this.hdIndex;
-	}
-	
 	
 	/***
 	public void setHidden(boolean hidden) {
@@ -225,76 +124,30 @@ public class ZWReceivingAddress extends ZWAddress {
 		return true;
 	}
 	
+	
 	/**
 	 * @return the keyType
 	 */
+	/***
 	public KeyType getKeyType() {
 		return keyType;
 	}
+	***/
 	
 	
 	
 	public ZWPrivateData getPrivateKeyData() {
 		return this.privateKeyData;
 	}
+
+	public abstract ZWPrivateKey getPrivateKey(String password) throws ZWDataEncryptionException;
 	
 	
 	/***
-	public ZWExtendedPrivateKey getExtendedPriv() {
-		return (ZWExtendedPrivateKey) this.priv;
-	}
+	public abstract void decrypt(String password) throws ZWDataEncryptionException;
 	
+
 	
-	public ZWHdPath getPath() {
-		return (ZWHdPath) this.priv;
-	}
-	
-	***/
-	
-	public ZWPrivateKey getPrivateKey(String password) {
-		
-		//if encrypted legacy key
-		byte[] privBytes = ZiftrUtils.hexStringToBytes(privateData.getDataString());
-		ZWPrivateKey newKey = new ZWPrivateKey(new BigInteger(1, privBytes), pubkey);
-		addrRet = new ZWReceivingAddress(coinId, newKey, hidden != 0);
-		
-		
-		//else if unecrypted legacy
-		//...?
-		
-		
-		//else if hd
-		String hdSeed = getDecryptedHdSeed(password);
-		if (hdSeed == null) {
-			return null;
-		}
-		byte[] seed = ZiftrUtils.hexStringToBytes(hdSeed);
-		ZWExtendedPrivateKey xprvkey = new ZWExtendedPrivateKey(seed);
-		addr.deriveFromStoredPath(xprvkey);
-		
-		
-		
-		return (ZWPrivateKey) this.priv;
-	}
-	
-	
-	
-	public void decrypt(String password) throws ZWDataEncryptionException {
-		switch (this.keyType) {
-		case STANDARD_UNENCRYPTED:
-			if (password != null && password.length() > 0) {
-				throw new ZWKeyCrypterException("Already decrypted.");
-			}
-			break;
-		case DERIVABLE_PATH:
-		case EXTENDED_UNENCRYPTED:
-			throw new ZWHdWalletException("Should not encrypt extended keys directly, only encrypt the seed.");
-		case ENCRYPTED:
-			this.priv = this.getPrivateKeyData().decrypt(password).getDataString();
-			this.keyType = KeyType.STANDARD_UNENCRYPTED;
-			break;
-		}
-	}
 	
 	public void deriveFromStoredPath(ZWExtendedPrivateKey masterPrivKey) {
 		switch (this.keyType) {
@@ -310,5 +163,6 @@ public class ZWReceivingAddress extends ZWAddress {
 		
 		this.keyType = KeyType.EXTENDED_UNENCRYPTED;
 	}
+	***/
 	
 }

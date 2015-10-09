@@ -46,11 +46,6 @@ public abstract class ZWPreferences {
 	/** Save whether we can spend unconfirmed txns or not*/
 	public final static String UNCONFIRMED_WARNING_KEY = "unconfirmed_warning";
 
-	/** Get the seed for the HD wallet. */
-	public final static String HD_WALLET_SEED_KEY = "hd_wallet_seed";
-	
-	public static final String HD_WALLET_MNEMONIC_KEY = "hd_wallet_mnemonic";
-
 	private static final String UPDATE_CHECK_KEY = "update_check";
 
 	private static final String AGREED_TO_TOS_KEY = "agreed_to_tos";
@@ -397,27 +392,6 @@ public abstract class ZWPreferences {
 		System.arraycopy(ZWCryptoUtils.Sha256Hash(salt.getBytes()), 0, concat, 0, 32);
 		System.arraycopy(newPasswordBytes, 0, concat, 32, newPasswordBytes.length);
 		return ZWCryptoUtils.Sha256Hash(concat);
-	}
-
-	
-	public static synchronized String getHdWalletSeed() {
-		String seedString = ZWWalletManager.getInstance().getAppDataString(HD_WALLET_SEED_KEY);
-		return seedString;
-	}
-
-	
-	public static synchronized void setHdWalletSeed(String data) {
-		ZWWalletManager.getInstance().upsertAppDataVal(HD_WALLET_SEED_KEY, data);
-	}
-	
-	
-	public static synchronized String getEncryptedHdMnemonic() {
-		String mnemonicString = ZWWalletManager.getInstance().getAppDataString(HD_WALLET_MNEMONIC_KEY);
-		return mnemonicString;
-	}
-	
-	public static synchronized void setEncryptedHdMnemonic(String ecryptedMnemonic) {
-		ZWWalletManager.getInstance().upsertAppDataVal(HD_WALLET_MNEMONIC_KEY, ecryptedMnemonic);
 	}
 	
 	

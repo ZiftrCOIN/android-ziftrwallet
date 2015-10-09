@@ -19,6 +19,7 @@ import com.ziftr.android.ziftrwallet.crypto.ZWPrivateData;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -33,7 +34,9 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 	View leftButton;
 	View rightButton;
 	
-	String hdMnemonic;
+	//String hdMnemonic;
+	ZWPrivateData hdMnemonic;
+	
 	private STATE accountState = STATE.NO_ACCOUNT;
 	
 	private enum STATE {
@@ -126,10 +129,23 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 	
 	
 	private void saveMnemonic() {
-		if(hdMnemonic != null && hdMnemonic.length() > 0) {
-			if(!ZWPreferences.userHasPassword()) {
-				//if no password just save this generated mnemonic directly
-				ZWPreferences.setEncryptedHdMnemonic(this.hdMnemonic);
+		String password = ZWPreferences.getCachedPassword();
+		if(password == null && ZWPreferences.userHasPassword()) {
+			//show password dialog
+			//TODO -really, implement this, for real
+			int errorToFindThisLater = 0.1f; //this is just here so i don't forget to implement that password dialog
+		}
+		else if(this.hdMnemonic != null) {
+			try {
+				this.hdMnemonic.encrypt(password);
+				ZWWalletManager.getInstance().setEncryptedHdMnemonic(this.hdMnemonic);
+				
+				//TODO -here we need to actually convert this mnemonic sentence into the seed and also save the seed
+				//we also need to make sure it's wrapped in a database transaction incase 1 of them fails
+				int errorToFindThisLater = 0.1f; //this is just here so i don't forget to implement this
+			}
+			catch(Exception e) {
+				ZLog.log("Exception storing mnemonic sentence: ", e);
 			}
 		}
 		
@@ -145,9 +161,14 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 		View statusText = rootView.findViewById(R.id.hdAccountStatus);
 		statusText.setVisibility(View.GONE);
 		
-		hdMnemonic = ZWPreferences.getEncryptedHdMnemonic();
-		if(hdMnemonic != null && hdMnemonic.length() > 0) {
-			if(ZWPreferences.userHasPassword()) {
+		//hdMnemonic = ZWPreferences.getEncryptedHdMnemonic();
+		
+		if(hdMnemonic == null) {
+			hdMnemonic = ZWWalletManager.getInstance().getHdMnemonic();
+		}
+		
+		if(hdMnemonic != null) {
+			if(hdMnemonic.isEncrypted()) {
 				accountState = STATE.LOCKED_ACCOUNT;
 				rightButton.setVisibility(View.GONE);
 				
@@ -156,7 +177,7 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 			}
 			else {
 				accountState = STATE.UNLOCKED_ACCOUNT;
-				mnemonicText.setText(hdMnemonic);
+				mnemonicText.setText(hdMnemonic.getDataString());
 				leftButton.setVisibility(View.GONE);
 				rightButton.setVisibility(View.GONE);
 			}
@@ -200,10 +221,11 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 		TextView statusText = (TextView) rootView.findViewById(R.id.hdAccountStatus);
 		statusText.setVisibility(View.VISIBLE);
 		
-		this.hdMnemonic = enterMnemonic.getText().toString();
-		boolean passed = ZWMnemonicGenerator.passesChecksum(hdMnemonic);
+		String mnemonic = enterMnemonic.getText().toString();
+		boolean passed = ZWMnemonicGenerator.passesChecksum(mnemonic);
 		
 		if(passed) {
+			hdMnemonic = ZWPrivateData.createFromUnecryptedData(mnemonic);
 			statusText.setText(R.string.zw_accounts_hd_verify_pass);
 		}
 		else {
@@ -231,8 +253,9 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 		byte[] entropy = this.getRandomEntropy();
 		if(entropy != null) {
 			String[] mnemonic = ZWMnemonicGenerator.createHdWalletMnemonic(entropy);
-			this.hdMnemonic = Joiner.on(" ").join(mnemonic);
-			this.mnemonicText.setText(hdMnemonic);
+			String mnemonicString = Joiner.on(" ").join(mnemonic); 
+			this.hdMnemonic = ZWPrivateData.createFromUnecryptedData(mnemonicString);
+			this.mnemonicText.setText(mnemonicString);
 		}
 		else {
 			this.hdMnemonic = null;
@@ -268,14 +291,13 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 	
 	public void readMnemonic(String password) {
 		
-		String encryptedMnemonic = ZWPreferences.getEncryptedHdMnemonic();
-		ZWPrivateData mnemonicData = ZWPrivateData.createFromPrivateDataString(encryptedMnemonic);
 		try {
-			String decryptedMnemonic = mnemonicData.decrypt(password).getDataString();
+			ZWPrivateData mnemonic = ZWWalletManager.getInstance().getHdMnemonic();
+			String decryptedMnemonic = hdMnemonic.decrypt(password).getDataString();
 			
 			if(ZWMnemonicGenerator.passesChecksum(decryptedMnemonic)) {
-				hdMnemonic = decryptedMnemonic;
-				this.mnemonicText.setText(hdMnemonic);
+				hdMnemonic = mnemonic;
+				this.mnemonicText.setText(decryptedMnemonic);
 			}
 		} 
 		catch (ZWDataEncryptionException e) {

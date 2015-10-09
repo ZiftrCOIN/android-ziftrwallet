@@ -22,13 +22,12 @@ import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWHDReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdAccount;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypterUtils;
 import com.ziftr.android.ziftrwallet.crypto.ZWPrivateData;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
-import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress.KeyType;
 import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
@@ -59,6 +58,12 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 
 	/** Following the standard, we name our wallet file as below. */
 	public static final String DATABASE_NAME = "wallet.dat";
+	
+	
+	/** Get the seed for the HD wallet. */
+	public final static String HD_WALLET_SEED_KEY = "hd_wallet_seed";
+	
+	public static final String HD_WALLET_MNEMONIC_KEY = "hd_wallet_mnemonic";
 
 	/**
 	 * <p>It's possible to calculate a wallets balance from multiple points of view. This enum specifies which
@@ -262,17 +267,13 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	public ZWReceivingAddress createReceivingAddress(ZWCoin coin, int account, boolean change, String note) throws ZWAddressFormatException {
 		long time = System.currentTimeMillis() / 1000;
 		
-		ZWHdAccount hdAccount = this.accountsTable.getAccount(coin.getSymbol(), account, getReadableDatabase());
-		
 		int nextUnused = this.receivingAddressesTable.nextUnusedIndex(coin, change, account, getReadableDatabase());
 		
+		ZWHdAccount hdAccount = this.accountsTable.getAccount(coin.getSymbol(), account, getReadableDatabase());
 		ZWExtendedPublicKey xpubkeyNewAddress = hdAccount.xpubkey.deriveChild("M/" + (change ? 1 : 0) + "/" + nextUnused);
 		
 		
-		ZWReceivingAddress address = new ZWReceivingAddress(coin, xpubkeyNewAddress, null, change, account, nextUnused);
-		
-		//ZWReceivingAddress address = new ZWReceivingAddress(coin, xpubkeyNewAddress, xpubkeyNewAddress.getPath());
-		
+		ZWReceivingAddress address = new ZWHDReceivingAddress(coin, xpubkeyNewAddress, change, account, nextUnused);
 		
 		address.setLabel(note);
 		address.setLastKnownBalance(0);
@@ -300,33 +301,29 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		String salt = ZWPreferences.getSalt();
 		SecretKey oldKey = ZWPbeAesCrypterUtils.generateSecretKey(oldPassword, salt);
 		SecretKey newKey = ZWPbeAesCrypterUtils.generateSecretKey(newPassword, salt);
-		
 
-		//TODO -need to change this
-		//first off, if changing encryption on addresses fails, the seed will still change encryption,
-		//due to it being outside the beginTransaction block,
-		//it's also somewhat confusing that we generate a key if there isn't one, we can't do this anymore
-		//since we're now using mnemonics and we need to be sure the user is aware of this
-		//best case is to manually get the encrypted seed, if that's not null or empty
-		//attempt to decrypt it
-		//finally if that is successful, re-encrypt it, and save it again, all INSIDE the transaction block
-		String decryptedSeed = this.getDecryptedHdSeed(oldPassword);
-		if (ZWPreferences.getHdWalletSeed() == null){
-			createNewHdWalletSeed(newPassword);
-		} 
-		else if (decryptedSeed == null) {
-			ZLog.log("ERROR: Mismatch in oldCrypter and status of HD seed");
-			
-			return false;
-		}
-		else {
-			//String newSeedVal = newCrypter.encrypt(decryptedSeed).toStringWithEncryptionId();
-			//ZWPreferences.setHdWalletSeed(newSeedVal);
-		}
 		
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.beginTransaction();
 		try {
+			
+			//need to also change the encryption of the hd seed (if there is one)
+			ZWPrivateData hdSeed = this.getHdSeedData();
+			ZWPrivateData hdMnemonic = this.getHdMnemonic();
+			if(hdSeed != null) {
+				hdSeed.decrypt(oldKey);
+				//note, no null check for hdMnemonic, if we have an hdseed but no mnemonic, we're boned
+				hdMnemonic.decrypt(oldKey);
+				
+				hdSeed.encrypt(newKey);
+				hdMnemonic.encrypt(newKey);
+				
+				this.updateHdSeedData(hdSeed);
+			}
+			else {
+				//do nothing, if the user hasn't setup a mnemonic hd wallet, we must have all legacy addresses
+			}
+			
 			ZWReceivingAddressesTable receiveTable = this.receivingAddressesTable;
 
 			for (ZWCoin coin : this.getNotUnactivatedCoins()) {
@@ -352,6 +349,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	 * @param oldCrypter
 	 * @return
 	 */
+	/***
 	private String getDecryptedHdSeed(String password) {
 		String hdSeed = ZWPreferences.getHdWalletSeed();
 		if (hdSeed == null || hdSeed.isEmpty()) {
@@ -369,6 +367,10 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			return null;
 		}
 	}
+	***/
+	
+
+	
 
 
 	/**
@@ -497,6 +499,9 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	public synchronized ZWReceivingAddress getDecryptedReceivingAddress(ZWCoin coin, String address, String password) throws ZWDataEncryptionException {
 		ZWReceivingAddress addr = this.receivingAddressesTable.getAddress(coin, address, getReadableDatabase());
 
+		return addr;
+		
+		/***
 		KeyType type = addr.getKeyType();
 		switch(type) {
 		case DERIVABLE_PATH:
@@ -519,6 +524,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			break;
 		}
 		return addr;
+		***/
 	}
 
 	/**
@@ -702,19 +708,16 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		this.activateHd(coin, password);
 	}
 	
+	
+	//TODO -may reuse this method, but disabling it for now, 
+	//we need to change it so users can only activate HD after setting up the mnemonic
+	/***
 	public synchronized void activateHd(ZWCoin coin, String password){
 		
-		// Make sure the seed data for the wallet exists, and read it
-		String seedStr = ZWPreferences.getHdWalletSeed();
+		ZWPrivateData seedData = this.getHdSeedData();
 		
-		ZWPrivateData seedData;
-		
-		if (seedStr == null) {
-			seedStr = createNewHdWalletSeed(password);
-			seedData = ZWPrivateData.createFromUnecryptedData(seedStr);
-		}
-		else {
-			seedData = ZWPrivateData.createFromPrivateDataString(seedStr);
+		if(seedData == null) {
+			//user needs to create a seed
 		}
 		
 		byte[] seed = null;
@@ -744,6 +747,8 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			this.accountsTable.insertAccount(account, this.getWritableDatabase());
 		}
 	}
+	***/
+	
 	
 	public synchronized boolean hasHdAccount(ZWCoin coin){
 		return this.accountsTable.getAccount(coin.getSymbol(), 0, this.getWritableDatabase()) != null;
@@ -860,6 +865,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	
 	
 	
+	/***
 	
 	private static synchronized String createNewHdWalletSeed(String password) {
 		//we need to re-check the current one, incase multiple threads try to do this at the same time
@@ -874,8 +880,50 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		
 		return seedString;
 	}
+	***/
 	
 	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public synchronized ZWPrivateData getHdSeedData() {
+		String hdSeed = this.getAppDataString(HD_WALLET_SEED_KEY);
+		if (hdSeed == null || hdSeed.isEmpty()) {
+			return null;
+		}
+		
+		ZWPrivateData seedData = ZWPrivateData.createFromPrivateDataString(hdSeed);
+		return seedData;
+	}	
+
+	
+	public synchronized ZWPrivateData getHdMnemonic() {
+		String mnemonicString = this.getAppDataString(HD_WALLET_MNEMONIC_KEY);
+		
+		if (mnemonicString == null || mnemonicString.isEmpty()) {
+			return null;
+		}
+		
+		ZWPrivateData mnemonicData = ZWPrivateData.createFromPrivateDataString(mnemonicString);
+		return mnemonicData;
+	}
+	
+	
+	public synchronized void updateHdSeedData(ZWPrivateData hdSeedData) {
+		this.upsertAppDataVal(HD_WALLET_SEED_KEY, hdSeedData.getStorageString());
+	}
+	
+	
+	/**
+	 * sets the encrypted mnemonic sentence to be stored
+	 * note: this is only for displaying back to the user, not used to calculate the see in any way
+	 * @param mnemonicData
+	 */
+	public synchronized void setEncryptedHdMnemonic(ZWPrivateData mnemonicData) {
+		this.upsertAppDataVal(HD_WALLET_MNEMONIC_KEY, mnemonicData.getStorageString());
+	}
 	
 	
 	

@@ -351,6 +351,9 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 	
 	private void upgradeToHdAccount(final ZWCoin coin) {
 		
+		//TODO -we aren't going to do it like this any more, the user must setup an HD wallet using mnemonics
+		//so we should simply test if it's possible to activate the coin, and display an error to the user if not
+		
 		ZiftrTaskDialogFragment newAddressTaskFragment = new ZiftrTaskDialogFragment() {
 			@Override
 			protected boolean doTask() {

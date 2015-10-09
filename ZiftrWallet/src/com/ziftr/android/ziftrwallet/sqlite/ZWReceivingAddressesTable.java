@@ -17,8 +17,10 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWHDReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWPrivateData;
 import com.ziftr.android.ziftrwallet.crypto.ZWPublicKey;
+import com.ziftr.android.ziftrwallet.crypto.ZWRNGReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
@@ -117,55 +119,35 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		// Hidden column is used even in non-HD address rows
 		boolean hidden = getBooleanValue(c, COLUMN_HIDDEN);
 		
-		ZWPrivateData privateData = ZWPrivateData.createFromPrivateDataString(dataInPrivColumn);
-
-		Integer hdAccount = getIntegerValue(c, COLUMN_HD_ACCOUNT);
-		Integer hdIndex = getIntegerValue(c, COLUMN_HD_INDEX);
 		
-		ZWReceivingAddress addrRet = new ZWReceivingAddress(coin, pubkey, privateData, hidden, hdAccount, hdIndex);
+		ZWReceivingAddress returnAddress = null; // = new ZWReceivingAddress(coin, pubkey, privateData, hidden, hdAccount, hdIndex);
 		
-		/***
 		if (dataInPrivColumn == null || dataInPrivColumn.isEmpty()) {
 			//this address is derived from an HD seed and the private key can be calculated later
-			int account = c.getInt(c.getColumnIndex(COLUMN_HD_ACCOUNT));
-			int index = c.getInt(c.getColumnIndex(COLUMN_HD_INDEX));
+			Integer hdAccount = getIntegerValue(c, COLUMN_HD_ACCOUNT);
+			Integer hdIndex = getIntegerValue(c, COLUMN_HD_INDEX);
 			
-			
-			
-			String path = "[m/44'/" + coinId.getHdId() + "'/" + account + "']/" + hidden + "/" + c.getInt(c.getColumnIndex(COLUMN_HD_INDEX));
-			
-			
-			
-			
-			
-			addrRet = new ZWReceivingAddress(coinId, pubkey, new ZWHdPath(path));
+			returnAddress = new ZWHDReceivingAddress(coin, pubkey, hidden, hdAccount, hdIndex);
 		}
 		else {
 			//otherwise it's an address where the private key is known and stored (a legacy address)
 			ZWPrivateData privateData = ZWPrivateData.createFromPrivateDataString(dataInPrivColumn);
-			if(privateData.isEncrypted()) {
-				addrRet = new ZWReceivingAddress(coinId, pubkey, privateData, hidden != 0);
-			}
-			else {
-				byte[] privBytes = ZiftrUtils.hexStringToBytes(privateData.getDataString());
-				ZWPrivateKey newKey = new ZWPrivateKey(new BigInteger(1, privBytes), pubkey);
-				addrRet = new ZWReceivingAddress(coinId, newKey, hidden != 0);
-			}
+			returnAddress = new ZWRNGReceivingAddress(coin, pubkey, privateData, hidden);
 		}
 		
-		***/
 		
 
-		addrRet.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
-		addrRet.setSpentFrom(c.getInt(c.getColumnIndex(COLUMN_SPENT_FROM)) != 0);
+		returnAddress.setCreationTimeSeconds(c.getLong(c.getColumnIndex(COLUMN_CREATION_TIMESTAMP)));
+		returnAddress.setSpentFrom(c.getInt(c.getColumnIndex(COLUMN_SPENT_FROM)) != 0);
 
 		// All addresses ahve these columns
-		addrRet.setLabel(c.getString(c.getColumnIndex(COLUMN_LABEL)));
-		addrRet.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
-		addrRet.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
+		returnAddress.setLabel(c.getString(c.getColumnIndex(COLUMN_LABEL)));
+		returnAddress.setLastKnownBalance(c.getInt(c.getColumnIndex(COLUMN_BALANCE)));
+		returnAddress.setLastTimeModifiedSeconds(c.getLong(c.getColumnIndex(COLUMN_MODIFIED_TIMESTAMP)));
 
-		return addrRet;
+		return returnAddress;
 	}
+	
 
 	//called in wrapper with transaction begin and transaction end to ensure atomicity
 	protected boolean recryptAllAddresses(ZWCoin coin, SecretKey oldKey, SecretKey newKey, SQLiteDatabase db) throws ZWDataEncryptionException {
@@ -276,17 +258,25 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	protected ContentValues addressToContentValues(ZWReceivingAddress address, boolean forInsert) {
 		ContentValues values = super.addressToContentValues(address, forInsert);
 
-		String privData = null;
-		Integer index = null;
-		Integer account = null;
+		String privateKeyData = null;
+		Integer hdIndex = null;
+		Integer hdAccount = null;
 		
-		ZWPrivateData addressPrivateData = address.getPrivateKeyData();
-		if(addressPrivateData != null) {
-			privData = addressPrivateData.getStorageString();
+		
+		
+		if(address instanceof ZWHDReceivingAddress) {
+			hdIndex = ((ZWHDReceivingAddress) address).getHdIndex();
+			hdAccount = ((ZWHDReceivingAddress) address).getHdAccount();
+			
+		}
+		else {
+			ZWPrivateData addressPrivateData = address.getPrivateKeyData();
+			if(addressPrivateData != null) {
+				privateKeyData = addressPrivateData.getStorageString();
+			}
 		}
 		
-		index = address.getHdIndex();
-		account = address.getHdAccount();
+		
 		
 		/***
 		switch (address.getKeyType()) {
@@ -314,7 +304,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		case STANDARD_UNENCRYPTED:
 			ZWPrivateKey key = address.getStandardKey();
 			ZWPrivateData privateKeyData = ZWPrivateData.createFromUnecryptedData(key.getPrivHex());
-
+?
 			privData = privateKeyData.getStorageString();
 			index = null;
 			account = null;
@@ -329,16 +319,16 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		**/
 
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getCreationTimeSeconds());
-		values.put(COLUMN_PRIV_KEY, privData);
+		values.put(COLUMN_PRIV_KEY, privateKeyData);
 		values.put(COLUMN_PUB_KEY, address.getPublicKey().getPubHex());
 		values.put(COLUMN_SPENT_FROM, address.isSpentFrom());
-		if (forInsert || !privData.isEmpty()) {
+		if (forInsert || !privateKeyData.isEmpty()) {
 			values.put(COLUMN_HIDDEN, address.isHidden() ? 1 : 0);
 		}
 		if (forInsert) {
 			// Do not update these, they cannot be changed after insertion
-			values.put(COLUMN_HD_INDEX, index);
-			values.put(COLUMN_HD_ACCOUNT, account);
+			values.put(COLUMN_HD_INDEX, hdIndex);
+			values.put(COLUMN_HD_ACCOUNT, hdAccount);
 		}
 
 		return values;

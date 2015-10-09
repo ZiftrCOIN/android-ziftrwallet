@@ -11,7 +11,6 @@ import javax.crypto.SecretKey;
 
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
-import com.ziftr.android.ziftrwallet.util.ZLog;
 
 /**
  * This is mainly just used for private keys in the ziftrWALLET app. 
@@ -134,35 +133,50 @@ public class ZWPrivateData {
     
     
     public synchronized void encrypt(SecretKey secretKey) throws ZWKeyCrypterException, ZWDataEncryptionException {
-    
+
+    	if(this.isEncrypted()) {
+			throw new ZWDataEncryptionException("Data is already encrypted.");
+		}
+    	
+    	if(secretKey == null) {
+    		//no password, no encryption, so we're done
+			return;
+    	}
+    	
+    	String encryptedData = ZWPbeAesCrypterUtils.encrypt(secretKey, this.rawData);
+		this.rawData = encryptedData;
+		this.encryptionIdentifier = PBE_AES_ENCRYPTION;
+		
     }
     
 	public synchronized void encrypt(String password) throws ZWKeyCrypterException, ZWDataEncryptionException {
 		
-		if(password == null || password.length() == 0) {
-			//no password, no encryption, so we're done
-			return;
+		SecretKey secretKey = null;
+		if(password != null && password.length() > 0) {
+			secretKey = ZWPbeAesCrypterUtils.generateSecretKey(password, ZWPreferences.getSalt());
 		}
 		
-		if(this.isEncrypted()) {
-			throw new ZWDataEncryptionException("Data is already encrypted.");
-		}
-		
-		try {
-			SecretKey secretKey = ZWPbeAesCrypterUtils.generateSecretKey(password, ZWPreferences.getSalt());
-			String encryptedData = ZWPbeAesCrypterUtils.encrypt(secretKey, this.rawData);
-			this.rawData = encryptedData;
-			this.encryptionIdentifier = PBE_AES_ENCRYPTION;
-		}
-		catch(Exception e) {
-			ZLog.log("Exception trying to encrypt data: ", e);
-		}
-		
+		this.encrypt(secretKey);
 	}
     
 	
-	public synchronized void decrypt(SecretKey secretKey) throws ZWDataEncryptionException {
+	public synchronized ZWPrivateData decrypt(SecretKey secretKey) throws ZWDataEncryptionException {
+
+    	if(!this.isEncrypted()) {
+    		throw new ZWDataEncryptionException("Trying to decrypt unecrypted data.");
+    	}
 		
+		if(secretKey == null) {
+			//if there's no secret key passed in, assume it's not encrypted
+			//if this is wrong, it's the same as having passed in the wrong password
+			return this;
+		}
+    		
+		String decryptedData = ZWPbeAesCrypterUtils.decrypt(secretKey, this.rawData);
+		this.rawData = decryptedData;
+		this.encryptionIdentifier = NO_ENCRYPTION;
+		
+    	return this;
 	}
     
 	
@@ -173,27 +187,12 @@ public class ZWPrivateData {
 	 * @throws ZWDataEncryptionException
 	 */
     public synchronized ZWPrivateData decrypt(String password) throws ZWDataEncryptionException {
-    	if(password == null || password.length() == 0) {
-    		
-    		//TODO -what do we do in this situation?
-    		return this;
+    	SecretKey secretKey = null;
+    	if(password != null && password.length() > 0) {
+    		secretKey = ZWPbeAesCrypterUtils.generateSecretKey(password, ZWPreferences.getSalt());
     	}
     	
-    	if(!this.isEncrypted()) {
-    		throw new ZWDataEncryptionException("Trying to decrypt unecrypted data.");
-    	}
-    	
-    	try {
-			SecretKey secretKey = ZWPbeAesCrypterUtils.generateSecretKey(password, ZWPreferences.getSalt());
-			String decryptedData = ZWPbeAesCrypterUtils.decrypt(secretKey, this.rawData);
-			this.rawData = decryptedData;
-			this.encryptionIdentifier = NO_ENCRYPTION;
-		}
-		catch(Exception e) {
-			ZLog.log("Exception trying to encrypt data: ", e);
-		}
-    	
-    	return this;
+    	return this.decrypt(secretKey);
     }
     
 }

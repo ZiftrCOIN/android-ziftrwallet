@@ -48,7 +48,7 @@ public class ZWSendingAddress extends ZWAddress {
 	 */
 	public ZWSendingAddress(ZWCoin coinId, ZWPublicKey key) throws ZWAddressFormatException {
 		this.initialize(coinId, coinId.getPubKeyHashPrefix(), key.getPubKeyHash());
-		this.pub = key;
+		this.publicKey = key;
 	}
 
 	/**
