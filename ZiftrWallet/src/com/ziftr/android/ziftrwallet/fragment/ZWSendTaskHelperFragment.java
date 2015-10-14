@@ -39,6 +39,7 @@ public class ZWSendTaskHelperFragment extends Fragment {
 	private final String DIALOG_WRONG_PASSWORD = "wrong_password";
 	private final String DIALOG_CONFIRM_SENDING = "confirm_sending";
 	private final String DIALOG_WARNING_UNCONFIRMED = "unconfirmed_warning";
+	
 
 	private ZWCoin coin; //coin type being sent
 	private BigInteger feePerKb; //user's preferred feePerKb for this transaction
@@ -144,7 +145,10 @@ public class ZWSendTaskHelperFragment extends Fragment {
 						//create new address for change
 						// TODO default is account 0 for now, wallet may use different accoutns eventually
 						if (!ZWWalletManager.getInstance().hasHdAccount(coin)){
-							ZWWalletManager.getInstance().activateHd(coin, ZWSendTaskHelperFragment.this.password);
+							//if we don't have a change address we can use and an hd account isn't setup
+							//then we need to tell the user to set one up
+							showActivateHdDialog();
+							return true; //not the result we wanted, but still handled successfully
 						}
 						changeAddress = ZWWalletManager.getInstance().createReceivingAddress(coin, 0, true).getAddress();
 						ZLog.log(changeAddress);
@@ -181,6 +185,37 @@ public class ZWSendTaskHelperFragment extends Fragment {
 		buildingTransactionFragment.show(getFragmentManager(), DIALOG_BUILDING_TRANSACTION);
 	}
 
+	
+	
+	private void showActivateHdDialog() {
+		ZiftrSimpleDialogFragment hdSetupDialog = new ZiftrSimpleDialogFragment();
+		hdSetupDialog.setupDialog(R.string.zw_app_name, 
+				R.string.zw_dialog_error_need_hd,
+				R.string.zw_dialog_button_setup_hd, 
+				R.string.zw_dialog_cancel);
+		
+		hdSetupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+
+				if(which == DialogInterface.BUTTON_POSITIVE) {
+					//if the user wants to setup hd account
+					ZWSendCoinsFragment sendFragment = (ZWSendCoinsFragment) getFragmentManager().findFragmentByTag(ZWSendCoinsFragment.FRAGMENT_TAG);
+					if(sendFragment != null) {
+						sendFragment.getZWMainActivity().openManageHdWallet();
+					}
+					
+					
+				}
+
+			}
+		});
+		
+		hdSetupDialog.show(getFragmentManager(), "receive_setup_hd");
+	}
+	
+	
 
 	private void handleRawTransaction() {
 

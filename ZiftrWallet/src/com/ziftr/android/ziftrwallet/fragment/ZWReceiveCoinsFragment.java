@@ -42,7 +42,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
 import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrTaskDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
@@ -56,9 +55,9 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
 	public static final String FRAGMENT_TAG = "receive_coins_fragment";
+	
 	public static final String DIALOG_NEW_ADDRESS_TAG = "receive_new_address";
 	public static final String DIALOG_ENTER_PASSWORD_TAG = "receive_enter_password";
-	public static final String DIALOT_TASK_CREATE_HD_ACCOUNT = "receive_create_hd_account";
 
 	private static final int FADE_DURATION = 500;
 
@@ -334,7 +333,9 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 		
 		ZWCoin coin = getSelectedCoin();
 		if (!ZWWalletManager.getInstance().hasHdAccount(coin)){
-			this.upgradeToHdAccount(coin);
+			//an hd account should be created for any active coins when the mnemonic is setup
+			//if there's no hd wallet, the user likely hasn't set it up, so display a warning message
+			this.showHdActivationDialog();
 		}
 		else {
 			ZiftrUtils.runOnNewThread(new Runnable() {
@@ -347,67 +348,30 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 		}
 			
 	}
+
 	
-	
-	private void upgradeToHdAccount(final ZWCoin coin) {
+	private void showHdActivationDialog() {
+		ZiftrSimpleDialogFragment hdSetupDialog = new ZiftrSimpleDialogFragment();
+		hdSetupDialog.setupDialog(R.string.zw_app_name, 
+				R.string.zw_dialog_error_need_hd,
+				R.string.zw_dialog_button_setup_hd, 
+				R.string.zw_dialog_cancel);
 		
-		//TODO -we aren't going to do it like this any more, the user must setup an HD wallet using mnemonics
-		//so we should simply test if it's possible to activate the coin, and display an error to the user if not
-		
-		ZiftrTaskDialogFragment newAddressTaskFragment = new ZiftrTaskDialogFragment() {
-			@Override
-			protected boolean doTask() {
-				long start = System.currentTimeMillis();
-				try {	
-					//if the user doesn't have an HD account, we can't create an address for them, so we need to make one
-					String cachedPassword = ZWPreferences.getCachedPassword();
-					if(ZWPreferences.userHasPassword() && cachedPassword == null){
-						//if they have a password and it's not cached, we need them to enter it, so 
-						//show a dialog for that and stop the rest
-						showEnterPasswordDialog();
-						return true;
-					} 
-					else {
-						ZWWalletManager.getInstance().activateHd(coin, cachedPassword);
-						createNewAddressFromDatabase();
-					}
-				
-				} 
-				catch(Exception e) {
-					return false;
-				}
-				
-				long end = System.currentTimeMillis();
-				long minTime = 500;
-				if ((end - start) < minTime) {
-					try {
-						Thread.sleep(minTime - (end - start)); //quick sleep so the UI doesn't "flash" the loading message
-					} 
-					catch (InterruptedException e) {
-						//do nothing, just quick sleep
-					}
-				}
-				return true;
-			}
-		};
-		
-		newAddressTaskFragment.setupDialog(R.string.zw_dialog_new_account);
-		
-		newAddressTaskFragment.setOnClickListener(new DialogInterface.OnClickListener() {
+		hdSetupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
+
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				if (which == DialogInterface.BUTTON_NEGATIVE) {
-					//if it was successful (BUTTON_POSITIVE), we just dismiss it and show the address
-					//otherwise, show the error
-					ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_error_in_account_creation);
+
+				if(which == DialogInterface.BUTTON_POSITIVE) {
+					//if the user wants to setup hd account
+					getZWMainActivity().openManageHdWallet();
 				}
+
 			}
 		});
-
-		newAddressTaskFragment.show(getFragmentManager(), DIALOT_TASK_CREATE_HD_ACCOUNT);
+		
+		hdSetupDialog.show(getFragmentManager(), "receive_setup_hd");
 	}
-
-	
 	
 
 	/**

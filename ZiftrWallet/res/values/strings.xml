@@ -192,6 +192,9 @@
 	<string name="zw_accounts_hd_verify_fail">Sentence is invalid!</string>
 	<string name="zw_button_hd_new_account">New HD Account</string>
 	<string name="zw_button_hd_restore_account">Restore Account</string>
+	<string name="zw_dialog_error_need_hd">You need to setup your HD wallet account before generating a new address.</string>
+	<string name="zw_dialog_error_need_hd_change">To complete this transaction you need to setup your HD wallet account.</string>
+	<string name="zw_dialog_button_setup_hd">Setup HD Account</string>
 </resources>
 
 

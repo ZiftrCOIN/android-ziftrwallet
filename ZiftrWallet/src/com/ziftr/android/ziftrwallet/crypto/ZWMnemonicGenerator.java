@@ -155,6 +155,18 @@ public static synchronized String[] createHdWalletMnemonic(byte[] entropy) {
 	}
 	
 	
+	public static byte[] generateHdSeed(String mnemonic, String seedPassword) {
+		
+		//first normalize the string per bip39
+		String mnemonicString = Normalizer.normalize(mnemonic, Normalizer.Form.NFKD);
+		
+		//now break the sentence up into an array of Strings
+		String[] mnemonicSentence = mnemonicString.split(" ");
+		
+		return generateHdSeed(mnemonicSentence, seedPassword);
+	}
+	
+	
 	public static byte[] generateHdSeed(String[] mnemonicSentence, String seedPassword) {
 		
 		if(seedPassword == null) {

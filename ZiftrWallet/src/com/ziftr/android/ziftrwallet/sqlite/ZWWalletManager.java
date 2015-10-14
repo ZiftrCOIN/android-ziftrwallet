@@ -7,7 +7,6 @@ package com.ziftr.android.ziftrwallet.sqlite;
 
 import java.io.File;
 import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +16,11 @@ import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
+import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPrivateKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWExtendedPublicKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWHDReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWHdAccount;
@@ -31,7 +30,6 @@ import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransaction;
 import com.ziftr.android.ziftrwallet.crypto.ZWTransactionOutput;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
 import com.ziftr.android.ziftrwallet.exceptions.ZWDataEncryptionException;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -318,7 +316,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 				hdSeed.encrypt(newKey);
 				hdMnemonic.encrypt(newKey);
 				
-				this.updateHdSeedData(hdSeed);
+				this.updateHdSeedData(hdSeed, hdMnemonic, false);
 			}
 			else {
 				//do nothing, if the user hasn't setup a mnemonic hd wallet, we must have all legacy addresses
@@ -711,13 +709,14 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	
 	//TODO -may reuse this method, but disabling it for now, 
 	//we need to change it so users can only activate HD after setting up the mnemonic
-	/***
-	public synchronized void activateHd(ZWCoin coin, String password){
+	//***
+	private synchronized boolean activateHd(ZWCoin coin, String password){
 		
 		ZWPrivateData seedData = this.getHdSeedData();
 		
 		if(seedData == null) {
 			//user needs to create a seed
+			return false;
 		}
 		
 		byte[] seed = null;
@@ -728,13 +727,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		} 
 		catch (ZWDataEncryptionException e) {
 			ZLog.log("Exception activating HD: ", e);
-		}
-		
-		
-		//TODO -this isn't really an acceptable way to handlet this
-		//the app shouldn't crash, it should let the user know there is an issue
-		if (seed == null) {
-			throw new RuntimeException("ERROR: was not able to decrypt seed data, this is bad!");
+			return false;
 		}
 	
 		
@@ -746,8 +739,14 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 			ZWHdAccount account = new ZWHdAccount(coin.getSymbol(), mPub);
 			this.accountsTable.insertAccount(account, this.getWritableDatabase());
 		}
+		
+		if(this.hasHdAccount(coin)) {
+			return true;
+		}
+		
+		return false;
 	}
-	***/
+
 	
 	
 	public synchronized boolean hasHdAccount(ZWCoin coin){
@@ -911,37 +910,25 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 	}
 	
 	
-	public synchronized void updateHdSeedData(ZWPrivateData hdSeedData) {
-		this.upsertAppDataVal(HD_WALLET_SEED_KEY, hdSeedData.getStorageString());
-	}
-	
-	
-	/**
-	 * sets the encrypted mnemonic sentence to be stored
-	 * note: this is only for displaying back to the user, not used to calculate the see in any way
-	 * @param mnemonicData
-	 */
-	public synchronized void setEncryptedHdMnemonic(ZWPrivateData mnemonicData) {
-		this.upsertAppDataVal(HD_WALLET_MNEMONIC_KEY, mnemonicData.getStorageString());
-	}
-	
-	
-	
-	
-
-
-	
-	
-	
-	private static SecureRandom getSecureRandom() {
-		SecureRandom random = ZiftrUtils.createTrulySecureRandom();
-		if(random == null) {
-			String rngError = ZWApplication.getApplication().getString(R.string.zw_dialog_error_rng);
-			ZiftrDialogManager.showSimpleAlert(rngError);
+	public synchronized void updateHdSeedData(ZWPrivateData hdSeedData, ZWPrivateData mnemonicData, boolean singleDbTransaction) {
+		try {
+			if(singleDbTransaction) {
+				this.getWritableDatabase().beginTransaction();
+			}
+			this.upsertAppDataVal(HD_WALLET_SEED_KEY, hdSeedData.getStorageString());
+			this.upsertAppDataVal(HD_WALLET_MNEMONIC_KEY, mnemonicData.getStorageString());
+			
+			if(singleDbTransaction) {
+				this.getWritableDatabase().setTransactionSuccessful();
+			}
 		}
-
-		return random;
+		finally {
+			if(singleDbTransaction) {
+				this.getWritableDatabase().endTransaction();
+			}
+		}
 	}
+
 
 	
 
