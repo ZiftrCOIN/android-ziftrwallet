@@ -194,45 +194,7 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 		
 		return true;
 	}
-	
 
-	//	protected boolean attemptDecryptAllAddresses(ZWCoin coin, ZWKeyCrypter crypter, SQLiteDatabase db){
-	//		StringBuilder sb = new StringBuilder();
-	//		sb.append("SELECT ");
-	//		sb.append(COLUMN_PRIV_KEY);
-	//		sb.append(",");
-	//		sb.append(COLUMN_PUB_KEY);
-	//		sb.append(" FROM ");
-	//		sb.append(getTableName(coin));
-	//		sb.append(";");
-	//		Cursor c = db.rawQuery(sb.toString(), null);
-	//		//read private keys
-	//		if (c.moveToFirst()) {
-	//			do {
-	//				String encryptedPrivKeyString = c.getString(c.getColumnIndex(COLUMN_PRIV_KEY));
-	//				String storedPubKeyString = c.getString(c.getColumnIndex(COLUMN_PUB_KEY));
-	//				if (encryptedPrivKeyString.charAt(0) != ZWKeyCrypter.PBE_AES_ENCRYPTION){
-	//					ZLog.log("Error tried to decrypt already decrypted key...");
-	//				} else {
-	//					try {
-	//						// Create public address from decrypted and see if it matches the stored one in the database
-	//						// as a safety check
-	//						ZWEncryptedData encryptedPrivKey = new ZWEncryptedData(encryptedPrivKeyString.substring(1));
-	//						ZWPrivateKey key = new ZWPrivateKey(encryptedPrivKey, null, crypter);
-	//						key = key.decrypt();
-	//						if (!storedPubKeyString.equals(ZiftrUtils.bytesToHexString(key.getPub().getPubKeyBytes()))) {
-	//							return false;
-	//						}
-	//					} catch(ZWKeyCrypterException e){
-	//						ZLog.log("Crypter error " + e);
-	//						return false;
-	//					}
-	//
-	//				}
-	//			} while (c.moveToNext());
-	//		}
-	//		return true;
-	//	}
 
 	protected List<String> getHiddenAddresses(ZWCoin coin, SQLiteDatabase db, boolean includeSpentFrom){
 
@@ -258,77 +220,37 @@ public class ZWReceivingAddressesTable extends ZWAddressesTable<ZWReceivingAddre
 	protected ContentValues addressToContentValues(ZWReceivingAddress address, boolean forInsert) {
 		ContentValues values = super.addressToContentValues(address, forInsert);
 
-		String privateKeyData = null;
+		String privateKey = null;
 		Integer hdIndex = null;
 		Integer hdAccount = null;
-		
-		
 		
 		if(address instanceof ZWHDReceivingAddress) {
 			hdIndex = ((ZWHDReceivingAddress) address).getHdIndex();
 			hdAccount = ((ZWHDReceivingAddress) address).getHdAccount();
+			privateKey = "";
 			
 		}
 		else {
 			ZWPrivateData addressPrivateData = address.getPrivateKeyData();
 			if(addressPrivateData != null) {
-				privateKeyData = addressPrivateData.getStorageString();
+				privateKey = addressPrivateData.getStorageString();
 			}
 		}
-		
-		
-		
-		/***
-		switch (address.getKeyType()) {
-		case EXTENDED_UNENCRYPTED:
-			ZWHdPath p = address.getExtendedPriv().getPath();
-
-			privData = "";
-			index = p.getBip44AddressIndex();
-			account = p.getBip44Account();
-			break;
-		case DERIVABLE_PATH:
-			ZWHdPath path = address.getPath();
-
-			privData = "";
-			index = path.getBip44AddressIndex();
-			account = path.getBip44Account();
-			break;
-		case ENCRYPTED:
-			ZWPrivateData data = address.getEncryptedKey();
-
-			privData = data.getStorageString();
-			index = null;
-			account = null;
-			break;
-		case STANDARD_UNENCRYPTED:
-			ZWPrivateKey key = address.getStandardKey();
-			ZWPrivateData privateKeyData = ZWPrivateData.createFromUnecryptedData(key.getPrivHex());
-?
-			privData = privateKeyData.getStorageString();
-			index = null;
-			account = null;
-			break;
-		}
-		***/
-
-		/**
-		if (privData.isEmpty() == (index == null || account == null)) {
-			throw new ZWHdWalletException("Data for insertion not available. ");
-		}
-		**/
 
 		values.put(COLUMN_CREATION_TIMESTAMP, address.getCreationTimeSeconds());
-		values.put(COLUMN_PRIV_KEY, privateKeyData);
 		values.put(COLUMN_PUB_KEY, address.getPublicKey().getPubHex());
 		values.put(COLUMN_SPENT_FROM, address.isSpentFrom());
-		if (forInsert || !privateKeyData.isEmpty()) {
-			values.put(COLUMN_HIDDEN, address.isHidden() ? 1 : 0);
-		}
+		
+		values.put(COLUMN_HIDDEN, address.isHidden() ? 1 : 0);
+		
 		if (forInsert) {
 			// Do not update these, they cannot be changed after insertion
 			values.put(COLUMN_HD_INDEX, hdIndex);
 			values.put(COLUMN_HD_ACCOUNT, hdAccount);
+			
+			//we may someday want to be able to update this (for example for cacheing hd wallet private keys)
+			//but if we add that, we need to add code to check to make sure we never accidently wipe out private keys
+			values.put(COLUMN_PRIV_KEY, privateKey);
 		}
 
 		return values;

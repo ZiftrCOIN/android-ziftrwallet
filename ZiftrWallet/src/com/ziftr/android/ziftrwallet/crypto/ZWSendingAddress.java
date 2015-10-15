@@ -36,20 +36,6 @@ import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
  */
 public class ZWSendingAddress extends ZWAddress {
 
-	
-	/**
-	 * <p>Uses an ECKey to make an Address. The ECKey need not necessarilty have access
-	 * to a private key as this class can be used for both sending (non-owned) and 
-	 * receiving (owned) addresses.</p> 
-	 * 
-	 * @param coinId
-	 * @param key
-	 * @throws ZWAddressFormatException
-	 */
-	public ZWSendingAddress(ZWCoin coinId, ZWPublicKey key) throws ZWAddressFormatException {
-		this.initialize(coinId, coinId.getPubKeyHashPrefix(), key.getPubKeyHash());
-		this.publicKey = key;
-	}
 
 	/**
 	 * <p>Decodes the given address and determines the coin type and version byte.</p>
@@ -68,12 +54,12 @@ public class ZWSendingAddress extends ZWAddress {
 	 * @param address
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWSendingAddress(ZWCoin coinId, String address) throws ZWAddressFormatException {
+	public ZWSendingAddress(ZWCoin coin, String address) throws ZWAddressFormatException {
 		// Checksum is validated in the decoding
 		byte[] allData = ZiftrBase58.decodeChecked(address);
 		byte[] hash160 = ZiftrUtils.stripVersionAndChecksum(allData, 20);
 
-		this.initialize(coinId, allData[0], hash160);
+		this.initialize(coin, allData[0], hash160);
 	}
 
 	/**
@@ -85,8 +71,8 @@ public class ZWSendingAddress extends ZWAddress {
 	 * @param hash160
 	 * @throws ZWAddressFormatException
 	 */
-	public ZWSendingAddress(ZWCoin coinId, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
-		this.initialize(coinId, versionByte, hash160);
+	public ZWSendingAddress(ZWCoin coin, byte versionByte, byte[] hash160) throws ZWAddressFormatException {
+		this.initialize(coin, versionByte, hash160);
 	}
 
 	/** 

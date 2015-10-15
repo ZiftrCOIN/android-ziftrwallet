@@ -31,6 +31,8 @@ public abstract class ZWReceivingAddress extends ZWAddress {
 	 * with keys not derived from HD wallets. 
 	 */
 	private boolean hidden = false;
+	
+	private ZWPublicKey publicKey;
 
 	
 	/**
@@ -44,10 +46,7 @@ public abstract class ZWReceivingAddress extends ZWAddress {
 	 * @throws ZWAddressFormatException
 	 */
 	protected ZWReceivingAddress(ZWCoin coin, ZWPublicKey publicKey, boolean change) throws ZWAddressFormatException {
-		
-		
-		//this.privateKeyData = privateKeyData;
-		
+		this.publicKey = publicKey;
 		this.hidden = change; //most other wallets call this change, so we're starting to move over to that (change addresses are hidden from the user)
 		this.initialize(coin, coin.getPubKeyHashPrefix(), publicKey.getPubKeyHash());
 	}
@@ -104,20 +103,6 @@ public abstract class ZWReceivingAddress extends ZWAddress {
 	}
 
 	
-	
-	/***
-	public void setHidden(boolean hidden) {
-		switch (this.keyType) {
-		case ENCRYPTED:
-		case STANDARD_UNENCRYPTED:
-			this.hidden = hidden;
-			break;
-		case DERIVABLE_PATH:
-		case EXTENDED_UNENCRYPTED:
-			throw new ZWHdWalletException("Cannot change whether a HD derived key is hidden.");
-		}
-	}
-	***/
 
 	@Override
 	public boolean isOwnedAddress() {
@@ -125,44 +110,17 @@ public abstract class ZWReceivingAddress extends ZWAddress {
 	}
 	
 	
-	/**
-	 * @return the keyType
-	 */
-	/***
-	public KeyType getKeyType() {
-		return keyType;
-	}
-	***/
-	
-	
-	
 	public ZWPrivateData getPrivateKeyData() {
 		return this.privateKeyData;
 	}
+	
+	/**
+	 * @return the key
+	 */
+	public ZWPublicKey getPublicKey() {
+		return publicKey;
+	}
 
 	public abstract ZWPrivateKey getPrivateKey(String password) throws ZWDataEncryptionException;
-	
-	
-	/***
-	public abstract void decrypt(String password) throws ZWDataEncryptionException;
-	
-
-	
-	
-	public void deriveFromStoredPath(ZWExtendedPrivateKey masterPrivKey) {
-		switch (this.keyType) {
-		case DERIVABLE_PATH:
-			ZWExtendedPrivateKey xprvkey = (ZWExtendedPrivateKey) masterPrivKey.deriveChild(this.getPath().toPrivatePath());
-			this.priv = xprvkey;
-			break;
-		case STANDARD_UNENCRYPTED:
-		case EXTENDED_UNENCRYPTED:
-		case ENCRYPTED:
-			throw new ZWHdWalletException("Should only call this method on addresses that store the derivable path");
-		}
-		
-		this.keyType = KeyType.EXTENDED_UNENCRYPTED;
-	}
-	***/
 	
 }

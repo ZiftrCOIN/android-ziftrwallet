@@ -278,9 +278,14 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		address.setCreationTimeSeconds(time);
 		address.setLastTimeModifiedSeconds(time);
 		address.setSpentFrom(false);
-		this.receivingAddressesTable.insert(address, this.getWritableDatabase());
+		
+		long inserted = this.receivingAddressesTable.insert(address, this.getWritableDatabase());
 
-		return address;
+		if(inserted > 0) {
+			return address;
+		}
+		
+		return null;
 	}
 
 	/**

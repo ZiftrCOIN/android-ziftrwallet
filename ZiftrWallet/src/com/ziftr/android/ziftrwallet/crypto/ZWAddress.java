@@ -56,9 +56,6 @@ public abstract class ZWAddress implements ZWSearchableListItem {
 	*/
 	private byte[] hash160;
 	
-	/** The ECKey for this address, if known. May be null. */
-	protected ZWPublicKey publicKey;
-	
 	
 	/**
 	 * A private helper method for initialization that prevents code duplication. 
@@ -106,12 +103,6 @@ public abstract class ZWAddress implements ZWSearchableListItem {
 		return versionByte;
 	}
 
-	/**
-	 * @return the key
-	 */
-	public ZWPublicKey getPublicKey() {
-		return publicKey;
-	}
 	
 	/** The (big endian) 20 byte hash that is the core of an address. */
 	public byte[] getHash160() {

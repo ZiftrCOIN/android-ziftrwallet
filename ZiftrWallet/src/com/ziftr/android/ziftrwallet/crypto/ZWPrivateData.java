@@ -134,14 +134,14 @@ public class ZWPrivateData {
     
     public synchronized void encrypt(SecretKey secretKey) throws ZWKeyCrypterException, ZWDataEncryptionException {
 
-    	if(this.isEncrypted()) {
-			throw new ZWDataEncryptionException("Data is already encrypted.");
-		}
-    	
     	if(secretKey == null) {
     		//no password, no encryption, so we're done
 			return;
     	}
+    	
+    	if(this.isEncrypted()) {
+			throw new ZWDataEncryptionException("Data is already encrypted.");
+		}
     	
     	String encryptedData = ZWPbeAesCrypterUtils.encrypt(secretKey, this.rawData);
 		this.rawData = encryptedData;
@@ -162,15 +162,15 @@ public class ZWPrivateData {
 	
 	public synchronized ZWPrivateData decrypt(SecretKey secretKey) throws ZWDataEncryptionException {
 
-    	if(!this.isEncrypted()) {
-    		throw new ZWDataEncryptionException("Trying to decrypt unecrypted data.");
-    	}
-		
 		if(secretKey == null) {
 			//if there's no secret key passed in, assume it's not encrypted
 			//if this is wrong, it's the same as having passed in the wrong password
 			return this;
 		}
+		
+		if(!this.isEncrypted()) {
+    		throw new ZWDataEncryptionException("Trying to decrypt unecrypted data.");
+    	}
     		
 		String decryptedData = ZWPbeAesCrypterUtils.decrypt(secretKey, this.rawData);
 		this.rawData = decryptedData;
