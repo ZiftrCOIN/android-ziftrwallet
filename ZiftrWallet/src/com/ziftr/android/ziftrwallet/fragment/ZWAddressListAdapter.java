@@ -94,7 +94,7 @@ public class ZWAddressListAdapter extends ZWSearchableListAdapter<ZWAddress> imp
 	 * @return
 	 */
 	private int getImgResIdForItem(ZWAddress address) {
-		if (address.isPersonalAddress()) {
+		if (address.isOwnedAddress()) {
 			return R.drawable.received_enabled;
 		} else {
 			return R.drawable.sent_enabled;

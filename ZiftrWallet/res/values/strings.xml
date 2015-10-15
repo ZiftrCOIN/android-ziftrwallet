@@ -141,9 +141,12 @@
     <string name="zw_dialog_receive_help">The message and amount fields are encoded into the QRcode and should be used if you wish to pre-fill a message and amount for the scanning user\'s wallet. These are optional and are not saved when loading an address from the address book.</string>
     <string name="zw_dialog_error_activate_coin">You must activate %1$s and add coins to your wallet before you can send to an address.</string>
     <string name="zw_dialog_sending">Sending&#8230;</string>
+    <string name="zw_dialog_new_account">Adding account&#8230;</string>
     <string name="zw_dialog_error_send_badtransaction">There was an error with the data received from the server. Unable to send coins. Please try again later.</string>
     <string name="zw_dialog_error_send_noconnection">Unable to connect to the server. Please check your internet connection and try again.</string>
+    <string name="zw_dialog_error_in_account_creation">Unable to add a wallet for the coin specified. Please contact info@ziftrcoin.com to alert us that you are experiencing an issue.</string>
     <string name="zw_dialog_error_send_returnederror">Error (%1$s): \n%2$s</string>
+    <string name="zw_dialog_error_failed_creating_address">Could not create a new receiving address!</string>
     <string name="zw_dialog_error_send_nocoins">You do not have enough %1$s to complete this transaction.</string>
     <string name="zw_dialog_warning_unconfirmed">Warning! To complete this transaction you must spend coins that are not fully confirmed. Are you sure you want to continue?</string>
     <string name="zw_dialog_send">Send</string>
@@ -163,6 +166,35 @@
     <string name="zw_welcome_terms_directions">Please take a moment to review our terms of service at: \n \n<a href="http://www.ziftrwallet.com/terms-conditions">http://www.ziftrwallet.com/terms-conditions</a> \n \nBy using ziftrWALLET you agree to the terms and conditions provided at the above link. \n \n</string>
     <string name="zw_dialog_error_rng">Unable to properly initialize this device\'s random number generator. Causes may be; too many apps running, low storage, or low battery. Until the issue is resolved, you will be unable to send coins, create new addresses, or create a password.</string>
 	<string name="zw_debug_cleared_data">All non-private data has been cleared and will re-sync. \nNote: Your wallet balance may be inaccurate until all coin types have been refreshed.</string>
+	<string name="zw_toast_wallet_created">Wallet Created!</string>
+	<string name="zw_button_manage_hd_wallet">Manage HD Account</string>
+	<string name="zw_actionbar_addresses">ADDRESSES</string>
+	<string name="zw_actionbar_account">ACCOUNT</string>
+	<string name="zw_actionbar_about">ABOUT</string>
+	<string name="zw_actionbar_main">ziftrWALLET</string>
+	<string name="zw_actionbar_currency">CURRENCY</string>
+	<string name="zw_actionbar_security">SECURITY</string>
+	<string name="zw_actionbar_settings">SETTINGS</string>
+	<string name="zw_actionbar_terms">TERMS</string>
+	<string name="zw_actionbar_transaction">TRANSACTION</string>
+	<string name="zw_actionbar_send">SEND</string>
+	<string name="zw_actionbar_receive">RECEIVE</string>
+	<string name="zw_actionbar_hd_account">HD ACCOUNT</string>
+	<string name="zw_accounts_hd_need_password">You need to enter your password to see your backup sentence.</string>
+	<string name="zw_accounts_hd_no_account">You do not have an HD account setup.</string>
+	<string name="zw_button_enter_password">View Backup Sentence</string>
+	<string name="zw_button_accept_hd_account">Accept Account</string>
+	<string name="zw_button_hd_new_sentence">New Sentence</string>
+	<string name="zw_accounts_hd_enter_mnemonic">Please enter an existing backup sentence.</string>
+	<string name="zw_button_verify">Verify</string>
+	<string name="zw_button_restore">Restore</string>
+	<string name="zw_accounts_hd_verify_pass">Backup sentence is valid!</string>
+	<string name="zw_accounts_hd_verify_fail">Sentence is invalid!</string>
+	<string name="zw_button_hd_new_account">New HD Account</string>
+	<string name="zw_button_hd_restore_account">Restore Account</string>
+	<string name="zw_dialog_error_need_hd">You need to setup your HD wallet account before generating a new address.</string>
+	<string name="zw_dialog_error_need_hd_change">To complete this transaction you need to setup your HD wallet account.</string>
+	<string name="zw_dialog_button_setup_hd">Setup HD Account</string>
 </resources>
 
 

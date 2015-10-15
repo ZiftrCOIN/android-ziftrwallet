@@ -4,13 +4,13 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import com.ziftr.android.ziftrwallet.util.ZLog;
-
 import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQuery;
 import android.util.Log;
+
+import com.ziftr.android.ziftrwallet.util.ZLog;
 
 public class ZiftrDebugSQLiteCursor extends SQLiteCursor {
 

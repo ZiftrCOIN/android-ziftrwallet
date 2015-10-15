@@ -47,7 +47,7 @@ public class ZWSetFiatFragment extends ZWFragment implements OnItemClickListener
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("SETTINGS", false, true, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_settings, false, true, false);
 	}
 
 	@Override

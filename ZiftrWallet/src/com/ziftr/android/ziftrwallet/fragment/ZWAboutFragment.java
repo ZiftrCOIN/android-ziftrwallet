@@ -15,8 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWApplication;
 
 
 public class ZWAboutFragment extends ZWFragment implements OnClickListener{
@@ -41,7 +41,7 @@ public class ZWAboutFragment extends ZWFragment implements OnClickListener{
 	
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("ABOUT", true, true, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_about, true, true, false);
 	}
 
 	@Override

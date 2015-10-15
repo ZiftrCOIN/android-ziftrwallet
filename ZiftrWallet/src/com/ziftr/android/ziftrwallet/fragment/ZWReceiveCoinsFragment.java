@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -33,22 +34,28 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.android.Contents;
 import com.ziftr.android.ziftrwallet.R;
+import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinFiatTextWatcher;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoinURI;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
+import com.ziftr.android.ziftrwallet.crypto.ZWReceivingAddress;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
+import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.QRCodeEncoder;
+import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrTextWatcher;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
-public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
+public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment {
 
 	/** The key used to save the current address in bundles. */
 	private static final String KEY_ADDRESS = "KEY_ADDRESS";
 	public static final String FRAGMENT_TAG = "receive_coins_fragment";
+	
 	public static final String DIALOG_NEW_ADDRESS_TAG = "receive_new_address";
 	public static final String DIALOG_ENTER_PASSWORD_TAG = "receive_enter_password";
 
@@ -64,8 +71,8 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	private ImageView generateAddressForLabel;
 	private EditText messageEditText;
 	private ImageView helpButton;
-	
-	private ZWAddress prefilledAddress;
+
+	private ZWReceivingAddress prefilledAddress;
 
 	private boolean qrCodeGenerated = false;
 
@@ -82,10 +89,10 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.initializeViewFields(inflater, container);
 
 		this.initializeQrCodeFromBundle(savedInstanceState);
-		
+
 		return this.rootView;
 	}
-	
+
 	@Override
 	public void onResume(){
 		super.onResume();
@@ -101,7 +108,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 	@Override
 	public void onClick(View v) {
 
-		if(v == this.copyButton) {
+		if (v == this.copyButton) {
 			if(this.fragmentHasAddress()) {
 				// Gets a handle to the clipboard service.
 				ClipboardManager clipboard = (ClipboardManager)
@@ -129,16 +136,30 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 	}
 
-	
-	
+
+
 	private void generateNewAddress() {
-		if (ZWPreferences.userHasPassword() && ZWPreferences.getCachedPassword() == null) {
-			showEnterPasswordDialog();
-		}
-		else {
+		
+		showNewAddressConfirmationDialog();
+		
+		/**
+		if (ZWWalletManager.getInstance().hasHdAccount(this.getSelectedCoin())){
 			showNewAddressConfirmationDialog();
 		}
+		else {
+			//if we don't have an hd account for this coin, we need to create one
+			//which may require a password
+			String cachedPassword = ZWPreferences.getCachedPassword();
+			if(ZWPreferences.userHasPassword() && cachedPassword == null){
+				showEnterPasswordDialog();
+			} 
+			else {
+				showNewAddressConfirmationDialog();
+			}
+		}
+		**/
 	}
+	
 	
 	private void showEnterPasswordDialog() {
 		
@@ -149,13 +170,13 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		passwordDialog.show(getFragmentManager(), DIALOG_ENTER_PASSWORD_TAG);
 	}
 	
-	
+
 	private void showNewAddressConfirmationDialog() {
 		ZiftrSimpleDialogFragment dialog = ZiftrSimpleDialogFragment.buildContinueCancelDialog(R.string.zw_dialog_create_address);
 		dialog.show(getFragmentManager(), DIALOG_NEW_ADDRESS_TAG);
 	}
-	
-	
+
+
 
 	/**
 	 * @param inflater
@@ -166,7 +187,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 
 		this.scrollView = this.rootView.findViewById(R.id.receiveCoinsContainingScrollView);
 
-		
+
 		// For the amounts and the binding
 		this.coinAmountEditText = (EditText) this.rootView.findViewById(R.id.receiveAmountCoinFiatDualView
 				).findViewById(R.id.dualTextBoxLinLayout1).findViewById(R.id.customEditText);
@@ -181,7 +202,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		ZWCoinFiatTextWatcher coinTextWatcher = new ZWCoinFiatTextWatcher(getSelectedCoin(), coinAmountEditText, fiatAmountEditText);
 		coinAmountEditText.addTextChangedListener(coinTextWatcher);
 		fiatAmountEditText.addTextChangedListener(coinTextWatcher);
-		
+
 		this.helpButton = (ImageView) this.rootView.findViewById(R.id.help_msg_button);
 		this.helpButton.setOnClickListener(this);
 		// For the message edit text
@@ -217,7 +238,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 				refreshAddNewAddressButtonsEnabled();
 			}
 		});
-		
+
 		if (this.prefilledAddress != null) {
 			this.addressEditText.setText(this.prefilledAddress.getAddress());
 			this.labelEditText.setText(this.prefilledAddress.getLabel());
@@ -304,54 +325,99 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			}
 		});
 	}
+	
+	
+	
+	
+	public void createNewAddress() {
+		
+		ZWCoin coin = getSelectedCoin();
+		if (!ZWWalletManager.getInstance().hasHdAccount(coin)){
+			//an hd account should be created for any active coins when the mnemonic is setup
+			//if there's no hd wallet, the user likely hasn't set it up, so display a warning message
+			this.showHdActivationDialog();
+		}
+		else {
+			ZiftrUtils.runOnNewThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					createNewAddressFromDatabase();
+				}
+			});
+		}
+			
+	}
+
+	
+	private void showHdActivationDialog() {
+		ZiftrSimpleDialogFragment hdSetupDialog = new ZiftrSimpleDialogFragment();
+		hdSetupDialog.setupDialog(R.string.zw_app_name, 
+				R.string.zw_dialog_error_need_hd,
+				R.string.zw_dialog_button_setup_hd, 
+				R.string.zw_dialog_cancel);
+		
+		hdSetupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+
+				if(which == DialogInterface.BUTTON_POSITIVE) {
+					//if the user wants to setup hd account
+					getZWMainActivity().openManageHdWallet();
+				}
+
+			}
+		});
+		
+		hdSetupDialog.show(getFragmentManager(), "receive_setup_hd");
+	}
+	
 
 	/**
 	 * This method gets the database from the activity on the UI thread,
 	 * gets a new key from the database helper on an extra thread, and
 	 * then updates the UI with the new address on the UI thread. 
 	 */
-	public void loadNewAddressFromDatabase() {
-		
-		ZiftrUtils.runOnNewThread(new Runnable() {
-			@Override
-			public void run() {
-				final ZWAddress address;
-				final boolean needPassword;
-				
-				String password = ZWPreferences.getCachedPassword();
-				if(ZWPreferences.userHasPassword() && password == null) {
-					//user's cached password has expired, so we have to ask them for it again
-					needPassword = true;
-					address = null;
-				}
-				else {
-					needPassword = false;
-					long time = System.currentTimeMillis() / 1000;
-					String addressLabel = addressEditText.getText().toString();
-					 address = getWalletManager().createReceivingAddress(password, getSelectedCoin(), addressLabel, 0, time, time);
-				}
+	private void createNewAddressFromDatabase() {
 
-				// Run the updating of the UI on the UI thread
-				ZWReceiveCoinsFragment.this.getZWMainActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if(needPassword) {
-							showEnterPasswordDialog();
-						}
-						else {
-							if(address != null) {
-								String newAddress = address.getAddress();
-								addressEditText.setText(newAddress);
-								updateAddressLabelInDatabase();
-								generateQrCode(true);
-							}
-						}
-						
-					}
-				});
-			}
-		});
+		ZWReceivingAddress address = null;
+
+		try {
+			String addressLabel = addressEditText.getText().toString();
+			address = getWalletManager().createReceivingAddress(getSelectedCoin(), 0, false, addressLabel);
+		} 
+		catch (ZWAddressFormatException e) {
+			ZLog.log("Should not have happened, wallet corruption?");
+		}
+		
+		if(address == null) {
+			ZiftrDialogManager.showSimpleAlert(this.getString(R.string.zw_dialog_error_failed_creating_address));
+		}
+		else {
+			String addressString = address.getAddress();
+			updateAddressUI(addressString);
+		}
+
 	}
+	
+	
+	private void updateAddressUI(final String newAddress) {
+		ZWMainFragmentActivity activity = ZWReceiveCoinsFragment.this.getZWMainActivity();
+		if(activity != null) {
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					addressEditText.setText(newAddress);
+					updateAddressLabelInDatabase();
+					generateQrCode(true);
+				}
+			});
+		}
+	}
+	
+	
+	
 
 	@Override
 	public void updateAddress(String address, String label) {
@@ -359,16 +425,17 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 		this.qrCodeGenerated = false;
 	}
 
-	public String getActionBarTitle() {
-		return "RECEIVE"; 
+	@Override
+	public int getActionBarTitleResId() {
+		return R.string.zw_actionbar_receive; 
 	}
 
 	@Override
 	public View getContainerView() {
 		return this.scrollView;
 	}
-	
-	public void setReceiveAddress(ZWAddress address){
+
+	public void setReceiveAddress(ZWReceivingAddress address){
 		this.prefilledAddress = address;
 	}
 
@@ -403,7 +470,7 @@ public class ZWReceiveCoinsFragment extends ZWAddressBookParentFragment{
 			coinAmountEditText.setFocusableInTouchMode(false);
 		}
 	}
-	
+
 	public View getWalletHeaderView(){
 		return this.rootView.findViewById(R.id.walletHeader);
 	}

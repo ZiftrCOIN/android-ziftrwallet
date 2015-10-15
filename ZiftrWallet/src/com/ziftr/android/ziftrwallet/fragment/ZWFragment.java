@@ -33,6 +33,7 @@ public abstract class ZWFragment extends Fragment {
 	public void onDataUpdated() {
 	}
 	
+	
 	/**
 	 * tells the fragment that any data it's showing needs to be refreshed (likely at the request of a user)
 	 * fragments are responsible for initiating the network connections for the api,

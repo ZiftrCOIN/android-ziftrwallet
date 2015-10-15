@@ -26,7 +26,7 @@ public class ZWSecurityFragment extends ZWFragment {
 	}
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("SECURITY", true, true, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_security, true, true, false);
 	}
 
 }

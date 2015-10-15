@@ -26,13 +26,13 @@ import android.widget.TextView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWConverter;
 import com.ziftr.android.ziftrwallet.crypto.ZWFiat;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
 import com.ziftr.android.ziftrwallet.network.ZiftrNetworkManager;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 
 /**
  * The ZWMainActivity starts this fragment. This fragment is 
@@ -103,7 +103,7 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("ziftrWALLET", true, false, true);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_main, true, false, true);
 		this.refreshData(true);
 	}
 
@@ -182,6 +182,7 @@ public class ZWAccountsFragment extends ZWFragment implements OnItemClickListene
 			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.VISIBLE);
 			this.rootView.findViewById(R.id.total_label).setVisibility(View.GONE);
 			this.totalBalance.setVisibility(View.GONE);
+			this.currencyListView.removeFooterView(this.footer);
 		} else {
 			this.rootView.findViewById(R.id.add_currency_message).setVisibility(View.GONE);
 			this.rootView.findViewById(R.id.total_label).setVisibility(View.VISIBLE);

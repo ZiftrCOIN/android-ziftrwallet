@@ -15,10 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
-import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
 public class ZWWelcomePasswordFragment extends Fragment implements OnClickListener {
@@ -58,7 +55,7 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 
 		confirmPasswordEditText = 
 				(EditText) rootView.findViewById(R.id.new_confirm_password).findViewById(R.id.customEditText);
-		
+
 		confirmPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 		confirmPasswordEditText.clearFocus();
 
@@ -87,52 +84,20 @@ public class ZWWelcomePasswordFragment extends Fragment implements OnClickListen
 				ZiftrUtils.runOnNewThread(new Runnable() {
 					@Override
 					public void run() {
-						final EncryptionStatus status = ZWWalletManager.getInstance().changeEncryptionOfReceivingAddresses(null, password);
-						//tried to set password on encrypted database private keys
-						if (status == EncryptionStatus.ALREADY_ENCRYPTED || status == EncryptionStatus.ERROR){
-							welcomeActivity.runOnUiThread(new Runnable(){
-								@Override
-								public void run() {
-									if (status == EncryptionStatus.ALREADY_ENCRYPTED){
-										ZiftrTextDialogFragment oldPasswordDialog = new ZiftrTextDialogFragment();
-										oldPasswordDialog.setupDialog(R.string.zw_dialog_old_encryption);
-										oldPasswordDialog.addEmptyTextbox(true);
-										
-										oldPasswordDialog.show(getFragmentManager(), ZWActivityDialogHandler.DIALOG_OLD_PASSWORD_TAG);	
-									} 
-									else {
-										ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_old_encryption_fatal);
-									}
-								}
-								
-							});
 
-						} 
-						else {
-							//set password
-							if (ZWPreferences.setStoredPassword(password) <= 0){
-								//if we failed setting password, something could be wrong with db
-								ZiftrSimpleDialogFragment dbErrorFragment = new ZiftrTextDialogFragment();
-								dbErrorFragment.setupDialog(R.string.zw_app_name, 
-															R.string.zw_dialog_database_error, 
-															R.string.zw_dialog_restart, 
-															R.string.zw_dialog_cancel);
-								
-								dbErrorFragment.show(getFragmentManager(), ZWActivityDialogHandler.DIALOG_DATABASE_ERROR_TAG);
-							}
-						}
+						ZWActivityDialogHandler.changePassword(welcomeActivity, null, password);
 					}
 				});
-				
+
 				this.startNextScreen();
-				
+
 			} 
 			else {
 				ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_dialog_new_password_match);
 			}
 		}
 	}
-	
+
 	private void startNextScreen() {
 		ZWWelcomeActivity welcomeActivity = (ZWWelcomeActivity) this.getActivity();
 		welcomeActivity.showNameFragment(false);

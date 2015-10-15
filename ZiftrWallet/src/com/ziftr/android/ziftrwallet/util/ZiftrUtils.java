@@ -16,8 +16,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,8 +24,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -47,7 +43,7 @@ public class ZiftrUtils {
 
 	/** flag indicating if the fixes for secure random number generator have been applied */
 	private static boolean randomSecured = false;
-	
+
 	/** formatting for date written like "2013-08-26T13:59:30-04:00" */
 	public static final DateFormat formatter = 
 			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
@@ -57,18 +53,6 @@ public class ZiftrUtils {
 	/** formatting for date written like "2013-12-11 10:59:48" */
 	public static final DateFormat formatterNoTimeZone = 
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); 
-
-	/** The string that prefixes all text messages signed using Bitcoin keys. */
-
-	private static final MessageDigest digest;
-	static {
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			// Can't happen, we should know about it if it does happen.
-			throw new RuntimeException(e);
-		}
-	}
 
 	/**
 	 * Converts a date string in a format such as "2013-08-26T13:59:30-04:00" 
@@ -252,19 +236,6 @@ public class ZiftrUtils {
 	}
 
 	/**
-	 * Returns the Sha256 hash of the specified byte array.
-	 * The returned array will have 32 elements.
-	 * 
-	 * @param arr - The array of information to hash.
-	 * @return - the Sha256 hash of the specified byte array.
-	 */
-	public static byte[] Sha256Hash(byte[] arr) {
-		synchronized (digest) {
-			return digest.digest(arr);
-		}
-	}
-
-	/**
 	 * Converts an array of bytes to string data.
 	 * For example:
 	 * [0xf0, 0x34, 0x5a] => "f0345a"
@@ -292,6 +263,7 @@ public class ZiftrUtils {
 	 * @return The result of the conversion.
 	 */
 	public static byte[] hexStringToBytes(String hexStr) {
+		if (hexStr == null) return null;
 		// TODO is this the same: Hex.decode(hexStr); ???
 		byte bArray[] = new byte[hexStr.length()/2];  
 		for (int i=0; i<(hexStr.length()/2); i++) {
@@ -354,60 +326,13 @@ public class ZiftrUtils {
 		return toFormat.setScale(numDecimalPlaces, RoundingMode.HALF_UP);
 	}
 
-	
+
 	/**
-	 * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
-	 * TODO change name order, as it is confusing
+	 * Work around lack of unsigned types in Java.
 	 */
-	public static byte[] sha256hash160(byte[] input) {
-		try {
-			byte[] sha256 = MessageDigest.getInstance("SHA-256").digest(input);
-			RIPEMD160Digest digest = new RIPEMD160Digest();
-			digest.update(sha256, 0, sha256.length);
-			byte[] out = new byte[20];
-			digest.doFinal(out, 0);
-			return out;
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);  // Cannot happen.
-		}
+	public static boolean isLessThanUnsigned(long n1, long n2) {
+		return UnsignedLongs.compare(n1, n2) < 0;
 	}
-	
-
-	/**
-	 * See Utils#doubleDigest(byte[], int, int).
-	 */
-	public static byte[] doubleDigest(byte[] input) {
-		return doubleDigest(input, 0, input.length);
-	}
-
-	/**
-	 * Calculates the SHA-256 hash of the given byte range, and then hashes the resulting hash again. This is
-	 * standard procedure in Bitcoin. The resulting hash is in big endian form.
-	 */
-	public static byte[] doubleDigest(byte[] input, int offset, int length) {
-		synchronized (digest) {
-			digest.reset();
-			digest.update(input, offset, length);
-			byte[] first = digest.digest();
-			return digest.digest(first);
-		}
-	}
-
-	public static byte[] singleDigest(byte[] input, int offset, int length) {
-		synchronized (digest) {
-			digest.reset();
-			digest.update(input, offset, length);
-			return digest.digest();
-		}
-	}
-
-	
-	/**
-     * Work around lack of unsigned types in Java.
-     */
-    public static boolean isLessThanUnsigned(long n1, long n2) {
-        return UnsignedLongs.compare(n1, n2) < 0;
-    }
 
 	/**
 	 * The regular {@link java.math.BigInteger#toByteArray()} method isn't quite what we often need: it appends a
@@ -428,12 +353,12 @@ public class ZiftrUtils {
 		System.arraycopy(biBytes, start, bytes, numBytes - length, length);
 		return bytes;        
 	}
-	
+
 	public static String bigIntegerToString(BigInteger b, int numBytes) {
 		return ZiftrUtils.bytesToHexString(ZiftrUtils.bigIntegerToBytes(b, numBytes));
 	}
 
-	
+
 	/**
 	 * Decoded bytes sometimes have format (when for uncompressed private keys):
 	 *   version byte + data
@@ -451,7 +376,7 @@ public class ZiftrUtils {
 		System.arraycopy(wifPrivBytes, 1, privBytes, 0, size);
 		return privBytes;
 	}
-	
+
 	/**
 	 * See: https://android-developers.blogspot.com/2013/08/some-securerandom-thoughts.html
 	 * Makes sure the fixes are applied and by using {@link PRNGFixes#apply()}.
@@ -470,10 +395,10 @@ public class ZiftrUtils {
 				return null;
 			}
 		}
-		
+
 		return new SecureRandom();
 	}
-	
+
 	//get number of decimal places in a bigDecimal
 	public static int numDecimalPlaces(BigDecimal num){
 		if (num.compareTo(BigDecimal.ZERO) == 0){
@@ -483,68 +408,212 @@ public class ZiftrUtils {
 		int index = numtString.indexOf(".");
 		return index < 0 ? 0 : numtString.length() - index - 1;
 	}
-	
+
 	public static long readUint32(byte[] bytes, int offset) {
-        return ((bytes[offset++] & 0xFFL) << 0) |
-                ((bytes[offset++] & 0xFFL) << 8) |
-                ((bytes[offset++] & 0xFFL) << 16) |
-                ((bytes[offset] & 0xFFL) << 24);
-    }
-    
-    public static long readInt64(byte[] bytes, int offset) {
-        return ((bytes[offset++] & 0xFFL) << 0) |
-               ((bytes[offset++] & 0xFFL) << 8) |
-               ((bytes[offset++] & 0xFFL) << 16) |
-               ((bytes[offset++] & 0xFFL) << 24) |
-               ((bytes[offset++] & 0xFFL) << 32) |
-               ((bytes[offset++] & 0xFFL) << 40) |
-               ((bytes[offset++] & 0xFFL) << 48) |
-               ((bytes[offset] & 0xFFL) << 56);
-    }
+		return ((bytes[offset++] & 0xFFL) << 0) |
+				((bytes[offset++] & 0xFFL) << 8) |
+				((bytes[offset++] & 0xFFL) << 16) |
+				((bytes[offset] & 0xFFL) << 24);
+	}
 
-    public static long readUint32BE(byte[] bytes, int offset) {
-        return ((bytes[offset + 0] & 0xFFL) << 24) |
-                ((bytes[offset + 1] & 0xFFL) << 16) |
-                ((bytes[offset + 2] & 0xFFL) << 8) |
-                ((bytes[offset + 3] & 0xFFL) << 0);
-    }
+	public static long readInt64(byte[] bytes, int offset) {
+		return ((bytes[offset++] & 0xFFL) << 0) |
+				((bytes[offset++] & 0xFFL) << 8) |
+				((bytes[offset++] & 0xFFL) << 16) |
+				((bytes[offset++] & 0xFFL) << 24) |
+				((bytes[offset++] & 0xFFL) << 32) |
+				((bytes[offset++] & 0xFFL) << 40) |
+				((bytes[offset++] & 0xFFL) << 48) |
+				((bytes[offset] & 0xFFL) << 56);
+	}
 
-    public static int readUint16BE(byte[] bytes, int offset) {
-        return ((bytes[offset] & 0xff) << 8) | bytes[offset + 1] & 0xff;
-    }
-    
-    public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
-        out[offset + 0] = (byte) (0xFF & (val >> 24));
-        out[offset + 1] = (byte) (0xFF & (val >> 16));
-        out[offset + 2] = (byte) (0xFF & (val >> 8));
-        out[offset + 3] = (byte) (0xFF & (val >> 0));
-    }
+	public static long readUint32BE(byte[] bytes, int offset) {
+		return ((bytes[offset + 0] & 0xFFL) << 24) |
+				((bytes[offset + 1] & 0xFFL) << 16) |
+				((bytes[offset + 2] & 0xFFL) << 8) |
+				((bytes[offset + 3] & 0xFFL) << 0);
+	}
 
-    public static void uint32ToByteArrayLE(long val, byte[] out, int offset) {
-        out[offset + 0] = (byte) (0xFF & (val >> 0));
-        out[offset + 1] = (byte) (0xFF & (val >> 8));
-        out[offset + 2] = (byte) (0xFF & (val >> 16));
-        out[offset + 3] = (byte) (0xFF & (val >> 24));
-    }
+	public static int readUint16BE(byte[] bytes, int offset) {
+		return ((bytes[offset] & 0xff) << 8) | bytes[offset + 1] & 0xff;
+	}
 
-    public static void uint64ToByteArrayLE(long val, byte[] out, int offset) {
-        out[offset + 0] = (byte) (0xFF & (val >> 0));
-        out[offset + 1] = (byte) (0xFF & (val >> 8));
-        out[offset + 2] = (byte) (0xFF & (val >> 16));
-        out[offset + 3] = (byte) (0xFF & (val >> 24));
-        out[offset + 4] = (byte) (0xFF & (val >> 32));
-        out[offset + 5] = (byte) (0xFF & (val >> 40));
-        out[offset + 6] = (byte) (0xFF & (val >> 48));
-        out[offset + 7] = (byte) (0xFF & (val >> 56));
-    }
+	public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
+		out[offset + 0] = (byte) (0xFF & (val >> 24));
+		out[offset + 1] = (byte) (0xFF & (val >> 16));
+		out[offset + 2] = (byte) (0xFF & (val >> 8));
+		out[offset + 3] = (byte) (0xFF & (val >> 0));
+	}
 
-    
-    public static SpannableString getCurrencyDisplayString(String currencyString) {
-    	SpannableString spannableString = new SpannableString(currencyString);
-    	spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
-    	return spannableString;
-    }
-    
+	public static void uint32ToByteArrayLE(long val, byte[] out, int offset) {
+		out[offset + 0] = (byte) (0xFF & (val >> 0));
+		out[offset + 1] = (byte) (0xFF & (val >> 8));
+		out[offset + 2] = (byte) (0xFF & (val >> 16));
+		out[offset + 3] = (byte) (0xFF & (val >> 24));
+	}
+
+	public static void uint64ToByteArrayLE(long val, byte[] out, int offset) {
+		out[offset + 0] = (byte) (0xFF & (val >> 0));
+		out[offset + 1] = (byte) (0xFF & (val >> 8));
+		out[offset + 2] = (byte) (0xFF & (val >> 16));
+		out[offset + 3] = (byte) (0xFF & (val >> 24));
+		out[offset + 4] = (byte) (0xFF & (val >> 32));
+		out[offset + 5] = (byte) (0xFF & (val >> 40));
+		out[offset + 6] = (byte) (0xFF & (val >> 48));
+		out[offset + 7] = (byte) (0xFF & (val >> 56));
+	}
+
+
+	public static SpannableString getCurrencyDisplayString(String currencyString) {
+		SpannableString spannableString = new SpannableString(currencyString);
+		spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
+		return spannableString;
+	}
+	
+	
+	/**
+	 * converts an integer into an array of bits (booleans)
+	 * @param integer the int to be converted
+	 * @param msbFirst (Most Significant Bit First) if true, the most significant (left most) bit of the integer will be the first bit
+	 * in the array (index 0) 
+	 * @return an array of booleans representing the bit data
+	 */
+	public static boolean[] integerToBits(int integer, boolean msbFirst) {
+	
+		boolean[] bits = new boolean[Integer.SIZE];
+		
+		if(msbFirst) {
+			for(int x = 0; x < bits.length; x++) {
+				boolean bit = (integer & (1 << x)) > 0;
+				bits[bits.length -1 -x] = bit;
+			}
+		}
+		else {
+			for(int x = 0; x < bits.length; x++) {
+				boolean bit = (integer & (1 << x)) > 0;
+				bits[x] = bit;
+			}
+		}
+		
+		return bits;
+	}
+
+
+	/**
+	 * Converts an array of bytes in an array of bits (booleans)
+	 * @param bytes the bytes to be converted
+	 * @param msbFirst (Most Significant Bit First) if true the most significant (left most) bit of the first byte 
+	 * will be stored at index 0 of the returned array, the most significant byte of the second byte will be at index 8, etc
+	 * @return an array of booleans representing the bit data
+	 */
+	public static boolean[] bytesToBits(byte[] bytes, boolean msbFirst) {
+		
+		boolean[] bits = new boolean[bytes.length * Byte.SIZE];
+		
+		//note some code re-use here, but much more efficient to check for msb once instead of each bit or byte
+		if(msbFirst) {
+			for(int x = 0; x < bytes.length; x++) {
+				byte data = bytes[x];
+				int bitIndex = x * Byte.SIZE + Byte.SIZE -1;
+				for(int i = Byte.SIZE -1; i >= 0 ; i--) {
+					boolean bit = (data & (1 << i)) > 0;
+					bits[bitIndex - i] = bit;
+				}
+			}
+		}
+		else {
+			for(int x = 0; x < bytes.length; x++) {
+				byte data = bytes[x];
+				int bitIndex = x * Byte.SIZE;
+				for(int i = 0; i < Byte.SIZE; i++) {
+					boolean bit = (data & (1 << i)) > 0;
+					bits[bitIndex + i] = bit;
+				}
+			}
+		}
+		
+		return bits;
+	}
+	
+	
+	
+	/**
+	 * Converts an array of booleans representing bits into an array of bytes representing the bit data
+	 * @param bits the bits to be converted
+	 * @param msbFirst (Most Significant Bit First), if true, the first bit in the array is considered the most significant bit of
+	 * the first byte, the 9th bit (index 8) would be the most significant bit of the second byte, etc
+	 * @return an array of bytes representing the bit data passed in
+	 */
+	public static byte[] bitsToBytes(boolean[] bits, boolean msbFirst) {
+		byte[] bytes;
+		if(bits.length % Byte.SIZE != 0) {
+			ZLog.log("Trying to convert arbitrary sized bit array to bytes: size = ", String.valueOf(bits.length));
+			bytes = new byte[bits.length / Byte.SIZE +1];
+		}
+		else {
+			bytes = new byte[bits.length / Byte.SIZE];
+		}
+		
+		if(msbFirst) {
+			int byteIndex = 0;
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					byteIndex = x / Byte.SIZE;
+					int bitShift = Byte.SIZE -1 - x % Byte.SIZE;
+					
+					bytes[byteIndex] += 1 << bitShift;
+				}
+			}
+		}
+		else {
+			int byteIndex = 0;
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					byteIndex = x / Byte.SIZE;
+					int bitShift = x % Byte.SIZE;
+					
+					bytes[byteIndex] += 1 << bitShift;
+				}
+			}
+		}
+		
+		return bytes;
+	}
+	
+	
+	
+	/**
+	 * Converts an array of booleans representing bits into the integer equivalent
+	 * @param bits the bits to be converted
+	 * @param msbFirst (Most Significant Bit First), true if the most significant bit is the first element in the array (index 0)
+	 * @return an int value of the bits in the array
+	 */
+	public static int bitsToInt(boolean[] bits, boolean msbFirst) {
+		int value = 0;
+		
+		if(bits.length > Integer.SIZE) {
+			throw new NumberFormatException("bit array is too large to convert to int.");
+		}
+		
+		if(msbFirst) {
+			int msbShift = bits.length - 1; //how far to shift the most significant bit
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					value += (1 << (msbShift - x));
+				}
+			}
+		}
+		else {
+			for(int x = 0; x < bits.length; x++) {
+				if(bits[x]) {
+					value += (1 << x);
+				}
+			}
+		}
+	
+		return value;
+	}
+	
 }
 
 

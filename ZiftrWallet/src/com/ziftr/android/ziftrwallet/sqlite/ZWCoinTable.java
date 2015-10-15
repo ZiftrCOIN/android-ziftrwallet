@@ -20,7 +20,7 @@ import com.ziftr.android.ziftrwallet.util.ZLog;
 
 // TODO make a column for balance so that we don't have to loop through transaction table? 
 public class ZWCoinTable {
-	
+
 	private static final String TABLE_NAME = "coin_status";
 
 
@@ -33,7 +33,7 @@ public class ZWCoinTable {
 	public static final String COLUMN_PRIV_KEY_PREFIX = "priv_key_hash_prefix";
 	public static final String COLUMN_BLOCK_TIME = "block_time";
 	public static final String COLUMN_RECOMMENDED_CONFIRMS = "recommended_confirmations";
-	
+
 	/** if server has enabled the coin (as opposed to activated by client)*/
 	public static final String COLUMN_ENABLED = "is_enabled";
 	public static final String COLUMN_HEALTH = "health";
@@ -42,17 +42,21 @@ public class ZWCoinTable {
 	public static final String COLUMN_SCALE = "scale";
 	public static final String COLUMN_SCHEME = "scheme";
 	public static final String COLUMN_LOGO_URL = "logo_url";
-	
+
 	public static final String COLUMN_SYNCED_BLOCK_HEIGHT = "synced_block_height";
-	
-	
+
+	/**
+	 * Each coin type has a branch of the HD wallet. 
+	 */
+	public static final String COLUMN_HD_COIN_ID = "hd_id";
+
 	private static final int UNACTIVATED = 0; //Used for table types that just haven't been used yet.
 	private static final int DEACTIVATED = 1; //Used for table types that used to be ACTIVATED, but now user deactivated them.
 	private static final int ACTIVATED = 2; //Used for table types that are activated and in use by user (should always be largest value when adding other types).
-	
+
 
 	protected void create(SQLiteDatabase db) {
-		
+
 		//create basic table with required column for coin id
 		String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + COLUMN_SYMBOL + " TEXT UNIQUE NOT NULL)";
 		db.execSQL(sql);
@@ -72,13 +76,14 @@ public class ZWCoinTable {
 		this.addColumn(COLUMN_CHAIN, "TEXT", db);
 		this.addColumn(COLUMN_TYPE, "TEXT", db);
 		this.addColumn(COLUMN_LOGO_URL, "TEXT", db);
-		
+
 		this.addColumn(COLUMN_ENABLED, "INTEGER", db);
 		this.addColumn(COLUMN_HEALTH, "TEXT", db);
 
+		this.addColumn(COLUMN_HD_COIN_ID, "INTEGER", db);
 	}
-	
-	
+
+
 	private void addColumn(String columnName, String constraints, SQLiteDatabase database) {
 		try {
 			String sql = "ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + columnName + " " + constraints;
@@ -88,58 +93,38 @@ public class ZWCoinTable {
 			//quietly fail when adding columns, they likely already exist
 		}
 	}
-		
-	
-	
-	protected void insertDefault(ZWCoin defaultCoin, SQLiteDatabase db) {
-	
-		try {
-			ContentValues baseCoinValues = getContentValues(defaultCoin);
-			db.insertOrThrow(TABLE_NAME, null, baseCoinValues); //this may fail, that's ok
-			
-			ContentValues defaults = new ContentValues(2);
-			defaults.put(COLUMN_SYNCED_BLOCK_HEIGHT, 0);
-			defaults.put(COLUMN_ACTIVATED_STATUS, UNACTIVATED);
-			String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(defaultCoin.getSymbol());
-			
-			db.update(TABLE_NAME, defaults, where, null);
-		}
-		catch(Exception e) {
-			//quietly fail if these defaults already exist
-		}
-	}
-	
-	
+
+
 	public synchronized List<ZWCoin> getNotUnactiveCoins(SQLiteDatabase db) {
 		String whereClause = COLUMN_ACTIVATED_STATUS + " != " + String.valueOf(UNACTIVATED);
 		return this.getCoins(whereClause, db);
 	}
-	
-	
+
+
 	protected List<ZWCoin> getActiveCoins(SQLiteDatabase db) {
 		String whereClause = COLUMN_ACTIVATED_STATUS + " >= " + String.valueOf(ACTIVATED);
 		return getCoins(whereClause, db);
 	}
-	
-	
+
+
 	protected List<ZWCoin> getInactiveCoins(SQLiteDatabase db, boolean includeTestnet) {
 		String whereClause = "(" + COLUMN_ACTIVATED_STATUS + " IS NULL OR " + COLUMN_ACTIVATED_STATUS + " < " + String.valueOf(ACTIVATED) + ")";
 		if(!includeTestnet) {
 			whereClause += " AND " + COLUMN_CHAIN + " = 'main'" + " AND " + COLUMN_ENABLED + " = 1";
 		}
-		
-		
+
+
 		return getCoins(whereClause, db);
 	}
-	
-	
+
+
 	private List<ZWCoin> getCoins(String whereClause, SQLiteDatabase db) {
 		ArrayList<ZWCoin> coins = new ArrayList<ZWCoin>();
-		
+
 		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + whereClause;
-		
+
 		Cursor cursor = db.rawQuery(sql, null);
-		
+
 		if (cursor.moveToFirst()) {
 			do {
 				ZWCoin coin = cursorToCoin(cursor);
@@ -149,16 +134,16 @@ public class ZWCoinTable {
 
 		// Make sure we close the cursor
 		cursor.close();
-		
+
 		return coins;
 	}
-	
-	
+
+
 	protected List<ZWCoin> getAllCoins(SQLiteDatabase database) {
 		ArrayList<ZWCoin> coins = new ArrayList<ZWCoin>();
-		
+
 		String sql = "SELECT * FROM " + TABLE_NAME;
-		
+
 		Cursor cursor = database.rawQuery(sql, null);
 		if(cursor.moveToFirst()) {
 			do {
@@ -168,92 +153,92 @@ public class ZWCoinTable {
 			while(cursor.moveToNext());
 		}
 		cursor.close();
-		
+
 		return coins;
 	}
-	
+
 	protected ZWCoin getCoin(String coinSymbol, SQLiteDatabase db){
 		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coinSymbol);
-		
+
 		ZWCoin coin = null;
-		
+
 		Cursor cursor = db.rawQuery(sql, null);
 		if(cursor.moveToFirst()) {
 			coin = cursorToCoin(cursor);
 		}
 		cursor.close();
-		
+
 		return coin;
 	}
-	
-	
+
+
 	protected long getSyncedBlockHeight(ZWCoin coin, SQLiteDatabase database) {
 		long height = 0;
-		
+
 		String sql = "SELECT " + COLUMN_SYNCED_BLOCK_HEIGHT + " FROM " + TABLE_NAME + 
 				" WHERE " + COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
-		
+
 		Cursor cursor = database.rawQuery(sql, null);
 		if(cursor.moveToFirst()) {
 			height = cursor.getLong(0); //only selected 1 column, so use the first one
 		}
 		cursor.close();
-		
+
 		return height;
 	}
-	
+
 	protected void setSyncedBlockHeight(ZWCoin coin, long blockHeight, SQLiteDatabase database) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_SYNCED_BLOCK_HEIGHT, blockHeight);
 		String whereClause = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
 		database.update(TABLE_NAME, values, whereClause, null);
 	}
-	
-	
+
+
 	protected boolean isCoinActivated(ZWCoin coin, SQLiteDatabase db) {
-		
+
 		boolean isActivated = false;
-		
+
 		String sql = "SELECT " + COLUMN_ACTIVATED_STATUS + " FROM " + TABLE_NAME + 
 				" WHERE " + COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
-		
+
 		Cursor cursor = db.rawQuery(sql, null);
 		if(cursor.moveToFirst()) {
 			if(!cursor.isLast()) {
 				ZLog.log("Multiple rows were returned from database for activation of coin: ", coin.getSymbol(), " - ", coin.getType(), " - ", coin.getChain());
 			}
-			
+
 			int activatedStatus = cursor.getInt(0); //only 1 column asked for
 			if(activatedStatus == ACTIVATED) {
 				isActivated = true;
 			}
 		}
 		cursor.close();
-		
+
 		return isActivated;
 	}
 
-	
+
 	protected void activateCoin(ZWCoin coin, SQLiteDatabase db) {
 		this.setActivation(coin, ACTIVATED, db);
 	}
-	
+
 	protected void deactivateCoin(ZWCoin coin, SQLiteDatabase db) {
 		this.setActivation(coin, DEACTIVATED, db);
 	}
-	
+
 	private void setActivation(ZWCoin coin, int activationStatus, SQLiteDatabase db) {
 		ContentValues values = new ContentValues();
 		values.put(COLUMN_ACTIVATED_STATUS, activationStatus);
 		String whereClause = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
 		db.update(TABLE_NAME, values, whereClause, null);
 	}
-	
-	
+
+
 	public void upsertCoin(ZWCoin coin, SQLiteDatabase db) {
-		
+
 		ContentValues cv = getContentValues(coin);
-		
+
 		String where = COLUMN_SYMBOL + " = " + DatabaseUtils.sqlEscapeString(coin.getSymbol());
 		int updated = db.update(TABLE_NAME, cv, where, null);
 		if(updated == 0) {
@@ -263,45 +248,45 @@ public class ZWCoinTable {
 		}
 	}
 
-	
+
 	private ZWCoin cursorToCoin(Cursor cursor) {
 		long defaultFee = cursor.getLong(cursor.getColumnIndex(COLUMN_DEFAULT_FEE_PER_KB));
 		//BigInteger defaultFeePerKb = BigInteger.valueOf(defaultFee);
-		
+
 		String name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
 		String type = cursor.getString(cursor.getColumnIndex(COLUMN_TYPE));
 		String scheme = cursor.getString(cursor.getColumnIndex(COLUMN_SCHEME));
 		String logoUrl = cursor.getString(cursor.getColumnIndex(COLUMN_LOGO_URL));
 		int scale = cursor.getInt(cursor.getColumnIndex(COLUMN_SCALE));
-		
+
 		byte pubKeyPrefix = (byte) cursor.getInt(cursor.getColumnIndex(COLUMN_PUB_KEY_PREFIX));
 		byte privKeyPrefix = (byte) cursor.getInt(cursor.getColumnIndex(COLUMN_PRIV_KEY_PREFIX));
 		byte scriptHashPrefix = (byte) cursor.getInt(cursor.getColumnIndex(COLUMN_SCRIPT_PREFIX));
 		int confirmationsNeeded = cursor.getInt(cursor.getColumnIndex(COLUMN_RECOMMENDED_CONFIRMS));
 		int blockGenTime = cursor.getInt(cursor.getColumnIndex(COLUMN_BLOCK_TIME));
 		String chain = cursor.getString(cursor.getColumnIndex(COLUMN_CHAIN));
-		
+
 		String health = cursor.getString(cursor.getColumnIndex(COLUMN_HEALTH));
 		long syncedHeight = cursor.getLong(cursor.getColumnIndex(COLUMN_SYNCED_BLOCK_HEIGHT));
-		
+
 		int enabledInt = cursor.getInt(cursor.getColumnIndex(COLUMN_ENABLED));
 		boolean enabled = enabledInt > 0;
-		
+		int hdId = cursor.getInt(cursor.getColumnIndex(COLUMN_HD_COIN_ID));
+
 		//activationStatus isn't stored as part of a ZWCoin object, so don't load that here
 		//maybe it should be?
 		//Integer activationStatus = cursor.getInt(cursor.getColumnIndex(COLUMN_ACTIVATED_STATUS));
-		
+
 		ZWCoin coin = new ZWCoin(name, type, chain, scheme, scale, String.valueOf(defaultFee), logoUrl, 
-				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime);
-		
+				pubKeyPrefix, scriptHashPrefix, privKeyPrefix, confirmationsNeeded, blockGenTime, hdId);
 		coin.setEnabled(enabled);
 		coin.setHealth(health);
 		coin.setSyncedHeight(syncedHeight);
-		
+
 		return coin;
 	}
-	
-	
+
+
 	/**
 	 * takes the parameters of a coin and returns a {@link ContentValues} object for insertion into a database,
 	 * note: only adds "permanent" features of a coin, eg blockheight and activation status are not added
@@ -310,7 +295,7 @@ public class ZWCoinTable {
 	 */
 	private ContentValues getContentValues(ZWCoin coin) {
 		ContentValues content = new ContentValues(16);
-		
+
 		//these are properties of the coin and extremely unlikely to change
 		content.put(COLUMN_DEFAULT_FEE_PER_KB, coin.getDefaultFee().longValue());
 		content.put(COLUMN_LOGO_URL, coin.getLogoUrl());
@@ -327,8 +312,8 @@ public class ZWCoinTable {
 		content.put(COLUMN_CHAIN, coin.getChain());
 		content.put(COLUMN_ENABLED, coin.isEnabled());
 		content.put(COLUMN_HEALTH, coin.getHealth());
-		
-		
+		content.put(COLUMN_HD_COIN_ID, coin.getHdId());
+
 		return content;
 	}
 

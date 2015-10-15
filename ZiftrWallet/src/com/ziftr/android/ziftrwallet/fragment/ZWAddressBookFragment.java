@@ -23,6 +23,7 @@ import android.widget.ListView;
 
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
+import com.ziftr.android.ziftrwallet.crypto.ZWSendingAddress;
 import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter.SortState;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -45,7 +46,7 @@ implements TextWatcher, OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("ADDRESSES", false, false, false, this, this.addressAdapter);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_addresses, false, false, false, this, this.addressAdapter);
 	}
 
 	@Override
@@ -128,7 +129,7 @@ implements TextWatcher, OnClickListener {
 		ZiftrUtils.runOnNewThread(new Runnable() {
 			@Override
 			public void run() {
-				final List<ZWAddress> addresses = getDisplayAddresses();
+				final List<? extends ZWAddress> addresses = getDisplayAddresses();
 				Activity a = ZWAddressBookFragment.this.getZWMainActivity();
 				// It it's null then the app is dying and we do it on the next round
 				if (a != null) {
@@ -149,11 +150,11 @@ implements TextWatcher, OnClickListener {
 
 	
 	/**
-	 * read, load, create or otherwise obtain an array of {@link ZWAddress} objects for the 
+	 * read, load, create or otherwise obtain an array of {@link ZWSendingAddress} objects for the 
 	 * fragment to display to the user
 	 * @return a list of address objects
 	 */
-	protected abstract List<ZWAddress> getDisplayAddresses();
+	protected abstract List<? extends ZWAddress> getDisplayAddresses();
 	
 	
 	/**

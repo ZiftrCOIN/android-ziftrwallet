@@ -18,41 +18,41 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
-import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 
 public class ZWWalletWidget extends AppWidgetProvider{
-	
+
 	public static final String WIDGET_SEND = "widgetSendButton";
 	public static final String WIDGET_RECEIVE = "widgetReceiveButton";
 	public static final String WIDGET_CURR = "widgetCurrencyButton";
-	
+
 	private static final int send_intent_requestcode = 0;
 	private static final int receive_intent_requestcode = 1;
 	private static final int curr_requestcode = 2;
-	
+
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds){
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
 		RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-		
+
 		for (int i=0; i<appWidgetIds.length; i++){
 			initButtons(context, views);
 			changeCurrency(context, views);
-            appWidgetManager.updateAppWidget(appWidgetIds[i], views);
+			appWidgetManager.updateAppWidget(appWidgetIds[i], views);
 		}
 	}
-	
+
 	@Override
 	public void onReceive(Context context, Intent intent){
 		super.onReceive(context, intent);
 		if (WIDGET_CURR.equals(intent.getAction())){
-	        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-	        changeCurrency(context, views);
-	        ComponentName cn = new ComponentName(context, ZWWalletWidget.class);
-	        initButtons(context, views);
-	        AppWidgetManager.getInstance(context).updateAppWidget(cn, views);
+			RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
+			changeCurrency(context, views);
+			ComponentName cn = new ComponentName(context, ZWWalletWidget.class);
+			initButtons(context, views);
+			AppWidgetManager.getInstance(context).updateAppWidget(cn, views);
 		}
 	}
-	
+
 	private void changeCurrency(Context context, RemoteViews views){
 		List<ZWCoin> coins = ZWWalletManager.getInstance().getActivatedCoins();
 		if (coins.size() >0) {
@@ -79,7 +79,7 @@ public class ZWWalletWidget extends AppWidgetProvider{
 				views.setViewVisibility(R.id.widget_select_coin, View.VISIBLE);
 				views.setImageViewResource(R.id.widget_select_coin, selectedCurr.getLogoResId());
 				views.setTextViewText(R.id.widget_coin, selectedCurr.getName());
-				BigDecimal balance = selectedCurr.getAmount(ZWWalletManager.getInstance().getWalletBalance(selectedCurr, ZWSQLiteOpenHelper.BalanceType.AVAILABLE));
+				BigDecimal balance = selectedCurr.getAmount(ZWWalletManager.getInstance().getWalletBalance(selectedCurr, ZWWalletManager.BalanceType.AVAILABLE));
 				views.setTextViewText(R.id.widget_balance, selectedCurr.getFormattedAmount(balance));
 			}
 		} else {
@@ -90,7 +90,7 @@ public class ZWWalletWidget extends AppWidgetProvider{
 			views.setViewVisibility(R.id.no_wallets, View.VISIBLE);
 		}
 	}
-	
+
 	private void initButtons(Context context, RemoteViews views){
 
 		Intent intent_send = new Intent(context, ZWMainFragmentActivity.class);
@@ -111,6 +111,6 @@ public class ZWWalletWidget extends AppWidgetProvider{
 		views.setOnClickPendingIntent(R.id.widget_change_coin, pendingIntent_curr);
 
 	}
-	
-	
+
+
 }

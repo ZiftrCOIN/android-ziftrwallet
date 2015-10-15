@@ -17,9 +17,9 @@ import java.util.Locale;
 
 import com.google.common.base.Charsets;
 import com.ziftr.android.ziftrwallet.R;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.Base58;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
+import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 import com.ziftr.android.ziftrwallet.util.ZiftrUtils;
 
@@ -83,7 +83,7 @@ public class ZWCoin implements ZWCurrency {
 				//if the schemes are equal we found the right coin
 				//now check if it's regular or testnet (or the address is messed up)
 				try {
-					byte[] decodedAddress = Base58.decodeChecked(address);
+					byte[] decodedAddress = ZiftrBase58.decodeChecked(address);
 					byte prefix = decodedAddress[0];
 					if(prefix == coin.pubKeyHashPrefix || prefix == coin.scriptHashPrefix) {
 						return coin;
@@ -113,6 +113,7 @@ public class ZWCoin implements ZWCurrency {
 	private String scheme; 
 	private int scale;
 	private String logoUrl;
+	private int hd_id;
 	
 	private boolean enabled = false;
 	private String health = null;
@@ -120,7 +121,7 @@ public class ZWCoin implements ZWCurrency {
 	
 	public ZWCoin(String name, String type, String chain, String scheme, int scale, 
 			String defaultFee, String logoUrl, byte pubKeyHashPrefix, byte scriptHashPrefix, 
-			byte privKeyPrefix, int confirmationsNeeded, int blockTime) {
+			byte privKeyPrefix, int confirmationsNeeded, int blockTime, int hd_id) {
 
 		this.name = name;
 		this.type = type;
@@ -133,7 +134,7 @@ public class ZWCoin implements ZWCurrency {
 		this.privKeyPrefix = privKeyPrefix;
 		this.confirmationsNeeded = confirmationsNeeded;
 		this.blockTime = blockTime;
-		
+		this.hd_id = hd_id;
 
 		try {
 			this.defaultFeePer = new BigInteger(defaultFee);
@@ -167,6 +168,10 @@ public class ZWCoin implements ZWCurrency {
 		}
 		
 		return symbol;
+	}
+	
+	public boolean isMainNetworkCoin() {
+		return chain.equals("main");
 	}
 	
 
@@ -280,7 +285,6 @@ public class ZWCoin implements ZWCurrency {
 	public int getSecondsPerAverageBlockSolve() {
 		return this.blockTime;
 	}
-
 	
 	@Override
 	public String getFormattedAmount(BigDecimal amount) {
@@ -324,7 +328,7 @@ public class ZWCoin implements ZWCurrency {
 		}
 
 		try {
-			byte[] decodedBytes = Base58.decode(address);
+			byte[] decodedBytes = ZiftrBase58.decode(address);
 			for (byte b : this.getAcceptableAddressCodes()) {
 				if (decodedBytes[0] == b) {
 					return true;
@@ -422,7 +426,9 @@ public class ZWCoin implements ZWCurrency {
 		return this.syncedHeight;
 	}
 
-	
+	public int getHdId() {
+		return this.hd_id;
+	}	
 	
 	
 	

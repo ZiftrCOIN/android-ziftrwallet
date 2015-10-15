@@ -43,13 +43,13 @@ public class ZWECDSASignature {
 	 * considered legal and the other will be banned.
 	 */
 	public void ensureCanonical() {
-		if (s.compareTo(ZWECKey.HALF_CURVE_ORDER) > 0) {
+		if (s.compareTo(ZWCurveParameters.HALF_CURVE_ORDER) > 0) {
 			// The order of the curve is the number of valid points that exist on that curve. If S is in the upper
 			// half of the number of valid points, then bring it back to the lower half. Otherwise, imagine that
 			//    N = 10
 			//    s = 8, so (-8 % 10 == 2) thus both (r, 8) and (r, 2) are valid solutions.
 			//    10 - 8 == 2, giving us always the latter solution, which is canonical.
-			s = ZWECKey.CURVE.getN().subtract(s);
+			s = ZWCurveParameters.CURVE.getN().subtract(s);
 		}
 	}
 

@@ -23,11 +23,11 @@ import android.widget.TextView;
 import com.ziftr.android.ziftrwallet.R;
 import com.ziftr.android.ziftrwallet.ZWApplication;
 import com.ziftr.android.ziftrwallet.ZWPreferences;
-import com.ziftr.android.ziftrwallet.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.network.ZWDataSyncHelper;
+import com.ziftr.android.ziftrwallet.sqlite.ZWWalletManager;
 import com.ziftr.android.ziftrwallet.util.ZLog;
 
 
@@ -38,9 +38,9 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 	public static final String DIALOG_CHANGE_PASSWORD_TAG = "settings_change_password";
 	public static final String DIALOG_SET_NAME_TAG = "settings_set_name";
 	public static final String DIALOG_CHANGE_SERVER_TAG = "settings_change_server";
-	
+
 	//TODO -there's no need to keep all these around, the click handler could just use view ids
-	
+
 	private RelativeLayout disablePassword;
 	private RelativeLayout resetPassword;
 	private TextView resetPasswordLabel;
@@ -98,13 +98,13 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.disableName = (RelativeLayout) rootView.findViewById(R.id.disable_name_button);
 		this.disableName.setOnClickListener(this);
 		this.setNameLabel = (TextView) this.setName.findViewById(R.id.set_name_label);
-		
+
 		if (ZWPreferences.getFeesAreEditable()) {
 			this.editableConfirmationFee.setChecked(true);
 		} else {
 			this.editableConfirmationFee.setChecked(false);
 		}
-		
+
 		if (ZWPreferences.getWarningUnconfirmed()) {
 			this.warnUnconfirmedSpending.setChecked(true);
 		} else {
@@ -123,14 +123,14 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 		this.setCustomServer.setOnClickListener(this);
 		this.resyncDataButton = (Button) rootView.findViewById(R.id.resync_data);
 		resyncDataButton.setOnClickListener(this);
-		
+
 		this.updateSettingsVisibility();
 		return rootView;
 	}
 
 	public void onResume() {
 		super.onResume();
-		this.getZWMainActivity().changeActionBar("SETTINGS", true, true, false);
+		this.getZWMainActivity().changeActionBar(R.string.zw_actionbar_settings, true, true, false);
 	}
 
 	public void updateSettingsVisibility() {
@@ -156,7 +156,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.setNameLabel.setText("Set Name");
 			this.disableName.setVisibility(View.VISIBLE);
 		}
-		
+
 		//show debug button text based on dis/enabled
 		if (!ZWPreferences.getDebugMode()){
 			this.debugButton.setText("Enable debugging");
@@ -181,7 +181,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			}
 		}
 	}
-	
+
 
 	@Override
 	public void onClick(View v) {
@@ -189,20 +189,20 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			if (ZWPreferences.userHasPassword()) {
 				ZiftrTextDialogFragment changePasswordDialog = new ZiftrTextDialogFragment();
 				changePasswordDialog.setupDialog(R.string.zw_dialog_change_password);
-				
+
 				changePasswordDialog.addTextbox(0, R.string.zw_old_passphrase_hint, true);
 				changePasswordDialog.addTextbox(0, R.string.zw_dialog_new_passphrase_hint, true);
 				changePasswordDialog.addTextbox(0, R.string.zw_dialog_confirm_password_hint, true);
-				
+
 				changePasswordDialog.show(getFragmentManager(), DIALOG_CHANGE_PASSWORD_TAG);
 			} 
 			else {
 				ZiftrTextDialogFragment createPasswordDialog = new ZiftrTextDialogFragment();
 				createPasswordDialog.setupDialog(0, R.string.zw_dialog_create_password, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
-				
+
 				createPasswordDialog.addTextbox(0, R.string.zw_dialog_new_passphrase_hint, true);
 				createPasswordDialog.addTextbox(0, R.string.zw_dialog_confirm_password_hint, true);
-				
+
 				createPasswordDialog.show(getFragmentManager(), DIALOG_CREATE_PASSWORD_TAG);
 			}
 		} 
@@ -214,7 +214,7 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 				ZiftrTextDialogFragment disablePasswordFragment = new ZiftrTextDialogFragment();
 				disablePasswordFragment.setupDialog(R.string.zw_dialog_enter_password);
 				disablePasswordFragment.addEmptyTextbox(true);
-				
+
 				//note the tag, removing a password is just changing it to an empty password
 				disablePasswordFragment.show(getFragmentManager(), DIALOG_CHANGE_PASSWORD_TAG);
 			} 
@@ -245,12 +245,12 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			this.updateSettingsVisibility();
 		}
 		else if (v == this.setName){
-			
+
 			ZiftrTextDialogFragment setNameDialog = new ZiftrTextDialogFragment();
 			setNameDialog.addEmptyTextbox(false);
-			
+
 			setNameDialog.setupDialog(R.string.zw_app_name, R.string.zw_dialog_enter_name, R.string.zw_dialog_save, R.string.zw_dialog_cancel);
-			
+
 			setNameDialog.show(getFragmentManager(), DIALOG_SET_NAME_TAG);
 		}
 		else if (v == this.debugButton) {
@@ -294,17 +294,16 @@ public class ZWSettingsFragment extends ZWFragment implements OnClickListener{
 			ZiftrTextDialogFragment customServerDialog = new ZiftrTextDialogFragment();
 			customServerDialog.setupDialog(R.string.zw_debug_change_server);
 			customServerDialog.addTextbox(ZWPreferences.getCustomAPIServer(), null, false);
-			
+
 			customServerDialog.show(getFragmentManager(), DIALOG_CHANGE_SERVER_TAG);
 		}
 		else if(v == this.resyncDataButton) {
 			ZiftrDialogManager.showSimpleAlert(getFragmentManager(), R.string.zw_debug_cleared_data);
 			ZWWalletManager.getInstance().resetAllSyncedData();
-			
 			getZWMainActivity().goHome();
 		}
 	}
-	
+
 	private void resetLoggerHelper(){
 		ZWPreferences.setLogToFile(false);
 		if (ZWApplication.isDebuggable() || ZWPreferences.getDebugMode()){

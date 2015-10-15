@@ -253,7 +253,7 @@ public class ZWCoinURI {
 		return builder.toString();
 	}
 
-	public static String convertToCoinURI(ZWAddress address, BigInteger amount, String label, String message) {
+	public static String convertToCoinURI(ZWSendingAddress address, BigInteger amount, String label, String message) {
 		try {
 		 return convertToCoinURI(address.getCoin(), address.getAddress(), amount, label, message);
 		} catch (IllegalArgumentException e) {

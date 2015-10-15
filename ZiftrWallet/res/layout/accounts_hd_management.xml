@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:text="Manage HD Wallet Account" />
+
+    <TextView
+        android:id="@+id/hdAccountCurrentMnemonicText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <EditText
+        android:id="@+id/hdAccountEnterMnemonic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/hdAccountStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <View
+        android:id="@+id/view1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    
+    <LinearLayout
+    android:id="@+id/manageHdAccountButtonsHolder"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/zw_button_footer_height"
+    android:layout_gravity="bottom" >
+
+    <LinearLayout
+        android:id="@+id/hdAccountLeftButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_margin="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/nav_footer_clickable"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/hdAccountLeftButtonText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/zw_button_hd_new_account"
+            android:textColor="@color/White"
+            android:textSize="@dimen/zw_txt_mediumsmall" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="@color/White" >
+    </View>
+
+    <LinearLayout
+        android:id="@+id/hdAccountRightButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_margin="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/nav_footer_clickable"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/hdAccountRightButtonText"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="@string/zw_button_hd_restore_account"
+            android:textColor="@color/White"
+            android:textSize="@dimen/zw_txt_mediumsmall" />
+
+    </LinearLayout>
+
+</LinearLayout>
+
+</LinearLayout>
