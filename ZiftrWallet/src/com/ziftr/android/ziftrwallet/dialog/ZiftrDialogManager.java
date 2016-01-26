@@ -20,6 +20,8 @@ public abstract class ZiftrDialogManager {
 	private static WeakReference<ZiftrDialogHandler> handlerHolder = new WeakReference<ZiftrDialogHandler>(null);
 	
 	private static String waitingDialogMessage;
+	private static ZiftrDialogFragment waitingDialog;
+	private static String waitingDialogTag;
 	
 	public static synchronized void registerHandler(ZiftrDialogHandler handler) {
 		handlerHolder = new WeakReference<ZiftrDialogHandler>(handler);
@@ -27,6 +29,12 @@ public abstract class ZiftrDialogManager {
 		if(waitingDialogMessage != null && handler != null) {
 			showSimpleAlert(handler.getSupportFragmentManager(), waitingDialogMessage);
 			waitingDialogMessage = null;
+		}
+		
+		if(waitingDialog != null && handler != null) {
+			waitingDialog.show(handler.getSupportFragmentManager(), waitingDialogTag);
+			waitingDialog = null;
+			waitingDialogTag = null;
 		}
 	}
 	
@@ -107,5 +115,28 @@ public abstract class ZiftrDialogManager {
 		}
 		
 	}
+	
+	
+	/**
+	 * This can be used to allow background threads/tasks to show a dialog fragment as soon as the UI is available
+	 * @param dialog the dialog to show
+	 */
+	public static synchronized void showDialog(ZiftrDialogFragment dialog, String tag) {
+		ZiftrDialogHandler handler = handlerHolder.get();
+		if(handler != null) {
+			try {
+				dialog.show(handler.getSupportFragmentManager(), tag);
+			}
+			catch(Exception e) {
+				waitingDialog = dialog;
+				waitingDialogTag = tag;
+			}
+		}
+		else {
+			waitingDialog = dialog;
+			waitingDialogTag = tag;
+		}
+	}
+	
 	
 }
