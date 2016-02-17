@@ -16,6 +16,9 @@ import com.ziftr.android.ziftrwallet.crypto.ZWCoin;
 import com.ziftr.android.ziftrwallet.crypto.ZWECKey;
 import com.ziftr.android.ziftrwallet.crypto.ZWKeyCrypter;
 import com.ziftr.android.ziftrwallet.crypto.ZWPbeAesCrypter;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.sqlite.ZWReceivingAddressesTable.EncryptionStatus;
 import com.ziftr.android.ziftrwallet.sqlite.ZWSQLiteOpenHelper;
 import com.ziftr.android.ziftrwallet.util.ZLog;
@@ -41,6 +44,8 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 	
 	/** Following the standard, we name our wallet file as below. */
 	public static final String DATABASE_NAME = "wallet.dat";
+	
+	public static final String DATABASE_DIRECTORY_ERROR = "wallet_manager_database_error";
 
 	///////////////////////////////////////////////////////
 	//////////  Static Singleton Access Members ///////////
@@ -70,12 +75,32 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 						File externalDirectory = applicationContext.getExternalFilesDir(null);
 						if (externalDirectory != null) {
 							databasePath = new File(externalDirectory, DATABASE_NAME).getAbsolutePath();
-						} else {
-							// If we couldn't get the external directory the user is doing something weird with their sd card
-							// Leaving databaseName as null will let the database exist in memory
-		
-							//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
-							log("CANNOT ACCESS LOCAL STORAGE!");
+						} 
+						else {
+							File internalStorage = applicationContext.getFilesDir();
+							if(internalStorage != null) {
+								//TODO -pop up warning for user that they're using internal storage for their wallet
+								
+								databasePath = new File(internalStorage, DATABASE_NAME).getAbsolutePath();
+							}
+							else {
+								
+								// If we couldn't get the external directory the user is doing something weird with their sd card
+								// Leaving databaseName as null will let the database exist in memory
+			
+								//TODO -at flag and use it to trigger UI to let user know they are running on an in memory database
+								log("CANNOT ACCESS LOCAL STORAGE!");
+								
+								//we need to let the user know their data isn't being stored and quit the app if possible
+								//we don't want it to be possible for the user to create private keys that only exist in memory
+								ZiftrSimpleDialogFragment localStorageErrorFragment = new ZiftrTextDialogFragment();
+								localStorageErrorFragment.setupDialog(R.string.zw_dialog_title_fatal, 
+															R.string.zw_dialog_error_localstorage, 
+															R.string.zw_dialog_ok, 0);
+								localStorageErrorFragment.setCancelable(false);
+								
+								ZiftrDialogManager.showDialog(localStorageErrorFragment, DATABASE_DIRECTORY_ERROR);
+							}
 						}
 					}
 		
@@ -85,7 +110,8 @@ public class ZWWalletManager extends ZWSQLiteOpenHelper {
 				return null;
 			}
 		}
-			return instance;
+		
+		return instance;
 	}
 
 	/**

@@ -12,9 +12,9 @@ import android.support.v4.app.FragmentManager;
 
 import com.ziftr.android.ziftrwallet.ZWMainFragmentActivity.FragmentType;
 import com.ziftr.android.ziftrwallet.crypto.ZWAddress;
-import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogHandler;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrDialogManager;
+import com.ziftr.android.ziftrwallet.dialog.ZiftrSimpleDialogFragment;
 import com.ziftr.android.ziftrwallet.dialog.ZiftrTextDialogFragment;
 import com.ziftr.android.ziftrwallet.fragment.ZWAddressListAdapter;
 import com.ziftr.android.ziftrwallet.fragment.ZWReceiveCoinsFragment;
@@ -198,6 +198,9 @@ public class ZWActivityDialogHandler implements ZiftrDialogHandler {
 		}
 		else if(ZWActivityDialogHandler.DIALOG_DATABASE_ERROR_TAG.equals(fragment.getTag())) {
 			//user pressed the restart button
+			System.exit(0);
+		}
+		else if(ZWWalletManager.DATABASE_DIRECTORY_ERROR.equals(fragment.getTag())) {
 			System.exit(0);
 		}
 		else if(ZWSettingsFragment.DIALOG_SET_NAME_TAG.equals(fragment.getTag())) {
