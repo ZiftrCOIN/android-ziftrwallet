@@ -17,7 +17,8 @@ public class ZWHDReceivingAddress extends ZWReceivingAddress {
 		
 		this.hdAccount = hdAccount;
 		this.hdIndex = hdIndex;
-		this.path = "[m/44'/" + coin.getHdId() + "'/" + hdAccount + "']/" + change + "/" + hdIndex;
+        int changeIndex = change ? 1 : 0;
+        this.path = "[m/44'/" + coin.getHdId() + "'/" + hdAccount + "']/" + changeIndex + "/" + hdIndex;
 	}
 	
 
