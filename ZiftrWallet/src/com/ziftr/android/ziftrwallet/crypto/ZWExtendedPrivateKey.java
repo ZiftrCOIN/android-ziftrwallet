@@ -7,8 +7,8 @@ import java.util.Arrays;
 import org.spongycastle.math.ec.ECPoint;
 
 import com.ziftr.android.ziftrwallet.exceptions.ZWAddressFormatException;
-import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
 import com.ziftr.android.ziftrwallet.util.ZWCryptoUtils;
+import com.ziftr.android.ziftrwallet.util.ZiftrBase58;
 
 public class ZWExtendedPrivateKey extends ZWPrivateKey {
 
@@ -101,7 +101,7 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		//     priv_child * G = priv_parent * G + one_way(pub_parent) * G
 		// which is the same as
 		//     pub_child = pub_parent + one_way(pub_parent) * G
-		// TODO In case parse256(I_left) ³ n or ki = 0, the resulting key is invalid, proceed with the next value
+		// TODO In case parse256(I_left) ï¿½ n or ki = 0, the resulting key is invalid, proceed with the next value
 		BigInteger left = new BigInteger(1, ZWCryptoUtils.left(result));
 		ZWCryptoUtils.checkLessThanCurveOrder(left);
 		BigInteger newPriv = left.add(this.priv).mod(ZWCurveParameters.CURVE_ORDER);
@@ -114,29 +114,19 @@ public class ZWExtendedPrivateKey extends ZWPrivateKey {
 		return new ZWExtendedPrivateKey(this.path.slash(index), newPriv, childData);
 	}
 	
-	public Object deriveChild(String path) throws ZWHdWalletException {
+	public ZWExtendedPrivateKey deriveChild(String path) throws ZWHdWalletException {
 		return this.deriveChild(new ZWHdPath(path));
 	}
 
-	public Object deriveChild(ZWHdPath path) throws ZWHdWalletException {
+	public ZWExtendedPrivateKey deriveChild(ZWHdPath path) throws ZWHdWalletException {
 		if (path == null)
 			throw new ZWHdWalletException("Cannot derive null path");
 		if (!path.derivedFromPrivateKey())
 			throw new ZWHdWalletException("Cannot derive this path, it is relative to a public key");
 		
 		ZWExtendedPrivateKey p = this;
-		for (ZWHdChildNumber ci : path.getRelativeToPrv()) {
+		for (ZWHdChildNumber ci : path.toPrivatePath().getRelativeToPrv()) {
 			p = p.deriveChild(ci);
-		}
-		
-		String xprv = p.xprv(true);
-		
-		if (path.resolvesToPublicKey()) {
-			ZWExtendedPublicKey pub = (ZWExtendedPublicKey) p.calculatePublicKey(true);
-			for (ZWHdChildNumber ci : path.getRelativeToPub()) {
-				pub = pub.deriveChild(ci);
-			}
-			return pub;
 		}
 		
 		return p;

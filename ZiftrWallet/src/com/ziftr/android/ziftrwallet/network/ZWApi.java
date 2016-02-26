@@ -30,7 +30,7 @@ public class ZWApi {
 	protected static final String SANDBOX_BASE_URL = "sandbox.fpa.bz";
 	protected static final String LIVE_BASE_URL = "api.fpa.bz";
 
-	protected static String BASE_URL = LIVE_BASE_URL;
+	protected static String BASE_URL = SANDBOX_BASE_URL;
 
 	static {
 		String customBaseUrl = ZWPreferences.getCustomAPIServer();

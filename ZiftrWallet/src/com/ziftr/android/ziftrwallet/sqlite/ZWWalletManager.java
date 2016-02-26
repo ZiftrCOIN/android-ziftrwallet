@@ -740,7 +740,7 @@ public class ZWWalletManager extends SQLiteOpenHelper {
 		if (!this.hasHdAccount(coin)) {
 			ZWExtendedPrivateKey m = new ZWExtendedPrivateKey(seed);
 			String path = "[m/44'/" + coin.getHdId() + "'/0']";
-			ZWExtendedPublicKey mPub = (ZWExtendedPublicKey) m.deriveChild(path);
+			ZWExtendedPublicKey mPub = (ZWExtendedPublicKey) m.deriveChild(path).calculatePublicKey(true);
 			ZWHdAccount account = new ZWHdAccount(coin.getSymbol(), mPub);
 			this.accountsTable.insertAccount(account, this.getWritableDatabase());
 		}
