@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="api_key_blockchain_server">pub_f25a9af0e615cff6fdf5a93c8eab7c6b</string>
+    <string name="api_key_blockchain_server">pub_dummy</string>
 </resources>
