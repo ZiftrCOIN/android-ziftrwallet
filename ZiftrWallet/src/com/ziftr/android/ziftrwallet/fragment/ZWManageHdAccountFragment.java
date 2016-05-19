@@ -130,6 +130,14 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 	}
 	
 	
+	private void startAccountScan() {
+		//TODO show some sort of dialog explaining process to user
+		
+	}
+	
+	
+	
+	
 	private void saveMnemonic() {
 		String password = ZWPreferences.getCachedPassword();
 		if(password == null && ZWPreferences.userHasPassword()) {
@@ -170,7 +178,11 @@ public class ZWManageHdAccountFragment extends ZWFragment implements OnClickList
 				accountState = STATE.UNLOCKED_ACCOUNT;
 				mnemonicText.setText(hdMnemonicData.getDataString());
 				leftButton.setVisibility(View.GONE);
-				rightButton.setVisibility(View.GONE);
+				
+				//set the right button the start scanning accounts
+				rightButton.setVisibility(View.VISIBLE);
+				TextView rightText = (TextView) rightButton.findViewById(R.id.hdAccountRightButtonText);
+				rightText.setText(R.string.zw_button_account_scan);
 			}
 		}
 		else {
